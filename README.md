@@ -1,4 +1,5 @@
-![alt text](https://github.com/chasemc/IDBac/blob/master/ico/Picture1.png)  # IDBac Super-Beta 
+![alt text](https://github.com/chasemc/IDBac/blob/master/ico/Picture1.png =100*100) 
+# IDBac Super-Beta 
 
 #### Currently IDBAC comes in two forms:
 
