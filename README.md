@@ -1,4 +1,4 @@
-# IDBac Super-Beta  <img src = "https://github.com/chasemc/IDBac/blob/master/ico/Picture1.png" height="60">
+<h1><img src = "https://github.com/chasemc/IDBac/blob/master/ico/Picture1.png" height="60" align="left">  IDBac Super-Beta </h1>
  
 
 #### Currently IDBAC comes in two forms:
