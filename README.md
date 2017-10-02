@@ -27,9 +27,14 @@ Install_And_Load <- function(Required_Packages)
             character.only = TRUE,
             quietly = TRUE)  } }
 # Required packages to install and load
-Required_Packages = c("devtools","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
+Required_Packages = c("devtools","BiocInstaller","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
 # Install and Load Packages
 Install_And_Load(Required_Packages)
+
+source("https://bioconductor.org/biocLite.R")
+biocLite("mzR")
+
+
 ```
 
 
