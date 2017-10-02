@@ -16,7 +16,7 @@ testing.  This means it may install another version of R on your system
 
 
 #### Code to use IDBac from R:
-The R code below will, if needed, install "devtools" for downloading IDBac; and a number of necessary packages for IDBac functions.
+The R code below will, if needed, install "devtools" for downloading IDBac; and the R packages necessary for IDBac to function.
 ```
 Install_And_Load <- function(Required_Packages)
 {  Remaining_Packages <- Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
