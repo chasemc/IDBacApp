@@ -1,6 +1,15 @@
 <h1><img src = "https://github.com/chasemc/IDBac/blob/master/ico/Picture1.png" height="60" align="left">  IDBac Pre-Beta </h1>
  
 
+
+<br></br>
+
+### Download the Excel template for renaming raw MALDI files:
+https://github.com/chasemc/IDBac/blob/master/ico/384_spot_MALDI_template.xltx
+
+### Download/Install the IDBac Application
+
+
 #### Currently IDBAC comes in two forms:
 
 1. For those uncomfortable with using R there is an easy-installer
