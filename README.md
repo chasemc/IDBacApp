@@ -1,5 +1,5 @@
-# IDBac Super-Beta
-
+<h1><img src = "https://github.com/chasemc/IDBac/blob/master/ico/Picture1.png" height="60" align="left">  IDBac Pre-Beta </h1>
+ 
 
 #### Currently IDBAC comes in two forms:
 
@@ -11,7 +11,7 @@
 #### Why you would want to use R instead of the easy-install:
 
 * To help ensure IDBac doesn't break we make sure the user has the same version of R installed as was used in our
-testing.  This means it may install another version of R on your system
+testing.  This means it may install another version of R on your system than you currently use.
 * Currently the easy-install version only allows one instance of IDBac to be running at a time.  This is not true if you run natively from R. This could be helpful if you want to view two separate panels at once.
 
 
@@ -27,9 +27,15 @@ Install_And_Load <- function(Required_Packages)
             character.only = TRUE,
             quietly = TRUE)  } }
 # Required packages to install and load
-Required_Packages = c("devtools","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
+Required_Packages = c("devtools","BiocInstaller","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
 # Install and Load Packages
 Install_And_Load(Required_Packages)
+
+source("https://bioconductor.org/biocLite.R")
+# Change FALSE to TRUE if you would like to be prompted before updating bioconductor packages during the execution of the below function
+biocLite("mzR",ask=FALSE)
+
+
 ```
 
 
