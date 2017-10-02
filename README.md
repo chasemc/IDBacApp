@@ -11,7 +11,7 @@
 #### Why you would want to use R instead of the easy-install:
 
 * To help ensure IDBac doesn't break we make sure the user has the same version of R installed as was used in our
-testing.  This means it may install another version of R on your system
+testing.  This means it may install another version of R on your system than you currently use.
 * Currently the easy-install version only allows one instance of IDBac to be running at a time.  This is not true if you run natively from R. This could be helpful if you want to view two separate panels at once.
 
 
