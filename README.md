@@ -32,7 +32,8 @@ Required_Packages = c("devtools","BiocInstaller","snow","parallel","shiny", "MAL
 Install_And_Load(Required_Packages)
 
 source("https://bioconductor.org/biocLite.R")
-biocLite("mzR")
+# Change FALSE to TRUE if you would like to be prompted before updating bioconductor packages during the execution of the below function
+biocLite("mzR",ask=FALSE)
 
 
 ```
