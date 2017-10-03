@@ -1,6 +1,6 @@
 #' @export
 runExample <- function() {
-  appDir <- system.file("app", package = "IDBac_app")
+  appDir <- system.file("IDBacApp", "app",package = "IDBac_app")
   if (appDir == "") {
     stop("Could not find example directory. Try re-installing `mypackage`.", call. = FALSE)
   }
