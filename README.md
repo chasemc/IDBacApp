@@ -2,12 +2,13 @@
  
 
 
-<br></br>
+
 
 ### Download the Excel template for renaming raw MALDI files:
 https://github.com/chasemc/IDBac/blob/master/ico/384_spot_MALDI_template.xltx
 
-<br></br>
+  
+  
 
 ### Download/Install the IDBac Application
 
