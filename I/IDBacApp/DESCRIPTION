@@ -1,0 +1,11 @@
+Package: IDBacApp
+Type: Package
+Title: Protein and small molecule analysis of bacteria by MALDI-TOF MS
+Version: 0.0.1
+Author: Chase Clark
+Maintainer: Chase Clark <cclark42@uic.edu>
+Description: More about what it does 
+License: GPL
+Encoding: UTF-8
+LazyData: true
+Depends: shiny
