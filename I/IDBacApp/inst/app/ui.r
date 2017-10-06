@@ -44,15 +44,6 @@ Install_And_Load(Required_Packages)
   
   
   
-  tabPanel(
-    "Instructions",
-    fluidPage(
-      
-      includeMarkdown("README.md")
-      
-      )),
-  
-  
   
   
   
