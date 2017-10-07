@@ -65,14 +65,76 @@ function(input,output,session){
                    actionButton("run2", label = "run2"),
                    actionButton("run3", label = "run3")
                )
-
-
         )
-
-
       })
     }
   })
+
+
+
+
+  #This "observe" event creates the UI element for analyzing multiple MALDI plates based on user-input.
+
+  observe({
+
+    if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 3){
+      output$ui1<-renderUI({
+
+        column(12,
+               br(),
+               br(),
+               column(5,
+                      h3("Instructions:"),
+                      br(),
+                      p("Left-click the button to the right to select
+                        where you would like to create an IDBac working directory."),
+                      p("This will create folders within a main directory named \"IDBac\""),
+
+                      p("Your working directory is the folder which contains \"Converted_To_mzML\",\"Peak_Lists\", and \"Saved_MANs\"       "),
+                      img(src="WorkingDirectory.png", style="width:200px;height:125px")
+                      ),
+                column(5,style = "background-color:#F5F5F5",
+                      h3("Start With Raw Data"),
+                      br(),
+                      p(strong("1:"), " Your Working Directory is where files will be created"),
+                      actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
+                      fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectory", placeholder = TRUE))),
+                      br(),
+                      p(strong("2:"), "Your RAW data should be one folder that contains a series of folder which
+                        contain in each: two folders containing protein and small-molecule data and an excel map of the MALDI plate for those two data"),
+                      actionButton("multipleMaldiRawFileDirectory", label = "Click to select the location of your RAW data"),
+                      fluidRow(column(12, verbatimTextOutput("multipleMaldiRawFileDirectory", placeholder = TRUE))),
+                      br(),
+
+
+
+
+                       actionButton("run", label = "run"),
+                      actionButton("run2", label = "run2"),
+                      actionButton("run3", label = "run3")
+               )
+      )
+      })
+    }
+  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -116,21 +178,8 @@ function(input,output,session){
                         12,
                         verbatimTextOutput("idbacDirectoryOut", placeholder = TRUE)
                       ))
-
-
-
                )
-
-
-        )
-
-
-
-
-
-
-
-
+           )
       })
     }
   })
@@ -205,8 +254,6 @@ function(input,output,session){
 
 
 
-
-
   # Creates text showing the user which directory they chose for raw files
   output$rawFileDirectory <- renderText(if (is.null(rawFilesLocation())) {
     return(NULL)
@@ -224,19 +271,52 @@ function(input,output,session){
     folders
   })
 
+
+
+  multipleMaldiRawFileLocation <- reactive({
+    if (input$multipleMaldiRawFileDirectory > 0) {
+      choose.dir()
+    }
+  })
+
+
+
+
+  # Creates text showing the user which directory they chose for raw files
+  output$multipleMaldiRawFileDirectory <- renderText(if (is.null(multipleMaldiRawFileLocation())) {
+    return(NULL)
+  } else{
+    folders <- NULL
+    foldersInFolder <-
+      list.dirs(multipleMaldiRawFileLocation(),
+                recursive = FALSE,
+                full.names = FALSE) # Get the folders contained directly within the chosen folder.
+    for (i in 1:length(foldersInFolder)) {
+      folders <-
+        paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+    }
+
+    folders
+  })
+
+
+
+
+
+
   #This handles reading in the excel file and displaying it on the    page.
 
-  output$sampleMap <- renderTable({
-    inFile <- input$excelFile
-    if (is.null(inFile))
-      return(NULL)
-    file.rename(inFile$datapath,
-                paste(inFile$datapath, ".xlsx", sep = ""))
-
-
-    read_excel(paste(inFile$datapath, ".xlsx", sep = ""), 1)
-
-  })
+#  output$sampleMap <- renderTable({
+#    inFile <- input$excelFile
+#    if (is.null(inFile))
+#      return(NULL)
+#    file.rename(inFile$datapath,
+#                paste(inFile$datapath, ".xlsx", sep = ""))
+#
+#
+#    read_excel(paste(inFile$datapath, ".xlsx", sep = ""), 1)
+#
+#  })
 
 
 
@@ -257,51 +337,74 @@ function(input,output,session){
 
 
 
-      excelMap <-
-        as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
-      lookupExcel <-
-        as.data.frame(cbind(
-          sapply(excelMap$Key, function(x)
-            paste0("0_", x)),
-          excelMap$Value,
-          make.unique(excelMap$Value, sep = "_replicate-")
-        ))
+     if(is.null(input$multipleMaldiRawFileDirectory)){
+
+      #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
+      excelMap <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
+      lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(excelMap$Value, sep = "_replicate-")))
       lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
-      fullZ <-
-        list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE),
-                  recursive = FALSE)
-
-
-
-
-
+      fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
       excelTable<-ldply(lookupExcel, data.frame)
       fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[3]])))
       colnames(fullZ)<-c("UserInput","ExcelCell")
       colnames(excelTable)<-c("UserInput","ExcelCell")
-
-
-
-
       fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
-
-
       fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
 
+     }else{
+
+      #When analyzing more han one MALDI plate this handles fiding the raw data directories and the excel map
+      mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
+      lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
+      collectfullZ<-NULL
+  for (i in 1:length(lapped)){
+
+      fullZ<-list.dirs(lapped[[i]],recursive = F)
+      excelMap <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
+      lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(excelMap$Value, sep = "_replicate-")))
+      lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
+
+
+
+      excelTable<-ldply(lookupExcel, data.frame)
+      fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
+      colnames(fullZ)<-c("UserInput","ExcelCell")
+      colnames(excelTable)<-c("UserInput","ExcelCell")
+      fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
+      fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
+
+      collectfullZ<-c(collectfullZ,list(fullZ))
+
+
+  }
+      fullZ<-ldply(collectfullZ,data.frame)
+
+     }
+
+
+
+
+
+
+
+
+
+
+
+
       fullZ<-dlply(fullZ,.(UserInput.x))
-
-      saveRDS(fullZ,"fullZ.rds")
-
-
       workdir <- selectedDirectory()
+      outp <- file.path(workdir, "IDBac/Converted_To_mzML")
 
-      outp <- paste0(workdir, "\\IDBac\\Converted_To_mzML")
+#fullZ$UserInput.x = sample name
+#fullZ$UserInput.y = file locations
 
+#Command-line MSConvert, converts from proprietary vendor data to open mzXML
       w<-lapply(fullZ,function(x)
-        paste0("pwiz\\msconvert.exe",
+        paste0("..\\..\\pwiz\\msconvert.exe",
 
                " ",
-               paste0(x[[3]],collapse = "",sep=" "),
+               paste0(x$UserInput.y,collapse = "",sep=" "),
                " --mzXML --merge -z",
                " -o ",
                outp,
@@ -309,7 +412,7 @@ function(input,output,session){
 
 
 
-               paste0(x[[2]][1],".mzXML")
+               paste0(x$UserInput.x[1],".mzXML")
         ))
 
 
@@ -324,7 +427,7 @@ function(input,output,session){
 
 
 
-
+sapply(w,rot)
 
       numCores <- detectCores()
       cl <- makeCluster(numCores)
@@ -969,7 +1072,6 @@ function(input,output,session){
 
 
 
-
 if(is.null(input$plot_brush$ymin)){
   #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
 
@@ -996,10 +1098,15 @@ if(is.null(input$plot_brush$ymin)){
 
 
 
+#if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
+
+
+    combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)][[1]]
 
 
 
-    combinedSmallMolPeaksm<-combinedSmallMolPeaks[which(grepl("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))][[1]]
+
+
     combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
 
     labs <-as.vector(sapply(smallPeaks(), function(x)metaData(x)$Strain))
@@ -1117,6 +1224,8 @@ if(is.null(input$plot_brush$ymin)){
 
     simpleNetwork(bool,zoom=TRUE)
 
+
+#IF NO MATRIX    }
   })
   ################################################
   #This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the clustering page.
