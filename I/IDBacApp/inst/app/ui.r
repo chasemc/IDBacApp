@@ -40,24 +40,24 @@ Install_And_Load(Required_Packages)
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
  navbarPage(
   "IDBac",
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   tabPanel(
     "PreProcessing",
     fluidPage(
@@ -68,7 +68,7 @@ Install_And_Load(Required_Packages)
       br(),
       br(),
       fluidRow( radioButtons("rawORreanalyze", label = h4("Begin with selecting an option below:"),
-      choices = list("Start with Raw MALDI Data" = 1, "Reanalyze Data" = 2),selected=0),
+      choices = list("Start with Raw MALDI Data" = 1, "Reanalyze Data" = 2,"Start with Multiple MALDI-plates of Data" = 3),selected=0),
       uiOutput("ui1"))
 
   )),
@@ -88,6 +88,5 @@ Install_And_Load(Required_Packages)
 
 )
 
- 
- 
- 
+
+
