@@ -38,16 +38,14 @@ function(input,output,session){
                column(5,
                       h3("Instructions:"),
                       br(),
-                      p("Left-click the button to the right to select
-                        where you would like to create an IDBac working directory."),
-                      p("This will create folders within a main directory named \"IDBac\"."),
-
-                    p("Your working directory is the folder which contains \"Converted_To_mzML\",\"Peak_Lists\", and \"Saved_MANs\"."),
-                      img(src="WorkingDirectory.png", style="width:200px;height:125px")
-               ),
-
-
-
+                      p(strong("1:")," This directs where you would like to create an IDBac working directory."),
+                      p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
+                      img(src="WorkingDirectory.png", style="width:322px;height:164px"),
+                      p("If there is already an \"IDBac\" folder present in the working directory,
+                        files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
+                      br(),
+                      p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+                      div(img(src="window.png",style="width:750px;height:40px"))),
                column(5,style = "background-color:#F5F5F5",
                    h3("Start With Raw Data"),
                    br(),
@@ -61,9 +59,8 @@ function(input,output,session){
                    br(),
                    p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files."),
                    fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
-                   actionButton("run", label = "run"),
-                   actionButton("run2", label = "run2"),
-                   actionButton("run3", label = "run3")
+                   actionButton("run", label = "Convert to mzXML"),
+                   actionButton("run2", label = "Process mzXML")
                )
         )
       })
@@ -86,15 +83,21 @@ function(input,output,session){
                column(5,
                       h3("Instructions:"),
                       br(),
-                      p("Left-click the button to the right to select
-                        where you would like to create an IDBac working directory."),
-                      p("This will create folders within a main directory named \"IDBac\""),
+                      p(strong("1:")," This directs where you would like to create an IDBac working directory."),
+                      p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
+                      img(src="WorkingDirectory.png", style="width:322px;height:164px"),
+                      p("If there is already an \"IDBac\" folder present in the working directory,
+                        files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
+                      br(),
+                      p(strong("2:"),"The RAW data file should be one folder which will contain individual folders for each
+                        MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
+                        containing protein data and the other containing small molecule data:"),
+                      img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
 
-                      p("Your working directory is the folder which contains \"Converted_To_mzML\",\"Peak_Lists\", and \"Saved_MANs\"       "),
-                      img(src="WorkingDirectory.png", style="width:200px;height:125px"),
-                      p("Your"),
-                      img(src="Multi-MALDI-Plate.png", style="width:233px;height:235px")
-                      ),
+               p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+               div(img(src="window.png",style="width:750px;height:40px"))),
+
+
                 column(5,style = "background-color:#F5F5F5",
                       h3("Start With Raw Data"),
                       br(),
@@ -109,10 +112,8 @@ function(input,output,session){
 
 
 
-
-                       actionButton("run", label = "run"),
-                      actionButton("run2", label = "run2"),
-                      actionButton("run3", label = "run3")
+                      actionButton("run", label = "Convert to mzXML"),
+                      actionButton("run2", label = "Process mzXML")
                )
       )
       })
@@ -150,7 +151,7 @@ observe({
                         ),
                       br(),
                       tags$b("Example:"),br(),
-                        img(src="WorkingDirectory.png", style="width:200px;height:125px"),
+                        img(src="WorkingDirectory.png", style="width:322px;height:164px"),
                       br(),br(),
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       div(img(src="window.png",style="width:750px;height:40px"))
@@ -1001,11 +1002,9 @@ sapply(w,rot)
                      selected = 2),
         radioButtons("kORheight", label = h4("Create clusters based on specified number of groups or height?"),
                      choices = list("# Groups" = 1, "Height" = 2),
-                     selected = 2),
+                     selected = 1),
         uiOutput("hclustui"),
         uiOutput("groupui"),
-        #   numericInput("height", label = p("Cut Tree at Height"),value = .5,step=.1,min=0),
-#        numericInput("kClusters", label = p("Number of Groups"),value = 2,step=1,min=1),
         numericInput("hclustHeight", label = h5("Tree Plot Height"),value = 750,step=50,min=100)
 
       ),
@@ -1019,7 +1018,7 @@ sapply(w,rot)
   })
   output$groupui <-  renderUI({
     if(input$kORheight=="1"){
-      numericInput("kClusters", label = h5("Number of Groups"),value = 2,step=1,min=1)}
+      numericInput("kClusters", label = h5("Number of Groups"),value = 1,step=1,min=1)}
     })
 
 
