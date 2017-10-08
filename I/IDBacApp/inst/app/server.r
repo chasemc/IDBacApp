@@ -40,9 +40,9 @@ function(input,output,session){
                       br(),
                       p("Left-click the button to the right to select
                         where you would like to create an IDBac working directory."),
-                      p("This will create folders within a main directory named \"IDBac\""),
+                      p("This will create folders within a main directory named \"IDBac\"."),
 
-                    p("Your working directory is the folder which contains \"Converted_To_mzML\",\"Peak_Lists\", and \"Saved_MANs\"       "),
+                    p("Your working directory is the folder which contains \"Converted_To_mzML\",\"Peak_Lists\", and \"Saved_MANs\"."),
                       img(src="WorkingDirectory.png", style="width:200px;height:125px")
                ),
 
@@ -59,7 +59,7 @@ function(input,output,session){
                    actionButton("rawFileDirectory", label = "Click to select the location of your RAW data"),
                fluidRow(column(12, verbatimTextOutput("rawFileDirectory", placeholder = TRUE))),
                    br(),
-                   p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files"),
+                   p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files."),
                    fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
                    actionButton("run", label = "run"),
                    actionButton("run2", label = "run2"),
@@ -91,17 +91,18 @@ function(input,output,session){
                       p("This will create folders within a main directory named \"IDBac\""),
 
                       p("Your working directory is the folder which contains \"Converted_To_mzML\",\"Peak_Lists\", and \"Saved_MANs\"       "),
-                      img(src="WorkingDirectory.png", style="width:200px;height:125px")
+                      img(src="WorkingDirectory.png", style="width:200px;height:125px"),
+                      p("Your"),
+                      img(src="Multi-MALDI-Plate.png", style="width:233px;height:235px")
                       ),
                 column(5,style = "background-color:#F5F5F5",
                       h3("Start With Raw Data"),
                       br(),
-                      p(strong("1:"), " Your Working Directory is where files will be created"),
+                      p(strong("1:"), " Your Working Directory is where files will be created."),
                       actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
                       fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectory", placeholder = TRUE))),
                       br(),
-                      p(strong("2:"), "Your RAW data should be one folder that contains a series of folder which
-                        contain in each: two folders containing protein and small-molecule data and an excel map of the MALDI plate for those two data"),
+                      p(strong("2:"), "Your RAW data should be one folder that contains folders for each MALDI plate."),
                       actionButton("multipleMaldiRawFileDirectory", label = "Click to select the location of your RAW data"),
                       fluidRow(column(12, verbatimTextOutput("multipleMaldiRawFileDirectory", placeholder = TRUE))),
                       br(),
@@ -128,17 +129,8 @@ function(input,output,session){
 
 
 
-
-
-
-
-
-
-
-
-
-
-  observe({
+  #This "observe" event creates the UI element for re-analyzing data
+observe({
 
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 2){
       output$ui1<-renderUI({
@@ -149,8 +141,7 @@ function(input,output,session){
                column(5,
                       h2("Instructions:"),
                       br(),
-                      p("Left-click the button to the right to select the previous working directory"),
-                      br(),
+                      p("Left-click the button to the right to select a working directory."),
                       p("Your working directory is the folder (originally named \"IDBac\"), which contains the folders:"),
                       tags$ul(
                           tags$li("Converted_To_mzML"),
@@ -161,7 +152,9 @@ function(input,output,session){
                       tags$b("Example:"),br(),
                         img(src="WorkingDirectory.png", style="width:200px;height:125px"),
                       br(),br(),
-                      p("Note: Sometimes the browser window won't pop up, but will still appear in the appliacation bar.")
+                      p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+                      div(img(src="window.png",style="width:750px;height:40px"))
+
 
                ),
 
@@ -203,7 +196,7 @@ function(input,output,session){
 
   selectedDirectory <- reactive({
     if(input$selectedWorkingDirectory==0){
-      "No Folder Selected"
+      return("No Folder Selected")
     }else if (input$selectedWorkingDirectory > 0) {
       choose.dir()
     }
@@ -218,9 +211,9 @@ function(input,output,session){
   idbacDirectory<-reactive({
 
     if(is.null(input$idbacDirectoryButton)){
-      "No Folder Selected"
+      return("No Folder Selected")
     } else if(input$idbacDirectoryButton==0){
-      "No Folder Selected"
+      return("No Folder Selected")
     }else if (input$idbacDirectoryButton > 0){
       choose.dir()
     }else if (input$selectedWorkingDirectory > 0){
@@ -256,7 +249,7 @@ function(input,output,session){
 
   # Creates text showing the user which directory they chose for raw files
   output$rawFileDirectory <- renderText(if (is.null(rawFilesLocation())) {
-    return(NULL)
+    return("No Folder Selected")
   } else{
     folders <- NULL
     foldersInFolder <-
@@ -274,7 +267,8 @@ function(input,output,session){
 
 
   multipleMaldiRawFileLocation <- reactive({
-    if (input$multipleMaldiRawFileDirectory > 0) {
+
+   if (input$multipleMaldiRawFileDirectory > 0) {
       choose.dir()
     }
   })
@@ -284,7 +278,7 @@ function(input,output,session){
 
   # Creates text showing the user which directory they chose for raw files
   output$multipleMaldiRawFileDirectory <- renderText(if (is.null(multipleMaldiRawFileLocation())) {
-    return(NULL)
+    return("No Folder Selected")
   } else{
     folders <- NULL
     foldersInFolder <-
@@ -833,10 +827,10 @@ sapply(w,rot)
         selectInput("Spectra2", label=h5("Spectrum 2 (down, grey)"),
                     choices = sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain)),
 
-        h4("Note: Mass Cutoff and Percent Replicate values selected here will be used in all later analyses")
+        p("Note: Mass Cutoff and Percent Replicate values selected here will be used in all later analyses."),
+        p("Displayed spectra are the mean spectrum for a sample.")
 
       ),
-
 
       mainPanel(
         fluidRow(plotOutput("inversePeakComparisonPlot",
@@ -854,27 +848,7 @@ sapply(w,rot)
 
 
 
-  ################################################
-  #Create the hierarchical clustering based upon the user input for distance method and clustering technique
-  dendro <- reactive({
-    ret<-{
-      if(input$distance=="cosineD"){
-        a<-as.function(get(input$distance))
-        dend <- proteinMatrix() %>% a %>% hclust(method=input$clustering) %>% as.dendrogram
-      }
-      else{
-        dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
-      }
 
-    }
-    ret
-  })
-
-
-  #User input changes the height of the heirarchical clustering plot
-  plotHeight <- reactive({
-    return(as.numeric(input$hclustHeight))
-  })
 
 
   ################################################
@@ -885,11 +859,11 @@ sapply(w,rot)
     a<-as.data.frame(a)
     nam<-rownames(a)
     a<-cbind(a,nam)
-    if(input$kmeansORheight=="2"){
+    if(input$kORheight=="2"){
       d<-cutree(dendro(),h=input$height)
     }
     else{
-      d<-cutree(dendro(),k=input$kmeansClusters)
+      d<-cutree(dendro(),k=input$kClusters)
 
     }
     e<-as.data.frame(cbind(a,d))
@@ -898,29 +872,6 @@ sapply(w,rot)
       text3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,text=e$nam,col=factor(d))}
     ggplot(e,aes(Dim.1,Dim.2,label=nam))+geom_label(aes(col=factor(d)),size=6)+xlab("Dimension 1")+ylab("Dimension 2")+ggtitle("PCA of Protein MALDI Spectra (colors based on clusters from hiearchical clustering)")+theme(plot.title=element_text(size=15)) + scale_color_discrete(name="Clusters from hierarchical clustering")+theme(legend.position="none")
   },height=750)
-  ################################################
-  #Create the hierarchical clustering plot as well as the calculations needed for such.
-  output$hclust <- renderPlot({
-    if(input$kmeansORheight=="2"){
-      par(mar=c(5,5,5,10))
-      dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
-      abline(v=input$height,lty=2)
-    }
-    else{
-      par(mar=c(5,5,5,10))
-      dendro() %>% color_branches(k=input$kmeansClusters)   %>% plot(horiz=TRUE,lwd=8)
-    }
-  },height=plotHeight)
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -972,9 +923,31 @@ sapply(w,rot)
 
 
 
+  ################################################
+  #Create the hierarchical clustering based upon the user input for distance method and clustering technique
+  dendro <- reactive({
+    ret<-{
+      if(input$distance=="cosineD"){
+        a<-as.function(get(input$distance))
+        dend <- proteinMatrix() %>% a %>% hclust(method=input$clustering) %>% as.dendrogram
+      }
+      else{
+        dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
+      }
+
+    }
+    ret
+  })
 
 
 
+
+
+
+  #User input changes the height of the main heirarchical clustering plot
+  plotHeight <- reactive({
+    return(as.numeric(input$hclustHeight))
+  })
 
 
 
@@ -983,14 +956,14 @@ sapply(w,rot)
   ################################################
   #Create the hierarchical clustering plot as well as the calculations needed for such.
   output$hclust <- renderPlot({
-    if(input$kmeansORheight=="2"){
+    if(input$kORheight=="2"){
       par(mar=c(5,5,5,10))
       dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
       abline(v=input$height,lty=2)
     }
     else{
       par(mar=c(5,5,5,10))
-      dendro() %>% color_branches(k=input$kmeansClusters)   %>% plot(horiz=TRUE,lwd=8)
+      dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
     }
   },height=plotHeight)
 
@@ -998,22 +971,6 @@ sapply(w,rot)
 
 
 
-
-
-  output$netheir<-renderPlot({
-
-    if(input$kmeansORheight=="2"){
-      par(mar=c(5,5,5,10))
-      dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
-      abline(v=input$height,lty=2)
-    }
-    else{
-      par(mar=c(5,5,5,10))
-      dendro() %>% color_branches(k=input$kmeansClusters)   %>% plot(horiz=TRUE,lwd=8)
-    }
-
-
-  })
 
 
 
@@ -1042,11 +999,13 @@ sapply(w,rot)
         radioButtons("booled", label = h4("Include peak intensities in calculations or use presence/absence?"),
                      choices = list("Presence/Absence" = 1, "Intensities" = 2),
                      selected = 2),
-        radioButtons("kmeansORheight", label = h4("Create clusters based on k-means or height?"),
-                     choices = list("k-means" = 1, "Height" = 2),
+        radioButtons("kORheight", label = h4("Create clusters based on specified number of groups or height?"),
+                     choices = list("# Groups" = 1, "Height" = 2),
                      selected = 2),
-        numericInput("height", label = h5("Cut Tree at Height"),value = .5,step=.1,min=0),
-        numericInput("kmeansClusters", label = h5("Number of clusters if using k-means"),value = 2,step=1,min=1),
+        uiOutput("hclustui"),
+        uiOutput("groupui"),
+        #   numericInput("height", label = p("Cut Tree at Height"),value = .5,step=.1,min=0),
+#        numericInput("kClusters", label = p("Number of Groups"),value = 2,step=1,min=1),
         numericInput("hclustHeight", label = h5("Tree Plot Height"),value = 750,step=50,min=100)
 
       ),
@@ -1054,13 +1013,24 @@ sapply(w,rot)
     )
   })
 
-
+  output$hclustui <-  renderUI({
+    if(input$kORheight!="2"){return(NULL)}else{
+      numericInput("height", label = h5("Cut Tree at Height"),value = .5,step=.1,min=0)}
+  })
+  output$groupui <-  renderUI({
+    if(input$kORheight=="1"){
+      numericInput("kClusters", label = h5("Number of Groups"),value = 2,step=1,min=1)}
+    })
 
 
 
 
   smallPeaks <- reactive({ unlist(sapply(list.files(paste0(idbacDirectory(), "\\Peak_Lists"),full.names=TRUE)[grep(".SmallMoleculePeaks.", list.files(paste0(idbacDirectory(), "\\Peak_Lists")))], readRDS))
   })
+
+
+
+
 
 
   ################################################
@@ -1075,22 +1045,27 @@ sapply(w,rot)
 if(is.null(input$plot_brush$ymin)){
   #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
 
-      if(input$kmeansORheight=="2"){
+      if(input$kORheight=="2"){
         combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),h=input$height)==input$Group)),"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
       }
       else{
-        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),k=input$kmeansClusters)==input$Group)),"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
+        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),k=input$kClusters)==input$Group)),"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
 
       }
 }else{
   #This takes a brush selection over the heirarchical clustering plot within the MAN tab and uses this selection of samples for MAN analysis
 
+
       location_of_Heirarchical_Leaves<-get_nodes_xy(dendro())
       minLoc<-input$plot_brush$ymin
       maxLoc<-input$plot_brush$ymax
-      threeColTable<<-cbind(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
+      threeColTable<<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
+        #column 1= y-values of dendrogram leaves
+        #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
+        #column 3= leaf labels
       w<- which(threeColTable[,1] > minLoc & threeColTable[,1] < maxLoc)
-      brushed<-threeColTable[,3][w]
+      brushed<-as.vector(threeColTable[,3][w])
+      labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
       combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(brushed,"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
 
 }
@@ -1198,7 +1173,6 @@ if(is.null(input$plot_brush$ymin)){
     for (i in 1:length(peaksa)){
       temp<-c(temp,combinedSmallMolPeaks[[i]]@metaData$Strain)
     }
-    remove(smallAveragedSpectra)
     peaksaNames<-factor(temp)
     remove(temp)
     rownames(smallNetwork) <- paste(peaksaNames)
@@ -1224,19 +1198,28 @@ if(is.null(input$plot_brush$ymin)){
 
     simpleNetwork(bool,zoom=TRUE)
 
+})
 
-#IF NO MATRIX    }
-  })
+
+
+
+
+
+
+
+
+
   ################################################
   #This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the clustering page.
   output$Clusters <- renderText({
 
     # Display text of how many clusters were created.
-    if(input$kmeansORheight=="2"){
+    if (is.null(input$kORheight)){
+      }else if (input$kORheight=="2"){
       paste("You have Created ", length(unique(cutree(dendro(),h=input$height)))," Cluster(s)")
     }
-    else{
-      paste("You have Created ", length(unique(cutree(dendro(),k=input$kmeansClusters)))," Cluster(s)")
+    else if (input$kORheight=="1"){
+      paste("You have Created ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)")
     }
   })
   ################################################
@@ -1244,12 +1227,12 @@ if(is.null(input$plot_brush$ymin)){
   output$Clusters2 <- renderText({
 
     # Display text of how many clusters were created.
-    if(input$kmeansORheight=="2"){
+    if(input$kORheight=="2"){
 
       paste("You have ", length(unique(cutree(dendro(),h=input$height)))," Cluster(s)")
     }
     else{
-      paste("You have ", length(unique(cutree(dendro(),k=input$kmeansClusters)))," Cluster(s)")
+      paste("You have ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)")
     }
 
   })
@@ -1284,13 +1267,38 @@ if(is.null(input$plot_brush$ymin)){
 
 
 
+  #User input changes the height of the heirarchical clustering plot within the network analysis pane
+  plotHeightHeirNetwork <- reactive({
+    return(as.numeric(input$hclustHeightNetwork))
+  })
+
+
+
+  output$netheir<-renderPlot({
+
+    if(input$kORheight=="2"){
+      par(mar=c(5,5,5,10))
+      dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
+      abline(v=input$height,lty=2)
+    }
+    else{
+      par(mar=c(5,5,5,10))
+      dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
+    }
+
+
+  },height=plotHeightHeirNetwork)
 
 
 
 
 
 
-  # Create Heir ui
+
+
+
+
+  # Create MAN ui
   output$MANui <-  renderUI({
 
 
@@ -1301,37 +1309,19 @@ if(is.null(input$plot_brush$ymin)){
         numericInput("Group", label = h5("View Small-Molecule Network for Cluster #:"),value = 1,step=1,min=1),
         checkboxInput("save", label = "Save Current Network?", value = FALSE),
         numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=50,max=max(sapply(smallPeaks(),function(x)max(mass(x))))),
-        numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=50,min=min(sapply(smallPeaks(),function(x)min(mass(x)))))
+        numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=50,min=min(sapply(smallPeaks(),function(x)min(mass(x))))),
+        numericInput("hclustHeightNetwork", label = h5("Tree Plot Height"),value = 750,step=50,min=100)
+
+
       ),
       mainPanel(textOutput("Clusters2"),simpleNetworkOutput("ddd"),
                 plotOutput("netheir",
                            click = "plot_click",
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
-                           brush = "plot_brush"))
-
-    )
+                           brush = "plot_brush")
+    ))
   })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
