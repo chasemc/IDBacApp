@@ -26,7 +26,7 @@ function(input,output,session){
 
   output$value <- renderPrint({ input$radio })
 
-#This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
+  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
 
   observe({
 
@@ -48,22 +48,22 @@ function(input,output,session){
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       div(img(src="window.png",style="width:750px;height:40px"))),
                column(5,style = "background-color:#F5F5F5",
-                   h3("Starting with 1 MALDI-Plate of Raw Data"),
-                   br(),
-                   p(strong("1:"), " Your Working Directory is where files will be created"),
-                   actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
-               fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectory", placeholder = TRUE))),
-                   br(),
-                   p(strong("2:"), "Your RAW data should be one folder that contains: a folder containing protein data and folder containing small-molecule data"),
-                   actionButton("rawFileDirectory", label = "Click to select the location of your RAW data"),
-               fluidRow(column(12, verbatimTextOutput("rawFileDirectory", placeholder = TRUE))),
-                   br(),
-                   p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files."),
-                   fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
-                   actionButton("run", label = "Convert to mzXML"),
-                   actionButton("run2", label = "Process mzXML")
+                      h3("Starting with 1 MALDI-Plate of Raw Data"),
+                      br(),
+                      p(strong("1:"), " Your Working Directory is where files will be created"),
+                      actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
+                      fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectory", placeholder = TRUE))),
+                      br(),
+                      p(strong("2:"), "Your RAW data should be one folder that contains: a folder containing protein data and folder containing small-molecule data"),
+                      actionButton("rawFileDirectory", label = "Click to select the location of your RAW data"),
+                      fluidRow(column(12, verbatimTextOutput("rawFileDirectory", placeholder = TRUE))),
+                      br(),
+                      p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files."),
+                      fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
+                      actionButton("run", label = "Convert to mzXML"),
+                      actionButton("run2", label = "Process mzXML")
                )
-        )
+               )
       })
     }
   })
@@ -95,11 +95,11 @@ function(input,output,session){
                         containing protein data and the other containing small molecule data:"),
                       img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
 
-               p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-               div(img(src="window.png",style="width:750px;height:40px"))),
+                      p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+                      div(img(src="window.png",style="width:750px;height:40px"))),
 
 
-                column(5,style = "background-color:#F5F5F5",
+               column(5,style = "background-color:#F5F5F5",
                       h3("Starting With >1 MALDI-Plate of Raw Data"),
                       br(),
                       p(strong("1:"), " Your Working Directory is where files will be created."),
@@ -116,7 +116,7 @@ function(input,output,session){
                       actionButton("run", label = "Convert to mzXML"),
                       actionButton("run2", label = "Process mzXML")
                )
-      )
+                      )
       })
     }
   })
@@ -125,7 +125,7 @@ function(input,output,session){
 
 
   #This "observe" event creates the UI element for re-analyzing data
-observe({
+  observe({
 
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 2){
       output$ui1<-renderUI({
@@ -139,13 +139,13 @@ observe({
                       p("Left-click the button to the right to select a working directory."),
                       p("Your working directory is the folder (originally named \"IDBac\"), which contains the folders:"),
                       tags$ul(
-                          tags$li("Converted_To_mzML"),
-                          tags$li("Peak_Lists"),
+                        tags$li("Converted_To_mzML"),
+                        tags$li("Peak_Lists"),
                         tags$li("Saved_MANs")
-                        ),
+                      ),
                       br(),
                       tags$b("Example:"),br(),
-                        img(src="WorkingDirectory.png", style="width:322px;height:164px"),
+                      img(src="WorkingDirectory.png", style="width:322px;height:164px"),
                       br(),br(),
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       div(img(src="window.png",style="width:750px;height:40px"))
@@ -167,7 +167,7 @@ observe({
                         verbatimTextOutput("idbacDirectoryOut", placeholder = TRUE)
                       ))
                )
-           )
+        )
       })
     }
   })
@@ -253,7 +253,7 @@ observe({
 
   multipleMaldiRawFileLocation <- reactive({
 
-   if (input$multipleMaldiRawFileDirectory > 0) {
+    if (input$multipleMaldiRawFileDirectory > 0) {
       choose.dir()
     }
   })
@@ -285,17 +285,17 @@ observe({
 
   #This handles reading in the excel file and displaying it on the    page.
 
-#  output$sampleMap <- renderTable({
-#    inFile <- input$excelFile
-#    if (is.null(inFile))
-#      return(NULL)
-#    file.rename(inFile$datapath,
-#                paste(inFile$datapath, ".xlsx", sep = ""))
-#
-#
-#    read_excel(paste(inFile$datapath, ".xlsx", sep = ""), 1)
-#
-#  })
+  #  output$sampleMap <- renderTable({
+  #    inFile <- input$excelFile
+  #    if (is.null(inFile))
+  #      return(NULL)
+  #    file.rename(inFile$datapath,
+  #                paste(inFile$datapath, ".xlsx", sep = ""))
+  #
+  #
+  #    read_excel(paste(inFile$datapath, ".xlsx", sep = ""), 1)
+  #
+  #  })
 
 
 
@@ -316,49 +316,49 @@ observe({
 
 
 
-     if(is.null(input$multipleMaldiRawFileDirectory)){
+      if(is.null(input$multipleMaldiRawFileDirectory)){
 
-      #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
-      excelMap <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
-      lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(excelMap$Value, sep = "_replicate-")))
-      lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
-      fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
-      excelTable<-ldply(lookupExcel, data.frame)
-      fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[3]])))
-      colnames(fullZ)<-c("UserInput","ExcelCell")
-      colnames(excelTable)<-c("UserInput","ExcelCell")
-      fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
-      fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
+        #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
+        excelMap <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
+        lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(excelMap$Value, sep = "_replicate-")))
+        lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
+        fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
+        excelTable<-ldply(lookupExcel, data.frame)
+        fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[3]])))
+        colnames(fullZ)<-c("UserInput","ExcelCell")
+        colnames(excelTable)<-c("UserInput","ExcelCell")
+        fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
+        fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
 
-     }else{
+      }else{
 
-      #When analyzing more han one MALDI plate this handles fiding the raw data directories and the excel map
-      mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
-      lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
-      collectfullZ<-NULL
-  for (i in 1:length(lapped)){
+        #When analyzing more han one MALDI plate this handles fiding the raw data directories and the excel map
+        mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
+        lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
+        collectfullZ<-NULL
+        for (i in 1:length(lapped)){
 
-      fullZ<-list.dirs(lapped[[i]],recursive = F)
-      excelMap <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
-      lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(excelMap$Value, sep = "_replicate-")))
-      lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
-
-
-
-      excelTable<-ldply(lookupExcel, data.frame)
-      fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
-      colnames(fullZ)<-c("UserInput","ExcelCell")
-      colnames(excelTable)<-c("UserInput","ExcelCell")
-      fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
-      fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
-
-      collectfullZ<-c(collectfullZ,list(fullZ))
+          fullZ<-list.dirs(lapped[[i]],recursive = F)
+          excelMap <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
+          lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(excelMap$Value, sep = "_replicate-")))
+          lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
 
 
-  }
-      fullZ<-ldply(collectfullZ,data.frame)
 
-     }
+          excelTable<-ldply(lookupExcel, data.frame)
+          fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
+          colnames(fullZ)<-c("UserInput","ExcelCell")
+          colnames(excelTable)<-c("UserInput","ExcelCell")
+          fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
+          fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
+
+          collectfullZ<-c(collectfullZ,list(fullZ))
+
+
+        }
+        fullZ<-ldply(collectfullZ,data.frame)
+
+      }
 
 
 
@@ -375,10 +375,10 @@ observe({
       workdir <- selectedDirectory()
       outp <- file.path(workdir, "IDBac/Converted_To_mzML")
 
-#fullZ$UserInput.x = sample name
-#fullZ$UserInput.y = file locations
+      #fullZ$UserInput.x = sample name
+      #fullZ$UserInput.y = file locations
 
-#Command-line MSConvert, converts from proprietary vendor data to open mzXML
+      #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       w<-lapply(fullZ,function(x)
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
         paste0("..\\..\\pwiz\\msconvert.exe",
@@ -407,7 +407,7 @@ observe({
 
 
 
-sapply(w,rot)
+      sapply(w,rot)
 
       numCores <- detectCores()
       cl <- makeCluster(numCores)
@@ -428,170 +428,170 @@ sapply(w,rot)
 
 
 
-      functionA <- function(z) {
-        setwd(paste0(selectedDirectory(),"//IDBac"))
-        strReverse <- function(x) {
-          sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
-        }
+  functionA <- function(z) {
+    setwd(paste0(selectedDirectory(),"//IDBac"))
+    strReverse <- function(x) {
+      sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
+    }
 
 
 
 
-        # Function to Install and Load R Packages
-        Install_And_Load <- function(Required_Packages)
-        {
-          Remaining_Packages <-
-            Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
+    # Function to Install and Load R Packages
+    Install_And_Load <- function(Required_Packages)
+    {
+      Remaining_Packages <-
+        Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
 
 
-          if (length(Remaining_Packages))
-          {
-            install.packages(Remaining_Packages)
-
-          }
-          for (package_name in Required_Packages)
-          {
-            library(package_name,
-                    character.only = TRUE,
-                    quietly = TRUE)
-
-          }
-        }
-
-        # Required packages to install and load
-        Required_Packages = c("snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","dplyr","igraph","rgl")
-
-
-        # Install and Load Packages
-        Install_And_Load(Required_Packages)
-
-
-
-        if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
-          spectraImport <-  sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
-          spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
-          names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
-          spectraImport <-lapply(1:length(spectraImport), function(x)createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
-        } else{
-          spectraImport <-  lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
-          spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
-          names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
-          spectraImport <-createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
-          spectraImport<-list(spectraImport)
-        }
-
-
-        sampleNames <- strsplit(names, ".mzXML")[[1]][1]
-
-
-        for (i in 1:length(spectraImport)) {
-          spectraImport[[i]]@metaData$Strain <- sampleNames
-        }
-
-        labs <-
-          sapply(spectraImport, function(x)
-            metaData(x)$Strain)[[1]]
-
-
-        proteinSpectra <-
-          spectraImport[which(sapply(spectraImport, function(x)
-            max(mass(x))) > 10000)]
-        smallSpectra <-
-          spectraImport[which(!sapply(spectraImport, function(x)
-            max(mass(x))) > 10000)]
-
-        if(length(proteinSpectra) > 0){
-          averaged <- averageMassSpectra(proteinSpectra, method = "mean")
-          saveRDS(
-            averaged,
-            paste0(
-
-              getwd(),
-              "/Peak_Lists/",
-              averaged@metaData$Strain[[1]],
-              "_",
-              "SummedProteinSpectra.rds"
-            )
-          )
-          remove(averaged)
-
-
-
-
-          proteinSpectra <-
-            transformIntensity(proteinSpectra, method = "sqrt")
-          proteinSpectra <-
-            smoothIntensity(proteinSpectra,
-                            method = "SavitzkyGolay",
-                            halfWindowSize = 20)
-          proteinSpectra <-
-            removeBaseline(proteinSpectra, method = "TopHat")
-          proteinSpectra <-
-            detectPeaks(
-              proteinSpectra,
-              method = "MAD",
-              halfWindowSize = 20,
-              SNR = 4
-            )
-          saveRDS(
-            proteinSpectra,
-            paste0(
-
-              getwd(),
-              "/Peak_Lists/",
-              labs,
-              "_",
-              "ProteinPeaks.rds"
-            )
-          )
-
-
-
-
-
-        }
-
-        if(length(smallSpectra) > 0){
-          ############
-          #Spectra Preprocessing, Peak Picking
-          smallSpectra <-
-            smoothIntensity(smallSpectra,
-                            method = "SavitzkyGolay",
-                            halfWindowSize = 20)
-          smallSpectra <- removeBaseline(smallSpectra, method = "TopHat")
-          smallSpectra <-
-            detectPeaks(
-              smallSpectra,
-              method = "SuperSmoother",
-              halfWindowSize = 20,
-              SNR = 1
-            )
-          saveRDS(
-            smallSpectra,
-            paste0(
-
-              getwd(),
-              "/Peak_Lists/",
-              labs,
-              "_",
-
-              "SmallMoleculePeaks.rds"
-            )
-          )
-          remove(smallSpectra)
-
-          gc()
-
-        }
-
-
-
-
-
-
-
+      if (length(Remaining_Packages))
+      {
+        install.packages(Remaining_Packages)
 
       }
+      for (package_name in Required_Packages)
+      {
+        library(package_name,
+                character.only = TRUE,
+                quietly = TRUE)
+
+      }
+    }
+
+    # Required packages to install and load
+    Required_Packages = c("snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","dplyr","igraph","rgl")
+
+
+    # Install and Load Packages
+    Install_And_Load(Required_Packages)
+
+
+
+    if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
+      spectraImport <-  sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
+      spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
+      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
+      spectraImport <-lapply(1:length(spectraImport), function(x)createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
+    } else{
+      spectraImport <-  lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
+      spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
+      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
+      spectraImport <-createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
+      spectraImport<-list(spectraImport)
+    }
+
+
+    sampleNames <- strsplit(names, ".mzXML")[[1]][1]
+
+
+    for (i in 1:length(spectraImport)) {
+      spectraImport[[i]]@metaData$Strain <- sampleNames
+    }
+
+    labs <-
+      sapply(spectraImport, function(x)
+        metaData(x)$Strain)[[1]]
+
+
+    proteinSpectra <-
+      spectraImport[which(sapply(spectraImport, function(x)
+        max(mass(x))) > 10000)]
+    smallSpectra <-
+      spectraImport[which(!sapply(spectraImport, function(x)
+        max(mass(x))) > 10000)]
+
+    if(length(proteinSpectra) > 0){
+      averaged <- averageMassSpectra(proteinSpectra, method = "mean")
+      saveRDS(
+        averaged,
+        paste0(
+
+          getwd(),
+          "/Peak_Lists/",
+          averaged@metaData$Strain[[1]],
+          "_",
+          "SummedProteinSpectra.rds"
+        )
+      )
+      remove(averaged)
+
+
+
+
+      proteinSpectra <-
+        transformIntensity(proteinSpectra, method = "sqrt")
+      proteinSpectra <-
+        smoothIntensity(proteinSpectra,
+                        method = "SavitzkyGolay",
+                        halfWindowSize = 20)
+      proteinSpectra <-
+        removeBaseline(proteinSpectra, method = "TopHat")
+      proteinSpectra <-
+        detectPeaks(
+          proteinSpectra,
+          method = "MAD",
+          halfWindowSize = 20,
+          SNR = 4
+        )
+      saveRDS(
+        proteinSpectra,
+        paste0(
+
+          getwd(),
+          "/Peak_Lists/",
+          labs,
+          "_",
+          "ProteinPeaks.rds"
+        )
+      )
+
+
+
+
+
+    }
+
+    if(length(smallSpectra) > 0){
+      ############
+      #Spectra Preprocessing, Peak Picking
+      smallSpectra <-
+        smoothIntensity(smallSpectra,
+                        method = "SavitzkyGolay",
+                        halfWindowSize = 20)
+      smallSpectra <- removeBaseline(smallSpectra, method = "TopHat")
+      smallSpectra <-
+        detectPeaks(
+          smallSpectra,
+          method = "SuperSmoother",
+          halfWindowSize = 20,
+          SNR = 1
+        )
+      saveRDS(
+        smallSpectra,
+        paste0(
+
+          getwd(),
+          "/Peak_Lists/",
+          labs,
+          "_",
+
+          "SmallMoleculePeaks.rds"
+        )
+      )
+      remove(smallSpectra)
+
+      gc()
+
+    }
+
+
+
+
+
+
+
+
+  }
   # Spectra processing
 
   observe({
@@ -612,13 +612,13 @@ sapply(w,rot)
 
       sapply(fileList,functionA)
 
-   #   numCores <- detectCores()
-   #   cl <- makeCluster(numCores)
-   #   parSapply(cl,fileList,functionA)
+      #   numCores <- detectCores()
+      #   cl <- makeCluster(numCores)
+      #   parSapply(cl,fileList,functionA)
 
 
 
-  #    stopCluster(cl)
+      #    stopCluster(cl)
 
 
 
@@ -686,7 +686,6 @@ sapply(w,rot)
     new2
 
 
-    sdsdsdsdd<<-new2
   })
 
 
@@ -715,43 +714,82 @@ sapply(w,rot)
   #This creates the Inverse Peak Comparison plot that compares two user-selected spectra() and the calculation required for such.
 
 
+  listOfDataframesForInversePeakComparisonPlot <- reactive({
+
+    #Selects the peaks to plot based on user-input
+    peaksSampleOne<-collapsedPeaksP()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
+    peaksSampleTwo<-collapsedPeaksP()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
+
+
+    #pSNR= the User-Selected Signal to Noise Ratio for protein
+
+    #Create a MALDIquant massObject from the selected peaks
+    peaksSampleOne@mass<-peaksSampleOne@mass[which(peaksSampleOne@snr>input$pSNR)]
+    peaksSampleOne@intensity<-peaksSampleOne@intensity[which(peaksSampleOne@snr>input$pSNR)]
+    peaksSampleOne@snr<-peaksSampleOne@snr[which(peaksSampleOne@snr>input$pSNR)]
+    peaksSampleTwo@mass<-peaksSampleTwo@mass[which(peaksSampleTwo@snr>input$pSNR)]
+    peaksSampleTwo@intensity<-peaksSampleTwo@intensity[which(peaksSampleTwo@snr>input$pSNR)]
+    peaksSampleTwo@snr<-peaksSampleTwo@snr[which(peaksSampleTwo@snr>input$pSNR)]
+
+    #Selects the spectra to plot based on user-input
+    meanSpectrumSampleOne<-spectra()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
+    meanSpectrumSampleTwo<-spectra()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
+
+    #Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
+    p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
+    p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
+    p2b<-as.data.frame(cbind(peaksSampleTwo@mass,peaksSampleTwo@intensity))
+    p2b<-as.data.frame(cbind(peaksSampleTwo@mass,peaksSampleTwo@intensity))
+
+
+    p3b<-data.frame(p1b,rep("red",length=length(p1b$V1)),stringsAsFactors = F)
+    colnames(p3b)<-c("Mass","Intensity","Color")
+
+    p4b<-data.frame(p2b,rep("grey",length=length(p2b$V1)),stringsAsFactors = F)
+    colnames(p4b)<-c("Mass","Intensity","Color")
+    p3b$Color[which(p3b$Mass %in% intersect(p3b$Mass,p4b$Mass))]<-"blue"
+
+
+    a<-(list(meanSpectrumSampleOne,meanSpectrumSampleTwo,p1b,p2b,p3b,p4b))
+    names(a)<-c("meanSpectrumSampleOne","meanSpectrumSampleTwo","p1b","p2b","p3b","p4b")
+return(a)
+
+
+  })
+
+
+
+
+
+
+
+
+  #Used in the the inverse-peak plot for zooming
+  ranges2 <- reactiveValues(x = NULL, y = NULL)
+
+
 
   output$inversePeakComparisonPlot <- renderPlot({
 
-    p1<-collapsedPeaksP()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
-    p2<-collapsedPeaksP()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
+    temp<- listOfDataframesForInversePeakComparisonPlot()
 
+    meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
+    meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
+    p1b <-temp$p1b
+    p2b <-temp$p2b
+    p3b <-temp$p3b
+    p4b <-temp$p4b
 
-      p1@mass<-p1@mass[which(p1@snr>input$pSNR)]
-      p1@intensity<-p1@intensity[which(p1@snr>input$pSNR)]
-      p1@snr<-p1@snr[which(p1@snr>input$pSNR)]
+    remove(temp)
 
-
-
-      p2@mass<-p2@mass[which(p2@snr>input$pSNR)]
-      p2@intensity<-p2@intensity[which(p2@snr>input$pSNR)]
-      p2@snr<-p2@snr[which(p2@snr>input$pSNR)]
-
-
-    p1s<<-spectra()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
-    p2s<<-spectra()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
-
-    p1b<-as.data.frame(cbind(p1@mass,p1@intensity))
-    p1b<-as.data.frame(cbind(p1@mass,p1@intensity))
-    p2b<-as.data.frame(cbind(p2@mass,p2@intensity))
-    p2b<-as.data.frame(cbind(p2@mass,p2@intensity))
     #Create peak plots and color each peak according to whether it occurs in the other spectrum
-
-    p3b<<-data.frame(p1b,rep("red",length=length(p1b$V1)),stringsAsFactors = F)
-    colnames(p3b)<<-c("Mass","Intensity","Color")
-
-    p4b<<-data.frame(p2b,rep("grey",length=length(p2b$V1)),stringsAsFactors = F)
-    colnames(p4b)<<-c("Mass","Intensity","Color")
+    plot(meanSpectrumSampleOne@mass,meanSpectrumSampleOne@intensity,ylim=c(-max(meanSpectrumSampleTwo@intensity),max(meanSpectrumSampleOne@intensity)),type="l",col=adjustcolor("Black", alpha=0.3),xlab="m/z",ylab="Intensity")
+    lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
+    rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
+    rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
 
 
-    p3b$Color[which(p3b$Mass %in% intersect(p3b$Mass,p4b$Mass))]<-"blue"
-
-    observe({
+     observe({
       brush <- input$plot2_brush
       if (!is.null(brush)) {
         ranges2$x <- c(brush$xmin, brush$xmax)
@@ -759,29 +797,29 @@ sapply(w,rot)
 
       } else {
         ranges2$x <- NULL
-        ranges2$y <- c(-max(p2s@intensity),max(p1s@intensity))
+        ranges2$y <- c(-max(meanSpectrumSampleTwo@intensity),max(meanSpectrumSampleOne@intensity))
       }
     })
-
-    plot(p1s@mass,p1s@intensity,ylim=c(-max(p2s@intensity),max(p1s@intensity)),type="l",col=adjustcolor("Black", alpha=0.3),xlab="m/z",ylab="Intensity")
-    lines(p2s@mass,-p2s@intensity)
-    rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(p1s@intensity)/max(p3b$Intensity)),border=p3b$Color)
-    rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(p2s@intensity)/max(p4b$Intensity)),border=p4b$Color)
-
   })
 
 
-  #Used in the the inverse-peak plot for zooming
-  ranges2 <- reactiveValues(x = NULL, y = NULL)
-
   output$inversePeakComparisonPlotZoom <- renderPlot({
 
-    plot(p1s@mass,p1s@intensity,type="l",col=adjustcolor("Black", alpha=0.3), xlim = ranges2$x, ylim = ranges2$y,xlab="m/z",ylab="Intensity")
-    lines(p2s@mass,-p2s@intensity)
-    rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(p1s@intensity)/max(p3b$Intensity)),border=p3b$Color)
-    rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(p2s@intensity)/max(p4b$Intensity)),border=p4b$Color)
+    temp<- listOfDataframesForInversePeakComparisonPlot()
 
+    meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
+    meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
+    p1b <-temp$p1b
+    p2b <-temp$p2b
+    p3b <-temp$p3b
+    p4b <-temp$p4b
 
+    remove(temp)
+
+    plot(meanSpectrumSampleOne@mass,meanSpectrumSampleOne@intensity,type="l",col=adjustcolor("Black", alpha=0.3), xlim = ranges2$x, ylim = ranges2$y,xlab="m/z",ylab="Intensity")
+    lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
+    rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
+    rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
 
 
   })
@@ -1004,7 +1042,7 @@ sapply(w,rot)
   output$groupui <-  renderUI({
     if(input$kORheight=="1"){
       numericInput("kClusters", label = h5("Number of Groups"),value = 1,step=1,min=1)}
-    })
+  })
 
 
 
@@ -1026,8 +1064,8 @@ sapply(w,rot)
 
 
 
-if(is.null(input$plot_brush$ymin)){
-  #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
+    if(is.null(input$plot_brush$ymin)){
+      #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
 
       if(input$kORheight=="2"){
         combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),h=input$height)==input$Group)),"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
@@ -1036,28 +1074,28 @@ if(is.null(input$plot_brush$ymin)){
         combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),k=input$kClusters)==input$Group)),"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
 
       }
-}else{
-  #This takes a brush selection over the heirarchical clustering plot within the MAN tab and uses this selection of samples for MAN analysis
+    }else{
+      #This takes a brush selection over the heirarchical clustering plot within the MAN tab and uses this selection of samples for MAN analysis
 
 
       location_of_Heirarchical_Leaves<-get_nodes_xy(dendro())
       minLoc<-input$plot_brush$ymin
       maxLoc<-input$plot_brush$ymax
       threeColTable<<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
-        #column 1= y-values of dendrogram leaves
-        #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
-        #column 3= leaf labels
+      #column 1= y-values of dendrogram leaves
+      #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
+      #column 3= leaf labels
       w<- which(threeColTable[,1] > minLoc & threeColTable[,1] < maxLoc)
       brushed<-as.vector(threeColTable[,3][w])
       labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
       combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(brushed,"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
 
-}
+    }
 
 
 
 
-#if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
+    #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
 
 
     combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)][[1]]
@@ -1189,7 +1227,7 @@ if(is.null(input$plot_brush$ymin)){
 
     simpleNetwork(bool,zoom=TRUE)
 
-})
+  })
 
 
 
@@ -1206,7 +1244,7 @@ if(is.null(input$plot_brush$ymin)){
 
     # Display text of how many clusters were created.
     if (is.null(input$kORheight)){
-      }else if (input$kORheight=="2"){
+    }else if (input$kORheight=="2"){
       paste("You have Created ", length(unique(cutree(dendro(),h=input$height)))," Cluster(s)")
     }
     else if (input$kORheight=="1"){
@@ -1311,7 +1349,7 @@ if(is.null(input$plot_brush$ymin)){
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
                            brush = "plot_brush")
-    ))
+      ))
   })
 
 
