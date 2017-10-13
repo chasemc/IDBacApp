@@ -50,8 +50,8 @@ Install_And_Load(Required_Packages)
       fluidRow(
         column(9,h2("IDBac"), br(),
         p("Welcome to the IDBac application. For documentation please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
-        p("Bugs and suggestions may be reported on the ",a(href="https://github.com/chasemc/IDBac_app/issues", target="_blank", "IDBac Github."))),
-        column(3,div(img(src="placeholder.gif",style="width:370px;height:210px")))),
+        p("Bugs and suggestions may be reported on the ",a(href="https://github.com/chasemc/IDBac_app/issues", target="_blank", "IDBac Github.")))),
+      #  column(3,div(img(src="placeholder.gif",style="width:370px;height:210px")))),
       #br(),
       fluidRow( radioButtons("rawORreanalyze", label = h4("Begin with selecting an option below:"),
       choices = list("Start with Raw MALDI Data" = 1, "Start with Multiple MALDI-plates of Data" = 3,"Analyze Existing Data" = 2),selected=0),
