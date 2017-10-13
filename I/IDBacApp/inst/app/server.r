@@ -1034,7 +1034,7 @@ sapply(w,rot)
 
   ################################################
   #This creates the network plot and calculations needed for such.
-  output$ddd <- renderSimpleNetwork({
+  output$metaboliteAssociationNetwork <- renderSimpleNetwork({
 
 
     labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
@@ -1313,7 +1313,7 @@ if(is.null(input$plot_brush$ymin)){
 
 
       ),
-      mainPanel(textOutput("Clusters2"),simpleNetworkOutput("ddd"),
+      mainPanel(textOutput("Clusters2"),simpleNetworkOutput("metaboliteAssociationNetwork"),
                 plotOutput("netheir",
                            click = "plot_click",
                            dblclick = "plot_dblclick",

@@ -40,10 +40,6 @@ Install_And_Load(Required_Packages)
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
  navbarPage(
   "IDBac",
-
-
-
-
   tabPanel(
     "PreProcessing",
     fluidPage(
