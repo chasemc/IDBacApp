@@ -7,7 +7,7 @@ function(input,output,session){
 
   # "appLocation" will be assigned to the directory of where IDBac was installed to.  This will be used later in order to access MSConvert
   # which is used for converting raw MALDI files to mzML via command line.
-  appLocation <- getwd()
+  #appLocation <- getwd()
   #####################################################################################################################################################
 
   ################################################
@@ -26,6 +26,7 @@ function(input,output,session){
 
   output$value <- renderPrint({ input$radio })
 
+#This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
 
   observe({
 
@@ -47,13 +48,13 @@ function(input,output,session){
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       div(img(src="window.png",style="width:750px;height:40px"))),
                column(5,style = "background-color:#F5F5F5",
-                   h3("Start With Raw Data"),
+                   h3("Starting with 1 MALDI-Plate of Raw Data"),
                    br(),
                    p(strong("1:"), " Your Working Directory is where files will be created"),
                    actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
                fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectory", placeholder = TRUE))),
                    br(),
-                   p(strong("2:"), "Your RAW data should be one folder that contains: two folders containing protein and small-molecule data"),
+                   p(strong("2:"), "Your RAW data should be one folder that contains: a folder containing protein data and folder containing small-molecule data"),
                    actionButton("rawFileDirectory", label = "Click to select the location of your RAW data"),
                fluidRow(column(12, verbatimTextOutput("rawFileDirectory", placeholder = TRUE))),
                    br(),
@@ -70,7 +71,7 @@ function(input,output,session){
 
 
 
-  #This "observe" event creates the UI element for analyzing multiple MALDI plates based on user-input.
+  #This "observe" event creates the UI element for analyzing multiple MALDI plates, based on user-input.
 
   observe({
 
@@ -99,7 +100,7 @@ function(input,output,session){
 
 
                 column(5,style = "background-color:#F5F5F5",
-                      h3("Start With Raw Data"),
+                      h3("Starting With >1 MALDI-Plate of Raw Data"),
                       br(),
                       p(strong("1:"), " Your Working Directory is where files will be created."),
                       actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
@@ -119,13 +120,6 @@ function(input,output,session){
       })
     }
   })
-
-
-
-
-
-
-
 
 
 
@@ -177,16 +171,6 @@ observe({
       })
     }
   })
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -396,18 +380,19 @@ observe({
 
 #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       w<-lapply(fullZ,function(x)
+        #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
         paste0("..\\..\\pwiz\\msconvert.exe",
-
+               #sets up the command to pass to MSConvert in CMD, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
                " ",
                paste0(x$UserInput.y,collapse = "",sep=" "),
-               " --mzXML --merge -z",
+               " --mzML --merge -z",
                " -o ",
                outp,
                " --outfile ",
 
 
 
-               paste0(x$UserInput.x[1],".mzXML")
+               paste0(x$UserInput.x[1],".mzML")
         ))
 
 
@@ -1192,7 +1177,14 @@ if(is.null(input$plot_brush$ymin)){
     bool$Target<-round(as.numeric(as.matrix(bool$Target)),digits=1)
     if(input$save=="FALSE"){
     }
-    else{ write.csv(as.matrix(bool),"Current Network.csv")
+
+    else{
+
+      workdir<-idbacDirectory()
+      write.csv(as.matrix(bool),paste0(workdir, "\\Saved_MANs\\Current_Network.csv"))
+
+
+
     }
 
     simpleNetwork(bool,zoom=TRUE)
