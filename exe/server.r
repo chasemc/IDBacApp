@@ -60,7 +60,12 @@ function(input,output,session){
                       p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files."),
                       fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
                       actionButton("run", label = "Convert to mzXML"),
-                      actionButton("run2", label = "Process mzXML")
+                      br(),
+                      actionButton("run2", label = "Process mzXML"),
+                      br(),
+                      p("Spectra Processing Progress"),
+                      textOutput("mzXMLProcessingProgress")
+
                )
                )
       })
@@ -282,43 +287,19 @@ function(input,output,session){
 
 
 
-  #This handles reading in the excel file and displaying it on the    page.
-
-  #  output$sampleMap <- renderTable({
-  #    inFile <- input$excelFile
-  #    if (is.null(inFile))
-  #      return(NULL)
-  #    file.rename(inFile$datapath,
-  #                paste(inFile$datapath, ".xlsx", sep = ""))
-  #
-  #
-  #    read_excel(paste(inFile$datapath, ".xlsx", sep = ""), 1)
-  #
-  #  })
-
-
-
-
 
 
 
   # Spectra conversion
   #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
 
-  observe({
-    if (is.null(input$run)){}else if(input$run > 0) {
-      dir.create(paste0(selectedDirectory(), "/IDBac"))
-      dir.create(paste0(selectedDirectory(), "/IDBac/Converted_To_mzML"))
-      dir.create(paste0(selectedDirectory(), "/IDBac/Sample_Spreadsheet_Map"))
-      dir.create(paste0(selectedDirectory(), "/IDBac/Peak_Lists"))
-      dir.create(paste0(selectedDirectory(), "/IDBac/Saved_MANs"))
-
+spectraConversion<-reactive({
 
 
       if(is.null(input$multipleMaldiRawFileDirectory)){
 
         #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
-        excelMap <<- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
+        excelMap <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
         lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(as.character(excelMap$Value), sep = "_replicate-")))
         lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
         fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
@@ -361,16 +342,30 @@ function(input,output,session){
 
 
 
-
-
-
-
-
-
-
-
-
       fullZ<-dlply(fullZ,.(UserInput.x))
+
+
+
+fullZ
+
+
+})
+
+
+
+
+
+  observe({
+    if (is.null(input$run)){}else if(input$run > 0) {
+
+      dir.create(paste0(selectedDirectory(), "/IDBac"))
+      dir.create(paste0(selectedDirectory(), "/IDBac/Converted_To_mzML"))
+      dir.create(paste0(selectedDirectory(), "/IDBac/Sample_Spreadsheet_Map"))
+      dir.create(paste0(selectedDirectory(), "/IDBac/Peak_Lists"))
+      dir.create(paste0(selectedDirectory(), "/IDBac/Saved_MANs"))
+
+
+      fullZ<-spectraConversion()
       workdir <- selectedDirectory()
       outp <- file.path(workdir, "IDBac/Converted_To_mzML")
 
@@ -396,8 +391,6 @@ function(input,output,session){
 
 
 
-
-
       rot<-function(x){
         system(command =
                  "cmd.exe",
@@ -405,14 +398,21 @@ function(input,output,session){
       }
 
 
+      #sapply(w,rot)
+
+
+      popup()
 
 
       numCores <- detectCores()
-      cl <- makeCluster(numCores)
+      cl <- makeCluster(numCores-1)
       parSapply(cl,w,rot)
-
-
       stopCluster(cl)
+
+
+      popup2()
+
+
 
 
 
@@ -425,6 +425,21 @@ function(input,output,session){
 
 
 
+popup<-reactive({
+
+    showModal(modalDialog(
+      title = "Important message",
+      "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",br(),
+      "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
+      "This also means your computer might be slow during these file conversions.",br(),
+      "To check what has been converted you can navigate to:",
+
+      paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"),
+      easyClose = FALSE, size="l",footer=""
+    ))
+
+
+})
 
 
 
@@ -433,11 +448,43 @@ function(input,output,session){
 
 
 
-  observe({
+popup2<-reactive({
+
+  showModal(modalDialog(
+    title = "Important message",
+
+    paste0(nrow(ldply(spectraConversion()))," files were converted into ",length(list.files(paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"))),
+           " open data format files."),br(),
+    "To check what has been converted you can navigate to:",
+
+    paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"),
+    easyClose = TRUE,
+    footer = modalButton("Close")
+
+  ))
+
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     functionA <- function(z) {
-      setwd(paste0(selectedDirectory(),"//IDBac"))
+
       strReverse <- function(x) {
         sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
       }
@@ -474,8 +521,7 @@ function(input,output,session){
       Install_And_Load(Required_Packages)
 
 
-
-      if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
+            if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
         spectraImport <-  sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
         spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
         names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
@@ -603,6 +649,12 @@ function(input,output,session){
     # Spectra processing
 
 
+
+
+
+    observe({
+
+
     if (is.null(input$run2)){}else if(input$run2 > 0) {
 
       setwd(paste0(selectedDirectory(),"/IDBac"))
@@ -615,11 +667,11 @@ function(input,output,session){
 
 
 
-      sapply(fileList,functionA)
+    #  sapply(fileList,functionA)
 
-      #   numCores <- detectCores()
-      #   cl <- makeCluster(numCores)
-      #   parSapply(cl,fileList,functionA)
+       numCores <- detectCores()
+       cl <- makeCluster(numCores)
+       parSapply(cl,fileList,functionA)
 
 
 
@@ -630,11 +682,7 @@ function(input,output,session){
 
     }
 
-
-
-
-  })
-
+})
 
 
 
@@ -1391,5 +1439,5 @@ function(input,output,session){
   # })
 
 
-}
+  }
 
