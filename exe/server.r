@@ -189,7 +189,15 @@ function(input,output,session){
     }else if (input$selectedWorkingDirectory > 0) {
       choose.dir()
     }
+
   })
+
+
+
+
+
+
+
 
 
   output$selectedWorkingDirectory <-
@@ -200,13 +208,16 @@ function(input,output,session){
   idbacDirectory<-reactive({
 
     if(is.null(input$idbacDirectoryButton)){
-      return("No Folder Selected")
+      if(is.null(selectedDirectory())){
+        return("No Folder Selected")
+        }else(paste0(selectedDirectory(),"/IDBac"))
+
     } else if(input$idbacDirectoryButton==0){
       return("No Folder Selected")
     }else if (input$idbacDirectoryButton > 0){
       choose.dir()
-    }else if (input$selectedWorkingDirectory > 0){
-      paste0(selectedDirectory(),"/IDBac")}
+    }else{
+      }
   })
 
 
@@ -401,7 +412,7 @@ fullZ
       #sapply(w,rot)
 
 
-      popup()
+      popup1()
 
 
       numCores <- detectCores()
@@ -425,7 +436,7 @@ fullZ
 
 
 
-popup<-reactive({
+popup1<-reactive({
 
     showModal(modalDialog(
       title = "Important message",
@@ -487,10 +498,6 @@ observeEvent(input$beginPeakProcessing, {
 
     functionA <- function(z) {
 
-      strReverse <- function(x) {
-        sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
-      }
-
 
 
 
@@ -516,14 +523,37 @@ observeEvent(input$beginPeakProcessing, {
       }
 
       # Required packages to install and load
-      Required_Packages = c("snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","dplyr","igraph","rgl")
+      Required_Packages = c("colourpicker","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
 
 
       # Install and Load Packages
       Install_And_Load(Required_Packages)
 
 
-            if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      strReverse <- function(x) {
+        sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
+      }
+
+
+
+
+        if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
         spectraImport <-  sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
         spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
         names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
@@ -535,6 +565,9 @@ observeEvent(input$beginPeakProcessing, {
         spectraImport <-createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
         spectraImport<-list(spectraImport)
       }
+
+
+
 
 
       sampleNames <- strsplit(names, ".mzXML")[[1]][1]
@@ -549,91 +582,28 @@ observeEvent(input$beginPeakProcessing, {
           metaData(x)$Strain)[[1]]
 
 
-      proteinSpectra <-
-        spectraImport[which(sapply(spectraImport, function(x)
-          max(mass(x))) > 10000)]
-      smallSpectra <-
-        spectraImport[which(!sapply(spectraImport, function(x)
-          max(mass(x))) > 10000)]
+      proteinSpectra <- spectraImport[which(sapply(spectraImport, function(x)max(mass(x))) > 10000)]
+      smallSpectra <- spectraImport[which(!sapply(spectraImport, function(x) max(mass(x))) > 10000)]
 
       if(length(proteinSpectra) > 0){
         averaged <- averageMassSpectra(proteinSpectra, method = "mean")
-        saveRDS(
-          averaged,
-          paste0(
-
-            getwd(),
-            "/Peak_Lists/",
-            averaged@metaData$Strain[[1]],
-            "_",
-            "SummedProteinSpectra.rds"
-          )
-        )
+        saveRDS(averaged, paste0(idbacDirectory(),"/Peak_Lists/", averaged@metaData$Strain[[1]], "_", "SummedProteinSpectra.rds"))
         remove(averaged)
 
-
-
-
-        proteinSpectra <-
-          transformIntensity(proteinSpectra, method = "sqrt")
-        proteinSpectra <-
-          smoothIntensity(proteinSpectra,
-                          method = "SavitzkyGolay",
-                          halfWindowSize = 20)
-        proteinSpectra <-
-          removeBaseline(proteinSpectra, method = "TopHat")
-        proteinSpectra <-
-          detectPeaks(
-            proteinSpectra,
-            method = "MAD",
-            halfWindowSize = 20,
-            SNR = 4
-          )
-        saveRDS(
-          proteinSpectra,
-          paste0(
-
-            getwd(),
-            "/Peak_Lists/",
-            labs,
-            "_",
-            "ProteinPeaks.rds"
-          )
-        )
-
-
-
-
-
-      }
+        proteinSpectra <- transformIntensity(proteinSpectra, method = "sqrt")
+        proteinSpectra <- smoothIntensity(proteinSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
+        proteinSpectra <- removeBaseline(proteinSpectra, method = "TopHat")
+        proteinSpectra <- detectPeaks(proteinSpectra, method = "MAD", halfWindowSize = 20, SNR = 4)
+        saveRDS(proteinSpectra, paste0(idbacDirectory(), "/Peak_Lists/", labs, "_", "ProteinPeaks.rds"))
+    }
 
       if(length(smallSpectra) > 0){
         ############
         #Spectra Preprocessing, Peak Picking
-        smallSpectra <-
-          smoothIntensity(smallSpectra,
-                          method = "SavitzkyGolay",
-                          halfWindowSize = 20)
+        smallSpectra <- smoothIntensity(smallSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
         smallSpectra <- removeBaseline(smallSpectra, method = "TopHat")
-        smallSpectra <-
-          detectPeaks(
-            smallSpectra,
-            method = "SuperSmoother",
-            halfWindowSize = 20,
-            SNR = 1
-          )
-        saveRDS(
-          smallSpectra,
-          paste0(
-
-            getwd(),
-            "/Peak_Lists/",
-            labs,
-            "_",
-
-            "SmallMoleculePeaks.rds"
-          )
-        )
+        smallSpectra <- detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
+        saveRDS(smallSpectra, paste0(idbacDirectory(), "/Peak_Lists/", labs, "_", "SmallMoleculePeaks.rds"))
         remove(smallSpectra)
 
         gc()
@@ -659,25 +629,22 @@ observeEvent(input$beginPeakProcessing, {
 
     if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
 
-      setwd(paste0(selectedDirectory(),"/IDBac"))
 
-      fileList <-
-        list.files(list.dirs(("Converted_To_mzML")),
-                   pattern = ".mzXML",
-                   full.names = TRUE)
+
+      fileList <-list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
 
 popup3()
 
 
-    #  sapply(fileList,functionA)
+     sapply(fileList,functionA)
 
-       numCores <- detectCores()
-       cl <- makeCluster(numCores)
-       parSapply(cl,fileList,functionA)
+   #    numCores <- detectCores()
+    #   cl <- makeCluster(numCores)
+    #   parSapply(cl,fileList,functionA)
 
 
 
-          stopCluster(cl)
+     #     stopCluster(cl)
 
 popup4()
 
@@ -1174,7 +1141,7 @@ popup4()
       location_of_Heirarchical_Leaves<-get_nodes_xy(dendro())
       minLoc<-input$plot_brush$ymin
       maxLoc<-input$plot_brush$ymax
-      threeColTable<<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
+      threeColTable<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
       #column 1= y-values of dendrogram leaves
       #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
       #column 3= leaf labels
