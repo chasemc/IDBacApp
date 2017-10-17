@@ -140,8 +140,8 @@ function(input,output,session){
                column(5,
                       h2("Instructions:"),
                       br(),
-                      p("Left-click the button to the right to select a working directory."),
-                      p("Your working directory is the folder (originally named \"IDBac\"), which contains the folders:"),
+                      p("Left-click the button to the right to select your previously-analyzed data."),
+                      p("This is the folder (originally named \"IDBac\"), which contains the folders:"),
                       tags$ul(
                         tags$li("Converted_To_mzML"),
                         tags$li("Peak_Lists"),
@@ -149,7 +149,7 @@ function(input,output,session){
                       ),
                       br(),
                       tags$b("Example:"),br(),
-                      img(src="WorkingDirectory.png", style="width:322px;height:164px"),
+                      img(src="WorkingDirectory_ReAnalysis.png", style="width:322px;height:164px"),
                       br(),br(),
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       div(img(src="window.png",style="width:750px;height:40px"))
@@ -159,17 +159,15 @@ function(input,output,session){
 
 
                column(5,style = "background-color:#F5F5F5",
-                      h2("ReAnalyze Data:"),
-                      br(),
-                      p(
-                        strong("1:"),
-                        "Your Working Directory is where files will be created"
-                      ),
-                      actionButton("idbacDirectoryButton", label = "Click to select your Working Directory"),
+                      h3("ReAnalyze Data:"),
+                      p(strong("1:"), "Select the folder containing your data"),
+                      actionButton("idbacDirectoryButton", label = "Click to select the data directory"),
                       fluidRow(column(
                         12,
-                        verbatimTextOutput("idbacDirectoryOut", placeholder = TRUE)
-                      ))
+                        verbatimTextOutput("idbacDirectoryOut", placeholder = TRUE))),
+                      br(),
+                      p(strong("2:"), "You can now reanalyze your data by proceeding through the tabs at the top of the page. (\"Inverse Peak Comparison\", etc)      ")
+
                )
         )
       })

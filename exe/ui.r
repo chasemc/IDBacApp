@@ -43,13 +43,13 @@ navbarPage(
     "PreProcessing",
     fluidPage(
       fluidRow(
-        column(7,h2("IDBac"), br(),
-               p("Welcome to the IDBac application. For documentation please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
-               p("Bugs and suggestions may be reported on the IDBac Github Issues Page", a(href="https://github.com/chasemc/IDBac_app/issues","IDBac Github Issues Page", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))),
+        column(5,h2("IDBac"), br(),
+               p("Welcome to the IDBac application. For documentation, as well as links to the full code, please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
+               p("Bugs and suggestions may be reported on the IDBac Github Issues Page", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Github Issues Page", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))),
 
 
 
-        column(5,
+        column(7,
 
 
 br(),br(),
