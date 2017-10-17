@@ -1451,7 +1451,14 @@ numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
         checkboxInput("save", label = "Save Current Network?", value = FALSE),
         numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=50,max=max(sapply(smallPeaks(),function(x)max(mass(x))))),
         numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=50,min=min(sapply(smallPeaks(),function(x)min(mass(x))))),
-        numericInput("hclustHeightNetwork", label = h5("Tree Plot Height"),value = 750,step=50,min=100)
+        numericInput("hclustHeightNetwork", label = h5("Tree Plot Height"),value = 750,step=50,min=100),
+
+        p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples"),
+        p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br(),
+        p(strong("Note 1:"), "For publication-quality networks click the box next to \"Save Current Network\",
+          while selected- this saves a .csv file of the currently-displayed
+          network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
+          For detailed instructions see here: linkedy-link " )
 
 
       ),
@@ -1461,7 +1468,9 @@ numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
                            brush = "plot_brush")
-      ))
+
+
+                ))
   })
 
 
