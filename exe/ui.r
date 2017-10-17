@@ -44,8 +44,8 @@ navbarPage(
     fluidPage(
       fluidRow(
         column(5,h2("IDBac"), br(),
-               p("Welcome to the IDBac application. For documentation, as well as links to the full code, please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
-               p("Bugs and suggestions may be reported on the IDBac Github Issues Page", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Github Issues Page", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))),
+               p("Welcome to the IDBac application. For more information, as well as links to the full code, please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
+               p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac IssuesPage on GitHub", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))),
 
 
 
@@ -54,9 +54,9 @@ navbarPage(
 
 br(),br(),
         radioButtons("rawORreanalyze", label = h4("Begin with selecting an option below:"),
-                     choices = list("Select here to convert raw-data from a single MALDI-plate" = 1,
-                                    "Select here to convert raw-data from Multiple MALDI-plates" = 3,
-                                    "Select here if you have already converted data and just want to re-analyze the data" = 2),selected=0)),
+                     choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
+                                    "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3,
+                                    "Select here if you have already converted data and just want to re-analyze it" = 2),selected=0)),
           fluidRow(
             uiOutput("ui1"))
 

@@ -32,11 +32,16 @@ function(input,output,session){
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 1){
       output$ui1<-renderUI({
 
-        column(12,
+        fluidRow(
+          column(12,
                br(),
                br(),
-               column(5,
-                      h3("Instructions:"),
+               fluidRow(
+                 column(12,offset=3,
+               h3("Starting with a Single MALDI Plate of Raw Data"))),br(),br(),
+
+                column(5,
+                      fluidRow(column(5,offset=3,h3("Instructions"))),
                       br(),
                       p(strong("1:")," This directs where you would like to create an IDBac working directory."),
                       p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
@@ -46,8 +51,9 @@ function(input,output,session){
                       br(),
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       div(img(src="window.png",style="width:750px;height:40px"))),
+               column(1),
                column(5,style = "background-color:#F5F5F5",
-                      h3("Starting with 1 MALDI-Plate of Raw Data"),
+                    fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                       br(),
                       p(strong("1:"), " Your Working Directory is where files will be created"),
                       actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
@@ -59,15 +65,19 @@ function(input,output,session){
                       br(),
                       p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files."),
                       fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
+                    p(strong("4:"),"Click \"Convert to mzXML\" to begin spectra conversion."),
+
                       actionButton("run", label = "Convert to mzXML"),
                       br(),
-                      actionButton("mbeginPeakProcessing", label = "Process mzXML"),
+                    br(),
+                    p("If you canceled out of the popup after spectra conversion completed you can process your converted spectra using the button below:"),
+                      actionButton("mbeginPeakProcessing", label = "Process mzXML spectra"),
                       br(),
                       p("Spectra Processing Progress"),
                       textOutput("mzXMLProcessingProgress")
-
                )
                )
+        )
       })
     }
   })
@@ -141,7 +151,8 @@ function(input,output,session){
                       h2("Instructions:"),
                       br(),
                       p("Left-click the button to the right to select your previously-analyzed data."),
-                      p("This is the folder (originally named \"IDBac\"), which contains the folders:"),
+                      p("This will be the folder, originally named \"IDBac\", that was created when you analyzed data the first time."),
+                      p("It contains the folders:"),
                       tags$ul(
                         tags$li("Converted_To_mzML"),
                         tags$li("Peak_Lists"),
@@ -154,7 +165,6 @@ function(input,output,session){
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       div(img(src="window.png",style="width:750px;height:40px"))
 
-
                ),
 
 
@@ -166,10 +176,9 @@ function(input,output,session){
                         12,
                         verbatimTextOutput("idbacDirectoryOut", placeholder = TRUE))),
                       br(),
-                      p(strong("2:"), "You can now reanalyze your data by proceeding through the tabs at the top of the page. (\"Inverse Peak Comparison\", etc)      ")
+                      p(strong("2:"), "You can now reanalyze your data by proceeding through the tabs at the top of the page. (\"Inverse Peak Comparison\", etc)      ")))
 
-               )
-        )
+
       })
     }
   })
@@ -521,7 +530,7 @@ observeEvent(input$beginPeakProcessing, {
       }
 
       # Required packages to install and load
-      Required_Packages = c("colourpicker","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
+      Required_Packages = c("colourpicker","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","plotly","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
 
 
       # Install and Load Packages
@@ -933,7 +942,7 @@ popup4()
     if(input$PCA3d==1){
       plot3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,xlab="", ylab="", zlab="")
       text3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,text=e$nam,col=factor(d))}
-    ggplot(e,aes(Dim.1,Dim.2,label=nam))+geom_label(aes(col=factor(d)),size=6)+xlab("Dimension 1")+ylab("Dimension 2")+ggtitle("PCA of Protein MALDI Spectra (colors based on clusters from hiearchical clustering)")+theme(plot.title=element_text(size=15)) + scale_color_discrete(name="Clusters from hierarchical clustering")+theme(legend.position="none")
+    ggplotly(e,aes(Dim.1,Dim.2,label=nam))+geom_label(aes(col=factor(d)),size=6)+xlab("Dimension 1")+ylab("Dimension 2")+ggtitle("PCA of Protein MALDI Spectra (colors based on clusters from hiearchical clustering)")+theme(plot.title=element_text(size=15)) + scale_color_discrete(name="Clusters from hierarchical clustering")+theme(legend.position="none")
   },height=750)
 
 
