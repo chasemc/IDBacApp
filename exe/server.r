@@ -878,6 +878,7 @@ popup4()
   # Create peak comparison ui
   output$inversepeakui <-  renderUI({
     sidebarLayout(
+
       sidebarPanel(
         numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=70,max=70),
         numericInput("pSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
@@ -1004,6 +1005,8 @@ popup4()
     }
     else{
       par(mar=c(5,5,5,10))
+      s<<-dendro()
+
       dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
     }
 
