@@ -61,7 +61,7 @@ function(input,output,session){
                       fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
                       actionButton("run", label = "Convert to mzXML"),
                       br(),
-                      actionButton("run2", label = "Process mzXML"),
+                      actionButton("beginPeakProcessing", label = "Process mzXML"),
                       br(),
                       p("Spectra Processing Progress"),
                       textOutput("mzXMLProcessingProgress")
@@ -118,7 +118,7 @@ function(input,output,session){
 
 
                       actionButton("run", label = "Convert to mzXML"),
-                      actionButton("run2", label = "Process mzXML")
+                      actionButton("beginPeakProcessing", label = "Process mzXML")
                )
                       )
       })
@@ -451,7 +451,7 @@ popup<-reactive({
 popup2<-reactive({
 
   showModal(modalDialog(
-    title = "Important message",
+    title = "Conversion Complete",
 
     paste0(nrow(ldply(spectraConversion()))," files were converted into ",length(list.files(paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"))),
            " open data format files."),br(),
@@ -459,7 +459,8 @@ popup2<-reactive({
 
     paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"),
     easyClose = TRUE,
-    footer = modalButton("Close")
+    footer = tagList(actionButton("beginPeakProcessing","Click to continue with Peak Processing"), modalButton("Close"))
+
 
   ))
 
@@ -470,8 +471,9 @@ popup2<-reactive({
 
 
 
-
-
+observeEvent(input$beginPeakProcessing, {
+  removeModal()
+})
 
 
 
@@ -655,7 +657,7 @@ popup2<-reactive({
     observe({
 
 
-    if (is.null(input$run2)){}else if(input$run2 > 0) {
+    if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
 
       setwd(paste0(selectedDirectory(),"/IDBac"))
 
@@ -664,7 +666,7 @@ popup2<-reactive({
                    pattern = ".mzXML",
                    full.names = TRUE)
 
-
+popup3()
 
 
     #  sapply(fileList,functionA)
@@ -675,9 +677,9 @@ popup2<-reactive({
 
 
 
-      #    stopCluster(cl)
+          stopCluster(cl)
 
-
+popup4()
 
 
     }
@@ -688,7 +690,35 @@ popup2<-reactive({
 
 
 
+    popup3<-reactive({
 
+      showModal(modalDialog(
+        title = "Important message",
+        "When spectra processing is complete you will be able to begin with the data-analysis",br(),
+        "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
+        "This also means your computer might be slow during the computations.",br(),
+        "The step allows for fast interaction during the various data analysis",
+
+        easyClose = FALSE, size="l",footer=""
+      ))
+
+
+    })
+
+
+    popup4<-reactive({
+
+      showModal(modalDialog(
+        title = "Spectra Processing is Now Complete",
+        br(),
+        easyClose = TRUE,
+        footer = modalButton("Continue to Data Analysis by consecutively visiting tabs at the top of the page.")))
+
+
+
+
+
+    })
 
 
 
