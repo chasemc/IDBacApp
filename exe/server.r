@@ -92,10 +92,16 @@ function(input,output,session){
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 3){
       output$ui1<-renderUI({
 
-        column(12,
-               br(),
-               br(),
-               column(5,
+
+        fluidRow(
+          column(12,
+                 br(),
+                 br(),
+                 fluidRow(
+                   column(12,offset=3,
+                          h3("Starting with Multiple MALDI Plates of Raw Data"))),br(),br(),
+
+                 column(5,
                       h3("Instructions:"),
                       br(),
                       p(strong("1:")," This directs where you would like to create an IDBac working directory."),
@@ -110,11 +116,12 @@ function(input,output,session){
                       img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
 
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                      div(img(src="window.png",style="width:750px;height:40px"))),
+                      img(src="window.png",style="width:750px;height:40px")),
 
+                 column(1),
 
                column(5,style = "background-color:#F5F5F5",
-                      h3("Starting With >1 MALDI-Plate of Raw Data"),
+                      h3("Starting With Multiple MALDI Plates of Raw Data"),
                       br(),
                       p(strong("1:"), " Your Working Directory is where files will be created."),
                       actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
@@ -131,6 +138,8 @@ function(input,output,session){
                       actionButton("mbeginPeakProcessing", label = "Process mzXML")
                )
                       )
+        )
+
       })
     }
   })
@@ -887,20 +896,25 @@ popup4()
     sidebarLayout(
 
       sidebarPanel(
-        numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=70,max=70),
-        numericInput("pSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
-
-
-        numericInput("upperMass", label = h5("Upper Mass Cutoff"),value = 15000,step=50),
-        numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
-
         selectInput("Spectra1", label=h5("Spectrum 1 (up; matches to bottom spectrum are blue, non-matches are red)"),
                     choices = sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain)),
         selectInput("Spectra2", label=h5("Spectrum 2 (down, grey)"),
                     choices = sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain)),
 
+
+        numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=70,max=70),
+        numericInput("pSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
+
+numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
+
+        numericInput("upperMass", label = h5("Upper Mass Cutoff"),value = 15000,step=50),
+
+
+
         p("Note: Mass Cutoff and Percent Replicate values selected here will be used in all later analyses."),
-        p("Displayed spectra are the mean spectrum for a sample.")
+        p("Note 2: Displayed spectra are the mean spectrum for a sample, this means if you can see a peak
+          in your spectrum but it isn't appearing as a peak, then either it doesn't occur often enough across your replicates
+          or its signal to noise ratio is less than what is selected.")
 
       ),
 
@@ -925,7 +939,7 @@ popup4()
 
   ################################################
   # This creates the PCA plot and the calculation required for such.
-  output$pcaplot <- renderPlot({
+  output$pcaplot <- renderPlotly({
     c<-PCA(proteinMatrix(),graph=FALSE)
     a<-c$ind$coord
     a<-as.data.frame(a)
@@ -942,8 +956,15 @@ popup4()
     if(input$PCA3d==1){
       plot3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,xlab="", ylab="", zlab="")
       text3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,text=e$nam,col=factor(d))}
-    ggplotly(e,aes(Dim.1,Dim.2,label=nam))+geom_label(aes(col=factor(d)),size=6)+xlab("Dimension 1")+ylab("Dimension 2")+ggtitle("PCA of Protein MALDI Spectra (colors based on clusters from hiearchical clustering)")+theme(plot.title=element_text(size=15)) + scale_color_discrete(name="Clusters from hierarchical clustering")+theme(legend.position="none")
-  },height=750)
+
+    p<-(ggplot(e,aes(Dim.1,Dim.2,label=nam)))
+
+    output$pcaplot2<-renderPlot(p+geom_text(aes(col=factor(d)),size=6)+xlab("Dimension 1")+ylab("Dimension 2")+ggtitle("PCA of Protein MALDI Spectra (colors based on clusters from hiearchical clustering)")+theme(plot.title=element_text(size=15)) + scale_color_discrete(name="Clusters from hierarchical clustering")+theme(legend.position="none"))
+
+  ggplotly(p + geom_text()+xlab("Dimension 1")+ylab("Dimension 2")+ ggtitle("Zoomable PCA of Protein MALDI Spectra")+theme(plot.title=element_text(size=15),legend.position="none"))
+
+  })
+  #  },height=750)
 
 
   # Create PCA ui
@@ -952,10 +973,14 @@ popup4()
 
     sidebarLayout	(
       sidebarPanel(
-        radioButtons("PCA3d", label = h4("PCA 3d Plot"),
-                     choices = list("Yes" = 1, "No" = 2),selected = 2)
+        radioButtons("PCA3d", label = h4("PCA 3D Plot"),
+                     choices = list("Show" = 1, "Don't Show" = 2),selected = 2)
       ),
-      mainPanel(plotOutput("pcaplot"))
+      mainPanel(plotOutput("pcaplot2"),
+
+                h5("Same PCA as above, no colors, but with interaction"),
+
+                plotlyOutput("pcaplot"))
     )
 
   })
@@ -1100,6 +1125,9 @@ popup4()
         uiOutput("hclustui"),
         uiOutput("groupui"),
         numericInput("hclustHeight", label = h5("Tree Plot Height"),value = 750,step=50,min=100),
+
+
+        p("To color samples according to user-defined groupings...",strong("This isn't yet functional! :( ")),
         fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
         uiOutput("sampleMapColumns")
 

@@ -45,7 +45,7 @@ navbarPage(
       fluidRow(
         column(5,h2("IDBac"), br(),
                p("Welcome to the IDBac application. For more information, as well as links to the full code, please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
-               p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac IssuesPage on GitHub", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))),
+               p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))),
 
 
 
@@ -66,13 +66,13 @@ br(),br(),
 
 
 
-  tabPanel("Inverse Peak Comparison",
+  tabPanel("Compare Two Samples (Protein)",
            uiOutput("inversepeakui")),
-  tabPanel("Heirarchical Clustering",
+  tabPanel("Heirarchical Clustering (Protein)",
            uiOutput("Heirarchicalui")),
-  tabPanel("PCA",
+  tabPanel("PCA (Protein)",
            uiOutput("PCAui")),
-  tabPanel("Metabolite Association Network",
+  tabPanel("Metabolite Association Network (Small-Molecule)",
            uiOutput("MANui"))
 
 )
