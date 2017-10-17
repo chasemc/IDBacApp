@@ -61,7 +61,7 @@ function(input,output,session){
                       fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
                       actionButton("run", label = "Convert to mzXML"),
                       br(),
-                      actionButton("beginPeakProcessing", label = "Process mzXML"),
+                      actionButton("mbeginPeakProcessing", label = "Process mzXML"),
                       br(),
                       p("Spectra Processing Progress"),
                       textOutput("mzXMLProcessingProgress")
@@ -118,7 +118,7 @@ function(input,output,session){
 
 
                       actionButton("run", label = "Convert to mzXML"),
-                      actionButton("beginPeakProcessing", label = "Process mzXML")
+                      actionButton("mbeginPeakProcessing", label = "Process mzXML")
                )
                       )
       })
@@ -624,10 +624,10 @@ observeEvent(input$beginPeakProcessing, {
 
 
 
-    observe({
+    observeEvent(input$beginPeakProcessing, {
 
 
-    if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
+    if (is.null(input$beginPeakProcessing) | is.null(input$mbeginPeakProcessing) ){}else if(input$beginPeakProcessing > 0 | input$mbeginPeakProcessing > 0) {
 
 
 
