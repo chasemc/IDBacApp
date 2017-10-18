@@ -14,3 +14,4 @@ create_app(
   #R_version   = 3.4,  # Old versions of R
   privilege   = "none", # Admin only installation
   default_dir = "userdocs")   # Install app in to DUCUMENTS
+

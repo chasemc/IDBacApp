@@ -1124,7 +1124,7 @@ numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
                      selected = 1),
         uiOutput("hclustui"),
         uiOutput("groupui"),
-        numericInput("hclustHeight", label = h5("Tree Plot Height"),value = 750,step=50,min=100),
+        numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
 
 
         p("To color samples according to user-defined groupings...",strong("This isn't yet functional! :( ")),
@@ -1191,14 +1191,16 @@ numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
     }
 
 
-
+    combinedSmallMolPeaks<<-combinedSmallMolPeaks
 
     #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
 
+#find matrix spectra
+    combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
 
-    combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)][[1]]
 
-
+  #For now, replicate matrix samples are
+    combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
 
 
 
@@ -1451,7 +1453,7 @@ numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
         checkboxInput("save", label = "Save Current Network?", value = FALSE),
         numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=50,max=max(sapply(smallPeaks(),function(x)max(mass(x))))),
         numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=50,min=min(sapply(smallPeaks(),function(x)min(mass(x))))),
-        numericInput("hclustHeightNetwork", label = h5("Tree Plot Height"),value = 750,step=50,min=100),
+        numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
 
         p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples"),
         p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br(),
