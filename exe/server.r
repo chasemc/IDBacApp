@@ -153,6 +153,15 @@ function(input,output,session){
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 2){
       output$ui1<-renderUI({
 
+
+
+        fluidRow(
+          column(12,
+                 br(),
+                 br(),
+                 fluidRow(
+                   column(12,offset=3,
+                          h3("Re-Analyze Data That You Already Passed Through the Pipeline"))),br(),br(),
         column(12,
 
                br(),
@@ -187,7 +196,7 @@ function(input,output,session){
                       br(),
                       p(strong("2:"), "You can now reanalyze your data by proceeding through the tabs at the top of the page. (\"Inverse Peak Comparison\", etc)      ")))
 
-
+))
       })
     }
   })
@@ -1455,7 +1464,7 @@ numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
         numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=50,min=min(sapply(smallPeaks(),function(x)min(mass(x))))),
         numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
 
-        p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples"),
+        p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
         p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br(),
         p(strong("Note 1:"), "For publication-quality networks click the box next to \"Save Current Network\",
           while selected- this saves a .csv file of the currently-displayed

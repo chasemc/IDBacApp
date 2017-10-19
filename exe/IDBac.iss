@@ -140,7 +140,7 @@ Source: "pwiz\Microsoft.Practices.Unity.Configuration.dll"; DestDir: "{app}\pwiz
 Source: "pwiz\Microsoft.Practices.Unity.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MIDAC.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\mkl_sequential.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz\MSConvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
+Source: "pwiz\msconvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSConvertGUI.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSFileReader.XRawfile2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSFileReader.XRawfile2.SxS.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
