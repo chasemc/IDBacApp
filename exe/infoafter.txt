@@ -1,6 +1,6 @@
-This message will display on the last page of your setup wizard.
-
-
+Installation of IDBac is now complete.  
+Thank you and please refer to https://github.com/chasemc/IDBac
+for the complete source code, or if you have any questions/bug reports/suggestions.
 
 
 

@@ -102,8 +102,8 @@ function(input,output,session){
                           h3("Starting with Multiple MALDI Plates of Raw Data"))),br(),br(),
 
                  column(5,
-                      h3("Instructions:"),
-                      br(),
+                        fluidRow(column(5,offset=3,h3("Instructions"))),
+                        br(),
                       p(strong("1:")," This directs where you would like to create an IDBac working directory."),
                       p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
                       img(src="WorkingDirectory.png", style="width:322px;height:164px"),
@@ -121,7 +121,7 @@ function(input,output,session){
                  column(1),
 
                column(5,style = "background-color:#F5F5F5",
-                      h3("Starting With Multiple MALDI Plates of Raw Data"),
+                      fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                       br(),
                       p(strong("1:"), " Your Working Directory is where files will be created."),
                       actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
@@ -166,7 +166,7 @@ function(input,output,session){
 
                br(),
                column(5,
-                      h2("Instructions:"),
+                      fluidRow(column(5,offset=3,h3("Instructions"))),
                       br(),
                       p("Left-click the button to the right to select your previously-analyzed data."),
                       p("This will be the folder, originally named \"IDBac\", that was created when you analyzed data the first time."),
@@ -185,9 +185,10 @@ function(input,output,session){
 
                ),
 
+               column(1),
 
                column(5,style = "background-color:#F5F5F5",
-                      h3("ReAnalyze Data:"),
+                      fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                       p(strong("1:"), "Select the folder containing your data"),
                       actionButton("idbacDirectoryButton", label = "Click to select the data directory"),
                       fluidRow(column(

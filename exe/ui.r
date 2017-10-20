@@ -42,28 +42,33 @@ navbarPage(
   tabPanel(
     "PreProcessing",
     fluidPage(
-      fluidRow(
-        column(5,h2("IDBac"), br(),
-               p("Welcome to the IDBac application. For more information, as well as links to the full code, please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
-               p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))),
+        column(1,div(img(src="IDBac_Computer_SVG_300DPI.png",style="width:250px;height:250px"))),
+        column(1),column(4,
+               h3("Welcome to the IDBac application."),
+              p("For more information, as well as links to the full code, please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
+               p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25"))),
+              p("If you use IDBac in your work please cite our paper:") ,
+              br(),
+              p(strong("Reference"))),
+
+        column(1),
+        column(4,
 
 
 
-        column(7,
 
-
-br(),br(),
-        radioButtons("rawORreanalyze", label = h4("Begin with selecting an option below:"),
+        radioButtons("rawORreanalyze", label = h2("Begin by selecting an option below:"),
                      choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
                                     "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3,
-                                    "Select here if you have already converted data and just want to re-analyze it" = 2),selected=0)),
-          fluidRow(
-            uiOutput("ui1"))
+                                    "Select here if you have already converted data and just want to re-analyze it" = 2),selected=0,inline=TRUE)),
 
-    ))),
+            uiOutput("ui1")
+
+    )),
 
 
 
+  tags$hr(),
 
 
   tabPanel("Compare Two Samples (Protein)",

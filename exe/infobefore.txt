@@ -1,6 +1,6 @@
-This message will display on the first page of your setup wizard.
-
-
+Thank you for downloading IDBac. Follow the directions to begin the installation.
+Please refer to https://github.com/chasemc/IDBac
+for the complete source code, or if you have any questions/bug reports/suggestions.
 
 
 

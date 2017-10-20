@@ -10,13 +10,13 @@
 
 
 [Setup]
-AppId = {{U0AVS0HX-MLH5-OBJW-C50E-76KTWEDZI1YH}
+AppId = {{7YWRL36Q-O9AV-LJGJ-426A-HSITE9GZ170H}
 AppName = {#MyAppName}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
 OutputBaseFilename = setup_{#MyAppName}
-SetupIconFile = setup.ico
+SetupIconFile = SmallSetupIcon3.ico
 AppVersion = {#MyAppVersion}
 AppPublisher = {#MyAppPublisher}
 AppPublisherURL = {#MyAppURL}
@@ -26,6 +26,7 @@ PrivilegesRequired = none
 InfoBeforeFile = infobefore.txt
 InfoAfterFile = infoafter.txt
 Compression = lzma2/ultra64
+LicenseFile = gpl.txt
 SolidCompression = yes
 
 [Languages]
@@ -35,10 +36,10 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"
 
 [Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\default.ico"
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\SmallAppIcon3.ico"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\default.ico"
-Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\default.ico"
+Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\SmallAppIcon3.ico"
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; IconFilename: "{app}\SmallAppIcon3.ico"
 
 [Files]
 Source: "LICENSE"; Flags: dontcopy
@@ -49,13 +50,14 @@ Source: "{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 #if IncludePandoc
     Source: "pandoc-{#PandocVersion}-windows.msi"; DestDir: "{tmp}"; Check: PandocNeeded
 #endif
-Source: "default.ico"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "DESCRIPTION"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "gpl.txt"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "IDBac.bat"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "NAMESPACE"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "server.r"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "setup.ico"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "SmallAppIcon.png"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "SmallSetupIcon.ico"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "SmallAppIcon3.ico"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "SmallSetupIcon3.ico"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "ui.r"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "pwiz\agtsampleinforw.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\baf2sql_c.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
@@ -140,7 +142,7 @@ Source: "pwiz\Microsoft.Practices.Unity.Configuration.dll"; DestDir: "{app}\pwiz
 Source: "pwiz\Microsoft.Practices.Unity.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MIDAC.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\mkl_sequential.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz\msconvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
+Source: "pwiz\MSConvertGUI.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSConvertGUI.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSFileReader.XRawfile2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSFileReader.XRawfile2.SxS.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
@@ -178,10 +180,14 @@ Source: "utils\wsf\js\JSON.minify.js"; DestDir: "{app}\utils\wsf\js"; Flags: ign
 Source: "utils\wsf\js\json2.js"; DestDir: "{app}\utils\wsf\js"; Flags: ignoreversion;
 Source: "utils\wsf\js\run.js"; DestDir: "{app}\utils\wsf\js"; Flags: ignoreversion;
 Source: "utils\wsf\run.wsf"; DestDir: "{app}\utils\wsf"; Flags: ignoreversion;
+Source: "www\GitHub.png"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www\IDBac_Computer_SVG_300DPI.png"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www\IDBacLogo.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\Multi-MALDI-Plate.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\placeholder.gif"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\window.PNG"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\WorkingDirectory.png"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www\WorkingDirectory_ReAnalysis.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 
 [Run]
 #if IncludeR
