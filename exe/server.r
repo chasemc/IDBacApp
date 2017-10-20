@@ -426,7 +426,7 @@ fullZ
                paste0(x$UserInput.x[1],".mzXML")
         ))
 
-
+ww<<-w
 
       rot<-function(x){
         system(command =
