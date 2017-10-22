@@ -15,19 +15,14 @@ https://github.com/chasemc/IDBac_App/blob/master/MALDI-Plate_Template/384_Spot_M
 
 #### Currently IDBAC comes in two forms:
 
-1. For those uncomfortable with using R there is an easy-installer
-    * The current stable Version "0.0.1" may be downloaded from here:
-2. For those even slightly familiar with R IDBac may be downloaded as a package by following the directions below
+1. The stable, easy-to-install version:
+    * Version "0.0.1" may be downloaded from here:
+2. Development versions of IDBac may be downloaded as an R package by following the directions below
 
-
-#### Why you would want to use R instead of the easy-install:
-
-* To help ensure IDBac doesn't break we make sure the user has the same version of R installed as was used in our
-testing.  This means it may install another version of R on your system than you currently use.
 
 
 #### Code to use IDBac from R:
-The R code below will, if needed, install "devtools" for downloading IDBac; and the R packages necessary for IDBac to function.
+The R code below will, if needed, install "devtools" for downloading IDBac and "biocLite" for downlaoding Bioconductor packages
 ```
 Install_And_Load <- function(Required_Packages)
 {  Remaining_Packages <- Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
@@ -38,7 +33,7 @@ Install_And_Load <- function(Required_Packages)
             character.only = TRUE,
             quietly = TRUE)  } }
 # Required packages to install and load
-Required_Packages = c("devtools","BiocInstaller","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
+Required_Packages = c("devtools","BiocInstaller")
 # Install and Load Packages
 Install_And_Load(Required_Packages)
 
@@ -54,7 +49,7 @@ biocLite("mzR",ask=FALSE)
 Once you have installed the necessary packages above, install IDBac using the code below:
 
 ```
-devtools:installGithub("https://github.com/chasemc/IDBac")
+devtools::install_github("chasemc/IDBac")
 ```
 
 
