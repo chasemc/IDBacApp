@@ -39,7 +39,6 @@ function(input,output,session){
                fluidRow(
                  column(12,offset=3,
                h3("Starting with a Single MALDI Plate of Raw Data"))),br(),br(),
-
                 column(5,
                       fluidRow(column(5,offset=3,h3("Instructions"))),
                       br(),
@@ -65,12 +64,11 @@ function(input,output,session){
                       br(),
                       p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files."),
                       fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
-                    p(strong("4:"),"Click \"Convert to mzXML\" to begin spectra conversion."),
-
+                      p(strong("4:"),"Click \"Convert to mzXML\" to begin spectra conversion."),
                       actionButton("run", label = "Convert to mzXML"),
                       br(),
-                    br(),
-                    p("If you canceled out of the popup after spectra conversion completed you can process your converted spectra using the button below:"),
+                      br(),
+                      p("If you canceled out of the popup after spectra conversion completed you can process your converted spectra using the button below:"),
                       actionButton("mbeginPeakProcessing", label = "Process mzXML spectra"),
                       br(),
                       p("Spectra Processing Progress"),
@@ -84,15 +82,11 @@ function(input,output,session){
 
 
 
-
-  #This "observe" event creates the UI element for analyzing multiple MALDI plates, based on user-input.
+#This "observe" event creates the UI element for analyzing multiple MALDI plates, based on user-input.
 
   observe({
-
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 3){
       output$ui1<-renderUI({
-
-
         fluidRow(
           column(12,
                  br(),
@@ -100,7 +94,6 @@ function(input,output,session){
                  fluidRow(
                    column(12,offset=3,
                           h3("Starting with Multiple MALDI Plates of Raw Data"))),br(),br(),
-
                  column(5,
                         fluidRow(column(5,offset=3,h3("Instructions"))),
                         br(),
@@ -114,13 +107,10 @@ function(input,output,session){
                         MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
                         containing protein data and the other containing small molecule data:"),
                       img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
-
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       img(src="window.png",style="width:750px;height:40px")),
-
                  column(1),
-
-               column(5,style = "background-color:#F5F5F5",
+                 column(5,style = "background-color:#F5F5F5",
                       fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                       br(),
                       p(strong("1:"), " Your Working Directory is where files will be created."),
@@ -336,56 +326,44 @@ spectraConversion<-reactive({
       if(is.null(input$multipleMaldiRawFileDirectory)){
 
         #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
-        excelMap <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
-        lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(as.character(excelMap$Value), sep = "_replicate-")))
-        lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
+        #excelMap is a dataframe (it's "Sheet1" of the excel template)
+        excelTable <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
+        #excelTable takes the sample location and name from excelTable, and also converts the location to the same name-format as Bruker (A1 -> 0-A1)
+        excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
+        #List the raw data files (for Bruker MALDI files this means pointing to a directory, not an individual file)
         fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
-        excelTable<-ldply(lookupExcel, data.frame)
+        #Get folder name from fullZ for merging with excel table names
         fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[3]])))
         colnames(fullZ)<-c("UserInput","ExcelCell")
-        colnames(excelTable)<-c("UserInput","ExcelCell")
+        colnames(excelTable)<-c("ExcelCell","UserInput")
+        #merge to connect filenames in excel sheet to file paths
         fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
         fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
-
       }else{
 
         #When analyzing more han one MALDI plate this handles fiding the raw data directories and the excel map
         mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
         lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
         collectfullZ<-NULL
-        for (i in 1:length(lapped)){
 
+        #For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
+         for (i in 1:length(lapped)){
+           excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
+          excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
           fullZ<-list.dirs(lapped[[i]],recursive = F)
-          excelMap <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
-          lookupExcel <- as.data.frame(cbind(sapply(excelMap$Key, function(x)paste0("0_", x)), excelMap$Value, make.unique(excelMap$Value, sep = "_replicate-")))
-          lookupExcel <- split(lookupExcel$V1, lookupExcel$V2)
-
-
-
-          excelTable<-ldply(lookupExcel, data.frame)
           fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
           colnames(fullZ)<-c("UserInput","ExcelCell")
-          colnames(excelTable)<-c("UserInput","ExcelCell")
+          colnames(excelTable)<-c("ExcelCell","UserInput")
           fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
           fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
-
           collectfullZ<-c(collectfullZ,list(fullZ))
-
-
         }
         fullZ<-ldply(collectfullZ,data.frame)
-
       }
-
-
-
       fullZ<-dlply(fullZ,.(UserInput.x))
-
-
-
+#return fullz to the "spectraConversion" reactive variable, this is a list of samples; contents of each sample are file paths to the raw data for that samples
+#This will be used by the spectra conversion observe function/event
 fullZ
-
-
 })
 
 
@@ -426,7 +404,6 @@ fullZ
                paste0(x$UserInput.x[1],".mzXML")
         ))
 
-ww<<-w
 
       rot<-function(x){
         system(command =
@@ -636,6 +613,9 @@ observeEvent(input$beginPeakProcessing, {
         #Spectra Preprocessing, Peak Picking
         smallSpectra <- smoothIntensity(smallSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
         smallSpectra <- removeBaseline(smallSpectra, method = "TopHat")
+
+
+        #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
         smallSpectra <- detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
         saveRDS(smallSpectra, paste0(idbacDirectory(), "/Peak_Lists/", labs, "_", "SmallMoleculePeaks.rds"))
         remove(smallSpectra)
