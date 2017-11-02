@@ -1121,7 +1121,7 @@ output$hclustPlot <- renderPlot({
     zz <- b$nodes
     forceNetwork(Links = z, Nodes = zz, Source = "source",
                  Target = "target", NodeID = "name",
-                 Group = "group", opacity = 1, zoom = TRUE)
+                 Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
   })
 
 
