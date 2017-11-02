@@ -136,9 +136,13 @@ function(input,output,session){
                         br(),
                         p(strong("1:")," This directs where you would like to create an IDBac working directory."),
                         p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
-                        img(src="WorkingDirectory.png", style="width:322px;height:164px"),
+                        img(src="WorkingDirectory.png", style="width:60%;height:60%"),
                         p("If there is already an \"IDBac\" folder present in the working directory,
                           files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
+                        br(),
+                        p(strong("2:"),"The RAW data will be one folder which itself contains
+                          an Excel map and two folders: one containing protein data and another containing small molecule data:"),
+                        img(src="Single-MALDI-Plate.png", style="width:60%;height:60%"),
                         br(),
                         p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                         div(img(src="window.png",style="width:750px;height:40px"))
@@ -1191,19 +1195,24 @@ output$hclustPlot <- renderPlot({
   output$MANui <-  renderUI({
     sidebarLayout(
       sidebarPanel(
+
         numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=0,max=100),
         numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
         numericInput("Group", label = h5("View Small-Molecule Network for Cluster #:"),value = 1,step=1,min=1),
-        checkboxInput("save", label = "Save Current Network?", value = FALSE),
         numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=50,max=max(sapply(smallPeaks(),function(x)max(mass(x))))),
         numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=50,min=min(sapply(smallPeaks(),function(x)min(mass(x))))),
         numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
+               checkboxInput("save", label = "Save Current Network?", value = FALSE),
+        br(),
         p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
         p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br(),
         p(strong("Note 1:"), "For publication-quality networks click the box next to \"Save Current Network\",
           while selected- this saves a .csv file of the currently-displayed
           network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
-          For detailed instructions see here: linkedy-link " )
+          While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
+          means this box is checked and the file is open in another program, either uncheck or close the file."
+
+           )
         ),
       mainPanel(textOutput("Clusters2"),simpleNetworkOutput("metaboliteAssociationNetwork"),
                 plotOutput("netheir",

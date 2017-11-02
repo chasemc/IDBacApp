@@ -39,11 +39,10 @@ navbarPage(
        fluidRow(
          column(3,div(img(src="IDBac_Computer_SVG_300DPI.png",style="width:75%;height:75%"))),
         column(4,
-               h3("Welcome to the IDBac application."),
+              h3("Welcome to the IDBac application."),
               p("For more information, as well as links to the full code, please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
-               p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25"))),
-              p("If you use IDBac in your work please cite our paper:") ,
-              br(),
+              p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25"))),
+              p("If you use IDBac in your work please cite:") ,
               p(strong("Reference"))),
 
         column(1),
