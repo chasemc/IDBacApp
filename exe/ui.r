@@ -36,8 +36,9 @@ navbarPage(
   tabPanel(
     "PreProcessing",
     fluidPage(
-        column(1,div(img(src="IDBac_Computer_SVG_300DPI.png",style="width:250px;height:250px"))),
-        column(1),column(4,
+       fluidRow(
+         column(3,div(img(src="IDBac_Computer_SVG_300DPI.png",style="width:75%;height:75%"))),
+        column(4,
                h3("Welcome to the IDBac application."),
               p("For more information, as well as links to the full code, please visit our ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "website.")),
                p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25"))),
@@ -51,14 +52,14 @@ navbarPage(
 
 
 
-        radioButtons("rawORreanalyze", label = h2("Begin by selecting an option below:"),
+        radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
                      choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
                                     "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3,
-                                    "Select here if you have already converted data and just want to re-analyze it" = 2),selected=0,inline=TRUE)),
+                                    "Select here if you have already converted data and just want to re-analyze it" = 2),selected=0,inline=FALSE)),
 
             uiOutput("ui1")
 
-    )),
+    ))),
 
 
 

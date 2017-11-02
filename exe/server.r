@@ -3,90 +3,99 @@
 
 
 
-
-functionA <- function(z) {
-  # Function to Install and Load R Packages
-  Install_And_Load <- function(Required_Packages){
-    Remaining_Packages <- Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-    if (length(Remaining_Packages)){
-      install.packages(Remaining_Packages)
-    }
-    for (package_name in Required_Packages){
-      library(package_name,
-              character.only = TRUE,
-              quietly = TRUE)
-    }
-  }
-  # Required packages to install and load
-  Required_Packages = c("colourpicker","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "mzR", "readxl","networkD3","factoextra","ggplot2","plotly","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl")
-  # Install and Load Packages
-  Install_And_Load(Required_Packages)
-
-  strReverse <- function(x) {
-    sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
-  }
-
-  if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
-    spectraImport <- sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
-    spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
-    names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
-    spectraImport <- lapply(1:length(spectraImport), function(x)createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
-  } else{
-    spectraImport <- lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
-    spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
-    names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
-    spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
-    spectraImport<- list(spectraImport)
-  }
-
-  sampleNames <- strsplit(names, ".mzXML")[[1]][1]
-  for (i in 1:length(spectraImport)) {
-    spectraImport[[i]]@metaData$Strain <- sampleNames
-  }
-  labs <- sapply(spectraImport, function(x) metaData(x)$Strain)[[1]]
-  proteinSpectra <- spectraImport[which(sapply(spectraImport, function(x)max(mass(x))) > 10000)]
-  smallSpectra <- spectraImport[which(!sapply(spectraImport, function(x) max(mass(x))) > 10000)]
-  if(length(proteinSpectra) > 0){
-    averaged <- averageMassSpectra(proteinSpectra, method = "mean")
-    saveRDS(averaged, paste0(idbacDirectory(),"/Peak_Lists/", averaged@metaData$Strain[[1]], "_", "SummedProteinSpectra.rds"))
-    remove(averaged)
-    # Why square root transformation and not log:
-    #  Anal Bioanal Chem. 2011 Jul; 401(1): 167–181.
-    # Published online 2011 Apr 12. doi:  10.1007/s00216-011-4929-z
-    #"Especially for multivariate treatment of MALDI imaging data, the square root transformation can be considered for the data preparation
-    #because for all three intensity groups in Table 1, the variance is approximately constant."
-
-    proteinSpectra <- transformIntensity(proteinSpectra, method = "sqrt")
-    proteinSpectra <- smoothIntensity(proteinSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
-    proteinSpectra <- removeBaseline(proteinSpectra, method = "TopHat")
-    proteinSpectra <- detectPeaks(proteinSpectra, method = "MAD", halfWindowSize = 20, SNR = 4)
-    saveRDS(proteinSpectra, paste0(idbacDirectory(), "/Peak_Lists/", labs, "_", "ProteinPeaks.rds"))
-  }
-
-  if(length(smallSpectra) > 0){
-    ############
-    #Spectra Preprocessing, Peak Picking
-    smallSpectra <- smoothIntensity(smallSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
-    smallSpectra <- removeBaseline(smallSpectra, method = "TopHat")
-    #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
-    smallSpectra <- detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
-    saveRDS(smallSpectra, paste0(idbacDirectory(), "/Peak_Lists/", labs, "_", "SmallMoleculePeaks.rds"))
-    remove(smallSpectra)
-    gc()
-  }
-}
-
-
-
-
-
-
-
-
-
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
 
+
+
+
+  functionA <- function(z,idbacDir) {
+    Install_And_Load <- function(Required_Packages)
+    {
+      Remaining_Packages <-
+        Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
+
+
+      if (length(Remaining_Packages))
+      {
+        install.packages(Remaining_Packages)
+
+      }
+      for (package_name in Required_Packages)
+      {
+        library(package_name,
+                character.only = TRUE,
+                quietly = TRUE)
+
+      }
+    }
+
+    # Required packages to install and load
+    Required_Packages = c("MALDIquant", "MALDIquantForeign", "mzR", "readxl")
+
+
+    # Install and Load Packages
+    Install_And_Load(Required_Packages)
+
+
+
+    strReverse <- function(x) {
+      sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
+    }
+
+    if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
+      spectraImport <- sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
+      spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
+      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
+      spectraImport <- lapply(1:length(spectraImport), function(x)createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
+    } else{
+      spectraImport <- lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
+      spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
+      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
+      spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
+      spectraImport<- list(spectraImport)
+    }
+
+    sampleNames <- strsplit(names, ".mzXML")[[1]][1]
+    for (i in 1:length(spectraImport)) {
+      spectraImport[[i]]@metaData$Strain <- sampleNames
+    }
+    labs <- sapply(spectraImport, function(x) metaData(x)$Strain)[[1]]
+    proteinSpectra <- spectraImport[which(sapply(spectraImport, function(x)max(mass(x))) > 10000)]
+    smallSpectra <- spectraImport[which(!sapply(spectraImport, function(x) max(mass(x))) > 10000)]
+    if(length(proteinSpectra) > 0){
+      averaged <- averageMassSpectra(proteinSpectra, method = "mean")
+      saveRDS(averaged, paste0(idbacDir,"/Peak_Lists/", averaged@metaData$Strain[[1]], "_", "SummedProteinSpectra.rds"))
+      remove(averaged)
+      gc()
+      # Why square root transformation and not log:
+      #  Anal Bioanal Chem. 2011 Jul; 401(1): 167–181.
+      # Published online 2011 Apr 12. doi:  10.1007/s00216-011-4929-z
+      #"Especially for multivariate treatment of MALDI imaging data, the square root transformation can be considered for the data preparation
+      #because for all three intensity groups in Table 1, the variance is approximately constant."
+
+      proteinSpectra <- transformIntensity(proteinSpectra, method = "sqrt")
+      proteinSpectra <- smoothIntensity(proteinSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
+      proteinSpectra <- removeBaseline(proteinSpectra, method = "TopHat")
+      proteinSpectra <- detectPeaks(proteinSpectra, method = "MAD", halfWindowSize = 20, SNR = 4)
+      saveRDS(proteinSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "ProteinPeaks.rds"))
+    }
+
+    if(length(smallSpectra) > 0){
+      ############
+      #Spectra Preprocessing, Peak Picking
+      averaged <- averageMassSpectra(smallSpectra, method = "mean")
+      saveRDS(averaged, paste0(idbacDir,"/Peak_Lists/", averaged@metaData$Strain[[1]], "_", "SummedSmallMoleculeSpectra.rds"))
+      remove(averaged)
+      gc()
+      smallSpectra <- smoothIntensity(smallSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
+      smallSpectra <- removeBaseline(smallSpectra, method = "TopHat")
+      #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
+      smallSpectra <- detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
+      saveRDS(smallSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "SmallMoleculePeaks.rds"))
+
+    }
+  }
 
   # "appLocation" will be assigned to the directory of where IDBac was installed to.  This will be used later in order to access MSConvert
   # which is used for converting raw MALDI files to mzML via command line.
@@ -479,10 +488,8 @@ function(input,output,session){
 
   # Spectra processing
 
-  observeEvent(input$beginPeakProcessing, {
-
-
-    if (is.null(input$beginPeakProcessing) | is.null(input$mbeginPeakProcessing) ){}else if(input$beginPeakProcessing > 0 | input$mbeginPeakProcessing > 0) {
+  observeEvent(input$beginPeakProcessing,{
+    if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
       fileList <-list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
 
@@ -493,6 +500,24 @@ function(input,output,session){
 
       #Single process with sapply instead of parsapply
       sapply(fileList,functionA)
+      popup4()
+    }
+
+  })
+  # Spectra processing
+
+  observeEvent(input$mbeginPeakProcessing,{
+    if (is.null(input$mbeginPeakProcessing) ){}else if(input$mbeginPeakProcessing > 0) {
+      fileList <-list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
+      popup3()
+
+   #      numCores <- detectCores()
+    #     cl <- makeCluster(numCores)
+     #    parSapply(cl,fileList,function(x)functionA(x,idbacDirectory()))
+      #   stopCluster(cl)
+
+      #Single process with sapply instead of parsapply
+      sapply(fileList,function(x)functionA(x,idbacDirectory()))
       popup4()
     }
 
@@ -776,24 +801,6 @@ function(input,output,session){
 
 
 
-  ################################################
-  #Create the hierarchical clustering plot as well as the calculations needed for such.
-  output$hclustPlot <- renderPlot({
-    # sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-    # toHighlite<-which(input$sampleMap
-    #  dendro %>% color_labels(labels=labels(dendro)[c(4,5,6,16)],col=brewer.pal(3,"Set1")[[3]]) %>% plot
-    #If no sample map is selected, run this:
-    if(input$kORheight=="2"){
-      par(mar=c(5,5,5,10))
-      dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
-      abline(v=input$height,lty=2)
-    }
-    else{
-      par(mar=c(5,5,5,10))
-      s<-dendro()
-      dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
-    }
-  },height=plotHeight)
 
 
   output$hclustui <-  renderUI({
@@ -809,20 +816,121 @@ function(input,output,session){
 
 
 
-
-  # sampleMapAttributes <- reactive({
-  # sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-  # colnames(sampleMappings)[!grepl("id",colnames(sampleMappings),ignore.case = TRUE)]
-  # #    dendro %>% color_labels(labels=labels(dendro)[c(4,5,6,16)],col=brewer.pal(3,"Set1")[[3]]) %>% plot
-  # })
-
-
-  output$sampleMapColumns<-renderUI({
+  sampleFactorMapColumns<-reactive({
     sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-    sampleMappings<-colnames(sampleMappings)[!grepl("id",colnames(sampleMappings),ignore.case = TRUE)]
-    selectInput("sampleMapChosenAttribute", label = h5("Select a Group Mapping"),
-                choices = as.list(sampleMappings))
+    sampleMappings<-colnames(sampleMappings)
+
   })
+
+
+  output$sampleMapColumns1<-renderUI({
+    selectInput("sampleFactorMapChosenIDColumn", label = h5("Select a Group Mapping"),
+                choices = as.list(sampleFactorMapColumns()))
+  })
+
+
+
+  output$sampleMapColumns2<-renderUI({
+
+    selectInput("sampleFactorMapChosenAttribute", label = h5("Select a Group Mapping"),
+                choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,sampleFactorMapColumns(),ignore.case = TRUE)]))
+  })
+
+
+
+levs<-reactive({
+    sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+    #selected column
+    sampleMappings<-factor(sampleMappings[[input$sampleFactorMapChosenAttribute]])
+    levs<-levels(sampleMappings)
+})
+
+
+output$sampleFactorMapColors<-renderUI({
+    column(3,
+        lapply(1:length(levs()),function(x){
+        do.call(colourInput,list(paste0("factor-",x,"_",levs()[[x]]),levs()[[x]],value="blue"))
+          })
+    )
+})
+
+
+
+################################################
+#Create the hierarchical clustering plot as well as the calculations needed for such.
+output$hclustPlot <- renderPlot({
+
+
+  if (input$kORheight =="3"){
+  sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+  sampleFactors<-levels(factor(sampleMappings[[input$sampleFactorMapChosenAttribute]]))
+
+
+
+  sampleIDs1<-cbind.data.frame(sampleMappings[[input$sampleFactorMapChosenIDColumn]],sampleMappings[[input$sampleFactorMapChosenAttribute]])
+
+
+
+#get colors chosen
+   colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+
+
+   zz<-cbind.data.frame(colorsChosen,sampleFactors)
+   zz$sampleFactors<-as.vector(zz$sampleFactors)
+   zz$asew<-as.vector(zz$colorsChosen)
+   colnames(zz)<-c("colors","chosenFactor")
+   colnames(sampleIDs1)<-c(input$sampleFactorMapChosenIDColumn,"chosenFactor")
+   sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
+   zz$chosenFactor<- as.character(zz$chosenFactor)
+
+   matchedColors<-merge(zz,sampleIDs1)
+
+ # fcol<-grep(paste0(as.character(unlist(matchedColors["ID"])),collapse="|"), labels(dendro()),ignore.case=TRUE)
+  fcol<-match(as.character(unlist(matchedColors[input$sampleFactorMapChosenIDColumn])),labels(dendro()))
+   fcol2<-c(as.character(unlist(matchedColors["colors"])))
+   aaa<-rep("#000000",length(labels(dendro())))
+   aaa[fcol]<-fcol2
+
+  dendro() %>% color_labels(labels=labels(dendro()),col=aaa) %>% plot(horiz=TRUE,lwd=8)
+  #dendro %>% set("labels_cex", c(2,1)) %>% plot
+
+
+  #If no sample map is selected, run this:
+  }else if (input$kORheight=="2"){
+    par(mar=c(5,5,5,10))
+    dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
+    abline(v=input$height,lty=2)
+
+
+
+  }
+  else{
+    par(mar=c(5,5,5,10))
+    s<-dendro()
+    dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
+  }
+},height=plotHeight)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -834,22 +942,29 @@ function(input,output,session){
         #                    choices = levels(phyla)),
         selectInput("distance", label = h5("Distance Method"),
                     choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
-                    selected = "cosineD"),
+                    selected = "euclidean"),
         selectInput("clustering", label = h5("Agglomeration Method for Tree"),
                     choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
-                    selected = "complete"),
+                    selected = "ward.D2"),
         radioButtons("booled", label = h5("Include peak intensities in calculations or use presence/absence?"),
                      choices = list("Presence/Absence" = 1, "Intensities" = 2),
                      selected = 2),
         radioButtons("kORheight", label = h5("Create clusters based on specified number of groups or height?"),
-                     choices = list("# Groups" = 1, "Height" = 2),
+                     choices = list("# Groups" = 1, "Height" = 2, "Sample Mapping" = 3),
                      selected = 1),
         uiOutput("hclustui"),
         uiOutput("groupui"),
         numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
-        p("To color samples according to user-defined groupings...",strong("This isn't yet functional! :( ")),
+        p("To color samples according to user-defined groupings...",strong("This function is beta!")),
+        p("Select an excel file with labelled columns. One column will contain
+        the same labels as in the dendrogram to the right. Add additional labeled columns
+        for each factor you want to map to your samples. Sample ID's should only
+        be present once, and will associate to factors row-wise"),
+        p("Click the blue boxes under a factor (below) to change the color of the factor."),
         fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
-        uiOutput("sampleMapColumns")
+        uiOutput("sampleMapColumns1"),
+        uiOutput("sampleMapColumns2"),
+        uiOutput("sampleFactorMapColors")
       ),
       mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))
     )

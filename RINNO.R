@@ -17,5 +17,7 @@ create_app(
   compression = "bzip",
   info_after = "infoafter.txt",
   info_before = "infobefore.txt",
-  license_file = "gpl.txt")
+  license_file = "gpl.txt",
+  app_version = "0.0.3")
 
+compile_iss()

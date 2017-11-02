@@ -1,8 +1,8 @@
-IDBac relies on Proteowizard to convert raw data to mzXML.  IDBac uses simple exec
-to invoke MSConvert.exe and does not establish intimate communication between
+﻿IDBac relies on Proteowizard to convert raw data to mzXML.  IDBac uses simple exec
+to invoke MSConvert.exe but does not establish intimate communication between
 the R code and Msconvert libraries, resulting in the plug-ins being a separate program.
 http://proteowizard.sourceforge.net/downloads.shtml
-
+Any Proteowizard components (all files within "pwiz") or vendor libraries released under such are subject to their own licenses. The user accepts that all "pwiz" conponents must be removed or replaced from any redistributed version or derivative of IDBac. The remainder of the IDBac software, especially "server.R" and "ui.R" are to be released under GNU-GPL.
 Bruker CompassXport (License Follows)
 http://www.bdal.de/compassxtract
 
