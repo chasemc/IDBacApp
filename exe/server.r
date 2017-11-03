@@ -983,6 +983,8 @@ function(input,output,session){
   ################################################
   #This creates the network plot and calculations needed for such.
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+    
+    
     labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
     if(is.null(input$plot_brush$ymin)){
       #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
@@ -1004,19 +1006,33 @@ function(input,output,session){
       brushed<-as.vector(threeColTable[,3][w])
       labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
 
-       combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(brushed,"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
-       
-
+      combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(brushed,"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
     }
     #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
     #find matrix spectra
     
     
-    combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
-
-     #For now, replicate matrix samples are
-    combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
-    combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
+    
+    
+    
+    # input$matrixSamplePresent (Whether there is a matrix sample)  1=Yes   2=No
+    if(input$matrixSamplePresent ==1){    
+        combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
+        #For now, replicate matrix samples are merged into a consensus peak list.
+        combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
+        #For now, matrix peaks are all picked at SNR > 6
+        combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
+        combinedSmallMolPeaksm@intensity<-combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr>6)]
+        combinedSmallMolPeaksm@snr<-combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr>6)]
+        combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
+        combinedSmallMolPeaks<-c(combinedSmallMolPeaksm,combinedSmallMolPeaks)
+        
+    }else{
+      combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
+    }    
+   
+    
+    
 
     for (i in 1:length(combinedSmallMolPeaks)){
       combinedSmallMolPeaks[[i]]@mass<-combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
@@ -1024,16 +1040,18 @@ function(input,output,session){
       combinedSmallMolPeaks[[i]]@snr<-combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
     }
     
-    combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
-    combinedSmallMolPeaksm@intensity<-combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr>6)]
-    combinedSmallMolPeaksm@snr<-combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr>6)]
-    combinedSmallMolPeaks<-c(combinedSmallMolPeaksm,combinedSmallMolPeaks)
+    
+    
+    
+    
+    
     allS<-binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
     tt <-  trim(allS,c(input$lowerMassSM,input$upperMassSM))
     labs <- sapply(tt, function(x)metaData(x)$Strain)
     labs <- factor(labs)
     new2 <- NULL
     newPeaks <- NULL
+
     for (i in seq_along(levels(labs))){
       specSubset <- (which(labs==levels(labs)[[i]]))
       if(specSubset>1){
@@ -1056,8 +1074,6 @@ function(input,output,session){
         newPeaks@snr <- newPeaks@snr[which(sapply(mass(newPeaks),function(x) round(x,digits=4)) %in% sapply(commonMasses,function(x) round(x,digits=4)))]
         new2 <- c(new2,newPeaks)}
       else{
-        
-        
         new2 <- c(new2,tt[specSubset])}
       
     }
@@ -1065,36 +1081,36 @@ function(input,output,session){
     combinedSmallMolPeaks <- new2
     
     
-    ############
-    #Filter out peaks that occur in less than xx percent of replicates.(rounded !up! to the nearest whole number replicate)
-    #We realize MALDIquant's "filter peaks" exists but needed to write the following for some work within KNIME
-    #For a different percentage of peak presence: change the value of percentToRoundTo  to a percent between 0 and 1 (percent/100)  eg 0.7 = 70% presence
-    labs <- sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain)
-    labs <- factor(labs)
+   
+    if(input$matrixSamplePresent ==1){    
+      
+    #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
+
     ############
     #Find the matrix sample index
     labs <- sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain)
     matrixIndex <- grep(paste0("Matrix",collapse="|"),labs,ignore.case=TRUE)
     ############
-    #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
     #peaksa = samples
     #peaksb = matrix blank
     peaksa <- combinedSmallMolPeaks[-matrixIndex]
     peaksb <- combinedSmallMolPeaks[[matrixIndex]]
-    
-    
-    aaa<<-peaksa
-    bbb<<-peaksb
-    
-    
+  
     for (i in 1:length(peaksa)){
       commonIons <- which(!peaksa[[i]]@mass %in% setdiff(peaksa[[i]]@mass,peaksb@mass))
       peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
       peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
       peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
-    }
-    ############
-    #Trim Peak Lists ends so that <200 m/z and >2000 m/z are removed
+    
+    }  
+      
+    }else{ 
+      peaksa<-combinedSmallMolPeaks
+      }
+    
+    
+    
+    
     
     ############
     # Turn Peak-List into a table, add names, change from wide to long, and export as Gephi-compatible edge list
@@ -1103,9 +1119,7 @@ function(input,output,session){
     for (i in 1:length(peaksa)){
       temp <- c(temp,peaksa[[i]]@metaData$Strain)
     }
-    pp<<-peaksa
-    ss<<-smallNetwork
-    temfp<<-temp
+    
     
     peaksaNames <- factor(temp)
     remove(temp)
@@ -1132,6 +1146,7 @@ function(input,output,session){
       write.csv(as.matrix(bool),paste0(workdir, "\\Saved_MANs\\Current_Network.csv"))
     }
     a <- as.undirected(graph_from_data_frame(bool))
+    a<-simplify(a)
     wc <- fastgreedy.community(a)
     b <- igraph_to_networkD3(a, group = (wc$membership + 1))
     z <- b$links
@@ -1139,7 +1154,8 @@ function(input,output,session){
     forceNetwork(Links = z, Nodes = zz, Source = "source",
                  Target = "target", NodeID = "name",
                  Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
-  })
+ 
+     })
   
   
   ################################################
@@ -1212,7 +1228,9 @@ function(input,output,session){
   output$MANui <-  renderUI({
     sidebarLayout(
       sidebarPanel(
-        
+        radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
+                     choices = list("Yes" = 1, "No" = 2),
+                     selected = 1),
         numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=0,max=100),
         numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
         numericInput("Group", label = h5("View Small-Molecule Network for Cluster #:"),value = 1,step=1,min=1),
