@@ -51,6 +51,18 @@ method adapted from [Freiwald & Sauer](http://www.nature.com/nprot/journal/v4/n5
 1. Prepare the matrix solution in an Eppendorf centrifuge tube: 10 mg/mL CHCA [α-cyano-4-hydroxycinnamic acid](http://www.sigmaaldrich.com/catalog/search?term=28166-41-8&interface=CAS%20No.&N=0&mode=partialmax&lang=en&region=US&focus=product) in 50% Acetonitrile (ACN), 2.5% Trifluoroacetic Acid (TFA).
 2. 100 µL of solution = 50 µL ACN + 47.5 µL H2O + 2.5µL TFA + 1 mg CHCA
 
+**Note**: Use fresh matrix solution and be sure to store unused solid CHCA between 2-8°C
+
+
+sdsdsd
+Apply bacteria directly without any prior chemical treatment. Smear a single bacterial colony as a thin film directly onto the plate using a sterile toothpick.
+
+![](/ReadMe_Images/ApplyingToMALDIPlate1.png)
+![](/ReadMe_Images/ApplyingToMALDIPlate2.png)
+![](/ReadMe_Images/ApplyingToMALDIPlate3.png)
+
+
+
 
 
 
