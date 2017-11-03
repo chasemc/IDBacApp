@@ -503,7 +503,7 @@ function(input,output,session){
       #   stopCluster(cl)
 
       #Single process with sapply instead of parsapply
-      sapply(fileList,functionA)
+      sapply(fileList,function(x)functionA(x,idbacDirectory()))
       popup4()
     }
 
@@ -1226,10 +1226,10 @@ output$hclustPlot <- renderPlot({
 
   #The following code is necessary to stop the R backend when the user closes the browser window
 
-  # session$onSessionEnded(function() {
-  # stopApp()
-  # q("no")
-  # })
+   session$onSessionEnded(function() {
+   stopApp()
+   q("no")
+   })
 
 
 }

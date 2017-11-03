@@ -1,7 +1,4 @@
 Installation of IDBac is now complete.  
-Thank you and please refer to https://github.com/chasemc/IDBac
+Thank you and please refer to https://github.com/chasemc/IDBac_App
 for the complete source code, or if you have any questions/bug reports/suggestions.
 
-
-
-Icons made by Vectors Market from Flaticon are licensed by Creative Commons BY 3.0

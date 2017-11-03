@@ -1,5 +1,5 @@
 #define MyAppName "IDBac"
-#define MyAppVersion "0.0.0"
+#define MyAppVersion "0.0.3"
 #define MyAppExeName "IDBac.bat"
 #define RVersion "3.4.2"
 #define IncludeR true
@@ -10,14 +10,14 @@
 
 
 [Setup]
-AppId = {{7YWRL36Q-O9AV-LJGJ-426A-HSITE9GZ170H}
+AppId = {{FGOGS6WN-RM43-FPSS-5TED-MK6F8C7N86B8}
 AppName = {#MyAppName}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
 OutputBaseFilename = setup_{#MyAppName}
 SetupIconFile = SmallSetupIcon3.ico
-AppVersion = {#MyAppVersion}
+AppVersion = 0.0.3
 AppPublisher = {#MyAppPublisher}
 AppPublisherURL = {#MyAppURL}
 AppSupportURL = {#MyAppURL}
@@ -142,6 +142,7 @@ Source: "pwiz\Microsoft.Practices.Unity.Configuration.dll"; DestDir: "{app}\pwiz
 Source: "pwiz\Microsoft.Practices.Unity.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MIDAC.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\mkl_sequential.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
+Source: "pwiz\msconvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSConvertGUI.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSConvertGUI.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz\MSFileReader.XRawfile2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
@@ -180,11 +181,13 @@ Source: "utils\wsf\js\JSON.minify.js"; DestDir: "{app}\utils\wsf\js"; Flags: ign
 Source: "utils\wsf\js\json2.js"; DestDir: "{app}\utils\wsf\js"; Flags: ignoreversion;
 Source: "utils\wsf\js\run.js"; DestDir: "{app}\utils\wsf\js"; Flags: ignoreversion;
 Source: "utils\wsf\run.wsf"; DestDir: "{app}\utils\wsf"; Flags: ignoreversion;
+Source: "www\1-col-portfolio.css"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\GitHub.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\IDBac_Computer_SVG_300DPI.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\IDBacLogo.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\Multi-MALDI-Plate.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\placeholder.gif"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www\Single-MALDI-Plate.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\window.PNG"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\WorkingDirectory.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www\WorkingDirectory_ReAnalysis.png"; DestDir: "{app}\www"; Flags: ignoreversion;
