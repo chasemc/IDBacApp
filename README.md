@@ -1,4 +1,8 @@
-<h1><img src = "https://github.com/chasemc/IDBac/blob/master/ico/Picture1.png?raw=true" height="60" align="left">  IDBac Pre-Beta </h1>
+<p align="center">
+ <h3> IDBac </h3>
+</p>
+
+![alt text](/ReadMe_Images/MainImage.png)
  
 
 
