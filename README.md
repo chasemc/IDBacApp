@@ -70,19 +70,12 @@ Once you have prepared your MALDI target plate protein and small molecule data y
 
 
 ![](/ReadMe_Images/Acquire1.PNG)
-
 ![](/ReadMe_Images/Acquire2.PNG)
-
 ![](/ReadMe_Images/Acquire3.PNG)
-
 ![](/ReadMe_Images/Acquire4.PNG)
-
 ![](/ReadMe_Images/Acquire5.png)
-
 ![](/ReadMe_Images/Acquire6.PNG)
-
 ![](/ReadMe_Images/Acquire7.PNG)
-
 ![](/ReadMe_Images/Acquire8.PNG)
 
 
