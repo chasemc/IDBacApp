@@ -1,5 +1,7 @@
-.Rproj.user
+/.Rproj.user
 .Rhistory
 .RData
 .Ruserdata
 /pwiz
+IDBacApp.Rproj
+.Rbuildignore
