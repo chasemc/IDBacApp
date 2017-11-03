@@ -1,5 +1,3 @@
-# IDBac
-
 ![](/ReadMe_Images/MainImage.png)
  
 
