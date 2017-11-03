@@ -5,44 +5,44 @@
 
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
-
-
-
-
+  
+  
+  
+  
   functionA <- function(z,idbacDir) {
     Install_And_Load <- function(Required_Packages)
     {
       Remaining_Packages <-
         Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-
-
+      
+      
       if (length(Remaining_Packages))
       {
         install.packages(Remaining_Packages)
-
+        
       }
       for (package_name in Required_Packages)
       {
         library(package_name,
                 character.only = TRUE,
                 quietly = TRUE)
-
+        
       }
     }
-
+    
     # Required packages to install and load
     Required_Packages = c("MALDIquant", "MALDIquantForeign", "mzR", "readxl")
-
-
+    
+    
     # Install and Load Packages
     Install_And_Load(Required_Packages)
-
-
-
+    
+    
+    
     strReverse <- function(x) {
       sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
     }
-
+    
     if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
       spectraImport <- sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
       spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
@@ -55,7 +55,7 @@ function(input,output,session){
       spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
       spectraImport<- list(spectraImport)
     }
-
+    
     sampleNames <- strsplit(names, ".mzXML")[[1]][1]
     for (i in 1:length(spectraImport)) {
       spectraImport[[i]]@metaData$Strain <- sampleNames
@@ -73,14 +73,14 @@ function(input,output,session){
       # Published online 2011 Apr 12. doi:  10.1007/s00216-011-4929-z
       #"Especially for multivariate treatment of MALDI imaging data, the square root transformation can be considered for the data preparation
       #because for all three intensity groups in Table 1, the variance is approximately constant."
-
+      
       proteinSpectra <- transformIntensity(proteinSpectra, method = "sqrt")
       proteinSpectra <- smoothIntensity(proteinSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
       proteinSpectra <- removeBaseline(proteinSpectra, method = "TopHat")
       proteinSpectra <- detectPeaks(proteinSpectra, method = "MAD", halfWindowSize = 20, SNR = 4)
       saveRDS(proteinSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "ProteinPeaks.rds"))
     }
-
+    
     if(length(smallSpectra) > 0){
       ############
       #Spectra Preprocessing, Peak Picking
@@ -93,35 +93,35 @@ function(input,output,session){
       #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
       smallSpectra <- detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
       saveRDS(smallSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "SmallMoleculePeaks.rds"))
-
+      
     }
   }
-
+  
   # "appLocation" will be assigned to the directory of where IDBac was installed to.  This will be used later in order to access MSConvert
   # which is used for converting raw MALDI files to mzML via command line.
   #appLocation <- getwd()
   #####################################################################################################################################################
-
+  
   ################################################
   #Cosine Distance Matrix Function
   cosineD <- function(x) {
     as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
   }
   ################################################
-
+  
   # This function revereses a provided string
   strReverse <- function(x) {
     sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
   }
-
-
-
+  
+  
+  
   output$value <- renderPrint({ input$radio })
-
+  
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
-
+  
   observe({
-
+    
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 1){
       output$ui1<-renderUI({
         fluidRow(
@@ -172,16 +172,16 @@ function(input,output,session){
                         p("Spectra Processing Progress"),
                         textOutput("mzXMLProcessingProgress")
                  )
-          )
+                 )
         )
       })
     }
   })
-
-
-
+  
+  
+  
   #This "observe" event creates the UI element for analyzing multiple MALDI plates, based on user-input.
-
+  
   observe({
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 3){
       output$ui1<-renderUI({
@@ -229,8 +229,8 @@ function(input,output,session){
       })
     }
   })
-
-
+  
+  
   #This "observe" event creates the UI element for re-analyzing data
   observe({
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 2){
@@ -275,15 +275,15 @@ function(input,output,session){
                                p(strong("2:"), "You can now reanalyze your data by proceeding through the tabs at the top of the page. (\"Inverse Peak Comparison\", etc)      ")
                         )
                  )
-
+                 
           )
         )
       })
     }
   })
-
-
-
+  
+  
+  
   selectedDirectory <- reactive({
     if(input$selectedWorkingDirectory==0){
       return("No Folder Selected")
@@ -291,13 +291,13 @@ function(input,output,session){
       choose.dir()
     }
   })
-
-
-
-
+  
+  
+  
+  
   output$selectedWorkingDirectory <- renderPrint(selectedDirectory())
-
-
+  
+  
   idbacDirectory<-reactive({
     if(is.null(input$idbacDirectoryButton)){
       if(is.null(selectedDirectory())){
@@ -309,24 +309,24 @@ function(input,output,session){
       choose.dir()
     }else{}
   })
-
-
+  
+  
   output$idbacDirectoryOut <- renderPrint(idbacDirectory())
-
-
+  
+  
   # This function revereses a provided string
   strReverse <- function(x){
     sapply(lapply(strsplit(x, NULL), rev), paste, collapse="")
   }
-
+  
   # Reactive variable returning the user-chosen location of the raw MALDI files as string
   rawFilesLocation <- reactive({
     if (input$rawFileDirectory > 0) {
       choose.dir()
     }
   })
-
-
+  
+  
   # Creates text showing the user which directory they chose for raw files
   output$rawFileDirectory <- renderText(if (is.null(rawFilesLocation())) {
     return("No Folder Selected")
@@ -337,17 +337,17 @@ function(input,output,session){
       folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
     }
     folders #output$rawFileDirectory == folders
-
+    
   })
-
-
-
+  
+  
+  
   multipleMaldiRawFileLocation <- reactive({
     if (input$multipleMaldiRawFileDirectory > 0) {
       choose.dir()
     }
   })
-
+  
   # Creates text showing the user which directory they chose for raw files
   output$multipleMaldiRawFileDirectory <- renderText({
     if (is.null(multipleMaldiRawFileLocation())) {
@@ -358,16 +358,16 @@ function(input,output,session){
       for (i in 1:length(foldersInFolder)) {
         folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
       }
-
+      
       folders
     }
   })
-
-
-
+  
+  
+  
   # Spectra conversion
   #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
-
+  
   spectraConversion<-reactive({
     if(is.null(input$multipleMaldiRawFileDirectory)){
       #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
@@ -408,8 +408,8 @@ function(input,output,session){
     #This will be used by the spectra conversion observe function/event
     fullZ
   })
-
-
+  
+  
   observe({
     if (is.null(input$run)){}else if(input$run > 0) {
       #Create IDBac directories
@@ -423,7 +423,7 @@ function(input,output,session){
       outp <- file.path(workdir, "IDBac/Converted_To_mzML")
       #fullZ$UserInput.x = sample name
       #fullZ$UserInput.y = file locations
-
+      
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands<-lapply(fullZ,function(x)
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -442,21 +442,21 @@ function(input,output,session){
                  "cmd.exe",
                input = as.character(x))
       }
-
-
+      
+      
       #sapply(msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)  #No parallel processing
       popup1()
-
+      
       numCores <- detectCores()
       numCores <- makeCluster(numCores-1)
       parSapply(numCores,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
       stopCluster(numCores)
-
+      
       popup2()
     }
   })
-
-
+  
+  
   popup1<-reactive({
     showModal(modalDialog(
       title = "Important message",
@@ -468,66 +468,66 @@ function(input,output,session){
       easyClose = FALSE, size="l",footer=""
     ))
   })
-
-
+  
+  
   popup2<-reactive({
     showModal(modalDialog(
       title = "Conversion Complete",
-
+      
       paste0(nrow(ldply(spectraConversion()))," files were converted into ",length(list.files(paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"))),
              " open data format files."),br(),
       "To check what has been converted you can navigate to:",
-
+      
       paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"),
       easyClose = TRUE,
       footer = tagList(actionButton("beginPeakProcessing","Click to continue with Peak Processing"), modalButton("Close"))
     ))
   })
-
-
+  
+  
   observeEvent(input$beginPeakProcessing, {
     removeModal()
   })
-
-
+  
+  
   # Spectra processing
-
+  
   observeEvent(input$beginPeakProcessing,{
     if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
       fileList <-list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
-
+      
       #   numCores <- detectCores()
       #   cl <- makeCluster(numCores)
       #   parSapply(cl,fileList,functionA)
       #   stopCluster(cl)
-
+      
       #Single process with sapply instead of parsapply
       sapply(fileList,function(x)functionA(x,idbacDirectory()))
       popup4()
     }
-
+    
   })
   # Spectra processing
-
+  
   observeEvent(input$mbeginPeakProcessing,{
     if (is.null(input$mbeginPeakProcessing) ){}else if(input$mbeginPeakProcessing > 0) {
       fileList <-list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
-
-   #      numCores <- detectCores()
-    #     cl <- makeCluster(numCores)
-     #    parSapply(cl,fileList,function(x)functionA(x,idbacDirectory()))
+      
+      #      numCores <- detectCores()
+      #     cl <- makeCluster(numCores)
+      #    parSapply(cl,fileList,function(x)functionA(x,idbacDirectory()))
       #   stopCluster(cl)
-
+      
       #Single process with sapply instead of parsapply
       sapply(fileList,function(x)functionA(x,idbacDirectory()))
       popup4()
     }
-
+    
   })
-
-
+  
+  
   popup3<-reactive({
     showModal(modalDialog(
       title = "Important message",
@@ -538,8 +538,8 @@ function(input,output,session){
       easyClose = FALSE, size="l",footer=""
     ))
   })
-
-
+  
+  
   popup4<-reactive({
     showModal(modalDialog(
       title = "Spectra Processing is Now Complete",
@@ -547,20 +547,20 @@ function(input,output,session){
       easyClose = TRUE,
       footer = modalButton("Continue to Data Analysis by consecutively visiting tabs at the top of the page.")))
   })
-
-
+  
+  
   spectra <- reactive({
     unlist(sapply(list.files(paste0(idbacDirectory(), "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory(), "\\Peak_Lists")))], readRDS))
   })
-
-
+  
+  
   trimmedP <- reactive({
     all <-unlist(sapply(list.files(paste0(idbacDirectory(), "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory(), "\\Peak_Lists")))], readRDS))
     all<-binPeaks(all, tolerance =.02)
     trim(all, c(input$lowerMass, input$upperMass))
   })
-
-
+  
+  
   collapsedPeaksP <- reactive({
     labs <- sapply(trimmedP(), function(x)metaData(x)$Strain)
     labs <- factor(labs)
@@ -575,16 +575,16 @@ function(input,output,session){
       } else{
         new2 <- c(new2, trimmedP()[specSubset])
       }
-
+      
     }
-
-
+    
+    
     new2   #collapsedPeaksP() == new2
-
-
+    
+    
   })
-
-
+  
+  
   proteinMatrix <- reactive({
     temp <- NULL
     for (i in 1:length(collapsedPeaksP())) {
@@ -594,31 +594,31 @@ function(input,output,session){
     proteinMatrixInnard <- intensityMatrix(collapsedPeaksP())
     rownames(proteinMatrixInnard) <- paste(proteinSamples)
     proteinMatrixInnard[is.na(proteinMatrixInnard)] <- 0
-
+    
     if (input$booled == "1") {
       ifelse(proteinMatrixInnard > 0, 1, 0)
     }
     else{
       proteinMatrixInnard
     }
-
+    
   })
-
-
-
+  
+  
+  
   ################################################
   #This creates the Inverse Peak Comparison plot that compares two user-selected spectra() and the calculation required for such.
-
-
+  
+  
   listOfDataframesForInversePeakComparisonPlot <- reactive({
-
+    
     #Selects the peaks to plot based on user-input
     peaksSampleOne<-collapsedPeaksP()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
     peaksSampleTwo<-collapsedPeaksP()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
-
-
+    
+    
     #pSNR= the User-Selected Signal to Noise Ratio for protein
-
+    
     #Create a MALDIquant massObject from the selected peaks
     peaksSampleOne@mass<-peaksSampleOne@mass[which(peaksSampleOne@snr>input$pSNR)]
     peaksSampleOne@intensity<-peaksSampleOne@intensity[which(peaksSampleOne@snr>input$pSNR)]
@@ -626,39 +626,39 @@ function(input,output,session){
     peaksSampleTwo@mass<-peaksSampleTwo@mass[which(peaksSampleTwo@snr>input$pSNR)]
     peaksSampleTwo@intensity<-peaksSampleTwo@intensity[which(peaksSampleTwo@snr>input$pSNR)]
     peaksSampleTwo@snr<-peaksSampleTwo@snr[which(peaksSampleTwo@snr>input$pSNR)]
-
+    
     #Selects the spectra to plot based on user-input
     meanSpectrumSampleOne<-spectra()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
     meanSpectrumSampleTwo<-spectra()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
-
+    
     #Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
     p2b<-as.data.frame(cbind(peaksSampleTwo@mass,peaksSampleTwo@intensity))
     p2b<-as.data.frame(cbind(peaksSampleTwo@mass,peaksSampleTwo@intensity))
-
-
+    
+    
     p3b<-data.frame(p1b,rep("red",length=length(p1b$V1)),stringsAsFactors = F)
     colnames(p3b)<-c("Mass","Intensity","Color")
-
+    
     p4b<-data.frame(p2b,rep("grey",length=length(p2b$V1)),stringsAsFactors = F)
     colnames(p4b)<-c("Mass","Intensity","Color")
     p3b$Color[which(p3b$Mass %in% intersect(p3b$Mass,p4b$Mass))]<-"blue"
-
-
+    
+    
     a<-(list(meanSpectrumSampleOne,meanSpectrumSampleTwo,p1b,p2b,p3b,p4b))
     names(a)<-c("meanSpectrumSampleOne","meanSpectrumSampleTwo","p1b","p2b","p3b","p4b")
     return(a)
-
-
+    
+    
   })
-
+  
   #Used in the the inverse-peak plot for zooming
   ranges2 <- reactiveValues(x = NULL, y = NULL)
-
-
+  
+  
   output$inversePeakComparisonPlot <- renderPlot({
-
+    
     temp<- listOfDataframesForInversePeakComparisonPlot()
     meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
     meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
@@ -666,15 +666,15 @@ function(input,output,session){
     p2b <-temp$p2b
     p3b <-temp$p3b
     p4b <-temp$p4b
-
+    
     remove(temp)
-
+    
     #Create peak plots and color each peak according to whether it occurs in the other spectrum
     plot(meanSpectrumSampleOne@mass,meanSpectrumSampleOne@intensity,ylim=c(-max(meanSpectrumSampleTwo@intensity),max(meanSpectrumSampleOne@intensity)),type="l",col=adjustcolor("Black", alpha=0.3),xlab="m/z",ylab="Intensity")
     lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
     rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
     rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
-
+    
     observe({
       brush <- input$plot2_brush
       if (!is.null(brush)) {
@@ -686,10 +686,10 @@ function(input,output,session){
       }
     })
   })
-
-
+  
+  
   output$inversePeakComparisonPlotZoom <- renderPlot({
-
+    
     temp<- listOfDataframesForInversePeakComparisonPlot()
     meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
     meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
@@ -702,11 +702,11 @@ function(input,output,session){
     lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
     rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
     rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
-
+    
   })
-
-
-
+  
+  
+  
   # Create peak comparison ui
   output$inversepeakui <-  renderUI({
     sidebarLayout(
@@ -735,8 +735,8 @@ function(input,output,session){
       )
         )
   })
-
-
+  
+  
   ################################################
   # This creates the Plotly PCA plot and the calculation required for such.
   output$pcaplot <- renderPlotly({
@@ -759,8 +759,8 @@ function(input,output,session){
     ggplotly(p + geom_text()+xlab("Dimension 1")+ylab("Dimension 2")+ ggtitle("Zoomable PCA of Protein MALDI Spectra")+theme(plot.title=element_text(size=15),legend.position="none"))
   })
   #  },height=750)
-
-
+  
+  
   # Create PCA ui
   output$PCAui <-  renderUI({
     sidebarLayout	(
@@ -772,13 +772,13 @@ function(input,output,session){
                 h5("Same PCA as above, no colors, but with interaction"),
                 plotlyOutput("pcaplot"))
     )
-
+    
   })
-
-
-
-
-
+  
+  
+  
+  
+  
   ################################################
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
@@ -790,154 +790,154 @@ function(input,output,session){
       else{
         dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
       }
-
+      
     }
     ret
   })
-
-
+  
+  
   #User input changes the height of the main heirarchical clustering plot
   plotHeight <- reactive({
     return(as.numeric(input$hclustHeight))
   })
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
   output$hclustui <-  renderUI({
     if(input$kORheight!="2"){return(NULL)}else{
       numericInput("height", label = h5("Cut Tree at Height"),value = .5,step=.1,min=0)}
   })
-
-
+  
+  
   output$groupui <-  renderUI({
     if(input$kORheight=="1"){
       numericInput("kClusters", label = h5("Number of Groups"),value = 1,step=1,min=1)}
   })
-
-
-
+  
+  
+  
   sampleFactorMapColumns<-reactive({
     sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
     sampleMappings<-colnames(sampleMappings)
-
+    
   })
-
-
+  
+  
   output$sampleMapColumns1<-renderUI({
     selectInput("sampleFactorMapChosenIDColumn", label = h5("Select a Group Mapping"),
                 choices = as.list(sampleFactorMapColumns()))
   })
-
-
-
+  
+  
+  
   output$sampleMapColumns2<-renderUI({
-
+    
     selectInput("sampleFactorMapChosenAttribute", label = h5("Select a Group Mapping"),
                 choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,sampleFactorMapColumns(),ignore.case = TRUE)]))
   })
-
-
-
-levs<-reactive({
+  
+  
+  
+  levs<-reactive({
     sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
     #selected column
     sampleMappings<-factor(sampleMappings[[input$sampleFactorMapChosenAttribute]])
     levs<-levels(sampleMappings)
-})
-
-
-output$sampleFactorMapColors<-renderUI({
+  })
+  
+  
+  output$sampleFactorMapColors<-renderUI({
     column(3,
-        lapply(1:length(levs()),function(x){
-        do.call(colourInput,list(paste0("factor-",x,"_",levs()[[x]]),levs()[[x]],value="blue"))
-          })
+           lapply(1:length(levs()),function(x){
+             do.call(colourInput,list(paste0("factor-",x,"_",levs()[[x]]),levs()[[x]],value="blue"))
+           })
     )
-})
-
-
-
-################################################
-#Create the hierarchical clustering plot as well as the calculations needed for such.
-output$hclustPlot <- renderPlot({
-
-
-  if (input$kORheight =="3"){
-  sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-  sampleFactors<-levels(factor(sampleMappings[[input$sampleFactorMapChosenAttribute]]))
-
-
-
-  sampleIDs1<-cbind.data.frame(sampleMappings[[input$sampleFactorMapChosenIDColumn]],sampleMappings[[input$sampleFactorMapChosenAttribute]])
-
-
-
-#get colors chosen
-   colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-
-
-   zz<-cbind.data.frame(colorsChosen,sampleFactors)
-   zz$sampleFactors<-as.vector(zz$sampleFactors)
-   zz$asew<-as.vector(zz$colorsChosen)
-   colnames(zz)<-c("colors","chosenFactor")
-   colnames(sampleIDs1)<-c(input$sampleFactorMapChosenIDColumn,"chosenFactor")
-   sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
-   zz$chosenFactor<- as.character(zz$chosenFactor)
-
-   matchedColors<-merge(zz,sampleIDs1)
-
- # fcol<-grep(paste0(as.character(unlist(matchedColors["ID"])),collapse="|"), labels(dendro()),ignore.case=TRUE)
-  fcol<-match(as.character(unlist(matchedColors[input$sampleFactorMapChosenIDColumn])),labels(dendro()))
-   fcol2<-c(as.character(unlist(matchedColors["colors"])))
-   aaa<-rep("#000000",length(labels(dendro())))
-   aaa[fcol]<-fcol2
-
-  dendro() %>% color_labels(labels=labels(dendro()),col=aaa) %>% plot(horiz=TRUE,lwd=8)
-  #dendro %>% set("labels_cex", c(2,1)) %>% plot
-
-
-  #If no sample map is selected, run this:
-  }else if (input$kORheight=="2"){
-    par(mar=c(5,5,5,10))
-    dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
-    abline(v=input$height,lty=2)
-
-
-
-  }
-  else{
-    par(mar=c(5,5,5,10))
-    s<-dendro()
-    dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
-  }
-},height=plotHeight)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  })
+  
+  
+  
+  ################################################
+  #Create the hierarchical clustering plot as well as the calculations needed for such.
+  output$hclustPlot <- renderPlot({
+    
+    
+    if (input$kORheight =="3"){
+      sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+      sampleFactors<-levels(factor(sampleMappings[[input$sampleFactorMapChosenAttribute]]))
+      
+      
+      
+      sampleIDs1<-cbind.data.frame(sampleMappings[[input$sampleFactorMapChosenIDColumn]],sampleMappings[[input$sampleFactorMapChosenAttribute]])
+      
+      
+      
+      #get colors chosen
+      colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+      
+      
+      zz<-cbind.data.frame(colorsChosen,sampleFactors)
+      zz$sampleFactors<-as.vector(zz$sampleFactors)
+      zz$asew<-as.vector(zz$colorsChosen)
+      colnames(zz)<-c("colors","chosenFactor")
+      colnames(sampleIDs1)<-c(input$sampleFactorMapChosenIDColumn,"chosenFactor")
+      sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
+      zz$chosenFactor<- as.character(zz$chosenFactor)
+      
+      matchedColors<-merge(zz,sampleIDs1)
+      
+      # fcol<-grep(paste0(as.character(unlist(matchedColors["ID"])),collapse="|"), labels(dendro()),ignore.case=TRUE)
+      fcol<-match(as.character(unlist(matchedColors[input$sampleFactorMapChosenIDColumn])),labels(dendro()))
+      fcol2<-c(as.character(unlist(matchedColors["colors"])))
+      aaa<-rep("#000000",length(labels(dendro())))
+      aaa[fcol]<-fcol2
+      
+      dendro() %>% color_labels(labels=labels(dendro()),col=aaa) %>% plot(horiz=TRUE,lwd=8)
+      #dendro %>% set("labels_cex", c(2,1)) %>% plot
+      
+      
+      #If no sample map is selected, run this:
+    }else if (input$kORheight=="2"){
+      par(mar=c(5,5,5,10))
+      dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
+      abline(v=input$height,lty=2)
+      
+      
+      
+    }
+    else{
+      par(mar=c(5,5,5,10))
+      s<-dendro()
+      dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
+    }
+  },height=plotHeight)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   # Create Heir ui
   output$Heirarchicalui <-  renderUI({
     sidebarLayout	(
@@ -961,25 +961,25 @@ output$hclustPlot <- renderPlot({
         numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
         p("To color samples according to user-defined groupings...",strong("This function is beta!")),
         p("Select an excel file with labelled columns. One column will contain
-        the same labels as in the dendrogram to the right. Add additional labeled columns
-        for each factor you want to map to your samples. Sample ID's should only
-        be present once, and will associate to factors row-wise"),
+          the same labels as in the dendrogram to the right. Add additional labeled columns
+          for each factor you want to map to your samples. Sample ID's should only
+          be present once, and will associate to factors row-wise"),
         p("Click the blue boxes under a factor (below) to change the color of the factor."),
         fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
         uiOutput("sampleMapColumns1"),
         uiOutput("sampleMapColumns2"),
         uiOutput("sampleFactorMapColors")
-      ),
+        ),
       mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))
-    )
+      )
   })
-
-
+  
+  
   smallPeaks <- reactive({
     unlist(sapply(list.files(paste0(idbacDirectory(), "\\Peak_Lists"),full.names=TRUE)[grep(".SmallMoleculePeaks.", list.files(paste0(idbacDirectory(), "\\Peak_Lists")))], readRDS))
   })
-
-
+  
+  
   ################################################
   #This creates the network plot and calculations needed for such.
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
@@ -987,9 +987,9 @@ output$hclustPlot <- renderPlot({
     if(is.null(input$plot_brush$ymin)){
       #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
       if(input$kORheight=="2"){
-        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),h=input$height)==input$Group)),"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
+        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),h=input$height)==input$Group)),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
       }else{
-        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),k=input$kClusters)==input$Group)),"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
+        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),k=input$kClusters)==input$Group)),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
       }
     }else{
       #This takes a brush selection over the heirarchical clustering plot within the MAN tab and uses this selection of samples for MAN analysis
@@ -1003,21 +1003,27 @@ output$hclustPlot <- renderPlot({
       w<- which(threeColTable[,1] > minLoc & threeColTable[,1] < maxLoc)
       brushed<-as.vector(threeColTable[,3][w])
       labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
-      combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(brushed,"Matrix"),"$",collapse="|"), labs,ignore.case=TRUE)]
+
+       combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(brushed,"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
+       
+
     }
-    combinedSmallMolPeaks<<-combinedSmallMolPeaks
     #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
     #find matrix spectra
-    combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
-    #For now, replicate matrix samples are
+    
+    
+    combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
+
+     #For now, replicate matrix samples are
     combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
-    combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
-    labs <-as.vector(sapply(smallPeaks(), function(x)metaData(x)$Strain))
+    combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
+
     for (i in 1:length(combinedSmallMolPeaks)){
       combinedSmallMolPeaks[[i]]@mass<-combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
       combinedSmallMolPeaks[[i]]@intensity<-combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
       combinedSmallMolPeaks[[i]]@snr<-combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
     }
+    
     combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
     combinedSmallMolPeaksm@intensity<-combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr>6)]
     combinedSmallMolPeaksm@snr<-combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr>6)]
@@ -1050,13 +1056,15 @@ output$hclustPlot <- renderPlot({
         newPeaks@snr <- newPeaks@snr[which(sapply(mass(newPeaks),function(x) round(x,digits=4)) %in% sapply(commonMasses,function(x) round(x,digits=4)))]
         new2 <- c(new2,newPeaks)}
       else{
-
-
+        
+        
         new2 <- c(new2,tt[specSubset])}
-
+      
     }
-
+    
     combinedSmallMolPeaks <- new2
+    
+    
     ############
     #Filter out peaks that occur in less than xx percent of replicates.(rounded !up! to the nearest whole number replicate)
     #We realize MALDIquant's "filter peaks" exists but needed to write the following for some work within KNIME
@@ -1066,30 +1074,39 @@ output$hclustPlot <- renderPlot({
     ############
     #Find the matrix sample index
     labs <- sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain)
-    matrixIndex <- grep("Matrix",labs,ignore.case=TRUE)
+    matrixIndex <- grep(paste0("Matrix",collapse="|"),labs,ignore.case=TRUE)
     ############
     #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
     #peaksa = samples
     #peaksb = matrix blank
     peaksa <- combinedSmallMolPeaks[-matrixIndex]
     peaksb <- combinedSmallMolPeaks[[matrixIndex]]
+    
+    
+    aaa<<-peaksa
+    bbb<<-peaksb
+    
+    
     for (i in 1:length(peaksa)){
       commonIons <- which(!peaksa[[i]]@mass %in% setdiff(peaksa[[i]]@mass,peaksb@mass))
       peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
       peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
       peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
-      peaksa[[i]]@metaData <- peaksa[[i]]@metaData[-commonIons]
     }
     ############
     #Trim Peak Lists ends so that <200 m/z and >2000 m/z are removed
-
+    
     ############
     # Turn Peak-List into a table, add names, change from wide to long, and export as Gephi-compatible edge list
     smallNetwork <- intensityMatrix(peaksa)
     temp <- NULL
     for (i in 1:length(peaksa)){
-      temp <- c(temp,combinedSmallMolPeaks[[i]]@metaData$Strain)
+      temp <- c(temp,peaksa[[i]]@metaData$Strain)
     }
+    pp<<-peaksa
+    ss<<-smallNetwork
+    temfp<<-temp
+    
     peaksaNames <- factor(temp)
     remove(temp)
     rownames(smallNetwork) <- paste(peaksaNames)
@@ -1123,12 +1140,12 @@ output$hclustPlot <- renderPlot({
                  Target = "target", NodeID = "name",
                  Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
   })
-
-
+  
+  
   ################################################
   #This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the clustering page.
   output$Clusters <- renderText({
-
+    
     # Display text of how many clusters were created.
     if (is.null(input$kORheight)){
     }else if (input$kORheight=="2"){
@@ -1138,8 +1155,8 @@ output$hclustPlot <- renderPlot({
       paste("You have Created ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)")
     }
   })
-
-
+  
+  
   ################################################
   ##This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the networking page.
   output$Clusters2 <- renderText({
@@ -1151,8 +1168,8 @@ output$hclustPlot <- renderPlot({
       paste("You have ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)")
     }
   })
-
-
+  
+  
   output$info <- renderText({
     xy_str <- function(e) {
       if(is.null(e)) return("NULL\n")
@@ -1170,14 +1187,14 @@ output$hclustPlot <- renderPlot({
       "brush: ", xy_range_str(input$plot_brush)
     )
   })
-
-
+  
+  
   #User input changes the height of the heirarchical clustering plot within the network analysis pane
   plotHeightHeirNetwork <- reactive({
     return(as.numeric(input$hclustHeightNetwork))
   })
-
-
+  
+  
   output$netheir <- renderPlot({
     if(input$kORheight=="2"){
       par(mar=c(5,5,5,10))
@@ -1189,20 +1206,20 @@ output$hclustPlot <- renderPlot({
       dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
     }
   },height=plotHeightHeirNetwork)
-
-
+  
+  
   # Create MAN ui
   output$MANui <-  renderUI({
     sidebarLayout(
       sidebarPanel(
-
+        
         numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=0,max=100),
         numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
         numericInput("Group", label = h5("View Small-Molecule Network for Cluster #:"),value = 1,step=1,min=1),
         numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=50,max=max(sapply(smallPeaks(),function(x)max(mass(x))))),
         numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=50,min=min(sapply(smallPeaks(),function(x)min(mass(x))))),
         numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
-               checkboxInput("save", label = "Save Current Network?", value = FALSE),
+        checkboxInput("save", label = "Save Current Network?", value = FALSE),
         br(),
         p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
         p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br(),
@@ -1211,9 +1228,9 @@ output$hclustPlot <- renderPlot({
           network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
           While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
           means this box is checked and the file is open in another program, either uncheck or close the file."
-
-           )
-        ),
+          
+        )
+      ),
       mainPanel(textOutput("Clusters2"),simpleNetworkOutput("metaboliteAssociationNetwork"),
                 plotOutput("netheir",
                            click = "plot_click",
@@ -1222,15 +1239,14 @@ output$hclustPlot <- renderPlot({
                            brush = "plot_brush")
       ))
   })
-
-
+  
+  
   #The following code is necessary to stop the R backend when the user closes the browser window
-
-   session$onSessionEnded(function() {
-   stopApp()
-   q("no")
-   })
-
-
+  
+#  session$onSessionEnded(function() {
+#    stopApp()
+#    q("no")
+#  })
+  
+  
 }
-
