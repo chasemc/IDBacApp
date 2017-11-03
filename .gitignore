@@ -2,7 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
-/pwiz
+
 IDBacApp.Rproj
 .Rbuildignore
+
+/exe/pwiz
 /exe/wizard
+/exe/RInno_installer
+/exe/R-3.4.2-win
+/exe/utils
