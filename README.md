@@ -73,26 +73,15 @@ Once you have prepared your MALDI target plate protein and small molecule data y
 
 ![](/ReadMe_Images/Acquire2.PNG)
 
-
 ![](/ReadMe_Images/Acquire3.PNG)
-<br/><br/>
-<br/><br/>
 
 ![](/ReadMe_Images/Acquire4.PNG)
-<br/><br/>
-<br/><br/>
 
 ![](/ReadMe_Images/Acquire5.png)
-<br/><br/>
-<br/><br/>
 
 ![](/ReadMe_Images/Acquire6.PNG)
-<br/><br/>
-<br/><br/>
 
 ![](/ReadMe_Images/Acquire7.PNG)
-<br/><br/>
-<br/><br/>
 
 ![](/ReadMe_Images/Acquire8.PNG)
 
@@ -102,7 +91,23 @@ Once you have prepared your MALDI target plate protein and small molecule data y
 
 ### Data Analysis: Quick Start
 ### Data Analysis: Step by Step
+
+
+
+
 ### Gephi Network Analysis
+![](/ReadMe_Images/GEPHItutorial/Slide51.PNG)
+
+![](/ReadMe_Images/GEPHItutorial/Slide52.PNG)
+
+![](/ReadMe_Images/GEPHItutorial/Slide53.PNG)
+
+![](/ReadMe_Images/GEPHItutorial/Slide54.PNG)
+
+![](/ReadMe_Images/GEPHItutorial/Slide55.PNG)
+
+![](/ReadMe_Images/GEPHItutorial/Slide56.PNG)
+
 
 
 
