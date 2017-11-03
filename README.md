@@ -65,13 +65,41 @@ Apply bacteria directly without any prior chemical treatment. Smear a single bac
 
 
 
-
-
-
-
-
-
 ### Data Acquisition
+Once you have prepared your MALDI target plate protein and small molecule data you will need tosetup autoXecute and begin the data acquisition process
+
+
+![](/ReadMe_Images/Acquire1.PNG)
+
+![](/ReadMe_Images/Acquire2.PNG)
+
+
+![](/ReadMe_Images/Acquire3.PNG)
+<br/><br/>
+<br/><br/>
+
+![](/ReadMe_Images/Acquire4.PNG)
+<br/><br/>
+<br/><br/>
+
+![](/ReadMe_Images/Acquire5.png)
+<br/><br/>
+<br/><br/>
+
+![](/ReadMe_Images/Acquire6.PNG)
+<br/><br/>
+<br/><br/>
+
+![](/ReadMe_Images/Acquire7.PNG)
+<br/><br/>
+<br/><br/>
+
+![](/ReadMe_Images/Acquire8.PNG)
+
+
+
+
+
 ### Data Analysis: Quick Start
 ### Data Analysis: Step by Step
 ### Gephi Network Analysis
