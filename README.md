@@ -69,19 +69,19 @@ Apply bacteria directly without any prior chemical treatment. Smear a single bac
 Once you have prepared your MALDI target plate protein and small molecule data you will need tosetup autoXecute and begin the data acquisition process
 
 
-![](/ReadMe_Images/Acquire1.png)
+![](/ReadMe_Images/Acquire1.PNG)
 <br/><br/>
 <br/><br/>
 
-![](/ReadMe_Images/Acquire2.png)
+![](/ReadMe_Images/Acquire2.PNG)
 <br/><br/>
 <br/><br/>
 
-![](/ReadMe_Images/Acquire3.png)
+![](/ReadMe_Images/Acquire3.PNG)
 <br/><br/>
 <br/><br/>
 
-![](/ReadMe_Images/Acquire4.png)
+![](/ReadMe_Images/Acquire4.PNG)
 <br/><br/>
 <br/><br/>
 
@@ -89,15 +89,15 @@ Once you have prepared your MALDI target plate protein and small molecule data y
 <br/><br/>
 <br/><br/>
 
-![](/ReadMe_Images/Acquire6.png)
+![](/ReadMe_Images/Acquire6.PNG)
 <br/><br/>
 <br/><br/>
 
-![](/ReadMe_Images/Acquire7.png)
+![](/ReadMe_Images/Acquire7.PNG)
 <br/><br/>
 <br/><br/>
 
-![](/ReadMe_Images/Acquire8.png)
+![](/ReadMe_Images/Acquire8.PNG)
 
 
 
