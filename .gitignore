@@ -9,5 +9,6 @@ IDBacApp.Rproj
 /exe/pwiz
 /exe/wizard
 /exe/RInno_installer
-/exe/R-3.4.2-win
+/exe/R-3.4.2-win.exe
 /exe/utils
+/exe/IDBac.bat
