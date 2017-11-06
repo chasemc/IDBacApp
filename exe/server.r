@@ -137,8 +137,6 @@ function(input,output,session){
                         p(strong("1:")," This directs where you would like to create an IDBac working directory."),
                         p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
                         img(src="WorkingDirectory.png", style="width:60%;height:60%"),
-                        p("If there is already an \"IDBac\" folder present in the working directory,
-                          files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
                         br(),
                         p(strong("2:"),"The RAW data will be one folder which itself contains
                           an Excel map and two folders: one containing protein data and another containing small molecule data:"),
@@ -284,34 +282,176 @@ function(input,output,session){
   
   
   
-  selectedDirectory <- reactive({
-    if(input$selectedWorkingDirectory==0){
-      return("No Folder Selected")
-    }else if (input$selectedWorkingDirectory > 0){
+  
+  
+  
+  
+  
+  
+  
+  observe({
+    
+    if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 4){
+      output$ui1<-renderUI({
+        fluidRow(
+          column(12,
+                 br(),
+                 br(),
+                 fluidRow(
+                   column(12,offset=3,
+                          h3("Customizing which samples to analyze"))),br(),br(),
+                 column(5,
+                        fluidRow(column(5,offset=3,h3("Instructions"))),
+                        br(),
+                        p("Begin by creating a blank working directory.")
+                        ),
+                 column(1
+                 ),
+                 column(5,style = "background-color:#F5F5F5",
+                        fluidRow(column(5,offset=3,h3("Workflow Pane"))),
+                        br(), 
+                        p(strong("1: "), actionButton("selectBlankSelectedWorkingDirectory", label = "Click to select where to create a working directory")),
+                        p("Selected Location:"),
+                        fluidRow(column(12, verbatimTextOutput("selectedBlankSelectedWorkingDirectory", placeholder = TRUE))),
+                        
+                        br(),
+                        p(strong("2: "), actionButton("createBlankSelectedWorkingDirectoryFolders", label = "Click to create a blank working directory")),   
+                        br(),
+                        p(strong("3:"), "Place the mzXML files which you wish to analyze into:"),
+                        p(verbatimTextOutput("whereConvert")),
+                        p(strong("4:"), "Select \"Process mzXML\" to process mzXML files for analysis"),
+                        actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
+                        
+                 )
+                 )
+        )
+      })
+    }
+  })
+  
+      
+  
+  
+  # Reactive variable returning the user-chosen location of the raw MALDI files as string
+  createBlankDirectory <- reactive({
+    if (input$selectBlankSelectedWorkingDirectory > 0) {
       choose.dir()
     }
   })
   
   
   
-  
-  output$selectedWorkingDirectory <- renderPrint(selectedDirectory())
-  
-  
-  idbacDirectory<-reactive({
-    if(is.null(input$idbacDirectoryButton)){
-      if(is.null(selectedDirectory())){
-        return("No Folder Selected")
-      }else(paste0(selectedDirectory(),"/IDBac"))
-    }else if(input$idbacDirectoryButton==0){
+  # Creates text showing the user which directory they chose for raw files
+  output$selectedBlankSelectedWorkingDirectory <- renderText({
+    if (is.null(createBlankDirectory())) {
       return("No Folder Selected")
-    }else if (input$idbacDirectoryButton > 0){
-      choose.dir()
-    }else{}
+    } else{createBlankDirectory()
+    }
+})
+    
+  
+  
+  
+  
+  
+idbacuniquedir <-reactive({
+   if (input$createBlankSelectedWorkingDirectoryFolders>0) {
+      
+
+     uniquifiedIDBac<-list.dirs(createBlankDirectory(),recursive = F,full.names = F)
+      uniquifiedIDBac<-make.unique(c(uniquifiedIDBac,"IDBac"),sep="-")
+      uniquifiedIDBac<-last(uniquifiedIDBac)
+      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac))
+      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac,"\\Converted_To_mzML"))
+      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac,"\\Sample_Spreadsheet_Map"))
+      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac,"\\Peak_Lists"))
+      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac,"\\Saved_MANs"))
+      
+      return(paste0(createBlankDirectory(), "\\",uniquifiedIDBac))
+      
+      
+   }
+     
   })
   
   
-  output$idbacDirectoryOut <- renderPrint(idbacDirectory())
+
+    
+output$whereConvert<-renderText({
+  idbacuniquedir()
+})
+
+  
+  
+selectedDirectory <- reactive({
+    if(is.null(input$selectedWorkingDirectory)){
+      return("No Folder Selected")
+    }else if (input$selectedWorkingDirectory > 0){
+      choose.dir()
+    }
+  })
+  
+output$selectedWorkingDirectory <- renderPrint(selectedDirectory())
+  
+  
+
+
+
+
+
+
+
+
+
+idbacDirectory<-reactive({
+       if(!is.null(input$createBlankSelectedWorkingDirectoryFolders)){
+       idbacuniquedir()
+      }else if (!is.null(input$selectedWorkingDirectory)){
+        paste0(selectedDirectory(),"/IDBac")
+      }else if (input$idbacDirectoryButton > 0){
+        pressedidbacDirectoryButton()
+        
+      }
+  
+})  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+pressedidbacDirectoryButton <- reactive({
+  if(is.null(input$idbacDirectoryButton)){
+    return("No Folder Selected")
+  }else if (input$idbacDirectoryButton > 0){
+    choose.dir()
+  }
+})
+
+output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
+
+
+
+
+
+
   
   
   # This function revereses a provided string
@@ -413,11 +553,15 @@ function(input,output,session){
   observe({
     if (is.null(input$run)){}else if(input$run > 0) {
       #Create IDBac directories
-      dir.create(paste0(selectedDirectory(), "/IDBac"))
-      dir.create(paste0(selectedDirectory(), "/IDBac/Converted_To_mzML"))
-      dir.create(paste0(selectedDirectory(), "/IDBac/Sample_Spreadsheet_Map"))
-      dir.create(paste0(selectedDirectory(), "/IDBac/Peak_Lists"))
-      dir.create(paste0(selectedDirectory(), "/IDBac/Saved_MANs"))
+      uniquifiedIDBac<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
+      uniquifiedIDBac<-make.unique(c(uniquifiedIDBac,"IDBac"),sep="-")
+      uniquifiedIDBac<-last(uniquifiedIDBac)
+      
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac,"/Converted_To_mzML"))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac,"/Sample_Spreadsheet_Map"))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac,"/Peak_Lists"))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac,"/Saved_MANs"))
       fullZ<-spectraConversion()
       workdir <- selectedDirectory()
       outp <- file.path(workdir, "IDBac/Converted_To_mzML")
@@ -785,7 +929,19 @@ function(input,output,session){
     ret<-{
       if(input$distance=="cosineD"){
         a<-as.function(get(input$distance))
-        dend <- proteinMatrix() %>% a %>% hclust(method=input$clustering) %>% as.dendrogram
+        
+        
+        
+        
+        dend <- proteinMatrix() %>% a
+          
+          
+          dend[which(is.na(dend))]<-1  
+          
+          dend %>% hclust(method=input$clustering) %>% as.dendrogram
+                
+        
+        
       }
       else{
         dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
@@ -917,27 +1073,6 @@ function(input,output,session){
   
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   # Create Heir ui
   output$Heirarchicalui <-  renderUI({
     sidebarLayout	(
@@ -980,13 +1115,21 @@ function(input,output,session){
   })
   
   
+  
+  
+  
+  
+  
+  
+  
+  
   ################################################
   #This creates the network plot and calculations needed for such.
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
     
-    
     labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
-    if(is.null(input$plot_brush$ymin)){
+   
+     if(is.null(input$plot_brush$ymin)){
       #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
       if(input$kORheight=="2"){
         combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),h=input$height)==input$Group)),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
@@ -1012,9 +1155,6 @@ function(input,output,session){
     #find matrix spectra
     
     
-    
-    
-    
     # input$matrixSamplePresent (Whether there is a matrix sample)  1=Yes   2=No
     if(input$matrixSamplePresent ==1){    
         combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
@@ -1032,8 +1172,6 @@ function(input,output,session){
     }    
    
     
-    
-
     for (i in 1:length(combinedSmallMolPeaks)){
       combinedSmallMolPeaks[[i]]@mass<-combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
       combinedSmallMolPeaks[[i]]@intensity<-combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
@@ -1043,45 +1181,29 @@ function(input,output,session){
     
     
     
-    
+       
     
     allS<-binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
-    tt <-  trim(allS,c(input$lowerMassSM,input$upperMassSM))
-    labs <- sapply(tt, function(x)metaData(x)$Strain)
+    trimmedSM <-  trim(allS,c(input$lowerMassSM,input$upperMassSM))
+    labs <- sapply(trimmedSM, function(x)metaData(x)$Strain)
     labs <- factor(labs)
     new2 <- NULL
     newPeaks <- NULL
-
-    for (i in seq_along(levels(labs))){
-      specSubset <- (which(labs==levels(labs)[[i]]))
-      if(specSubset>1){
-        perGroup <- intensityMatrix(tt[specSubset])
-        bool <- perGroup
-        bool[is.na(bool)] <- 0
-        bool <- as.data.frame(bool)
-        bool <-  ifelse(bool > 0,1,0)
-        freq <- colSums(bool)
-        freq <- as.data.frame(freq)
-        group <- length(tt[specSubset])
-        perc <- ceiling(((input$percentPresenceSM/100))*group)
-        for (i in seq_along(freq)){
-          ind <- which(freq$freq>=perc)
-        }
-        commonMasses <- as.double(rownames(freq)[ind])
-        newPeaks <-  mergeMassPeaks(tt[specSubset])
-        newPeaks@mass <- newPeaks@mass[which(sapply(mass(newPeaks),function(x) round(x,digits=4)) %in% sapply(commonMasses,function(x) round(x,digits=4)))]
-        newPeaks@intensity <- newPeaks@intensity[which(sapply(mass(newPeaks),function(x) round(x,digits=4)) %in% sapply(commonMasses,function(x) round(x,digits=4)))]
-        newPeaks@snr <- newPeaks@snr[which(sapply(mass(newPeaks),function(x) round(x,digits=4)) %in% sapply(commonMasses,function(x) round(x,digits=4)))]
-        new2 <- c(new2,newPeaks)}
-      else{
-        new2 <- c(new2,tt[specSubset])}
+    
+    for (i in seq_along(levels(labs))) {
+      specSubset <- (which(labs == levels(labs)[[i]]))
+      if (length(specSubset) > 1) {
+        new <- filterPeaks(trimmedSM[specSubset],minFrequency=input$percentPresenceSM/100)
+        new<-mergeMassPeaks(new,method="mean")
+        new2 <- c(new2, new)
+      } else{
+        new2 <- c(new2, trimmedSM[specSubset])
+      }
       
     }
     
     combinedSmallMolPeaks <- new2
     
-    
-   
     if(input$matrixSamplePresent ==1){    
       
     #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
@@ -1108,11 +1230,7 @@ function(input,output,session){
       peaksa<-combinedSmallMolPeaks
       }
     
-    
-    
-    
-    
-    ############
+     ############
     # Turn Peak-List into a table, add names, change from wide to long, and export as Gephi-compatible edge list
     smallNetwork <- intensityMatrix(peaksa)
     temp <- NULL
@@ -1229,7 +1347,7 @@ function(input,output,session){
     sidebarLayout(
       sidebarPanel(
         radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
-                     choices = list("Yes" = 1, "No" = 2),
+                     choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
                      selected = 1),
         numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=0,max=100),
         numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
