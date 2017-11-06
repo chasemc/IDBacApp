@@ -1,5 +1,5 @@
 #define MyAppName "IDBac"
-#define MyAppVersion "0.0.3"
+#define MyAppVersion "0.0.4"
 #define MyAppExeName "IDBac.bat"
 #define RVersion "3.4.2"
 #define IncludeR true
@@ -10,14 +10,14 @@
 
 
 [Setup]
-AppId = {{FGOGS6WN-RM43-FPSS-5TED-MK6F8C7N86B8}
+AppId = {{SQRIVDNN-OGBG-NEIJ-TYH4-6PP3UIKOHQV0}
 AppName = {#MyAppName}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
 OutputBaseFilename = setup_{#MyAppName}
 SetupIconFile = SmallSetupIcon3.ico
-AppVersion = 0.0.3
+AppVersion = 0.0.4
 AppPublisher = {#MyAppPublisher}
 AppPublisherURL = {#MyAppURL}
 AppSupportURL = {#MyAppURL}

@@ -68,7 +68,7 @@ navbarPage(
 
   tabPanel("Compare Two Samples (Protein)",
            uiOutput("inversepeakui")),
-  tabPanel("Heirarchical Clustering (Protein)",
+  tabPanel("Hierarchical Clustering (Protein)",
            uiOutput("Heirarchicalui")),
   tabPanel("PCA (Protein)",
            uiOutput("PCAui")),

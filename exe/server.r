@@ -134,7 +134,7 @@ function(input,output,session){
                  column(5,
                         fluidRow(column(5,offset=3,h3("Instructions"))),
                         br(),
-                        p(strong("1:")," This directs where you would like to create an IDBac working directory."),
+                        p(strong("1:")," This directs where on your computer you would like to create an IDBac working directory."),
                         p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
                         img(src="WorkingDirectory.png", style="width:60%;height:60%"),
                         br(),
@@ -152,7 +152,7 @@ function(input,output,session){
                         br(),
                         p(strong("1:"), " Your Working Directory is where files will be created"),
                         actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
-                        fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectory", placeholder = TRUE))),
+                        fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectoryText", placeholder = TRUE))),
                         br(),
                         p(strong("2:"), "Your RAW data should be one folder that contains: a folder containing protein data and folder containing small-molecule data"),
                         actionButton("rawFileDirectory", label = "Click to select the location of your RAW data"),
@@ -199,7 +199,7 @@ function(input,output,session){
                         p("If there is already an \"IDBac\" folder present in the working directory,
                           files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
                         br(),
-                        p(strong("2:"),"The RAW data file should be one folder which will contain individual folders for each
+                        p(strong("2:"),"The RAW data file should be one folder that contains individual folders for each
                           MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
                           containing protein data and the other containing small molecule data:"),
                         img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
@@ -213,7 +213,7 @@ function(input,output,session){
                         br(),
                         p(strong("1:"), " Your Working Directory is where files will be created."),
                         actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
-                        fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectory", placeholder = TRUE))),
+                        fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectoryText", placeholder = TRUE))),
                         br(),
                         p(strong("2:"), "Your RAW data should be one folder that contains folders for each MALDI plate."),
                         actionButton("multipleMaldiRawFileDirectory", label = "Click to select the location of your RAW data"),
@@ -310,9 +310,9 @@ function(input,output,session){
                  column(5,style = "background-color:#F5F5F5",
                         fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                         br(), 
-                        p(strong("1: "), actionButton("selectBlankSelectedWorkingDirectory", label = "Click to select where to create a working directory")),
+                        p(strong("1: "), actionButton("selectedWorkingDirectory", label = "Click to select where to create a working directory")),
                         p("Selected Location:"),
-                        fluidRow(column(12, verbatimTextOutput("selectedBlankSelectedWorkingDirectory", placeholder = TRUE))),
+                        fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectoryText", placeholder = TRUE))),
                         
                         br(),
                         p(strong("2: "), actionButton("createBlankSelectedWorkingDirectoryFolders", label = "Click to create a blank working directory")),   
@@ -332,57 +332,12 @@ function(input,output,session){
       
   
   
-  # Reactive variable returning the user-chosen location of the raw MALDI files as string
-  createBlankDirectory <- reactive({
-    if (input$selectBlankSelectedWorkingDirectory > 0) {
-      choose.dir()
-    }
-  })
-  
-  
-  
-  # Creates text showing the user which directory they chose for raw files
-  output$selectedBlankSelectedWorkingDirectory <- renderText({
-    if (is.null(createBlankDirectory())) {
-      return("No Folder Selected")
-    } else{createBlankDirectory()
-    }
-})
-    
   
   
   
   
   
-idbacuniquedir <-reactive({
-   if (input$createBlankSelectedWorkingDirectoryFolders>0) {
-      
-
-     uniquifiedIDBac<-list.dirs(createBlankDirectory(),recursive = F,full.names = F)
-      uniquifiedIDBac<-make.unique(c(uniquifiedIDBac,"IDBac"),sep="-")
-      uniquifiedIDBac<-last(uniquifiedIDBac)
-      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac))
-      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac,"\\Converted_To_mzML"))
-      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac,"\\Sample_Spreadsheet_Map"))
-      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac,"\\Peak_Lists"))
-      dir.create(paste0(createBlankDirectory(), "\\",uniquifiedIDBac,"\\Saved_MANs"))
-      
-      return(paste0(createBlankDirectory(), "\\",uniquifiedIDBac))
-      
-      
-   }
-     
-  })
-  
-  
-
-    
-output$whereConvert<-renderText({
-  idbacuniquedir()
-})
-
-  
-  
+# Lets the user choose the directory which the IDBac working directory will be located in 
 selectedDirectory <- reactive({
     if(is.null(input$selectedWorkingDirectory)){
       return("No Folder Selected")
@@ -390,12 +345,53 @@ selectedDirectory <- reactive({
       choose.dir()
     }
   })
-  
-output$selectedWorkingDirectory <- renderPrint(selectedDirectory())
-  
+# Shows the user which directory they chose for the IDBac working directory   
+output$selectedWorkingDirectoryText <- renderPrint(selectedDirectory())
   
 
 
+# Find if "IDBac" exists in selected folder and then uniquify if necessary
+uniquifiedIDBac<-reactive({
+    uniquifiedIDBacs<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
+    uniquifiedIDBacs<-make.unique(c(uniquifiedIDBacs,"IDBac"),sep="-")
+    last(uniquifiedIDBacs)
+})
+
+  
+# Creates the IDBac Directory structure, Uniquifies the  "IDBac" folder according to what folders are present in the selected directory
+idbacuniquedir <-reactive({
+   if (input$createBlankSelectedWorkingDirectoryFolders>0 ) {
+     
+      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
+      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzML"))
+      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Sample_Spreadsheet_Map"))
+      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Peak_Lists"))
+      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Saved_MANs"))
+  
+      return(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
+   }
+
+})
+
+  
+# Shows the user where the created, uniquified, IDBac folder was created    
+output$whereConvert<-renderText({
+  idbacuniquedir()
+})
+
+  
+
+#When ReAnalyzing data, and need to select the "IDBac" folder directly
+pressedidbacDirectoryButton <- reactive({
+  if(is.null(input$idbacDirectoryButton)){
+    return("No Folder Selected")
+  }else if (input$idbacDirectoryButton > 0){
+    choose.dir()
+  }
+})
+
+
+output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
 
 
 
@@ -404,11 +400,16 @@ output$selectedWorkingDirectory <- renderPrint(selectedDirectory())
 
 
 idbacDirectory<-reactive({
-       if(!is.null(input$createBlankSelectedWorkingDirectoryFolders)){
-       idbacuniquedir()
+      
+  
+  
+   if(!is.null(input$createBlankSelectedWorkingDirectoryFolders)){
+     if(input$createBlankSelectedWorkingDirectoryFolders > 0){  
+     idbacuniquedir()}
       }else if (!is.null(input$selectedWorkingDirectory)){
-        paste0(selectedDirectory(),"/IDBac")
-      }else if (input$idbacDirectoryButton > 0){
+        if(input$selectedWorkingDirectory > 0){
+        paste0(selectedDirectory(), "/",uniquifiedIDBac())}
+      }else if (!is.null(input$idbacDirectoryButton)){
         pressedidbacDirectoryButton()
         
       }
@@ -421,31 +422,6 @@ idbacDirectory<-reactive({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-
-pressedidbacDirectoryButton <- reactive({
-  if(is.null(input$idbacDirectoryButton)){
-    return("No Folder Selected")
-  }else if (input$idbacDirectoryButton > 0){
-    choose.dir()
-  }
-})
-
-output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
 
 
 
@@ -505,6 +481,14 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
   
   
   
+  
+  
+  
+  
+  
+  
+  
+  
   # Spectra conversion
   #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
   
@@ -525,23 +509,28 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
       fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
       fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
     }else{
+    
       #When analyzing more han one MALDI plate this handles fiding the raw data directories and the excel map
       mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
       lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
       collectfullZ<-NULL
       #For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
-      for (i in 1:length(lapped)){
-        excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
-        excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
-        fullZ<-list.dirs(lapped[[i]],recursive = F)
-        fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
-        colnames(fullZ)<-c("UserInput","ExcelCell")
-        colnames(excelTable)<-c("ExcelCell","UserInput")
-        fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
-        fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
-        collectfullZ<-c(collectfullZ,list(fullZ))
-      }
-      fullZ<-ldply(collectfullZ,data.frame)
+      lll<<-lapped
+          for (i in 1:length(lapped)){
+            excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])][-grep("\\~\\$",a)],2 )) 
+            excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
+            fullZ<-list.dirs(lapped[[i]],recursive = F)
+            fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
+            colnames(fullZ)<-c("UserInput","ExcelCell")
+            colnames(excelTable)<-c("ExcelCell","UserInput")
+            fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
+            fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
+            collectfullZ<-c(collectfullZ,list(fullZ))
+          }
+         
+      fullZ<-ldply(collectfullZ,data.frame)    
+      
+
     }
     fullZ<-dlply(fullZ,.(UserInput.x))
     #return fullz to the "spectraConversion" reactive variable, this is a list of samples; contents of each sample are file paths to the raw data for that samples
@@ -551,25 +540,30 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
   
   
   observe({
+    
     if (is.null(input$run)){}else if(input$run > 0) {
-      #Create IDBac directories
-      uniquifiedIDBac<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
-      uniquifiedIDBac<-make.unique(c(uniquifiedIDBac,"IDBac"),sep="-")
-      uniquifiedIDBac<-last(uniquifiedIDBac)
+    
+  
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac()))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Sample_Spreadsheet_Map"))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Peak_Lists"))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Saved_MANs"))
       
-      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac))
-      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac,"/Converted_To_mzML"))
-      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac,"/Sample_Spreadsheet_Map"))
-      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac,"/Peak_Lists"))
-      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac,"/Saved_MANs"))
       fullZ<-spectraConversion()
-      workdir <- selectedDirectory()
-      outp <- file.path(workdir, "IDBac/Converted_To_mzML")
+  
+      
+          outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzML"))
+    
+          
       #fullZ$UserInput.x = sample name
       #fullZ$UserInput.y = file locations
       
+    aaaa<<-fullZ
+    bbbb<<-outp
+          
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
-      msconvertCmdLineCommands<-lapply(fullZ,function(x)
+      msconvertCmdLineCommands<-lapply(fullZ,function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
         paste0("pwiz\\msconvert.exe",
                #sets up the command to pass to MSConvert in CMD, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
@@ -580,35 +574,40 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
                outp,
                " --outfile ",
                paste0(x$UserInput.x[1],".mzXML")
-        ))
+        )
+        }
+    )
       functionTOrunMSCONVERTonCMDline<-function(x){
         system(command =
                  "cmd.exe",
                input = as.character(x))
       }
       
+    
       
+        popup1()
       #sapply(msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)  #No parallel processing
-      popup1()
-      
       numCores <- detectCores()
       numCores <- makeCluster(numCores-1)
       parSapply(numCores,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
       stopCluster(numCores)
-      
       popup2()
+      
+      
     }
   })
   
   
   popup1<-reactive({
-    showModal(modalDialog(
+    
+      
+      showModal(modalDialog(
       title = "Important message",
       "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",br(),
       "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
       "This also means your computer might be slow during these file conversions.",br(),
       "To check what has been converted you can navigate to:",
-      paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"),
+      paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"),
       easyClose = FALSE, size="l",footer=""
     ))
   })
@@ -618,11 +617,11 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
     showModal(modalDialog(
       title = "Conversion Complete",
       
-      paste0(nrow(ldply(spectraConversion()))," files were converted into ",length(list.files(paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"))),
+      paste0(nrow(ldply(spectraConversion()))," files were converted into ",length(list.files(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"))),
              " open data format files."),br(),
       "To check what has been converted you can navigate to:",
       
-      paste0(selectedDirectory(), "\\IDBac\\Converted_To_mzML"),
+      paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"),
       easyClose = TRUE,
       footer = tagList(actionButton("beginPeakProcessing","Click to continue with Peak Processing"), modalButton("Close"))
     ))
@@ -634,11 +633,18 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
   })
   
   
+  
+  
+  
+  
+  
+  
+  
   # Spectra processing
   
   observeEvent(input$beginPeakProcessing,{
     if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
-      fileList <-list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
+      fileList <- list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
       
       #   numCores <- detectCores()
@@ -675,7 +681,7 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
   popup3<-reactive({
     showModal(modalDialog(
       title = "Important message",
-      "When spectra processing is complete you will be able to begin with the data-analysis",br(),
+      "When spectra processing is complete you will be able to begin with the data analysis",br(),
       "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
       "This also means your computer might be slow during the computations.",br(),
       "The step allows for fast interaction during the various data analysis",
@@ -952,7 +958,7 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
   })
   
   
-  #User input changes the height of the main heirarchical clustering plot
+  #User input changes the height of the main hierarchical clustering plot
   plotHeight <- reactive({
     return(as.numeric(input$hclustHeight))
   })
@@ -1079,17 +1085,17 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
       sidebarPanel(
         #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
         #                    choices = levels(phyla)),
-        selectInput("distance", label = h5("Distance Method"),
+        selectInput("distance", label = h5("Distance Algorithm"),
                     choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
                     selected = "euclidean"),
-        selectInput("clustering", label = h5("Agglomeration Method for Tree"),
+        selectInput("clustering", label = h5("Clustering Algorithm"),
                     choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
                     selected = "ward.D2"),
         radioButtons("booled", label = h5("Include peak intensities in calculations or use presence/absence?"),
                      choices = list("Presence/Absence" = 1, "Intensities" = 2),
                      selected = 2),
-        radioButtons("kORheight", label = h5("Create clusters based on specified number of groups or height?"),
-                     choices = list("# Groups" = 1, "Height" = 2, "Sample Mapping" = 3),
+        radioButtons("kORheight", label = h5("Create clusters based on:"),
+                     choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "Sample Mapping" = 3),
                      selected = 1),
         uiOutput("hclustui"),
         uiOutput("groupui"),
@@ -1379,10 +1385,10 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
   
   #The following code is necessary to stop the R backend when the user closes the browser window
   
-#  session$onSessionEnded(function() {
-#    stopApp()
-#    q("no")
-#  })
+  session$onSessionEnded(function() {
+    stopApp()
+    q("no")
+  })
   
   
 }
