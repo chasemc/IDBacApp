@@ -10,7 +10,7 @@
 
 
 [Setup]
-AppId = {{4O6595JR-083W-XZDE-COFY-H2OP7LJBJKNP}
+AppId = {{QB923KDG-TJS6-QT0X-PMYN-LDIKEQNQ3A4Z}
 AppName = {#MyAppName}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}

@@ -396,7 +396,7 @@ output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
 
 
 
-
+makeReactiveBinding
 
 
 idbacDirectory<-reactive({
@@ -1165,7 +1165,10 @@ idbacDirectory<-reactive({
     if(input$matrixSamplePresent ==1){    
         combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
         #For now, replicate matrix samples are merged into a consensus peak list.
-        combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
+       validate(
+         need(trymergeMassPeaks(combinedSmallMolPeaksm),"ebfhhbfhsdbfs")
+       )
+         combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
         #For now, matrix peaks are all picked at SNR > 6
         combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
         combinedSmallMolPeaksm@intensity<-combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr>6)]
@@ -1184,10 +1187,6 @@ idbacDirectory<-reactive({
       combinedSmallMolPeaks[[i]]@snr<-combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
     }
     
-    
-    
-    
-       
     
     allS<-binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
     trimmedSM <-  trim(allS,c(input$lowerMassSM,input$upperMassSM))
