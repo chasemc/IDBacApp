@@ -48,14 +48,13 @@ navbarPage(
         column(1),
         column(4,
 
-
-
+                 
 
         radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
                      choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
                                     "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3,
-                                    "Select here if you have already converted data and just want to re-analyze it" = 2,
-                                    "Select here if you have already converted files to mzXML but want to add or subtract files for analyses" = 4),selected=0,inline=FALSE)),
+                                    "Select here if you have already converted data with IDBac and want to re-analyze all of it" = 2,
+                                    "Select here if you have already converted data with IDBac and want to re-analyze select files" = 4),selected=0,inline=FALSE)),
 
             uiOutput("ui1")
 

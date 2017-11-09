@@ -134,15 +134,15 @@ function(input,output,session){
                  column(5,
                         fluidRow(column(5,offset=3,h3("Instructions"))),
                         br(),
-                        p(strong("1:")," This directs where on your computer you would like to create an IDBac working directory."),
-                        p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
+                        p(strong("1: Working Directory")," This directs where on your computer you would like to create an IDBac working directory."),
+                        p("In the folder you select, IDBac will create sub-folders within a main directory named \"IDBac\":"),
                         img(src="WorkingDirectory.png", style="width:60%;height:60%"),
                         br(),
-                        p(strong("2:"),"The RAW data will be one folder which itself contains
-                          an Excel map and two folders: one containing protein data and another containing small molecule data:"),
+                        p(strong("2: Raw Data"),"Your RAW data is a single folder that contains: one subfolder containing protein
+                          data and one subfolder containing small-molecule data"),
                         img(src="Single-MALDI-Plate.png", style="width:60%;height:60%"),
                         br(),
-                        p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+                        p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                         div(img(src="window.png",style="width:750px;height:40px"))
                         ),
                  column(1
@@ -150,25 +150,25 @@ function(input,output,session){
                  column(5,style = "background-color:#F5F5F5",
                         fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                         br(),
-                        p(strong("1:"), " Your Working Directory is where files will be created"),
+                        p(strong("1: Working Directory")),
                         actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
                         fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectoryText", placeholder = TRUE))),
                         br(),
-                        p(strong("2:"), "Your RAW data should be one folder that contains: a folder containing protein data and folder containing small-molecule data"),
+                        p(strong("2: Raw Data")),
                         actionButton("rawFileDirectory", label = "Click to select the location of your RAW data"),
                         fluidRow(column(12, verbatimTextOutput("rawFileDirectory", placeholder = TRUE))),
                         br(),
-                        p(strong("3:"), "Choose  your Sample Map file, the excel sheet which IDBac will use to rename your files."),
+                        p(strong("3:"), "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files."),
                         fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
                         p(strong("4:"),"Click \"Convert to mzXML\" to begin spectra conversion."),
                         actionButton("run", label = "Convert to mzXML"),
                         br(),
                         br(),
-                        p("If you canceled out of the popup after spectra conversion completed you can process your converted spectra using the button below:"),
-                        actionButton("mbeginPeakProcessing", label = "Process mzXML spectra"),
                         br(),
-                        p("Spectra Processing Progress"),
-                        textOutput("mzXMLProcessingProgress")
+                        br(),
+                                                p(strong("Note:"),"If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."),
+                        actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
+                        
                  )
           )
         )
@@ -193,13 +193,13 @@ function(input,output,session){
                  column(5,
                         fluidRow(column(5,offset=3,h3("Instructions"))),
                         br(),
-                        p(strong("1:")," This directs where you would like to create an IDBac working directory."),
+                        p(strong("1:")," This directs where on your computeryou would like to create an IDBac working directory."),
                         p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
                         img(src="WorkingDirectory.png", style="width:322px;height:164px"),
                         p("If there is already an \"IDBac\" folder present in the working directory,
                           files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
                         br(),
-                        p(strong("2:"),"The RAW data file should be one folder that contains individual folders for each
+                        p(strong("2:"),"The RAW data file will be one folder that contains individual folders for each
                           MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
                           containing protein data and the other containing small molecule data:"),
                         img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
@@ -215,7 +215,7 @@ function(input,output,session){
                         actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
                         fluidRow(column(12, verbatimTextOutput("selectedWorkingDirectoryText", placeholder = TRUE))),
                         br(),
-                        p(strong("2:"), "Your RAW data should be one folder that contains folders for each MALDI plate."),
+                        p(strong("2:"), "Your RAW data will be one folder that contains folders for each MALDI plate."),
                         actionButton("multipleMaldiRawFileDirectory", label = "Click to select the location of your RAW data"),
                         fluidRow(column(12, verbatimTextOutput("multipleMaldiRawFileDirectory", placeholder = TRUE))),
                         br(),
@@ -239,7 +239,7 @@ function(input,output,session){
                  br(),
                  fluidRow(
                    column(12,offset=3,
-                          h3("Re-Analyze Data That You Already Passed Through the Pipeline"))),br(),br(),
+                          h3("Re-Analyze Data That You Already Converted with IDBac"))),br(),br(),
                  column(12,
                         br(),
                         column(5,
@@ -317,7 +317,7 @@ function(input,output,session){
                         br(),
                         p(strong("2: "), actionButton("createBlankSelectedWorkingDirectoryFolders", label = "Click to create a blank working directory")),   
                         br(),
-                        p(strong("3:"), "Place the mzXML files which you wish to analyze into:"),
+                        p(strong("3:"), "Place the mzXML files that you wish to analyze into:"),
                         p(verbatimTextOutput("whereConvert")),
                         p(strong("4:"), "Select \"Process mzXML\" to process mzXML files for analysis"),
                         actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
@@ -605,7 +605,7 @@ function(input,output,session){
       "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",br(),
       "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
       "This also means your computer might be slow during these file conversions.",br(),
-      "To check what has been converted you can navigate to:",
+      "To check what has been converted, you can navigate to:",
       paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"),
       easyClose = FALSE, size="l",footer=""
     ))
@@ -694,7 +694,7 @@ function(input,output,session){
       title = "Spectra Processing is Now Complete",
       br(),
       easyClose = TRUE,
-      footer = modalButton("Continue to Data Analysis by consecutively visiting tabs at the top of the page.")))
+      footer = modalButton("Continue to Data Analysis by visiting consecutive tabs at the top of the page.")))
   })
   
   
@@ -862,15 +862,15 @@ function(input,output,session){
       sidebarPanel(
         selectInput("Spectra1", label=h5("Spectrum 1 (up; matches to bottom spectrum are blue, non-matches are red)"),
                     choices = sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain)),
-        selectInput("Spectra2", label=h5("Spectrum 2 (down, grey)"),
+        selectInput("Spectra2", label=h5("Spectrum 2 (down)"),
                     choices = sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain)),
-        numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=70,max=70),
+        numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=70,max=70),
         numericInput("pSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
         numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
         numericInput("upperMass", label = h5("Upper Mass Cutoff"),value = 15000,step=50),
         p("Note: Mass Cutoff and Percent Replicate values selected here will be used in all later analyses."),
-        p("Note 2: Displayed spectra are the mean spectrum for a sample, this means if you can see a peak
-          in your spectrum but it isn't appearing as a peak, then either it doesn't occur often enough across your replicates
+        p("Note 2: Displayed spectra represent the mean spectrum for a sample. Example: if you observe a peak
+          in your mean spectrum but it isn't represented as a red or blue line, then either it doesn't occur often enough across your replicates
           or its signal to noise ratio is less than what is selected.")
         ),
       mainPanel(
@@ -1090,20 +1090,21 @@ function(input,output,session){
         selectInput("clustering", label = h5("Clustering Algorithm"),
                     choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
                     selected = "ward.D2"),
-        radioButtons("booled", label = h5("Include peak intensities in calculations or use presence/absence?"),
+        radioButtons("booled", label = h5("Include peak intensities, or use presence/absence?"),
                      choices = list("Presence/Absence" = 1, "Intensities" = 2),
                      selected = 2),
-        radioButtons("kORheight", label = h5("Create clusters based on:"),
-                     choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "Sample Mapping" = 3),
+        radioButtons("kORheight", label = h5("Color clusters based on:"),
+                     choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-defined Categories in Excel Sheet" = 3),
                      selected = 1),
         uiOutput("hclustui"),
         uiOutput("groupui"),
         numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
-        p("To color samples according to user-defined groupings...",strong("This function is beta!")),
-        p("Select an excel file with labelled columns. One column will contain
-          the same labels as in the dendrogram to the right. Add additional labeled columns
-          for each factor you want to map to your samples. Sample ID's should only
-          be present once, and will associate to factors row-wise"),
+        p("To color samples according to user-defined groupings..."),
+        p("To use this function, create a different excel file and list all of your sample names in 
+		       different rows of a single column. In other columns you may add additional characteristics 
+          of your samples (eg. media type, genus, sample location), with one characteristic per column. 
+          You will have the option to color code your hierarchical clustering plot
+          based on these characteristics, which will appear in the drop-down list below."),
         p("Click the blue boxes under a factor (below) to change the color of the factor."),
         fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
         uiOutput("sampleMapColumns1"),
@@ -1353,7 +1354,7 @@ function(input,output,session){
         radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
                      choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
                      selected = 1),
-        numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%)"),value = 70,step=10,min=0,max=100),
+        numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hyp+othesis dependent)"),value = 70,step=10,min=0,max=100),
         numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
         numericInput("Group", label = h5("View Small-Molecule Network for Cluster #:"),value = 1,step=1,min=1),
         numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=50,max=max(sapply(smallPeaks(),function(x)max(mass(x))))),
