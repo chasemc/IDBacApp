@@ -170,7 +170,7 @@ function(input,output,session){
                         p("Spectra Processing Progress"),
                         textOutput("mzXMLProcessingProgress")
                  )
-                 )
+          )
         )
       })
     }
@@ -304,7 +304,7 @@ function(input,output,session){
                         fluidRow(column(5,offset=3,h3("Instructions"))),
                         br(),
                         p("Begin by creating a blank working directory.")
-                        ),
+                 ),
                  column(1
                  ),
                  column(5,style = "background-color:#F5F5F5",
@@ -323,13 +323,12 @@ function(input,output,session){
                         actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
                         
                  )
-                 )
+          )
         )
       })
     }
   })
   
-      
   
   
   
@@ -337,97 +336,97 @@ function(input,output,session){
   
   
   
-# Lets the user choose the directory which the IDBac working directory will be located in 
-selectedDirectory <- reactive({
+  
+  # Lets the user choose the directory which the IDBac working directory will be located in 
+  selectedDirectory <- reactive({
     if(is.null(input$selectedWorkingDirectory)){
       return("No Folder Selected")
     }else if (input$selectedWorkingDirectory > 0){
       choose.dir()
     }
   })
-# Shows the user which directory they chose for the IDBac working directory   
-output$selectedWorkingDirectoryText <- renderPrint(selectedDirectory())
+  # Shows the user which directory they chose for the IDBac working directory   
+  output$selectedWorkingDirectoryText <- renderPrint(selectedDirectory())
   
-
-
-# Find if "IDBac" exists in selected folder and then uniquify if necessary
-uniquifiedIDBac<-reactive({
+  
+  
+  # Find if "IDBac" exists in selected folder and then uniquify if necessary
+  uniquifiedIDBac<-reactive({
     uniquifiedIDBacs<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
     uniquifiedIDBacs<-make.unique(c(uniquifiedIDBacs,"IDBac"),sep="-")
     last(uniquifiedIDBacs)
-})
-
+  })
   
-# Creates the IDBac Directory structure, Uniquifies the  "IDBac" folder according to what folders are present in the selected directory
-idbacuniquedir <-reactive({
-   if (input$createBlankSelectedWorkingDirectoryFolders>0 ) {
-     
+  
+  # Creates the IDBac Directory structure, Uniquifies the  "IDBac" folder according to what folders are present in the selected directory
+  idbacuniquedir <-reactive({
+    if (input$createBlankSelectedWorkingDirectoryFolders>0 ) {
+      
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzML"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Sample_Spreadsheet_Map"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Peak_Lists"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Saved_MANs"))
-  
-      return(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
-   }
-
-})
-
-  
-# Shows the user where the created, uniquified, IDBac folder was created    
-output$whereConvert<-renderText({
-  idbacuniquedir()
-})
-
-  
-
-#When ReAnalyzing data, and need to select the "IDBac" folder directly
-pressedidbacDirectoryButton <- reactive({
-  if(is.null(input$idbacDirectoryButton)){
-    return("No Folder Selected")
-  }else if (input$idbacDirectoryButton > 0){
-    choose.dir()
-  }
-})
-
-
-output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
-
-
-
-
-makeReactiveBinding
-
-
-idbacDirectory<-reactive({
       
+      return(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
+    }
+    
+  })
   
   
-   if(!is.null(input$createBlankSelectedWorkingDirectoryFolders)){
-     if(input$createBlankSelectedWorkingDirectoryFolders > 0){  
-     idbacuniquedir()}
-      }else if (!is.null(input$selectedWorkingDirectory)){
-        if(input$selectedWorkingDirectory > 0){
+  # Shows the user where the created, uniquified, IDBac folder was created    
+  output$whereConvert<-renderText({
+    idbacuniquedir()
+  })
+  
+  
+  
+  #When ReAnalyzing data, and need to select the "IDBac" folder directly
+  pressedidbacDirectoryButton <- reactive({
+    if(is.null(input$idbacDirectoryButton)){
+      return("No Folder Selected")
+    }else if (input$idbacDirectoryButton > 0){
+      choose.dir()
+    }
+  })
+  
+  
+  output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
+  
+  
+  
+  
+
+  
+  idbacDirectory<-reactive({
+    
+    
+    
+    if(!is.null(input$createBlankSelectedWorkingDirectoryFolders)){
+      if(input$createBlankSelectedWorkingDirectoryFolders > 0){  
+        idbacuniquedir()}
+    }else if (!is.null(input$selectedWorkingDirectory)){
+      if(input$selectedWorkingDirectory > 0){
         paste0(selectedDirectory(), "/",uniquifiedIDBac())}
-      }else if (!is.null(input$idbacDirectoryButton)){
-        pressedidbacDirectoryButton()
-        
-      }
+    }else if (!is.null(input$idbacDirectoryButton)){
+      pressedidbacDirectoryButton()
+      
+    }
+    
+  })  
   
-})  
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   # This function revereses a provided string
@@ -509,28 +508,28 @@ idbacDirectory<-reactive({
       fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
       fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
     }else{
-    
+      
       #When analyzing more han one MALDI plate this handles fiding the raw data directories and the excel map
       mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
       lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
       collectfullZ<-NULL
       #For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
       lll<<-lapped
-          for (i in 1:length(lapped)){
-            excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])][-grep("\\~\\$",a)],2 )) 
-            excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
-            fullZ<-list.dirs(lapped[[i]],recursive = F)
-            fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
-            colnames(fullZ)<-c("UserInput","ExcelCell")
-            colnames(excelTable)<-c("ExcelCell","UserInput")
-            fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
-            fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
-            collectfullZ<-c(collectfullZ,list(fullZ))
-          }
-         
+      for (i in 1:length(lapped)){
+        excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])][-grep("\\~\\$",a)],2 )) 
+        excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
+        fullZ<-list.dirs(lapped[[i]],recursive = F)
+        fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
+        colnames(fullZ)<-c("UserInput","ExcelCell")
+        colnames(excelTable)<-c("ExcelCell","UserInput")
+        fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
+        fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
+        collectfullZ<-c(collectfullZ,list(fullZ))
+      }
+      
       fullZ<-ldply(collectfullZ,data.frame)    
       
-
+      
     }
     fullZ<-dlply(fullZ,.(UserInput.x))
     #return fullz to the "spectraConversion" reactive variable, this is a list of samples; contents of each sample are file paths to the raw data for that samples
@@ -542,8 +541,8 @@ idbacDirectory<-reactive({
   observe({
     
     if (is.null(input$run)){}else if(input$run > 0) {
-    
-  
+      
+      
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac()))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Sample_Spreadsheet_Map"))
@@ -551,17 +550,17 @@ idbacDirectory<-reactive({
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Saved_MANs"))
       
       fullZ<-spectraConversion()
-  
       
-          outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzML"))
-    
-          
+      
+      outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzML"))
+      
+      
       #fullZ$UserInput.x = sample name
       #fullZ$UserInput.y = file locations
       
-    aaaa<<-fullZ
-    bbbb<<-outp
-          
+      aaaa<<-fullZ
+      bbbb<<-outp
+      
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands<-lapply(fullZ,function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -575,17 +574,17 @@ idbacDirectory<-reactive({
                " --outfile ",
                paste0(x$UserInput.x[1],".mzXML")
         )
-        }
-    )
+      }
+      )
       functionTOrunMSCONVERTonCMDline<-function(x){
         system(command =
                  "cmd.exe",
                input = as.character(x))
       }
       
-    
       
-        popup1()
+      
+      popup1()
       #sapply(msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)  #No parallel processing
       numCores <- detectCores()
       numCores <- makeCluster(numCores-1)
@@ -600,8 +599,8 @@ idbacDirectory<-reactive({
   
   popup1<-reactive({
     
-      
-      showModal(modalDialog(
+    
+    showModal(modalDialog(
       title = "Important message",
       "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",br(),
       "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
@@ -940,12 +939,12 @@ idbacDirectory<-reactive({
         
         
         dend <- proteinMatrix() %>% a
-          
-          
-          dend[which(is.na(dend))]<-1  
-          
-          dend %>% hclust(method=input$clustering) %>% as.dendrogram
-                
+        
+        
+        dend[which(is.na(dend))]<-1  
+        
+        dend %>% hclust(method=input$clustering) %>% as.dendrogram
+        
         
         
       }
@@ -1134,8 +1133,8 @@ idbacDirectory<-reactive({
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
     
     labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
-   
-     if(is.null(input$plot_brush$ymin)){
+    
+    if(is.null(input$plot_brush$ymin)){
       #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
       if(input$kORheight=="2"){
         combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),h=input$height)==input$Group)),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
@@ -1154,7 +1153,7 @@ idbacDirectory<-reactive({
       w<- which(threeColTable[,1] > minLoc & threeColTable[,1] < maxLoc)
       brushed<-as.vector(threeColTable[,3][w])
       labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
-
+      
       combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(brushed,"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
     }
     #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
@@ -1163,23 +1162,23 @@ idbacDirectory<-reactive({
     
     # input$matrixSamplePresent (Whether there is a matrix sample)  1=Yes   2=No
     if(input$matrixSamplePresent ==1){    
-        combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
-        #For now, replicate matrix samples are merged into a consensus peak list.
-       validate(
-         need(trymergeMassPeaks(combinedSmallMolPeaksm),"ebfhhbfhsdbfs")
-       )
-         combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
-        #For now, matrix peaks are all picked at SNR > 6
-        combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
-        combinedSmallMolPeaksm@intensity<-combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr>6)]
-        combinedSmallMolPeaksm@snr<-combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr>6)]
-        combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
-        combinedSmallMolPeaks<-c(combinedSmallMolPeaksm,combinedSmallMolPeaks)
-        
+      combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
+      #For now, replicate matrix samples are merged into a consensus peak list.
+      validate(
+        need(trymergeMassPeaks(combinedSmallMolPeaksm),"ebfhhbfhsdbfs")
+      )
+      combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
+      #For now, matrix peaks are all picked at SNR > 6
+      combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
+      combinedSmallMolPeaksm@intensity<-combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr>6)]
+      combinedSmallMolPeaksm@snr<-combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr>6)]
+      combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
+      combinedSmallMolPeaks<-c(combinedSmallMolPeaksm,combinedSmallMolPeaks)
+      
     }else{
       combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
     }    
-   
+    
     
     for (i in 1:length(combinedSmallMolPeaks)){
       combinedSmallMolPeaks[[i]]@mass<-combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
@@ -1211,31 +1210,31 @@ idbacDirectory<-reactive({
     
     if(input$matrixSamplePresent ==1){    
       
-    #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
-
-    ############
-    #Find the matrix sample index
-    labs <- sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain)
-    matrixIndex <- grep(paste0("Matrix",collapse="|"),labs,ignore.case=TRUE)
-    ############
-    #peaksa = samples
-    #peaksb = matrix blank
-    peaksa <- combinedSmallMolPeaks[-matrixIndex]
-    peaksb <- combinedSmallMolPeaks[[matrixIndex]]
-  
-    for (i in 1:length(peaksa)){
-      commonIons <- which(!peaksa[[i]]@mass %in% setdiff(peaksa[[i]]@mass,peaksb@mass))
-      peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
-      peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
-      peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
-    
-    }  
+      #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
+      
+      ############
+      #Find the matrix sample index
+      labs <- sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain)
+      matrixIndex <- grep(paste0("Matrix",collapse="|"),labs,ignore.case=TRUE)
+      ############
+      #peaksa = samples
+      #peaksb = matrix blank
+      peaksa <- combinedSmallMolPeaks[-matrixIndex]
+      peaksb <- combinedSmallMolPeaks[[matrixIndex]]
+      
+      for (i in 1:length(peaksa)){
+        commonIons <- which(!peaksa[[i]]@mass %in% setdiff(peaksa[[i]]@mass,peaksb@mass))
+        peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
+        peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
+        peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
+        
+      }  
       
     }else{ 
       peaksa<-combinedSmallMolPeaks
-      }
+    }
     
-     ############
+    ############
     # Turn Peak-List into a table, add names, change from wide to long, and export as Gephi-compatible edge list
     smallNetwork <- intensityMatrix(peaksa)
     temp <- NULL
@@ -1277,8 +1276,8 @@ idbacDirectory<-reactive({
     forceNetwork(Links = z, Nodes = zz, Source = "source",
                  Target = "target", NodeID = "name",
                  Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
- 
-     })
+    
+  })
   
   
   ################################################
@@ -1384,10 +1383,10 @@ idbacDirectory<-reactive({
   
   #The following code is necessary to stop the R backend when the user closes the browser window
   
-  session$onSessionEnded(function() {
-    stopApp()
-    q("no")
-  })
+ # session$onSessionEnded(function() {
+#    stopApp()
+#    q("no")
+#  })
   
   
 }
