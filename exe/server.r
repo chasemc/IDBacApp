@@ -706,7 +706,16 @@ function(input,output,session){
   trimmedP <- reactive({
     all <-unlist(sapply(list.files(paste0(idbacDirectory(), "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory(), "\\Peak_Lists")))], readRDS))
     all<-binPeaks(all, tolerance =.02)
+    
+    validate(
+      need(try(trim(all, c(input$lowerMass, input$upperMass))),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
+tab at the top of the page.")
+    )
     trim(all, c(input$lowerMass, input$upperMass))
+    
+    
+    
+    
   })
   
   
@@ -931,14 +940,9 @@ function(input,output,session){
   ################################################
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
-    ret<-{
-      if(input$distance=="cosineD"){
+    ret<-if(req(input$distance)=="cosineD"){
         a<-as.function(get(input$distance))
-        
-        
-        
-        
-        dend <- proteinMatrix() %>% a
+                dend <- proteinMatrix() %>% a
         
         
         dend[which(is.na(dend))]<-1  
@@ -952,7 +956,7 @@ function(input,output,session){
         dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
       }
       
-    }
+    
     ret
   })
   
@@ -1125,14 +1129,26 @@ function(input,output,session){
   
   
   
-  
+  eee<-reactive({
+    
+    validate(
+      need(try(dendro()),"It seems." )
+    )    
+    
+    
+    
+    
+  })
   
   
   
   ################################################
   #This creates the network plot and calculations needed for such.
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+   
     
+    if(!is.null(input$Spectra1)){
+
     labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
     
     if(is.null(input$plot_brush$ymin)){
@@ -1160,14 +1176,21 @@ function(input,output,session){
     #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
     #find matrix spectra
     
+  }else{
+    combinedSmallMolPeaks<-smallPeaks()
     
+    
+  }  
+
     # input$matrixSamplePresent (Whether there is a matrix sample)  1=Yes   2=No
     if(input$matrixSamplePresent ==1){    
       combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
       #For now, replicate matrix samples are merged into a consensus peak list.
+      
       validate(
-        need(trymergeMassPeaks(combinedSmallMolPeaksm),"ebfhhbfhsdbfs")
+        need(try(mergeMassPeaks(combinedSmallMolPeaksm)),"It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
       )
+      
       combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
       #For now, matrix peaks are all picked at SNR > 6
       combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
@@ -1178,7 +1201,10 @@ function(input,output,session){
       
     }else{
       combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
-    }    
+    }
+    
+    
+    
     
     
     for (i in 1:length(combinedSmallMolPeaks)){
@@ -1245,7 +1271,6 @@ function(input,output,session){
     
     
     peaksaNames <- factor(temp)
-    remove(temp)
     rownames(smallNetwork) <- paste(peaksaNames)
     bool <- smallNetwork
     bool[is.na(bool)] <- 0
@@ -1268,13 +1293,19 @@ function(input,output,session){
       workdir <- idbacDirectory()
       write.csv(as.matrix(bool),paste0(workdir, "\\Saved_MANs\\Current_Network.csv"))
     }
+    
+
     a <- as.undirected(graph_from_data_frame(bool))
     a<-simplify(a)
     wc <- fastgreedy.community(a)
     b <- igraph_to_networkD3(a, group = (wc$membership + 1))
     z <- b$links
     zz <- b$nodes
-    forceNetwork(Links = z, Nodes = zz, Source = "source",
+    
+    biggerSampleNodes<-rep(1,times=length(zz[,1]))
+    zz<-cbind(zz,biggerSampleNodes)
+    zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
+    forceNetwork(Links = z, Nodes = zz, Source = "source",Nodesize = "biggerSampleNodes",
                  Target = "target", NodeID = "name",
                  Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
     
@@ -1300,17 +1331,26 @@ function(input,output,session){
   ##This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the networking page.
   output$Clusters2 <- renderText({
     # Display text of how many clusters were created.
+    
+    if(!is.null(input$Spectra1)){
+      
     if(input$kORheight=="2"){
       paste("You have ", length(unique(cutree(dendro(),h=input$height)))," Cluster(s)")
     }
     else{
       paste("You have ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)")
     }
+      
+    }
   })
   
   
   output$info <- renderText({
-    xy_str <- function(e) {
+   
+    if(!is.null(input$Spectra1)){
+      
+    
+   xy_str <- function(e) {
       if(is.null(e)) return("NULL\n")
       paste0("x=", round(e$x, 1), " y=", round(e$y, 1), "\n")
     }
@@ -1325,16 +1365,26 @@ function(input,output,session){
       "hover: ", xy_str(input$plot_hover),
       "brush: ", xy_range_str(input$plot_brush)
     )
+    
+    }
   })
   
   
   #User input changes the height of the heirarchical clustering plot within the network analysis pane
   plotHeightHeirNetwork <- reactive({
-    return(as.numeric(input$hclustHeightNetwork))
+ 
+    if(!is.null(input$Spectra1)){
+      
+   return(as.numeric(input$hclustHeightNetwork))
+      
+    }
   })
   
   
   output$netheir <- renderPlot({
+    if(req(input$Spectra1)==TRUE){
+
+      
     if(input$kORheight=="2"){
       par(mar=c(5,5,5,10))
       dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
@@ -1343,6 +1393,9 @@ function(input,output,session){
     else{
       par(mar=c(5,5,5,10))
       dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
+    }
+      
+    
     }
   },height=plotHeightHeirNetwork)
   
