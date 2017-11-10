@@ -18,7 +18,8 @@ create_app(
   info_after = "infoafter.txt",
   info_before = "infobefore.txt",
   license_file = "gpl.txt",
-  app_version = "0.0.4")
+  app_version = "0.0.5"
+  )
 
-compile_iss()
+zcompile_iss()
 
