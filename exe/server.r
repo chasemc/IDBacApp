@@ -283,12 +283,6 @@ function(input,output,session){
   
   
   
-  
-  
-  
-  
-  
-  
   observe({
     
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 4){
@@ -352,7 +346,10 @@ function(input,output,session){
   
   # Find if "IDBac" exists in selected folder and then uniquify if necessary
   uniquifiedIDBac<-reactive({
-    uniquifiedIDBacs<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
+  
+    
+    req(selectedDirectory())
+      uniquifiedIDBacs<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
     uniquifiedIDBacs<-make.unique(c(uniquifiedIDBacs,"IDBac"),sep="-")
     last(uniquifiedIDBacs)
   })
@@ -395,31 +392,24 @@ function(input,output,session){
   
   
   
+  idbacDirectory<-reactiveValues(filePath = NULL)
   
   
+
   
-  idbacDirectory<-reactive({
-    
-    
-    
-    if(!is.null(input$createBlankSelectedWorkingDirectoryFolders)){
-      if(input$createBlankSelectedWorkingDirectoryFolders > 0){  
-        idbacuniquedir()}
-    }else if (!is.null(input$selectedWorkingDirectory)){
-      if(input$selectedWorkingDirectory > 0){
-        paste0(selectedDirectory(), "/",uniquifiedIDBac())}
-    }else if (!is.null(input$idbacDirectoryButton)){
-      pressedidbacDirectoryButton()
-      
-    }
-    
-  })  
+  #Reactive events to trigger the creation of the "idbacDirectory" reactive variable
   
+  observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
+    idbacDirectory$filePath <- idbacuniquedir()
+  })
   
+  observeEvent(input$selectedWorkingDirectory,{
+    idbacDirectory$filePath <- paste0(selectedDirectory(), "/",uniquifiedIDBac())
+  })
   
-  
-  
-  
+  observeEvent(input$idbacDirectoryButton,{
+    idbacDirectory$filePath <- pressedidbacDirectoryButton()
+  })
   
   
   
@@ -481,18 +471,11 @@ function(input,output,session){
   
   
   
-  
-  
-  
-  
-  
-  
-  
   # Spectra conversion
   #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
   
   spectraConversion<-reactive({
-    if(is.null(input$multipleMaldiRawFileDirectory)){
+    if(input$rawORreanalyze == 1){
       #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
       #excelMap is a dataframe (it's "Sheet1" of the excel template)
       excelTable <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
@@ -507,7 +490,7 @@ function(input,output,session){
       #merge to connect filenames in excel sheet to file paths
       fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
       fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
-    }else{
+    }else if(input$rawORreanalyze == 3){
       
       #When analyzing more han one MALDI plate this handles fiding the raw data directories and the excel map
       mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
@@ -531,6 +514,15 @@ function(input,output,session){
       
       
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     fullZ<-dlply(fullZ,.(UserInput.x))
     #return fullz to the "spectraConversion" reactive variable, this is a list of samples; contents of each sample are file paths to the raw data for that samples
     #This will be used by the spectra conversion observe function/event
@@ -558,8 +550,7 @@ function(input,output,session){
       #fullZ$UserInput.x = sample name
       #fullZ$UserInput.y = file locations
       
-      aaaa<<-fullZ
-      bbbb<<-outp
+    
       
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands<-lapply(fullZ,function(x){
@@ -643,7 +634,7 @@ function(input,output,session){
   
   observeEvent(input$beginPeakProcessing,{
     if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
-      fileList <- list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
+      fileList <- list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
       
       #   numCores <- detectCores()
@@ -652,7 +643,7 @@ function(input,output,session){
       #   stopCluster(cl)
       
       #Single process with sapply instead of parsapply
-      sapply(fileList,function(x)functionA(x,idbacDirectory()))
+      sapply(fileList,function(x)functionA(x,idbacDirectory$filePath))
       popup4()
     }
     
@@ -661,16 +652,16 @@ function(input,output,session){
   
   observeEvent(input$mbeginPeakProcessing,{
     if (is.null(input$mbeginPeakProcessing) ){}else if(input$mbeginPeakProcessing > 0) {
-      fileList <-list.files(list.dirs(paste0(idbacDirectory(),"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
+      fileList <-list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
       
       #      numCores <- detectCores()
       #     cl <- makeCluster(numCores)
-      #    parSapply(cl,fileList,function(x)functionA(x,idbacDirectory()))
+      #    parSapply(cl,fileList,function(x)functionA(x,idbacDirectory$filePath))
       #   stopCluster(cl)
       
       #Single process with sapply instead of parsapply
-      sapply(fileList,function(x)functionA(x,idbacDirectory()))
+      sapply(fileList,function(x)functionA(x,idbacDirectory$filePath))
       popup4()
     }
     
@@ -684,6 +675,10 @@ function(input,output,session){
       "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
       "This also means your computer might be slow during the computations.",br(),
       "The step allows for fast interaction during the various data analysis",
+      "To check the progress, you can navigate to the following directory, where four files will be created per sample ",
+      paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Peak_Lists"), 
+      
+      
       easyClose = FALSE, size="l",footer=""
     ))
   })
@@ -699,12 +694,12 @@ function(input,output,session){
   
   
   spectra <- reactive({
-    unlist(sapply(list.files(paste0(idbacDirectory(), "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory(), "\\Peak_Lists")))], readRDS))
+    unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
   })
   
   
   trimmedP <- reactive({
-    all <-unlist(sapply(list.files(paste0(idbacDirectory(), "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory(), "\\Peak_Lists")))], readRDS))
+    all <-unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
     all<-binPeaks(all, tolerance =.02)
     
     validate(
@@ -1127,24 +1122,11 @@ function(input,output,session){
   
   
   smallPeaks <- reactive({
-    unlist(sapply(list.files(paste0(idbacDirectory(), "\\Peak_Lists"),full.names=TRUE)[grep(".SmallMoleculePeaks.", list.files(paste0(idbacDirectory(), "\\Peak_Lists")))], readRDS))
+    unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SmallMoleculePeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
   })
   
   
   
-  
-  
-  
-  eee<-reactive({
-    
-    validate(
-      need(try(dendro()),"It seems." )
-    )    
-    
-    
-    
-    
-  })
   
   
   
@@ -1307,7 +1289,7 @@ function(input,output,session){
     if(input$save=="FALSE"){
     }
     else{
-      workdir <- idbacDirectory()
+      workdir <- idbacDirectory$filePath
       write.csv(as.matrix(bool),paste0(workdir, "\\Saved_MANs\\Current_Network.csv"))
     }
     
@@ -1446,9 +1428,22 @@ function(input,output,session){
                            click = "plot_click",
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
-                           brush = "plot_brush")
+                           brush = "plot_brush"),
+                textOutput("loppy")
+                
+                
+                
+                
       ))
   })
+  
+  
+ output$loppy<- renderText(
+   
+  
+ print( sapply(names(as.list(.GlobalEnv)),object.size))
+  )
+  
   
   
   #The following code is necessary to stop the R backend when the user closes the browser window
