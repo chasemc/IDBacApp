@@ -1215,7 +1215,9 @@ tab at the top of the page.")
     
     
     allS<-binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
-    trimmedSM <-  trim(allS,c(input$lowerMassSM,input$upperMassSM))
+
+     trimmedSM <-  trim(allS,c(input$lowerMassSM,input$upperMassSM))
+     
     labs <- sapply(trimmedSM, function(x)metaData(x)$Strain)
     labs <- factor(labs)
     new2 <- NULL
@@ -1235,6 +1237,8 @@ tab at the top of the page.")
     
     combinedSmallMolPeaks <- new2
     
+    
+    
     if(input$matrixSamplePresent ==1){    
       
       #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
@@ -1248,13 +1252,17 @@ tab at the top of the page.")
       #peaksb = matrix blank
       peaksa <- combinedSmallMolPeaks[-matrixIndex]
       peaksb <- combinedSmallMolPeaks[[matrixIndex]]
+        
+      
       
       for (i in 1:length(peaksa)){
+        
         commonIons <- which(!peaksa[[i]]@mass %in% setdiff(peaksa[[i]]@mass,peaksb@mass))
+        if(length(commonIons)!=0){   # Without this if statement, peaksa values will be set to 0 if no matrix matches are found == BAD 
         peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
         peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
         peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
-        
+        }
       }  
       
     }else{ 
@@ -1275,7 +1283,9 @@ tab at the top of the page.")
     bool <- smallNetwork
     bool[is.na(bool)] <- 0
     bool <- as.data.frame(bool)
-    bool <-  ifelse(bool > 0,1,0)
+   
+    
+     bool <-  ifelse(bool > 0,1,0)
     bool <- bool
     bool <- as.data.frame(bool)
     #The network is weighted by the inverse of percentage of presence of the peak, this de-emphasizes commonly occuring peaks and "pulls" rarer peaks closer to their associated sample
@@ -1410,8 +1420,8 @@ tab at the top of the page.")
         numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hyp+othesis dependent)"),value = 70,step=10,min=0,max=100),
         numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
         numericInput("Group", label = h5("View Small-Molecule Network for Cluster #:"),value = 1,step=1,min=1),
-        numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=50,max=max(sapply(smallPeaks(),function(x)max(mass(x))))),
-        numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=50,min=min(sapply(smallPeaks(),function(x)min(mass(x))))),
+        numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=20,max=round(max(sapply(smallPeaks(),function(x)max(mass(x)))),digits=-1)),
+        numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=20,min=round(min(sapply(smallPeaks(),function(x)min(mass(x)))),digits=-1)),
         numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
         checkboxInput("save", label = "Save Current Network?", value = FALSE),
         br(),
@@ -1425,7 +1435,8 @@ tab at the top of the page.")
           
         )
       ),
-      mainPanel(textOutput("Clusters2"),simpleNetworkOutput("metaboliteAssociationNetwork"),
+      mainPanel(textOutput("Clusters2"),
+                simpleNetworkOutput("metaboliteAssociationNetwork"),
                 plotOutput("netheir",
                            click = "plot_click",
                            dblclick = "plot_dblclick",
