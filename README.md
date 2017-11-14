@@ -15,7 +15,7 @@
 
 
 ### IDBac Software Installation
-The IDBac software, MALDI plate sample template, and example data can be downloaded, [here](https://drive.google.com/open?id=0B0n1AhTXfxHqSmJFSHEyWjdaNmM)
+The IDBac software, MALDI plate sample template, and example data may be downloaded [here](https://drive.google.com/open?id=0B0n1AhTXfxHqSmJFSHEyWjdaNmM)
 
 
 ### Renaming Bruker Raw Data Files
