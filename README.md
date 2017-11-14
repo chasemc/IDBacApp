@@ -4,14 +4,13 @@
 
 
 
-# IDBac Instruction Manual
-# for MALDI-TOF MS Acquistion and Data Analysis 
+# IDBac Instruction Manual for MALDI-TOF MS Acquistion and Data Analysis 
 
 
 ## Contents
 - [IDBac Software Installation](#idbac-software-installation)
-- [Renaming Bruker Raw Data Files](#renaming-bruker-raw-data-files)
 - [Sample Preparation](#sample-preparation)
+- [Renaming Bruker Raw Data Files](#renaming-bruker-raw-data-files)
 - [Data Acquisition](#data-acquisition)
 - [Data Analysis: Quick Start](#data-analysis-quick-start)
 - [Data Analysis: Step by Step](#data-analysis-step-by-step)
@@ -24,15 +23,16 @@
 The IDBac software, MALDI plate sample template, and example data may be downloaded [here](https://drive.google.com/open?id=0B0n1AhTXfxHqSmJFSHEyWjdaNmM)
 
 
+### Sample Preparation
+This section details our easy way to label sample data as well as preparing the MALDI target plate for data acquisition.
+
+
 ### Renaming Bruker Raw Data Files
 If you haven't already, download the Excel template for renaming raw data files [here](/MALDI-Plate_Template/384_Spot_MALDI_Template.xltx)
 
   
-### Sample Preparation
-This section details our easy way to label sample data as well as preparing the MALDI target plate for data acquisition.
-
 #### Naming Samples
-- We created an excel template for 384-spot MALDI target plates (template will also work for 96-spot and 48-spot plates). Using this   template removes the need to name your files within Bruker’s flexControl software and is the preferred method for IDBac. 
+- We created an excel template for 384-spot MALDI target plates (template will also work for 96-spot and 48-spot plates). Using this template removes the need to name your files within Bruker’s flexControl software and is the preferred method for IDBac. 
 - Simply enter your sample names into the spreadsheet as seen below.
 - Be sure to reserve at least one spot on the MALDI target plate for the two calibration standards, at least one spot for PepMix and at least one other spot for Bruker’s BTS Standard!
 - Be sure to include a matrix blank to be subtracted from small-molecule acquisitions. This spot should contain the word “matrix” (any capitalization)
