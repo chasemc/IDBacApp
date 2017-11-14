@@ -1,6 +1,12 @@
+![](/ReadMe_Images/MainImage.png)
 
 
-# IDBac Instruction Manual for MALDI-TOF MS Acquistion and Data Analysis 
+
+
+
+# IDBac Instruction Manual
+# for MALDI-TOF MS Acquistion and Data Analysis 
+
 
 ## Contents
 - [IDBac Software Installation](#idbac-software-installation)
