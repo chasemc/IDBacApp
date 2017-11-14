@@ -1,7 +1,7 @@
 
 
 # IDBac Instruction Manual for MALDI-TOF MS Acquistion and Data Analysis 
-![](/ReadMe_Images/MainImage.png)
+
 ## Contents
 - [IDBac Software Installation](#idbac-software-installation)
 - [Renaming Bruker Raw Data Files](#renaming-bruker-raw-data-files)
