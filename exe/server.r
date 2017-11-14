@@ -372,8 +372,15 @@ function(input,output,session){
   
   
   # Shows the user where the created, uniquified, IDBac folder was created    
-  output$whereConvert<-renderText({
-    idbacuniquedir()
+  
+  observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
+    
+    output$whereConvert<-renderText({
+    
+    paste0(idbacuniquedir(),"\\Converted_To_mzXML")
+  
+    })
+  
   })
   
   
@@ -1428,9 +1435,8 @@ function(input,output,session){
                            click = "plot_click",
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
-                           brush = "plot_brush"),
-                textOutput("loppy")
-                
+                           brush = "plot_brush")
+
                 
                 
                 
@@ -1438,20 +1444,13 @@ function(input,output,session){
   })
   
   
- output$loppy<- renderText(
-   
   
- print( sapply(names(as.list(.GlobalEnv)),object.size))
-  )
+#  The following code is necessary to stop the R backend when the user closes the browser window
   
-  
-  
-  #The following code is necessary to stop the R backend when the user closes the browser window
-  
-  # session$onSessionEnded(function() {
-  #    stopApp()
-  #    q("no")
-  #  })
+   session$onSessionEnded(function() {
+      stopApp()
+      q("no")
+    })
   
   
 }

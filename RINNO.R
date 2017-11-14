@@ -21,5 +21,5 @@ create_app(
   app_version = "0.0.5"
   )
 
-zcompile_iss()
+compile_iss()
 
