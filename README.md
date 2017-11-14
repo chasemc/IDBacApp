@@ -1,5 +1,6 @@
-![](/ReadMe_Images/MainImage.png)
- 
+
+
+# IDBac Instruction Manual for MALDI-TOF MS Acquistion and Data Analysis 
 
 ## Contents
 - [IDBac Software Installation](#idbac-software-installation)
@@ -14,9 +15,11 @@
 
 
 ### IDBac Software Installation
+The IDBac software, MALDI plate sample template, and example data may be downloaded [here](https://drive.google.com/open?id=0B0n1AhTXfxHqSmJFSHEyWjdaNmM)
+
 
 ### Renaming Bruker Raw Data Files
-The Excel template for renaming raw data files may be found [here](/MALDI-Plate_Template/384_Spot_MALDI_Template.xltx)
+If you haven't already, download the Excel template for renaming raw data files [here](/MALDI-Plate_Template/384_Spot_MALDI_Template.xltx)
 
   
 ### Sample Preparation
@@ -54,7 +57,7 @@ method adapted from [Freiwald & Sauer](http://www.nature.com/nprot/journal/v4/n5
 **Note**: Use fresh matrix solution and be sure to store unused solid CHCA between 2-8°C
 
 
-sdsdsd
+
 Apply bacteria directly without any prior chemical treatment. Smear a single bacterial colony as a thin film directly onto the plate using a sterile toothpick.
 
 ![](/ReadMe_Images/ApplyingToMALDIPlate1.png)
@@ -81,25 +84,6 @@ Once you have prepared your MALDI target plate protein and small molecule data y
 
 
 
-
-### Data Analysis: Quick Start
-### Data Analysis: Step by Step
-
-
-
-
-### Gephi Network Analysis
-![](/ReadMe_Images/GEPHItutorial/Slide51.PNG)
-
-![](/ReadMe_Images/GEPHItutorial/Slide52.PNG)
-
-![](/ReadMe_Images/GEPHItutorial/Slide53.PNG)
-
-![](/ReadMe_Images/GEPHItutorial/Slide54.PNG)
-
-![](/ReadMe_Images/GEPHItutorial/Slide55.PNG)
-
-![](/ReadMe_Images/GEPHItutorial/Slide56.PNG)
 
 
 
