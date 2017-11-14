@@ -61,10 +61,17 @@ method adapted from [Freiwald & Sauer](http://www.nature.com/nprot/journal/v4/n5
 2. 100 µL of solution = 50 µL ACN + 47.5 µL H2O + 2.5µL TFA + 1 mg CHCA
 
 **Note**: Use fresh matrix solution and be sure to store unused solid CHCA between 2-8°C
+**Note 2**: There are many MALDI matrix alternatives, we have simply had luck using CHCA which is also more common for protein profiling bacteria.
 
 
+
+#### Applying Samples to the MALDI Plate
 
 Apply bacteria directly without any prior chemical treatment. Smear a single bacterial colony as a thin film directly onto the plate using a sterile toothpick.
+
+**Note** For alternative sample preparation methods please refere to [Freiwald & Sauer](http://www.nature.com/nprot/journal/v4/n5/full/nprot.2009.37.html?foxtrotcallback=true)
+
+
 
 ![](/ReadMe_Images/ApplyingToMALDIPlate1.png)
 ![](/ReadMe_Images/ApplyingToMALDIPlate2.png)
