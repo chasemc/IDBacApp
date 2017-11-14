@@ -15,9 +15,11 @@
 
 
 ### IDBac Software Installation
+The IDBac software, MALDI plate sample template, and example data can be downloaded, [here](https://drive.google.com/open?id=0B0n1AhTXfxHqSmJFSHEyWjdaNmM)
+
 
 ### Renaming Bruker Raw Data Files
-The Excel template for renaming raw data files may be found [here](/MALDI-Plate_Template/384_Spot_MALDI_Template.xltx)
+If you haven't already, download the Excel template for renaming raw data files [here](/MALDI-Plate_Template/384_Spot_MALDI_Template.xltx)
 
   
 ### Sample Preparation
