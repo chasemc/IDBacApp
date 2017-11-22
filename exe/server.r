@@ -346,10 +346,10 @@ function(input,output,session){
   
   # Find if "IDBac" exists in selected folder and then uniquify if necessary
   uniquifiedIDBac<-reactive({
-  
+    
     
     req(selectedDirectory())
-      uniquifiedIDBacs<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
+    uniquifiedIDBacs<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
     uniquifiedIDBacs<-make.unique(c(uniquifiedIDBacs,"IDBac"),sep="-")
     last(uniquifiedIDBacs)
   })
@@ -376,11 +376,11 @@ function(input,output,session){
   observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
     
     output$whereConvert<-renderText({
-    
-    paste0(idbacuniquedir(),"\\Converted_To_mzXML")
-  
+      
+      paste0(idbacuniquedir(),"\\Converted_To_mzXML")
+      
     })
-  
+    
   })
   
   
@@ -402,7 +402,7 @@ function(input,output,session){
   idbacDirectory<-reactiveValues(filePath = NULL)
   
   
-
+  
   
   #Reactive events to trigger the creation of the "idbacDirectory" reactive variable
   
@@ -506,7 +506,7 @@ function(input,output,session){
       #For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
       lll<<-lapped
       for (i in 1:length(lapped)){
-        excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])][-grep("\\~\\$",a)],2 )) 
+        excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
         excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
         fullZ<-list.dirs(lapped[[i]],recursive = F)
         fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
@@ -519,12 +519,11 @@ function(input,output,session){
       
       fullZ<-ldply(collectfullZ,data.frame)    
       
-      
     }
     
     
     
-    
+    aaa<<-fullZ
     
     
     
@@ -556,8 +555,9 @@ function(input,output,session){
       
       #fullZ$UserInput.x = sample name
       #fullZ$UserInput.y = file locations
+      zxcv<<-fullZ
+      oooo<<-outp
       
-    
       
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands<-lapply(fullZ,function(x){
@@ -1092,7 +1092,7 @@ function(input,output,session){
   
   # Create Heir ui
   output$Heirarchicalui <-  renderUI({
-    sidebarLayout	(
+    fluidPage(
       sidebarPanel(
         #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
         #                    choices = levels(phyla)),
@@ -1121,11 +1121,27 @@ function(input,output,session){
         fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
         uiOutput("sampleMapColumns1"),
         uiOutput("sampleMapColumns2"),
-        uiOutput("sampleFactorMapColors")
-        ),
-      mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))
+        fluidRow(       
+          uiOutput("sampleFactorMapColors")),
+        br(),
+        h4(" Reporting Settings"),
+        p("This dendrogram was created by analyzing ",length(labels(a)), " samples,
+          and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. 
+          Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analysis. ",
+          "For clustering spectra, ",input$distance, " distance and ",input$clustering, " clustering algorithms were used."
+          
+          
+        )),	
+      mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))		
+      
       )
   })
+  
+  
+  
+  
+  
+  
   
   
   smallPeaks <- reactive({
@@ -1447,10 +1463,10 @@ function(input,output,session){
   
 #  The following code is necessary to stop the R backend when the user closes the browser window
   
-   session$onSessionEnded(function() {
-      stopApp()
-      q("no")
-    })
+#   session$onSessionEnded(function() {
+#      stopApp()
+#      q("no")
+#    })
   
   
 }
