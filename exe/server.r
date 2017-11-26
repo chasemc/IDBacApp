@@ -523,9 +523,6 @@ function(input,output,session){
     
     
     
-    aaa<<-fullZ
-    
-    
     
     
     
@@ -1124,14 +1121,10 @@ function(input,output,session){
         fluidRow(       
           uiOutput("sampleFactorMapColors")),
         br(),
-        h4(" Reporting Settings"),
-        p("This dendrogram was created by analyzing ",length(labels(a)), " samples,
-          and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. 
-          Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analysis. ",
-          "For clustering spectra, ",input$distance, " distance and ",input$clustering, " clustering algorithms were used."
+        h4("Suggestions for Reporting Protein Analysis:"),
+        uiOutput("proteinReport") 
           
-          
-        )),	
+        ),	
       mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))		
       
       )
@@ -1139,8 +1132,12 @@ function(input,output,session){
   
   
   
-  
-  
+  output$proteinReport<-renderUI({
+  p("This dendrogram was created by analyzing ",length(labels(a)), " samples,
+          and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. 
+    Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analyses. ",
+    "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
+  })
   
   
   
@@ -1151,12 +1148,8 @@ function(input,output,session){
   
   
   
+ small_Binned_Matrix<-reactive({ 
   
-  
-  ################################################
-  #This creates the network plot and calculations needed for such.
-  output$metaboliteAssociationNetwork <- renderSimpleNetwork({
-    
     
     if(!is.null(input$Spectra1)){
       
@@ -1225,11 +1218,35 @@ function(input,output,session){
     }
     
     
-    allS<-binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
+    ww<<-binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
     
-    trimmedSM <-  trim(allS,c(input$lowerMassSM,input$upperMassSM))
     
-    labs <- sapply(trimmedSM, function(x)metaData(x)$Strain)
+})
+    
+    
+   
+    
+    trimmedSM <- reactive({
+      
+      trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
+      
+      })
+    
+ 
+    
+    
+    
+    
+    
+    
+    ################################################
+    #This creates the network plot and calculations needed for such.
+    output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+      
+    
+    # process for MAN creation
+    
+    labs <- sapply(trimmedSM(), function(x)metaData(x)$Strain)
     labs <- factor(labs)
     new2 <- NULL
     newPeaks <- NULL
@@ -1237,11 +1254,11 @@ function(input,output,session){
     for (i in seq_along(levels(labs))) {
       specSubset <- (which(labs == levels(labs)[[i]]))
       if (length(specSubset) > 1) {
-        new <- filterPeaks(trimmedSM[specSubset],minFrequency=input$percentPresenceSM/100)
+        new <- filterPeaks(trimmedSM()[specSubset],minFrequency=input$percentPresenceSM/100)
         new<-mergeMassPeaks(new,method="mean")
         new2 <- c(new2, new)
       } else{
-        new2 <- c(new2, trimmedSM[specSubset])
+        new2 <- c(new2, trimmedSM()[specSubset])
       }
       
     }
@@ -1287,7 +1304,8 @@ function(input,output,session){
     for (i in 1:length(peaksa)){
       temp <- c(temp,peaksa[[i]]@metaData$Strain)
     }
-    
+    aaz<<-peaksa
+    cccz<<-smallNetwork
     
     peaksaNames <- factor(temp)
     
@@ -1315,9 +1333,13 @@ function(input,output,session){
       workdir <- idbacDirectory$filePath
       write.csv(as.matrix(bool),paste0(workdir, "\\Saved_MANs\\Current_Network.csv"))
     }
+  
+  
+    
     
     
     a <- as.undirected(graph_from_data_frame(bool))
+    
     a<-simplify(a)
     wc <- fastgreedy.community(a)
     b <- igraph_to_networkD3(a, group = (wc$membership + 1))
@@ -1367,34 +1389,10 @@ function(input,output,session){
   })
   
   
-  output$info <- renderText({
     
-    if(!is.null(input$Spectra1)){
-      
-      
-      xy_str <- function(e) {
-        if(is.null(e)) return("NULL\n")
-        paste0("x=", round(e$x, 1), " y=", round(e$y, 1), "\n")
-      }
-      xy_range_str <- function(e) {
-        if(is.null(e)) return("NULL\n")
-        paste0("xmin=", round(e$xmin, 1), " xmax=", round(e$xmax, 1),
-               " ymin=", round(e$ymin, 1), " ymax=", round(e$ymax, 1))
-      }
-      paste0(
-        "click: ", xy_str(input$plot_click),
-        "dblclick: ", xy_str(input$plot_dblclick),
-        "hover: ", xy_str(input$plot_hover),
-        "brush: ", xy_range_str(input$plot_brush)
-      )
-      
-    }
-  })
-  
   
   #User input changes the height of the heirarchical clustering plot within the network analysis pane
   plotHeightHeirNetwork <- reactive({
-    
     
     return(as.numeric(input$hclustHeightNetwork))
     
@@ -1441,10 +1439,13 @@ function(input,output,session){
           while selected- this saves a .csv file of the currently-displayed
           network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
           While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
-          means this box is checked and the file is open in another program, either uncheck or close the file."
-          
-        )
-      ),
+          means this box is checked and the file is open in another program, either uncheck or close the file."),
+        br(),
+        h4("Suggestions for Reporting MAN Analysis:"),
+        uiOutput("manReport"),
+        h4("Suggestions for Reporting Protein Analysis"),
+        uiOutput("proteinReport2")
+     ),
       mainPanel(textOutput("Clusters2"),
                 simpleNetworkOutput("metaboliteAssociationNetwork"),
                 plotOutput("netheir",
@@ -1457,6 +1458,24 @@ function(input,output,session){
                 
                 
       ))
+  })
+  
+  
+  output$manReport<-renderUI({
+  
+  p("This MAN was created by analyzing ",length(labels(a)), " samples,
+    and retaining peaks with a signal to noise ratio above ",input$smSNR," and occurring in greater than ",input$percentPresenceSM,"% of replicate spectra. 
+    Peaks occuring below ",input$lowerMassSM," m/z or above ",input$upperMassSM," m/z were removed from the analysis. ",
+    "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
+  
+})  
+  
+  
+  output$proteinReport2<-renderUI({
+    p("This dendrogram was created by analyzing ",length(labels(a)), " samples,
+      and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. 
+      Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analyses. ",
+      "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
   })
   
   
