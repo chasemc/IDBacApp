@@ -961,8 +961,10 @@ function(input,output,session){
     }
     
     
-    
     ret
+  
+    wwww<<-ret
+      
   })
   
   
@@ -1133,10 +1135,10 @@ function(input,output,session){
   
   
   output$proteinReport<-renderUI({
-  p("This dendrogram was created by analyzing ",length(labels(a)), " samples,
-          and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. 
-    Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analyses. ",
-    "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
+  p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
+          and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra. 
+    Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
+    "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
   })
   
   
@@ -1218,7 +1220,7 @@ function(input,output,session){
     }
     
     
-    ww<<-binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
+    binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
     
     
 })
@@ -1235,14 +1237,7 @@ function(input,output,session){
  
     
     
-    
-    
-    
-    
-    ################################################
-    #This creates the network plot and calculations needed for such.
-    output$metaboliteAssociationNetwork <- renderSimpleNetwork({
-      
+    subSelect<-reactive({
     
     # process for MAN creation
     
@@ -1297,15 +1292,27 @@ function(input,output,session){
       peaksa<-combinedSmallMolPeaks
     }
     
+    peaksa
+})
+    
+    
+    
+    
+    
+    ################################################
+    #This creates the network plot and calculations needed for such.
+    output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+      
+    
+    
     ############
     # Turn Peak-List into a table, add names, change from wide to long, and export as Gephi-compatible edge list
-    smallNetwork <- intensityMatrix(peaksa)
+    smallNetwork <- intensityMatrix(subSelect())
     temp <- NULL
-    for (i in 1:length(peaksa)){
-      temp <- c(temp,peaksa[[i]]@metaData$Strain)
+    for (i in 1:length(subSelect())){
+      temp <- c(temp,subSelect()[[i]]@metaData$Strain)
     }
-    aaz<<-peaksa
-    cccz<<-smallNetwork
+   
     
     peaksaNames <- factor(temp)
     
@@ -1443,6 +1450,7 @@ function(input,output,session){
         br(),
         h4("Suggestions for Reporting MAN Analysis:"),
         uiOutput("manReport"),
+        br(),
         h4("Suggestions for Reporting Protein Analysis"),
         uiOutput("proteinReport2")
      ),
@@ -1463,19 +1471,18 @@ function(input,output,session){
   
   output$manReport<-renderUI({
   
-  p("This MAN was created by analyzing ",length(labels(a)), " samples,
-    and retaining peaks with a signal to noise ratio above ",input$smSNR," and occurring in greater than ",input$percentPresenceSM,"% of replicate spectra. 
-    Peaks occuring below ",input$lowerMassSM," m/z or above ",input$upperMassSM," m/z were removed from the analysis. ",
-    "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
+  p("This MAN was created by analyzing ",tags$code(length(subSelect())), " samples,",if(input$matrixSamplePresent==1){("subtracting a matrix blank,")}else{},
+"and retaining peaks with a signal to noise ratio above ",tags$code(input$smSNR)," and occurring in greater than ",tags$code(input$percentPresenceSM),"% of replicate spectra. 
+    Peaks occuring below ",tags$code(input$lowerMassSM)," m/z or above ",tags$code(input$upperMassSM)," m/z were removed from the analysis. ")
   
 })  
   
   
   output$proteinReport2<-renderUI({
-    p("This dendrogram was created by analyzing ",length(labels(a)), " samples,
-      and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. 
-      Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analyses. ",
-      "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
+    p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
+      and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra. 
+      Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
+      "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
   })
   
   
