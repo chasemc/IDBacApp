@@ -894,6 +894,16 @@ function(input,output,session){
   })
   
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   ################################################
   # This creates the Plotly PCA plot and the calculation required for such.
   output$pcaplot <- renderPlotly({
@@ -907,13 +917,27 @@ function(input,output,session){
     }else{
       d <- cutree(dendro(),k=input$kClusters)
     }
+    
     e <- as.data.frame(cbind(a,d))
+    
     if(input$PCA3d==1){
       plot3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,xlab="", ylab="", zlab="")
       text3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,text=e$nam,col=factor(d))}
-    p <- (ggplot(e,aes(Dim.1,Dim.2,label=nam)))
-    output$pcaplot2<-renderPlot(p+geom_text(aes(col=factor(d)),size=6)+xlab("Dimension 1")+ylab("Dimension 2")+ggtitle("PCA of Protein MALDI Spectra (colors based on clusters from hiearchical clustering)")+theme(plot.title=element_text(size=15)) + scale_color_discrete(name="Clusters from hierarchical clustering")+theme(legend.position="none"))
-    ggplotly(p + geom_text()+xlab("Dimension 1")+ylab("Dimension 2")+ ggtitle("Zoomable PCA of Protein MALDI Spectra")+theme(plot.title=element_text(size=15),legend.position="none"))
+    
+    
+    
+    p<-ggplot(e,aes(Dim.1,Dim.2,label=nam,col=factor(d)))+
+      geom_text()+
+      xlab("Dimension 1")+
+      ylab("Dimension 2")+
+      ggtitle("Zoomable PCA of Protein MALDI Spectra")+
+      theme(plot.title=element_text(size=15),legend.position="none")
+    
+    ggplotly(p)
+    
+    
+    
+    
   })
   #  },height=750)
   
@@ -925,9 +949,7 @@ function(input,output,session){
         radioButtons("PCA3d", label = h4("PCA 3D Plot"),
                      choices = list("Show" = 1, "Don't Show" = 2),selected = 2)
       ),
-      mainPanel(plotOutput("pcaplot2"),
-                h5("Same PCA as above, no colors, but with interaction"),
-                plotlyOutput("pcaplot"))
+      mainPanel(plotlyOutput("pcaplot"))
     )
     
   })
