@@ -504,7 +504,7 @@ function(input,output,session){
       lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
       collectfullZ<-NULL
       #For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
-      lll<<-lapped
+      
       for (i in 1:length(lapped)){
         excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
         excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
@@ -1104,8 +1104,8 @@ function(input,output,session){
     }
     else{
       par(mar=c(5,5,5,10))
-      s<-dendro()
-      dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
+      s<<-dendro()
+      dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=50)
     }
   },height=plotHeight)
   
