@@ -984,9 +984,9 @@ function(input,output,session){
     
     
     ret
-  
+    
     wwww<<-ret
-      
+    
   })
   
   
@@ -1147,7 +1147,7 @@ function(input,output,session){
         br(),
         h4("Suggestions for Reporting Protein Analysis:"),
         uiOutput("proteinReport") 
-          
+        
         ),	
       mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))		
       
@@ -1157,10 +1157,10 @@ function(input,output,session){
   
   
   output$proteinReport<-renderUI({
-  p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
-          and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra. 
-    Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
-    "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
+    p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
+      and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra. 
+      Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
+      "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
   })
   
   
@@ -1172,8 +1172,8 @@ function(input,output,session){
   
   
   
- small_Binned_Matrix<-reactive({ 
-  
+  small_Binned_Matrix<-reactive({ 
+    
     
     if(!is.null(input$Spectra1)){
       
@@ -1245,21 +1245,21 @@ function(input,output,session){
     binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
     
     
-})
+  })
+  
+  
+  
+  
+  trimmedSM <- reactive({
     
+    trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
     
-   
-    
-    trimmedSM <- reactive({
-      
-      trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
-      
-      })
-    
- 
-    
-    
-    subSelect<-reactive({
+  })
+  
+  
+  
+  
+  subSelect<-reactive({
     
     # process for MAN creation
     
@@ -1315,16 +1315,16 @@ function(input,output,session){
     }
     
     peaksa
-})
+  })
+  
+  
+  
+  
+  
+  ################################################
+  #This creates the network plot and calculations needed for such.
+  output$metaboliteAssociationNetwork <- renderSimpleNetwork({
     
-    
-    
-    
-    
-    ################################################
-    #This creates the network plot and calculations needed for such.
-    output$metaboliteAssociationNetwork <- renderSimpleNetwork({
-      
     
     
     ############
@@ -1334,7 +1334,7 @@ function(input,output,session){
     for (i in 1:length(subSelect())){
       temp <- c(temp,subSelect()[[i]]@metaData$Strain)
     }
-   
+    
     
     peaksaNames <- factor(temp)
     
@@ -1362,8 +1362,8 @@ function(input,output,session){
       workdir <- idbacDirectory$filePath
       write.csv(as.matrix(bool),paste0(workdir, "\\Saved_MANs\\Current_Network.csv"))
     }
-  
-  
+    
+    
     
     
     
@@ -1418,7 +1418,7 @@ function(input,output,session){
   })
   
   
-    
+  
   
   #User input changes the height of the heirarchical clustering plot within the network analysis pane
   plotHeightHeirNetwork <- reactive({
@@ -1475,7 +1475,7 @@ function(input,output,session){
         br(),
         h4("Suggestions for Reporting Protein Analysis"),
         uiOutput("proteinReport2")
-     ),
+        ),
       mainPanel(textOutput("Clusters2"),
                 simpleNetworkOutput("metaboliteAssociationNetwork"),
                 plotOutput("netheir",
@@ -1483,7 +1483,7 @@ function(input,output,session){
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
                            brush = "plot_brush")
-
+                
                 
                 
                 
@@ -1492,12 +1492,12 @@ function(input,output,session){
   
   
   output$manReport<-renderUI({
-  
-  p("This MAN was created by analyzing ",tags$code(length(subSelect())), " samples,",if(input$matrixSamplePresent==1){("subtracting a matrix blank,")}else{},
-"and retaining peaks with a signal to noise ratio above ",tags$code(input$smSNR)," and occurring in greater than ",tags$code(input$percentPresenceSM),"% of replicate spectra. 
-    Peaks occuring below ",tags$code(input$lowerMassSM)," m/z or above ",tags$code(input$upperMassSM)," m/z were removed from the analysis. ")
-  
-})  
+    
+    p("This MAN was created by analyzing ",tags$code(length(subSelect())), " samples,",if(input$matrixSamplePresent==1){("subtracting a matrix blank,")}else{},
+      "and retaining peaks with a signal to noise ratio above ",tags$code(input$smSNR)," and occurring in greater than ",tags$code(input$percentPresenceSM),"% of replicate spectra. 
+      Peaks occuring below ",tags$code(input$lowerMassSM)," m/z or above ",tags$code(input$upperMassSM)," m/z were removed from the analysis. ")
+    
+  })  
   
   
   output$proteinReport2<-renderUI({
@@ -1509,12 +1509,12 @@ function(input,output,session){
   
   
   
-#  The following code is necessary to stop the R backend when the user closes the browser window
+  #  The following code is necessary to stop the R backend when the user closes the browser window
   
-   session$onSessionEnded(function() {
-      stopApp()
-      q("no")
-    })
+#  session$onSessionEnded(function() {
+ #   stopApp()
+#    q("no")
+#  })
   
   
 }
