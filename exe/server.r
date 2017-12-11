@@ -8,36 +8,29 @@ function(input,output,session){
   
   
   
-  
+# ----------------- 
   functionA <- function(z,idbacDir) {
     Install_And_Load <- function(Required_Packages)
     {
       Remaining_Packages <-
         Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-      
-      
       if (length(Remaining_Packages))
       {
         install.packages(Remaining_Packages)
-        
       }
       for (package_name in Required_Packages)
       {
         library(package_name,
                 character.only = TRUE,
                 quietly = TRUE)
-        
       }
     }
     
     # Required packages to install and load
     Required_Packages = c("MALDIquant", "MALDIquantForeign", "mzR", "readxl")
     
-    
-    # Install and Load Packages
+        # Install and Load Packages
     Install_And_Load(Required_Packages)
-    
-    
     
     strReverse <- function(x) {
       sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
@@ -97,18 +90,13 @@ function(input,output,session){
     }
   }
   
-  # "appLocation" will be assigned to the directory of where IDBac was installed to.  This will be used later in order to access MSConvert
-  # which is used for converting raw MALDI files to mzML via command line.
-  #appLocation <- getwd()
-  #####################################################################################################################################################
-  
-  ################################################
+# ----------------- 
   #Cosine Distance Matrix Function
   cosineD <- function(x) {
     as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
   }
-  ################################################
-  
+
+  # -----------------   
   # This function revereses a provided string
   strReverse <- function(x) {
     sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
@@ -118,8 +106,9 @@ function(input,output,session){
   
   output$value <- renderPrint({ input$radio })
   
-  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   
+  # ----------------- 
+  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   observe({
     
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 1){
@@ -177,9 +166,8 @@ function(input,output,session){
   })
   
   
-  
+  # -----------------  
   #This "observe" event creates the UI element for analyzing multiple MALDI plates, based on user-input.
-  
   observe({
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 3){
       output$ui1<-renderUI({
@@ -228,7 +216,7 @@ function(input,output,session){
     }
   })
   
-  
+  # -----------------  
   #This "observe" event creates the UI element for re-analyzing data
   observe({
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 2){
@@ -282,7 +270,7 @@ function(input,output,session){
   
   
   
-  
+  # ----------------- 
   observe({
     
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 4){
@@ -330,7 +318,7 @@ function(input,output,session){
   
   
   
-  
+  # -----------------  
   # Lets the user choose the directory which the IDBac working directory will be located in 
   selectedDirectory <- reactive({
     if(is.null(input$selectedWorkingDirectory)){
@@ -339,11 +327,14 @@ function(input,output,session){
       choose.dir()
     }
   })
+
+  
+  # -----------------   
   # Shows the user which directory they chose for the IDBac working directory   
   output$selectedWorkingDirectoryText <- renderPrint(selectedDirectory())
   
   
-  
+  # -----------------   
   # Find if "IDBac" exists in selected folder and then uniquify if necessary
   uniquifiedIDBac<-reactive({
     
@@ -354,7 +345,7 @@ function(input,output,session){
     last(uniquifiedIDBacs)
   })
   
-  
+  # ----------------- 
   # Creates the IDBac Directory structure, Uniquifies the  "IDBac" folder according to what folders are present in the selected directory
   idbacuniquedir <-reactive({
     if (input$createBlankSelectedWorkingDirectoryFolders>0 ) {
@@ -371,8 +362,8 @@ function(input,output,session){
   })
   
   
+  # ----------------- 
   # Shows the user where the created, uniquified, IDBac folder was created    
-  
   observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
     
     output$whereConvert<-renderText({
@@ -383,8 +374,7 @@ function(input,output,session){
     
   })
   
-  
-  
+  # ----------------- 
   #When ReAnalyzing data, and need to select the "IDBac" folder directly
   pressedidbacDirectoryButton <- reactive({
     if(is.null(input$idbacDirectoryButton)){
@@ -394,43 +384,40 @@ function(input,output,session){
     }
   })
   
-  
+  # -----------------  
   output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
   
   
-  
+  # ----------------- 
   idbacDirectory<-reactiveValues(filePath = NULL)
   
   
   
-  
+  # -----------------   
   #Reactive events to trigger the creation of the "idbacDirectory" reactive variable
   
   observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
     idbacDirectory$filePath <- idbacuniquedir()
   })
-  
+
+  # -----------------   
   observeEvent(input$selectedWorkingDirectory,{
     idbacDirectory$filePath <- paste0(selectedDirectory(), "/",uniquifiedIDBac())
   })
-  
+ 
+  # -----------------  
   observeEvent(input$idbacDirectoryButton,{
     idbacDirectory$filePath <- pressedidbacDirectoryButton()
   })
   
   
-  
-  
-  
-  
-  
-  
-  
+  # -----------------  
   # This function revereses a provided string
   strReverse <- function(x){
     sapply(lapply(strsplit(x, NULL), rev), paste, collapse="")
   }
-  
+
+  # -----------------   
   # Reactive variable returning the user-chosen location of the raw MALDI files as string
   rawFilesLocation <- reactive({
     if (input$rawFileDirectory > 0) {
@@ -438,9 +425,9 @@ function(input,output,session){
     }
   })
   
-  
+  # ----------------- 
   # Creates text showing the user which directory they chose for raw files
-  output$rawFileDirectory <- renderText(if (is.null(rawFilesLocation())) {
+  output$rawFileDirectory <- renderText({if (is.null(rawFilesLocation())) {
     return("No Folder Selected")
   } else{
     folders <- NULL
@@ -450,16 +437,19 @@ function(input,output,session){
     }
     folders #output$rawFileDirectory == folders
     
+  }
   })
   
   
-  
+  # -----------------  
   multipleMaldiRawFileLocation <- reactive({
     if (input$multipleMaldiRawFileDirectory > 0) {
       choose.dir()
     }
   })
   
+  
+  # ----------------- 
   # Creates text showing the user which directory they chose for raw files
   output$multipleMaldiRawFileDirectory <- renderText({
     if (is.null(multipleMaldiRawFileLocation())) {
@@ -475,9 +465,9 @@ function(input,output,session){
     }
   })
   
+ 
   
-  
-  
+  # -----------------   
   # Spectra conversion
   #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
   
@@ -522,10 +512,6 @@ function(input,output,session){
     }
     
     
-    
-    
-    
-    
     fullZ<-dlply(fullZ,.(UserInput.x))
     #return fullz to the "spectraConversion" reactive variable, this is a list of samples; contents of each sample are file paths to the raw data for that samples
     #This will be used by the spectra conversion observe function/event
@@ -533,6 +519,7 @@ function(input,output,session){
   })
   
   
+  # -----------------   
   observe({
     
     if (is.null(input$run)){}else if(input$run > 0) {
@@ -552,10 +539,7 @@ function(input,output,session){
       
       #fullZ$UserInput.x = sample name
       #fullZ$UserInput.y = file locations
-      zxcv<<-fullZ
-      oooo<<-outp
-      
-      
+
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands<-lapply(fullZ,function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -592,6 +576,7 @@ function(input,output,session){
   })
   
   
+  # -----------------  
   popup1<-reactive({
     
     
@@ -606,7 +591,7 @@ function(input,output,session){
     ))
   })
   
-  
+  # -----------------   
   popup2<-reactive({
     showModal(modalDialog(
       title = "Conversion Complete",
@@ -621,21 +606,14 @@ function(input,output,session){
     ))
   })
   
-  
+  # -----------------   
   observeEvent(input$beginPeakProcessing, {
     removeModal()
   })
   
-  
-  
-  
-  
-  
-  
-  
-  
+
+  # ----------------- 
   # Spectra processing
-  
   observeEvent(input$beginPeakProcessing,{
     if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
       fileList <- list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
@@ -652,8 +630,10 @@ function(input,output,session){
     }
     
   })
-  # Spectra processing
+
   
+    # Spectra processing
+  # ----------------- 
   observeEvent(input$mbeginPeakProcessing,{
     if (is.null(input$mbeginPeakProcessing) ){}else if(input$mbeginPeakProcessing > 0) {
       fileList <-list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
@@ -671,7 +651,7 @@ function(input,output,session){
     
   })
   
-  
+  # -----------------  
   popup3<-reactive({
     showModal(modalDialog(
       title = "Important message",
@@ -687,7 +667,7 @@ function(input,output,session){
     ))
   })
   
-  
+  # -----------------  
   popup4<-reactive({
     showModal(modalDialog(
       title = "Spectra Processing is Now Complete",
@@ -696,12 +676,12 @@ function(input,output,session){
       footer = modalButton("Continue to Data Analysis by visiting consecutive tabs at the top of the page.")))
   })
   
-  
+  # ----------------- 
   spectra <- reactive({
     unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
   })
   
-  
+  # ----------------- 
   trimmedP <- reactive({
     all <-unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
     all<-binPeaks(all, tolerance =.02)
@@ -717,7 +697,7 @@ function(input,output,session){
     
   })
   
-  
+  # ----------------- 
   collapsedPeaksP <- reactive({
     labs <- sapply(trimmedP(), function(x)metaData(x)$Strain)
     labs <- factor(labs)
@@ -741,7 +721,7 @@ function(input,output,session){
     
   })
   
-  
+  # ----------------- 
   proteinMatrix <- reactive({
     temp <- NULL
     for (i in 1:length(collapsedPeaksP())) {
@@ -761,12 +741,10 @@ function(input,output,session){
     
   })
   
-  
-  
+
+  # ----------------- 
   ################################################
   #This creates the Inverse Peak Comparison plot that compares two user-selected spectra() and the calculation required for such.
-  
-  
   listOfDataframesForInversePeakComparisonPlot <- reactive({
     
     #Selects the peaks to plot based on user-input
@@ -810,10 +788,11 @@ function(input,output,session){
     
   })
   
+  # ----------------- 
   #Used in the the inverse-peak plot for zooming
   ranges2 <- reactiveValues(x = NULL, y = NULL)
   
-  
+  # -----------------  
   output$inversePeakComparisonPlot <- renderPlot({
     
     temp<- listOfDataframesForInversePeakComparisonPlot()
@@ -844,7 +823,7 @@ function(input,output,session){
     })
   })
   
-  
+  # -----------------  
   output$inversePeakComparisonPlotZoom <- renderPlot({
     
     temp<- listOfDataframesForInversePeakComparisonPlot()
@@ -863,7 +842,7 @@ function(input,output,session){
   })
   
   
-  
+  # -----------------  
   # Create peak comparison ui
   output$inversepeakui <-  renderUI({
     sidebarLayout(
@@ -894,16 +873,7 @@ function(input,output,session){
   })
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  # ----------------- 
   ################################################
   # This creates the Plotly PCA plot and the calculation required for such.
   output$pcaplot <- renderPlotly({
@@ -941,7 +911,7 @@ function(input,output,session){
   })
   #  },height=750)
   
-  
+  # -----------------   
   # Create PCA ui
   output$PCAui <-  renderUI({
     sidebarLayout	(
@@ -954,40 +924,22 @@ function(input,output,session){
     
   })
   
-  
-  
-  
-  
+ 
   ################################################
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
     
     ret<-if(req(input$distance)=="cosineD"){
       a<-as.function(get(input$distance))
-      
-      
-      
-      
       dend <- proteinMatrix() %>% a
-      
-      
       dend[which(is.na(dend))]<-1  
-      
       dend %>% hclust(method=input$clustering) %>% as.dendrogram
-      
-      
-      
     }
     else{
       dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
     }
-    
-    
-    ret
-    
-    wwww<<-ret
-    
-  })
+   dend
+ })
   
   
   #User input changes the height of the main hierarchical clustering plot
@@ -995,47 +947,40 @@ function(input,output,session){
     return(as.numeric(input$hclustHeight))
   })
   
-  
-  
-  
-  
-  
-  
+
+  # -----------------
   output$hclustui <-  renderUI({
     if(input$kORheight!="2"){return(NULL)}else{
       numericInput("height", label = h5("Cut Tree at Height"),value = .5,step=.1,min=0)}
   })
   
-  
+  # -----------------  
   output$groupui <-  renderUI({
     if(input$kORheight=="1"){
       numericInput("kClusters", label = h5("Number of Groups"),value = 1,step=1,min=1)}
   })
   
-  
-  
+  # -----------------
   sampleFactorMapColumns<-reactive({
     sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
     sampleMappings<-colnames(sampleMappings)
-    
   })
   
-  
+  # -----------------  
   output$sampleMapColumns1<-renderUI({
     selectInput("sampleFactorMapChosenIDColumn", label = h5("Select a Group Mapping"),
                 choices = as.list(sampleFactorMapColumns()))
   })
   
   
-  
+  # -----------------  
   output$sampleMapColumns2<-renderUI({
-    
     selectInput("sampleFactorMapChosenAttribute", label = h5("Select a Group Mapping"),
                 choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,sampleFactorMapColumns(),ignore.case = TRUE)]))
   })
   
   
-  
+  # -----------------  
   levs<-reactive({
     sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
     #selected column
@@ -1043,7 +988,7 @@ function(input,output,session){
     levs<-levels(sampleMappings)
   })
   
-  
+  # -----------------  
   output$sampleFactorMapColors<-renderUI({
     column(3,
            lapply(1:length(levs()),function(x){
@@ -1052,35 +997,27 @@ function(input,output,session){
     )
   })
   
-  
-  
-  ################################################
+
+  # -----------------
   #Create the hierarchical clustering plot as well as the calculations needed for such.
   output$hclustPlot <- renderPlot({
-    
-    
     if (input$kORheight =="3"){
       sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
       sampleFactors<-levels(factor(sampleMappings[[input$sampleFactorMapChosenAttribute]]))
-      
-      
-      
       sampleIDs1<-cbind.data.frame(sampleMappings[[input$sampleFactorMapChosenIDColumn]],sampleMappings[[input$sampleFactorMapChosenAttribute]])
-      
-      
-      
       #get colors chosen
       colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-      
-      
       zz<-cbind.data.frame(colorsChosen,sampleFactors)
+      
+      
+      sap<<-zz
+      
       zz$sampleFactors<-as.vector(zz$sampleFactors)
       zz$asew<-as.vector(zz$colorsChosen)
       colnames(zz)<-c("colors","chosenFactor")
       colnames(sampleIDs1)<-c(input$sampleFactorMapChosenIDColumn,"chosenFactor")
       sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
       zz$chosenFactor<- as.character(zz$chosenFactor)
-      
       matchedColors<-merge(zz,sampleIDs1)
       
       # fcol<-grep(paste0(as.character(unlist(matchedColors["ID"])),collapse="|"), labels(dendro()),ignore.case=TRUE)
@@ -1092,25 +1029,38 @@ function(input,output,session){
       dendro() %>% color_labels(labels=labels(dendro()),col=aaa) %>% plot(horiz=TRUE,lwd=8)
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
       
-      
-      #If no sample map is selected, run this:
+          #If no sample map is selected, run this:
     }else if (input$kORheight=="2"){
       par(mar=c(5,5,5,10))
       dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
       abline(v=input$height,lty=2)
       
-      
-      
     }
     else{
       par(mar=c(5,5,5,10))
-      s<<-dendro()
       dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=50)
     }
+    
+    
+
+    
   },height=plotHeight)
   
   
   
+  
+output$downloadHierarchical <- downloadHandler(
+  
+
+  filename = function() {
+    paste0(input$saveHierAs,"-", Sys.Date(), ".newick")
+  },
+  content = function(file) {
+    ape::write.tree(as.phylo(dendro()), file=file)
+  }
+  
+)
+  # -----------------  
   # Create Heir ui
   output$Heirarchicalui <-  renderUI({
     fluidPage(
@@ -1132,6 +1082,8 @@ function(input,output,session){
         uiOutput("hclustui"),
         uiOutput("groupui"),
         numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
+        textInput("saveHierAs","Save File As:"),
+        downloadButton("downloadHierarchical","Download"),
         p("To color samples according to user-defined groupings..."),
         p("To use this function, create a different excel file and list all of your sample names in 
           different rows of a single column. In other columns you may add additional characteristics 
@@ -1155,7 +1107,7 @@ function(input,output,session){
   })
   
   
-  
+  # -----------------
   output$proteinReport<-renderUI({
     p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
       and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra. 
@@ -1164,14 +1116,13 @@ function(input,output,session){
   })
   
   
-  
+  # -----------------
   smallPeaks <- reactive({
     unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SmallMoleculePeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
   })
   
   
-  
-  
+  # ----------------- 
   small_Binned_Matrix<-reactive({ 
     
     
@@ -1232,9 +1183,6 @@ function(input,output,session){
     }
     
     
-    
-    
-    
     for (i in 1:length(combinedSmallMolPeaks)){
       combinedSmallMolPeaks[[i]]@mass<-combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
       combinedSmallMolPeaks[[i]]@intensity<-combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
@@ -1247,9 +1195,8 @@ function(input,output,session){
     
   })
   
-  
-  
-  
+
+  # ----------------- 
   trimmedSM <- reactive({
     
     trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
@@ -1257,8 +1204,7 @@ function(input,output,session){
   })
   
   
-  
-  
+  # -----------------  
   subSelect<-reactive({
     
     # process for MAN creation
@@ -1318,10 +1264,7 @@ function(input,output,session){
   })
   
   
-  
-  
-  
-  ################################################
+  # -----------------
   #This creates the network plot and calculations needed for such.
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
     
@@ -1385,7 +1328,7 @@ function(input,output,session){
   })
   
   
-  ################################################
+  # -----------------
   #This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the clustering page.
   output$Clusters <- renderText({
     
@@ -1399,8 +1342,8 @@ function(input,output,session){
     }
   })
   
-  
-  ################################################
+
+  # -----------------
   ##This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the networking page.
   output$Clusters2 <- renderText({
     # Display text of how many clusters were created.
@@ -1418,8 +1361,7 @@ function(input,output,session){
   })
   
   
-  
-  
+  # -----------------
   #User input changes the height of the heirarchical clustering plot within the network analysis pane
   plotHeightHeirNetwork <- reactive({
     
@@ -1428,7 +1370,7 @@ function(input,output,session){
     
   })
   
-  
+  # -----------------
   output$netheir <- renderPlot({
     
     
@@ -1446,7 +1388,7 @@ function(input,output,session){
     
   },height=plotHeightHeirNetwork)
   
-  
+  # -----------------  
   # Create MAN ui
   output$MANui <-  renderUI({
     sidebarLayout(
@@ -1490,7 +1432,7 @@ function(input,output,session){
       ))
   })
   
-  
+  # ----------------- 
   output$manReport<-renderUI({
     
     p("This MAN was created by analyzing ",tags$code(length(subSelect())), " samples,",if(input$matrixSamplePresent==1){("subtracting a matrix blank,")}else{},
@@ -1499,7 +1441,7 @@ function(input,output,session){
     
   })  
   
-  
+  # ----------------- 
   output$proteinReport2<-renderUI({
     p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
       and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra. 
