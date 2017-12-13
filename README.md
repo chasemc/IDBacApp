@@ -1,4 +1,4 @@
-IDBac releases are is preserved at Zenodo:   
+IDBac releases are preserved at Zenodo:   
 [![DOI](https://zenodo.org/badge/105386217.svg)](https://zenodo.org/badge/latestdoi/105386217)
 
 
