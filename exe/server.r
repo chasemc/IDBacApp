@@ -1,36 +1,32 @@
 # The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the U function(input, output,session) {
 
-
-
-
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
   
   
-  
-# ----------------- 
-  functionA <- function(z,idbacDir) {
-    Install_And_Load <- function(Required_Packages)
-    {
-      Remaining_Packages <-
-        Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-      if (length(Remaining_Packages))
-      {
-        install.packages(Remaining_Packages)
-      }
-      for (package_name in Required_Packages)
-      {
-        library(package_name,
-                character.only = TRUE,
-                quietly = TRUE)
-      }
-    }
+  # ----------------- 
+  spectraProcessingFunction <- function(z,idbacDir) {
+    # Install_And_Load <- function(Required_Packages)
+    # {
+    # Remaining_Packages <-
+    # Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
+    # if (length(Remaining_Packages))
+    # {
+    # install.packages(Remaining_Packages)
+    # }
+    # for (package_name in Required_Packages)
+    # {
+    # library(package_name,
+    # character.only = TRUE,
+    # quietly = TRUE)
+    # }
+    # }
     
-    # Required packages to install and load
-    Required_Packages = c("MALDIquant", "MALDIquantForeign", "mzR", "readxl")
+    # # Required packages to install and load
+    # Required_Packages = c("MALDIquant", "MALDIquantForeign", "mzR", "readxl")
     
-        # Install and Load Packages
-    Install_And_Load(Required_Packages)
+    # # Install and Load Packages
+    # Install_And_Load(Required_Packages)
     
     strReverse <- function(x) {
       sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
@@ -90,12 +86,14 @@ function(input,output,session){
     }
   }
   
-# ----------------- 
+  
+  # ----------------- 
   #Cosine Distance Matrix Function
   cosineD <- function(x) {
     as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
   }
-
+  
+  
   # -----------------   
   # This function revereses a provided string
   strReverse <- function(x) {
@@ -103,14 +101,9 @@ function(input,output,session){
   }
   
   
-  
-  output$value <- renderPrint({ input$radio })
-  
-  
   # ----------------- 
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   observe({
-    
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 1){
       output$ui1<-renderUI({
         fluidRow(
@@ -272,7 +265,6 @@ function(input,output,session){
   
   # ----------------- 
   observe({
-    
     if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 4){
       output$ui1<-renderUI({
         fluidRow(
@@ -303,19 +295,12 @@ function(input,output,session){
                         p(verbatimTextOutput("whereConvert")),
                         p(strong("4:"), "Select \"Process mzXML\" to process mzXML files for analysis"),
                         actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
-                        
                  )
           )
         )
       })
     }
   })
-  
-  
-  
-  
-  
-  
   
   
   # -----------------  
@@ -327,7 +312,7 @@ function(input,output,session){
       choose.dir()
     }
   })
-
+  
   
   # -----------------   
   # Shows the user which directory they chose for the IDBac working directory   
@@ -337,8 +322,6 @@ function(input,output,session){
   # -----------------   
   # Find if "IDBac" exists in selected folder and then uniquify if necessary
   uniquifiedIDBac<-reactive({
-    
-    
     req(selectedDirectory())
     uniquifiedIDBacs<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
     uniquifiedIDBacs<-make.unique(c(uniquifiedIDBacs,"IDBac"),sep="-")
@@ -348,31 +331,25 @@ function(input,output,session){
   # ----------------- 
   # Creates the IDBac Directory structure, Uniquifies the  "IDBac" folder according to what folders are present in the selected directory
   idbacuniquedir <-reactive({
-    if (input$createBlankSelectedWorkingDirectoryFolders>0 ) {
-      
+    if (input$createBlankSelectedWorkingDirectoryFolders > 0 ) {
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzML"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Sample_Spreadsheet_Map"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Peak_Lists"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Saved_MANs"))
-      
       return(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
     }
-    
   })
   
   
   # ----------------- 
   # Shows the user where the created, uniquified, IDBac folder was created    
   observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
-    
     output$whereConvert<-renderText({
-      
       paste0(idbacuniquedir(),"\\Converted_To_mzXML")
-      
     })
-    
   })
+  
   
   # ----------------- 
   #When ReAnalyzing data, and need to select the "IDBac" folder directly
@@ -384,6 +361,7 @@ function(input,output,session){
     }
   })
   
+  
   # -----------------  
   output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
   
@@ -392,19 +370,19 @@ function(input,output,session){
   idbacDirectory<-reactiveValues(filePath = NULL)
   
   
-  
   # -----------------   
   #Reactive events to trigger the creation of the "idbacDirectory" reactive variable
-  
   observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
     idbacDirectory$filePath <- idbacuniquedir()
   })
-
+  
+  
   # -----------------   
   observeEvent(input$selectedWorkingDirectory,{
     idbacDirectory$filePath <- paste0(selectedDirectory(), "/",uniquifiedIDBac())
   })
- 
+  
+  
   # -----------------  
   observeEvent(input$idbacDirectoryButton,{
     idbacDirectory$filePath <- pressedidbacDirectoryButton()
@@ -416,7 +394,8 @@ function(input,output,session){
   strReverse <- function(x){
     sapply(lapply(strsplit(x, NULL), rev), paste, collapse="")
   }
-
+  
+  
   # -----------------   
   # Reactive variable returning the user-chosen location of the raw MALDI files as string
   rawFilesLocation <- reactive({
@@ -424,6 +403,7 @@ function(input,output,session){
       choose.dir()
     }
   })
+  
   
   # ----------------- 
   # Creates text showing the user which directory they chose for raw files
@@ -436,7 +416,6 @@ function(input,output,session){
       folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
     }
     folders #output$rawFileDirectory == folders
-    
   }
   })
   
@@ -465,12 +444,11 @@ function(input,output,session){
     }
   })
   
- 
+  
   
   # -----------------   
   # Spectra conversion
   #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
-  
   spectraConversion<-reactive({
     if(input$rawORreanalyze == 1){
       #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
@@ -488,13 +466,11 @@ function(input,output,session){
       fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
       fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
     }else if(input$rawORreanalyze == 3){
-      
-      #When analyzing more han one MALDI plate this handles fiding the raw data directories and the excel map
+      #When analyzing more han one MALDI plate this handles finding the raw data directories and the excel map
       mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
       lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
       collectfullZ<-NULL
       #For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
-      
       for (i in 1:length(lapped)){
         excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
         excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
@@ -539,7 +515,7 @@ function(input,output,session){
       
       #fullZ$UserInput.x = sample name
       #fullZ$UserInput.y = file locations
-
+      
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands<-lapply(fullZ,function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -611,7 +587,7 @@ function(input,output,session){
     removeModal()
   })
   
-
+  
   # ----------------- 
   # Spectra processing
   observeEvent(input$beginPeakProcessing,{
@@ -621,18 +597,18 @@ function(input,output,session){
       
       #   numCores <- detectCores()
       #   cl <- makeCluster(numCores)
-      #   parSapply(cl,fileList,functionA)
+      #   parSapply(cl,fileList,spectraProcessingFunction)
       #   stopCluster(cl)
       
       #Single process with sapply instead of parsapply
-      sapply(fileList,function(x)functionA(x,idbacDirectory$filePath))
+      sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
       popup4()
     }
     
   })
-
   
-    # Spectra processing
+  
+  # Spectra processing
   # ----------------- 
   observeEvent(input$mbeginPeakProcessing,{
     if (is.null(input$mbeginPeakProcessing) ){}else if(input$mbeginPeakProcessing > 0) {
@@ -641,11 +617,11 @@ function(input,output,session){
       
       #      numCores <- detectCores()
       #     cl <- makeCluster(numCores)
-      #    parSapply(cl,fileList,function(x)functionA(x,idbacDirectory$filePath))
+      #    parSapply(cl,fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
       #   stopCluster(cl)
       
       #Single process with sapply instead of parsapply
-      sapply(fileList,function(x)functionA(x,idbacDirectory$filePath))
+      sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
       popup4()
     }
     
@@ -741,7 +717,7 @@ function(input,output,session){
     
   })
   
-
+  
   # ----------------- 
   ################################################
   #This creates the Inverse Peak Comparison plot that compares two user-selected spectra() and the calculation required for such.
@@ -914,7 +890,7 @@ function(input,output,session){
   # -----------------   
   # Create PCA ui
   output$PCAui <-  renderUI({
-    sidebarLayout	(
+    sidebarLayout    (
       sidebarPanel(
         radioButtons("PCA3d", label = h4("PCA 3D Plot"),
                      choices = list("Show" = 1, "Don't Show" = 2),selected = 2)
@@ -924,7 +900,7 @@ function(input,output,session){
     
   })
   
- 
+  
   ################################################
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
@@ -938,8 +914,8 @@ function(input,output,session){
     else{
       dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
     }
-   dend
- })
+    dend
+  })
   
   
   #User input changes the height of the main hierarchical clustering plot
@@ -947,7 +923,7 @@ function(input,output,session){
     return(as.numeric(input$hclustHeight))
   })
   
-
+  
   # -----------------
   output$hclustui <-  renderUI({
     if(input$kORheight!="2"){return(NULL)}else{
@@ -997,7 +973,7 @@ function(input,output,session){
     )
   })
   
-
+  
   # -----------------
   #Create the hierarchical clustering plot as well as the calculations needed for such.
   output$hclustPlot <- renderPlot({
@@ -1005,31 +981,54 @@ function(input,output,session){
       sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
       sampleFactors<-levels(factor(sampleMappings[[input$sampleFactorMapChosenAttribute]]))
       sampleIDs1<-cbind.data.frame(sampleMappings[[input$sampleFactorMapChosenIDColumn]],sampleMappings[[input$sampleFactorMapChosenAttribute]])
+      
+      
       #get colors chosen
       colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
       zz<-cbind.data.frame(colorsChosen,sampleFactors)
       
       
-      sap<<-zz
-      
       zz$sampleFactors<-as.vector(zz$sampleFactors)
-      zz$asew<-as.vector(zz$colorsChosen)
       colnames(zz)<-c("colors","chosenFactor")
-      colnames(sampleIDs1)<-c(input$sampleFactorMapChosenIDColumn,"chosenFactor")
+      colnames(sampleIDs1)<-c("sampleFactorID","chosenFactor")
+      #Ensure string
       sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
+      #Ensure string
       zz$chosenFactor<- as.character(zz$chosenFactor)
+      
       matchedColors<-merge(zz,sampleIDs1)
       
-      # fcol<-grep(paste0(as.character(unlist(matchedColors["ID"])),collapse="|"), labels(dendro()),ignore.case=TRUE)
-      fcol<-match(as.character(unlist(matchedColors[input$sampleFactorMapChosenIDColumn])),labels(dendro()))
-      fcol2<-c(as.character(unlist(matchedColors["colors"])))
-      aaa<-rep("#000000",length(labels(dendro())))
-      aaa[fcol]<-fcol2
       
-      dendro() %>% color_labels(labels=labels(dendro()),col=aaa) %>% plot(horiz=TRUE,lwd=8)
+      
+      # fcol<-grep(paste0(as.character(unlist(matchedColors["ID"])),collapse="|"), labels(dendro()),ignore.case=TRUE)
+      
+      matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
+      matchedColors<-as_tibble(matchedColors)
+      
+      
+      #ba<-as_tibble(as.character(labels(dendro())))
+      
+      ba<-as_tibble(sapply(labels(dendro()),function(x)strsplit(x,"-")[[1]][[1]]))
+      
+      
+      
+      
+      
+      
+      
+      colnames(ba)<-"sampleFactorID"
+      fcol<- right_join(matchedColors,ba,by="sampleFactorID")
+      
+      
+      
+      fcol$colors<-as.character(fcol$colors)
+      fcol$colors[is.na(fcol$colors)]<-"#000000"
+      
+      
+      dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) %>% plot(horiz=TRUE,lwd=8)
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
       
-          #If no sample map is selected, run this:
+      #If no sample map is selected, run this:
     }else if (input$kORheight=="2"){
       par(mar=c(5,5,5,10))
       dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
@@ -1042,24 +1041,24 @@ function(input,output,session){
     }
     
     
-
+    
     
   },height=plotHeight)
   
   
   
   
-output$downloadHierarchical <- downloadHandler(
-  
-
-  filename = function() {
-    paste0(input$saveHierAs,"-", Sys.Date(), ".newick")
-  },
-  content = function(file) {
-    ape::write.tree(as.phylo(dendro()), file=file)
-  }
-  
-)
+  output$downloadHierarchical <- downloadHandler(
+    
+    
+    filename = function() {
+      paste0(input$saveHierAs,"-", Sys.Date(), ".newick")
+    },
+    content = function(file) {
+      ape::write.tree(as.phylo(dendro()), file=file)
+    }
+    
+  )
   # -----------------  
   # Create Heir ui
   output$Heirarchicalui <-  renderUI({
@@ -1100,8 +1099,8 @@ output$downloadHierarchical <- downloadHandler(
         h4("Suggestions for Reporting Protein Analysis:"),
         uiOutput("proteinReport") 
         
-        ),	
-      mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))		
+        ),    
+      mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))        
       
       )
   })
@@ -1142,7 +1141,12 @@ output$downloadHierarchical <- downloadHandler(
         location_of_Heirarchical_Leaves<-get_nodes_xy(dendro())
         minLoc<-input$plot_brush$ymin
         maxLoc<-input$plot_brush$ymax
+        
+        
+        
         threeColTable<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
+        
+        #note: because rotated tree, x is actually y, y is actually x
         #column 1= y-values of dendrogram leaves
         #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
         #column 3= leaf labels
@@ -1150,7 +1154,7 @@ output$downloadHierarchical <- downloadHandler(
         brushed<-as.vector(threeColTable[,3][w])
         labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
         
-        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(brushed,"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
+        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(paste0("^",brushed,"$"),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
       }
       #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
       #find matrix spectra
@@ -1195,7 +1199,7 @@ output$downloadHierarchical <- downloadHandler(
     
   })
   
-
+  
   # ----------------- 
   trimmedSM <- reactive({
     
@@ -1208,7 +1212,6 @@ output$downloadHierarchical <- downloadHandler(
   subSelect<-reactive({
     
     # process for MAN creation
-    
     labs <- sapply(trimmedSM(), function(x)metaData(x)$Strain)
     labs <- factor(labs)
     new2 <- NULL
@@ -1342,7 +1345,7 @@ output$downloadHierarchical <- downloadHandler(
     }
   })
   
-
+  
   # -----------------
   ##This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the networking page.
   output$Clusters2 <- renderText({
@@ -1453,10 +1456,10 @@ output$downloadHierarchical <- downloadHandler(
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
   
-#  session$onSessionEnded(function() {
- #   stopApp()
-#    q("no")
-#  })
+  #  session$onSessionEnded(function() {
+  #   stopApp()
+  #    q("no")
+  #  })
   
   
 }
