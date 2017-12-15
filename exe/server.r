@@ -852,27 +852,33 @@ function(input,output,session){
   # ----------------- 
   ################################################
   # This creates the Plotly PCA plot and the calculation required for such.
+  
+  
+  #PCA Calculation
+  
+  pcaCalculation <- reactive({
+    
+   c<- PCA(proteinMatrix(),graph=FALSE)
+  a <- c$ind$coord
+  a <- as.data.frame(a)
+  nam <- rownames(a)
+  a <- cbind(a,nam)
+  if(input$kORheight=="2"){
+    d <- cutree(dendro(),h=input$height)
+  }else{
+    d <- cutree(dendro(),k=input$kClusters)
+  }
+  
+   as.data.frame(cbind(a,d))
+  
+  
+  })
+  
   output$pcaplot <- renderPlotly({
-    c <- PCA(proteinMatrix(),graph=FALSE)
-    a <- c$ind$coord
-    a <- as.data.frame(a)
-    nam <- rownames(a)
-    a <- cbind(a,nam)
-    if(input$kORheight=="2"){
-      d <- cutree(dendro(),h=input$height)
-    }else{
-      d <- cutree(dendro(),k=input$kClusters)
-    }
     
-    e <- as.data.frame(cbind(a,d))
-    
-    if(input$PCA3d==1){
-      plot3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,xlab="", ylab="", zlab="")
-      text3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,text=e$nam,col=factor(d))}
-    
-    
-    
-    p<-ggplot(e,aes(Dim.1,Dim.2,label=nam,col=factor(d)))+
+    e<-pcaCalculation()
+
+    p<-ggplot(e,aes(Dim.1,Dim.2,label=nam,col=factor(e$d)))+
       geom_text()+
       xlab("Dimension 1")+
       ylab("Dimension 2")+
@@ -881,22 +887,33 @@ function(input,output,session){
     
     ggplotly(p)
     
-    
-    
-    
   })
-  #  },height=750)
+  
+  
+  output$pcaplot3d <- renderRglwidget({
+    
+e<-pcaCalculation()
+  
+  options(rgl.useNULL=TRUE)
+    plot3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,xlab="", ylab="", zlab="")
+    text3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,text=e$nam,col=factor(e$d))
+    rglwidget()
+    
+})
+  
+  
   
   # -----------------   
   # Create PCA ui
   output$PCAui <-  renderUI({
-    sidebarLayout    (
-      sidebarPanel(
-        radioButtons("PCA3d", label = h4("PCA 3D Plot"),
-                     choices = list("Show" = 1, "Don't Show" = 2),selected = 2)
-      ),
-      mainPanel(plotlyOutput("pcaplot"))
-    )
+    
+      mainPanel(
+        
+        fluidRow( plotlyOutput("pcaplot")),
+                br(),
+          fluidRow(      rglwidgetOutput("pcaplot3d"))
+                )
+    
     
   })
   
