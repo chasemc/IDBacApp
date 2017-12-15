@@ -38,33 +38,62 @@ navbarPage(
     fluidPage(
       fluidRow(
         column(3,
-               p("To begin, select \"PreProcessing\" above:"),
-               
+               br(),
                div(img(src="IDBac_Computer_SVG_300DPI.png",style="width:75%;height:75%"))),
         column(8,
-               h3("Welcome to the IDBac application."),
+               h1("Welcome to IDBac",align="center"),
                br(),
                h4("General Information:"),
-              tags$ul( 
-               tags$li(p("For more information about the method, as well as links to the full code, please visit ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "chasemc.github.io/IDBac"))),
-               tags$li(p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25"))))),
-            
-              br(),
-              h4("How to Cite IDBac:"),
               
-               p("If you use IDBac in your work please cite:") ,
-               p(strong("Reference"),
-                 p("Also cite this version of IDBac using the DOI:",tags$b("10.5281/zenodo.1115619")),
-                 p("Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function
-                   Chase M. Clark, Maria S. Costa, Laura M. Sanchez, Brian T. Murphy
-                   bioRxiv 215350; doi: https://doi.org/10.1101/215350"),
-                 p("For past versions of IDBac can be found here:",a(href="https://doi.org/10.5281/zenodo.1115620",img(src="https://zenodo.org/badge/DOI/10.5281/zenodo.1115620.svg"),target="_blank") ),  
-                 a(href="https://doi.org/10.5281/zenodo.1115620",img(src="https://zenodo.org/badge/DOI/10.5281/zenodo.1115620.svg"),target="_blank")
+               tags$ul( 
+                  tags$li(
+                     p("For more information about the method, as well as links to the full code, please visit ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "chasemc.github.io/IDBac"))
+                  ),
+                  tags$li(
+                     p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
+                  )
+                 ),
+              
+              br(),
+              h4("How to Cite the IDBac:"),
+              
+              tags$ul(
+                 tags$li(
+                    p("Publication:")
+                 ),
+                 tags$ul( 
+                    tags$li(
+                       p(tags$i("Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function"),br(),
+                       "Chase M. Clark, Maria S. Costa, Laura M. Sanchez, Brian T. Murphy;
+                          bioRxiv 215350; doi: https://doi.org/10.1101/215350")
+                    )
+                 )
+               ),
+              tags$ul(
+                tags$li(
+                  p("Software:")
+                ),
+                tags$ul( 
+                  tags$li(
+                    p("For reproducibility, cite this version of IDBac with the version DOI: \"10.5281/zenodo.1115619\"")
+                    ),
+                  tags$li(
+                    p("Past versions of IDBac can be found here:",a(href="https://doi.org/10.5281/zenodo.1115620",img(src="https://zenodo.org/badge/DOI/10.5281/zenodo.1115620.svg"),target="_blank") )
+                  )
+                )
+              ),
+              
+              br(),
+              
+              h4("To begin, select \"PreProcessing\" above")
+              
+              
+                
+
                  
+               
                  
-                 
-                 
-  ))))),
+  )))),
   
   
   
@@ -73,7 +102,6 @@ navbarPage(
     fluidPage(
        
 
-        column(1),
         column(4,
 
                  
@@ -90,7 +118,6 @@ navbarPage(
 
 
 
-  tags$hr(),
 
 
   tabPanel("Compare Two Samples (Protein)",
