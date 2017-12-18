@@ -926,7 +926,7 @@ e<-pcaCalculation()
       a<-as.function(get(input$distance))
       dend <- proteinMatrix() %>% a
       dend[which(is.na(dend))]<-1  
-      dend %>% hclust(method=input$clustering) %>% as.dendrogram
+     dend<- dend %>% hclust(method=input$clustering) %>% as.dendrogram
     }
     else{
       dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
