@@ -32,6 +32,8 @@ function(input,output,session){
       sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
     }
     
+    
+    
     if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
       spectraImport <- sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
       spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
@@ -68,7 +70,6 @@ function(input,output,session){
       proteinSpectra <- removeBaseline(proteinSpectra, method = "TopHat")
       proteinSpectra <- detectPeaks(proteinSpectra, method = "MAD", halfWindowSize = 20, SNR = 4)
       saveRDS(proteinSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "ProteinPeaks.rds"))
-    }
     
     if(length(smallSpectra) > 0){
       ############
@@ -85,13 +86,8 @@ function(input,output,session){
       
     }
   }
+  }  
   
-  
-  # ----------------- 
-  #Cosine Distance Matrix Function
-  cosineD <- function(x) {
-    as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
-  }
   
   
   # -----------------   
@@ -230,7 +226,7 @@ function(input,output,session){
                                p("This will be the folder, originally named \"IDBac\", that was created when you analyzed data the first time."),
                                p("It contains the folders:"),
                                tags$ul(
-                                 tags$li("Converted_To_mzML"),
+                                 tags$li("Converted_To_mzXML"),
                                  tags$li("Peak_Lists"),
                                  tags$li("Saved_MANs")
                                ),
@@ -333,7 +329,7 @@ function(input,output,session){
   idbacuniquedir <-reactive({
     if (input$createBlankSelectedWorkingDirectoryFolders > 0 ) {
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
-      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzML"))
+      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Sample_Spreadsheet_Map"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Peak_Lists"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Saved_MANs"))
@@ -448,7 +444,7 @@ function(input,output,session){
   
   # -----------------   
   # Spectra conversion
-  #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
+  #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzXML
   spectraConversion<-reactive({
     if(input$rawORreanalyze == 1){
       #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
@@ -502,7 +498,7 @@ function(input,output,session){
       
       
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac()))
-      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"))
+      dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Sample_Spreadsheet_Map"))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Peak_Lists"))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Saved_MANs"))
@@ -510,7 +506,7 @@ function(input,output,session){
       fullZ<-spectraConversion()
       
       
-      outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzML"))
+      outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
       
       
       #fullZ$UserInput.x = sample name
@@ -562,7 +558,7 @@ function(input,output,session){
       "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
       "This also means your computer might be slow during these file conversions.",br(),
       "To check what has been converted, you can navigate to:",
-      paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"),
+      paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"),
       easyClose = FALSE, size="l",footer=""
     ))
   })
@@ -572,11 +568,11 @@ function(input,output,session){
     showModal(modalDialog(
       title = "Conversion Complete",
       
-      paste0(nrow(ldply(spectraConversion()))," files were converted into ",length(list.files(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"))),
+      paste0(nrow(ldply(spectraConversion()))," files were converted into ",length(list.files(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"))),
              " open data format files."),br(),
       "To check what has been converted you can navigate to:",
       
-      paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzML"),
+      paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"),
       easyClose = TRUE,
       footer = tagList(actionButton("beginPeakProcessing","Click to continue with Peak Processing"), modalButton("Close"))
     ))
@@ -592,7 +588,7 @@ function(input,output,session){
   # Spectra processing
   observeEvent(input$beginPeakProcessing,{
     if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
-      fileList <- list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
+      fileList <- list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
       
       #   numCores <- detectCores()
@@ -612,7 +608,7 @@ function(input,output,session){
   # ----------------- 
   observeEvent(input$mbeginPeakProcessing,{
     if (is.null(input$mbeginPeakProcessing) ){}else if(input$mbeginPeakProcessing > 0) {
-      fileList <-list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzML")),pattern = ".mzXML", full.names = TRUE)
+      fileList <-list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
       
       #      numCores <- detectCores()
@@ -699,6 +695,7 @@ function(input,output,session){
   
   # ----------------- 
   proteinMatrix <- reactive({
+    
     temp <- NULL
     for (i in 1:length(collapsedPeaksP())) {
       temp <- c(temp, collapsedPeaksP()[[i]]@metaData$Strain)
@@ -715,7 +712,7 @@ function(input,output,session){
       proteinMatrixInnard
     }
     
-  })
+    })
   
   
   # ----------------- 
@@ -918,21 +915,62 @@ e<-pcaCalculation()
   })
   
   
-  ################################################
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
     
-    ret<-if(req(input$distance)=="cosineD"){
-      a<-as.function(get(input$distance))
-      dend <- proteinMatrix() %>% a
-      dend[which(is.na(dend))]<-1  
-     dend<- dend %>% hclust(method=input$clustering) %>% as.dendrogram
-    }
+    if (input$booled == "1") {
+    booled<-"_UsedIntenstites"
+      }
     else{
-      dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
+      booled<-"_UsedPresenceAbsence"
     }
+
+    
+    
+    cacheDir<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\")
+    cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
+                      "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
+    
+    # Create the cache directory if it doesn't exist
+    if(!dir.exists(cacheDir)){
+      dir.create(cacheDir)
+    }
+    
+   ret<- if(req(input$distance)=="cosineD"){
+      
+      if(!file.exists(cacheFile)){
+        
+        #Cosine Distance Matrix Function
+        cosineD <- function(x) {
+          as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
+        }
+        # Perform cosine similarity function
+        dend <- proteinMatrix() %>% cosineD
+        # Convert NA to 1
+        dend[which(is.na(dend))]<-1  
+        # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
+        dend<- dend %>% hclust(method=input$clustering) %>% as.dendrogram
+        # Cache results (insignificant for small trees, helpful for larger trees)
+        saveRDS(dend,cacheFile)
+        
+      }else{
+        dend<-  readRDS(cacheFile)
+      }
+    }else{
+      if(!file.exists(cacheFile)){
+        dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
+        saveRDS(dend,cacheFile)
+      }else{
+        dend<-  readRDS(cacheFile)
+      }
+    }
+   
     dend
+    
+    
+    
   })
+  
   
   
   #User input changes the height of the main hierarchical clustering plot
@@ -955,9 +993,11 @@ e<-pcaCalculation()
   
   # -----------------
   sampleFactorMapColumns<-reactive({
-    sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-    sampleMappings<-colnames(sampleMappings)
-  })
+    sampleMappings<-variable.names(read_excel(input$sampleMap$datapath,sheet=1,range=cell_rows(1)))
+
+    })
+  
+  
   
   # -----------------  
   output$sampleMapColumns1<-renderUI({
@@ -968,6 +1008,10 @@ e<-pcaCalculation()
   
   # -----------------  
   output$sampleMapColumns2<-renderUI({
+    
+    az<<-sampleFactorMapColumns()
+    bz<<-input$sampleFactorMapChosenIDColumn
+    
     selectInput("sampleFactorMapChosenAttribute", label = h5("Select a Group Mapping"),
                 choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,sampleFactorMapColumns(),ignore.case = TRUE)]))
   })
@@ -975,14 +1019,25 @@ e<-pcaCalculation()
   
   # -----------------  
   levs<-reactive({
-    sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+    
+    w<<-input$sampleMap$datapath
+    ww<<-input$sampleMap
+    
+    sampleMappings<-read_excel(input$sampleMap$datapath,1)
+    azz<<-sampleMappings
+    
     #selected column
-    sampleMappings<-factor(sampleMappings[[input$sampleFactorMapChosenAttribute]])
-    levs<-levels(sampleMappings)
+    
+    sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
+
+        
   })
   
   # -----------------  
   output$sampleFactorMapColors<-renderUI({
+    
+     
+    
     column(3,
            lapply(1:length(levs()),function(x){
              do.call(colourInput,list(paste0("factor-",x,"_",levs()[[x]]),levs()[[x]],value="blue"))
@@ -995,15 +1050,17 @@ e<-pcaCalculation()
   #Create the hierarchical clustering plot as well as the calculations needed for such.
   output$hclustPlot <- renderPlot({
     if (input$kORheight =="3"){
+      
       sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-      sampleFactors<-levels(factor(sampleMappings[[input$sampleFactorMapChosenAttribute]]))
+      
+      sampleFactors<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
+      
       sampleIDs1<-cbind.data.frame(sampleMappings[[input$sampleFactorMapChosenIDColumn]],sampleMappings[[input$sampleFactorMapChosenAttribute]])
       
       
       #get colors chosen
       colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
       zz<-cbind.data.frame(colorsChosen,sampleFactors)
-      
       
       zz$sampleFactors<-as.vector(zz$sampleFactors)
       colnames(zz)<-c("colors","chosenFactor")
@@ -1013,22 +1070,31 @@ e<-pcaCalculation()
       #Ensure string
       zz$chosenFactor<- as.character(zz$chosenFactor)
       
+      
+      sampleIDs1$chosenFactor<-gsub(" ","_",sampleIDs1$chosenFactor)
+      
+      
+      
+      #Contains variables "chosenFactor", "colors", and "sampleFactorID"    (factor to color, colors chosen, sample ID)
       matchedColors<-merge(zz,sampleIDs1)
       
       
+      z1<<-matchedColors
+      z2<<-dendro()
       
-      # fcol<-grep(paste0(as.character(unlist(matchedColors["ID"])),collapse="|"), labels(dendro()),ignore.case=TRUE)
-      
+
       matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
-      matchedColors<-as_tibble(matchedColors)
+#      matchedColors<-as_tibble(matchedColors)
       
-      
+      z3<<-matchedColors
       #ba<-as_tibble(as.character(labels(dendro())))
       
-      ba<-as_tibble(sapply(labels(dendro()),function(x)strsplit(x,"-")[[1]][[1]]))
+      ba<-as_tibble(labels(z2))
+        
+       # as_tibble(sapply(labels(dendro()),function(x)strsplit(x,"-")[[1]][[1]]))
       
       
-      
+      z4<<-ba
       
       
       
@@ -1228,14 +1294,18 @@ e<-pcaCalculation()
   # -----------------  
   subSelect<-reactive({
     
+    tr<<-trimmedSM()
     # process for MAN creation
+    
+    #Get sample IDs from MALDIquant spectra
     labs <- sapply(trimmedSM(), function(x)metaData(x)$Strain)
     labs <- factor(labs)
     new2 <- NULL
     newPeaks <- NULL
     
+    #Merge specctra based on frequency of presence.  For peaks above threshold, keep the mean intensity
     for (i in seq_along(levels(labs))) {
-      specSubset <- (which(labs == levels(labs)[[i]]))
+      specSubset <- which(labs == levels(labs)[[i]])
       if (length(specSubset) > 1) {
         new <- filterPeaks(trimmedSM()[specSubset],minFrequency=input$percentPresenceSM/100)
         new<-mergeMassPeaks(new,method="mean")
@@ -1249,25 +1319,29 @@ e<-pcaCalculation()
     combinedSmallMolPeaks <- new2
     
     
-    
+    #This section deals with whether to remove a matrix blank or not, as decided by user, defaults to remove blank
     if(input$matrixSamplePresent ==1){    
       
       #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
       
-      ############
+      #----------------------------------------------------------------------------
       #Find the matrix sample index
+      #First, get all sample IDs
       labs <- sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain)
+      #Next, find which ID contains "matrix", in any capitalization
       matrixIndex <- grep(paste0("Matrix",collapse="|"),labs,ignore.case=TRUE)
-      ############
-      #peaksa = samples
-      #peaksb = matrix blank
+      
+      #----------------------------------------------------------------------------
+      #peaksa = all samples but remove the matrix sample from the list
       peaksa <- combinedSmallMolPeaks[-matrixIndex]
+      #peaksb = matrix blank sample
       peaksb <- combinedSmallMolPeaks[[matrixIndex]]
       
-      
-      
+      aa<<-peaksa
+      bb<<-peaksb
       for (i in 1:length(peaksa)){
         
+        # setdiff to find which peaks are 
         commonIons <- which(!peaksa[[i]]@mass %in% setdiff(peaksa[[i]]@mass,peaksb@mass))
         if(length(commonIons)!=0){   # Without this if statement, peaksa values will be set to 0 if no matrix matches are found == BAD 
           peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
@@ -1329,7 +1403,7 @@ e<-pcaCalculation()
     
     
     
-    
+
     a <- as.undirected(graph_from_data_frame(bool))
     
     a<-simplify(a)
