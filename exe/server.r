@@ -1040,7 +1040,7 @@ e<-pcaCalculation()
     
     column(3,
            lapply(1:length(levs()),function(x){
-             do.call(colourInput,list(paste0("factor-",x,"_",levs()[[x]]),levs()[[x]],value="blue"))
+             do.call(colourInput,list(paste0("factor-",x,"_",levs()[[x]]),levs()[[x]],value="blue",allowTransparent=T))
            })
     )
   })
@@ -1052,19 +1052,25 @@ e<-pcaCalculation()
     if (input$kORheight =="3"){
       
       sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-      
+      sampleMappings<<-sampleMappings
       sampleFactors<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
+     
+       sampleFactors<<-sampleFactors
       
-      sampleIDs1<-cbind.data.frame(sampleMappings[[input$sampleFactorMapChosenIDColumn]],sampleMappings[[input$sampleFactorMapChosenAttribute]])
-      
+       sampleIDs1<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+      sampleIDs1<<-sampleIDs1
       
       #get colors chosen
       colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-      zz<-cbind.data.frame(colorsChosen,sampleFactors)
+      colorsChosen<<-colorsChosen
       
-      zz$sampleFactors<-as.vector(zz$sampleFactors)
-      colnames(zz)<-c("colors","chosenFactor")
-      colnames(sampleIDs1)<-c("sampleFactorID","chosenFactor")
+      zz<-bind_cols(colors=colorsChosen,chosenFactor=sampleFactors)
+      
+      
+
+      
+      
+      
       #Ensure string
       sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
       #Ensure string
@@ -1076,7 +1082,7 @@ e<-pcaCalculation()
       
       
       #Contains variables "chosenFactor", "colors", and "sampleFactorID"    (factor to color, colors chosen, sample ID)
-      matchedColors<-merge(zz,sampleIDs1)
+      matchedColors<-left_join(zz,sampleIDs1)
       
       
       z1<<-matchedColors
@@ -1225,8 +1231,7 @@ e<-pcaCalculation()
         minLoc<-input$plot_brush$ymin
         maxLoc<-input$plot_brush$ymax
         
-        
-        
+
         threeColTable<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
         
         #note: because rotated tree, x is actually y, y is actually x
@@ -1294,7 +1299,6 @@ e<-pcaCalculation()
   # -----------------  
   subSelect<-reactive({
     
-    tr<<-trimmedSM()
     # process for MAN creation
     
     #Get sample IDs from MALDIquant spectra
@@ -1337,8 +1341,6 @@ e<-pcaCalculation()
       #peaksb = matrix blank sample
       peaksb <- combinedSmallMolPeaks[[matrixIndex]]
       
-      aa<<-peaksa
-      bb<<-peaksb
       for (i in 1:length(peaksa)){
         
         # setdiff to find which peaks are 
