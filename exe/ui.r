@@ -1,3 +1,12 @@
+
+if(!length(grep("mzR",row.names(installed.packages())))){
+  
+  
+  source("https://bioconductor.org/biocLite.R")
+  biocLite("mzR",ask=F)
+}
+
+
 # Function to Install and Load R Packages
 Install_And_Load <- function(Required_Packages)
 {
