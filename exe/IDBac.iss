@@ -1,5 +1,5 @@
             #define MyAppName "IDBac"
-#define MyAppVersion "0.0.5"
+#define MyAppVersion "0.0.9"
 #define MyAppExeName "IDBac.bat"
 #define RVersion "3.4.2"
 #define IncludeR true
@@ -11,13 +11,13 @@
 
 [Setup]
 AppName = {#MyAppName}
-AppId = {{1V23PMEL-X2OP-Q371-68K7-C2MYGJS37N91}
+AppId = {{O14UW9ER-OO0X-Y7DW-AHDE-TFIP9VFI2F0O}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
 OutputBaseFilename = setup_{#MyAppName}
 SetupIconFile = SmallSetupIcon3.ico
-AppVersion = 0.0.5
+AppVersion = 0.0.9
 AppPublisher = {#MyAppPublisher}
 AppPublisherURL = {#MyAppURL}
 AppSupportURL = {#MyAppURL}
@@ -56,7 +56,6 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
           Source: "DESCRIPTION"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "gpl.txt"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "IDBac.bat"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "IDBacApp.bat"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "NAMESPACE"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "server.r"; DestDir: "{app}"; Flags: ignoreversion;
@@ -148,6 +147,7 @@ Source: "pwiz/MIDAC.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/mkl_sequential.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSConvertGUI.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSConvertGUI.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
+Source: "pwiz/msconvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSFileReader.XRawfile2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSFileReader.XRawfile2.SxS.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSGraph.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
@@ -160,7 +160,6 @@ Source: "pwiz/OFX.Security.Core.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversio
 Source: "pwiz/protobuf-net.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/pwiz.CommonUtil.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/pwiz_bindings_cli.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/README.md"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/Sciex.Clearcore.FMan.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/Sciex.Data.Processing.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/Sciex.Data.SimpleTypes.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;

@@ -1,6 +1,9 @@
 
 if(!length(grep("mzR",row.names(installed.packages())))){
-  
+  if(!length(grep("BiocInstaller",row.names(installed.packages())))){
+    source("https://bioconductor.org/biocLite.R")
+    biocLite("BiocInstaller",suppressUpdates = T)
+    }
   
   source("https://bioconductor.org/biocLite.R")
   biocLite("mzR",ask=F)
@@ -64,7 +67,7 @@ navbarPage(
                  ),
               
               br(),
-              h4("How to Cite the IDBac:"),
+              h4("How to Cite IDBac:"),
               
               tags$ul(
                  tags$li(
@@ -84,17 +87,17 @@ navbarPage(
                 ),
                 tags$ul( 
                   tags$li(
-                    p("For reproducibility, cite this version of IDBac with the version DOI: \"10.5281/zenodo.1115619\"")
+                    p("For reproducibility, cite this version of IDBac with the version DOI: \"10.5281/zenodo.1145465\"")
                     ),
                   tags$li(
-                    p("Past versions of IDBac can be found here:",a(href="https://doi.org/10.5281/zenodo.1115620",img(src="https://zenodo.org/badge/DOI/10.5281/zenodo.1115620.svg"),target="_blank") )
+                    p("Past versions of IDBac can be found here:",a(href="https://doi.org/10.5281/zenodo.1145465",img(src="https://zenodo.org/badge/DOI/10.5281/zenodo.1145465.svg"),target="_blank") )
                   )
                 )
               ),
               
               br(),
               
-              h4("To begin, select \"PreProcessing\" above")
+              h4("Select \"PreProcessing\" above to begin")
               
               
                 

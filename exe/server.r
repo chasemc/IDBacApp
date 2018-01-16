@@ -705,16 +705,14 @@ function(input,output,session){
     rownames(proteinMatrixInnard) <- paste(proteinSamples)
     proteinMatrixInnard[is.na(proteinMatrixInnard)] <- 0
 
-    if (input$booled == "1") {
+    if(length(input$booled)==0){
+      proteinMatrixInnard
+    }else if (input$booled == "1") {
       ifelse(proteinMatrixInnard > 0, 1, 0)
 
-  ppin<<-    proteinMatrixInnard
-      }
-    else{
+    }else{
       proteinMatrixInnard
     }
-
-    ppin2<<-proteinMatrixInnard
 
 
 
@@ -860,27 +858,45 @@ function(input,output,session){
   #PCA Calculation
 
   pcaCalculation <- reactive({
-    aaa<<-proteinMatrix()
-   c<- PCA(proteinMatrix(),graph=FALSE)
-  a <- c$ind$coord
-  a <- as.data.frame(a)
-  nam <- rownames(a)
-  a <- cbind(a,nam)
+    
+   
+  pc <- log(proteinMatrix())
+  pc[is.infinite(pc)]<-.000001   
+  
+  pc <- PCA(pc,graph=FALSE)
+  pc <- pc$ind$coord
+  pc <- as.data.frame(pc)
+  nam <- row.names(pc)
+  pc <- cbind(pc,nam)
+  
+  
+  if(!is.null(isolate(input$kORheight))){
   if(input$kORheight=="2"){
     d <- cutree(dendro(),h=input$height)
   }else{
     d <- cutree(dendro(),k=input$kClusters)
   }
-
-   as_tibble(cbind(a,d))
+    
+    
+    
+ return( as_tibble(cbind(pc,d)))
+  }else{
+    return( as_tibble(pc))
+    
+  }
+  
+  
 
 
   })
 
   output$pcaplot <- renderPlotly({
 
+    
     e<-pcaCalculation()
 
+    if(any(names(e) == 'd')){
+    
     p<-ggplot(e,aes(Dim.1,Dim.2,label=nam,col=factor(e$d)))+
       geom_text()+
       xlab("Dimension 1")+
@@ -888,19 +904,46 @@ function(input,output,session){
       ggtitle("Zoomable PCA of Protein MALDI Spectra")+
       theme(plot.title=element_text(size=15),legend.position="none")
 
-    ggplotly(p)
+    }else{
+   
+      p<-ggplot(e,aes(Dim.1,Dim.2,label=nam))+
+        geom_text()+
+        xlab("Dimension 1")+
+        ylab("Dimension 2")+
+        ggtitle("Zoomable PCA of Protein MALDI Spectra")+
+        theme(plot.title=element_text(size=15),legend.position="none")
+      
 
+ }
+    ggplotly(p)
+    
+    
+    
+    
+    
   })
 
 
+  
+
+  
   output$pcaplot3d <- renderRglwidget({
 
-e<-pcaCalculation()
+  e<-pcaCalculation()
 
+  if(!any(names(e) == 'd')){
+    e<-cbind(e,d=rep("black",length(e[,1])))
+  }
+
+  e<-as.data.frame(e)
+  
+  
   options(rgl.useNULL=TRUE)
-    plot3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,xlab="", ylab="", zlab="")
-    text3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,text=e$nam,col=factor(e$d))
-    rglwidget()
+    #plot3d(x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,xlab="", ylab="", zlab="")
+
+    
+  
+    
 
 })
 
@@ -1015,9 +1058,7 @@ e<-pcaCalculation()
   # -----------------
   output$sampleMapColumns2<-renderUI({
 
-    az<<-sampleFactorMapColumns()
-    bz<<-input$sampleFactorMapChosenIDColumn
-
+    
     selectInput("sampleFactorMapChosenAttribute", label = h5("Select a Group Mapping"),
                 choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,sampleFactorMapColumns(),ignore.case = TRUE)]))
   })
@@ -1026,12 +1067,11 @@ e<-pcaCalculation()
   # -----------------
   levs<-reactive({
 
-    w<<-input$sampleMap$datapath
-    ww<<-input$sampleMap
+    
 
     sampleMappings<-read_excel(input$sampleMap$datapath,1)
-    azz<<-sampleMappings
 
+    
     #selected column
 
     sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
@@ -1058,19 +1098,14 @@ e<-pcaCalculation()
     if (input$kORheight =="3"){
 
       sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-      sampleMappings<<-sampleMappings
       sampleFactors<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
 
-       sampleFactors<<-sampleFactors
 
        sampleIDs1<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
-      sampleIDs1<<-sampleIDs1
 
       #get colors chosen
       colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-      colorsChosen<<-colorsChosen
 
-      zz<-bind_cols(colors=colorsChosen,chosenFactor=sampleFactors)
 
 
 
@@ -1091,23 +1126,23 @@ e<-pcaCalculation()
       matchedColors<-left_join(zz,sampleIDs1)
 
 
-      z1<<-matchedColors
-      z2<<-dendro()
+     
+      
 
 
       matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
 #      matchedColors<-as_tibble(matchedColors)
 
-      z3<<-matchedColors
+
       #ba<-as_tibble(as.character(labels(dendro())))
 
-      ba<-as_tibble(labels(z2))
+      ba<-as_tibble(labels(dendro()))
 
        # as_tibble(sapply(labels(dendro()),function(x)strsplit(x,"-")[[1]][[1]]))
 
 
-      z4<<-ba
 
+      
 
 
 
@@ -1405,11 +1440,13 @@ e<-pcaCalculation()
     }
     else{
       workdir <- idbacDirectory$filePath
+      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Saved_MANs"))
+      
       write.csv(as.matrix(bool),paste0(workdir, "\\Saved_MANs\\Current_Network.csv"))
     }
 
 
-
+boo<<-bool
 
 
     a <- as.undirected(graph_from_data_frame(bool))
@@ -1437,10 +1474,10 @@ e<-pcaCalculation()
     # Display text of how many clusters were created.
     if (is.null(input$kORheight)){
     }else if (input$kORheight=="2"){
-      paste("You have Created ", length(unique(cutree(dendro(),h=input$height)))," Cluster(s)")
+  isolate(   paste("You have Created ", length(unique(cutree(dendro(),h=input$height)))," Cluster(s)"))
     }
     else if (input$kORheight=="1"){
-      paste("You have Created ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)")
+     isolate( paste("You have Created ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)"))
     }
   })
 
@@ -1555,10 +1592,10 @@ e<-pcaCalculation()
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
 
-  #  session$onSessionEnded(function() {
-  #   stopApp()
-  #    q("no")
-  #  })
+#    session$onSessionEnded(function() {
+#     stopApp()
+#      q("no")
+#    })
 
 
 }
