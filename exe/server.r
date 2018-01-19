@@ -1112,23 +1112,149 @@ function(input,output,session){
 
 
 
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+      
+      #get colors chosen
+      colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+      zz<-cbind.data.frame(colorsChosen,sampleFactors)
+      
+      
+      zz$sampleFactors<-as.vector(zz$sampleFactors)
+      colnames(zz)<-c("colors","chosenFactor")
+      colnames(sampleIDs1)<-c("sampleFactorID","chosenFactor")
       #Ensure string
       sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
       #Ensure string
       zz$chosenFactor<- as.character(zz$chosenFactor)
-
-
-      sampleIDs1$chosenFactor<-gsub(" ","_",sampleIDs1$chosenFactor)
-
-
-
-      #Contains variables "chosenFactor", "colors", and "sampleFactorID"    (factor to color, colors chosen, sample ID)
-      matchedColors<-left_join(zz,sampleIDs1)
-
-
-     
       
+      matchedColors<-merge(zz,sampleIDs1)
+      
+      
+      
+      
+      
+      
+      
+      
+            
+      # 
+      # #Ensure string
+      # sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
+      # #Ensure string
+      # zz$chosenFactor<- as.character(zz$chosenFactor)
+      # 
+      # 
+      # sampleIDs1$chosenFactor<-gsub(" ","_",sampleIDs1$chosenFactor)
+      # 
+      # 
+      # 
+      # #Contains variables "chosenFactor", "colors", and "sampleFactorID"    (factor to color, colors chosen, sample ID)
+      # matchedColors<-left_join(zz,sampleIDs1)
+      # 
+      # 
+      # 
+      # 
 
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
 
       matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
 #      matchedColors<-as_tibble(matchedColors)
