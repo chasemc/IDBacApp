@@ -28,6 +28,7 @@ function(input,output,session){
     # # Install and Load Packages
     # Install_And_Load(Required_Packages)
 
+  # This needs to be here too because in parallel we will lose it from environment   
     strReverse <- function(x) {
       sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
     }
@@ -102,11 +103,6 @@ function(input,output,session){
 
 
 
-# -----------------
-  # This function revereses a provided string
-  strReverse <- function(x) {
-    sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
-  }
 
 
 # -----------------
@@ -360,7 +356,7 @@ function(input,output,session){
 
 
 # -----------------
-  #When ReAnalyzing data, and need to select the "IDBac" folder directly
+  # When ReAnalyzing data, and need to select the "IDBac" folder directly
   pressedidbacDirectoryButton <- reactive({
     if(is.null(input$idbacDirectoryButton)){
       return("No Folder Selected")
@@ -371,31 +367,32 @@ function(input,output,session){
 
 
 # -----------------
+  # Display which directory was selected
   output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
 
 
-# -----------------
+# Create NULL instance
   idbacDirectory<-reactiveValues(filePath = NULL)
 
 
-# -----------------
-  #Reactive events to trigger the creation of the "idbacDirectory" reactive variable
+# Reactive events to trigger the creation of the "idbacDirectory" reactive variable
+    # This variable is used in lieu of setting a working directory, therefore should point to the main working folder 
   observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
     idbacDirectory$filePath <- idbacuniquedir()
   })
 
 
-# -----------------
   observeEvent(input$selectedWorkingDirectory,{
     idbacDirectory$filePath <- paste0(selectedDirectory(), "/",uniquifiedIDBac())
   })
 
 
-# -----------------
   observeEvent(input$idbacDirectoryButton,{
     idbacDirectory$filePath <- pressedidbacDirectoryButton()
   })
 
+  
+  
 
 # -----------------
   # This function revereses a provided string
@@ -415,20 +412,21 @@ function(input,output,session){
 
 # -----------------
   # Creates text showing the user which directory they chose for raw files
-  output$rawFileDirectory <- renderText({if (is.null(rawFilesLocation())) {
-    return("No Folder Selected")
-  } else{
+  output$rawFileDirectory <- renderText({
+    if (is.null(rawFilesLocation())) {
+    return("No Folder Selected")} else{
     folders <- NULL
     foldersInFolder <-list.dirs(rawFilesLocation(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
     for (i in 1:length(foldersInFolder)) {
       folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
     }
-    folders #output$rawFileDirectory == folders
+    folders 
   }
   })
 
 
 # -----------------
+  # Reactive variable returning the user-chosen location of the raw MALDI files as string
   multipleMaldiRawFileLocation <- reactive({
     if (input$multipleMaldiRawFileDirectory > 0) {
       choose.dir()
@@ -459,37 +457,37 @@ function(input,output,session){
   #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzXML
   spectraConversion<-reactive({
     if(input$rawORreanalyze == 1){
-      #When only analyzing one maldi plate this handles finding the raw data directories and the excel map
-      #excelMap is a dataframe (it's "Sheet1" of the excel template)
-      excelTable <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
-      #excelTable takes the sample location and name from excelTable, and also converts the location to the same name-format as Bruker (A1 -> 0-A1)
-      excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
-      #List the raw data files (for Bruker MALDI files this means pointing to a directory, not an individual file)
-      fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
-      #Get folder name from fullZ for merging with excel table names
-      fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[3]])))
-      colnames(fullZ)<-c("UserInput","ExcelCell")
-      colnames(excelTable)<-c("ExcelCell","UserInput")
-      #merge to connect filenames in excel sheet to file paths
-      fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
-      fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
+      # When only analyzing one maldi plate this handles finding the raw data directories and the excel map
+      # excelMap is a dataframe (it's "Sheet1" of the excel template)
+          excelTable <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
+      # excelTable takes the sample location and name from excelTable, and also converts the location to the same name-format as Bruker (A1 -> 0-A1)
+          excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
+      # List the raw data files (for Bruker MALDI files this means pointing to a directory, not an individual file)
+          fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
+      # Get folder name from fullZ for merging with excel table names
+          fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[3]])))
+          colnames(fullZ)<-c("UserInput","ExcelCell")
+          colnames(excelTable)<-c("ExcelCell","UserInput")
+      # Merge to connect filenames in excel sheet to file paths
+          fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
+          fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
     }else if(input$rawORreanalyze == 3){
-      #When analyzing more han one MALDI plate this handles finding the raw data directories and the excel map
-      mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
-      lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
-      collectfullZ<-NULL
-      #For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
-      for (i in 1:length(lapped)){
-        excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
-        excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
-        fullZ<-list.dirs(lapped[[i]],recursive = F)
-        fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
-        colnames(fullZ)<-c("UserInput","ExcelCell")
-        colnames(excelTable)<-c("ExcelCell","UserInput")
-        fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
-        fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
-        collectfullZ<-c(collectfullZ,list(fullZ))
-      }
+      # When analyzing more han one MALDI plate this handles finding the raw data directories and the excel map
+          mainDirectory<-list.dirs(multipleMaldiRawFileLocation(),recursive = F)
+          lapped<-lapply(mainDirectory,function(x)list.files(x,recursive = F,full.names = T))
+          collectfullZ<-NULL
+      # For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
+          for (i in 1:length(lapped)){
+              excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
+              excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
+              fullZ<-list.dirs(lapped[[i]],recursive = F)
+              fullZ<-cbind.data.frame(fullZ,unlist(lapply(fullZ,function(x)strsplit(x,"/")[[1]][[4]])))
+              colnames(fullZ)<-c("UserInput","ExcelCell")
+              colnames(excelTable)<-c("ExcelCell","UserInput")
+              fullZ<-merge(excelTable,fullZ,by=c("ExcelCell"))
+              fullZ[,3]<-normalizePath(as.character(fullZ[,3]))
+              collectfullZ<-c(collectfullZ,list(fullZ))
+          }
 
       fullZ<-ldply(collectfullZ,data.frame)
 
@@ -497,38 +495,42 @@ function(input,output,session){
 
 
     fullZ<-dlply(fullZ,.(UserInput.x))
-    #return fullz to the "spectraConversion" reactive variable, this is a list of samples; contents of each sample are file paths to the raw data for that samples
-    #This will be used by the spectra conversion observe function/event
+    # return fullz to the "spectraConversion" reactive variable, this is  is a named list, where each element represents a sample and the element name is the sample name;
+    # contents of each element are file paths to the raw data for that sample
+    # This will be used by the spectra conversion observe function/event
     fullZ
   })
 
 
 # -----------------
   observe({
-
+    # If user chooses to convert files...
     if (is.null(input$run)){}else if(input$run > 0) {
 
-
+  
+      # Create the proper directory structure, and make sure main directory name is unique so there is no overwriting
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac()))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Sample_Spreadsheet_Map"))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Peak_Lists"))
       dir.create(paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Saved_MANs"))
 
+      
+      # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
+      # contents of each element are file paths to the raw data for that sample
       fullZ<-spectraConversion()
-
-
+          # fullZ$UserInput.x = sample name
+          # fullZ$UserInput.y = file locations
+      
+      # outp is the filepath of where to save the created mzXML files
       outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
 
-
-      #fullZ$UserInput.x = sample name
-      #fullZ$UserInput.y = file locations
 
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands<-lapply(fullZ,function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
         paste0("pwiz\\msconvert.exe",
-               #sets up the command to pass to MSConvert in CMD, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
+               # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
                " ",
                paste0(x$UserInput.y,collapse = "",sep=" "),
                "--noindex --mzXML --merge -z",
@@ -548,7 +550,7 @@ function(input,output,session){
 
 
       popup1()
-      #sapply(msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)  #No parallel processing
+      # sapply(msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)  #No parallel processing
       numCores <- detectCores()
       numCores <- makeCluster(numCores-1)
       parSapply(numCores,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
@@ -561,9 +563,9 @@ function(input,output,session){
 
 
 # -----------------
+  # Intermediate popup showing where to check for files being created, no status bar because parallel (maybe in future 
+  # can count files present vs need to be made, on a timer update)
   popup1<-reactive({
-
-
     showModal(modalDialog(
       title = "Important message",
       "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",br(),
@@ -576,6 +578,7 @@ function(input,output,session){
   })
 
 # -----------------
+  # Popup summarizing the final status of the conversion 
   popup2<-reactive({
     showModal(modalDialog(
       title = "Conversion Complete",
@@ -591,15 +594,18 @@ function(input,output,session){
   })
 
 # -----------------
+  # Make popup disappear when peak processing button is pressed
   observeEvent(input$beginPeakProcessing, {
     removeModal()
   })
 
 
 # -----------------
-  # Spectra processing
+  # Call the Spectra processing function when the spectra processing button is pressed
   observeEvent(input$beginPeakProcessing,{
-    if (is.null(input$beginPeakProcessing)){}else if(input$beginPeakProcessing > 0) {
+    if (is.null(input$beginPeakProcessing)){
+      
+    }else if(input$beginPeakProcessing > 0) {
       fileList <- list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE)
       popup3()
 
@@ -616,26 +622,9 @@ function(input,output,session){
   })
 
 
-  # Spectra processing
+  
 # -----------------
-  observeEvent(input$mbeginPeakProcessing,{
-    if (is.null(input$mbeginPeakProcessing) ){}else if(input$mbeginPeakProcessing > 0) {
-      fileList <-list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE)
-      popup3()
-
-      #      numCores <- detectCores()
-      #     cl <- makeCluster(numCores)
-      #    parSapply(cl,fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
-      #   stopCluster(cl)
-
-      #Single process with sapply instead of parsapply
-      sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
-      popup4()
-    }
-
-  })
-
-# -----------------
+  # Popup displaying where to find files being created during spectra processing. No status bar -parallel
   popup3<-reactive({
     showModal(modalDialog(
       title = "Important message",
@@ -652,6 +641,7 @@ function(input,output,session){
   })
 
 # -----------------
+  # Popup notifying user when spectra processing is complete
   popup4<-reactive({
     showModal(modalDialog(
       title = "Spectra Processing is Now Complete",
@@ -661,11 +651,16 @@ function(input,output,session){
   })
 
 # -----------------
+  # Read into R, the summed Protein Spectra (subset this (only need two at a time! monkeys) 
   spectra <- reactive({
     unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
   })
 
 # -----------------
+  # Read into R, Protein peak lists (subset this! monkeys) 
+    # Also, bin then trim
+    # Return Peak Intensity Matrix
+  
   trimmedP <- reactive({
     all <-unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
     all<-binPeaks(all, tolerance =.002,method="relaxed")
@@ -673,15 +668,12 @@ function(input,output,session){
     validate(
       need(try(trim(all, c(input$lowerMass, input$upperMass))),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
            tab at the top of the page.")
-      )
+    )
     trim(all, c(input$lowerMass, input$upperMass))
-
-
-
-
   })
 
 # -----------------
+  # Only include peaks occurring in specified percentage of replicates (groups determined by sample names)
   collapsedPeaksP <- reactive({
     labs <- sapply(trimmedP(), function(x)metaData(x)$Strain)
     labs <- factor(labs)
