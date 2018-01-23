@@ -851,7 +851,27 @@ function(input,output,session){
 # -----------------
   # Create peak comparison ui
   output$inversepeakui <-  renderUI({
-    sidebarLayout(
+  
+    if(is.null(input$rawORreanalyze)){
+      fluidPage( 
+        
+        h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
+        br(),
+        h4("Troubleshooting:"),
+        tags$ul(
+          tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab"),
+          tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
+                  named \"Peak_Lists\""),
+          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
+        )
+        
+      )
+      
+    }else{
+    
+    
+    
+      sidebarLayout(
       sidebarPanel(
         selectInput("Spectra1", label=h5("Spectrum 1 (up; matches to bottom spectrum are blue, non-matches are red)"),
                     choices = spectra()$names),
@@ -876,6 +896,8 @@ function(input,output,session){
         )
       )
         )
+      
+    }
   })
 
 
@@ -1242,6 +1264,26 @@ dendo<<-dendro()
 # -----------------
   # Create Heir ui
   output$Heirarchicalui <-  renderUI({
+    
+    if(is.null(input$Spectra1)){
+      fluidPage( 
+     
+        h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
+       
+    br(),
+    h4("Troubleshooting:"),
+    tags$ul(
+      tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the 
+        \"Compare Two Samples\" tab."),
+      tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
+        named \"Peak_Lists\""),
+      tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
+    )
+    
+      )
+      
+    }else{
+      
     fluidPage(
       sidebarPanel(
         #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
@@ -1283,6 +1325,7 @@ dendo<<-dendro()
       mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))
 
       )
+    }
   })
 
 
@@ -1307,36 +1350,39 @@ dendo<<-dendro()
 
     if(!is.null(input$Spectra1)){
 
-      labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
-
-      if(is.null(input$plot_brush$ymin)){
-        #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
-        if(input$kORheight=="2"){
-          combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),h=input$height)==input$Group)),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
-        }else{
-          combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),k=input$kClusters)==input$Group)),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
-        }
-      }else{
-        #This takes a brush selection over the heirarchical clustering plot within the MAN tab and uses this selection of samples for MAN analysis
-        location_of_Heirarchical_Leaves<-get_nodes_xy(dendro())
-        minLoc<-input$plot_brush$ymin
-        maxLoc<-input$plot_brush$ymax
-
-
-        threeColTable<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
-
-        #note: because rotated tree, x is actually y, y is actually x
-        #column 1= y-values of dendrogram leaves
-        #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
-        #column 3= leaf labels
-        w<- which(threeColTable[,1] > minLoc & threeColTable[,1] < maxLoc)
-        brushed<-as.vector(threeColTable[,3][w])
-        labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
-
-        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(paste0("^",brushed,"$"),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
-      }
-      #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
-      #find matrix spectra
+          labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
+    
+          if(is.null(input$plot_brush$ymin)){
+            #This takes the cluster # selection from the left selection pane and passes that cluster of samples for MAN analysis
+            if(input$kORheight=="2"){
+              combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),h=input$height)==input$Group)),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
+            }else{
+              combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(labels(which(cutree(dendro(),k=input$kClusters)==input$Group)),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
+            }
+          }else{
+            #This takes a brush selection over the heirarchical clustering plot within the MAN tab and uses this selection of samples for MAN analysis
+            location_of_Heirarchical_Leaves<-get_nodes_xy(dendro())
+            minLoc<-input$plot_brush$ymin
+            maxLoc<-input$plot_brush$ymax
+    
+            # See undernath for explanation of each column
+            threeColTable<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
+            #note: because rotated tree, x is actually y, y is actually x
+            #column 1= y-values of dendrogram leaves
+            #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
+            #column 3= leaf labels
+            
+            # w = pull out the selected sample(s) indices based on the brush
+            w<- which(threeColTable[,1] > minLoc & threeColTable[,1] < maxLoc)
+            # w = pull out the selected brushed sample(s) 
+            brushed<-as.vector(threeColTable[,3][w])
+            # get indices of all sample names for small molecule peak lists
+            labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
+            # only return small moleule peak lists which were brushed 
+            combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(paste0("^",brushed,"$"),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
+          }
+          #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
+          #find matrix spectra
 
     }else{
       combinedSmallMolPeaks<-smallPeaks()
