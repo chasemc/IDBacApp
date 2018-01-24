@@ -652,10 +652,30 @@ function(input,output,session){
 
 # -----------------
   # Read into R, the summed Protein Spectra (subset this (only need two at a time! monkeys) 
-  spectra <- reactive({
-    unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
-  })
+  # spectra <- reactive({
+  #   unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
+  # })
 
+  spectra <- reactive({
+    # Return Full File Path of all averaged protein spectra RDS
+    vectorFilePaths <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
+    # Return only file name of all averaged protein spectra RDS
+    vectorFileNames <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=FALSE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
+    # Keep only the sample name from file names
+    vectorFileNames <-unlist(strsplit(vectorFileNames,"_SummedProteinSpectra.rds"))
+    
+    # The above contains the 
+    bind_cols(paths=vectorFilePaths,names= vectorFileNames)
+    
+  })
+  
+  
+  
+  
+  
+  
+  
+  
 # -----------------
   # Read into R, Protein peak lists (subset this! monkeys) 
     # Also, bin then trim
@@ -744,9 +764,14 @@ function(input,output,session){
     peaksSampleTwo@snr<-peaksSampleTwo@snr[which(peaksSampleTwo@snr>input$pSNR)]
 
     #Selects the spectra to plot based on user-input
-    meanSpectrumSampleOne<-spectra()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
-    meanSpectrumSampleTwo<-spectra()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
+    # meanSpectrumSampleOne<-spectra()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
+    # meanSpectrumSampleTwo<-spectra()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
 
+    meanSpectrumSampleOne<-readRDS(spectra()$paths[[which(input$Spectra1 ==  spectra()$names)]])
+    meanSpectrumSampleTwo<<-readRDS(spectra()$paths[[which(input$Spectra2 == spectra()$names)]])
+    
+    aaaaaa<<-spectra()
+    bbbbbb<<-input$Spectra2
     #Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
@@ -849,9 +874,9 @@ function(input,output,session){
       sidebarLayout(
       sidebarPanel(
         selectInput("Spectra1", label=h5("Spectrum 1 (up; matches to bottom spectrum are blue, non-matches are red)"),
-                    choices = sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain)),
+                    choices = spectra()$names),
         selectInput("Spectra2", label=h5("Spectrum 2 (down)"),
-                    choices = sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain)),
+                    choices = spectra()$names),
         numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=70,max=70),
         numericInput("pSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
         numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
@@ -1139,50 +1164,87 @@ function(input,output,session){
 # -----------------
   #Create the hierarchical clustering plot as well as the calculations needed for such.
   output$hclustPlot <- renderPlot({
-    if (input$kORheight =="3"){
+  
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # if  want to custom group samples
+      if (input$kORheight =="3"){
 
-      sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-      sampleFactors<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
+      sampleMappings<<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+      sampleFactors<<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
 
 
-       sampleIDs1<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+       sampleIDs1<<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+
+      #get colors chosen
+      colorsChosen<<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+
+
 
       #get colors chosen
       colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-
-
-
-      #get colors chosen
-      colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+      colorsChosen2<<-colorsChosen
       zz<-cbind.data.frame(colorsChosen,sampleFactors)
-      
+      zz1<<-zz
       
       zz$sampleFactors<-as.vector(zz$sampleFactors)
       colnames(zz)<-c("colors","chosenFactor")
+      zz2<<-zz
+      
       colnames(sampleIDs1)<-c("sampleFactorID","chosenFactor")
       #Ensure string
       sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
       #Ensure string
       zz$chosenFactor<- as.character(zz$chosenFactor)
       
-      matchedColors<-merge(zz,sampleIDs1)
+      matchedColors<<-merge(zz,sampleIDs1)
       
      
       matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
-
+      matchedColors2<<-matchedColors
       
       ba<-as_tibble(labels(dendro()))
-
+ba<<-ba
       
       colnames(ba)<-"sampleFactorID"
       fcol<- right_join(matchedColors,ba,by="sampleFactorID")
-
+fcol<<-fcol
 
 
       fcol$colors<-as.character(fcol$colors)
       fcol$colors[is.na(fcol$colors)]<-"#000000"
 
-
+dendo<<-dendro()
       dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) %>% plot(horiz=TRUE,lwd=8)
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
 
