@@ -919,7 +919,7 @@ function(input,output,session){
   output$pcaplot <- renderPlotly({
 
     
-    e<-pcaCalculation()
+    e<<-pcaCalculation()
 
     if(any(names(e) == 'd')){
     
@@ -929,7 +929,6 @@ function(input,output,session){
       ylab("Dimension 2")+
       ggtitle("Zoomable PCA of Protein MALDI Spectra")+
       theme(plot.title=element_text(size=15),legend.position="none")
-
     }else{
    
       p<-ggplot(e,aes(Dim.1,Dim.2,label=nam))+
@@ -943,6 +942,7 @@ function(input,output,session){
  }
     ggplotly(p)
     
+    plot_ly(data=e,x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=~paste("ID:", e$nam),color = factor(e$d))
     
     
     
