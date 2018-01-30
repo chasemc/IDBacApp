@@ -41,7 +41,9 @@ function(input,output,session){
     if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
       spectraImport <- sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
       spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
-      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
+     
+      
+       names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
       spectraImport <- lapply(1:length(spectraImport), function(x)createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
     } else{
       spectraImport <- lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
@@ -50,6 +52,7 @@ function(input,output,session){
       spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
       spectraImport<- list(spectraImport)
     }
+    sss<<-spectraImport
     # Find sample names (fileNames)
     sampleNames <- strsplit(names, ".mzXML")[[1]][1]
     for (i in 1:length(spectraImport)) {
@@ -153,7 +156,7 @@ function(input,output,session){
                         br(),
                         br(),
                         p(strong("Note:"),"If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."),
-                        actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
+                        actionButton("beginPeakProcessing", label = "Process mzXML spectra")
                         
                  )
           )
@@ -205,7 +208,7 @@ function(input,output,session){
                         fluidRow(column(12, verbatimTextOutput("multipleMaldiRawFileDirectory", placeholder = TRUE))),
                         br(),
                         actionButton("run", label = "Convert to mzXML"),
-                        actionButton("mbeginPeakProcessing", label = "Process mzXML")
+                        actionButton("beginPeakProcessing", label = "Process mzXML")
                  )
                         )
         )
@@ -298,7 +301,7 @@ function(input,output,session){
                         p(strong("3:"), "Place the mzXML files that you wish to analyze into:"),
                         p(verbatimTextOutput("whereConvert")),
                         p(strong("4:"), "Select \"Process mzXML\" to process mzXML files for analysis"),
-                        actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
+                        actionButton("beginPeakProcessing", label = "Process mzXML spectra")
                  )
           )
         )
@@ -1729,10 +1732,10 @@ function(input,output,session){
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
   
-  session$onSessionEnded(function() {
-    stopApp()
-    q("no")
-  })
+ # session$onSessionEnded(function() {
+ #   stopApp()
+ #   q("no")
+#  })
   
   
 }
