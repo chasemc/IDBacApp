@@ -153,7 +153,7 @@ function(input,output,session){
                         br(),
                         br(),
                         p(strong("Note:"),"If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."),
-                        actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
+                        actionButton("beginPeakProcessing", label = "Process mzXML spectra")
 
                  )
           )
@@ -205,7 +205,7 @@ function(input,output,session){
                         fluidRow(column(12, verbatimTextOutput("multipleMaldiRawFileDirectory", placeholder = TRUE))),
                         br(),
                         actionButton("run", label = "Convert to mzXML"),
-                        actionButton("mbeginPeakProcessing", label = "Process mzXML")
+                        actionButton("beginPeakProcessing", label = "Process mzXML")
                  )
                         )
         )
@@ -298,7 +298,7 @@ function(input,output,session){
                         p(strong("3:"), "Place the mzXML files that you wish to analyze into:"),
                         p(verbatimTextOutput("whereConvert")),
                         p(strong("4:"), "Select \"Process mzXML\" to process mzXML files for analysis"),
-                        actionButton("mbeginPeakProcessing", label = "Process mzXML spectra")
+                        actionButton("beginPeakProcessing", label = "Process mzXML spectra")
                  )
           )
         )
@@ -418,7 +418,7 @@ function(input,output,session){
     folders <- NULL
     foldersInFolder <-list.dirs(rawFilesLocation(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
     for (i in 1:length(foldersInFolder)) {
-      folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+      folders <- paste0(folders, "\n", foldersInFolder[i]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
     }
     folders 
   }
@@ -768,10 +768,9 @@ function(input,output,session){
     # meanSpectrumSampleTwo<-spectra()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
 
     meanSpectrumSampleOne<-readRDS(spectra()$paths[[which(input$Spectra1 ==  spectra()$names)]])
-    meanSpectrumSampleTwo<<-readRDS(spectra()$paths[[which(input$Spectra2 == spectra()$names)]])
+    meanSpectrumSampleTwo<-readRDS(spectra()$paths[[which(input$Spectra2 == spectra()$names)]])
     
-    aaaaaa<<-spectra()
-    bbbbbb<<-input$Spectra2
+   
     #Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
@@ -944,7 +943,7 @@ function(input,output,session){
   output$pcaplot <- renderPlotly({
 
     
-    e<<-pcaCalculation()
+    e<-pcaCalculation()
 
     if(any(names(e) == 'd')){
     
@@ -1035,7 +1034,7 @@ function(input,output,session){
 
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
-
+saveRDS(proteinMatrix(),"sds.rds")
     if (input$booled == "1") {
     booled<-"_UsedIntenstites"
       }
@@ -1062,6 +1061,16 @@ function(input,output,session){
         cosineD <- function(x) {
           as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
         }
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
         # Perform cosine similarity function
         dend <- proteinMatrix() %>% cosineD
         # Convert NA to 1
@@ -1200,51 +1209,44 @@ function(input,output,session){
     # if  want to custom group samples
       if (input$kORheight =="3"){
 
-      sampleMappings<<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-      sampleFactors<<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
+      sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+      sampleFactors<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
 
 
-       sampleIDs1<<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+       sampleIDs1<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
 
       #get colors chosen
-      colorsChosen<<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+      colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
 
 
 
       #get colors chosen
       colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-      colorsChosen2<<-colorsChosen
       zz<-cbind.data.frame(colorsChosen,sampleFactors)
-      zz1<<-zz
-      
+
       zz$sampleFactors<-as.vector(zz$sampleFactors)
       colnames(zz)<-c("colors","chosenFactor")
-      zz2<<-zz
-      
+
       colnames(sampleIDs1)<-c("sampleFactorID","chosenFactor")
       #Ensure string
       sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
       #Ensure string
       zz$chosenFactor<- as.character(zz$chosenFactor)
       
-      matchedColors<<-merge(zz,sampleIDs1)
+      matchedColors<-merge(zz,sampleIDs1)
       
      
       matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
-      matchedColors2<<-matchedColors
-      
+
       ba<-as_tibble(labels(dendro()))
-ba<<-ba
-      
+
       colnames(ba)<-"sampleFactorID"
       fcol<- right_join(matchedColors,ba,by="sampleFactorID")
-fcol<<-fcol
 
 
       fcol$colors<-as.character(fcol$colors)
       fcol$colors[is.na(fcol$colors)]<-"#000000"
 
-dendo<<-dendro()
       dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) %>% plot(horiz=TRUE,lwd=8)
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
 
@@ -1708,7 +1710,7 @@ dendo<<-dendro()
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
 
-#    session$onSessionEnded(function() {
+#   session$onSessionEnded(function() {
 #     stopApp()
 #      q("no")
 #    })
