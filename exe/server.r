@@ -1012,7 +1012,11 @@ function(input,output,session){
         h4("Troubleshooting:"),
         tags$ul(
           tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the 
+<<<<<<< HEAD
+                  \"Compare Two Samples\"."),
+=======
                   \"Compare Two Samples\" tab."),
+>>>>>>> 09abf5a501dedfa9144d4fa6b7d8cdab81ef1dcd
           tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
                   named \"Peak_Lists\""),
           tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
@@ -1021,6 +1025,10 @@ function(input,output,session){
       )
       
     }else{
+<<<<<<< HEAD
+      
+=======
+>>>>>>> 09abf5a501dedfa9144d4fa6b7d8cdab81ef1dcd
       mainPanel(
 
         fluidRow( plotlyOutput("pcaplot")),
@@ -1646,6 +1654,26 @@ saveRDS(proteinMatrix(),"sds.rds")
 # -----------------
   # Create MAN ui
   output$MANui <-  renderUI({
+    
+    if(is.null(input$Spectra1)){
+      fluidPage( 
+        
+        h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
+        
+        br(),
+        h4("Troubleshooting:"),
+        tags$ul(
+          tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the 
+                  \"Compare Two Samples\" and \"Hierarchical Clustering\" tabs."),
+          tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
+                  named \"Peak_Lists\""),
+          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
+        )
+        
+      )
+      
+    }else{
+      
     sidebarLayout(
       sidebarPanel(
         radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
@@ -1685,6 +1713,7 @@ saveRDS(proteinMatrix(),"sds.rds")
 
 
       ))
+      }
   })
 
 # -----------------
@@ -1710,10 +1739,17 @@ saveRDS(proteinMatrix(),"sds.rds")
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
 
+<<<<<<< HEAD
 #   session$onSessionEnded(function() {
 #     stopApp()
 #      q("no")
 #    })
+=======
+    session$onSessionEnded(function() {
+     stopApp()
+      q("no")
+    })
+>>>>>>> e1527b88b2f527725baca47f3c539a7da2d47579
 
 
 }
