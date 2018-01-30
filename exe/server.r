@@ -944,7 +944,7 @@ function(input,output,session){
   output$pcaplot <- renderPlotly({
 
     
-    e<-pcaCalculation()
+    e<<-pcaCalculation()
 
     if(any(names(e) == 'd')){
     
@@ -954,7 +954,6 @@ function(input,output,session){
       ylab("Dimension 2")+
       ggtitle("Zoomable PCA of Protein MALDI Spectra")+
       theme(plot.title=element_text(size=15),legend.position="none")
-
     }else{
    
       p<-ggplot(e,aes(Dim.1,Dim.2,label=nam))+
@@ -968,6 +967,7 @@ function(input,output,session){
  }
     ggplotly(p)
     
+    plot_ly(data=e,x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=~paste("ID:", e$nam),color = factor(e$d))
     
     
     
@@ -1013,7 +1013,11 @@ function(input,output,session){
         h4("Troubleshooting:"),
         tags$ul(
           tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the 
+<<<<<<< HEAD
                   \"Compare Two Samples\"."),
+=======
+                  \"Compare Two Samples\" tab."),
+>>>>>>> 09abf5a501dedfa9144d4fa6b7d8cdab81ef1dcd
           tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
                   named \"Peak_Lists\""),
           tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
@@ -1022,7 +1026,10 @@ function(input,output,session){
       )
       
     }else{
+<<<<<<< HEAD
       
+=======
+>>>>>>> 09abf5a501dedfa9144d4fa6b7d8cdab81ef1dcd
       mainPanel(
 
         fluidRow( plotlyOutput("pcaplot")),
