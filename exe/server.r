@@ -1293,7 +1293,7 @@ function(input,output,session){
         }
         
         
-        par(mar = c(8,3,8,input$parmar))
+        par(mar = c(8,3,8,input$dendparmar))
         
         plot(dendro(),horiz=T)
         
@@ -1366,13 +1366,13 @@ function(input,output,session){
       
       #If no sample map is selected, run this:
     }else if (input$kORheight=="2"){
-      par(mar=c(5,5,5,input$parmar))
+      par(mar=c(5,5,5,input$dendparmar))
       dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
       abline(v=input$height,lty=2)
       
     }
     else{
-      par(mar=c(5,5,5,input$parmar))
+      par(mar=c(5,5,5,input$dendparmar))
       dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=50)
     }
     
@@ -1428,7 +1428,7 @@ function(input,output,session){
           selectInput("clustering", label = h5("Clustering Algorithm"),
                       choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
                       selected = "ward.D2"),
-          numericInput("parmar",label="parmar",value=1), #delete,
+          numericInput("dendparmar",label="Adjust right margin of dendrogram",value=1), 
           radioButtons("booled", label = h5("Include peak intensities, or use presence/absence?"),
                        choices = list("Presence/Absence" = 1, "Intensities" = 2),
                        selected = 2),
