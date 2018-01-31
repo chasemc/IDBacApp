@@ -1428,43 +1428,26 @@ function(input,output,session){
           selectInput("clustering", label = h5("Clustering Algorithm"),
                       choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
                       selected = "ward.D2"),
-          numericInput("dendparmar",label="Adjust right margin of dendrogram",value=1), 
+          
           radioButtons("booled", label = h5("Include peak intensities, or use presence/absence?"),
                        choices = list("Presence/Absence" = 1, "Intensities" = 2),
                        selected = 2),
+          numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
+          numericInput("dendparmar",label="Adjust right margin of dendrogram",value=1),
+          
           radioButtons("kORheight", label = h5("Color clusters based on:"),
                        choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-defined Categories in Excel Sheet" = 3),
                        selected = 1),
-          radioButtons("colDotsOrColDend", label = h5("Color dend or dots:"),
-                       choices = list("dots" = 1, "no dots" = 2),
-                       selected = 1),
           
-          
-          
-        
-          
-          
-          uiOutput("hclustui"),
           uiOutput("groupui"),
-          numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
-          textInput("saveHierAs","Save File As:"),
-          downloadButton("downloadHierarchical","Download"),
-          p("To color samples according to user-defined groupings..."),
-          p("To use this function, create a different excel file and list all of your sample names in
-            different rows of a single column. In other columns you may add additional characteristics
-            of your samples (eg. media type, genus, sample location), with one characteristic per column.
-            You will have the option to color code your hierarchical clustering plot
-            based on these characteristics, which will appear in the drop-down list below."),
-          p("Click the blue boxes under a factor (below) to change the color of the factor."),
-          fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
-          uiOutput("sampleMapColumns1"),
-          uiOutput("sampleMapColumns2"),
-          fluidRow(
-            uiOutput("sampleFactorMapColors")),
+          uiOutput("hclustui"),
+          uiOutput("sampleGroupColoringui"),
+  
           br(),
           h4("Suggestions for Reporting Protein Analysis:"),
-          uiOutput("proteinReport")
-          
+          uiOutput("proteinReport"),
+          textInput("saveHierAs","Save File As (File Name):"),
+          downloadButton("downloadHierarchical","Save File (to Downloads Folder)")
           ),
         mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))
         
@@ -1474,12 +1457,42 @@ function(input,output,session){
   
   
   # -----------------
-  output$proteinReport<-renderUI({
+  output$proteinReport<-renderUI(
     p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
       and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
       Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
       "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
+  )
+  
+  
+  
+  
+  
+    
+    output$sampleGroupColoringui <-   renderUI(
+
+if(input$kORheight == "3"){  
+ tags$div(
+   p("To color samples according to user-defined groupings..."), 
+  p("To use this function, create a different excel file and list all of your sample names in
+            different rows of a single column. In other columns you may add additional characteristics
+            of your samples (eg. media type, genus, sample location), with one characteristic per column.
+            You will have the option to color code your hierarchical clustering plot
+            based on these characteristics, which will appear in the drop-down list below."),
+  radioButtons("colDotsOrColDend", label = h5("Color dend or dots:"),
+               choices = list("dots" = 1, "no dots" = 2),
+               selected = 1),
+  p("Click the blue boxes under a factor (below) to change the color of the factor."),
+  fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
+  uiOutput("sampleMapColumns1"),
+  uiOutput("sampleMapColumns2"),
+  fluidRow(
+    uiOutput("sampleFactorMapColors"))
+ )
   })
+  
+  
+  
   
   
   # -----------------
@@ -1757,7 +1770,7 @@ function(input,output,session){
       dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
       abline(v=input$height,lty=2)
     }
-    else{
+    else if(input$kORheight=="1"){
       par(mar=c(5,5,5,10))
       dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
     }
