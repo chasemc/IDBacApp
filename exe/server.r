@@ -1174,16 +1174,151 @@ function(input,output,session){
     # if  want to custom group samples
     if (input$kORheight =="3"){
       
+      
+      
+      if(input$colDotsOrColDend == "1"){
+        
+        
+        
+        groupFile<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+
+        
+      #  Load colored_Dots.R function
+        
+        
+        source('colored_Dots.R', echo=TRUE)
+
+                
+        
+        
+        idCol   <- input$sampleFactorMapChosenIDColumn
+        sampCol <- input$sampleFactorMapChosenAttribute
+        
+        
+        
+        
+        dendrogramLabels<-as_tibble(labels(dendro()))
+        names(dendrogramLabels)<- idCol
+        
+        #join but keep prder of dendrogram label
+        joinedData<-left_join(dendrogramLabels,groupFile,by=idCol)
+        
+        naReplaceValues<-as.list(sapply(names(joinedData),function(x)paste0("Missing ",x)))
+        
+        joinedData<-joinedData %>% tidyr::replace_na(replace=naReplaceValues)
+        
+        colsel<- sampCol
+        
+        small<-bind_cols(joinedData[,1],joinedData[colsel])
+        
+        
+        
+        #w<-small %>% group_by(.dots=paste0(colsel))
+        
+        groupedList<-split(small,factor(small[colsel][[1]]))
+        
+        bigList<-lapply(1:length(groupedList),function(x)left_join(dendrogramLabels,groupedList[[x]],by=idCol))
+        
+        
+        
+
+                
+        labels(bigList)<-labels(groupedList)
+        
+        
+        
+        for(x in 1:length(bigList)){
+          bigList[[x]][colsel][!is.na(bigList[[x]][colsel])]<-"#000000"
+          bigList[[x]][colsel][is.na(bigList[[x]][colsel])]<-"#00000000"
+        }
+        
+        
+        
+        
+        
+        bigMatrix<-NULL
+        for (i in 1:length(bigList)){
+          bigMatrix<-bind_cols(bigMatrix,bigList[[i]][,2])
+          }
+        
+        names(bigMatrix)<-names(bigList)
+        
+       
+        
+        
+        "#000000"
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        sampleMappings<<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+        sampleFactors<<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
+        
+        
+        sampleIDs1<<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+        
+        
+        
+        
+        #get colors chosen
+        colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+        
+        colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+
+        
+        colorF<-cbind.data.frame(colorsChosen,sampleFactors)
+        colorF$sampleFactors<-as.vector(colorF$sampleFactors)
+        
+        
+        
+      
+        for (i in colorF$sampleFactors){
+          bigMatrix[which(bigMatrix[i] == "#000000"),i] <- as.vector(colorF[which(colorF[,2]==i),1])
+        }
+        
+        
+        par(mar = c(8,3,8,input$parmar))
+        
+        plot(dendro(),horiz=T)
+        
+  
+        
+        
+        
+        colored_dots(bigMatrix, dendro(),
+                     rowLabels = names(bigMatrix),horiz=T,sort_by_labels_order = FALSE) 
+        
+        
+        
+        
+        
+        
+      }else{
+      
       sampleMappings<<-as.data.frame(read_excel(input$sampleMap$datapath,1))
       sampleFactors<<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
       
       
       sampleIDs1<<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
       
-      #get colors chosen
-      colorsChosen<<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-      
-      
+    
+        
       
       #get colors chosen
       colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
@@ -1212,14 +1347,21 @@ function(input,output,session){
       
       colnames(ba)<-"sampleFactorID"
       fcol<- right_join(matchedColors,ba,by="sampleFactorID")
-      fcol<<-fcol
-      
+
+            
       
       fcol$colors<-as.character(fcol$colors)
       fcol$colors[is.na(fcol$colors)]<-"#000000"
-      cmd
-      dendo<<-dendro()
-      dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) %>% plot(horiz=TRUE,lwd=8)
+      
+      
+
+      
+      
+      
+      
+      
+      
+      dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) %>% plot(horiz=TRUE,lwd=8)}
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
       
       #If no sample map is selected, run this:
@@ -1293,6 +1435,15 @@ function(input,output,session){
           radioButtons("kORheight", label = h5("Color clusters based on:"),
                        choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-defined Categories in Excel Sheet" = 3),
                        selected = 1),
+          radioButtons("colDotsOrColDend", label = h5("Color dend or dots:"),
+                       choices = list("dots" = 1, "no dots" = 2),
+                       selected = 1),
+          
+          
+          
+        
+          
+          
           uiOutput("hclustui"),
           uiOutput("groupui"),
           numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
