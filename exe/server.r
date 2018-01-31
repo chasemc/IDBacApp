@@ -52,10 +52,11 @@ function(input,output,session){
       spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
       spectraImport<- list(spectraImport)
     }
-    sss<<-spectraImport
+
     # Find sample names (fileNames)
     sampleNames <- strsplit(names, ".mzXML")[[1]][1]
-    for (i in 1:length(spectraImport)) {
+ 
+       for (i in 1:length(spectraImport)) {
       spectraImport[[i]]@metaData$Strain <- sampleNames
     }
     labs <- sapply(spectraImport, function(x) metaData(x)$Strain)[[1]]
@@ -526,7 +527,7 @@ function(input,output,session){
       # fullZ$UserInput.y = file locations
       
       # outp is the filepath of where to save the created mzXML files
-      outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
+      outp <<- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
       
       
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
@@ -771,10 +772,9 @@ function(input,output,session){
     # meanSpectrumSampleTwo<-spectra()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
     
     meanSpectrumSampleOne<-readRDS(spectra()$paths[[which(input$Spectra1 ==  spectra()$names)]])
-    meanSpectrumSampleTwo<<-readRDS(spectra()$paths[[which(input$Spectra2 == spectra()$names)]])
+    meanSpectrumSampleTwo<-readRDS(spectra()$paths[[which(input$Spectra2 == spectra()$names)]])
     
-    aaaaaa<<-spectra()
-    bbbbbb<<-input$Spectra2
+   
     #Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
@@ -1171,35 +1171,6 @@ function(input,output,session){
     
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     # if  want to custom group samples
     if (input$kORheight =="3"){
       
@@ -1246,20 +1217,20 @@ function(input,output,session){
       
       fcol$colors<-as.character(fcol$colors)
       fcol$colors[is.na(fcol$colors)]<-"#000000"
-      
+      cmd
       dendo<<-dendro()
       dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) %>% plot(horiz=TRUE,lwd=8)
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
       
       #If no sample map is selected, run this:
     }else if (input$kORheight=="2"){
-      par(mar=c(5,5,5,10))
+      par(mar=c(5,5,5,input$parmar))
       dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
       abline(v=input$height,lty=2)
       
     }
     else{
-      par(mar=c(5,5,5,10))
+      par(mar=c(5,5,5,input$parmar))
       dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=50)
     }
     
@@ -1315,6 +1286,7 @@ function(input,output,session){
           selectInput("clustering", label = h5("Clustering Algorithm"),
                       choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
                       selected = "ward.D2"),
+          numericInput("parmar",label="parmar",value=1), #delete,
           radioButtons("booled", label = h5("Include peak intensities, or use presence/absence?"),
                        choices = list("Presence/Absence" = 1, "Intensities" = 2),
                        selected = 2),
