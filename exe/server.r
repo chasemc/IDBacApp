@@ -1197,29 +1197,72 @@ function(input,output,session){
         
         
         
-        dendrogramLabels<-as_tibble(labels(dendro()))
-        names(dendrogramLabels)<- idCol
+        dendLabels<-as_tibble(labels(dendro()))
+        names(dendLabels)<- idCol
         
         #join but keep prder of dendrogram label
-        joinedData<-left_join(dendrogramLabels,groupFile,by=idCol)
+        #dendrogramLabels<<-dendrogramLabels
+        
+        groupFile<<-dplyr::as_tibble(groupFile)
+        
+        dendrogramLabels<-NULL
+        dendrogramLabels$merged <- gsub(" ","",as.character(unlist(dendLabels[,idCol])))
+        groupFile$merged        <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
+        
+        a23<<-dendrogramLabels
+        b23<<-groupFile
+        
+        
+        dendrogramLabels<-as.data.frame(dendrogramLabels)
+        
+        joinedData<-left_join(dendrogramLabels,groupFile,by="merged")
+    
+        
+        joinedData<-joinedData[which(!is.na(joinedData[,idCol])),]
+        
+        
+        joinuu<<-joinedData
         
         naReplaceValues<-as.list(sapply(names(joinedData),function(x)paste0("Missing ",x)))
         
         joinedData<-joinedData %>% tidyr::replace_na(replace=naReplaceValues)
+       
         
+        joinedData1z<<-joinedData
+         
         colsel<- sampCol
+       
+        # small Contains two columns, one with the IDs and one with the factors 
+        small<-bind_cols(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
+        colnames(small)<-c(idCol,colsel)
+        small2<<-small
         
-        small<-bind_cols(joinedData[,1],joinedData[colsel])
+        
+        
+        
+        
+        
+        
+        
         
         
         
         #w<-small %>% group_by(.dots=paste0(colsel))
         
         groupedList<-split(small,factor(small[colsel][[1]]))
+      
+     
         
-        bigList<-lapply(1:length(groupedList),function(x)left_join(dendrogramLabels,groupedList[[x]],by=idCol))
+
+        
+        dendrogramLabels2<<-dendrogramLabels
+        groupedList2<<-groupedList
         
         
+        
+        bigList<-lapply(1:length(groupedList),function(x)left_join(dendLabels,groupedList[[x]],by=idCol))
+        
+        bigList2<<-bigList
         
 
                 
@@ -1234,8 +1277,7 @@ function(input,output,session){
         
         
         
-        
-        
+
         bigMatrix<-NULL
         for (i in 1:length(bigList)){
           bigMatrix<-bind_cols(bigMatrix,bigList[[i]][,2])
@@ -1243,28 +1285,7 @@ function(input,output,session){
         
         names(bigMatrix)<-names(bigList)
         
-       
-        
-        
-        "#000000"
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+       bigMatrix2<<-bigMatrix
         
         
         sampleMappings<<-as.data.frame(read_excel(input$sampleMap$datapath,1))
@@ -1292,7 +1313,7 @@ function(input,output,session){
           bigMatrix[which(bigMatrix[i] == "#000000"),i] <- as.vector(colorF[which(colorF[,2]==i),1])
         }
         
-        
+        bigMatrix22<<-bigMatrix
         par(mar = c(8,3,8,input$dendparmar))
         
         plot(dendro(),horiz=T)
