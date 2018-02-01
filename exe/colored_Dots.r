@@ -138,21 +138,11 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
     }
 
 
-
-
-    yb <<-yb
-    yt  <<-yt
-    xl  <<-xl
-    xr <<-xr
     if (horiz) {
       #rect(-yb, xl, -yt, xr, col = as.character(C[, j]),
       #     border = as.character(C[, j]))
 
 
-      yb <<-yb
-     yt  <<-yt
-        xl  <<-xl
-         xr <<-xr
 
     #C<-as_tibble(C)
     ccc<<-C
