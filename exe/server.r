@@ -1316,13 +1316,14 @@ function(input,output,session){
         bigMatrix22<<-bigMatrix
         par(mar = c(8,3,8,input$dendparmar))
         
-        plot(dendro(),horiz=T)
+       dendro() %>% set("labels_cex", .6) %>%  plot(.,horiz=T)
         
   
         
         
-        
-        colored_dots(bigMatrix, dendro(),
+        shortenedNames<-dendro()
+       labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
+        colored_dots(bigMatrix, shortenedNames,
                      rowLabels = names(bigMatrix),horiz=T,sort_by_labels_order = FALSE) 
         
         
@@ -1382,7 +1383,7 @@ function(input,output,session){
       
       
       
-      dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) %>% plot(horiz=TRUE,lwd=8)}
+      dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors)  %>% plot(horiz=TRUE,lwd=8,cex=1)}
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
       
       #If no sample map is selected, run this:
@@ -1672,6 +1673,10 @@ if(input$kORheight == "3"){
     }
     
     peaksa
+    
+    
+  #delete  saveRDS(peaksa,normalizePath("C:/Users/chase/Desktop/smallmolmatrix.rds",mustWork = F))
+    
   })
   
   
@@ -1714,9 +1719,9 @@ if(input$kORheight == "3"){
     }
     else{
       workdir <- idbacDirectory$filePath
-      dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Saved_MANs"))
+      dir.create(normalizePath(paste0(workdir,"\\Saved_MANs"),mustWork = F))
       
-      write.csv(as.matrix(bool),paste0(workdir, "\\Saved_MANs\\Current_Network.csv"))
+      write.csv(as.matrix(bool),normalizePath(paste0(workdir,"/SAVED_MANs/Current_Network.csv"),mustWork = F))
     }
     
     
@@ -1787,12 +1792,12 @@ if(input$kORheight == "3"){
     
     
     if(input$kORheight=="2"){
-      par(mar=c(5,5,5,10))
+      par(mar=c(5,5,5,input$dendparmar2))
       dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
       abline(v=input$height,lty=2)
     }
     else if(input$kORheight=="1"){
-      par(mar=c(5,5,5,10))
+      par(mar=c(5,5,5,input$dendparmar2))
       dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
     }
     
@@ -1835,6 +1840,7 @@ if(input$kORheight == "3"){
           numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=20,max=round(max(sapply(smallPeaks(),function(x)max(mass(x)))),digits=-1)),
           numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=20,min=round(min(sapply(smallPeaks(),function(x)min(mass(x)))),digits=-1)),
           numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
+          numericInput("dendparmar2",label="Adjust right margin of dendrogram",value=1),
           checkboxInput("save", label = "Save Current Network?", value = FALSE),
           br(),
           p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
@@ -1853,7 +1859,10 @@ if(input$kORheight == "3"){
           ),
         mainPanel(textOutput("Clusters2"),
                   simpleNetworkOutput("metaboliteAssociationNetwork"),
-                  plotOutput("netheir",
+                 
+                  
+                  
+                   plotOutput("netheir",
                              click = "plot_click",
                              dblclick = "plot_dblclick",
                              hover = "plot_hover",
