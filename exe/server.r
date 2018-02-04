@@ -1871,13 +1871,20 @@ function(input,output,session){
           h4("Suggestions for Reporting Protein Analysis"),
           uiOutput("proteinReport2")
           ),
-        mainPanel(textOutput("Clusters2"),
-                  simpleNetworkOutput("metaboliteAssociationNetwork"))
+     
       )),fluidRow(     
               mainPanel(
                   
-                  plotOutput("netheir"
-                             )
+                plotOutput("netheir",
+                           click = "plot_click",
+                           dblclick = "plot_dblclick",
+                           hover = "plot_hover",
+                           brush = "plot_brush")
+                
+                
+                
+                
+                
               )
                   
                   
