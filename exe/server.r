@@ -1193,12 +1193,11 @@ function(input,output,session){
   
   
   
-  
-  
     
  coloredDend <- reactive({    
     
-    
+   toReturn <- list(dend=NULL,bigMatrix=NULL,shortenedNames=NULL)
+   
     # if  want to custom group samples
     if (input$kORheight =="3"){
          if(input$colDotsOrColDend == "1"){
@@ -1282,29 +1281,23 @@ function(input,output,session){
             
             colorF<-cbind.data.frame(colorsChosen,sampleFactors)
             colorF$sampleFactors<-as.vector(colorF$sampleFactors)
-            
-            
-            for (i in colorF$sampleFactors){
+          
+            for (i in names(bigMatrix)){
               bigMatrix[which(bigMatrix[i] == "#000000"),i] <- as.vector(colorF[which(colorF[,2]==i),1])
             }
             
 
             
-            par(mar=c(5,5,5,input$dendparmar))
             
             
-            dendro() %>% set("labels_cex",1 ) %>%  plot(.,horiz=T)
-            
-            
-            
-            
+            toReturn$dend <- dendro() %>% set("labels_cex",1 )
+
             shortenedNames<-dendro()
             labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
             
-            colored_dots(bigMatrix, shortenedNames,
-                         rowLabels = names(bigMatrix),horiz=T,sort_by_labels_order = FALSE) 
-            
-            
+          
+            toReturn$bigMatrix <- bigMatrix
+            toReturn$shortenedNames <- shortenedNames   
             
             
         
@@ -1352,19 +1345,18 @@ function(input,output,session){
         fcol$colors<-as.character(fcol$colors)
         fcol$colors[is.na(fcol$colors)]<-"#000000"
         
-        
-        par(mar=c(5,5,5,input$dendparmar))
-        
+     
         
         
         
-        dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) } %>% plot(.,horiz=T)
+        
+        toReturn$dend <-  dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) } 
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
       
       #If no sample map is selected, run this:
     }
     
-    
+   toReturn
     
     
   })
@@ -1395,10 +1387,16 @@ function(input,output,session){
      abline(v=input$height,lty=2)
    
   } else if (input$kORheight=="3"){
+    
+    par(mar=c(5,5,5,input$dendparmar))
+
+     coloredDend()$dend  %>%  plot(.,horiz=T)
+    
+     
+     colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
+                                   rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE) 
      
 
-     coloredDend() 
-     
   }
   },height=plotHeight)
   
@@ -1821,10 +1819,14 @@ function(input,output,session){
       isolate( abline(v=input$height,lty=2) )
     
     } else if (input$kORheight=="3"){
-      isolate(
+
       
-      coloredDend() 
-      )
+      coloredDend()$dend  %>%  plot(.,horiz=T)
+      
+      
+      colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
+                   rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE) 
+      
     }
   },height=plotHeightHeirNetwork)
   
