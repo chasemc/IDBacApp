@@ -1,4 +1,12 @@
-# The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the U function(input, output,session) {
+# The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the UI function(input, output,session) {
+
+
+#  Load colored_Dots.R function
+
+
+source('colored_Dots.R', echo=TRUE)
+
+
 
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
@@ -41,9 +49,9 @@ function(input,output,session){
     if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
       spectraImport <- sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
       spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
-     
       
-       names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
+      
+      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
       spectraImport <- lapply(1:length(spectraImport), function(x)createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
     } else{
       spectraImport <- lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
@@ -52,11 +60,11 @@ function(input,output,session){
       spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
       spectraImport<- list(spectraImport)
     }
-
+    
     # Find sample names (fileNames)
     sampleNames <- strsplit(names, ".mzXML")[[1]][1]
- 
-       for (i in 1:length(spectraImport)) {
+    
+    for (i in 1:length(spectraImport)) {
       spectraImport[[i]]@metaData$Strain <- sampleNames
     }
     labs <- sapply(spectraImport, function(x) metaData(x)$Strain)[[1]]
@@ -774,7 +782,7 @@ function(input,output,session){
     meanSpectrumSampleOne<-readRDS(spectra()$paths[[which(input$Spectra1 ==  spectra()$names)]])
     meanSpectrumSampleTwo<-readRDS(spectra()$paths[[which(input$Spectra2 == spectra()$names)]])
     
-   
+    
     #Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
     p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
@@ -1164,244 +1172,242 @@ function(input,output,session){
   })
   
   
-  # -----------------
-  #Create the hierarchical clustering plot as well as the calculations needed for such.
-  output$hclustPlot <- renderPlot({
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
     
-    
+ coloredDend <- reactive({    
     
     
     # if  want to custom group samples
     if (input$kORheight =="3"){
-      
-      
-      
-      if(input$colDotsOrColDend == "1"){
-        
-        
-        
-        groupFile<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-
-        
-      #  Load colored_Dots.R function
-        
-        
-        source('colored_Dots.R', echo=TRUE)
-
-                
-        
-        
-        idCol   <- input$sampleFactorMapChosenIDColumn
-        sampCol <- input$sampleFactorMapChosenAttribute
-        
-        
-        
-        
-        dendLabels<-as_tibble(labels(dendro()))
-        names(dendLabels)<- idCol
-        
-        #join but keep prder of dendrogram label
-        #dendrogramLabels<<-dendrogramLabels
-        
-        groupFile<<-dplyr::as_tibble(groupFile)
-        
-        dendrogramLabels<-NULL
-        dendrogramLabels$merged <- gsub(" ","",as.character(unlist(dendLabels[,idCol])))
-        groupFile$merged        <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
-        
-        a23<<-dendrogramLabels
-        b23<<-groupFile
-        
-        
-        dendrogramLabels<-as.data.frame(dendrogramLabels)
-        
-        joinedData<-left_join(dendrogramLabels,groupFile,by="merged")
-    
-        
-        joinedData<-joinedData[which(!is.na(joinedData[,idCol])),]
-        
-        
-        joinuu<<-joinedData
-        
-        naReplaceValues<-as.list(sapply(names(joinedData),function(x)paste0("Missing ",x)))
-        
-        joinedData<-joinedData %>% tidyr::replace_na(replace=naReplaceValues)
-       
-        
-        joinedData1z<<-joinedData
+         if(input$colDotsOrColDend == "1"){
+            groupFile<-as.data.frame(read_excel(input$sampleMap$datapath,1))
          
-        colsel<- sampCol
-       
-        # small Contains two columns, one with the IDs and one with the factors 
-        small<-bind_cols(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
-        colnames(small)<-c(idCol,colsel)
-        small2<<-small
+            idCol   <- input$sampleFactorMapChosenIDColumn
+            sampCol <- input$sampleFactorMapChosenAttribute
+          
+            
+            dendLabels<-as_tibble(labels(dendro()))
+            names(dendLabels)<- idCol
+            
+            #join but keep prder of dendrogram label
+            #dendrogramLabels<<-dendrogramLabels
+            
+            groupFile<-dplyr::as_tibble(groupFile)
+            
+            dendrogramLabels<-NULL
+            dendrogramLabels$merged <- gsub(" ","",as.character(unlist(dendLabels[,idCol])))
+            groupFile$merged        <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        #w<-small %>% group_by(.dots=paste0(colsel))
-        
-        groupedList<-split(small,factor(small[colsel][[1]]))
-      
+            
+            dendrogramLabels<-as.data.frame(dendrogramLabels)
+            
+            joinedData<-left_join(dendrogramLabels,groupFile,by="merged")
+            
+            
+            joinedData<-joinedData[which(!is.na(joinedData[,idCol])),]
+            
+            
+           
+            
+            naReplaceValues<-as.list(sapply(names(joinedData),function(x)paste0("Missing ",x)))
+            
+            joinedData<-joinedData %>% tidyr::replace_na(replace=naReplaceValues)
+            
+         
+            colsel<- sampCol
+            
+            # small Contains two columns, one with the IDs and one with the factors 
+            small<-bind_cols(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
+            colnames(small)<-c(idCol,colsel)
+           
+            
+            groupedList<-split(small,factor(small[colsel][[1]]))
+            
+           
+            
      
-        
+            
+            bigList<-lapply(1:length(groupedList),function(x)left_join(dendLabels,groupedList[[x]],by=idCol))
+           
+            labels(bigList)<-labels(groupedList)
+            
+            for(x in 1:length(bigList)){
+              bigList[[x]][colsel][!is.na(bigList[[x]][colsel])]<-"#000000"
+              bigList[[x]][colsel][is.na(bigList[[x]][colsel])]<-"#00000000"
+            }
+            
+          
+            bigMatrix<-NULL
+            for (i in 1:length(bigList)){
+              bigMatrix<-bind_cols(bigMatrix,bigList[[i]][,2])
+            }
+            
+            names(bigMatrix)<-names(bigList)
+            
+      
+            sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+            sampleFactors<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
+            
+            
+            sampleIDs1<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+            
+            
+            #get colors chosen
+            colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+            
+            colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+            
+            
+            colorF<-cbind.data.frame(colorsChosen,sampleFactors)
+            colorF$sampleFactors<-as.vector(colorF$sampleFactors)
+            
+            
+            for (i in colorF$sampleFactors){
+              bigMatrix[which(bigMatrix[i] == "#000000"),i] <- as.vector(colorF[which(colorF[,2]==i),1])
+            }
+            
 
-        
-        dendrogramLabels2<<-dendrogramLabels
-        groupedList2<<-groupedList
-        
-        
-        
-        bigList<-lapply(1:length(groupedList),function(x)left_join(dendLabels,groupedList[[x]],by=idCol))
-        
-        bigList2<<-bigList
-        
-
-                
-        labels(bigList)<-labels(groupedList)
-        
-        
-        
-        for(x in 1:length(bigList)){
-          bigList[[x]][colsel][!is.na(bigList[[x]][colsel])]<-"#000000"
-          bigList[[x]][colsel][is.na(bigList[[x]][colsel])]<-"#00000000"
-        }
+            
+            par(mar=c(5,5,5,input$dendparmar))
+            
+            
+            dendro() %>% set("labels_cex",1 ) %>%  plot(.,horiz=T)
+            
+            
+            
+            
+            shortenedNames<-dendro()
+            labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
+            
+            colored_dots(bigMatrix, shortenedNames,
+                         rowLabels = names(bigMatrix),horiz=T,sort_by_labels_order = FALSE) 
+            
+            
+            
+            
         
         
+      }else{
         
-
-        bigMatrix<-NULL
-        for (i in 1:length(bigList)){
-          bigMatrix<-bind_cols(bigMatrix,bigList[[i]][,2])
-          }
-        
-        names(bigMatrix)<-names(bigList)
-        
-       bigMatrix2<<-bigMatrix
+        sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
+        sampleFactors<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
         
         
-        sampleMappings<<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-        sampleFactors<<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
-        
-        
-        sampleIDs1<<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+        sampleIDs1<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
         
         
         
         
         #get colors chosen
         colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+        colorsChosen2<<-colorsChosen
+        zz<-cbind.data.frame(colorsChosen,sampleFactors)
         
-        colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+        zz$sampleFactors<-as.vector(zz$sampleFactors)
+        colnames(zz)<-c("colors","chosenFactor")
+     
+        
+        colnames(sampleIDs1)<-c("sampleFactorID","chosenFactor")
+        #Ensure string
+        sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
+        #Ensure string
+        zz$chosenFactor<- as.character(zz$chosenFactor)
+        
+        matchedColors<-merge(zz,sampleIDs1)
+        
+        
+        matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
+        matchedColors2<-matchedColors
+        
+        ba<-as_tibble(labels(dendro()))
 
         
-        colorF<-cbind.data.frame(colorsChosen,sampleFactors)
-        colorF$sampleFactors<-as.vector(colorF$sampleFactors)
+        colnames(ba)<-"sampleFactorID"
+        fcol<- right_join(matchedColors,ba,by="sampleFactorID")
         
         
         
-      
-        for (i in colorF$sampleFactors){
-          bigMatrix[which(bigMatrix[i] == "#000000"),i] <- as.vector(colorF[which(colorF[,2]==i),1])
-        }
-        
-        bigMatrix22<<-bigMatrix
-        par(mar = c(8,3,8,input$dendparmar))
-        
-       dendro() %>% set("labels_cex", .6) %>%  plot(.,horiz=T)
-        
-  
+        fcol$colors<-as.character(fcol$colors)
+        fcol$colors[is.na(fcol$colors)]<-"#000000"
         
         
-        shortenedNames<-dendro()
-       labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
-        colored_dots(bigMatrix, shortenedNames,
-                     rowLabels = names(bigMatrix),horiz=T,sort_by_labels_order = FALSE) 
+        par(mar=c(5,5,5,input$dendparmar))
         
         
         
         
-        
-        
-      }else{
-      
-      sampleMappings<<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-      sampleFactors<<-sampleMappings %>% pull(input$sampleFactorMapChosenAttribute) %>% unique
-      
-      
-      sampleIDs1<<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
-      
-    
-        
-      
-      #get colors chosen
-      colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-      colorsChosen2<<-colorsChosen
-      zz<-cbind.data.frame(colorsChosen,sampleFactors)
-      zz1<<-zz
-      
-      zz$sampleFactors<-as.vector(zz$sampleFactors)
-      colnames(zz)<-c("colors","chosenFactor")
-      zz2<<-zz
-      
-      colnames(sampleIDs1)<-c("sampleFactorID","chosenFactor")
-      #Ensure string
-      sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
-      #Ensure string
-      zz$chosenFactor<- as.character(zz$chosenFactor)
-      
-      matchedColors<<-merge(zz,sampleIDs1)
-      
-      
-      matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
-      matchedColors2<<-matchedColors
-      
-      ba<-as_tibble(labels(dendro()))
-      ba<<-ba
-      
-      colnames(ba)<-"sampleFactorID"
-      fcol<- right_join(matchedColors,ba,by="sampleFactorID")
-
-            
-      
-      fcol$colors<-as.character(fcol$colors)
-      fcol$colors[is.na(fcol$colors)]<-"#000000"
-      
-      
-
-      
-      
-      
-      
-      
-      
-      dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors)  %>% plot(horiz=TRUE,lwd=8,cex=1)}
+        dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) } %>% plot(.,horiz=T)
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
       
       #If no sample map is selected, run this:
-    }else if (input$kORheight=="2"){
-      par(mar=c(5,5,5,input$dendparmar))
-      dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
-      abline(v=input$height,lty=2)
-      
-    }
-    else{
-      par(mar=c(5,5,5,input$dendparmar))
-      dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=50)
     }
     
     
     
     
+  })
+  
+  
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ # -----------------
+ #Create the hierarchical clustering plot as well as the calculations needed for such.
+
+ 
+  output$hclustPlot <- renderPlot({
+    
+    
+    par(mar=c(5,5,5,input$dendparmar))
+    
+   if (input$kORheight=="1"){
+     dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8)
+   } else if (input$kORheight=="2"){
+     
+     dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8)
+     abline(v=input$height,lty=2)
+   
+  } else if (input$kORheight=="3"){
+     
+
+     coloredDend() 
+     
+  }
   },height=plotHeight)
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -1464,16 +1470,16 @@ function(input,output,session){
           uiOutput("groupui"),
           uiOutput("hclustui"),
           uiOutput("sampleGroupColoringui"),
-  
+          
           br(),
           h4("Suggestions for Reporting Protein Analysis:"),
           uiOutput("proteinReport"),
           textInput("saveHierAs","Save File As (File Name):"),
           downloadButton("downloadHierarchical","Save File (to Downloads Folder)")
-          ),
+        ),
         mainPanel("Hierarchical Clustering",textOutput("Clusters"),plotOutput("hclustPlot"))
         
-        )
+      )
     }
   })
   
@@ -1490,28 +1496,28 @@ function(input,output,session){
   
   
   
+  
+  output$sampleGroupColoringui <-   renderUI(
     
-    output$sampleGroupColoringui <-   renderUI(
-
-if(input$kORheight == "3"){  
- tags$div(
-   p("To color samples according to user-defined groupings..."), 
-  p("To use this function, create a different excel file and list all of your sample names in
-            different rows of a single column. In other columns you may add additional characteristics
-            of your samples (eg. media type, genus, sample location), with one characteristic per column.
-            You will have the option to color code your hierarchical clustering plot
-            based on these characteristics, which will appear in the drop-down list below."),
-  radioButtons("colDotsOrColDend", label = h5("Color dend or dots:"),
-               choices = list("dots" = 1, "no dots" = 2),
-               selected = 1),
-  p("Click the blue boxes under a factor (below) to change the color of the factor."),
-  fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
-  uiOutput("sampleMapColumns1"),
-  uiOutput("sampleMapColumns2"),
-  fluidRow(
-    uiOutput("sampleFactorMapColors"))
- )
-  })
+    if(input$kORheight == "3"){  
+      tags$div(
+        p("To color samples according to user-defined groupings..."), 
+        p("To use this function, create a different excel file and list all of your sample names in
+          different rows of a single column. In other columns you may add additional characteristics
+          of your samples (eg. media type, genus, sample location), with one characteristic per column.
+          You will have the option to color code your hierarchical clustering plot
+          based on these characteristics, which will appear in the drop-down list below."),
+        radioButtons("colDotsOrColDend", label = h5("Color dend or dots:"),
+                     choices = list("dots" = 1, "no dots" = 2),
+                     selected = 1),
+        p("Click the blue boxes under a factor (below) to change the color of the factor."),
+        fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
+        uiOutput("sampleMapColumns1"),
+        uiOutput("sampleMapColumns2"),
+        fluidRow(
+          uiOutput("sampleFactorMapColors"))
+        )
+    })
   
   
   
@@ -1675,7 +1681,7 @@ if(input$kORheight == "3"){
     peaksa
     
     
-  #delete  saveRDS(peaksa,normalizePath("C:/Users/chase/Desktop/smallmolmatrix.rds",mustWork = F))
+    #DELETE  saveRDS(peaksa,normalizePath("C:/Users/chase/Desktop/smallmolmatrix.rds",mustWork = F))
     
   })
   
@@ -1785,50 +1791,56 @@ if(input$kORheight == "3"){
     
   })
   
-  # -----------------
-  # Check whether to color by height-cut or by slelected # clusters
-  # Return a colored dendrogram plot
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   output$netheir <- renderPlot({
     
     
-    if(input$kORheight=="2"){
-      par(mar=c(5,5,5,input$dendparmar2))
-      dendro() %>% color_branches(h=input$height) %>% plot(horiz=TRUE,lwd=8)
-      abline(v=input$height,lty=2)
+    par(mar=c(5,5,5,input$dendparmar2))
+
+    if (input$kORheight=="1"){
+   isolate(  
+       dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8)
+  )
+    } else if (input$kORheight=="2"){
+   
+      isolate(       dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8) )
+      isolate( abline(v=input$height,lty=2) )
+    
+    } else if (input$kORheight=="3"){
+      isolate(
+      
+      coloredDend() 
+      )
     }
-    else if(input$kORheight=="1"){
-      par(mar=c(5,5,5,input$dendparmar2))
-      dendro() %>% color_branches(k=input$kClusters)   %>% plot(horiz=TRUE,lwd=8)
-    }
-    
-    
-    
   },height=plotHeightHeirNetwork)
+  
+  
+  
+  
+  
+  
+  
   
   
   # -----------------
   # Create MAN ui
   output$MANui <-  renderUI({
-    
-    if(is.null(input$Spectra1)){
-      fluidPage( 
-        
-        h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
-        
-        br(),
-        h4("Troubleshooting:"),
-        tags$ul(
-          tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the 
-                  \"Compare Two Samples\" and \"Hierarchical Clustering\" tabs."),
-          tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
-                  named \"Peak_Lists\""),
-          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
-        )
-        
-      )
-      
-    }else{
-      
+   
+      fluidPage(fluidRow(
       sidebarLayout(
         sidebarPanel(
           radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
@@ -1858,21 +1870,18 @@ if(input$kORheight == "3"){
           uiOutput("proteinReport2")
           ),
         mainPanel(textOutput("Clusters2"),
-                  simpleNetworkOutput("metaboliteAssociationNetwork"),
-                 
+                  simpleNetworkOutput("metaboliteAssociationNetwork"))
+      )),fluidRow(     
+              mainPanel(
                   
-                  
-                   plotOutput("netheir",
-                             click = "plot_click",
-                             dblclick = "plot_dblclick",
-                             hover = "plot_hover",
-                             brush = "plot_brush")
-                  
+                  plotOutput("netheir"
+                             )
+              )
                   
                   
                   
         ))
-    }
+    
   })
   
   # -----------------
@@ -1898,10 +1907,10 @@ if(input$kORheight == "3"){
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
   
- # session$onSessionEnded(function() {
- #   stopApp()
- #   q("no")
-#  })
+  # session$onSessionEnded(function() {
+  #   stopApp()
+  #   q("no")
+  #  })
   
   
 }
