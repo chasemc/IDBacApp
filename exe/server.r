@@ -1843,7 +1843,7 @@ function(input,output,session){
   output$MANui <-  renderUI({
    
       fluidPage(fluidRow(
-      sidebarLayout(
+      sidebarLayout(column(width=6,
         sidebarPanel(
           radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
                        choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
@@ -1858,8 +1858,13 @@ function(input,output,session){
           checkboxInput("save", label = "Save Current Network?", value = FALSE),
           br(),
           p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
-          p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br(),
-          p(strong("Note 1:"), "For publication-quality networks click the box next to \"Save Current Network\",
+          p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br()
+          
+)),
+column(width=6,
+       sidebarPanel(
+
+p(strong("Note 1:"), "For publication-quality networks click the box next to \"Save Current Network\",
             while selected- this saves a .csv file of the currently-displayed
             network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
             While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
@@ -1870,21 +1875,23 @@ function(input,output,session){
           br(),
           h4("Suggestions for Reporting Protein Analysis"),
           uiOutput("proteinReport2")
-          ),
+          ),          mainPanel()
+
      
-      )),fluidRow(     
+      ))),fluidRow(     
               mainPanel(
-                  
+                  column(width=6,
                 plotOutput("netheir",
                            click = "plot_click",
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
-                           brush = "plot_brush")
+                           brush = "plot_brush")),
+                column(width=6,
                 
+            
+                          simpleNetworkOutput("metaboliteAssociationNetwork")
                 
-                
-                
-                
+                )
               )
                   
                   
