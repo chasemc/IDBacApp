@@ -1730,7 +1730,7 @@ function(input,output,session){
     
     
     a <- as.undirected(graph_from_data_frame(bool))
-    
+    a123<<-a
     a<-simplify(a)
     wc <- fastgreedy.community(a)
     b <- igraph_to_networkD3(a, group = (wc$membership + 1))
