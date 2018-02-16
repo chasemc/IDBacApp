@@ -1,0 +1,11 @@
+Package: IDBac
+Type: Package
+Title: Protein and small molecule analysis of bacteria by MALDI-TOF MS
+Version: 0.0.1
+Author: Chase Clark
+Maintainer: Chase Clark <cclark42@uic.edu>
+Description: This app allows users to take raw dat MALDI-TOF MS files (Tested on Bruker autoFlex) and create bundled mzXML files for easy sharing/database creation as well as data analysis (hierarchical clustering, PCA, Spectra Comparison, Metabolite Association Network)
+License: 	GPL (??? 3) except included packages or sources license otherwise
+Encoding: UTF-8
+LazyData: true
+Depends: devtools, svglite, shinyjs, mzR, plotly, colourpicker, shiny, MALDIquant, MALDIquantForeign, readxl, networkD3, ape, FactoMineR, dendextend, networkD3, reshape2, plyr, igraph

@@ -5,11 +5,9 @@
 
 IDBacApp.Rproj
 .Rbuildignore
-
-/exe/pwiz
-/exe/wizard
-/exe/RInno_installer
-/exe/R-3.4.2-win.exe
-/exe/utils
-/exe/IDBac.bat
-.Rproj.user
+/packrat/lib
+/packrat/src
+packrat/lib*/
+/inst/app/wizard
+/inst/app/utils
+/inst/app/Rtools34.exe
