@@ -759,7 +759,6 @@ function(input,output,session){
     }
 
 
-
   })
 
 
@@ -1086,7 +1085,7 @@ function(input,output,session){
       booled<-"_UsedPresenceAbsence"
     }
 
-
+    rty<<-proteinMatrix()
 
     cacheDir<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\")
     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
@@ -2089,7 +2088,7 @@ showModal(modalDialog(
 
     # Latest GitHub Release
     getLatestStableVersion <- function(){
-      base_url <- "https://api.github.com/repos/chasemc/IDBacPackage/releases"
+      base_url <- "https://api.github.com/repos/chasemc/IDBac_App/releases"
       response <- httr::GET(base_url)
       parsed_response <- httr::content(response, "parsed", encoding = "utf-8")
       parsed_response[[1]]$tag_name
@@ -2131,7 +2130,7 @@ showModal(modalDialog(
       if (local_version != latestStableVersion) {
 
         downfunc <- function() {
-                       devtools::install_github("chasemc/IDBacPackage",force=TRUE,quiet = F,quick=T)
+                       devtools::install_github("chasemc/IDBac_App",force=TRUE,quiet = F,quick=T)
           message(tags$span(style="color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
                     }
 
