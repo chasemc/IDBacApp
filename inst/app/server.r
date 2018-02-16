@@ -1913,8 +1913,10 @@ output$downloadSmallMolNetworkData <- downloadHandler(
   output$MANui <-  renderUI({
 
       fluidPage(fluidRow(
+
         div(style ="padding: 14px 0px; margin:0%",
-          sidebarPanel(width=2, style='padding:30px',
+
+               sidebarPanel(width=4, style='padding:30px',
           radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
                        choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
                        selected = 1),
@@ -1936,14 +1938,14 @@ output$downloadSmallMolNetworkData <- downloadHandler(
 
        mainPanel(
 
-column(width=6,style ="padding: 14px 0px; margin:0%",
+column(width=4,style ="padding: 14px 0px; margin:0%",
 
              plotOutput("netheir",width="100%",height="100%",
                            click = "plot_click",
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
                            brush = "plot_brush")
-     ),column(width=6,
+     ),column(width=4,
                      simpleNetworkOutput("metaboliteAssociationNetwork")
                ))
 
