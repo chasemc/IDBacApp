@@ -32,13 +32,11 @@ Install_And_Load <- function(Required_Packages)
 }
 
 # Required packages to install and load
-Required_Packages = c("dplyr","devtools","svglite","shinyjs", "mzR","plotly","colourpicker","shiny", "MALDIquant", "MALDIquantForeign","readxl","networkD3","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","igraph")
+Required_Packages = c("devtools","svglite","shinyjs", "mzR","plotly","colourpicker","shiny", "MALDIquant", "MALDIquantForeign","readxl","networkD3","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","igraph")
 
 
 # Install and Load Packages
 Install_And_Load(Required_Packages)
-
-
 
 
 # The UI section of the Shiny app provides the "User Interface" and is the means of user interaction.
@@ -103,24 +101,11 @@ navbarPage(
 
               h4("Select \"PreProcessing\" above to begin")
 
-
-
-
-
-
-
   )))),
-
-
-
   tabPanel(
     "PreProcessing",
     fluidPage(
-
-
       fluidRow(
-
-
         radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
                      choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
                                     "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3,
@@ -128,14 +113,9 @@ navbarPage(
                                     "Select here if you have already converted data with IDBac and want to re-analyze select files" = 4),selected=0,inline=FALSE,width="100%")),
 
           fluidRow(  uiOutput("ui1"))
-
     )),
 
-
-
-
-
-  tabPanel("Compare Two Samples (Protein)",
+    tabPanel("Compare Two Samples (Protein)",
            uiOutput("inversepeakui")),
   tabPanel("Hierarchical Clustering (Protein)",
            uiOutput("Heirarchicalui")),

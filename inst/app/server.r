@@ -706,20 +706,35 @@ function(input,output,session){
 
   # -----------------
   # Popup displaying where to find files being created during spectra processing. No status bar -parallel
+  # popup3<-reactive({
+  #   showModal(modalDialog(
+  #     title = "Important message",
+  #     "When spectra processing is complete you will be able to begin with the data analysis",br(),
+  #     "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
+  #     "This also means your computer might be slow during the computations.",br(),
+  #     "The step allows for fast interaction during the various data analysis",
+  #     "To check the progress, you can navigate to the following directory, where four files will be created per sample ",
+  #     paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Peak_Lists"),
+  #
+  #
+  #     easyClose = FALSE, size="l",footer=""
+  #   ))
+  # })
+
+
   popup3<-reactive({
     showModal(modalDialog(
       title = "Important message",
       "When spectra processing is complete you will be able to begin with the data analysis",br(),
-      "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
-      "This also means your computer might be slow during the computations.",br(),
-      "The step allows for fast interaction during the various data analysis",
-      "To check the progress, you can navigate to the following directory, where four files will be created per sample ",
+      "To check the progress, observe the progress bar at bottom right or navigate to the following directory, where four files will be created per sample ",
       paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Peak_Lists"),
 
 
       easyClose = FALSE, size="l",footer=""
     ))
   })
+
+
 
   # -----------------
   # Popup notifying user when spectra processing is complete
@@ -2009,7 +2024,7 @@ output$downloadSmallMolNetworkData <- downloadHandler(
 
         div(style ="padding: 14px 0px; margin:0%",
 
-               sidebarPanel(width=4, style='padding:30px',
+               sidebarPanel(width=3, style='padding:30px',
           radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
                        choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
                        selected = 1),
@@ -2031,14 +2046,14 @@ output$downloadSmallMolNetworkData <- downloadHandler(
 
        mainPanel(
 
-column(width=4,style ="padding: 14px 0px; margin:0%",
+column(width=5,style ="padding: 14px 0px; margin:0%",
 
              plotOutput("netheir",width="100%",height="100%",
                            click = "plot_click",
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
                            brush = "plot_brush")
-     ),column(width=8,style ="padding: 14px 0px; margin:0%",
+     ),column(width=7,style ="padding: 14px 0px; margin:0%",
                      simpleNetworkOutput("metaboliteAssociationNetwork")
                ))
 
