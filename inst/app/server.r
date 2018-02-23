@@ -538,7 +538,7 @@ function(input,output,session){
       # fullZ$UserInput.y = file locations
 
       # outp is the filepath of where to save the created mzXML files
-      outp <<- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
+      outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
 
 
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
@@ -679,7 +679,6 @@ function(input,output,session){
     }else if(input$beginPeakProcessing > 0) {
       fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE))
       popup3()
-ff<<-fileList
 
       #   numCores <- detectCores()
       #   cl <- makeCluster(numCores)
@@ -687,7 +686,7 @@ ff<<-fileList
       #   stopCluster(cl)
 
       #Single process with sapply instead of parsapply
-      sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
+      #sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
 
       lengthProgress <- length(fileList)
 
@@ -1307,7 +1306,7 @@ ff<<-fileList
 
    toReturn <- list(dend=NULL,bigMatrix=NULL,shortenedNames=NULL)
 
-    # if  want to custom group samples
+    # if user selects to customize group samples
     if (input$kORheight =="3"){
          if(input$colDotsOrColDend == "1"){
             groupFile<-as.data.frame(read_excel(input$sampleMap$datapath,1))
@@ -1423,7 +1422,7 @@ ff<<-fileList
 
         #get colors chosen
         colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-        colorsChosen2<<-colorsChosen
+
         zz<-cbind.data.frame(colorsChosen,sampleFactors)
 
         zz$sampleFactors<-as.vector(zz$sampleFactors)
@@ -1483,15 +1482,15 @@ ff<<-fileList
 
 
   output$hclustPlot <- renderPlot({
-dd<<-dendro()
+
 
     par(mar=c(5,5,5,input$dendparmar))
 
    if (input$kORheight=="1"){
-     dendro() %>% color_branches(k=input$kClusters, col= colorBlindPalette) %>% plot(horiz=TRUE,lwd=8)
+     dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8)
    } else if (input$kORheight=="2"){
 
-     dendro() %>% color_branches(h=input$height, col= colorBlindPalette)  %>% plot(horiz=TRUE,lwd=8)
+     dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8)
      abline(v=input$height,lty=2)
 
   } else if (input$kORheight=="3"){
@@ -2157,7 +2156,7 @@ showModal(modalDialog(
 
 
     # Currently installed version
-    local_version <<- try(packageVersion("IDBac"))
+    local_version <- try(packageVersion("IDBac"))
 
 
 
@@ -2195,7 +2194,7 @@ showModal(modalDialog(
       parsed_response[[1]]$tag_name
     }
 
-    latestStableVersion <<- try(getLatestStableVersion())
+    latestStableVersion <- try(getLatestStableVersion())
 
 
     showModal(modalDialog(
