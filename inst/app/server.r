@@ -1971,7 +1971,7 @@ column(width=4,style ="padding: 14px 0px; margin:0%",
                            dblclick = "plot_dblclick",
                            hover = "plot_hover",
                            brush = "plot_brush")
-     ),column(width=4,
+     ),column(width=8,style ="padding: 14px 0px; margin:0%",
                      simpleNetworkOutput("metaboliteAssociationNetwork")
                ))
 
