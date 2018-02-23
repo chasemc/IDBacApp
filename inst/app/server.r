@@ -635,9 +635,6 @@ function(input,output,session){
       paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"),
 
 
-        pre(id = "mzXMLconversion"),
-
-
       easyClose = FALSE, size="l",
       footer=""
     ))
@@ -660,23 +657,20 @@ function(input,output,session){
 
       paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"),
       easyClose = TRUE,
-      footer = tagList(actionButton("beginPeakProcessing","Click to continue with Peak Processing"), modalButton("Close"))
+      footer = tagList(actionButton("beginPeakProcessingModal","Click to continue with Peak Processing"), modalButton("Close"))
     ))
   })
 
-  # -----------------
-  # Make popup disappear when peak processing button is pressed
-  observeEvent(input$beginPeakProcessing, {
-    removeModal()
-  })
+
+
 
 
   # -----------------
   # Call the Spectra processing function when the spectra processing button is pressed
-  observeEvent(input$beginPeakProcessing,{
-    if (is.null(input$beginPeakProcessing)){
+  observeEvent({input$beginPeakProcessing
+                input$beginPeakProcessingModal},{
 
-    }else if(input$beginPeakProcessing > 0) {
+
       fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE))
       popup3()
 
@@ -704,7 +698,7 @@ function(input,output,session){
 
 
       popup4()
-    }
+
 
   })
 
