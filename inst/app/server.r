@@ -1804,9 +1804,9 @@ dd<<-dendro()
     # Round m/z values to two decimals, use sprintf to preserve trailing zeros
     bool$Target <- sprintf(as.numeric(as.matrix(bool$Target)),fmt='%#.3f')
 
-    boolySource <- as.character(bool$Source)
-    boolyTarget <- as.numeric(bool$Target)
-    boolyWeight <- as.numeric(bool$Weight)
+    bool$Source <- as.character(bool$Source)
+    bool$Target <- as.numeric(bool$Target)
+    bool$Weight <- as.numeric(bool$Weight)
 
     bool
   })
