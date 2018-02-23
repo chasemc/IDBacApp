@@ -1661,7 +1661,7 @@ dd<<-dendro()
       combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
       #For now, replicate matrix samples are merged into a consensus peak list.
 
-       e(
+       validate(
         need(try(mergeMassPeaks(combinedSmallMolPeaksm)),"It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
       )
 
@@ -1798,10 +1798,15 @@ dd<<-dendro()
     #Create a matrix readable by Gephi as an edges file
     bool <- cbind(rownames(bool),bool)
     bool <- melt(bool)
+    # Removeself
     bool <- subset(bool, value!=0)
     colnames(bool) <- c("Source","Target","Weight")
-    #Round m/z values to a single decimal
-    bool$Target <- round(as.numeric(as.matrix(bool$Target)),digits=1)
+    # Round m/z values to two decimals, use sprintf to preserve trailing zeros
+    bool$Target <- sprintf(as.numeric(as.matrix(bool$Target)),fmt='%#.3f')
+
+    boolySource <- as.character(bool$Source)
+    boolyTarget <- as.numeric(bool$Target)
+    boolyWeight <- as.numeric(bool$Weight)
 
     bool
   })
