@@ -4,6 +4,9 @@
 #  Load colored_Dots.R function
 
 
+
+colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",rainbow(1000)))
+
 source('colored_Dots.R', echo=TRUE)
 
 
@@ -668,14 +671,17 @@ function(input,output,session){
   # })
 
   spectra <- reactive({
+
     # Return Full File Path of all averaged protein spectra RDS
-    vectorFilePaths <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
+    vectorFilePaths <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"), full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
     # Return only file name of all averaged protein spectra RDS
-    vectorFileNames <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=FALSE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
+    vectorFileNames <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"), full.names=FALSE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
     # Keep only the sample name from file names
-    vectorFileNames <-unlist(strsplit(vectorFileNames,"_SummedProteinSpectra.rds"))
-    temp <- cbind.data.frame(paths= vectorFilePaths,names= vectorFileNames)
+    vectorFileNames <- unlist(strsplit(vectorFileNames, "_SummedProteinSpectra.rds"))
+    temp            <- cbind.data.frame(paths = vectorFilePaths, names = vectorFileNames)
+
     lapply(temp,as.vector)
+
 
     # The output is list of length 2: file paths of protein spectra rds files (full spectra, not just peaks) and the samples names
     #
@@ -703,14 +709,21 @@ function(input,output,session){
 
   trimmedP <- reactive({
     all <-unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
-    all<-binPeaks(all, tolerance =.002,method="relaxed")
 
+    # Check if protein spectra exist
     validate(
-      need(try(trim(all, c(input$lowerMass, input$upperMass))),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
+      need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
            tab at the top of the page.")
       )
+
+    # Bin protein peaks
+    all<-binPeaks(all, tolerance =.002,method="relaxed")
+
+
     trim(all, c(input$lowerMass, input$upperMass))
   })
+
+
 
   # -----------------
   # Only include peaks occurring in specified percentage of replicates (groups determined by sample names)
@@ -736,6 +749,8 @@ function(input,output,session){
 
 
   })
+
+
 
   # -----------------
   proteinMatrix <- reactive({
@@ -849,7 +864,6 @@ function(input,output,session){
 
   # -----------------
   output$inversePeakComparisonPlotZoom <- renderPlot({
-
     temp<- listOfDataframesForInversePeakComparisonPlot()
     meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
     meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
@@ -1005,22 +1019,31 @@ function(input,output,session){
     pc <- as.data.frame(pc)
     nam <- row.names(pc)
     pc <- cbind(pc,nam)
+  })
 
 
+  pcaWithColor <- reactive({
+    pc <- pcaCalculation()
+    # Based on user selection, color PCA based on dendrogram groupings
     if(!is.null(isolate(input$kORheight))){
-      if(input$kORheight=="2"){
-        d <- cutree(dendro(),h=input$height)
+      if(isolate(input$kORheight=="2")){
+        # Colors chosen by cutting dendrogram at user-chosen height
+        fac <- cutree(dendro(),h=input$height)
+      }else if (isolate(input$kORheight=="1")){
+        # Colors chosen by user-selected "k" of k-means
+        fac <- cutree(dendro(),k=input$kClusters)
       }else{
-        d <- cutree(dendro(),k=input$kClusters)
+        # No factors, everthing colored black
+        fac <- rep(1,length(dendro()))
       }
 
+      pc <- cbind.data.frame(pc,fac)
+      pc <- merge(pc,colorBlindPalette,by="fac")
 
-
-      return( as_tibble(cbind(pc,d)))
-    }else{
-      return( as_tibble(pc))
-
+      return(pc)
     }
+
+
 
 
 
@@ -1030,10 +1053,10 @@ function(input,output,session){
   output$pcaplot <- renderPlotly({
 
 
-    e<-pcaCalculation()
+    pcaDat <- pcaWithColor()
 
 
-    plot_ly(data=e,x=e$Dim.1,y=e$Dim.2,z=e$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=e$nam ,color = factor(e$d))
+    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam ,color = pcaDat$col)
 
 
 
@@ -1085,7 +1108,6 @@ function(input,output,session){
       booled<-"_UsedPresenceAbsence"
     }
 
-    rty<<-proteinMatrix()
 
     cacheDir<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\")
     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
@@ -1387,15 +1409,15 @@ function(input,output,session){
 
 
   output$hclustPlot <- renderPlot({
-
+dd<<-dendro()
 
     par(mar=c(5,5,5,input$dendparmar))
 
    if (input$kORheight=="1"){
-     dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8)
+     dendro() %>% color_branches(k=input$kClusters, col= colorBlindPalette) %>% plot(horiz=TRUE,lwd=8)
    } else if (input$kORheight=="2"){
 
-     dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8)
+     dendro() %>% color_branches(h=input$height, col= colorBlindPalette)  %>% plot(horiz=TRUE,lwd=8)
      abline(v=input$height,lty=2)
 
   } else if (input$kORheight=="3"){
@@ -1639,7 +1661,7 @@ function(input,output,session){
       combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
       #For now, replicate matrix samples are merged into a consensus peak list.
 
-      validate(
+       e(
         need(try(mergeMassPeaks(combinedSmallMolPeaksm)),"It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
       )
 
