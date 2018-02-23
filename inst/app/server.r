@@ -54,12 +54,12 @@ function(input,output,session){
       spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
 
 
-      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
+      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "\\\\")[[1]][1])))[[1]]
       spectraImport <- lapply(1:length(spectraImport), function(x)createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
     } else{
       spectraImport <- lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
       spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
-      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "/")[[1]][1])))[[1]]
+      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "\\\\")[[1]][1])))[[1]]
       spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
       spectraImport<- list(spectraImport)
     }
@@ -77,13 +77,13 @@ function(input,output,session){
     proteinSpectra <- spectraImport[which(separateSpectra > 10000)]
     smallSpectra <- spectraImport[which(!separateSpectra > 10000)]
     # Cleanup
-    remove(separateSpectra)
+    remove(separateSpectra,spectraImport)
 
     # Average and save Protein Spectra  as RDS (Used to display a single spectra per sample in the protein spectra comparison plots)
     # Also, process spectra and peak pick individually and save as RDS
     if(length(proteinSpectra) > 0){
       averaged <- averageMassSpectra(proteinSpectra, method = "mean")
-      saveRDS(averaged, paste0(idbacDir,"/Peak_Lists/", averaged@metaData$Strain[[1]], "_", "SummedProteinSpectra.rds"))
+      saveRDS(averaged, paste0(idbacDir,"\\\\Peak_Lists\\\\", averaged@metaData$Strain[[1]], "_", "SummedProteinSpectra.rds"))
       remove(averaged)
       gc()
       # Why square root transformation and not log:
@@ -99,6 +99,7 @@ function(input,output,session){
       saveRDS(proteinSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "ProteinPeaks.rds"))
       # Average and save Small Molecule Spectra as RDS (Used to display a single spectra per sample in the protein spectra comparison plots)
       # Also, process spectra and peak pick individually and save as RDS
+    }
       if(length(smallSpectra) > 0){
         ############
         #Spectra Preprocessing, Peak Picking
@@ -110,10 +111,10 @@ function(input,output,session){
         smallSpectra <- removeBaseline(smallSpectra, method = "TopHat")
         #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
         smallSpectra <- detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
-        saveRDS(smallSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "SmallMoleculePeaks.rds"))
+        saveRDS(smallSpectra, paste0(idbacDir, "\\\\Peak_Lists\\\\", labs, "_", "SmallMoleculePeaks.rds"))
 
       }
-    }
+
   }
 
 
@@ -343,7 +344,7 @@ function(input,output,session){
     req(selectedDirectory())
     uniquifiedIDBacs<-list.dirs(selectedDirectory(),recursive = F,full.names = F)
     uniquifiedIDBacs<-make.unique(c(uniquifiedIDBacs,"IDBac"),sep="-")
-    last(uniquifiedIDBacs)
+    tail(uniquifiedIDBacs,1)
   })
 
   # -----------------
@@ -555,20 +556,49 @@ function(input,output,session){
         )
       }
       )
+
+
       functionTOrunMSCONVERTonCMDline<-function(x){
-        system(command =
+
+         system(command =
                  "cmd.exe",
                input = as.character(x))
       }
 
 
 
+
+
+#
+#       try(numCores <- parallel::detectCores())
+#
+#       if(exists("numCores") & numCores > 2){
+#       numCores <- parallel::makeCluster(numCores-1)
+#       parallel::parSapply(numCores,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
+#       parallel::stopCluster(numCores)
+#       }else{
+#
+#          sapply(msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)  #No parallel processing
+#
+#       }
+
       popup1()
-      # sapply(msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)  #No parallel processing
-      numCores <- detectCores()
-      numCores <- makeCluster(numCores-1)
-      parSapply(numCores,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
-      stopCluster(numCores)
+
+
+    lengthProgress <- length(msconvertCmdLineCommands)
+
+      withProgress(message = 'Conversion in progress',
+                   detail = 'This may take a while...', value = 0, {
+
+    for(i in 1:lengthProgress){
+      incProgress(1/lengthProgress)
+
+      functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
+
+    }
+
+    })
+
       popup2()
 
 
@@ -579,17 +609,44 @@ function(input,output,session){
   # -----------------
   # Intermediate popup showing where to check for files being created, no status bar because parallel (maybe in future
   # can count files present vs need to be made, on a timer update)
+  # popup1<-reactive({
+  #   showModal(modalDialog(
+  #     title = "Important message",
+  #     "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",br(),
+  #     "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
+  #     "This also means your computer might be slow during these file conversions.",br(),
+  #     "To check what has been converted, you can navigate to:",
+  #     paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"),
+  #
+  #
+  #       pre(id = "mzXMLconversion"),
+  #
+  #
+  #     easyClose = FALSE, size="l",
+  #     footer=""
+  #   ))
+  # })
+
   popup1<-reactive({
     showModal(modalDialog(
       title = "Important message",
       "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",br(),
-      "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
-      "This also means your computer might be slow during these file conversions.",br(),
       "To check what has been converted, you can navigate to:",
       paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Converted_To_mzXML"),
-      easyClose = FALSE, size="l",footer=""
+
+
+        pre(id = "mzXMLconversion"),
+
+
+      easyClose = FALSE, size="l",
+      footer=""
     ))
   })
+
+
+
+
+
 
   # -----------------
   # Popup summarizing the final status of the conversion
@@ -620,8 +677,9 @@ function(input,output,session){
     if (is.null(input$beginPeakProcessing)){
 
     }else if(input$beginPeakProcessing > 0) {
-      fileList <- list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE)
+      fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE))
       popup3()
+ff<<-fileList
 
       #   numCores <- detectCores()
       #   cl <- makeCluster(numCores)
@@ -630,6 +688,22 @@ function(input,output,session){
 
       #Single process with sapply instead of parsapply
       sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
+
+      lengthProgress <- length(fileList)
+
+      withProgress(message = 'Processing in progress',
+                   detail = 'This may take a while...', value = 0, {
+
+                     for(i in 1:lengthProgress){
+                       incProgress(1/lengthProgress)
+
+                       spectraProcessingFunction(fileList[i],idbacDirectory$filePath)
+
+                     }
+
+                   })
+
+
       popup4()
     }
 
@@ -1802,7 +1876,7 @@ dd<<-dendro()
     bool <- subset(bool, value!=0)
     colnames(bool) <- c("Source","Target","Weight")
     # Round m/z values to two decimals, use sprintf to preserve trailing zeros
-    bool$Target <- sprintf(as.numeric(as.matrix(bool$Target)),fmt='%#.3f')
+    bool$Target <- sprintf(as.numeric(as.matrix(bool$Target)),fmt='%#.2f')
 
     bool$Source <- as.character(bool$Source)
     bool$Target <- as.numeric(bool$Target)
