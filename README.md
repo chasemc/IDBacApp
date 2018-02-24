@@ -1,5 +1,5 @@
 IDBac releases are preserved at Zenodo:   
-[![DOI](https://zenodo.org/badge/105386217.svg)](https://zenodo.org/badge/latestdoi/105386217)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115619.svg)](https://doi.org/10.5281/zenodo.1115619)
 
 
 
