@@ -106,12 +106,21 @@ navbarPage(
     "PreProcessing",
     fluidPage(
       fluidRow(
-        radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
-                     choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
-                                    "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3,
-                                    "Select here if you have already converted data with IDBac and want to re-analyze all of it" = 2,
-                                    "Select here if you have already converted data with IDBac and want to re-analyze select files" = 4),selected=0,inline=FALSE,width="100%")),
 
+        column(width=3,
+        radioButtons("startingWith", label = h3("Begin by selecting an option below:"),
+                     choices = list("Starting with raw data files" = 1,
+                                    "Starting with peak list files (.txt or .csv)" = 2,
+                                    "Re-analyzing data alrerady processed with IDBac" = 3),selected=0,inline=FALSE,width="100%")),
+        column(width=1,
+          uiOutput("arrowPNG")),
+        column(width=4,
+
+        uiOutput("startingWithUI"))
+
+
+
+      ),
           fluidRow(  uiOutput("ui1"))
     )),
 

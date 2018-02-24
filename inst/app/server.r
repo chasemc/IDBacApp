@@ -119,6 +119,58 @@ function(input,output,session){
 
 
 
+  observe({
+    if (is.null(input$startingWith)){}else{
+
+      output$arrowPNG<-renderUI({
+          absolutePanel(img(src="arrowRight.png"),top=50, right=75)
+
+      })
+    }
+})
+
+observe({
+    if (is.null(input$startingWith)){}else{
+
+
+
+      output$startingWithUI<-renderUI({
+
+      if(input$startingWith == 1){
+
+          radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
+                       choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
+                                      "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3),selected=0,inline=FALSE,width="100%")
+      }else if(input$startingWith == 2){
+          radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
+                       choices = list("Select here if you want to use .txt peak list files" = 5,
+                                      "Select here if you want to use .csv peak list files" = 6),selected=0,inline=FALSE,width="100%")
+
+      }else if(input$startingWith == 3){
+          radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
+                       choices = list("Select here if you have already converted data with IDBac and want to re-analyze all of it" = 2,
+                                      "Select here if you have already converted data with IDBac and want to re-analyze select files" = 4),selected=0,inline=FALSE,width="100%")
+
+      }
+
+})
+}
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   # -----------------
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
@@ -148,7 +200,7 @@ function(input,output,session){
                         ),
                  column(1
                  ),
-                 column(5,style = "background-color:#F5F5F5",
+                 column(5,style = "background-color:#0000001a",
                         fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                         br(),
                         p(strong("1: Working Directory")),
@@ -208,7 +260,7 @@ function(input,output,session){
                         ),
                  column(1
                  ),
-                 column(5,style = "background-color:#F5F5F5",
+                 column(5,style = "background-color:#0000001a",
                         fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                         br(),
                         p(strong("1:"), " Your Working Directory is where files will be created."),
@@ -262,7 +314,7 @@ function(input,output,session){
                         ),
                         column(1
                         ),
-                        column(5,style = "background-color:#F5F5F5",
+                        column(5,style = "background-color:#0000001a",
                                fluidRow(column(5,offset=3,h3("Workflow Pane"))),
                                p(strong("1:"), "Select the folder containing your data"),
                                actionButton("idbacDirectoryButton", label = "Click to select the data directory"),
@@ -291,17 +343,11 @@ function(input,output,session){
                  br(),
                  br(),
                  fluidRow(
-                   column(12,offset=3,
-                          h3("Customizing which samples to analyze"))),br(),br(),
-                 column(5,
-                        fluidRow(column(5,offset=3,h3("Instructions"))),
-                        br(),
-                        p("Begin by creating a blank working directory.")
-                 ),
-                 column(1
-                 ),
-                 column(5,style = "background-color:#F5F5F5",
-                        fluidRow(column(5,offset=3,h3("Workflow Pane"))),
+                   column(width = 12,
+                          h3("Customizing which samples to analyze",align="center"))),br(),br(),
+                 column(width = 4),
+                 column(width=4,style = "background-color:#0000001a",
+                        h3("Workflow Pane",align="center"),
                         br(),
                         p(strong("1: "), actionButton("selectedWorkingDirectory", label = "Click to select where to create a working directory")),
                         p("Selected Location:"),
@@ -313,7 +359,7 @@ function(input,output,session){
                         p(strong("3:"), "Place the mzXML files that you wish to analyze into:"),
                         p(verbatimTextOutput("whereConvert")),
                         p(strong("4:"), "Select \"Process mzXML\" to process mzXML files for analysis"),
-                        actionButton("beginPeakProcessing", label = "Process mzXML spectra")
+                        actionButton("beginPeakProcessingAgain", label = "Process mzXML spectra")
                  )
           )
         )
@@ -367,7 +413,18 @@ function(input,output,session){
     output$whereConvert<-renderText({
       paste0(idbacuniquedir(),"\\Converted_To_mzXML")
     })
+
+    # save path of where mzxml files will be
+    idbacDirectory$filePath <- idbacuniquedir()
+
+
   })
+
+
+
+
+
+
 
 
   # -----------------
@@ -405,7 +462,6 @@ function(input,output,session){
   observeEvent(input$idbacDirectoryButton,{
     idbacDirectory$filePath <- pressedidbacDirectoryButton()
   })
-
 
 
 
@@ -668,8 +724,8 @@ function(input,output,session){
   # -----------------
   # Call the Spectra processing function when the spectra processing button is pressed
   observeEvent({input$beginPeakProcessing
-                input$beginPeakProcessingModal},{
-
+                input$beginPeakProcessingModal
+                input$beginPeakProcessingAgain},{
 
       fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE))
       popup3()
@@ -1059,7 +1115,7 @@ function(input,output,session){
                       choices = spectra()$names),
           downloadButton("downloadInverse",label="Download Main Plot"),
           downloadButton("downloadInverseZoom",label="Download Zoomed Plot"),
-          numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=70,max=70),
+          numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
           numericInput("pSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
           numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
           numericInput("upperMass", label = h5("Upper Mass Cutoff"),value = 15000,step=50),
