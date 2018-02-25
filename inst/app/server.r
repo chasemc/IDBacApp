@@ -200,8 +200,9 @@ observe({
                         ),
                  column(1
                  ),
-                 column(5,style = "background-color:#0000001a",
-                        fluidRow(column(5,offset=3,h3("Workflow Pane"))),
+                 column(5,
+                        fluidRow(
+                        h3("Workflow Pane", align="center")),
                         br(),
                         p(strong("1: Working Directory")),
                         actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
@@ -211,15 +212,15 @@ observe({
                         actionButton("rawFileDirectory", label = "Click to select the location of your RAW data"),
                         fluidRow(column(12, verbatimTextOutput("rawFileDirectory", placeholder = TRUE))),
                         br(),
-                        p(strong("3:"), "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files."),
+                        p(strong("3:", "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files.")),
                         fileInput('excelFile', label = NULL , accept =c('.xlsx','.xls')),
-                        p(strong("4:"),"Click \"Convert to mzXML\" to begin spectra conversion."),
+                        p(strong("4:","Click \"Convert to mzXML\" to begin spectra conversion.")),
                         actionButton("run", label = "Convert to mzXML"),
                         br(),
                         br(),
                         br(),
                         br(),
-                        p(strong("Note:"),"If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."),
+                        p(strong("Note:","If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise.")),
                         actionButton("beginPeakProcessing", label = "Process mzXML spectra")
 
                  )
@@ -260,8 +261,9 @@ observe({
                         ),
                  column(1
                  ),
-                 column(5,style = "background-color:#0000001a",
-                        fluidRow(column(5,offset=3,h3("Workflow Pane"))),
+                 column(5, style = "background-color:#0000001a",
+                        fluidRow(
+                        h3("Workflow Pane", align="center")),
                         br(),
                         p(strong("1:"), " Your Working Directory is where files will be created."),
                         actionButton("selectedWorkingDirectory", label = "Click to select your Working Directory"),
@@ -315,7 +317,8 @@ observe({
                         column(1
                         ),
                         column(5,style = "background-color:#0000001a",
-                               fluidRow(column(5,offset=3,h3("Workflow Pane"))),
+                               fluidRow(
+                                 h3("Workflow Pane", align="center")),
                                p(strong("1:"), "Select the folder containing your data"),
                                actionButton("idbacDirectoryButton", label = "Click to select the data directory"),
                                fluidRow(column(
@@ -347,7 +350,7 @@ observe({
                           h3("Customizing which samples to analyze",align="center"))),br(),br(),
                  column(width = 4),
                  column(width=4,style = "background-color:#0000001a",
-                        h3("Workflow Pane",align="center"),
+                        h3("Workflow Pane", align="center"),
                         br(),
                         p(strong("1: "), actionButton("selectedWorkingDirectory", label = "Click to select where to create a working directory")),
                         p("Selected Location:"),
@@ -1020,7 +1023,7 @@ observe({
   # -----------------
 #observeEvent(input$downloadInverse,{
   output$downloadInverse <- downloadHandler(
-    filename = function(){paste0(input$Spectra1,"_",input$Spectra2,".svg")},
+    filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,".svg")},
     content = function(file1){
     temp<- listOfDataframesForInversePeakComparisonPlot()
     meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
@@ -1040,7 +1043,7 @@ observe({
     lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
     rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
     rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
-    legend(max(meanSpectrumSampleOne@mass)*.6,max(meanSpectrumSampleOne@intensity)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra1)),
+    legend(max(meanSpectrumSampleOne@mass)*.6,max(meanSpectrumSampleOne@intensity)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
            col=c("black", "black"), lty=1:1, cex=1)
 
      dev.off()
@@ -1052,7 +1055,7 @@ observe({
   # -----------------
   #observeEvent(input$downloadInverse,{
   output$downloadInverseZoom <- downloadHandler(
-    filename = function(){paste0(input$Spectra1,"_",input$Spectra2,"-Zoom.svg")},
+    filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")},
     content = function(file1){
 
       temp<- listOfDataframesForInversePeakComparisonPlot()
@@ -1065,7 +1068,6 @@ observe({
       remove(temp)
 
 
-      #svg(filename=paste0(input$Spectra1,"_",input$Spectra1,".svg"))
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
 
@@ -1075,7 +1077,7 @@ observe({
       rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
 
 
-      legend(max(meanSpectrumSampleOne@mass)*.6,max(meanSpectrumSampleOne@intensity)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra1)),
+      legend(max(meanSpectrumSampleOne@mass)*.6,max(meanSpectrumSampleOne@intensity)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
              col=c("black", "black"), lty=1:1, cex=1)
 
       dev.off()
@@ -1108,7 +1110,7 @@ observe({
 
 
       sidebarLayout(
-        sidebarPanel(
+        sidebarPanel(width = 3, style = "background-color:#0000001a",
           selectInput("Spectra1", label=h5("Spectrum 1 (up; matches to bottom spectrum are blue, non-matches are red)"),
                       choices = spectra()$names),
           selectInput("Spectra2", label=h5("Spectrum 2 (down)"),

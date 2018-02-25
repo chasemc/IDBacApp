@@ -1,3 +1,5 @@
+zenodoId <- "1115619"
+
 
 if(!length(grep("mzR",row.names(installed.packages())))){
   if(!length(grep("BiocInstaller",row.names(installed.packages())))){
@@ -41,21 +43,21 @@ Install_And_Load(Required_Packages)
 
 # The UI section of the Shiny app provides the "User Interface" and is the means of user interaction.
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
+#tags$body(background = "rotatingPCA.gif",
 navbarPage(
   "IDBac",
   tabPanel(
     "Introduction",
     fluidPage(
       shinyjs::useShinyjs(),
-
       fluidRow(
         column(3,
                br(),
                div(img(src="IDBac_Computer_SVG_300DPI.png",style="width:75%;height:75%"))),
-        column(8,
-               h1("Welcome to IDBac",align="center"),
+        column(5,
+               h1("Welcome to IDBac", align="center"),
                br(),
-               h4("General Information:"),
+               h4("General Information:", align="center"),
 
                tags$ul(
                   tags$li(
@@ -69,7 +71,7 @@ navbarPage(
                  ),
 
               br(),
-              h4("How to Cite IDBac:"),
+              h4("How to Cite IDBac:", align="center"),
 
               tags$ul(
                  tags$li(
@@ -89,23 +91,28 @@ navbarPage(
                 ),
                 tags$ul(
                   tags$li(
-                    p("For reproducibility, cite this version of IDBac with the version DOI: \"10.5281/zenodo.1145465\"")
+                    p("For reproducibility, cite this specific version of IDBac with the version ", a(href= paste0("http://doi.org/10.5281/zenodo.", zenodoId), target="_blank", tags$code(paste0("DOI: 10.5281/zenodo.", zenodoId))))
                     ),
                   tags$li(
-                    p("Past versions of IDBac can be found here:",a(href="https://doi.org/10.5281/zenodo.1145465",img(src="https://zenodo.org/badge/DOI/10.5281/zenodo.1145465.svg"),target="_blank") )
+                    p("Cite all versions? You can cite all versions by using the ", a(href="http://doi.org/10.5281/zenodo.1115619", target="_blank",tags$code("DOI: 10.5281/zenodo.1115619.")),br(), " This DOI represents all versions, and will always resolve to the latest one.")
                   )
                 )
               ),
 
               br(),
 
-              h4("Select \"PreProcessing\" above to begin")
+              h4("Select \"PreProcessing\" above to begin", align="center")
 
-  )))),
+  )
+
+
+
+
+  ))),
   tabPanel(
     "PreProcessing",
     fluidPage(
-      fluidRow(
+      fluidRow(style = "background-color:#0000001a",
 
         column(width=3,
         radioButtons("startingWith", label = h3("Begin by selecting an option below:"),
@@ -120,7 +127,7 @@ navbarPage(
 
 
 
-      ),
+      ),fluidRow(tags$hr(size=20)),
           fluidRow(  uiOutput("ui1"))
     )),
 
