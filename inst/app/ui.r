@@ -44,7 +44,7 @@ Install_And_Load(Required_Packages)
 # The UI section of the Shiny app provides the "User Interface" and is the means of user interaction.
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
 #tags$body(background = "rotatingPCA.gif",
-navbarPage(
+navbarPage(collapsible=T,
   "IDBac",
   tabPanel(
     "Introduction",
@@ -112,20 +112,18 @@ navbarPage(
   tabPanel(
     "PreProcessing",
     fluidPage(
-      fluidRow(style = "background-color:#0000001a",
+      fluidRow(style = "background-color:#7777770d",
 
         column(width=3,
-        radioButtons("startingWith", label = h3("Begin by selecting an option below:"),
+        radioButtons("startingWith", label = h3("I am:"),
                      choices = list("Starting with raw data files" = 1,
                                     "Starting with peak list files (.txt or .csv)" = 2,
                                     "Re-analyzing data alrerady processed with IDBac" = 3),selected=0,inline=FALSE,width="100%")),
         column(width=1,
-          uiOutput("arrowPNG")),
+        fluidRow(),fluidRow(  uiOutput("arrowPNG")),fluidRow()),
         column(width=4,
 
         uiOutput("startingWithUI"))
-
-
 
       ),fluidRow(tags$hr(size=20)),
           fluidRow(  uiOutput("ui1"))

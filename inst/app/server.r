@@ -123,7 +123,7 @@ function(input,output,session){
     if (is.null(input$startingWith)){}else{
 
       output$arrowPNG<-renderUI({
-          absolutePanel(img(src="arrowRight.png"),top=50, right=75)
+           img(src="arrowRight.png")
 
       })
     }
@@ -200,7 +200,7 @@ observe({
                         ),
                  column(1
                  ),
-                 column(5,
+                 column(5, style = "background-color:#7777770d",
                         fluidRow(
                         h3("Workflow Pane", align="center")),
                         br(),
@@ -261,7 +261,7 @@ observe({
                         ),
                  column(1
                  ),
-                 column(5, style = "background-color:#0000001a",
+                 column(5, style = "background-color:#7777770d",
                         fluidRow(
                         h3("Workflow Pane", align="center")),
                         br(),
@@ -316,7 +316,7 @@ observe({
                         ),
                         column(1
                         ),
-                        column(5,style = "background-color:#0000001a",
+                        column(5, style = "background-color:#7777770d",
                                fluidRow(
                                  h3("Workflow Pane", align="center")),
                                p(strong("1:"), "Select the folder containing your data"),
@@ -349,7 +349,7 @@ observe({
                    column(width = 12,
                           h3("Customizing which samples to analyze",align="center"))),br(),br(),
                  column(width = 4),
-                 column(width=4,style = "background-color:#0000001a",
+                 column(width=4,style = "background-color:#7777770d",
                         h3("Workflow Pane", align="center"),
                         br(),
                         p(strong("1: "), actionButton("selectedWorkingDirectory", label = "Click to select where to create a working directory")),
@@ -398,15 +398,15 @@ observe({
 
   # -----------------
   # Creates the IDBac Directory structure, Uniquifies the  "IDBac" folder according to what folders are present in the selected directory
-  idbacuniquedir <-reactive({
-    if (input$createBlankSelectedWorkingDirectoryFolders > 0 ) {
+  idbacuniquedir <-eventReactive (input$createBlankSelectedWorkingDirectoryFolders,{
+
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Sample_Spreadsheet_Map"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Peak_Lists"))
       dir.create(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Saved_MANs"))
       return(paste0(selectedDirectory(), "\\",uniquifiedIDBac()))
-    }
+
   })
 
 
@@ -1110,7 +1110,7 @@ observe({
 
 
       sidebarLayout(
-        sidebarPanel(width = 3, style = "background-color:#0000001a",
+        sidebarPanel(width = 3, style = "background-color:#7777770d",
           selectInput("Spectra1", label=h5("Spectrum 1 (up; matches to bottom spectrum are blue, non-matches are red)"),
                       choices = spectra()$names),
           selectInput("Spectra2", label=h5("Spectrum 2 (down)"),
@@ -1583,7 +1583,7 @@ observe({
  # -----------------
  #observeEvent(input$downloadInverse,{
  output$downloadHeirSVG <- downloadHandler(
-   filename = function(){paste0(input$Spectra1,"_",input$Spectra2,".svg")},
+   filename = function(){paste0("Dendrogram.svg")},
    content = function(file1){
 
 
@@ -1665,7 +1665,7 @@ observe({
     }else{
 
       fluidPage(
-        sidebarPanel(
+        sidebarPanel(style = "background-color:#7777770d",
           #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
           #                    choices = levels(phyla)),
           selectInput("distance", label = h5("Distance Algorithm"),
@@ -2078,11 +2078,10 @@ output$downloadSmallMolNetworkData <- downloadHandler(
   # Create MAN ui
   output$MANui <-  renderUI({
 
-      fluidPage(fluidRow(
-
-        div(style ="padding: 14px 0px; margin:0%",
-
-               sidebarPanel(width=3, style='padding:30px',
+      fluidPage(
+        column(width=3,
+fluidRow(
+         sidebarPanel(style='padding:30px',width="100%",
           radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
                        choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
                        selected = 1),
@@ -2102,8 +2101,26 @@ output$downloadSmallMolNetworkData <- downloadHandler(
 )),
 
 
-       mainPanel(
+fluidRow(
+  sidebarPanel(width="100%",
+    p(strong("Note 1:"), "For publication-quality networks click the box next to \"Save Current Network\",
+      while selected- this saves a .csv file of the currently-displayed
+      network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
+      While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
+      means this box is checked and the file is open in another program, either uncheck or close the file."),
+    br(),
+    h4("Suggestions for Reporting MAN Analysis:"),
+    uiOutput("manReport"),
+    br(),
+    h4("Suggestions for Reporting Protein Analysis"),
+    uiOutput("proteinReport2")
+    )
 
+
+)),
+
+
+column(width=9,
 column(width=5,style ="padding: 14px 0px; margin:0%",
 
              plotOutput("netheir",width="100%",height="100%",
@@ -2116,29 +2133,11 @@ column(width=5,style ="padding: 14px 0px; margin:0%",
                ))
 
 
+)
 
 
-),
-
-fluidRow(
-  column(width=6,
-       sidebarPanel(
-          p(strong("Note 1:"), "For publication-quality networks click the box next to \"Save Current Network\",
-            while selected- this saves a .csv file of the currently-displayed
-            network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
-            While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
-            means this box is checked and the file is open in another program, either uncheck or close the file."),
-          br(),
-          h4("Suggestions for Reporting MAN Analysis:"),
-          uiOutput("manReport"),
-          br(),
-          h4("Suggestions for Reporting Protein Analysis"),
-          uiOutput("proteinReport2")
-          ),          mainPanel()
 
 
-      ))
-  )
 
   })
 
@@ -2307,7 +2306,7 @@ showModal(modalDialog(
           tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
           tags$li(paste0("Installed Version: ", local_version)),
           tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
-          tags$li("Updating to latest version..."),
+          tags$li("Updating to latest version... (please be patient)"),
           pre(id = "console"),
           easyClose = TRUE, size="l",footer="",fade=FALSE
         ))
@@ -2332,7 +2331,7 @@ showModal(modalDialog(
           tags$li(paste0("Installed Version: ", local_version)),
           tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
           tags$li("Latest Version is Already Installed"),
-          easyClose = TRUE, size="l",footer="",fade=FALSE
+          easyClose = TRUE, size="l",fade=FALSE,footer = modalButton("Close")
         ))
 
       }
