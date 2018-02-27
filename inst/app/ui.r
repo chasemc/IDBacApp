@@ -45,7 +45,7 @@ Install_And_Load(Required_Packages)
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
 #tags$body(background = "rotatingPCA.gif",
 navbarPage(collapsible=T,
-  "IDBac",
+  "IDBac-Test",
   tabPanel(
     "Introduction",
     fluidPage(
