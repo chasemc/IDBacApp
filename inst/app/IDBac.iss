@@ -1,9 +1,8 @@
-#define MyAppName "IDBac"
-#define MyAppVersion "0.1.0"
+            #define MyAppName "IDBac"
+#define MyAppVersion "0.0.9"
 #define MyAppExeName "IDBac.bat"
 #define RVersion "3.4.3"
 #define IncludeR true
-#define IncludeRtools true
 #define PandocVersion "1.19.2.1"
 #define IncludePandoc false
 #define IncludeChrome false
@@ -12,13 +11,13 @@
 
 [Setup]
 AppName = {#MyAppName}
-AppId = {{GPML06I7-J3OL-9C5S-M68L-VMWD156AUFTM}
+AppId = {{U02F2B9W-XLPF-EQXF-AYUE-9TQ798WAGE4V}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
 OutputBaseFilename = setup_{#MyAppName}
 SetupIconFile = SmallSetupIcon3.ico
-AppVersion = 0.1.0
+AppVersion = 0.0.9
 AppPublisher = {#MyAppPublisher}
 AppPublisherURL = {#MyAppURL}
 AppSupportURL = {#MyAppURL}
@@ -45,11 +44,7 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 
           [Files]
           Source: "LICENSE"; Flags: dontcopy
-          
-		      Source: "{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-          #if IncludeR
-          Source: "Rtools34.exe"; DestDir: "{tmp}"; Check: RtoolsNeeded
-          #endif
+          Source: "{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
           #if IncludeR
               Source: "R-{#RVersion}-win.exe"; DestDir: "{tmp}"; Check: RNeeded
           #endif
@@ -59,8 +54,7 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
           #if IncludeChrome
               Source: "chrome_installer.exe"; DestDir: "{tmp}"; Check: ChromeNeeded
           #endif
-          Source: "autoGithub.R"; DestDir: "{app}"; Flags: ignoreversion;
-Source: "colored_Dots.r"; DestDir: "{app}"; Flags: ignoreversion;
+          Source: "colored_Dots.r"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "gpl.txt"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "IDBac.bat"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion;
@@ -151,8 +145,8 @@ Source: "pwiz/Microsoft.Practices.Unity.Configuration.dll"; DestDir: "{app}\pwiz
 Source: "pwiz/Microsoft.Practices.Unity.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MIDAC.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/mkl_sequential.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MSConvertGUI.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/msconvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
+Source: "pwiz/MSConvertGUI.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSConvertGUI.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSFileReader.XRawfile2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSFileReader.XRawfile2.SxS.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
@@ -189,7 +183,9 @@ Source: "utils/wsf/js/JSON.minify.js"; DestDir: "{app}\utils\wsf\js"; Flags: ign
 Source: "utils/wsf/js/json2.js"; DestDir: "{app}\utils\wsf\js"; Flags: ignoreversion;
 Source: "utils/wsf/js/run.js"; DestDir: "{app}\utils\wsf\js"; Flags: ignoreversion;
 Source: "utils/wsf/run.wsf"; DestDir: "{app}\utils\wsf"; Flags: ignoreversion;
-Source: "www/1-col-portfolio.css"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www/A.png"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www/arrowRight.png"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www/dendrogram.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/errors/hit1.gif"; DestDir: "{app}\www\errors"; Flags: ignoreversion;
 Source: "www/errors/hit2.gif"; DestDir: "{app}\www\errors"; Flags: ignoreversion;
 Source: "www/errors/hit3.gif"; DestDir: "{app}\www\errors"; Flags: ignoreversion;
@@ -197,7 +193,9 @@ Source: "www/GitHub.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/IDBac_Computer_SVG_300DPI.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/IDBacLogo.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/Multi-MALDI-Plate.png"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www/PCA.gif"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/placeholder.gif"; DestDir: "{app}\www"; Flags: ignoreversion;
+Source: "www/rotatingPCA.gif"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/Single-MALDI-Plate.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/SmallAppIcon3.ico"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/window.PNG"; DestDir: "{app}\www"; Flags: ignoreversion;
@@ -205,10 +203,6 @@ Source: "www/WorkingDirectory.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 Source: "www/WorkingDirectory_ReAnalysis.png"; DestDir: "{app}\www"; Flags: ignoreversion;
 
   [Run]
-  
-  #if IncludeRtools
-	  Filename: "{tmp}\Rtools34.exe"; Parameters: "/SILENT"; WorkingDir: {tmp}; Check: RtoolsNeeded; Flags: skipifdoesntexist; StatusMsg: "Installing Rtools if needed"
-  #endif
   #if IncludeR
       Filename: "{tmp}\R-{#RVersion}-win.exe"; Parameters: "/SILENT"; WorkingDir: {tmp}; Check: RNeeded; Flags: skipifdoesntexist; StatusMsg: "Installing R if needed"
   #endif
@@ -239,42 +233,6 @@ var
   License2AcceptedRadio: TRadioButton;
   License2NotAcceptedRadio: TRadioButton;
 
-  
-  
-  
-  
-// Is Rtools installed?
-function RtoolsDetected(): boolean;
-var
-    v: Integer;
-    success: boolean;
-begin
-    for v := 0 to (RVersions.Count - 1) do
-      begin
-        if RegKeyExists(HKLM, 'Software\\WOW6432Node\R-core\Rtools') or RegKeyExists(HKCU, 'software\WOW6432Node\R-core\Rtools') then
-          success := true
-        if success then
-          begin
-            RRegKey := 'Software\\WOW6432Node\R-core\Rtools';
-            break;
-          end;
-      end;
-  begin
-    Result := success;
-  end;
-end;
-
-
-
-// If R is not detected, it is needed
-function RtoolsNeeded(): Boolean;
-begin
-  Result := not RtoolsDetected;
-end;
-
-
-
-
 // Is R installed?
 function RDetected(): boolean;
 var
@@ -296,31 +254,11 @@ begin
   end;
 end;
 
-
-
-
-
 // If R is not detected, it is needed
 function RNeeded(): Boolean;
 begin
   Result := not RDetected;
 end;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // Is Chrome installed?

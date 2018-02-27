@@ -1,15 +1,15 @@
 library("RInno")
 
-setwd("~/GitHub/IDBac_App")
-filesToInclude<-c(list.files("exe/www",full.names = T),list.files("exe/pwiz",full.names = T))
+setwd("~/GitHub/IDBac_App/inst/app")
+filesToInclude<-c(list.files("www",full.names = T),list.files("pwiz",full.names = T))
 create_app(
   app_name    = "IDBac",
-  app_dir     = "exe",
+ # app_dir     = "app",
   dir_out     = "wizard",
-  pkgs        = c("plotly","snow","parallel","shiny", "MALDIquant", "MALDIquantForeign", "readxl","networkD3","factoextra","ggplot2","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","dplyr","igraph","rgl"),  # CRAN-like repo packages
+  #pkgs        =
   files       = filesToInclude,
   include_R   = TRUE,   # Download R and install it with your app, if necessary
-  R_version   = "3.4.2",  # Specified version to include of R
+  R_version   = "3.4.3",  # Specified version to include of R
   privilege   = "none", # Admin only installation
   default_dir = "userdocs",
   app_icon   = "SmallAppIcon3.ico",
