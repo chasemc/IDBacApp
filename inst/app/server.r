@@ -162,6 +162,23 @@ observe({
 
 
 
+# -----------------
+#This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
+observe({
+  if (is.null(input$startingWith)){}else if(input$startingWith == 2){
+    output$ui1<-renderUI({
+      fluidRow(
+        p(".txt and .csv support coming soon!")
+        
+      )
+    })
+    
+  }
+  })
+
+
+
+
 
 
 
@@ -726,9 +743,9 @@ observe({
 
   # -----------------
   # Call the Spectra processing function when the spectra processing button is pressed
-  observeEvent({input$beginPeakProcessing
+    observeEvent({input$beginPeakProcessing
                 input$beginPeakProcessingModal
-                input$beginPeakProcessingAgain},{
+                input$beginPeakProcessingAgain},{											 
 
       fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE))
       popup3()
@@ -1100,7 +1117,7 @@ observe({
           tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab"),
           tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
                   named \"Peak_Lists\""),
-          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
+          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
         )
 
       )
@@ -1221,7 +1238,7 @@ observe({
                   \"Compare Two Samples\" tab."),
           tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
                   named \"Peak_Lists\""),
-          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
+          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
         )
 
       )
@@ -1343,29 +1360,29 @@ observe({
 
 
     sampleMappings<-read_excel(input$sampleMap$datapath,1)
-
-
     #selected column
-
-    sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector
-
-
+    # if(any(is.na(sampleMappings[input$sampleFactorMapChosenAttribute]))){
+    sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector %>% c(.,"Missing in Excel")
+    # }else{
+    #   sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector  
+    # }
   })
 
   # -----------------
   output$sampleFactorMapColors<-renderUI({
 
-
-
     column(3,
            lapply(1:length(levs()),function(x){
-             do.call(colourInput,list(paste0("factor-",x,"_",levs()[[x]]),levs()[[x]],value="blue",allowTransparent=T))
+             do.call(colourInput,list(paste0("factor-",gsub(" ","",levs()[[x]])),levs()[[x]],value="blue",allowTransparent=T))
            })
     )
   })
 
 
 
+
+
+  
 
 
 
@@ -1376,93 +1393,91 @@ observe({
     # if user selects to customize group samples
     if (input$kORheight =="3"){
          if(input$colDotsOrColDend == "1"){
-            groupFile<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-
-            idCol   <- input$sampleFactorMapChosenIDColumn
-            sampCol <- input$sampleFactorMapChosenAttribute
-
-
-            dendLabels<-as_tibble(labels(dendro()))
-            names(dendLabels)<- idCol
-
-            #join but keep prder of dendrogram label
-            #dendrogramLabels<<-dendrogramLabels
-
-            groupFile<-dplyr::as_tibble(groupFile)
-
-            dendrogramLabels<-NULL
-            dendrogramLabels$merged <- gsub(" ","",as.character(unlist(dendLabels[,idCol])))
-            groupFile$merged        <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
-
-
-            dendrogramLabels<-as.data.frame(dendrogramLabels)
-
-            joinedData<-left_join(dendrogramLabels,groupFile,by="merged")
-
-
-            joinedData<-joinedData[which(!is.na(joinedData[,idCol])),]
-
-
-
-
-            naReplaceValues<-as.list(sapply(names(joinedData),function(x)paste0("Missing ",x)))
-
-            joinedData<-joinedData %>% tidyr::replace_na(replace=naReplaceValues)
+       
+            # This is the user-provided excel sheet, columns represent factors, rows are samples
+            # One column will be user-selected to match to names in the dendrogram
+            # Another column will be user-selected to color/dot the dendrogram
+            # Stored as data frame
+            groupFile <- as.data.frame(read_excel(input$sampleMap$datapath,1,na = c("","NA")))
+dq <<-dendro()
+            
+            # User-chosen column that will be grepped against the dendrogram labels
+            idCol <<- input$sampleFactorMapChosenIDColumn
+            # User-chosen column that represents a factor
+            sampCol <<- input$sampleFactorMapChosenAttribute
+            # Get the dendrogram labels
+            dendLabels <<- labels(dendro())
+            
+            # Collapse all strings to exclude spaces. People have a hard time with spaces :(
+            dendLabels                <<- gsub(" ","",as.character(dendLabels))
+            groupFile[,idCol]         <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
+            groupFile<<-groupFile
+            # Convert to data frame
+            dendLabels <- cbind.data.frame(tomerge = dendLabels, stringsAsFactors=F)
+            groupFile  <- cbind.data.frame(tomerge= groupFile[,idCol], toan= groupFile[,sampCol], stringsAsFactors=F)
+            # Merge dendrogram labels with selected excel id column
+            joinedData <<- merge(dendLabels, groupFile, by="tomerge", all.x = TRUE,sort=F)
+            
+            
+            # Make a new factor for any missing values the user didn't supply
+            joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing in Excel")
+            colnames(joinedData) <- c(idCol, sampCol)
 
 
             colsel<- sampCol
 
             # small Contains two columns, one with the IDs and one with the factors
-            small<-bind_cols(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
-            colnames(small)<-c(idCol,colsel)
+            small <- cbind.data.frame(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
+            colnames(small) <- c(idCol,colsel)
+            
+            
+            groupedList <- split(small,factor(small[colsel][[1]]))
 
-
-            groupedList<-split(small,factor(small[colsel][[1]]))
-
-
-
-
-            bigList<-lapply(1:length(groupedList),function(x)left_join(dendLabels,groupedList[[x]],by=idCol))
+            dendLabels <- as.data.frame(dendLabels)
+            colnames(dendLabels) <- idCol
+            bigList<-lapply(1:length(groupedList),function(x)merge(dendLabels,groupedList[[x]],by=idCol,all.x = TRUE,sort=F))
 
             labels(bigList)<-labels(groupedList)
 
+            # make sure colums are vectors, not factors
+            bigList <- lapply(bigList,function(x)sapply(x,as.vector))
+            
             for(x in 1:length(bigList)){
-              bigList[[x]][colsel][!is.na(bigList[[x]][colsel])]<-"#000000"
-              bigList[[x]][colsel][is.na(bigList[[x]][colsel])]<-"#00000000"
+              # Make factor match black Hex (Must be black, because will be replaced later with chosen colors)
+              bigList[[x]][,colsel][which(!is.na(as.vector(bigList[[x]][,colsel])))]<-"#000000"
+              # Make NA values fully transparent HEX
+              bigList[[x]][,colsel][which(is.na(bigList[[x]][,colsel]))]<-"#00000000"
             }
 
-
-            bigMatrix<-NULL
-            for (i in 1:length(bigList)){
-              bigMatrix<-bind_cols(bigMatrix,bigList[[i]][,2])
-            }
-
-            names(bigMatrix)<-names(bigList)
-
-
-            sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-            sampleFactors<-sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>% as.vector
-
-
-            sampleIDs1<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+            
+          
+            sampleFactors <<- names(bigList)
 
 
             #get colors chosen
-            colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+          #  colorsChosen <<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+           
+             colorsChosen <<- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
+             
+             a <- cbind(colorNew = colorsChosen, idc = levs())
+             b <- cbind(idc = sampleFactors)
+             colorsToreplace <<- merge(a, b, by="idc")
 
-            colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-
-
-            colorF<-cbind.data.frame(colorsChosen,sampleFactors)
-            colorF$sampleFactors<-as.vector(colorF$sampleFactors)
-
-            for (i in names(bigMatrix)){
-              bigMatrix[which(bigMatrix[i] == "#000000"),i] <- as.vector(colorF[which(colorF[,2]==i),1])
+        
+            
+            
+            
+          for (z in 1:length(names(bigList))){
+            temp <- bigList[colorsToreplace[z,1]][[1]][,2]
+            bigList[colorsToreplace[z,1]][[1]][,2][temp == "#000000"] <- as.vector(colorsToreplace[z,2])
             }
 
+    
+# Dendlabels was changed to a DF, so let's just re-do
+dendLabels <- labels(dendro())
 
-
-
+# Make sure factors are in same order as in dendlist
+bigList <<- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
 
             toReturn$dend <- dendro() %>% set("labels_cex",1 )
 
@@ -1470,10 +1485,8 @@ observe({
             labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
 
 
-            toReturn$bigMatrix <- bigMatrix
+            toReturn$bigMatrix <- sapply(bigList,function(x)cbind(x[,2]))
             toReturn$shortenedNames <- shortenedNames
-
-
 
 
       }else{
@@ -1482,7 +1495,7 @@ observe({
         sampleFactors<-sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>% as.vector
 
 
-        sampleIDs1<-bind_cols(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
+        sampleIDs1<-cbind.data.frame(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
 
 
 
@@ -1508,11 +1521,11 @@ observe({
         matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
         matchedColors2<-matchedColors
 
-        ba<-as_tibble(labels(dendro()))
+        ba<-as.data.frame(labels(dendro()))
 
 
         colnames(ba)<-"sampleFactorID"
-        fcol<- right_join(matchedColors,ba,by="sampleFactorID")
+        fcol<- merge(matchedColors,ba,by="sampleFactorID",all.y = TRUE)
 
 
 
@@ -1534,6 +1547,10 @@ observe({
 
 
   })
+
+
+
+
 
 
 
@@ -1657,7 +1674,7 @@ observe({
                   \"Compare Two Samples\" tab."),
           tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
                   named \"Peak_Lists\""),
-          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
+          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
         )
 
       )
@@ -1755,13 +1772,17 @@ observe({
   small_Binned_Matrix<-reactive({
 
 
-    if(!is.null(input$Spectra1)){
+    if(!is.null(input$Spectra1)){  # Check if there are protein spectra if TRUE, display dendro and use in analysis
+a1<<-smallPeaks()
 
       labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
 
       if(is.null(input$plot_brush$ymin)){
             if(length(smallPeaks()) >= 10){
                 combinedSmallMolPeaks <- smallPeaks()[1:sample.int(10,1)]
+				# Also get matrix sample for subtraction
+				combinedSmallMolPeaks <- c(combinedSmallMolPeaks,smallPeaks()[grep(paste0("Matrix",collapse="|"), labs,ignore.case=TRUE)])
+																														  
             }else{
               combinedSmallMolPeaks <- smallPeaks()
             }
@@ -1785,12 +1806,17 @@ observe({
         # get indices of all sample names for small molecule peak lists
         labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
         # only return small moleule peak lists which were brushed, strict grep
+		a2 <<-brushed
+a3<<-labs
+a4<<-smallPeaks	 
         combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(paste0("^",brushed,"$"),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
+			a5<<-      combinedSmallMolPeaks
+					
       }
       #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
       #find matrix spectra
 
-    }else{
+    }else{ # If !is.null(input$Spectra1 == TRUE then there are no protein spectra, run only MAN analysis
       combinedSmallMolPeaks<-smallPeaks()
 
 
@@ -1798,13 +1824,19 @@ observe({
 
     # input$matrixSamplePresent (Whether there is a matrix sample)  1=Yes   2=No
     if(input$matrixSamplePresent ==1){
+      # combinedsmallMolPeaksm  will contain all samples containing word matrix
       combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
-      #For now, replicate matrix samples are merged into a consensus peak list.
-
+      
+      # Check if there is a matrix sample
        validate(
-        need(try(mergeMassPeaks(combinedSmallMolPeaksm)),"It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
-      )
-
+        need(combinedSmallMolPeaksm != "", "It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
+       )
+      
+      
+      # For now, replicate matrix samples are merged into a consensus peak list.
+      # Make sure we haven't reduced the mass object down to S4 
+      if(typeof(combinedSmallMolPeaksm)=="S4"){combinedSmallMolPeaksm<- list(combinedSmallMolPeaksm)}
+      #
       combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
       #For now, matrix peaks are all picked at SNR > 6
       combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
@@ -2222,7 +2254,7 @@ showModal(modalDialog(
 
 
     # Currently installed version
-    local_version <- try(packageVersion("IDBac"))
+    local_version <- try(packageVersion("IDBacApp"))
 
 
 
@@ -2254,7 +2286,7 @@ showModal(modalDialog(
 
     # Latest GitHub Release
     getLatestStableVersion <- function(){
-      base_url <- "https://api.github.com/repos/chasemc/IDBac_App/releases"
+      base_url <- "https://api.github.com/repos/chasemc/IDBacApp/releases"
       response <- httr::GET(base_url)
       parsed_response <- httr::content(response, "parsed", encoding = "utf-8")
       parsed_response[[1]]$tag_name
@@ -2296,7 +2328,7 @@ showModal(modalDialog(
       if (local_version != latestStableVersion) {
 
         downfunc <- function() {
-                       devtools::install_github("chasemc/IDBac_App",force=TRUE,quiet = F,quick=T)
+                       devtools::install_github("chasemc/IDBacApp",force=TRUE,quiet = F,quick=T)
           message(tags$span(style="color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
                     }
 
@@ -2375,10 +2407,10 @@ showModal(modalDialog(
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
 
-  # session$onSessionEnded(function() {
-  #   stopApp()
-  #   q("no")
-  #  })
+#    session$onSessionEnded(function() {
+ #     stopApp()
+  #    q("no")
+   #  })
 
 
 }

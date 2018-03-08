@@ -45,7 +45,7 @@ Install_And_Load(Required_Packages)
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
 #tags$body(background = "rotatingPCA.gif",
 navbarPage(collapsible=T,
-  "IDBac-Test",
+  "IDBac",
   tabPanel(
     "Introduction",
     fluidPage(
@@ -61,10 +61,10 @@ navbarPage(collapsible=T,
 
                tags$ul(
                   tags$li(
-                     p("For more information about the method, as well as links to the full code, please visit ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "chasemc.github.io/IDBac"))
+                     p("For more information about the method, as well as links to the full code, please visit ", a(href="https://chasemc.github.io/IDBacApp/", target="_blank", "chasemc.github.io/IDBac"))
                   ),
                   tags$li(
-                     p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBac_app/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBac_app/issues", src="GitHub.png", width="25" ,height="25")))
+                     p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
                   ),
                   tags$li(  actionButton("updateIDBac", label = "Check for Updates"))
 

@@ -11,7 +11,7 @@
 
 [Setup]
 AppName = {#MyAppName}
-AppId = {{U02F2B9W-XLPF-EQXF-AYUE-9TQ798WAGE4V}
+AppId = {{PL77LJL8-E8L5-SFXW-ZKE3-8GJ8LO6B2WN1}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
@@ -145,7 +145,6 @@ Source: "pwiz/Microsoft.Practices.Unity.Configuration.dll"; DestDir: "{app}\pwiz
 Source: "pwiz/Microsoft.Practices.Unity.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MIDAC.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/mkl_sequential.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/msconvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSConvertGUI.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSConvertGUI.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSFileReader.XRawfile2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;

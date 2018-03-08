@@ -1,10 +1,10 @@
 library("RInno")
 
-setwd("~/GitHub/IDBac_App/inst/app")
-filesToInclude<-c(list.files("www",full.names = T),list.files("pwiz",full.names = T))
+
+filesToInclude<-c(list.files("C:/Users/chase/Documents/GitHub/IDBacInstaller/IDBac/inst/app/www",full.names = T),list.files("C:/Users/chase/Documents/GitHub/IDBacInstaller/IDBac/inst/app/pwiz",full.names = T))
 create_app(
   app_name    = "IDBac",
- # app_dir     = "app",
+  app_dir     = "app",
   dir_out     = "wizard",
   #pkgs        =
   files       = filesToInclude,
