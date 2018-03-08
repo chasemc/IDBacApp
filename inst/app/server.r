@@ -587,6 +587,12 @@ observe({
 
 
     fullZ<-dlply(fullZ,.(UserInput.x))
+f1<<-fullZ
+    # Allow spaces in filepathe
+    for (i in 1:length(f1)){
+      fullZ[[i]]$UserInput.y <- shQuote(fullZ[[i]]$UserInput.y)
+    }
+f2<<-fullZ
     # return fullz to the "spectraConversion" reactive variable, this is  is a named list, where each element represents a sample and the element name is the sample name;
     # contents of each element are file paths to the raw data for that sample
     # This will be used by the spectra conversion observe function/event
@@ -627,7 +633,7 @@ observe({
                paste0(x$UserInput.y,collapse = "",sep=" "),
                "--noindex --mzXML --merge -z",
                " -o ",
-               outp,
+               shQuote(outp),
                " --outfile ",
                paste0(x$UserInput.x[1],".mzXML")
         )
@@ -637,9 +643,7 @@ observe({
 
       functionTOrunMSCONVERTonCMDline<-function(x){
 
-         system(command =
-                 "cmd.exe",
-               input = as.character(x))
+         system(command = as.character(x))
       }
 
 
@@ -1639,7 +1643,7 @@ aws2<<-dendro()
 
 
     filename = function() {
-      paste0(input$saveHierAs,"-", Sys.Date(), ".newick")
+      paste0(Sys.Date(), ".newick")
     },
     content = function(file) {
       ape::write.tree(as.phylo(dendro()), file=file)
@@ -1701,7 +1705,6 @@ aws2<<-dendro()
           downloadButton("downloadHeirSVG",label="Save Dendrogram as SVG"),
           br(),
           br(),
-          textInput("saveHierAs","Save File As (File Name):"),
           downloadButton("downloadHierarchical","Save as Newick File")
         ),
         mainPanel("Hierarchical Clustering",plotOutput("hclustPlot"))
