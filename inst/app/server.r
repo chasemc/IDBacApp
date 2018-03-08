@@ -1517,7 +1517,7 @@ observe({
 
 
 
-        dendColor <<- as.vector(excelData$colorNew[ which(excelData$sampleFactorID %in% dendroLabels )])
+        dendColor <<- as.vector(excelData$colorNew[match(dendroLabels,excelData$sampleFactorID)])
 
         dendColor[is.na(dendColor)]<-"#000000"
 
