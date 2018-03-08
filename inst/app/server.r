@@ -66,6 +66,7 @@ function(input,output,session){
 
     # Find sample names (fileNames)
     sampleNames <- strsplit(names, ".mzXML")[[1]][1]
+    sampleNames <- c(sampleNames,strsplit(names, ".mzML")[[1]][1])
 
     for (i in 1:length(spectraImport)) {
       spectraImport[[i]]@metaData$Strain <- sampleNames
@@ -747,7 +748,9 @@ observe({
                 input$beginPeakProcessingModal
                 input$beginPeakProcessingAgain},{
 
-      fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE))
+      fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE,ignore.case = TRUE))
+      fileList <- c(fileList,normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzML", full.names = TRUE,ignore.case = TRUE)))
+
       popup3()
 
       #   numCores <- detectCores()
@@ -1193,10 +1196,8 @@ observe({
         # No factors, everthing colored black
         fac <- rep(1,length(dendro()))
       }
-
       pc <- cbind.data.frame(pc,fac)
       pc <- merge(pc,colorBlindPalette,by="fac")
-
       return(pc)
     }
 
