@@ -63,10 +63,10 @@ function(input,output,session){
       spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
       spectraImport<- list(spectraImport)
     }
+    n1<<-names
 
     # Find sample names (fileNames)
-    sampleNames <- strsplit(names, ".mzXML")[[1]][1]
-    sampleNames <- c(sampleNames,strsplit(names, ".mzML")[[1]][1])
+    sampleNames <<- strsplit(names, ".mz")[[1]][1]
 
     for (i in 1:length(spectraImport)) {
       spectraImport[[i]]@metaData$Strain <- sampleNames
@@ -292,7 +292,7 @@ observe({
                         fluidRow(column(12, verbatimTextOutput("multipleMaldiRawFileDirectory", placeholder = TRUE))),
                         br(),
                         actionButton("run", label = "Convert to mzXML"),
-                        actionButton("beginPeakProcessing", label = "Process mzXML")
+                        actionButton("beginPeakProcessing2", label = "Process mzXML")
                  )
                         )
         )
@@ -744,12 +744,14 @@ observe({
 
   # -----------------
   # Call the Spectra processing function when the spectra processing button is pressed
-    observeEvent({input$beginPeakProcessing
-                input$beginPeakProcessingModal
-                input$beginPeakProcessingAgain},{
+    observeEvent({
+      c(input$beginPeakProcessing,
+                input$beginPeakProcessing2,
+                input$beginPeakProcessingModal,
+                input$beginPeakProcessingAgain)},{
 
-      fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE,ignore.case = TRUE))
-      fileList <- c(fileList,normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzML", full.names = TRUE,ignore.case = TRUE)))
+      fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mz", full.names = TRUE,ignore.case = TRUE))
+
 
       popup3()
 
