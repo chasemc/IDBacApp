@@ -1,4 +1,4 @@
-Package: IDBac
+Package: IDBacApp
 Type: Package
 Title: Protein and small molecule analysis of bacteria by MALDI-TOF MS
 Version: 0.0.14
