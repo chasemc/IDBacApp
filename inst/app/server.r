@@ -169,10 +169,10 @@ observe({
     output$ui1<-renderUI({
       fluidRow(
         p(".txt and .csv support coming soon!")
-        
+
       )
     })
-    
+
   }
   })
 
@@ -745,7 +745,7 @@ observe({
   # Call the Spectra processing function when the spectra processing button is pressed
     observeEvent({input$beginPeakProcessing
                 input$beginPeakProcessingModal
-                input$beginPeakProcessingAgain},{											 
+                input$beginPeakProcessingAgain},{
 
       fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mzXML", full.names = TRUE))
       popup3()
@@ -1364,7 +1364,7 @@ observe({
     # if(any(is.na(sampleMappings[input$sampleFactorMapChosenAttribute]))){
     sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector %>% c(.,"Missing in Excel")
     # }else{
-    #   sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector  
+    #   sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector
     # }
   })
 
@@ -1382,7 +1382,7 @@ observe({
 
 
 
-  
+
 
 
 
@@ -1393,32 +1393,30 @@ observe({
     # if user selects to customize group samples
     if (input$kORheight =="3"){
          if(input$colDotsOrColDend == "1"){
-       
+
             # This is the user-provided excel sheet, columns represent factors, rows are samples
             # One column will be user-selected to match to names in the dendrogram
             # Another column will be user-selected to color/dot the dendrogram
             # Stored as data frame
             groupFile <- as.data.frame(read_excel(input$sampleMap$datapath,1,na = c("","NA")))
-dq <<-dendro()
-            
             # User-chosen column that will be grepped against the dendrogram labels
-            idCol <<- input$sampleFactorMapChosenIDColumn
+            idCol <- input$sampleFactorMapChosenIDColumn
             # User-chosen column that represents a factor
-            sampCol <<- input$sampleFactorMapChosenAttribute
+            sampCol <- input$sampleFactorMapChosenAttribute
             # Get the dendrogram labels
-            dendLabels <<- labels(dendro())
-            
+            dendLabels <- labels(dendro())
+
             # Collapse all strings to exclude spaces. People have a hard time with spaces :(
-            dendLabels                <<- gsub(" ","",as.character(dendLabels))
+            dendLabels                <- gsub(" ","",as.character(dendLabels))
             groupFile[,idCol]         <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
-            groupFile<<-groupFile
+            groupFile<-groupFile
             # Convert to data frame
             dendLabels <- cbind.data.frame(tomerge = dendLabels, stringsAsFactors=F)
             groupFile  <- cbind.data.frame(tomerge= groupFile[,idCol], toan= groupFile[,sampCol], stringsAsFactors=F)
             # Merge dendrogram labels with selected excel id column
-            joinedData <<- merge(dendLabels, groupFile, by="tomerge", all.x = TRUE,sort=F)
-            
-            
+            joinedData <- merge(dendLabels, groupFile, by="tomerge", all.x = TRUE,sort=F)
+
+
             # Make a new factor for any missing values the user didn't supply
             joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing in Excel")
             colnames(joinedData) <- c(idCol, sampCol)
@@ -1429,8 +1427,8 @@ dq <<-dendro()
             # small Contains two columns, one with the IDs and one with the factors
             small <- cbind.data.frame(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
             colnames(small) <- c(idCol,colsel)
-            
-            
+
+
             groupedList <- split(small,factor(small[colsel][[1]]))
 
             dendLabels <- as.data.frame(dendLabels)
@@ -1441,7 +1439,7 @@ dq <<-dendro()
 
             # make sure colums are vectors, not factors
             bigList <- lapply(bigList,function(x)sapply(x,as.vector))
-            
+
             for(x in 1:length(bigList)){
               # Make factor match black Hex (Must be black, because will be replaced later with chosen colors)
               bigList[[x]][,colsel][which(!is.na(as.vector(bigList[[x]][,colsel])))]<-"#000000"
@@ -1449,95 +1447,82 @@ dq <<-dendro()
               bigList[[x]][,colsel][which(is.na(bigList[[x]][,colsel]))]<-"#00000000"
             }
 
-            
-          
-            sampleFactors <<- names(bigList)
+
+
+            sampleFactors <- names(bigList)
 
 
             #get colors chosen
-          #  colorsChosen <<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-           
-             colorsChosen <<- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
-             
+          #  colorsChosen <- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+
+             colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
+
              a <- cbind(colorNew = colorsChosen, idc = levs())
              b <- cbind(idc = sampleFactors)
-             colorsToreplace <<- merge(a, b, by="idc")
+             colorsToreplace <- merge(a, b, by="idc")
 
-        
-            
-            
-            
+
+
+
+
           for (z in 1:length(names(bigList))){
             temp <- bigList[colorsToreplace[z,1]][[1]][,2]
             bigList[colorsToreplace[z,1]][[1]][,2][temp == "#000000"] <- as.vector(colorsToreplace[z,2])
             }
 
-    
-# Dendlabels was changed to a DF, so let's just re-do
-dendLabels <- labels(dendro())
 
-# Make sure factors are in same order as in dendlist
-bigList <<- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
+          # Dendlabels was changed to a DF, so let's just re-do
+          dendLabels <- labels(dendro())
 
-            toReturn$dend <- dendro() %>% set("labels_cex",1 )
+          # Make sure factors are in same order as in dendlist
+          bigList <- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
 
-            shortenedNames<-dendro()
-            labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
+          toReturn$dend <- dendro() %>% set("labels_cex",1 )
+
+          shortenedNames <- dendro()
+          labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
 
 
-            toReturn$bigMatrix <- sapply(bigList,function(x)cbind(x[,2]))
-            toReturn$shortenedNames <- shortenedNames
+          toReturn$bigMatrix <- sapply(bigList,function(x)cbind(x[,2]))
+          toReturn$shortenedNames <- shortenedNames
 
 
       }else{
 
-        sampleMappings<-as.data.frame(read_excel(input$sampleMap$datapath,1))
-        sampleFactors<-sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>% as.vector
-
-
-        sampleIDs1<-cbind.data.frame(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
 
 
 
+        sampleMappings <- as.data.frame(read_excel(input$sampleMap$datapath,1))
+        sampleFactors <- sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>% as.vector %>% gsub(" ","", . )
+
+
+        sampleIDs1 <- cbind.data.frame(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
 
         #get colors chosen
-        colorsChosen<- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+        colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
 
-        zz<-cbind.data.frame(colorsChosen,sampleFactors)
+      #  zz <- cbind.data.frame(colorsChosen,sampleFactors)
 
-        zz$sampleFactors<-as.vector(zz$sampleFactors)
-        colnames(zz)<-c("colors","chosenFactor")
+        a1 <- cbind(colorNew = colorsChosen, chosenFactor = levs())
+        b1 <- cbind(chosenFactor = sampleFactors)
+        colorsToreplace <- merge(a1, b1, by="chosenFactor")
 
+        # Merge excel sample IDs and factor with colors chosen by user in-app
+        excelData <<- merge(sampleIDs1,colorsToreplace,by="chosenFactor")
 
-        colnames(sampleIDs1)<-c("sampleFactorID","chosenFactor")
-        #Ensure string
-        sampleIDs1$chosenFactor<- as.character(sampleIDs1$chosenFactor)
-        #Ensure string
-        zz$chosenFactor<- as.character(zz$chosenFactor)
+        # Collapse strings to explude spaces
+        excelData$sampleFactorID <<- gsub(" ","",excelData$sampleFactorID)
 
-        matchedColors<-merge(zz,sampleIDs1)
-
-
-        matchedColors$sampleFactorID<-as.character(matchedColors$sampleFactorID)
-        matchedColors2<-matchedColors
-
-        ba<-as.data.frame(labels(dendro()))
-
-
-        colnames(ba)<-"sampleFactorID"
-        fcol<- merge(matchedColors,ba,by="sampleFactorID",all.y = TRUE)
+        dendroLabels <<- gsub(" ","",labels(dendro()))
 
 
 
-        fcol$colors<-as.character(fcol$colors)
-        fcol$colors[is.na(fcol$colors)]<-"#000000"
+        dendColor <<- as.vector(excelData$colorNew[ which(excelData$sampleFactorID %in% dendroLabels )])
 
+        dendColor[is.na(dendColor)]<-"#000000"
 
-
-
-
-
-        toReturn$dend <-  dendro() %>% color_labels(labels=labels(dendro()),col=fcol$colors) }
+aws2<<-dendro()
+        toReturn$dend <-  dendro() %>% color_labels(labels=labels(dendro()),col=dendColor) }
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
 
       #If no sample map is selected, run this:
@@ -1773,7 +1758,6 @@ bigList <<- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
 
 
     if(!is.null(input$Spectra1)){  # Check if there are protein spectra if TRUE, display dendro and use in analysis
-a1<<-smallPeaks()
 
       labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
 
@@ -1782,7 +1766,7 @@ a1<<-smallPeaks()
                 combinedSmallMolPeaks <- smallPeaks()[1:sample.int(10,1)]
 				# Also get matrix sample for subtraction
 				combinedSmallMolPeaks <- c(combinedSmallMolPeaks,smallPeaks()[grep(paste0("Matrix",collapse="|"), labs,ignore.case=TRUE)])
-																														  
+
             }else{
               combinedSmallMolPeaks <- smallPeaks()
             }
@@ -1806,12 +1790,9 @@ a1<<-smallPeaks()
         # get indices of all sample names for small molecule peak lists
         labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
         # only return small moleule peak lists which were brushed, strict grep
-		a2 <<-brushed
-a3<<-labs
-a4<<-smallPeaks	 
+
         combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(paste0("^",brushed,"$"),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
-			a5<<-      combinedSmallMolPeaks
-					
+
       }
       #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
       #find matrix spectra
@@ -1826,15 +1807,15 @@ a4<<-smallPeaks
     if(input$matrixSamplePresent ==1){
       # combinedsmallMolPeaksm  will contain all samples containing word matrix
       combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
-      
+
       # Check if there is a matrix sample
        validate(
         need(combinedSmallMolPeaksm != "", "It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
        )
-      
-      
+
+
       # For now, replicate matrix samples are merged into a consensus peak list.
-      # Make sure we haven't reduced the mass object down to S4 
+      # Make sure we haven't reduced the mass object down to S4
       if(typeof(combinedSmallMolPeaksm)=="S4"){combinedSmallMolPeaksm<- list(combinedSmallMolPeaksm)}
       #
       combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
