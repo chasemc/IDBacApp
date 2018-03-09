@@ -2273,11 +2273,11 @@ showModal(modalDialog(
 
     # Latest GitHub Release
     getLatestStableVersion <- function(){
-      base_url <- "https://api.github.com/repos/chasemc/IDBacApp/releases"
+      base_url <- "https://api.github.com/repos/chasemc/IDBacApp/releases/latest"
       response <- httr::GET(base_url)
       parsed_response <- httr::content(response, "parsed", encoding = "utf-8")
-      parsed_response[[1]]$tag_name
-    }
+      parsed_response$tag_name
+      }
 
     latestStableVersion <- try(getLatestStableVersion())
 
@@ -2312,7 +2312,7 @@ showModal(modalDialog(
     }else{
 
 
-      if (local_version != latestStableVersion) {
+      if (local_version <= latestStableVersion) {
 
         downfunc <- function() {
                        devtools::install_github("chasemc/IDBacApp",force=TRUE,quiet = F,quick=T)
