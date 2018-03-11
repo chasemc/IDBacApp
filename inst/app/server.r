@@ -1934,57 +1934,31 @@ output$downloadSmallMolNetworkData <- downloadHandler(
   # })
 
 
-
-
-
 # -----------------
 # User input changes the height of the heirarchical clustering plot within the network analysis pane
   plotHeightHeirNetwork <- reactive({
-
     return(as.numeric(input$hclustHeightNetwork))
-
-
   })
-
-
 
 # -----------------
 # Plot MAN Dendrogram
 
   output$netheir <- renderPlot({
-
-
     par(mar=c(5,5,5,input$dendparmar2))
-
     if (input$kORheight=="1"){
-   isolate(
-       dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8)
-  )
+      isolate(dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8))
     } else if (input$kORheight=="2"){
-
-      isolate(       dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8) )
-      isolate( abline(v=input$height,lty=2) )
-
+      isolate(dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8))
+      isolate(abline(v=input$height,lty=2))
     } else if (input$kORheight=="3"){
-
       if(input$colDotsOrColDend == "1"){
-
         colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
                      rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE)
       }else{
-
         coloredDend()$dend  %>%  plot(.,horiz=T)
       }
     }
   },height=plotHeightHeirNetwork)
-
-
-
-
-
-
-
-
 
   # -----------------
   # Create MAN ui
@@ -1992,23 +1966,23 @@ output$downloadSmallMolNetworkData <- downloadHandler(
 
       fluidPage(
         column(width=3,
-fluidRow(
-         sidebarPanel(style='padding:30px',width="100%",
-          radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
-                       choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
-                       selected = 1),
-           numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
-          numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
+          fluidRow(
+            sidebarPanel(style='padding:30px',width="100%",
+              radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
+                           choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
+                           selected = 1),
+              numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
+              numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
 
 
-          numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=20,max=round(max(sapply(smallPeaks(),function(x)max(mass(x)))),digits=-1)),
-          numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=20,min=round(min(sapply(smallPeaks(),function(x)min(mass(x)))),digits=-1)),
-          numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
-          numericInput("dendparmar2",label=h5("Adjust right margin of dendrogram"),value=5),
-          downloadButton("downloadSmallMolNetworkData", label = "Download Current Network Data", value = FALSE),
-          br(),
-          p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
-          p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br()
+              numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=20,max=round(max(sapply(smallPeaks(),function(x)max(mass(x)))),digits=-1)),
+              numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=20,min=round(min(sapply(smallPeaks(),function(x)min(mass(x)))),digits=-1)),
+              numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
+              numericInput("dendparmar2",label=h5("Adjust right margin of dendrogram"),value=5),
+              downloadButton("downloadSmallMolNetworkData", label = "Download Current Network Data", value = FALSE),
+              br(),
+              p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
+              p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br()
 
 )),
 
@@ -2027,14 +2001,11 @@ fluidRow(
     h4("Suggestions for Reporting Protein Analysis"),
     uiOutput("proteinReport2")
     )
-
-
 )),
 
 
 column(width=9,
 column(width=5,style ="padding: 14px 0px; margin:0%",
-
              plotOutput("netheir",width="100%",height="100%",
                            click = "plot_click",
                            dblclick = "plot_dblclick",
@@ -2042,25 +2013,15 @@ column(width=5,style ="padding: 14px 0px; margin:0%",
                            brush = "plot_brush")
      ),column(width=7,style ="padding: 14px 0px; margin:0%",
                      simpleNetworkOutput("metaboliteAssociationNetwork")
-               ))
-
-
-)
-
-
-
-
-
+               )))
   })
 
   # -----------------
   # Output a paragraph about which paramters were used to create the currently-displayed MAN
   output$manReport<-renderUI({
-
     p("This MAN was created by analyzing ",tags$code(length(subSelect())), " samples,",if(input$matrixSamplePresent==1){("subtracting a matrix blank,")}else{},
       "and retaining peaks with a signal to noise ratio above ",tags$code(input$smSNR)," and occurring in greater than ",tags$code(input$percentPresenceSM),"% of replicate spectra.
       Peaks occuring below ",tags$code(input$lowerMassSM)," m/z or above ",tags$code(input$upperMassSM)," m/z were removed from the analysis. ")
-
   })
 
   # -----------------
@@ -2079,26 +2040,21 @@ p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))
   })
 
 
-
-
-
 # Updating IDBac Functions
 #--------------------------------------
 
-observeEvent(input$updateIDBac,{
-
-
-withConsoleRedirect <- function(containerId, expr) {
-  # Change type="output" to type="message" to catch stderr
-  # (messages, warnings, and errors) instead of stdout.
-  txt <- capture.output(results <- expr, type = "message")
-  if (length(txt) > 0) {
-    insertUI(paste0("#", containerId), where = "beforeEnd",
-             ui = paste0(txt, "\n", collapse = "")
-    )
+  observeEvent(input$updateIDBac,{
+      withConsoleRedirect <- function(containerId, expr) {
+        # Change type="output" to type="message" to catch stderr
+        # (messages, warnings, and errors) instead of stdout.
+        txt <- capture.output(results <- expr, type = "message")
+        if (length(txt) > 0) {
+          insertUI(paste0("#", containerId), where = "beforeEnd",
+                   ui = paste0(txt, "\n", collapse = "")
+          )
+        }
+        results
   }
-  results
-}
 
 
 showModal(modalDialog(
@@ -2106,7 +2062,6 @@ showModal(modalDialog(
   tags$li(paste0("Checking for Internet Connection: ")),
   tags$li(paste0("Installed Version: ")),
   tags$li(paste0("Latest Stable Release: ")),
-
   easyClose = FALSE, size="l",footer="",fade=FALSE
 ))
 
@@ -2115,54 +2070,39 @@ showModal(modalDialog(
   internetPing <-  !suppressWarnings(system(paste("ping -n 1", "www.google.com")))
 
   if (internetPing == TRUE){
-
-
     internetPingResponse <- "Successful"
-
     showModal(modalDialog(
       title = "IDBac Update",
       tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
       tags$li(paste0("Installed Version: ")),
       tags$li(paste0("Latest Stable Release: ")),
-
       easyClose = TRUE, size="l",footer="",fade=FALSE
     ))
 
-
     Sys.sleep(.75)
-
-
 
     # Currently installed version
     local_version <- try(packageVersion("IDBacApp"))
 
+    showModal(modalDialog(
+      title = "IDBac Update",
+      tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
+      tags$li(paste0("Installed Version: ", local_version)),
+      tags$li(paste0("Latest Stable Release: ")),
+      easyClose = TRUE, size="l",footer="",fade=FALSE
+    ))
 
+    Sys.sleep(.75)
 
     showModal(modalDialog(
       title = "IDBac Update",
       tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
       tags$li(paste0("Installed Version: ", local_version)),
       tags$li(paste0("Latest Stable Release: ")),
-
       easyClose = TRUE, size="l",footer="",fade=FALSE
     ))
 
-
     Sys.sleep(.75)
-
-
-    showModal(modalDialog(
-      title = "IDBac Update",
-      tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
-      tags$li(paste0("Installed Version: ", local_version)),
-      tags$li(paste0("Latest Stable Release: ")),
-
-      easyClose = TRUE, size="l",footer="",fade=FALSE
-    ))
-
-
-    Sys.sleep(.75)
-
 
     # Latest GitHub Release
     getLatestStableVersion <- function(){
@@ -2174,21 +2114,15 @@ showModal(modalDialog(
 
     latestStableVersion <- try(getLatestStableVersion())
 
-
     showModal(modalDialog(
       title = "IDBac Update",
       tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
       tags$li(paste0("Installed Version: ", local_version)),
       tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
-
       easyClose = TRUE, size="l",footer="",fade=FALSE
     ))
 
-
-
-
     if (class(latestStableVersion) == "try-error"){
-
 
       showModal(modalDialog(
         title = "IDBac Update",
@@ -2199,18 +2133,14 @@ showModal(modalDialog(
         easyClose = TRUE, size="l",footer="",fade=FALSE
       ))
 
-
-
-
     }else{
       # Check current version # and the latest github version. If github v is higher, download and install
       # For more info on version comparison see: https://community.rstudio.com/t/comparing-string-version-numbers/6057/6
       if (compareVersion(as.character(local_version),as.character(latestStableVersion)) == -1) {
         downFunc <- function() {
                        devtools::install_github("chasemc/IDBacApp", force=TRUE, quiet = F, quick=T)
-          message(tags$span(style="color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
+                       message(tags$span(style="color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
                     }
-
 
         showModal(modalDialog(
           title = "IDBac Update",
@@ -2222,17 +2152,12 @@ showModal(modalDialog(
           easyClose = TRUE, size="l",footer="",fade=FALSE
         ))
 
-
-
         withCallingHandlers(
           downfunc(),
           message = function(m) {
             shinyjs::html("console", m$message, TRUE)
           }
         )
-
-
-
 
       }else{
 
@@ -2244,21 +2169,13 @@ showModal(modalDialog(
           tags$li("Latest Version is Already Installed"),
           easyClose = TRUE, size="l",fade=FALSE,footer = modalButton("Close")
         ))
-
       }
-
-
     }
-
-
-
-
 
   }else{
     # if internet ping is false:
 
     internetPingResponse <- "Unable to Connect"
-
     showModal(modalDialog(
       title = "IDBac Update",
       tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
@@ -2267,14 +2184,7 @@ showModal(modalDialog(
       easyClose = FALSE, size="l",footer="",fade=FALSE
     ))
 
-
   }
-
-
-
-
-
-
 })
 
 
