@@ -645,8 +645,6 @@ observe({
 
 
 
-
-
 #
 #       try(numCores <- parallel::detectCores())
 #
@@ -1189,15 +1187,15 @@ observe({
     pc <- pcaCalculation()
     # Based on user selection, color PCA based on dendrogram groupings
     if(!is.null(isolate(input$kORheight))){
-      if(isolate(input$kORheight=="2")){
+      if(input$kORheight=="2"){
         # Colors chosen by cutting dendrogram at user-chosen height
         fac <- cutree(dendro(),h=input$height)
-      }else if (isolate(input$kORheight=="1")){
+      }else if (input$kORheight=="1"){
         # Colors chosen by user-selected "k" of k-means
         fac <- cutree(dendro(),k=input$kClusters)
       }else{
         # No factors, everthing colored black
-        fac <- rep(1,length(dendro()))
+        fac <- rep(1,length(labels(dendro())))
       }
       pc <- cbind.data.frame(pc,fac)
       pc <- merge(pc,colorBlindPalette,by="fac")
@@ -1212,19 +1210,9 @@ observe({
   })
 
   output$pcaplot <- renderPlotly({
-
-
     pcaDat <- pcaWithColor()
-
-
     plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam ,color = pcaDat$col)
-
-
-
   })
-
-
-
 
   # -----------------
   # Create PCA ui
@@ -1308,13 +1296,8 @@ observe({
       }
     }
 
-    dend
-
-
-
+   dend
   })
-
-
 
   #User input changes the height of the main hierarchical clustering plot
   plotHeight <- reactive({
@@ -1341,7 +1324,6 @@ observe({
   })
 
 
-
   # -----------------
   output$sampleMapColumns1<-renderUI({
     selectInput("sampleFactorMapChosenIDColumn", label = h5("Select a Group Mapping"),
@@ -1360,9 +1342,6 @@ observe({
 
   # -----------------
   levs<-reactive({
-
-
-
     sampleMappings<-read_excel(input$sampleMap$datapath,1)
     #selected column
     # if(any(is.na(sampleMappings[input$sampleFactorMapChosenAttribute]))){
@@ -1383,12 +1362,7 @@ observe({
   })
 
 
-
-
-
-
-
-
+  # -----------------
 
  coloredDend <- reactive({
 
@@ -1465,10 +1439,6 @@ observe({
              b <- cbind(idc = sampleFactors)
              colorsToreplace <- merge(a, b, by="idc")
 
-
-
-
-
           for (z in 1:length(names(bigList))){
             temp <- bigList[colorsToreplace[z,1]][[1]][,2]
             bigList[colorsToreplace[z,1]][[1]][,2][temp == "#000000"] <- as.vector(colorsToreplace[z,2])
@@ -1480,33 +1450,19 @@ observe({
 
           # Make sure factors are in same order as in dendlist
           bigList <- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
-
           toReturn$dend <- dendro() %>% set("labels_cex",1 )
-
           shortenedNames <- dendro()
           labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
-
-
           toReturn$bigMatrix <- sapply(bigList,function(x)cbind(x[,2]))
           toReturn$shortenedNames <- shortenedNames
-
-
       }else{
-
-
-
-
         sampleMappings <- as.data.frame(read_excel(input$sampleMap$datapath,1))
         sampleFactors <- sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>% as.vector %>% gsub(" ","", . )
-
-
         sampleIDs1 <- cbind.data.frame(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
 
-        #get colors chosen
+        # get colors chosen
         colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
-
-      #  zz <- cbind.data.frame(colorsChosen,sampleFactors)
-
+        # zz <- cbind.data.frame(colorsChosen,sampleFactors)
         a1 <- cbind(colorNew = colorsChosen, chosenFactor = levs())
         b1 <- cbind(chosenFactor = sampleFactors)
         colorsToreplace <- merge(a1, b1, by="chosenFactor")
@@ -1516,45 +1472,22 @@ observe({
 
         # Collapse strings to exclude spaces
         excelData$sampleFactorID <- gsub(" ","",excelData$sampleFactorID)
-
         dendroLabels <- gsub(" ","",labels(dendro()))
-
-
-
         dendColor <- as.vector(excelData$colorNew[match(dendroLabels,excelData$sampleFactorID)])
-
         dendColor[is.na(dendColor)]<-"#000000"
-
         toReturn$dend <-  dendro() %>% color_labels(labels=labels(dendro()),col=dendColor) }
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
 
       #If no sample map is selected, run this:
     }
-
    toReturn
-
-
   })
-
-
-
-
-
-
-
-
-
-
-
-
 
 
  # -----------------
  #Create the hierarchical clustering plot as well as the calculations needed for such.
 
-
   output$hclustPlot <- renderPlot({
-
 
     par(mar=c(5,5,5,input$dendparmar))
 
@@ -1573,25 +1506,19 @@ observe({
 
        coloredDend()$dend  %>%  plot(.,horiz=T)
        colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
-                                     rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE)
+                                     rowLabels = names(coloredDend()$bigMatrix), horiz=T, sort_by_labels_order = FALSE)
       }else{
 
-        coloredDend()$dend  %>%  plot(.,horiz=T)
+        coloredDend()$dend  %>%  plot(., horiz=T)
       }
-
   }
-  },height=plotHeight)
-
-
-
+  }, height=plotHeight)
 
  # -----------------
  #observeEvent(input$downloadInverse,{
  output$downloadHeirSVG <- downloadHandler(
    filename = function(){paste0("Dendrogram.svg")},
    content = function(file1){
-
-
      # svg(filename=paste0(input$Spectra1,"_",input$Spectra1,".svg"))
      svglite::svglite(file1, width = 10, height = plotHeight()/100, bg = "white",
                       pointsize = 12, standalone = TRUE)
@@ -1615,26 +1542,15 @@ observe({
          colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
                       rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE)
        }else{
-
          coloredDend()$dend  %>%  plot(.,horiz=T)
        }
-
-
      }
-
-
-
      dev.off()
      if (file.exists(paste0(file1, ".svg")))
        file.rename(paste0(file1, ".svg"), file1)
-
    })
 
-
-
-
-
-
+  # -----------------
   output$downloadHierarchical <- downloadHandler(
 
 
@@ -1646,6 +1562,7 @@ observe({
     }
 
   )
+
   # -----------------
   # Create Heir ui
   output$Heirarchicalui <-  renderUI({
@@ -1722,7 +1639,7 @@ observe({
 
 
 
-
+  # -----------------
   output$sampleGroupColoringui <-   renderUI(
 
     if(input$kORheight == "3"){
@@ -1744,9 +1661,6 @@ observe({
           uiOutput("sampleFactorMapColors"))
         )
     })
-
-
-
 
 
   # -----------------
@@ -1815,8 +1729,7 @@ observe({
         need(combinedSmallMolPeaksm != "", "It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
        )
 
-
-      # For now, replicate matrix samples are merged into a consensus peak list.
+      # At least for now, replicate matrix samples are merged into a consensus peak list.
       # Make sure we haven't reduced the mass object down to S4
       if(typeof(combinedSmallMolPeaksm)=="S4"){combinedSmallMolPeaksm<- list(combinedSmallMolPeaksm)}
       #
@@ -1838,21 +1751,14 @@ observe({
       combinedSmallMolPeaks[[i]]@intensity<-combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
       combinedSmallMolPeaks[[i]]@snr<-combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
     }
-
-
     binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
-
-
   })
 
 
   # -----------------
   trimmedSM <- reactive({
-
     trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
-
   })
-
 
   # -----------------
   subSelect<-reactive({
@@ -1869,7 +1775,7 @@ observe({
     for (i in seq_along(levels(labs))) {
       specSubset <- which(labs == levels(labs)[[i]])
       if (length(specSubset) > 1) {
-        new <- filterPeaks(trimmedSM()[specSubset],minFrequency=input$percentPresenceSM/100)
+        new <-suppressWarnings(filterPeaks(trimmedSM()[specSubset],minFrequency=input$percentPresenceSM/100))
         new<-mergeMassPeaks(new,method="mean")
         new2 <- c(new2, new)
       } else{
@@ -1915,18 +1821,9 @@ observe({
     }
 
     peaksa
-
-
-    #DELETE  saveRDS(peaksa,normalizePath("C:/Users/chase/Desktop/smallmolmatrix.rds",mustWork = F))
-
   })
 
-
-
-
-    ############
-    # Turn Peak-List into a table, add names, change from wide to long, and export as Gephi-compatible edge list
-
+  # -----------------
 
   smallMolNetworkDataFrame <- reactive({
 
@@ -1966,6 +1863,7 @@ observe({
     bool
   })
 
+  # -----------------
 
 output$downloadSmallMolNetworkData <- downloadHandler(
   filename = function(){"SmallMolecule_Network.csv"},
@@ -1987,7 +1885,6 @@ output$downloadSmallMolNetworkData <- downloadHandler(
       }
 
     a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
-
     a<-igraph::simplify(a)
     wc <- fastgreedy.community(a)
     b <- igraph_to_networkD3(a, group = (wc$membership + 1))

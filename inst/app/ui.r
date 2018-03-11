@@ -101,11 +101,7 @@ navbarPage(collapsible=T,
               h4("Select \"PreProcessing\" above to begin", align="center")
 
   )
-
-
-
-
-  ))),
+ ))),
   tabPanel(
     "PreProcessing",
     fluidPage(
