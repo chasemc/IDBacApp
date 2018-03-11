@@ -63,10 +63,9 @@ function(input,output,session){
       spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
       spectraImport<- list(spectraImport)
     }
-    n1<<-names
 
     # Find sample names (fileNames)
-    sampleNames <<- strsplit(names, ".mz")[[1]][1]
+    sampleNames <- strsplit(names, ".mz")[[1]][1]
 
     for (i in 1:length(spectraImport)) {
       spectraImport[[i]]@metaData$Strain <- sampleNames
@@ -587,12 +586,10 @@ observe({
 
 
     fullZ<-dlply(fullZ,.(UserInput.x))
-f1<<-fullZ
     # Allow spaces in filepathe
     for (i in 1:length(f1)){
       fullZ[[i]]$UserInput.y <- shQuote(fullZ[[i]]$UserInput.y)
     }
-f2<<-fullZ
     # return fullz to the "spectraConversion" reactive variable, this is  is a named list, where each element represents a sample and the element name is the sample name;
     # contents of each element are file paths to the raw data for that sample
     # This will be used by the spectra conversion observe function/event
@@ -1479,7 +1476,7 @@ f2<<-fullZ
 
 
           # Dendlabels was changed to a DF, so let's just re-do
-          dendLabels <- labels(dendro())
+          dendLabels <- gsub(" ","",labels(dendro()))
 
           # Make sure factors are in same order as in dendlist
           bigList <- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
@@ -1515,20 +1512,19 @@ f2<<-fullZ
         colorsToreplace <- merge(a1, b1, by="chosenFactor")
 
         # Merge excel sample IDs and factor with colors chosen by user in-app
-        excelData <<- merge(sampleIDs1,colorsToreplace,by="chosenFactor")
+        excelData <- merge(sampleIDs1,colorsToreplace,by="chosenFactor")
 
-        # Collapse strings to explude spaces
-        excelData$sampleFactorID <<- gsub(" ","",excelData$sampleFactorID)
+        # Collapse strings to exclude spaces
+        excelData$sampleFactorID <- gsub(" ","",excelData$sampleFactorID)
 
-        dendroLabels <<- gsub(" ","",labels(dendro()))
+        dendroLabels <- gsub(" ","",labels(dendro()))
 
 
 
-        dendColor <<- as.vector(excelData$colorNew[match(dendroLabels,excelData$sampleFactorID)])
+        dendColor <- as.vector(excelData$colorNew[match(dendroLabels,excelData$sampleFactorID)])
 
         dendColor[is.na(dendColor)]<-"#000000"
 
-aws2<<-dendro()
         toReturn$dend <-  dendro() %>% color_labels(labels=labels(dendro()),col=dendColor) }
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
 
@@ -2310,12 +2306,11 @@ showModal(modalDialog(
 
 
     }else{
-
-
-      if (local_version <= latestStableVersion) {
-
-        downfunc <- function() {
-                       devtools::install_github("chasemc/IDBacApp",force=TRUE,quiet = F,quick=T)
+      # Check current version # and the latest github version. If github v is higher, download and install
+      # For more info on version comparison see: https://community.rstudio.com/t/comparing-string-version-numbers/6057/6
+      if (compareVersion(as.character(local_version),as.character(latestStableVersion)) == -1) {
+        downFunc <- function() {
+                       devtools::install_github("chasemc/IDBacApp", force=TRUE, quiet = F, quick=T)
           message(tags$span(style="color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
                     }
 

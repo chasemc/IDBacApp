@@ -54,14 +54,14 @@ navbarPage(collapsible=T,
         column(3,
                br(),
                div(img(src="IDBac_Computer_SVG_300DPI.png",style="width:75%;height:75%"))),
-        column(5,
+        column(7,
                h1("Welcome to IDBac", align="center"),
                br(),
                h4("General Information:", align="center"),
 
                tags$ul(
                   tags$li(
-                     p("For more information about the method, as well as links to the full code, please visit ", a(href="https://chasemc.github.io/IDBacApp/", target="_blank", "chasemc.github.io/IDBac"))
+                     p("For more information about the method, as well as links to the full code, please visit ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "chasemc.github.io/IDBac"))
                   ),
                   tags$li(
                      p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
@@ -79,9 +79,9 @@ navbarPage(collapsible=T,
                  ),
                  tags$ul(
                     tags$li(
-                       p(tags$i("Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function"),br(),
+                       p(("Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function"),br(),
                        "Chase M. Clark, Maria S. Costa, Laura M. Sanchez, Brian T. Murphy;
-                          bioRxiv 215350; doi: https://doi.org/10.1101/215350")
+                          bioRxiv 215350; doi:",a(href="https://doi.org/10.1101/215350", target="_blank", "10.1101/215350"))
                     )
                  )
                ),
@@ -91,11 +91,8 @@ navbarPage(collapsible=T,
                 ),
                 tags$ul(
                   tags$li(
-                    p("For reproducibility, cite this specific version of IDBac with the version ", a(href= paste0("http://doi.org/10.5281/zenodo.", zenodoId), target="_blank", tags$code(paste0("DOI: 10.5281/zenodo.", zenodoId))))
-                    ),
-                  tags$li(
-                    p("Cite all versions? You can cite all versions by using the ", a(href="http://doi.org/10.5281/zenodo.1115619", target="_blank",tags$code("DOI: 10.5281/zenodo.1115619.")),br(), " This DOI represents all versions, and will always resolve to the latest one.")
-                  )
+                    p("For reproducibility cite this specific version of IDBac as version:", a(href= paste0("http://doi.org/10.5281/zenodo.", zenodoId), target="_blank", tags$code(paste0("10.5281/zenodo.", zenodoId))))
+                    )
                 )
               ),
 
