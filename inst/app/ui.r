@@ -64,7 +64,7 @@ navbarPage(collapsible=T,
                      p("For more information about the method, as well as links to the full code, please visit ", a(href="https://chasemc.github.io/IDBac/", target="_blank", "chasemc.github.io/IDBac"))
                   ),
                   tags$li(
-                     p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page on GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
+                     p("Bugs and suggestions may be reported on the ", a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page on GitHub", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
                   ),
                   tags$li(  actionButton("updateIDBac", label = "Check for Updates"))
 
@@ -91,7 +91,7 @@ navbarPage(collapsible=T,
                 ),
                 tags$ul(
                   tags$li(
-                    p("For reproducibility cite this specific version of IDBac as version:", a(href= paste0("http://doi.org/10.5281/zenodo.", zenodoId), target="_blank", tags$code(paste0("10.5281/zenodo.", zenodoId))))
+                    p("For reproducibility, cite this specific version of IDBac as version:", a(href= paste0("http://doi.org/10.5281/zenodo.", zenodoId), target="_blank", tags$code(paste0("10.5281/zenodo.", zenodoId))))
                     )
                 )
               ),
