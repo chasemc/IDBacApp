@@ -13,19 +13,15 @@ IDBac releases are preserved at Zenodo:
 
 
 ## Contents
-- [IDBac Software Installation](#idbac-software-installation)
 - [Sample Preparation](#sample-preparation)
 - [Renaming Bruker Raw Data Files](#renaming-bruker-raw-data-files)
 - [Data Acquisition](#data-acquisition)
+- [IDBac Software Installation](#idbac-software-installation)
 - [Data Analysis: Quick Start](#data-analysis-quick-start)
-- [Data Analysis: Step by Step](#data-analysis-step-by-step)
 
 
 
 
-
-### IDBac Software Installation
-The IDBac software, MALDI plate sample template, and example data may be downloaded [here](https://drive.google.com/open?id=0B0n1AhTXfxHqSmJFSHEyWjdaNmM)
 
 
 ### Sample Preparation
@@ -102,6 +98,9 @@ Once you have prepared your MALDI target plate protein and small molecule data y
 
 
 
+
+### IDBac Software Installation
+The IDBac software, MALDI plate sample template, and example data may be downloaded [here](https://drive.google.com/open?id=0B0n1AhTXfxHqSmJFSHEyWjdaNmM)
 
 
 
