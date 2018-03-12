@@ -11,6 +11,8 @@ IDBac releases are preserved at Zenodo:
 
 # IDBac Instruction Manual for MALDI-TOF MS Acquistion and Data Analysis 
 
+[![Join the chat at https://gitter.im/IDBac/Lobby](https://badges.gitter.im/IDBac/Lobby.svg)](https://gitter.im/IDBac/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 
 ## Contents
 - [Sample Preparation](#sample-preparation)
