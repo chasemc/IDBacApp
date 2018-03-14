@@ -1,5 +1,5 @@
             #define MyAppName "IDBac"
-#define MyAppVersion "0.0.9"
+#define MyAppVersion "0.0.15"
 #define MyAppExeName "IDBac.bat"
 #define RVersion "3.4.3"
 #define IncludeR true
@@ -11,13 +11,13 @@
 
 [Setup]
 AppName = {#MyAppName}
-AppId = {{PL77LJL8-E8L5-SFXW-ZKE3-8GJ8LO6B2WN1}
+AppId = {{ZCQORHRK-38NZ-RD5S-A6M7-K3PNVKDT0AHX}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
 OutputBaseFilename = setup_{#MyAppName}
 SetupIconFile = SmallSetupIcon3.ico
-AppVersion = 0.0.9
+AppVersion = 0.0.15
 AppPublisher = {#MyAppPublisher}
 AppPublisherURL = {#MyAppURL}
 AppSupportURL = {#MyAppURL}
@@ -146,6 +146,7 @@ Source: "pwiz/Microsoft.Practices.Unity.dll"; DestDir: "{app}\pwiz"; Flags: igno
 Source: "pwiz/MIDAC.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/mkl_sequential.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSConvertGUI.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
+Source: "pwiz/msconvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSConvertGUI.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSFileReader.XRawfile2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
 Source: "pwiz/MSFileReader.XRawfile2.SxS.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;

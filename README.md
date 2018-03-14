@@ -104,6 +104,12 @@ The IDBac software, MALDI plate sample template, and example data may be downloa
 
 
 
+### Data Analysis: Quick Start]
+The software was designed with explanations and guidance throughout.  If you are stuck or 
+
+
+
+
 
 ### Contributions
 Below are the some of the relevant R packages that we utilized within IDBac’s code. Without these authors’ hard work, this project would not be possible.

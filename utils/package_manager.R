@@ -17,10 +17,6 @@ if (!dir.exists(applibpath)) {
   chooseCRANmirror(graphics = F, ind = 28)
   init_pkgs <- c("jsonlite", "devtools", "httr")
 
-# Modified by Chase
-  install.packages(file.path(appwd,"proteowizardinstallation.zip") ,repos=NULL)
-
-
   for (i in seq_along(init_pkgs)) {
     setWinProgressBar(pb, value = i / (length(init_pkgs) + 1),
       label = sprintf("Loading package - %s", init_pkgs[i]))
