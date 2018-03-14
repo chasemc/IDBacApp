@@ -587,7 +587,7 @@ observe({
 
     fullZ<-dlply(fullZ,.(UserInput.x))
     # Allow spaces in filepathe
-    for (i in 1:length(f1)){
+    for (i in 1:length(fullZ)){
       fullZ[[i]]$UserInput.y <- shQuote(fullZ[[i]]$UserInput.y)
     }
     # return fullz to the "spectraConversion" reactive variable, this is  is a named list, where each element represents a sample and the element name is the sample name;
@@ -621,10 +621,16 @@ observe({
       outp <- file.path(paste0(selectedDirectory(), "\\",uniquifiedIDBac(),"\\Converted_To_mzXML"))
 
 
+
+      # Find the location of the proteowizard libraries
+      pwizFolderLocation <- installed.packages()
+      pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation",pwizFolderLocation), ])
+      pwizFolderLocation <- file.path(pwizFolderLocation$LibPath,"proteowizardinstallation","pwiz")
+
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands<-lapply(fullZ,function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
-        paste0("pwiz\\msconvert.exe",
+        paste0(file.path(pwizFolderLocation, "msconvert.exe"),
                # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
                " ",
                paste0(x$UserInput.y,collapse = "",sep=" "),
@@ -2196,10 +2202,10 @@ showModal(modalDialog(
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
 
-    session$onSessionEnded(function() {
-      stopApp()
-      q("no")
-    })
+#    session$onSessionEnded(function() {
+#      stopApp()
+#      q("no")
+#    })
 
 
 }

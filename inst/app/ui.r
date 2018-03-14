@@ -1,5 +1,22 @@
+
+#----------
+ # cHANGES Zenodo DOI
 zenodoId <- "1115619"
 
+
+#----------
+ # Check ikf proteowizard was installed correctly
+installedPackages  <- installed.packages()
+pwizFolderLocation <- as.list(installedPackages[grep("proteowizardinstallation",installedPackages), ])
+pwizFolderLocation <- file.path(pwizFolderLocation$LibPath,"proteowizardinstallation","pwiz")
+if(!length(pwizFolderLocation) == 1){
+  }else{
+        winDialog(type = "ok","IDBac was unable to find the proteowizard libraries, please try uninstalling IDBac and then reinstalling.
+    Proteowizard libraries are necessary to convert your raw-data to mzXML format.")
+  }
+
+#----------
+ # Install any missing packages
 
 if(!length(grep("mzR",row.names(installed.packages())))){
   if(!length(grep("BiocInstaller",row.names(installed.packages())))){
