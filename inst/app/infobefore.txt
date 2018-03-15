@@ -1,2 +1,7 @@
-Thank you for downloading IDBac. Follow the directions to begin the installation.
-Please check out our website if you haven't already https://chasemc.github.io/IDBac
+This message will display on the first page of your setup wizard.
+
+
+
+
+
+Icons made by Vectors Market from Flaticon are licensed by Creative Commons BY 3.0

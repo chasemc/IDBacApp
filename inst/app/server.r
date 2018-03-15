@@ -623,7 +623,9 @@ observe({
 
 
       # Find the location of the proteowizard libraries
-      pwizFolderLocation <- installed.packages()
+      appwd <- getwd()
+      applibpath <- file.path(appwd, "library")
+      pwizFolderLocation <- installed.packages(c(.libPaths(),applibpath))
       pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation",pwizFolderLocation), ])
       pwizFolderLocation <- file.path(pwizFolderLocation$LibPath,"proteowizardinstallation","pwiz")
 
@@ -2088,7 +2090,7 @@ showModal(modalDialog(
     Sys.sleep(.75)
 
     # Currently installed version
-    local_version <- try(packageVersion("IDBacApp"))
+    local_version <- tryCatch(packageVersion("IDBacApp"),error = function(x) paste("Installed version is latest version"), finally = function(x)packageVersion("IDBacApp"))
 
     showModal(modalDialog(
       title = "IDBac Update",
@@ -2142,7 +2144,9 @@ showModal(modalDialog(
     }else{
       # Check current version # and the latest github version. If github v is higher, download and install
       # For more info on version comparison see: https://community.rstudio.com/t/comparing-string-version-numbers/6057/6
-      if (compareVersion(as.character(local_version),as.character(latestStableVersion)) == -1) {
+		  a<-try(compareVersion(as.character(local_version),as.character(latestStableVersion)))
+
+      if(inherits(a, "try-error")){}else if(compareVersion(as.character(local_version),as.character(latestStableVersion)) == -1) {
         downFunc <- function() {
                        devtools::install_github("chasemc/IDBacApp", force=TRUE, quiet = F, quick=T)
                        message(tags$span(style="color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
@@ -2202,10 +2206,10 @@ showModal(modalDialog(
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
 
-#    session$onSessionEnded(function() {
-#      stopApp()
-#      q("no")
-#    })
+      session$onSessionEnded(function() {
+        stopApp()
+        q("no")
+      })
 
 
 }

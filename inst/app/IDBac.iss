@@ -1,5 +1,5 @@
             #define MyAppName "IDBac"
-#define MyAppVersion "0.0.15"
+#define MyAppVersion "0.0.13"
 #define MyAppExeName "IDBac.bat"
 #define RVersion "3.4.3"
 #define IncludeR true
@@ -11,13 +11,13 @@
 
 [Setup]
 AppName = {#MyAppName}
-AppId = {{ZCQORHRK-38NZ-RD5S-A6M7-K3PNVKDT0AHX}
+AppId = {{08C0M7RN-OHX5-48HY-AD83-YDWNH5U98WFI}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
 OutputBaseFilename = setup_{#MyAppName}
 SetupIconFile = SmallSetupIcon3.ico
-AppVersion = 0.0.15
+AppVersion = 0.0.13
 AppPublisher = {#MyAppPublisher}
 AppPublisherURL = {#MyAppURL}
 AppSupportURL = {#MyAppURL}
@@ -58,123 +58,12 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Source: "gpl.txt"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "IDBac.bat"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "proteowizardinstallation.zip"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "server.r"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "SmallAppIcon3.ico"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "SmallSetupIcon3.ico"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "ui.r"; DestDir: "{app}"; Flags: ignoreversion;
-          Source: "pwiz/agtsampleinforw.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/baf2sql_c.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BaseCommon.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BaseDataAccess.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BaseDataAccess.dll.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BaseError.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BaseTof.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.BCO.Constants.xml"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.BCO.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.BCO.Interfaces.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.BCO.Objects.xml"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CCO.Calibration.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CCO.Constants.xml"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CCO.Interfaces.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CCO.Objects.xml"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CCO.TemperatureCompensation.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CCO.Transformation.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CCO.Utilities.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CXt.Lc.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CXt.Lc.Factory.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CXt.Lc.Interfaces.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/BDal.CXt.Lc.UntU2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/boost_date_time-vc90-mt-1_37-x64-BDAL_20091123.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/boost_regex-vc90-mt-1_37-x64-BDAL_20091123.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/boost_system-vc90-mt-1_37-x64-BDAL_20091123.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/boost_thread-vc90-mt-1_37-x64-BDAL_20091123.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/cdt.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Compression.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.Acquisition.Client.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.Acquisition.Contracts.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.AnalystDataProvider.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.Client.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.Common.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.CommonInterfaces.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.Contracts.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.Core.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.Wiff2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Data.WiffReader.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.DataService.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Devices.Types.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Domain.Acquisition.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Domain.Acquisition.Methods.MassSpec.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Infrastructure.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.InternalRawXYProcessing.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Muni.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.RawXYProcessing.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.StructuredStorage.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.UserLog.Types.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.Utility.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Clearcore2.XmlHelpers.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/CompassXtractMS.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Compressor_12451AC8-3BF1-48e1-8E66-DA05BF3852A0.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Compressor_382D5134-9727-4be6-B6F8-754F577426D6.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Compressor_4F1EA0CB-5A6A-43ED-9562-D6D873034577.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Compressor_6BB2E64A-27A0-4575-A66A-4E312C8B9AD7.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Compressor_6EEE649E-09AA-4332-8E82-8188652E8AB5.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Compressor_7F88E97F-2038-40ba-8F3A-FCA9A9719569.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/CustomDataSourceDialog.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/CustomDataSourceDialog.dll.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/DataGridViewAutoFilter.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/DataReader.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/DigitalRune.Windows.Docking.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/EULA.MHDAC"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/EULA.MSFileReader"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/EULA.SFCS"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/fileio_x64.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/FlexVariableTable.xml"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/fregistry_x64.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/HSReadWrite.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/ICRVariableTable.xml"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Interop.DataExplorer.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Interop.EDAL.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Interop.EDAL.SxS.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Interop.HSREADWRITELib.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Interop.HSREADWRITELib.SxS.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Interop.MSFileReaderLib.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MassLynxRaw.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MassSpecDataReader.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Microsoft.Practices.Unity.Configuration.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Microsoft.Practices.Unity.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MIDAC.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/mkl_sequential.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MSConvertGUI.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/msconvert.exe"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MSConvertGUI.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MSFileReader.XRawfile2.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MSFileReader.XRawfile2.SxS.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/MSGraph.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/msparser.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/OFX.Core.Contracts.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/OFX.Core.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/OFX.EventServices.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/OFX.Logging.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/OFX.Security.Core.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/protobuf-net.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/pwiz.CommonUtil.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/pwiz_bindings_cli.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Sciex.Clearcore.FMan.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Sciex.Data.Processing.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Sciex.Data.SimpleTypes.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Sciex.Data.XYData.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Sciex.FMan.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/Sciex.Wiff.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/seems.exe.config"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/seems.exe.manifest"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/SQLite_v1.0.98/System.Data.SQLite.dll"; DestDir: "{app}\pwiz\SQLite_v1098"; Flags: ignoreversion;
-Source: "pwiz/STL_Containers.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/System.Data.SQLite.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/UIMFLibrary.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/unimod_2.xsd"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "pwiz/ZedGraph.dll"; DestDir: "{app}\pwiz"; Flags: ignoreversion;
-Source: "utils/app.R"; DestDir: "{app}\utils"; Flags: ignoreversion;
+          Source: "utils/app.R"; DestDir: "{app}\utils"; Flags: ignoreversion;
 Source: "utils/config.cfg"; DestDir: "{app}\utils"; Flags: ignoreversion;
 Source: "utils/ensure.R"; DestDir: "{app}\utils"; Flags: ignoreversion;
 Source: "utils/get_app_from_app_url.R"; DestDir: "{app}\utils"; Flags: ignoreversion;

@@ -69,9 +69,7 @@ start_app <- function(
 
       # Shiny
     } else {
-      app_path <- file.path(system.file(package = config$appname), "app")
-
-      shiny::runApp(app_path, launch.browser = launch_browser, port = 1984)
+      shiny::runApp("./", launch.browser = launch_browser, port = 1984)
     }
   }
 }

@@ -3,16 +3,23 @@
  # cHANGES Zenodo DOI
 zenodoId <- "1115619"
 
+checkpoint::checkpoint("2018-03-01",checkpointLocation=file.path("library"))
 
 #----------
  # Check ikf proteowizard was installed correctly
-installedPackages  <- installed.packages()
+appwd <- getwd()
+applibpath <- file.path(appwd, "library")
+installedPackages  <- installed.packages(c(.libPaths(),applibpath))
 pwizFolderLocation <- as.list(installedPackages[grep("proteowizardinstallation",installedPackages), ])
 pwizFolderLocation <- file.path(pwizFolderLocation$LibPath,"proteowizardinstallation","pwiz")
-if(!length(pwizFolderLocation) == 1){
+if(length(pwizFolderLocation) == 1){
+  warning("Successfully found proteowizard installation!")
   }else{
-        winDialog(type = "ok","IDBac was unable to find the proteowizard libraries, please try uninstalling IDBac and then reinstalling.
-    Proteowizard libraries are necessary to convert your raw-data to mzXML format.")
+    # Modified by Chase
+
+    tryCatch(unzip(file.path(appwd,"proteowizardinstallation.zip"),exdir = applibpath),error = function(x)  warning("IDBac was unable to find the proteowizard libraries, please try uninstalling IDBac and then reinstalling.
+Proteowizard libraries are necessary to convert your raw-data to mzXML format."), finally = function(x)unzip(file.path(appwd,"proteowizardinstallation.zip"),exdir = applibpath))
+
   }
 
 #----------

@@ -1,3 +1,4 @@
+
 # capture the current working directory
 # set the package search path to the app specific library
 appwd <- getwd()
@@ -16,10 +17,6 @@ if (!dir.exists(applibpath)) {
   dir.create(applibpath)
   chooseCRANmirror(graphics = F, ind = 28)
   init_pkgs <- c("jsonlite", "devtools", "httr")
-
-# Modified by Chase
-  install.packages(file.path(appwd,"proteowizardinstallation.zip") ,repos=NULL)
-
 
   for (i in seq_along(init_pkgs)) {
     setWinProgressBar(pb, value = i / (length(init_pkgs) + 1),
@@ -59,7 +56,7 @@ appexit_msg <- tryCatch({
   # ensure all package dependencies are installed
   message("ensuring packages: ", paste(pkgs, collapse = ", "))
   setWinProgressBar(pb, 0, label = "Ensuring package dependencies ...")
-  if (!httr::http_error("www.google.com")) {
+  if (class(try(httr::http_error("www.google.com"))) != "try-error") {
     ._ <- mapply(ensure, pkgs, names(pkgs))
     if (remotes[1] != "none") {
       message("ensuring remotes: ", paste(remotes, collapse = ", "))
