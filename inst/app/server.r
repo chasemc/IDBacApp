@@ -2225,6 +2225,10 @@ function(input,output,session){
 
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
+  session$onSessionEnded(function() {
+    stopApp()
+    q("no")
+  })
 
 
 
