@@ -1,69 +1,29 @@
+# Add "packageLibrary" to libraries
+
 
 #----------
- # cHANGES Zenodo DOI
+# Changes Zenodo DOI
 zenodoId <- "1115619"
 
-checkpoint::checkpoint("2018-03-01",checkpointLocation=file.path("library"))
-
-#----------
- # Check ikf proteowizard was installed correctly
-appwd <- getwd()
-applibpath <- file.path(appwd, "library")
-installedPackages  <- installed.packages(c(.libPaths(),applibpath))
-pwizFolderLocation <- as.list(installedPackages[grep("proteowizardinstallation",installedPackages), ])
-pwizFolderLocation <- file.path(pwizFolderLocation$LibPath,"proteowizardinstallation","pwiz")
-if(length(pwizFolderLocation) == 1){
-  warning("Successfully found proteowizard installation!")
-  }else{
-    # Modified by Chase
-
-    tryCatch(unzip(file.path(appwd,"proteowizardinstallation.zip"),exdir = applibpath),error = function(x)  warning("IDBac was unable to find the proteowizard libraries, please try uninstalling IDBac and then reinstalling.
-Proteowizard libraries are necessary to convert your raw-data to mzXML format."), finally = function(x)unzip(file.path(appwd,"proteowizardinstallation.zip"),exdir = applibpath))
-
-  }
-
-#----------
- # Install any missing packages
-
-if(!length(grep("mzR",row.names(installed.packages())))){
-  if(!length(grep("BiocInstaller",row.names(installed.packages())))){
-    source("https://bioconductor.org/biocLite.R")
-    biocLite("BiocInstaller",suppressUpdates = T)
-    }
-
-  source("https://bioconductor.org/biocLite.R")
-  biocLite("mzR",ask=F)
-}
-
-
-# Function to Install and Load R Packages
-Install_And_Load <- function(Required_Packages)
-{
-  Remaining_Packages <-
-    Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-
-
-  if (length(Remaining_Packages))
-  {
-    install.packages(Remaining_Packages)
-
-  }
-  for (package_name in Required_Packages)
-  {
-    library(package_name,
-            character.only = TRUE,
-            quietly = TRUE)
-
-  }
-}
-
-# Required packages to install and load
-Required_Packages = c("devtools","svglite","shinyjs", "mzR","plotly","colourpicker","shiny", "MALDIquant", "MALDIquantForeign","readxl","networkD3","ape","FactoMineR","dendextend","networkD3","reshape2","plyr","igraph")
-
-
-# Install and Load Packages
-Install_And_Load(Required_Packages)
-
+library("Rcpp")
+library("devtools")
+library("svglite")
+library("shinyjs")
+library("mzR")
+library("plotly")
+library("colourpicker")
+library("shiny")
+library("MALDIquant")
+library("MALDIquantForeign")
+library("readxl")
+library("networkD3")
+library("ape")
+library("FactoMineR")
+library("dendextend")
+library("networkD3")
+library("reshape2")
+library("plyr")
+library("igraph")
 
 # The UI section of the Shiny app provides the "User Interface" and is the means of user interaction.
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
