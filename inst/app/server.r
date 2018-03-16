@@ -1609,7 +1609,7 @@ function(input,output,session){
                                   choices = list("Presence/Absence" = 1, "Intensities" = 2),
                                   selected = 2),
                      numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
-                     numericInput("dendparmar",label="Adjust right margin of dendrogram",value=5),
+                     numericInput("dendparmar",label="Adjust right margin of dendrogram",value=20),
 
                      radioButtons("kORheight", label = h5("Color clusters based on:"),
                                   choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-defined Categories in Excel Sheet" = 3),
@@ -1986,7 +1986,7 @@ function(input,output,session){
                             numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=20,max=round(max(sapply(smallPeaks(),function(x)max(mass(x)))),digits=-1)),
                             numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=20,min=round(min(sapply(smallPeaks(),function(x)min(mass(x)))),digits=-1)),
                             numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
-                            numericInput("dendparmar2",label=h5("Adjust right margin of dendrogram"),value=5),
+                            numericInput("dendparmar2",label=h5("Adjust right margin of dendrogram"),value=20),
                             downloadButton("downloadSmallMolNetworkData", label = "Download Current Network Data", value = FALSE),
                             br(),
                             p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
