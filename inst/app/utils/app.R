@@ -53,7 +53,7 @@ start_app <- function(
 
       # Shiny
     } else {
-      shiny::runApp(app_path, launch.browser = launch_browser, port = 1984)
+      shiny::runApp(app_path, launch.browser = T, port = 1984)
     }
 
   } else {
@@ -64,12 +64,12 @@ start_app <- function(
       }
 
       rmarkdown::run(paste0("./", config$flex_file),
-        shiny_args = list(host = '0.0.0.0', launch.browser = launch_browser,
+        shiny_args = list(host = '0.0.0.0', launch.browser = T,
                           port = 1984))
 
       # Shiny
     } else {
-      shiny::runApp("./", launch.browser = launch_browser, port = 1984)
+      shiny::runApp("./", launch.browser = T, port = 1984)
     }
   }
 }
