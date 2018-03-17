@@ -213,7 +213,7 @@ function(input,output,session){
                         img(src="Single-MALDI-Plate.png", style="width:60%;height:60%"),
                         br(),
                         p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                        div(img(src="window.png",style="width:750px;height:40px"))
+                        img(src="window.png",width="100%")
                         ),
                  column(1
                  ),
@@ -274,8 +274,8 @@ function(input,output,session){
                           containing protein data and the other containing small molecule data:"),
                         img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
                         p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                        img(src="window.png",style="width:750px;height:40px")
-                        ),
+                        img(src="window.png",width="100%")
+                 ),
                  column(1
                  ),
                  column(5, style = "background-color:#7777770d",
@@ -329,7 +329,7 @@ function(input,output,session){
                                img(src="WorkingDirectory_ReAnalysis.png", style="width:322px;height:164px"),
                                br(),br(),
                                p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                               div(img(src="window.png",style="width:750px;height:40px"))
+                               img(src="window.png",width="100%")
                         ),
                         column(1
                         ),
@@ -953,8 +953,8 @@ function(input,output,session){
   listOfDataframesForInversePeakComparisonPlot <- reactive({
 
     #Selects the peaks to plot based on user-input
-    peaksSampleOne<-collapsedPeaksP()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
-    peaksSampleTwo<-collapsedPeaksP()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
+    peaksSampleOne<-collapsedPeaksP()[[grep(paste0("^",input$Spectra1,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
+    peaksSampleTwo<-collapsedPeaksP()[[grep(paste0("^",input$Spectra2,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
 
 
     #pSNR= the User-Selected Signal to Noise Ratio for protein
@@ -1140,16 +1140,16 @@ function(input,output,session){
 
       sidebarLayout(
         sidebarPanel(width = 3, style = "background-color:#7777770d",
-                     selectInput("Spectra1", label=h5("Spectrum 1 (up; matches to bottom spectrum are blue, non-matches are red)"),
+                     selectInput("Spectra1", label=h5(strong("Spectrum 1 (up)"), br(), "(Peak matches to bottom spectrum are blue, non-matches are red)"),
                                  choices = spectra()$names),
-                     selectInput("Spectra2", label=h5("Spectrum 2 (down)"),
+                     selectInput("Spectra2", label=h5(strong("Spectrum 2 (down)")),
                                  choices = spectra()$names),
                      downloadButton("downloadInverse",label="Download Main Plot"),
                      downloadButton("downloadInverseZoom",label="Download Zoomed Plot"),
                      numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
-                     numericInput("pSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
-                     numericInput("lowerMass", label = h5("Lower Mass Cutoff"),value = 3000,step=50),
-                     numericInput("upperMass", label = h5("Upper Mass Cutoff"),value = 15000,step=50),
+                     numericInput("pSNR", label = h5(strong("Signal To Noise Cutoff")),value = 4,step=.5,min=1.5,max=100),
+                     numericInput("lowerMass", label = h5(strong("Lower Mass Cutoff")),value = 3000,step=50),
+                     numericInput("upperMass", label = h5(strong("Upper Mass Cutoff")),value = 15000,step=50),
                      p("Note: Mass Cutoff and Percent Replicate values selected here will be used in all later analyses."),
                      p("Note 2: Displayed spectra represent the mean spectrum for a sample. Example: if you observe a peak
                        in your mean spectrum but it isn't represented as a red or blue line, then either it doesn't occur often enough across your replicates
@@ -1316,13 +1316,13 @@ function(input,output,session){
   # -----------------
   output$hclustui <-  renderUI({
     if(input$kORheight!="2"){return(NULL)}else{
-      numericInput("height", label = h5("Cut Tree at Height"),value = .5,step=.1,min=0)}
+      numericInput("height", label = h5(strong("Cut Tree at Height")),value = .5,step=.1,min=0)}
   })
 
   # -----------------
   output$groupui <-  renderUI({
     if(input$kORheight=="1"){
-      numericInput("kClusters", label = h5("Number of Groups"),value = 1,step=1,min=1)}
+      numericInput("kClusters", label = h5(strong("Number of Groups")),value = 1,step=1,min=1)}
   })
 
   # -----------------
@@ -1378,7 +1378,11 @@ function(input,output,session){
 
     # if user selects to customize group samples
     if (input$kORheight =="3"){
-      if(input$colDotsOrColDend == "1"){
+         if(!is.null(input$sampleMap$datapath)){
+            if(input$colDotsOrColDend == "1"){
+
+
+
 
         # This is the user-provided excel sheet, columns represent factors, rows are samples
         # One column will be user-selected to match to names in the dendrogram
@@ -1447,10 +1451,12 @@ function(input,output,session){
         b <- cbind(idc = sampleFactors)
         colorsToreplace <- merge(a, b, by="idc")
 
-        for (z in 1:length(names(bigList))){
-          temp <- bigList[colorsToreplace[z,1]][[1]][,2]
-          bigList[colorsToreplace[z,1]][[1]][,2][temp == "#000000"] <- as.vector(colorsToreplace[z,2])
-        }
+        # biggy<<-bigList
+        # colorsy<<-colorsToreplace
+        # for (z in 1:length(names(bigList))){
+        #   temp <- bigList[colorsToreplace[z,1]][[1]][,2]
+        #   bigList[colorsToreplace[z,1]][[1]][,2][temp == "#000000"] <- as.vector(colorsToreplace[z,2])
+        # }
 
 
         # Dendlabels was changed to a DF, so let's just re-do
@@ -1487,6 +1493,7 @@ function(input,output,session){
       #dendro %>% set("labels_cex", c(2,1)) %>% plot
 
       #If no sample map is selected, run this:
+      }
     }
     toReturn
   })
@@ -1508,18 +1515,21 @@ function(input,output,session){
 
     } else if (input$kORheight=="3"){
 
-      par(mar=c(5,5,5,input$dendparmar))
+        if(is.null(input$sampleMap$datapath)){
 
-      if(input$colDotsOrColDend == "1"){
+      # No sample mapping selected
+      dendro() %>% plot(horiz=TRUE,lwd=8)}else{
+            if(input$colDotsOrColDend == "1"){
 
-        coloredDend()$dend  %>%  plot(.,horiz=T)
-        colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
-                     rowLabels = names(coloredDend()$bigMatrix), horiz=T, sort_by_labels_order = FALSE)
-      }else{
+              coloredDend()$dend  %>%  plot(.,horiz=T)
+              colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
+                           rowLabels = names(coloredDend()$bigMatrix), horiz=T, sort_by_labels_order = FALSE)
+            }else{
 
-        coloredDend()$dend  %>%  plot(., horiz=T)
+              coloredDend()$dend  %>%  plot(., horiz=T)
+            }
       }
-    }
+      }
   }, height=plotHeight)
 
   # -----------------
@@ -1594,24 +1604,24 @@ function(input,output,session){
 
     }else{
 
-      fluidPage(
+      sidebarLayout(
         sidebarPanel(style = "background-color:#7777770d",
                      #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
                      #                    choices = levels(phyla)),
-                     selectInput("distance", label = h5("Distance Algorithm"),
+                     selectInput("distance", label = h5(strong("Distance Algorithm")),
                                  choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
                                  selected = "euclidean"),
-                     selectInput("clustering", label = h5("Clustering Algorithm"),
+                     selectInput("clustering", label = h5(strong("Clustering Algorithm")),
                                  choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
                                  selected = "ward.D2"),
 
-                     radioButtons("booled", label = h5("Include peak intensities, or use presence/absence?"),
+                     radioButtons("booled", label = h5(strong("Include peak intensities, or use presence/absence?")),
                                   choices = list("Presence/Absence" = 1, "Intensities" = 2),
                                   selected = 2),
-                     numericInput("hclustHeight", label = h5("Expand Tree"),value = 750,step=50,min=100),
-                     numericInput("dendparmar",label="Adjust right margin of dendrogram",value=20),
+                     numericInput("hclustHeight", label = h5(strong("Expand Tree")),value = 750,step=50,min=100),
+                     numericInput("dendparmar",label=h5(strong("Adjust right margin of dendrogram")),value=20),
 
-                     radioButtons("kORheight", label = h5("Color clusters based on:"),
+                     radioButtons("kORheight", label = h5(strong("Color clusters based on:")),
                                   choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-defined Categories in Excel Sheet" = 3),
                                   selected = 1),
 
@@ -1976,17 +1986,17 @@ function(input,output,session){
       column(width=3,
              fluidRow(
                sidebarPanel(style='padding:30px',width="100%",
-                            radioButtons("matrixSamplePresent", label = h5("Do you have a matrix blank?"),
+                            radioButtons("matrixSamplePresent", label = h5(strong("Do you have a matrix blank?")),
                                          choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
                                          selected = 1),
                             numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
-                            numericInput("smSNR", label = h5("Signal To Noise Cutoff"),value = 4,step=.5,min=1.5,max=100),
+                            numericInput("smSNR", label = h5(strong("Signal To Noise Cutoff")),value = 4,step=.5,min=1.5,max=100),
 
 
-                            numericInput("upperMassSM", label = h5("Upper Mass Cutoff"),value = 2000,step=20,max=round(max(sapply(smallPeaks(),function(x)max(mass(x)))),digits=-1)),
-                            numericInput("lowerMassSM", label = h5("Lower Mass Cutoff"),value = 200,step=20,min=round(min(sapply(smallPeaks(),function(x)min(mass(x)))),digits=-1)),
-                            numericInput("hclustHeightNetwork", label = h5("Expand Tree"),value = 750,step=50,min=100),
-                            numericInput("dendparmar2",label=h5("Adjust right margin of dendrogram"),value=20),
+                            numericInput("upperMassSM", label = h5(strong("Upper Mass Cutoff")),value = 2000,step=20,max=round(max(sapply(smallPeaks(),function(x)max(mass(x)))),digits=-1)),
+                            numericInput("lowerMassSM", label = h5(strong("Lower Mass Cutoff")),value = 200,step=20,min=round(min(sapply(smallPeaks(),function(x)min(mass(x)))),digits=-1)),
+                            numericInput("hclustHeightNetwork", label = h5(strong("Expand Tree")),value = 750,step=50,min=100),
+                            numericInput("dendparmar2",label=h5(strong("Adjust right margin of dendrogram")),value=5),
                             downloadButton("downloadSmallMolNetworkData", label = "Download Current Network Data", value = FALSE),
                             br(),
                             p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
@@ -1997,7 +2007,7 @@ function(input,output,session){
 
              fluidRow(
                sidebarPanel(width="100%",
-                            p(strong("Note 1:"), "For publication-quality networks click the box next to \"Save Current Network\",
+                            p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network.\"
                               while selected- this saves a .csv file of the currently-displayed
                               network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
                               While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
@@ -2084,7 +2094,7 @@ function(input,output,session){
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ")),
         tags$li(paste0("Latest Stable Release: ")),
-        easyClose = TRUE, size="l",footer="",fade=FALSE
+        easyClose = FALSE, size="l",footer="",fade=FALSE
       ))
 
       Sys.sleep(.75)
@@ -2097,7 +2107,7 @@ function(input,output,session){
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ", local_version)),
         tags$li(paste0("Latest Stable Release: ")),
-        easyClose = TRUE, size="l",footer="",fade=FALSE
+        easyClose = FALSE, size="l",footer="",fade=FALSE
       ))
 
       Sys.sleep(.75)
@@ -2107,7 +2117,7 @@ function(input,output,session){
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ", local_version)),
         tags$li(paste0("Latest Stable Release: ")),
-        easyClose = TRUE, size="l",footer="",fade=FALSE
+        easyClose = FALSE, size="l",footer="",fade=FALSE
       ))
 
       Sys.sleep(.75)
@@ -2127,7 +2137,7 @@ function(input,output,session){
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ", local_version)),
         tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
-        easyClose = TRUE, size="l",footer="",fade=FALSE
+        easyClose = FALSE, size="l",footer="",fade=FALSE
       ))
 
       if (class(latestStableVersion) == "try-error"){
@@ -2160,7 +2170,7 @@ function(input,output,session){
             tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
             tags$li("Updating to latest version... (please be patient)"),
             pre(id = "console"),
-            easyClose = TRUE, size="l",footer="",fade=FALSE
+            easyClose = FALSE, size="l",footer="",fade=FALSE
           ))
 
           withCallingHandlers(
@@ -2179,7 +2189,7 @@ function(input,output,session){
             tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
             tags$li("Updating to latest version... (please be patient)"),
             pre(id = "console"),
-            easyClose = TRUE, size="l",footer="",fade=FALSE
+            easyClose = FALSE, size="l",footer="",fade=FALSE
           ))
 
           withCallingHandlers(
@@ -2224,11 +2234,11 @@ function(input,output,session){
 
 
 
-  #  The following code is necessary to stop the R backend when the user closes the browser window
-  session$onSessionEnded(function() {
-    stopApp()
-    q("no")
-  })
+  # #  The following code is necessary to stop the R backend when the user closes the browser window
+  # session$onSessionEnded(function() {
+  #   stopApp()
+  #   q("no")
+  # })
 
 
 
