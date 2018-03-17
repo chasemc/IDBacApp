@@ -6,7 +6,7 @@ reg_paths <- jsonlite::fromJSON("utils/regpaths.json")
 # information on app start up. If a user does not have the user browser,
 # their defult browser will be used.
 start_app <- function(
-  app_name = config$appname,
+  app_name = "IDBacApp",
   user_browser = config$user_browser,
   chrome = reg_paths$chrome,
   ff = reg_paths$ff,
