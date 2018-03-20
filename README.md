@@ -11,17 +11,18 @@ Every IDBac release (Including this Manual) is preserved at Zenodo for citabilit
     
 
 ## Table of Contents
-- [Naming Samples](#naming-samples)
+- [Naming Samples](#-naming-samples)
   - Instructions for Bruker MALDI-TOF MS Instruments 
   - Instructions for Other Instruments
-- [Sample Preparation](#sample-preparation)
+- [Sample Preparation](#-sample-preparation)
   - Cleaning MALDI Target Plates
   - MALDI Matrix Preparation
   - Applying Samples to the MALDI Plate
-- [Data Acquisition](#data-acquisition)
-- [IDBac Software Installation](#idbac-software-installation)
-- [Data Analysis: Quick Start](#data-analysis-quick-start)
-- [Statistics and MALDI](statistics-and-maldi)
+- [Data Acquisition](#-data-acquisition)
+- [IDBac Software Installation](#-idbac-software-installation)
+- [Data Analysis: Quick Start](#-data-analysis-quick-start)
+- [Statistics and MALDI](#-statistics-and-maldi)
+- [Reproducibility and Citation](#-reproducibility-and-citation)
 
 ---
 ---
@@ -170,11 +171,18 @@ A good overview of clustering methods may be found [here](http://research.med.he
       * An overview of MALDIquant's algorithm for peak binning may be found [here](https://www.rdocumentation.org/packages/MALDIquant/versions/1.17/topics/binPeaks)
       * The actual R code may be found [here](https://github.com/sgibb/MALDIquant/blob/master/R/binPeaks-functions.R)
 
+# Reproducibility and Citation
+Every IDBac release (Including this Manual) is preserved at Zenodo for citability/reproducibility:   
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115619.svg)](https://doi.org/10.5281/zenodo.1115619)
 
+All R packages used in IDBac are from the 01-01-2018 MRAN snapshot of CRAN "https://cran.microsoft.com/snapshot/2018-01-01".
+IDBac was built with R v3.4.4
 
-
-
-
+### Citation
+-  Currently you may cite our bioRxiv preprint:
+    - https://www.biorxiv.org/content/early/2017/11/08/215350 
+Every IDBac release (Including this Manual) is preserved at Zenodo for citability/reproducibility:   
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115619.svg)](https://doi.org/10.5281/zenodo.1115619)
 
 
 ---
