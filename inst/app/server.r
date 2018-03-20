@@ -275,7 +275,7 @@ function(input,output,session){
                         img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
                         p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                         img(src="window.png",width="100%")
-                 ),
+                        ),
                  column(1
                  ),
                  column(5, style = "background-color:#7777770d",
@@ -1378,130 +1378,130 @@ function(input,output,session){
 
     # if user selects to customize group samples
     if (input$kORheight =="3"){
-         if(!is.null(input$sampleMap$datapath)){
-            if(input$colDotsOrColDend == "1"){
+      if(!is.null(input$sampleMap$datapath)){
+        if(input$colDotsOrColDend == "1"){
 
 
 
 
-        # This is the user-provided excel sheet, columns represent factors, rows are samples
-        # One column will be user-selected to match to names in the dendrogram
-        # Another column will be user-selected to color/dot the dendrogram
-        # Stored as data frame
-        groupFile <- as.data.frame(read_excel(input$sampleMap$datapath,1,na = c("","NA")))
-        # User-chosen column that will be grepped against the dendrogram labels
-        idCol <- input$sampleFactorMapChosenIDColumn
-        # User-chosen column that represents a factor
-        sampCol <- input$sampleFactorMapChosenAttribute
-        # Get the dendrogram labels
-        dendLabels <- labels(dendro())
+          # This is the user-provided excel sheet, columns represent factors, rows are samples
+          # One column will be user-selected to match to names in the dendrogram
+          # Another column will be user-selected to color/dot the dendrogram
+          # Stored as data frame
+          groupFile <- as.data.frame(read_excel(input$sampleMap$datapath,1,na = c("","NA")))
+          # User-chosen column that will be grepped against the dendrogram labels
+          idCol <- input$sampleFactorMapChosenIDColumn
+          # User-chosen column that represents a factor
+          sampCol <- input$sampleFactorMapChosenAttribute
+          # Get the dendrogram labels
+          dendLabels <- labels(dendro())
 
-        # Collapse all strings to exclude spaces. People have a hard time with spaces :(
-        dendLabels                <- gsub(" ","",as.character(dendLabels))
-        groupFile[,idCol]         <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
-        groupFile<-groupFile
-        # Convert to data frame
-        dendLabels <- cbind.data.frame(tomerge = dendLabels, stringsAsFactors=F)
-        groupFile  <- cbind.data.frame(tomerge= groupFile[,idCol], toan= groupFile[,sampCol], stringsAsFactors=F)
-        # Merge dendrogram labels with selected excel id column
-        joinedData <- merge(dendLabels, groupFile, by="tomerge", all.x = TRUE,sort=F)
-
-
-        # Make a new factor for any missing values the user didn't supply
-        joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing in Excel")
-        colnames(joinedData) <- c(idCol, sampCol)
+          # Collapse all strings to exclude spaces. People have a hard time with spaces :(
+          dendLabels                <- gsub(" ","",as.character(dendLabels))
+          groupFile[,idCol]         <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
+          groupFile<-groupFile
+          # Convert to data frame
+          dendLabels <- cbind.data.frame(tomerge = dendLabels, stringsAsFactors=F)
+          groupFile  <- cbind.data.frame(tomerge= groupFile[,idCol], toan= groupFile[,sampCol], stringsAsFactors=F)
+          # Merge dendrogram labels with selected excel id column
+          joinedData <- merge(dendLabels, groupFile, by="tomerge", all.x = TRUE,sort=F)
 
 
-        colsel<- sampCol
-
-        # small Contains two columns, one with the IDs and one with the factors
-        small <- cbind.data.frame(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
-        colnames(small) <- c(idCol,colsel)
+          # Make a new factor for any missing values the user didn't supply
+          joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing in Excel")
+          colnames(joinedData) <- c(idCol, sampCol)
 
 
-        groupedList <- split(small,factor(small[colsel][[1]]))
+          colsel<- sampCol
 
-        dendLabels <- as.data.frame(dendLabels)
-        colnames(dendLabels) <- idCol
-        bigList<-lapply(1:length(groupedList),function(x)merge(dendLabels,groupedList[[x]],by=idCol,all.x = TRUE,sort=F))
-
-        labels(bigList)<-labels(groupedList)
-
-        # make sure colums are vectors, not factors
-        bigList <- lapply(bigList,function(x)sapply(x,as.vector))
-
-        for(x in 1:length(bigList)){
-          # Make factor match black Hex (Must be black, because will be replaced later with chosen colors)
-          bigList[[x]][,colsel][which(!is.na(as.vector(bigList[[x]][,colsel])))]<-"#000000"
-          # Make NA values fully transparent HEX
-          bigList[[x]][,colsel][which(is.na(bigList[[x]][,colsel]))]<-"#00000000"
-        }
+          # small Contains two columns, one with the IDs and one with the factors
+          small <- cbind.data.frame(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
+          colnames(small) <- c(idCol,colsel)
 
 
+          groupedList <- split(small,factor(small[colsel][[1]]))
 
-        sampleFactors <- names(bigList)
+          dendLabels <- as.data.frame(dendLabels)
+          colnames(dendLabels) <- idCol
+          bigList<-lapply(1:length(groupedList),function(x)merge(dendLabels,groupedList[[x]],by=idCol,all.x = TRUE,sort=F))
+
+          labels(bigList)<-labels(groupedList)
+
+          # make sure colums are vectors, not factors
+          bigList <- lapply(bigList,function(x)sapply(x,as.vector))
+
+          for(x in 1:length(bigList)){
+            # Make factor match black Hex (Must be black, because will be replaced later with chosen colors)
+            bigList[[x]][,colsel][which(!is.na(as.vector(bigList[[x]][,colsel])))]<-"#000000"
+            # Make NA values fully transparent HEX
+            bigList[[x]][,colsel][which(is.na(bigList[[x]][,colsel]))]<-"#00000000"
+          }
 
 
-        #get colors chosen
-        #  colorsChosen <- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
 
-        colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
+          sampleFactors <- names(bigList)
 
-        a <- cbind(colorNew = colorsChosen, idc = levs())
-        b <- cbind(idc = sampleFactors)
-        colorsToreplace <- merge(a, b, by="idc")
 
-        d1<<-dendro()
+          #get colors chosen
+          #  colorsChosen <- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
+
+          colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
+
+          a <- cbind(colorNew = colorsChosen, idc = levs())
+          b <- cbind(idc = sampleFactors)
+          colorsToreplace <- merge(a, b, by="idc")
+
+          d1<<-dendro()
           b2<<-bigList
-        d3<<-colorsToreplace
+          d3<<-colorsToreplace
 
-        for (z in colorsToreplace[,1]){
+          for (z in colorsToreplace[,1]){
 
-          bigList[z][[1]][,2][bigList[z][[1]][,2] =="#000000"] <- as.vector(colorsToreplace[which(colorsToreplace[,1] == z),2])
+            bigList[z][[1]][,2][bigList[z][[1]][,2] =="#000000"] <- as.vector(colorsToreplace[which(colorsToreplace[,1] == z),2])
 
-        }
-
-
-        # Dendlabels was changed to a DF, so let's just re-do
-        dendLabels <- gsub(" ","",labels(dendro()))
-
-        # Make sure factors are in same order as in dendlist
-        bigList <- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
+          }
 
 
+          # Dendlabels was changed to a DF, so let's just re-do
+          dendLabels <- gsub(" ","",labels(dendro()))
+
+          # Make sure factors are in same order as in dendlist
+          bigList <- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
 
 
 
 
-        toReturn$dend <- dendro() %>% set("labels_cex",1 )
-        shortenedNames <- dendro()
-        labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
-        toReturn$bigMatrix <- sapply(bigList,function(x)cbind(x[,2]))
-        toReturn$shortenedNames <- shortenedNames
-      }else{
-        sampleMappings <- as.data.frame(read_excel(input$sampleMap$datapath,1))
-        sampleFactors <- sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>% as.vector %>% gsub(" ","", . )
-        sampleIDs1 <- cbind.data.frame(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
 
-        # get colors chosen
-        colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
-        # zz <- cbind.data.frame(colorsChosen,sampleFactors)
-        a1 <- cbind(colorNew = colorsChosen, chosenFactor = levs())
-        b1 <- cbind(chosenFactor = sampleFactors)
-        colorsToreplace <- merge(a1, b1, by="chosenFactor")
 
-        # Merge excel sample IDs and factor with colors chosen by user in-app
-        excelData <- merge(sampleIDs1,colorsToreplace,by="chosenFactor")
+          toReturn$dend <- dendro() %>% set("labels_cex",1 )
+          shortenedNames <- dendro()
+          labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
+          toReturn$bigMatrix <- sapply(bigList,function(x)cbind(x[,2]))
+          toReturn$shortenedNames <- shortenedNames
+        }else{
+          sampleMappings <- as.data.frame(read_excel(input$sampleMap$datapath,1))
+          sampleFactors <- sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>% as.vector %>% gsub(" ","", . )
+          sampleIDs1 <- cbind.data.frame(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
 
-        # Collapse strings to exclude spaces
-        excelData$sampleFactorID <- gsub(" ","",excelData$sampleFactorID)
-        dendroLabels <- gsub(" ","",labels(dendro()))
-        dendColor <- as.vector(excelData$colorNew[match(dendroLabels,excelData$sampleFactorID)])
-        dendColor[is.na(dendColor)]<-"#000000"
-        toReturn$dend <-  dendro() %>% color_labels(labels=labels(dendro()),col=dendColor) }
-      #dendro %>% set("labels_cex", c(2,1)) %>% plot
+          # get colors chosen
+          colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
+          # zz <- cbind.data.frame(colorsChosen,sampleFactors)
+          a1 <- cbind(colorNew = colorsChosen, chosenFactor = levs())
+          b1 <- cbind(chosenFactor = sampleFactors)
+          colorsToreplace <- merge(a1, b1, by="chosenFactor")
 
-      #If no sample map is selected, run this:
+          # Merge excel sample IDs and factor with colors chosen by user in-app
+          excelData <- merge(sampleIDs1,colorsToreplace,by="chosenFactor")
+
+          # Collapse strings to exclude spaces
+          excelData$sampleFactorID <- gsub(" ","",excelData$sampleFactorID)
+          dendroLabels <- gsub(" ","",labels(dendro()))
+          dendColor <- as.vector(excelData$colorNew[match(dendroLabels,excelData$sampleFactorID)])
+          dendColor[is.na(dendColor)]<-"#000000"
+          toReturn$dend <-  dendro() %>% color_labels(labels=labels(dendro()),col=dendColor) }
+        #dendro %>% set("labels_cex", c(2,1)) %>% plot
+
+        #If no sample map is selected, run this:
       }
     }
     toReturn
@@ -1524,21 +1524,21 @@ function(input,output,session){
 
     } else if (input$kORheight=="3"){
 
-        if(is.null(input$sampleMap$datapath)){
+      if(is.null(input$sampleMap$datapath)){
 
-      # No sample mapping selected
-      dendro() %>% plot(horiz=TRUE,lwd=8)}else{
-            if(input$colDotsOrColDend == "1"){
+        # No sample mapping selected
+        dendro() %>% plot(horiz=TRUE,lwd=8)}else{
+          if(input$colDotsOrColDend == "1"){
 
-              coloredDend()$dend  %>%  plot(.,horiz=T)
-              colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
-                           rowLabels = names(coloredDend()$bigMatrix), horiz=T, sort_by_labels_order = FALSE)
-            }else{
+            coloredDend()$dend  %>%  plot(.,horiz=T)
+            colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
+                         rowLabels = names(coloredDend()$bigMatrix), horiz=T, sort_by_labels_order = FALSE)
+          }else{
 
-              coloredDend()$dend  %>%  plot(., horiz=T)
-            }
-      }
-      }
+            coloredDend()$dend  %>%  plot(., horiz=T)
+          }
+        }
+    }
   }, height=plotHeight)
 
   # -----------------
@@ -2163,14 +2163,12 @@ function(input,output,session){
       }else{
         # Check current version # and the latest github version. If github v is higher, download and install
         # For more info on version comparison see: https://community.rstudio.com/t/comparing-string-version-numbers/6057/6
-        local_version<<-local_version
-        latestStableVersion<<-latestStableVersion
         downFunc <- function() {
-          devtools::install_github("chasemc/IDBacApp", force=TRUE, quiet = F, quick=T)
+          devtools::install_github(paste0("chasemc/IDBacApp@",latestStableVersion), force=TRUE, quiet = F, quick=T)
           message(tags$span(style="color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
         }
 
-        if(local_version == "Installed version is latest version"){
+        if(as.character(local_version) == "Installed version is latest version"){
 
           showModal(modalDialog(
             title = "IDBac Update",
@@ -2243,11 +2241,11 @@ function(input,output,session){
 
 
 
-   #  The following code is necessary to stop the R backend when the user closes the browser window
-   session$onSessionEnded(function() {
-     stopApp()
-     q("no")
-   })
+  #  The following code is necessary to stop the R backend when the user closes the browser window
+  # session$onSessionEnded(function() {
+  #    stopApp()
+  #    q("no")
+  #  })
 
 
 
