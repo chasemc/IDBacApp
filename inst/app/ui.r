@@ -3,7 +3,7 @@
 
 #----------
 # Changes Zenodo DOI
-zenodoId <- "1185404"
+zenodoId <- "1203781"
 
 library("Rcpp")
 library("devtools")
