@@ -1451,12 +1451,15 @@ function(input,output,session){
         b <- cbind(idc = sampleFactors)
         colorsToreplace <- merge(a, b, by="idc")
 
-        # biggy<<-bigList
-        # colorsy<<-colorsToreplace
-        # for (z in 1:length(names(bigList))){
-        #   temp <- bigList[colorsToreplace[z,1]][[1]][,2]
-        #   bigList[colorsToreplace[z,1]][[1]][,2][temp == "#000000"] <- as.vector(colorsToreplace[z,2])
-        # }
+        d1<<-dendro()
+          b2<<-bigList
+        d3<<-colorsToreplace
+
+        for (z in colorsToreplace[,1]){
+
+          bigList[z][[1]][,2][bigList[z][[1]][,2] =="#000000"] <- as.vector(colorsToreplace[which(colorsToreplace[,1] == z),2])
+
+        }
 
 
         # Dendlabels was changed to a DF, so let's just re-do
@@ -1464,6 +1467,12 @@ function(input,output,session){
 
         # Make sure factors are in same order as in dendlist
         bigList <- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
+
+
+
+
+
+
         toReturn$dend <- dendro() %>% set("labels_cex",1 )
         shortenedNames <- dendro()
         labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
@@ -1622,7 +1631,7 @@ function(input,output,session){
                      numericInput("dendparmar",label=h5(strong("Adjust right margin of dendrogram")),value=20),
 
                      radioButtons("kORheight", label = h5(strong("Color clusters based on:")),
-                                  choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-defined Categories in Excel Sheet" = 3),
+                                  choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-Defined Categories in Excel Sheet" = 3),
                                   selected = 1),
 
                      uiOutput("groupui"),
@@ -2234,11 +2243,11 @@ function(input,output,session){
 
 
 
-  # #  The following code is necessary to stop the R backend when the user closes the browser window
-  # session$onSessionEnded(function() {
-  #   stopApp()
-  #   q("no")
-  # })
+   #  The following code is necessary to stop the R backend when the user closes the browser window
+   session$onSessionEnded(function() {
+     stopApp()
+     q("no")
+   })
 
 
 
