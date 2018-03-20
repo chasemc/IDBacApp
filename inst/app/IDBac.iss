@@ -11,7 +11,7 @@
 
 [Setup]
 AppName = {#MyAppName}
-AppId = {{RRC4WISJ-7HBB-0M6V-INQH-IIZX76RPRELZ}
+AppId = {{BXPKY8E7-D756-M4BK-VNQO-98MH0YC44Z5J}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
@@ -57,6 +57,7 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 Source: "gpl.txt"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "IDBac.bat"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion;
+Source: "R-3.4.4-win.exe"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "server.r"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "SmallAppIcon3.ico"; DestDir: "{app}"; Flags: ignoreversion;
 Source: "SmallSetupIcon3.ico"; DestDir: "{app}"; Flags: ignoreversion;
@@ -13649,6 +13650,7 @@ Source: "packageLibrary/proteowizardinstallation/pwiz/boost_regex-vc90-mt-1_37-x
 Source: "packageLibrary/proteowizardinstallation/pwiz/boost_system-vc90-mt-1_37-x64-BDAL_20091123.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/boost_thread-vc90-mt-1_37-x64-BDAL_20091123.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/cdt.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/chainsaw.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Clearcore2.Compression.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Clearcore2.Data.Acquisition.Client.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Clearcore2.Data.Acquisition.Contracts.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
@@ -13693,6 +13695,8 @@ Source: "packageLibrary/proteowizardinstallation/pwiz/FlexVariableTable.xml"; De
 Source: "packageLibrary/proteowizardinstallation/pwiz/fregistry_x64.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/HSReadWrite.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/ICRVariableTable.xml"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/idcat.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/idconvert.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Interop.DataExplorer.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Interop.EDAL.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Interop.EDAL.SxS.manifest"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
@@ -13705,31 +13709,46 @@ Source: "packageLibrary/proteowizardinstallation/pwiz/Microsoft.Practices.Unity.
 Source: "packageLibrary/proteowizardinstallation/pwiz/Microsoft.Practices.Unity.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/MIDAC.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/mkl_sequential.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/msaccess.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/msbenchmark.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/mscat.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/msconvert.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/MSConvertGUI.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/MSConvertGUI.exe.config"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/MSConvertGUI.exe.manifest"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/MSFileReader.XRawfile2.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/MSFileReader.XRawfile2.SxS.manifest"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/MSGraph.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/msistats.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/msparser.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/mspicture.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/OFX.Core.Contracts.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/OFX.Core.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/OFX.EventServices.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/OFX.Logging.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/OFX.Security.Core.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/peakaboo.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/pepcat.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/pepsum.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/protobuf-net.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/pwiz.CommonUtil.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/pwiz_bindings_cli.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/qtofpeakpicker.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Sciex.Clearcore.FMan.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Sciex.Data.Processing.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Sciex.Data.SimpleTypes.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Sciex.Data.XYData.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Sciex.FMan.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/Sciex.Wiff.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/seems.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/seems.exe.config"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/seems.exe.manifest"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/sldout.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/SQLite_v1.0.98/System.Data.SQLite.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz\SQLite_v1.0.98"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/STL_Containers.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/System.Data.SQLite.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/ThermoRawMetaDump.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
+Source: "packageLibrary/proteowizardinstallation/pwiz/txt2mzml.exe"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/UIMFLibrary.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/unimod_2.xsd"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
 Source: "packageLibrary/proteowizardinstallation/pwiz/ZedGraph.dll"; DestDir: "{app}\packageLibrary\proteowizardinstallation\pwiz"; Flags: ignoreversion;
