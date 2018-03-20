@@ -3,7 +3,7 @@
 
 #----------
 # Changes Zenodo DOI
-zenodoId <- "1115619"
+zenodoId <- "1185404"
 
 library("Rcpp")
 library("devtools")
@@ -75,7 +75,11 @@ navbarPage(collapsible=T,
                 ),
                 tags$ul(
                   tags$li(
-                    p("For reproducibility, cite this specific version of IDBac as version:", a(href= paste0("http://doi.org/10.5281/zenodo.", zenodoId), target="_blank", tags$code(paste0("10.5281/zenodo.", zenodoId))))
+                    p("For reproducibility, cite this specific version of IDBac as version:", a(href= paste0("http://doi.org/10.5281/zenodo.", zenodoId), target="_blank",img(border="0", title="Click to go to Zenodo", src="https://zenodo.org/badge/DOI/10.5281/zenodo.1185404.svg")))
+
+
+
+
                     )
                 )
               ),
