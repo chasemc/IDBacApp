@@ -29,14 +29,13 @@ Every IDBac release (Including this Manual) is preserved at Zenodo for citabilit
 <H1 align="center"> Naming Samples</H1>
  
 ### Instructions for Bruker MALDI-TOF MS Instruments 
-As it is quite cumbersome to label many samples from within Bruker flexControl we have created an easy method for naming samples using an Excel®/OpenOffice™ template.
+As it is quite cumbersome to label many samples from within Bruker flexControl, we have created an easy method for naming samples using an Excel®/OpenOffice™ template.
     
-If you haven't already, download the Excel template for renaming raw data files [here.](/MALDI-Plate_Template/384_Spot_MALDI_Template.xltx) This template was designed to work with both MALDI plates of up to 384 spots.
+If you haven't already, download the Excel template for renaming raw data files [here.](/MALDI-Plate_Template/384_Spot_MALDI_Template.xltx) This template was designed to work with MALDI plates of up to 384 spots.
 
 ---
 
-- Using the Excel®/OpenOffice™ template mentioned above removes the need to name your files within Bruker’s flexControl software and is the preferred method for IDBac. 
-- Simply enter your sample names into the spreadsheet as seen below.
+- Useing the Excel®/OpenOffice™ template mentioned above, simply enter your sample names into the spreadsheet as seen below.
 - You should always reserve at least four spots on the MALDI target plate.
    1. One spot for small-molecule calibration.
       - We use Bruker's Peptide Calibration Standard [Version 1](https://www.bruker.com/fileadmin/user_upload/8-PDF-Docs/Separations_MassSpectrometry/InstructionForUse/IFU_206195_Peptide_Cal_Stand_Rev1.pdf) or [Version 2](https://www.bruker.com/fileadmin/user_upload/8-PDF-Docs/Separations_MassSpectrometry/InstructionForUse/IFU_8222570_Peptide_Calibration_Standard_II_Revision_B.pdf)
