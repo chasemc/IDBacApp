@@ -153,6 +153,7 @@ A good overview of clustering methods may be found [here](http://research.med.he
 
 IDBac users are expected to use their own judgement and formal training in statistics to construct and validate their experiments. 
 We also suggest users be familiar with the concepts covered in  Section ["6.4.3 Remarks on Statistical Problems with MS Data"](https://medschool.vanderbilt.edu/msrc/files/msrc/public_files/Forms/clinprotoolsmanual.pdf) from Bruker Daltonic's "ClinProTools User Manual".
+
 ---
 
 ### Current Known Limitations of IDBac
