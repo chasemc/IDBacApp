@@ -10,6 +10,6 @@ IDBacApp.Rproj
 packrat/lib*/
 /inst/app/wizard
 
-/inst/app/R-3.4.3-win.exe
+/inst/app/R-3.4.4-win.exe
 /inst/app/Rtools34.exe
 /inst/app/packageLibrary/
