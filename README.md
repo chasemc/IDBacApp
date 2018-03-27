@@ -36,12 +36,13 @@ If you haven't already, download the Excel template for renaming raw data files 
 ---
 
 - Useing the Excel®/OpenOffice™ template mentioned above, simply enter your sample names into the spreadsheet as seen below.
-- You should always reserve at least four spots on the MALDI target plate.
+- You should always reserve at least three spots on the MALDI target plate.
    1. One spot for small-molecule calibration.
       - We use Bruker's Peptide Calibration Standard [Version 1](https://www.bruker.com/fileadmin/user_upload/8-PDF-Docs/Separations_MassSpectrometry/InstructionForUse/IFU_206195_Peptide_Cal_Stand_Rev1.pdf) or [Version 2](https://www.bruker.com/fileadmin/user_upload/8-PDF-Docs/Separations_MassSpectrometry/InstructionForUse/IFU_8222570_Peptide_Calibration_Standard_II_Revision_B.pdf)
    2. One spot for protein calibration
       - We use [Bruker BTS Standard.](https://www.bruker.com/fileadmin/user_upload/8-PDF-Docs/Separations_MassSpectrometry/InstructionForUse/IFU_Bruker_Bacterial_Test_Standard_Revision_C.pdf) Note this is not the same as "BTS IVD" which is the more expensive clinic-approved matrix.
-- Be sure to include a matrix blank to be subtracted from small-molecule acquisitions. This spot should contain the word “matrix” (any capitalization)
+   3. One spot for a matrix blank to be subtracted from small-molecule acquisitions. 
+      - This spot should contain the word “matrix” (any capitalization)
 
 <p align="center">
   <img src= "/ReadMe_Images/Naming_Files.png" />
