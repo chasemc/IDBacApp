@@ -158,10 +158,9 @@ We also suggest users be familiar with the concepts covered in  Section ["6.4.3 
 
 ### Current Known Limitations of IDBac
 * Spectra Alignment
-  * A common practice when preprocessing MALDI-TOF spectra (and two-dimensional spectra from similar instruments) is to do an alignment/warping/phase-correction of spectra before calling peak detection. However, this requires the prior establishment of an average/representative spectrum to which all other spectra are aligned.  This method is impractical with the number and diversity of spectra that IDBac was built to handle, for this reason IDBac currently relies on spectra being well-calibrated and on peak-binning which occurs after peak-picking has occured.
+  * A common practice when preprocessing MALDI-TOF spectra (and two-dimensional spectra from similar instruments) is to do an alignment/warping/phase-correction of spectra before calling peak detection. However, this requires the prior establishment of an average/representative spectrum to which all other spectra are aligned.  This method is impractical with the number and diversity of spectra that IDBac was built to handle. For this reason, IDBac currently relies on spectra being well-calibrated and on peak-binning, which occurs after peak-picking.
 * Peak Binning
-  * MALDIquant's peak binning algorithm begins to falter slightly with a large number of spectra/samples (100's-1000's), however it     still performs acceptably.
-    * Currently I am working on an algorithm for all-vs-all comparison of samples with a user-set ppm-window which is computationally expensive and so requires detailed planning. This is being done in my "free time" and so will take some time to implement.
+  * MALDIquant's peak binning algorithm begins to falter slightly with a large number of spectra/samples (100's-1000's).
       * An overview of MALDIquant's algorithm for peak binning may be found [here](https://www.rdocumentation.org/packages/MALDIquant/versions/1.17/topics/binPeaks)
       * The actual R code may be found [here](https://github.com/sgibb/MALDIquant/blob/master/R/binPeaks-functions.R)
 
