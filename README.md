@@ -143,21 +143,16 @@ The IDBac software, MALDI plate sample template, and example data may be downloa
 
 
 
----
----
----
-<H1 align="center"> Statistics and MALDI </H1>
-
-### Liability
-We assume no responsibility of claims of significance or other statistical inference and that users of IDBac will use their own judgement and formal training in statistics to validly construct their experiments. 
-If you are unsure about statistically-rooted experimental design we recommend becoming trained in such or seeking guidance.
-We also suggest users be familiar with the concepts covered in  Section ["6.4.3 Remarks on Statistical Problems with MS Data"](https://medschool.vanderbilt.edu/msrc/files/msrc/public_files/Forms/clinprotoolsmanual.pdf) from Bruker Daltonic's "ClinProTools User Manual"
-
----
-
 ### Principle Components Analysis (PCA) / Hierarchical Clustering
 A good overview of clustering methods may be found [here](http://research.med.helsinki.fi/corefacilities/proteinchem/hierarchical_clustering_basics.pdf)
 
+---
+---
+---
+<H1 align="center"> IDBac Limitions  </H1>
+
+IDBac users are expected to use their own judgement and formal training in statistics to construct and validate their experiments. 
+We also suggest users be familiar with the concepts covered in  Section ["6.4.3 Remarks on Statistical Problems with MS Data"](https://medschool.vanderbilt.edu/msrc/files/msrc/public_files/Forms/clinprotoolsmanual.pdf) from Bruker Daltonic's "ClinProTools User Manual".
 ---
 
 ### Current Known Limitations of IDBac
