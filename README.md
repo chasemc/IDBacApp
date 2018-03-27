@@ -11,18 +11,17 @@ Every IDBac release (Including this Manual) is preserved at Zenodo for citabilit
     
 
 ## Table of Contents
-- [Naming Samples](#-naming-samples)
+- [Naming Samples](#naming-samples)
   - Instructions for Bruker MALDI-TOF MS Instruments 
   - Instructions for Other Instruments
-- [Sample Preparation](#-sample-preparation)
+- [Sample Preparation](#sample-preparation)
   - Cleaning MALDI Target Plates
   - MALDI Matrix Preparation
   - Applying Samples to the MALDI Plate
-- [Data Acquisition](#-data-acquisition)
-- [IDBac Software Installation](#-idbac-software-installation)
-- [Data Analysis: Quick Start](#-data-analysis-quick-start)
-- [Statistics and MALDI](#-statistics-and-maldi)
-- [Reproducibility and Citation](#-reproducibility-and-citation)
+- [Data Acquisition](#data-acquisition)
+- [IDBac Software Installation](#idbac-software-installation)
+- [Data Analysis: Quick Start](#data-analysis-quick-start)
+- [Statistics and MALDI](statistics-and-maldi)
 
 ---
 ---
@@ -108,24 +107,24 @@ method adapted from [Freiwald & Sauer](http://www.nature.com/nprot/journal/v4/n5
 ---
 ---
 <H1 align="center"> Data Acquisition </H1>
-Once you have prepared your MALDI target plate protein and small molecule data you will need to setup autoXecute and begin the data acquisition process.
+Once you have prepared your MALDI target plate you will need to setup autoXecute and begin the data acquisition process.
 
 
 |               |               |
 | ------------- | ------------- |
-| 1. Insert MALDI plate into the mass spectrometer    															| <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire1.PNG?token=AR00N2AEuQAuRFgbD0Us0fVzo1p3h6KHks5asb86wA%3D%3D" align="center"> <img src= "/ReadMe_Images/Acquire1.PNG" width=900 />  </a> |
-| 2. Select the appropriate IDBac Method <li> “IDBac_Protein.par” </li>or<li> “IDBac_SmallMolecule.par” </li>   	|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire13.png?token=AR00N6lF4HJOvNeQRNac9Ww8OS2M1Mlmks5asb8_wA%3D%3D" align="center"> <img align="center" src= "/ReadMe_Images/Acquire13.png" width=900 /> </a>    |
-| 3. Under the “AutoXecute” control panel select “New”, to the right of “Run” 									|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire2.PNG?token=AR00N8SlrXFIESdzes5gNcpw-F8UUQG7ks5asb9QwA%3D%3D" align="center"> <img src= "/ReadMe_Images/Acquire2.PNG" width=900 /> </a>    |
-| 4. If it wasn’t automatically detected, select the appropriate MALDI target plate geometry. 					|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire3.PNG?token=AR00N1n7retoIi5rB_9pIn0zf_ngipt-ks5ascGBwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire3.PNG" width=900 /> </a>    |
-| 5. (Optional) Follow the directions to choose representative spots for laser power tuning and select “Next”   |  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire4.PNG?token=AR00N8R1nDaLorDJtKphSXmPxmt-vWm3ks5ascGUwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire4.PNG" width=900 /> </a>    |
-|  Note: If you skip step 5, you should manually determine the minimum laser fluency/power needed and then press “Set initial laser power” before beginning the run.         |  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire5.PNG?token=AR00N2iOtZX7U7md1h01XnRJkv0lkwL6ks5ascGfwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire5.PNG" width=900 /> </a>    |
-| 6. Select “Calibrate with own template” and then select “New"             									|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire6.PNG?token=AR00N63xEcE0MHolXPSvQ5S1UkbtBQxmks5ascGuwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire6.PNG" width=900 /> </a>    |
-| 7. Follow the directions in the left panel and then select “OK”         										|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire7.PNG?token=AR00N3MyQ1igfgZU_kRZG9WgRglxG1w1ks5ascG9wA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire7.PNG" width=900 /> </a>    |
-| 8. Select “Next”    																							|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire8.PNG?token=AR00N3eRZj2O5FsO8Thrg2L4VM2YutjZks5ascHJwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire8.PNG" width=900 /> </a>    |
-| 9. Within the "run parameters" page is important to ensure the correct methods are selected in the correct places. <br> For small molecule runs change both autoXecute methods to:  <br> “IDBac_Small-Molecule_autoX” <br> For protein runs change both autoXecute methods to: <br> “IDBac_Protein_AutoX.axe” <br> There are four flexAnalysis methods: <br> <ul>The protein or small molecule “Calibrant Calibration” should be selected within the calibration box’s “flexAnalysis Method” pull-down. <ul> IDBac Protein Calibrant Calibration </ul> <ul> IDBac Small Molecule Calibrant Calibration </ul></ul> <br> The protein or small molecule “Unknown Sample Calibration” should be selected within the second “flexAnalysis Method” pull-down. <br> IDBac Protein Unknown Sample Calibration <br> IDBac Small Molecule Unknown Sample Calibration <br> When you have finished, select “Next”. <br> 		|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire9.png?token=AR00N7f21H_sEK58lVcem9cKrrO5S4eLks5ascHVwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire9.png" width=900 /> </a>    |
-| 10. Select “Save as” and save the sequence run to your data directory.     Confirm and select “OK”       		|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire10.png?token=AR00N9BOLfErsSIq58ogBAXaYrWe3sXVks5ascHtwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire10.png" width=900 /> </a>   |
-| 11. Under the “AutoXecute” control panel select “Start automatic Run”              							|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire11.png?token=AR00N2N8zVU1cvLIoykjKffoHUS5eIcbks5ascH4wA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire11.png" width=900 /> </a>   |
-|               																								|  <a href="https://raw.githubusercontent.com/chasemc/pnas/master/ReadMe_Images/Acquire12.png?token=AR00N7dUKOI_CG6f9CFJ-tWzyyNUnXv6ks5ascICwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire12.png" width=900 /> </a>   |
+| 1. Insert MALDI plate into the mass spectrometer    															| <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire1.PNG?token=AR00N2AEuQAuRFgbD0Us0fVzo1p3h6KHks5asb86wA%3D%3D" align="center"> <img src= "/ReadMe_Images/Acquire1.PNG" width=900 />  </a> |
+| 2. Select the appropriate IDBac Method <li> “IDBac_Protein.par” </li>or<li> “IDBac_SmallMolecule.par” </li>   	|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire13.png?token=AR00N6lF4HJOvNeQRNac9Ww8OS2M1Mlmks5asb8_wA%3D%3D" align="center"> <img align="center" src= "/ReadMe_Images/Acquire13.png" width=900 /> </a>    |
+| 3. Under the “AutoXecute” control panel select “New”, which is to the right of “Run” 									|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire2.PNG?token=AR00N8SlrXFIESdzes5gNcpw-F8UUQG7ks5asb9QwA%3D%3D" align="center"> <img src= "/ReadMe_Images/Acquire2.PNG" width=900 /> </a>    |
+| 4. If it wasn’t automatically detected, select the appropriate MALDI target plate geometry. 					|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire3.PNG?token=AR00N1n7retoIi5rB_9pIn0zf_ngipt-ks5ascGBwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire3.PNG" width=900 /> </a>    |
+| 5. (Optional) Follow the directions to choose representative spots for laser power tuning and select “Next”   |  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire4.PNG?token=AR00N8R1nDaLorDJtKphSXmPxmt-vWm3ks5ascGUwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire4.PNG" width=900 /> </a>    |
+|  Note: If you skip step 5, you should manually determine the minimum laser fluency/power needed and then press “Set initial laser power” before beginning the run.         |  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire5.PNG?token=AR00N2iOtZX7U7md1h01XnRJkv0lkwL6ks5ascGfwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire5.PNG" width=900 /> </a>    |
+| 6. Select “Calibrate with own template” and then select “New"             									|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire6.PNG?token=AR00N63xEcE0MHolXPSvQ5S1UkbtBQxmks5ascGuwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire6.PNG" width=900 /> </a>    |
+| 7. Follow the directions in the left panel and then select “OK”         										|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire7.PNG?token=AR00N3MyQ1igfgZU_kRZG9WgRglxG1w1ks5ascG9wA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire7.PNG" width=900 /> </a>    |
+| 8. Select “Next”    																							|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire8.PNG?token=AR00N3eRZj2O5FsO8Thrg2L4VM2YutjZks5ascHJwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire8.PNG" width=900 /> </a>    |
+| 9. Within the "run parameters" page is important to ensure the correct methods are selected in the correct places. <br> For small molecule runs change both autoXecute methods to:  <br> “IDBac_Small-Molecule_autoX” <br> For protein runs change both autoXecute methods to: <br> “IDBac_Protein_AutoX.axe” <br> There are four flexAnalysis methods: <br> <ul>The protein or small molecule “Calibrant Calibration” should be selected within the calibration box’s “flexAnalysis Method” pull-down. <ul> IDBac Protein Calibrant Calibration </ul> <ul> IDBac Small Molecule Calibrant Calibration </ul></ul> <br> The protein or small molecule “Unknown Sample Calibration” should be selected within the second “flexAnalysis Method” pull-down. <br> IDBac Protein Unknown Sample Calibration <br> IDBac Small Molecule Unknown Sample Calibration <br> When you have finished, select “Next”. <br> 		|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire9.png?token=AR00N7f21H_sEK58lVcem9cKrrO5S4eLks5ascHVwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire9.png" width=900 /> </a>    |
+| 10. Select “Save as” and save the sequence run to your data directory.     Confirm and select “OK”       		|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire10.png?token=AR00N9BOLfErsSIq58ogBAXaYrWe3sXVks5ascHtwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire10.png" width=900 /> </a>   |
+| 11. Under the “AutoXecute” control panel select “Start automatic Run”              							|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire11.png?token=AR00N2N8zVU1cvLIoykjKffoHUS5eIcbks5ascH4wA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire11.png" width=900 /> </a>   |
+|               																								|  <a href="https://raw.githubusercontent.com/chasemc/IDBacApp/master/ReadMe_Images/Acquire12.png?token=AR00N7dUKOI_CG6f9CFJ-tWzyyNUnXv6ks5ascICwA%3D%3D" align="center">  <img src= "/ReadMe_Images/Acquire12.png" width=900 /> </a>   |
 
 
 
@@ -171,18 +170,11 @@ A good overview of clustering methods may be found [here](http://research.med.he
       * An overview of MALDIquant's algorithm for peak binning may be found [here](https://www.rdocumentation.org/packages/MALDIquant/versions/1.17/topics/binPeaks)
       * The actual R code may be found [here](https://github.com/sgibb/MALDIquant/blob/master/R/binPeaks-functions.R)
 
-# Reproducibility and Citation
-Every IDBac release (Including this Manual) is preserved at Zenodo for citability/reproducibility:   
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115619.svg)](https://doi.org/10.5281/zenodo.1115619)
 
-All R packages used in IDBac are from the 01-01-2018 MRAN snapshot of CRAN "https://cran.microsoft.com/snapshot/2018-01-01".
-IDBac was built with R v3.4.4
 
-### Citation
--  Currently you may cite our bioRxiv preprint:
-    - https://www.biorxiv.org/content/early/2017/11/08/215350 
-Every IDBac release (Including this Manual) is preserved at Zenodo for citability/reproducibility:   
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115619.svg)](https://doi.org/10.5281/zenodo.1115619)
+
+
+
 
 
 ---
