@@ -2,14 +2,14 @@
 # capture the current working directory
 # set the package search path to the app specific library
 appwd <- getwd()
-applibpath <- file.path(appwd, "library")
-config <- jsonlite::fromJSON(file.path(appwd, "utils/config.cfg"))
+applibpath <- file.path(appwd, "packageLibrary")
 
 .libPaths(c(file.path(getwd(),"packageLibrary"),.libPaths()))
 
 
 message("library paths in package_manager:\n", paste0("... ", .libPaths(), collapse = "\n"))
 message("working path in package_manager:\n", paste("...", appwd))
+config <- jsonlite::fromJSON(file.path(appwd, "utils/config.cfg"))
 
 
 # Load functions to ensure software dependencies and check the internet

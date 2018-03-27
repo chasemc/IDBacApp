@@ -11,7 +11,7 @@
 
 [Setup]
 AppName = {#MyAppName}
-AppId = {{BXPKY8E7-D756-M4BK-VNQO-98MH0YC44Z5J}
+AppId = {{VYY4ZHXV-BX00-NO1V-FWD8-26IH6TCY16UK}
 DefaultDirName = {userdocs}\{#MyAppName}
 DefaultGroupName = {#MyAppName}
 OutputDir = wizard
