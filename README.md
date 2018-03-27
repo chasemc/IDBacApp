@@ -21,7 +21,7 @@ Every IDBac release (Including this Manual) is preserved at Zenodo for citabilit
 - [Data Acquisition](#data-acquisition)
 - [IDBac Software Installation](#idbac-software-installation)
 - [Data Analysis: Quick Start](#data-analysis-quick-start)
-- [Statistics and MALDI](statistics-and-maldi)
+- [IDBac Limitations](idbac-limitations)
 
 ---
 ---
@@ -149,7 +149,7 @@ A good overview of clustering methods may be found [here](http://research.med.he
 ---
 ---
 ---
-<H1 align="center"> IDBac Limitions  </H1>
+<H1 align="center"> IDBac Limitations  </H1>
 
 IDBac users are expected to use their own judgement and formal training in statistics to construct and validate their experiments. 
 We also suggest users be familiar with the concepts covered in  Section ["6.4.3 Remarks on Statistical Problems with MS Data"](https://medschool.vanderbilt.edu/msrc/files/msrc/public_files/Forms/clinprotoolsmanual.pdf) from Bruker Daltonic's "ClinProTools User Manual".
