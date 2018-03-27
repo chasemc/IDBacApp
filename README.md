@@ -42,14 +42,14 @@ If you haven't already, download the Excel template for renaming raw data files 
    2. One spot for protein calibration
       - We use [Bruker BTS Standard.](https://www.bruker.com/fileadmin/user_upload/8-PDF-Docs/Separations_MassSpectrometry/InstructionForUse/IFU_Bruker_Bacterial_Test_Standard_Revision_C.pdf) Note this is not the same as "BTS IVD" which is the more expensive clinic-approved matrix.
    3. One spot for a matrix blank to be subtracted from small-molecule acquisitions. 
-      - This spot should contain the word “matrix” (any capitalization)
+      - This spot should contain the word “matrix”.
 
 <p align="center">
   <img src= "/ReadMe_Images/Naming_Files.png" />
 </p>
 
 
-If you don’t have access to Microsoft Excel, we have successfully tested this with the free Excel alternative:  Apache OpenOffice™ “Calc”. Which can be found at [www.openoffice.org](www.openoffice.org). Just ensure when saving the template you save it as type “Microsoft Excel 97/2000/XP (.xls)”
+If you don’t have access to Microsoft Excel, we have successfully tested this with the free Excel alternative:  Apache OpenOffice™ “Calc”, which can be found at [www.openoffice.org](www.openoffice.org). When saving the file, ensure you save it as type “Microsoft Excel 97/2000/XP (.xls)”.
 
 ---
 
@@ -63,13 +63,13 @@ If you don’t have access to Microsoft Excel, we have successfully tested this 
 
 ### Cleaning MALDI Target Plates
 
-The MALDI plate should be properly cleaned before use.  In order to clean the MALDI plate use the steps below:
+The MALDI plate should be properly cleaned before use.  In order to clean the MALDI plate, use the steps below:
 method adapted from [Freiwald & Sauer](http://www.nature.com/nprot/journal/v4/n5/full/nprot.2009.37.html?foxtrotcallback=true)
 
 1. Remove target plate from holder and rinse with acetone.
 2. To remove trace protein/lipids, use non-abrasive liquid soap.
-3. Rinse with HPLC grade water ~2 min.
-4. Sonicate in HPLC grade water (Ultrasonic bath).
+3. Rinse with distilled water ~2 min to completely remove soap.
+4. Sonicate in HPLC grade water (Ultrasonic bath) for ~5 min.
 5. Rinse with HPLC grade water.
 6. Rinse with HPLC grade methanol.
 
@@ -80,11 +80,11 @@ method adapted from [Freiwald & Sauer](http://www.nature.com/nprot/journal/v4/n5
    - 50% Acetonitrile (ACN)
    - 47.5% Water (H<sub>2</sub>O)
    - 2.5% Trifluoroacetic Acid (TFA)
-     - e.g. 100 µL of solution = 50 µL ACN + 47.5 µL H<sub>2</sub>O + 2.5µL TFA + 1 mg CHCA
+     - e.g. 100 µL of solution = 50 µL ACN + 47.5 µL H<sub>2</sub>O + 2.5 µL TFA + 1 mg CHCA
 
 **Notes:**
-- Use fresh matrix solution and store unused solid CHCA between 2-8°C.
-- There are many MALDI matrix alternatives, we have had success using CHCA which is also more common for protein profiling bacteria. It may be worth trying CHCA + DHB.
+- Use fresh matrix solution and store unused solid CHCA between 2-8 °C.
+- There are many MALDI matrix alternatives. We have had success using CHCA, which is also more common for protein profiling of bacteria. It may be worth trying CHCA + DHB. Matrix selection depends on individual user needs.
   - For alternative small-molecule matrices please see: https://doi.org/10.1055/s-0042-104800
 
 ---
