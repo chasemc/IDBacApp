@@ -1,6 +1,7 @@
-
 Every IDBac release (Including this Manual) is preserved at Zenodo for citability/reproducibility:   
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115619.svg)](https://doi.org/10.5281/zenodo.1115619)
+
+We have setup a discussion forum at https://groups.google.com/forum/#!forum/idbac
 
 <H1 align="center"> IDBac Instruction Manual for MALDI-TOF MS Acquistion and Data Analysis </H1>  
 
