@@ -1948,6 +1948,8 @@ asd123<<-pcaCalculation()
     peaksaNames <- factor(temp)
 
     rownames(smallNetwork) <- paste(peaksaNames)
+#---- Note for Chase: attributes(smallNetwork) contain vectors of masses, this will cause slow-downs
+																									
     bool <- smallNetwork
     bool[is.na(bool)] <- 0
     bool <- as.data.frame(bool)
