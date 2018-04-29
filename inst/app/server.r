@@ -1496,7 +1496,7 @@ asd123<<-pcaCalculation()
 
 
           # Make a new factor for any missing values the user didn't supply
-          joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing in Excel")
+          joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing_in_Excel")
           colnames(joinedData) <- c(idCol, sampCol)
 
 
@@ -1538,10 +1538,6 @@ asd123<<-pcaCalculation()
           a <- cbind(colorNew = colorsChosen, idc = levs())
           b <- cbind(idc = sampleFactors)
           colorsToreplace <- merge(a, b, by="idc")
-
-          d1<<-dendro()
-          b2<<-bigList
-          d3<<-colorsToreplace
 
           for (z in colorsToreplace[,1]){
 
