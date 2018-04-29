@@ -1,5 +1,52 @@
 # The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the UI function(input, output,session) {
 
+# Function to Install and Load R Packages
+Install_And_Load <- function(Required_Packages)
+{
+  Remaining_Packages <-
+    Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
+  
+  
+  if (length(Remaining_Packages))
+  {
+    install.packages(Remaining_Packages)
+    
+  }
+  for (package_name in Required_Packages)
+  {
+    library(package_name,
+            character.only = TRUE,
+            quietly = TRUE)
+    
+  }
+}
+
+# Required packages to install and load
+Required_Packages = c("Rtsne")
+
+
+# Install and Load Packages
+Install_And_Load(Required_Packages)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #  Load colored_Dots.R function
 
@@ -1441,7 +1488,7 @@ asd123<<-pcaCalculation()
     sampleMappings<-read_excel(input$sampleMap$datapath,1)
     #selected column
     # if(any(is.na(sampleMappings[input$sampleFactorMapChosenAttribute]))){
-    sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector %>% c(.,"Missing in Excel")
+    sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector %>% c(.,"Missing_in_Excel")
     # }else{
     #   sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector
     # }
@@ -1600,7 +1647,8 @@ asd123<<-pcaCalculation()
     par(mar=c(5,5,5,input$dendparmar))
 
     if (input$kORheight=="1"){
-      dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8)
+	df2<<-dendro()
+      dendro() %>% color_branches(k=input$kClusters, col = as.vector(colorBlindPalette$col[1:input$kClusters])) %>% plot(horiz=TRUE,lwd=8)
     } else if (input$kORheight=="2"){
 
       dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8)
@@ -2328,10 +2376,10 @@ asd123<<-pcaCalculation()
 
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
-  session$onSessionEnded(function() {
-     stopApp()
-     q("no")
-   })
+  # session$onSessionEnded(function() {
+  #    stopApp()
+  #    q("no")
+  #  })
 
 
 
