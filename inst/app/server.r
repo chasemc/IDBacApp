@@ -1174,6 +1174,46 @@ function(input,output,session){
   ################################################
   # This creates the Plotly PCA plot and the calculation required for such.
 
+ pcoaCalculation <- reactive({
+    if(req(input$distance)=="cosineD"){
+
+
+        #Cosine Distance Matrix Function
+        cosineD <- function(x) {
+          as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
+        }
+        # Perform cosine similarity function
+        dend <- proteinMatrix() %>% cosineD
+        # Convert NA to 1
+        dend[which(is.na(dend))] <- 1
+        # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
+
+    }else{
+        dend <- proteinMatrix() %>% dist(method=input$distance)
+        dend[which(is.na(dend))] <- 1
+
+    }
+
+    pc <- as.data.frame(cmdscale(dend, k=10))
+    pc<-pc[,1:3]
+    colnames(pc) <- c("Dimension A", "Dimension B", "Dimension C")
+    pc["nam"] <- row.names(pc)
+    pc
+  })
+
+  output$pcoaPlot <- renderPlotly({
+    pcoaDat <- pcoaCalculation()
+
+    colorsToUse <- colorMatch()
+    d34<<-colorsToUse
+    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
+    pcoaDat <- merge(pcoaDat, colorsToUse, by="nam")
+    pcoaDat <- merge(pcoaDat,colorBlindPalette,by="fac")
+
+
+    plot_ly(data=pcoaDat,x=pcoaDat$"Dimension A",y=pcoaDat$"Dimension B",z=pcoaDat$"Dimension C",type="scatter3d",mode="markers",hoverinfo = 'text',text=pcoaDat$nam, color = I(pcoaDat$col))
+  })
+
 
   #PCA Calculation
 
@@ -1183,7 +1223,7 @@ function(input,output,session){
     pc <- log(proteinMatrix())
     pc[is.infinite(pc)]<-.000001
 
-    pc <- PCA(pc,graph=FALSE)
+    pc <- PCA(pc, graph=FALSE, ncp = 50)
     pc <- pc$ind$coord
     pc <- as.data.frame(pc)
     nam <- row.names(pc)
@@ -1191,7 +1231,7 @@ function(input,output,session){
   })
 
 
-  pcaWithColor <- reactive({
+  colorMatch <- reactive({
     pc <- pcaCalculation()
     # Based on user selection, color PCA based on dendrogram groupings
     if(!is.null(isolate(input$kORheight))){
@@ -1204,23 +1244,58 @@ function(input,output,session){
       }else{
         # No factors, everthing colored black
         fac <- rep(1,length(labels(dendro())))
+        names(fac)<-labels(dendro())
       }
-      pc <- cbind.data.frame(pc,fac)
-      pc <- merge(pc,colorBlindPalette,by="fac")
-      return(pc)
+
+      fac
+												
+				
     }
 
+  })
+
+  output$pcaPlot <- renderPlotly({
+
+    pcaDat <- pcaCalculation()
+    colorsToUse <- colorMatch()
+    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
+    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
+    pcaDat <- merge(pcaDat,colorBlindPalette,by="fac")
+
+    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam ,color = I(pcaDat$col))
+  })
 
 
 
 
+
+  tsneCalculation <- reactive({
+asd123<<-pcaCalculation()
+  d<- Rtsne(pcaCalculation(), pca=FALSE, dims=3, perplexity = input$tsnePerplexity,theta = input$tsneTheta, max_iter = input$tsneIterations)
+  d <- as.data.frame(d$Y)
+  d <- cbind.data.frame(as.vector(pcaCalculation()$nam),d)
+  colnames(d) <- c("nam","Dim.1","Dim.2","Dim.3")
+
+  as.data.frame(d)
 
   })
 
-  output$pcaplot <- renderPlotly({
-    pcaDat <- pcaWithColor()
-    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam ,color = pcaDat$col)
+  output$tsnePlot <- renderPlotly({
+    pcaDat <- tsneCalculation()
+
+    colorsToUse <- colorMatch()
+    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
+    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
+    pcaDat <- merge(pcaDat,colorBlindPalette,by="fac")
+    p1<<-pcaDat
+
+
+    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam,color = I(pcaDat$col))
   })
+
+
+
+
 
   # -----------------
   # Create PCA ui
@@ -1246,14 +1321,27 @@ function(input,output,session){
     }else{
       mainPanel(width=12,
 
-                fluidRow( plotlyOutput("pcaplot",width="100%",height="800px"))
+
+                fluidRow(
+                  column(width=6,
+                  p("PCOA: Provides Three-Dimensional View of Distances (Based upon Distance Algorithm Chosen"),
+                  plotlyOutput("pcoaPlot",width="100%",height="800px")),
+                  column(width=6,
+                  p("Principle Components Analysis: Provides a dimension reduction of the peak intensity/presence matrix"),
+                  plotlyOutput("pcaPlot",width="100%",height="800px"))
+                ),
+                p("t-SNE"),
+                numericInput("tsnePerplexity", label = h5(strong("t-SNE Perplexity")), value = 30, step=10, min = 0, max = 300),
+                numericInput("tsneTheta", label = h5(strong("t-SNE Theta")), value = .5, step=.1, max = 1, min=0),
+                numericInput("tsneIterations", label = h5(strong("t-SNE Iterations")), value = 1000, step = 50),
+                fluidRow( plotlyOutput("tsnePlot",width="100%",height="800px"))
+
                 # br(),
                 # fluidRow(      rglwidgetOutput("pcaplot3d"))
       )
     }
 
   })
-
 
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
