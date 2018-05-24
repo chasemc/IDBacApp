@@ -1,3 +1,5 @@
+
+
 # The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the UI function(input, output,session) {
 
 # Function to Install and Load R Packages
@@ -2363,6 +2365,208 @@ function(input,output,session){
 
     }
   })
+
+
+
+
+
+
+#------------------------------------------------------------------------------------------------------------
+
+
+#-------------------------------------- In-house library generation code:
+
+
+  # The UI for the library editing/creation tab
+  output$libraryTab <-  renderUI({
+
+    fluidPage(
+
+      tabsetPanel(id= "libraryTabs",
+                  tabPanel("Create a New Library", value="newLibPanel",
+                           textInput("userLibraryName", "Input Library Name:", value="Default Library"),
+                           actionButton("saveBtn", "Save"),
+                           rHandsontableOutput("hot")
+                  ),
+                  tabPanel("Add Isolates to an Existing Library",
+                           value="addToExistingLibPanel"),
+                  tabPanel("Modify an Existing Library",
+                           value="modifyLibPanel",
+                           sidebarPanel(
+                             uiOutput("modifyLibPanelRadios")),
+                           rHandsontableOutput("hot2")
+                  )
+      )
+
+
+    )
+  })
+
+
+  # For creating a new Library
+
+  emptyLibraryTable <- reactive({
+
+    # "Get the sample names from the protein peak files
+    all <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
+    # Character vector of protein peak sample names
+    all <- as.character(strsplit(all,"_ProteinPeaks.rds"))
+    # Create the data frame structure for the "database"
+    all <- data.frame("Strain ID" = all, "Kingdom" = "", "Phylum"= "", "Class" = "", "Order" = "", "Family" = "", "Genus" = "", "Species" = "", "Strain" = "")
+
+    if (!is.null(input$hot)) {
+      rhandsontable::hot_to_r(input$hot)
+    } else {
+      all
+    }
+
+  })
+
+  # Display the new Library in an editable table
+
+  output$hot <- rhandsontable::renderRHandsontable({
+    DF <- emptyLibraryTable()
+    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE)
+  })
+
+
+
+
+
+
+
+
+
+
+  observe({
+
+    input$saveBtn
+
+    appDirectory <- getwd()
+
+    if (!dir.exists(file.path(appDirectory, "SpectraLibrary"))){  # If spectra library folder doesn't exist, create it
+      dir.create(file.path(appDirectory, "SpectraLibrary"))
+    }
+
+
+    hot = isolate(input$hot)
+    if (!is.null(hot)) {
+      all1 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
+      all2 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".SummedProtein.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
+      all3 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep("SmallMoleculePeaks", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
+
+
+
+      all <- lapply(1:length(all2), function(x) list("ProteinPeaks" = all1[[x]],".SummedProtein." = all2[[x]], "SmallMoleculePeaks" = all3[[x]] ))
+      remove(all1,all2,all3)
+
+      libFrame <- data.frame(emptyLibraryTable(), "MALDIdata" = NA)
+      libFrame$MALDIdata <- all
+
+
+      saveRDS(file = file.path(appDirectory, "SpectraLibrary",paste0(input$userLibraryName,".rds")), libFrame)
+
+    }
+  })
+
+  #------------------------------------
+
+
+
+
+  # Modify an Existing Library  panel code to create radio selection of existing libraries
+
+  libraries <- list.files(file.path(getwd(), "SpectraLibrary"), pattern=".rds", full.names = TRUE)
+
+  output$modifyLibPanelRadios  <- renderUI({
+    if(input$libraryTabs == "modifyLibPanel"){
+      radioButtons(inputId = "modifyLibPanelRadiosSelected",
+                   label= "Existing Libraries",
+                   choiceNames = basename(libraries),
+                   choiceValues = as.list(libraries)
+      )
+    }
+
+  })
+
+
+
+
+  # Modify an Existing Library  panel code to display selected library
+
+
+
+  observeEvent(input$modifyLibPanelRadiosSelected,{
+
+
+    emptyLibraryTable2 <- reactive({
+
+      if (!is.null(input$hot2)) {
+        rhandsontable::hot_to_r(input$hot2)
+      } else {
+        print(input$modifyLibPanelRadiosSelected)
+        readRDS(input$modifyLibPanelRadiosSelected)[,1:9]
+      }
+
+    })
+
+
+
+    output$hot2 <- rhandsontable::renderRHandsontable({
+      shiny::isolate(input$modifyLibPanelRadiosSelected)
+      DF2 <- emptyLibraryTable2()
+      rhandsontable::rhandsontable(DF2, useTypes = FALSE, selectCallback = TRUE)
+    })
+
+
+  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
