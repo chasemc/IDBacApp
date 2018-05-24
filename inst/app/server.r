@@ -5,19 +5,19 @@ Install_And_Load <- function(Required_Packages)
 {
   Remaining_Packages <-
     Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-  
-  
+
+
   if (length(Remaining_Packages))
   {
     install.packages(Remaining_Packages)
-    
+
   }
   for (package_name in Required_Packages)
   {
     library(package_name,
             character.only = TRUE,
             quietly = TRUE)
-    
+
   }
 }
 
@@ -1252,7 +1252,6 @@ function(input,output,session){
     pcoaDat <- pcoaCalculation()
 
     colorsToUse <- colorMatch()
-    d34<<-colorsToUse
     colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
     pcoaDat <- merge(pcoaDat, colorsToUse, by="nam")
     pcoaDat <- merge(pcoaDat,colorBlindPalette,by="fac")
@@ -1295,8 +1294,8 @@ function(input,output,session){
       }
 
       fac
-												
-				
+
+
     }
 
   })
@@ -1317,7 +1316,6 @@ function(input,output,session){
 
 
   tsneCalculation <- reactive({
-asd123<<-pcaCalculation()
   d<- Rtsne(pcaCalculation(), pca=FALSE, dims=3, perplexity = input$tsnePerplexity,theta = input$tsneTheta, max_iter = input$tsneIterations)
   d <- as.data.frame(d$Y)
   d <- cbind.data.frame(as.vector(pcaCalculation()$nam),d)
@@ -1334,7 +1332,6 @@ asd123<<-pcaCalculation()
     colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
     pcaDat <- merge(pcaDat, colorsToUse, by="nam")
     pcaDat <- merge(pcaDat,colorBlindPalette,by="fac")
-    p1<<-pcaDat
 
 
     plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam,color = I(pcaDat$col))
@@ -1647,7 +1644,6 @@ asd123<<-pcaCalculation()
     par(mar=c(5,5,5,input$dendparmar))
 
     if (input$kORheight=="1"){
-	df2<<-dendro()
       dendro() %>% color_branches(k=input$kClusters, col = as.vector(colorBlindPalette$col[1:input$kClusters])) %>% plot(horiz=TRUE,lwd=8)
     } else if (input$kORheight=="2"){
 
@@ -1997,7 +1993,7 @@ asd123<<-pcaCalculation()
 
     rownames(smallNetwork) <- paste(peaksaNames)
 #---- Note for Chase: attributes(smallNetwork) contain vectors of masses, this will cause slow-downs
-																									
+
     bool <- smallNetwork
     bool[is.na(bool)] <- 0
     bool <- as.data.frame(bool)
