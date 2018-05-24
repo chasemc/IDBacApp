@@ -2392,10 +2392,10 @@ function(input,output,session){
                            value="addToExistingLibPanel"),
                   tabPanel("Modify an Existing Library",
                            value="modifyLibPanel",
-                           sidebarPanel(
-                             uiOutput("modifyLibPanelRadios")),
-                           rHandsontableOutput("hot2")
-                  )
+
+
+                           rHandsontableOutput("hot2"))
+
       )
 
 
@@ -2405,7 +2405,7 @@ function(input,output,session){
 
   # For creating a new Library
 
-  emptyLibraryTable <- reactive({
+  userCreatedLibraryTable <- reactive({
 
     # "Get the sample names from the protein peak files
     all <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
@@ -2425,7 +2425,7 @@ function(input,output,session){
   # Display the new Library in an editable table
 
   output$hot <- rhandsontable::renderRHandsontable({
-    DF <- emptyLibraryTable()
+    DF <- userCreatedLibraryTable()
     rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE)
   })
 
@@ -2448,10 +2448,10 @@ function(input,output,session){
       dir.create(file.path(appDirectory, "SpectraLibrary"))
     }
 
-
     hot = isolate(input$hot)
     if (!is.null(hot)) {
-      all1 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
+
+         all1 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
       all2 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".SummedProtein.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
       all3 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep("SmallMoleculePeaks", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
 
@@ -2460,7 +2460,7 @@ function(input,output,session){
       all <- lapply(1:length(all2), function(x) list("ProteinPeaks" = all1[[x]],".SummedProtein." = all2[[x]], "SmallMoleculePeaks" = all3[[x]] ))
       remove(all1,all2,all3)
 
-      libFrame <- data.frame(emptyLibraryTable(), "MALDIdata" = NA)
+      libFrame <- data.frame(userCreatedLibraryTable(), "MALDIdata" = NA)
       libFrame$MALDIdata <- all
 
 
@@ -2495,17 +2495,16 @@ function(input,output,session){
   # Modify an Existing Library  panel code to display selected library
 
 
-
-  observeEvent(input$modifyLibPanelRadiosSelected,{
-
-
-    emptyLibraryTable2 <- reactive({
+    userCreatedLibraryTable2 <- reactive({
 
       if (!is.null(input$hot2)) {
         rhandsontable::hot_to_r(input$hot2)
       } else {
-        print(input$modifyLibPanelRadiosSelected)
-        readRDS(input$modifyLibPanelRadiosSelected)[,1:9]
+
+        myDB <- DBI::dbConnect(RSQLite::SQLite(),"SpectraLibrary/exampleDB.sqlite")
+        ww <- DBI::dbGetQuery(myDB, 'SELECT * FROM Sample1')
+        ww[,1:10]
+
       }
 
     })
@@ -2514,12 +2513,9 @@ function(input,output,session){
 
     output$hot2 <- rhandsontable::renderRHandsontable({
       shiny::isolate(input$modifyLibPanelRadiosSelected)
-      DF2 <- emptyLibraryTable2()
+      DF2 <- userCreatedLibraryTable2()
       rhandsontable::rhandsontable(DF2, useTypes = FALSE, selectCallback = TRUE)
     })
-
-
-  })
 
 
 
