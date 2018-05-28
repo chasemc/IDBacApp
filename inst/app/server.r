@@ -40,12 +40,23 @@ Install_And_Load(Required_Packages)
 
 
 
+makeReactiveTrigger <- function() {
+  rv <- reactiveValues(a = 0)
+  list(
+    depend = function() {
+      rv$a
+      invisible()
+    },
+    trigger = function() {
+      rv$a <- isolate(rv$a + 1)
+    }
+  )
+}
 
 
 
 
-
-
+myTrigger <- makeReactiveTrigger()
 
 
 
@@ -57,7 +68,7 @@ Install_And_Load(Required_Packages)
 colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",rainbow(1000)))
 
 source('colored_Dots.R', echo=TRUE)
-
+source('LibraryCreation.R', echo=TRUE)
 
 
 # Reactive variable returning the user-chosen working directory as string
@@ -2384,7 +2395,7 @@ function(input,output,session){
 
       tabsetPanel(id= "libraryTabs",
                   tabPanel("Create a New Library", value="newLibPanel",
-                           textInput("userLibraryName", "Input Library Name:", value="Default Library"),
+                           textInput("newDatabaseName", "Input Library Name:", value="Default Library"),
                            actionButton("saveBtn", "Save"),
                            rHandsontableOutput("hot")
                   ),
@@ -2405,19 +2416,28 @@ function(input,output,session){
 
   # For creating a new Library
 
-  userCreatedLibraryTable <- reactive({
+  createNewLibraryTable <- reactive({
 
     # "Get the sample names from the protein peak files
-    all <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
+    currentlyLoadedSamples <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
     # Character vector of protein peak sample names
-    all <- as.character(strsplit(all,"_ProteinPeaks.rds"))
+    currentlyLoadedSamples <- as.character(strsplit(currentlyLoadedSamples,"_ProteinPeaks.rds"))
     # Create the data frame structure for the "database"
-    all <- data.frame("Strain ID" = all, "Kingdom" = "", "Phylum"= "", "Class" = "", "Order" = "", "Family" = "", "Genus" = "", "Species" = "", "Strain" = "")
+    currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
+                                         "Genbank_Accession" = "",
+                                         "Kingdom" = "",
+                                         "Phylum"= "",
+                                         "Class" = "",
+                                         "Order" = "",
+                                         "Family" = "",
+                                         "Genus" = "",
+                                         "Species" = "",
+                                         "Strain" = "")
 
     if (!is.null(input$hot)) {
       rhandsontable::hot_to_r(input$hot)
     } else {
-      all
+      currentlyLoadedSamples
     }
 
   })
@@ -2425,7 +2445,7 @@ function(input,output,session){
   # Display the new Library in an editable table
 
   output$hot <- rhandsontable::renderRHandsontable({
-    DF <- userCreatedLibraryTable()
+    DF <- createNewLibraryTable()
     rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE)
   })
 
@@ -2433,41 +2453,86 @@ function(input,output,session){
 
 
 
+  observeEvent(input$saveBtn, {
 
-
-
-
-
-  observe({
-
-    input$saveBtn
-
-    appDirectory <- getwd()
+    appDirectory <- getwd() # Get the location of where IDBac is installed
 
     if (!dir.exists(file.path(appDirectory, "SpectraLibrary"))){  # If spectra library folder doesn't exist, create it
       dir.create(file.path(appDirectory, "SpectraLibrary"))
     }
 
-    hot = isolate(input$hot)
-    if (!is.null(hot)) {
 
-         all1 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
-      all2 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep(".SummedProtein.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
-      all3 <- sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE)[grep("SmallMoleculePeaks", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS)
+         if(!file.exists(paste0("SpectraLibrary/", isolate(input$newDatabaseName), ".sqlite"))){ # If SQL file does not exist
 
 
-
-      all <- lapply(1:length(all2), function(x) list("ProteinPeaks" = all1[[x]],".SummedProtein." = all2[[x]], "SmallMoleculePeaks" = all3[[x]] ))
-      remove(all1,all2,all3)
-
-      libFrame <- data.frame(userCreatedLibraryTable(), "MALDIdata" = NA)
-      libFrame$MALDIdata <- all
+              isolate(
+                newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", input$newDatabaseName, ".sqlite"))
+              )
 
 
-      saveRDS(file = file.path(appDirectory, "SpectraLibrary",paste0(input$userLibraryName,".rds")), libFrame)
+              isolate(
+                addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
+              )
 
-    }
+              DBI::dbDisconnect(newDatabase)
+
+print("l")
+         }else{
+           print("2")
+           showModal(popupDBCreation())
+
+           }
+
+
+
   })
+
+
+
+  # -----------------
+  # Popup summarizing the final status of the conversion
+  popupDBCreation <- function(failed = FALSE){
+
+    modalDialog(
+      title = "Are you sure?",
+
+      p("There is already a database with this name."),
+      p(paste0("Pressing save below will overwrite existing database: ", isolate(input$newDatabaseName))),
+
+      footer = tagList(actionButton("saveNewDatabase", paste0("Overwrite ", isolate(input$newDatabaseName))), modalButton("Close"))
+    )}
+
+
+
+    observeEvent(input$saveNewDatabase, {
+      removeModal()
+      # After initiating the database
+
+      newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", isolate(input$newDatabaseName),".sqlite"))
+
+      DBI::dbRemoveTable(newDatabase, "IDBacDatabase")
+
+# print(DBI::dbListTables(newDatabase,"IDBacDatabase"))
+
+      addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
+
+
+      DBI::dbDisconnect(newDatabase)
+
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   #------------------------------------
 
