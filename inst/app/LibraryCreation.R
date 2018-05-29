@@ -6,7 +6,7 @@ addNewLibrary <- function(samplesToAdd, newDatabase, IDBacAppLocation){
 
 # Which samples had strain info inputs in the table
 # This function just looks in "samplesToAdd" for any row that contains a column with a string vector of length > 0
-  toAdd <-  which(sapply(as.data.frame(nchar(t(samplesToAdd)[2:9, ])), sum) > 0)
+toAdd <-  which(sapply(as.data.frame(nchar(t(samplesToAdd)[2:9, ])), sum) > 0)
 
 # Character vector of only samples to be added to SQL DB (Samples with MetaInfo)
 toAdd <- as.character(samplesToAdd[,1])[toAdd]
@@ -16,12 +16,17 @@ rdsFiles <- list.files(paste0(IDBacAppLocation, "\\Peak_Lists"),
                        pattern = "ProteinPeaks.rds|_SummedProteinSpectra.rds|_SmallMoleculePeaks.rds",
                        full.names = TRUE)
 
-
 # Example rds file name ->   "Sample-XYZ_SummedSmallMoleculeSpectra.rds"  ...  "Sample-XYZ" + "_SummedSmallMoleculeSpectra.rds"
 # Get the sample IDs from the rds filename
-rdsSampleIDs <- unlist(lapply(rdsFiles, function(x) strsplit(basename(x), "_")[[1]][[1]]))
+
+filesNoPath <- basename(rdsFiles)
+lastUnderscore <- unlist(lapply(filesNoPath, function(x) tail(which(strsplit(x[[1]], "")[[1]] %in% "_"),1)))
+lengthString <- unlist(lapply(filesNoPath, nchar))
+
+rdsSampleIDs <- stringr::str_sub(filesNoPath, 1, lastUnderscore - 1) # Get just sample IDs
+
 # Get the rds type (eg "ProteinPeaks" or "SmallMoleculePeaks") from the rds filename
-rdsType <- unlist(lapply(rdsFiles, function(x) strsplit(basename(x), "_")[[1]][[2]]))
+rdsType <- stringr::str_sub(filesNoPath, lastUnderscore + 1, lengthString) # Get just sample types
 # Combine into a dataframe
 rdsFiles <- cbind.data.frame(rdsFiles, rdsSampleIDs, rdsType)
 # Split based on sample ID
@@ -36,7 +41,6 @@ rdsFiles <- split(rdsFiles, rdsSampleIDs)
 
 rdsFiles <- rdsFiles[which(names(rdsFiles) %in% toAdd)]
 
-
 #--------------- mzXML files
 # Get Instrument info
 mzXmlSpectraLocation <- list.files(paste0(IDBacAppLocation, "/Converted_To_mzXML"), full.names = TRUE)
@@ -46,24 +50,17 @@ names(mzXmlSpectra) <- mzXMLSampleIDs
 
 mzXmlSpectra <- mzXmlSpectra[which(names(mzXmlSpectra) %in% toAdd)]
 
-
-
 samplesWithMetadata <- samplesToAdd[which((samplesToAdd$Strain_ID) %in% toAdd), ]
-s1 <<-samplesToAdd
-s2 <<- toAdd
-sdd<<-samplesWithMetadata
 
 for(i in 1:length(rdsFiles)){
 
-  rdsContents <- sapply(as.character(rdsFiles[[i]][,1]), function(x) readRDS(x))
+  rdsContents <- sapply(as.character(rdsFiles[i][[1]][,1]), function(x) readRDS(x))
   # Make names of list elements correspond to rds file it came from
   # "ProteinPeaks.rds"         "SmallMoleculePeaks.rds"   "SummedProteinSpectra.rds"
-  names(rdsContents) <- as.character(rdsFiles[[i]][,3])
+  names(rdsContents) <- as.character(rdsFiles[i][[1]][,3])
   # nest list into a one-element list that will be named the sample ID
   rdsContents <- setNames(list(rdsContents), names(rdsFiles[i]))
   # eg ->  rdsContents$`172-1`$ProteinPeaks.rds
-
-
 
 
 # What remains is rdsContents, which is a list the length of the number sample IDs,
@@ -99,7 +96,7 @@ for(i in 1:length(rdsFiles)){
 
 
 # serialize rds contents
-rdsContents <- sapply(rdsContents, function(x) serialize(x, NULL))
+rdsContents <- sapply(rdsContents, function(x) memCompress(serialize(x, NULL), type="gzip"))
 
 onemzXmlSpectra <- mzXmlSpectra[i]
 instrumentInfo <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrumentInfo(x)))
@@ -111,7 +108,7 @@ instrumentInfo <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrument
 onemzXmlSpectra <- lapply(onemzXmlSpectra, function(x) mzR::peaks(x))
 
 # serialize rds contents
-onemzXmlSpectra <- lapply(onemzXmlSpectra, function(x) serialize(onemzXmlSpectra, NULL))
+onemzXmlSpectra <- lapply(onemzXmlSpectra, function(x) memCompress(serialize(onemzXmlSpectra, NULL), type= "gzip"))
 
 # Now we have 3 pieces of info
 #
