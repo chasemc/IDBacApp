@@ -2422,6 +2422,18 @@ function(input,output,session){
     currentlyLoadedSamples <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
     # Character vector of protein peak sample names
     currentlyLoadedSamples <- as.character(strsplit(currentlyLoadedSamples,"_ProteinPeaks.rds"))
+
+
+    # Check for mzXML files
+    mzXMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzXML"), full.names = FALSE)
+
+    mzXMLfiles <- unlist(strsplit(mzXMLfiles, ".mzXML"))
+
+    nonMissingmzXML <- which(currentlyLoadedSamples %in% mzXMLfiles)
+    missingmzXML <- which(! currentlyLoadedSamples %in% mzXMLfiles)
+
+    currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzXML]
+
     # Create the data frame structure for the "database"
     currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
                                          "Genbank_Accession" = "",
