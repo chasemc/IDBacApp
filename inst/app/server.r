@@ -2413,8 +2413,7 @@ function(input,output,session){
     )
   })
 
-
-  # For creating a new Library
+#-----------  Creating a new library
 
   createNewLibraryTable <- reactive({
 
@@ -2454,49 +2453,29 @@ function(input,output,session){
 
   })
 
-  # Display the new Library in an editable table
-
+# Display the new Library as an editable table
   output$hot <- rhandsontable::renderRHandsontable({
     DF <- createNewLibraryTable()
     rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE)
   })
 
-
-
-
-
   observeEvent(input$saveBtn, {
-
     appDirectory <- getwd() # Get the location of where IDBac is installed
-
     if (!dir.exists(file.path(appDirectory, "SpectraLibrary"))){  # If spectra library folder doesn't exist, create it
       dir.create(file.path(appDirectory, "SpectraLibrary"))
     }
-
-
          if(!file.exists(paste0("SpectraLibrary/", isolate(input$newDatabaseName), ".sqlite"))){ # If SQL file does not exist
-
-
               isolate(
                 newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", input$newDatabaseName, ".sqlite"))
               )
-
-
               isolate(
                 addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
               )
-
               DBI::dbDisconnect(newDatabase)
-
-print("l")
          }else{
            print("2")
            showModal(popupDBCreation())
-
            }
-
-
-
   })
 
 
@@ -2504,54 +2483,23 @@ print("l")
   # -----------------
   # Popup summarizing the final status of the conversion
   popupDBCreation <- function(failed = FALSE){
-
     modalDialog(
       title = "Are you sure?",
-
       p("There is already a database with this name."),
       p(paste0("Pressing save below will overwrite existing database: ", isolate(input$newDatabaseName))),
-
       footer = tagList(actionButton("saveNewDatabase", paste0("Overwrite ", isolate(input$newDatabaseName))), modalButton("Close"))
     )}
 
-
-
-    observeEvent(input$saveNewDatabase, {
+  observeEvent(input$saveNewDatabase, {
       removeModal()
       # After initiating the database
-
       newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", isolate(input$newDatabaseName),".sqlite"))
-
       DBI::dbRemoveTable(newDatabase, "IDBacDatabase")
-
-# print(DBI::dbListTables(newDatabase,"IDBacDatabase"))
-
       addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
-
-
       DBI::dbDisconnect(newDatabase)
+   })
 
-    })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  #------------------------------------
-
-
-
-
-  # Modify an Existing Library  panel code to create radio selection of existing libraries
+#------------------------------------ Modify an Existing Library
 
   libraries <- list.files(file.path(getwd(), "SpectraLibrary"), pattern=".rds", full.names = TRUE)
 
