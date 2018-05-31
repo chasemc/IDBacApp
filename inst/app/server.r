@@ -2456,7 +2456,8 @@ function(input,output,session){
 # Display the new Library as an editable table
   output$hot <- rhandsontable::renderRHandsontable({
     DF <- createNewLibraryTable()
-    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE)
+    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE) %>%
+      hot_col("Strain_ID", readOnly = TRUE)
   })
 
   observeEvent(input$saveBtn, {
@@ -2486,8 +2487,8 @@ function(input,output,session){
     modalDialog(
       title = "Are you sure?",
       p("There is already a database with this name."),
-      p(paste0("Pressing save below will overwrite existing database: ", isolate(input$newDatabaseName))),
-      footer = tagList(actionButton("saveNewDatabase", paste0("Overwrite ", isolate(input$newDatabaseName))), modalButton("Close"))
+      p(paste0("Pressing save below will append to the existing database: \"", isolate(input$newDatabaseName),"\"")),
+      footer = tagList(actionButton("saveNewDatabase", paste0("Append to: \"", isolate(input$newDatabaseName),"\"")), modalButton("Close"))
     )}
 
   observeEvent(input$saveNewDatabase, {
