@@ -2456,7 +2456,7 @@ function(input,output,session){
 # Display the new Library as an editable table
   output$hot <- rhandsontable::renderRHandsontable({
     DF <- createNewLibraryTable()
-    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE) %>%
+    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
       hot_col("Strain_ID", readOnly = TRUE)
   })
 
