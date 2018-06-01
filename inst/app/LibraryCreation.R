@@ -151,7 +151,7 @@ sqlDataFrame$rds <- list(rdsContents[1][[1]])
 sqlDataFrame$mzXML <- list(onemzXmlSpectra[1][[1]])
 
 
-DBI::dbWriteTable(newDatabase, "IDBacDatabase", sqlDataFrame[1,], append = TRUE , overwrite = FALSE)
+DBI::dbWriteTable(newDatabase, "IDBacDatabase", sqlDataFrame[1, ], append = TRUE , overwrite = FALSE)
 
 
 }
