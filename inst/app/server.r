@@ -2392,7 +2392,6 @@ function(input,output,session){
   output$libraryTab <-  renderUI({
 
     fluidPage(
-
       tabsetPanel(id= "libraryTabs",
                   tabPanel("Create a New Library", value="newLibPanel",
                            textInput("newDatabaseName", "Input Library Name:", value="Default Library"),
@@ -2405,11 +2404,8 @@ function(input,output,session){
                            rHandsontableOutput("hott"),
                            rHandsontableOutput("hot3")),
 
-
-
                   tabPanel("Modify an Existing Library",
                            value="modifyLibPanel",
-
                            uiOutput("modifyLibPanelRadios"),
                            rHandsontableOutput("hot2"))
 
@@ -2635,7 +2631,7 @@ popupDBappend <- function(failed = FALSE){
 observeEvent(input$saveAppendDatabase2, {
   # After initiating the database
   newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$appendLibPanelRadiosSelected))
-  addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
+  addNewLibrary(samplesToAdd = createNewLibraryTable2(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
 })
 
 
@@ -2666,7 +2662,7 @@ createNewLibraryTable2 <- reactive({
                                        "Species" = "",
                                        "Strain" = "")
   # If interactive table exists, show it, otherwise use "currentlyLoadedSamples" created above
-  if (!is.null(input$hot)) {
+  if (!is.null(input$hott)) {
     rhandsontable::hot_to_r(input$hott)
   } else {
     currentlyLoadedSamples
@@ -2676,7 +2672,7 @@ createNewLibraryTable2 <- reactive({
 
 # Display the new Library as an editable table
 output$hott <- rhandsontable::renderRHandsontable({
-  DF <- createNewLibraryTable()
+  DF <- createNewLibraryTable2()
   rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
     hot_col("Strain_ID", readOnly = TRUE)
 })
