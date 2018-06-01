@@ -2399,12 +2399,18 @@ function(input,output,session){
                            actionButton("saveBtn", "Save"),
                            rHandsontableOutput("hot")
                   ),
-                  tabPanel("Add Isolates to an Existing Library",
-                           value="addToExistingLibPanel"),
+                  tabPanel("Add Isolates to an Existing Library", value="addToExistingLibPanel",
+                           uiOutput("appendLibPanelRadios"),
+                           actionButton("saveAppendDatabase1", "Append"),
+                           rHandsontableOutput("hott"),
+                           rHandsontableOutput("hot3")),
+
+
+
                   tabPanel("Modify an Existing Library",
                            value="modifyLibPanel",
 
-
+                           uiOutput("modifyLibPanelRadios"),
                            rHandsontableOutput("hot2"))
 
       )
@@ -2421,18 +2427,12 @@ function(input,output,session){
     currentlyLoadedSamples <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
     # Character vector of protein peak sample names
     currentlyLoadedSamples <- as.character(strsplit(currentlyLoadedSamples,"_ProteinPeaks.rds"))
-
-
     # Check for mzXML files
     mzXMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzXML"), full.names = FALSE)
-
     mzXMLfiles <- unlist(strsplit(mzXMLfiles, ".mzXML"))
-
     nonMissingmzXML <- which(currentlyLoadedSamples %in% mzXMLfiles)
     missingmzXML <- which(! currentlyLoadedSamples %in% mzXMLfiles)
-
     currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzXML]
-
     # Create the data frame structure for the "database"
     currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
                                          "Genbank_Accession" = "",
@@ -2444,7 +2444,7 @@ function(input,output,session){
                                          "Genus" = "",
                                          "Species" = "",
                                          "Strain" = "")
-
+   # If interactive table exists, show it, otherwise use "currentlyLoadedSamples" created above
     if (!is.null(input$hot)) {
       rhandsontable::hot_to_r(input$hot)
     } else {
@@ -2502,7 +2502,8 @@ function(input,output,session){
 
 #------------------------------------ Modify an Existing Library
 
-  libraries <- list.files(file.path(getwd(), "SpectraLibrary"), pattern=".rds", full.names = TRUE)
+  libraries <- list.files(file.path(getwd(), "SpectraLibrary"), pattern=".sqlite", full.names = TRUE)
+
 
   output$modifyLibPanelRadios  <- renderUI({
     if(input$libraryTabs == "modifyLibPanel"){
@@ -2516,66 +2517,169 @@ function(input,output,session){
   })
 
 
+modifiedLibraryEnvironmentTracking <- new.env()  # This allows modifyLibraryTable() below to update correctly
 
+  modifyLibraryTable <- reactive({
+    # Open connection to chosen existing database
+    modifyDatabaseConnect <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$modifyLibPanelRadiosSelected))
+    # Create lazy-eval tbl
+    db <- dplyr::tbl(modifyDatabaseConnect, "IDBacDatabase")
+    # Select only columns to be displayed in IDBac
+    db <- db %>%
+          dplyr::select(-c("manufacturer",
+                           "model",
+                           "ionisation",
+                           "analyzer",
+                           "detector",
+                           "Protein_Replicates",
+                           "Small_Molecule_Replicates",
+                           "mzXML",
+                           "rds")) %>%
+          dplyr::collect()
 
-  # Modify an Existing Library  panel code to display selected library
+    if ((!is.null(input$hot2)) && modifiedLibraryEnvironmentTracking$value == input$modifyLibPanelRadiosSelected) {
+      rhandsontable::hot_to_r(input$hot2)
+    } else {
+      modifiedLibraryEnvironmentTracking$value <-input$modifyLibPanelRadiosSelected
+     db
+    }
 
+  })
 
-    userCreatedLibraryTable2 <- reactive({
-
-      if (!is.null(input$hot2)) {
-        rhandsontable::hot_to_r(input$hot2)
-      } else {
-
-        myDB <- DBI::dbConnect(RSQLite::SQLite(),"SpectraLibrary/exampleDB.sqlite")
-        ww <- DBI::dbGetQuery(myDB, 'SELECT * FROM Sample1')
-        ww[,1:10]
-
-      }
-
-    })
-
-
-
-    output$hot2 <- rhandsontable::renderRHandsontable({
-      shiny::isolate(input$modifyLibPanelRadiosSelected)
-      DF2 <- userCreatedLibraryTable2()
-      rhandsontable::rhandsontable(DF2, useTypes = FALSE, selectCallback = TRUE)
-    })
-
-
-
-
-
-
-
-
-
-
-
-
+  # Display the new Library as an editable table
+  output$hot2 <- rhandsontable::renderRHandsontable({
+    DF <- modifyLibraryTable()
+    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
+      hot_col("Strain_ID", readOnly = TRUE)
+  })
 
 
 
 
 
 
+#------------------------------------ Modify an Existing Library
+
+
+  output$appendLibPanelRadios  <- renderUI({
+    if(input$libraryTabs == "addToExistingLibPanel"){
+      radioButtons(inputId = "appendLibPanelRadiosSelected",
+                   label= "Existing Libraries",
+                   choiceNames = basename(libraries),
+                   choiceValues = as.list(libraries)
+      )
+    }
+
+  })
+
+
+  appendLibraryEnvironmentTracking <- new.env()  # This allows modifyLibraryTable() below to update correctly
+
+  appendToLibraryTable <- reactive({
+    # Open connection to chosen existing database
+    appendDatabaseConnect <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$appendLibPanelRadiosSelected))
+    # Create lazy-eval tbl
+    db <- dplyr::tbl(appendDatabaseConnect, "IDBacDatabase")
+    # Select only columns to be displayed in IDBac
+    db <- db %>%
+      dplyr::select(-c("manufacturer",
+                       "model",
+                       "ionisation",
+                       "analyzer",
+                       "detector",
+                       "Protein_Replicates",
+                       "Small_Molecule_Replicates",
+                       "mzXML",
+                       "rds")) %>%
+      dplyr::collect()
+
+
+    if ((!is.null(input$hot2)) && appendLibraryEnvironmentTracking$value == input$appendLibPanelRadiosSelected) {
+      rhandsontable::hot_to_r(input$hot3)
+    } else {
+      appendLibraryEnvironmentTracking$value <-input$appendLibPanelRadiosSelected
+      db
+    }
+
+  })
+
+  # Display the new Library as an editable table
+  output$hot3 <- rhandsontable::renderRHandsontable({
+    DF <- appendToLibraryTable()
+    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
+      hot_col("Strain_ID", readOnly = TRUE)
+  })
 
 
 
 
 
+# ----------------- Append Data
+
+observeEvent(input$saveAppendDatabase1, {
+
+  showModal(popupDBappend())
+
+})
+
+
+# Popup summarizing the final status of the conversion
+popupDBappend <- function(failed = FALSE){
+  modalDialog(
+    title = "Are you sure?",
+    p("There is already a database with this name."),
+    p(paste0("Pressing save below will append to the existing database: \"", isolate(input$appendLibPanelRadiosSelected),"\"")),
+    footer = tagList(actionButton("saveAppendDatabase2", paste0("Append to: \"", isolate(basename(input$appendLibPanelRadiosSelected)),"\"")), modalButton("Close"))
+  )}
+
+observeEvent(input$saveAppendDatabase2, {
+  # After initiating the database
+  newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$appendLibPanelRadiosSelected))
+  addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
+})
 
 
 
 
 
+createNewLibraryTable2 <- reactive({
 
+  # "Get the sample names from the protein peak files
+  currentlyLoadedSamples <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
+  # Character vector of protein peak sample names
+  currentlyLoadedSamples <- as.character(strsplit(currentlyLoadedSamples,"_ProteinPeaks.rds"))
+  # Check for mzXML files
+  mzXMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzXML"), full.names = FALSE)
+  mzXMLfiles <- unlist(strsplit(mzXMLfiles, ".mzXML"))
+  nonMissingmzXML <- which(currentlyLoadedSamples %in% mzXMLfiles)
+  missingmzXML <- which(! currentlyLoadedSamples %in% mzXMLfiles)
+  currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzXML]
+  # Create the data frame structure for the "database"
+  currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
+                                       "Genbank_Accession" = "",
+                                       "Kingdom" = "",
+                                       "Phylum"= "",
+                                       "Class" = "",
+                                       "Order" = "",
+                                       "Family" = "",
+                                       "Genus" = "",
+                                       "Species" = "",
+                                       "Strain" = "")
+  # If interactive table exists, show it, otherwise use "currentlyLoadedSamples" created above
+  if (!is.null(input$hot)) {
+    rhandsontable::hot_to_r(input$hott)
+  } else {
+    currentlyLoadedSamples
+  }
 
+})
 
-
-
-
+# Display the new Library as an editable table
+output$hott <- rhandsontable::renderRHandsontable({
+  DF <- createNewLibraryTable()
+  rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
+    hot_col("Strain_ID", readOnly = TRUE)
+})
 
 
 
