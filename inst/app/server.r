@@ -2407,6 +2407,7 @@ function(input,output,session){
                   tabPanel("Modify an Existing Library",
                            value="modifyLibPanel",
                            uiOutput("modifyLibPanelRadios"),
+                           actionButton("saveModifyDatabase1", "Update"),
                            rHandsontableOutput("hot2"))
 
       )
@@ -2496,10 +2497,10 @@ function(input,output,session){
       DBI::dbDisconnect(newDatabase)
    })
 
+#------------------------------------
 #------------------------------------ Modify an Existing Library
 
   libraries <- list.files(file.path(getwd(), "SpectraLibrary"), pattern=".sqlite", full.names = TRUE)
-
 
   output$modifyLibPanelRadios  <- renderUI({
     if(input$libraryTabs == "modifyLibPanel"){
@@ -2513,7 +2514,7 @@ function(input,output,session){
   })
 
 
-modifiedLibraryEnvironmentTracking <- new.env()  # This allows modifyLibraryTable() below to update correctly
+  modifiedLibraryEnvironmentTracking <- new.env()  # This allows modifyLibraryTable() below to update correctly
 
   modifyLibraryTable <- reactive({
     # Open connection to chosen existing database
@@ -2549,12 +2550,69 @@ modifiedLibraryEnvironmentTracking <- new.env()  # This allows modifyLibraryTabl
       hot_col("Strain_ID", readOnly = TRUE)
   })
 
+#------------------------------------ Modify existing databse
+
+
+  observeEvent(input$saveModifyDatabase1, {
+
+    showModal(popupDBmodify())
+
+  })
+
+
+  # Popup summarizing the final status of the conversion
+  popupDBmodify <- function(failed = FALSE){
+    modalDialog(
+      title = "Are you sure?",
+      p("There is already a database with this name."),
+      p(paste0("Pressing save below will append to the existing database: \"", isolate(input$modifyLibPanelRadiosSelected),"\"")),
+      footer = tagList(actionButton("saveModifyDatabase2", paste0("Append to: \"", isolate(basename(input$modifyLibPanelRadiosSelected)),"\"")), modalButton("Close"))
+    )}
+
+  observeEvent(input$saveModifyDatabase2, {
+    # After initiating the database
+
+    newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$modifyLibPanelRadiosSelected))
+    db          <- dplyr::tbl(newDatabase, "IDBacDatabase")
+
+    dbIds <- db %>% select(Strain_ID) %>% collect %>% unlist() %>% as.vector()
+    colsToUpdate <-  db %>%
+                     dplyr::select(-c("Strain_ID",
+                                       "manufacturer",
+                                       "model",
+                                       "ionisation",
+                                       "analyzer",
+                                       "detector",
+                                       "Protein_Replicates",
+                                       "Small_Molecule_Replicates",
+                                       "mzXML",
+                                       "rds")) %>%
+                     colnames()
 
 
 
+    for (i in dbIds){
+      # Allows editing dynamic columns (user-added metadata column) ie- prevents overwriting instrument data or
+      # MS data but can edit all other columns
+      # modded is a tbl with the user-updated values from rhandsontable
+      updateValues <-   modifyLibraryTable() %>% filter(Strain_ID == i) %>% select(colsToUpdate)
+      a <- as.vector(unlist(updateValues))
+      b <- colnames(updateValues)
+      # Format for SQL multiple "SET" query
+      a1 <- sapply(a, function(x) paste0("'",x,"'"))
+      b1 <- sapply(b, function(x) paste0("'",x,"'"))
+      all <- paste(b1, a1, sep = "=", collapse = ",")
+      # Run SQL update
+      DBI::dbSendQuery(newDatabase, paste("UPDATE IDBacDatabase SET ", all, " WHERE Strain_ID=",shQuote(i))) # works
+
+    }
+removeModal()
+
+  })
 
 
-#------------------------------------ Modify an Existing Library
+#------------------------------------
+#------------------------------------ append an Existing Library
 
 
   output$appendLibPanelRadios  <- renderUI({
@@ -2610,7 +2668,7 @@ modifiedLibraryEnvironmentTracking <- new.env()  # This allows modifyLibraryTabl
 
 
 
-# ----------------- Append Data
+# ----------------- Append data to selected database
 
 observeEvent(input$saveAppendDatabase1, {
 
