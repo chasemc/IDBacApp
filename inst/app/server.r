@@ -943,8 +943,8 @@ function(input,output,session){
       specSubset <- (which(labs == levels(labs)[[i]]))
       if (length(specSubset) > 1) {  #If there are replicates: bin replicates and then merge based on percent presence
         # Bin protein peaks
-        new <- binPeaks(trimmedP(), tolerance =.002,method="relaxed")
-        new <- filterPeaks(new[specSubset],minFrequency=input$percentPresenceP/100)
+        new <- binPeaks(trimmedP()[specSubset], tolerance =.002,method="relaxed")
+        new <- filterPeaks(new,minFrequency=input$percentPresenceP/100)
         new<-mergeMassPeaks(new,method="mean")
         new2 <- c(new2, new)
       } else{ # If there are no replcates, return the one spectrum
@@ -952,11 +952,7 @@ function(input,output,session){
       }
 
     }
-
-
     new2   #collapsedPeaksP() == new2
-
-
   })
 
 
@@ -968,8 +964,10 @@ function(input,output,session){
     for (i in 1:length(collapsedPeaksP())) {
       temp <- c(temp, collapsedPeaksP()[[i]]@metaData$Strain)
     }
+    proteinMatrixInnard <- binPeaks(collapsedPeaksP(), tolerance =.002,method="relaxed")
+
     proteinSamples <- factor(temp)
-    proteinMatrixInnard <- intensityMatrix(collapsedPeaksP())
+    proteinMatrixInnard <- intensityMatrix(proteinMatrixInnard)
     rownames(proteinMatrixInnard) <- paste(proteinSamples)
     proteinMatrixInnard[is.na(proteinMatrixInnard)] <- 0
 
