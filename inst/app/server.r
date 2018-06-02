@@ -39,28 +39,6 @@ Install_And_Load(Required_Packages)
 
 
 
-
-makeReactiveTrigger <- function() {
-  rv <- reactiveValues(a = 0)
-  list(
-    depend = function() {
-      rv$a
-      invisible()
-    },
-    trigger = function() {
-      rv$a <- isolate(rv$a + 1)
-    }
-  )
-}
-
-
-
-
-myTrigger <- makeReactiveTrigger()
-
-
-
-
 #  Load colored_Dots.R function
 
 
@@ -2384,7 +2362,6 @@ function(input,output,session){
 
 #------------------------------------------------------------------------------------------------------------
 
-
 #-------------------------------------- In-house library generation code:
 
 
@@ -2392,7 +2369,7 @@ function(input,output,session){
   output$libraryTab <-  renderUI({
 
     fluidPage(
-      tabsetPanel(id= "libraryTabs",
+      tabsetPanel(id= "libraryTabs", type="tabs",
                   tabPanel("Create a New Library", value="newLibPanel",
                            textInput("newDatabaseName", "Input Library Name:", value="Default Library"),
                            actionButton("saveBtn", "Save"),
@@ -2409,10 +2386,7 @@ function(input,output,session){
                            uiOutput("modifyLibPanelRadios"),
                            actionButton("saveModifyDatabase1", "Update"),
                            rHandsontableOutput("hot2"))
-
       )
-
-
     )
   })
 
@@ -2499,15 +2473,14 @@ function(input,output,session){
 
 #------------------------------------
 #------------------------------------ Modify an Existing Library
-
-  libraries <- list.files(file.path(getwd(), "SpectraLibrary"), pattern=".sqlite", full.names = TRUE)
+  libraries <- function(){list.files(file.path(getwd(), "SpectraLibrary"), pattern=".sqlite", full.names = TRUE)}
 
   output$modifyLibPanelRadios  <- renderUI({
     if(input$libraryTabs == "modifyLibPanel"){
       radioButtons(inputId = "modifyLibPanelRadiosSelected",
                    label= "Existing Libraries",
-                   choiceNames = basename(libraries),
-                   choiceValues = as.list(libraries)
+                   choiceNames = basename(libraries()),
+                   choiceValues = as.list(libraries())
       )
     }
 
@@ -2619,8 +2592,8 @@ removeModal()
     if(input$libraryTabs == "addToExistingLibPanel"){
       radioButtons(inputId = "appendLibPanelRadiosSelected",
                    label= "Existing Libraries",
-                   choiceNames = basename(libraries),
-                   choiceValues = as.list(libraries)
+                   choiceNames = basename(libraries()),
+                   choiceValues = as.list(libraries())
       )
     }
 
