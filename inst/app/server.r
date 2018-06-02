@@ -924,6 +924,8 @@ function(input,output,session){
            tab at the top of the page.")
       )
 
+    # Bin protein peaks
+    all <- binPeaks(all, tolerance =.002,method="relaxed")
 
 
     trim(all, c(input$lowerMass, input$upperMass))
@@ -934,20 +936,24 @@ function(input,output,session){
   # -----------------
   # Only include peaks occurring in specified percentage of replicates (groups determined by sample names)
   collapsedPeaksP <- reactive({
-
     labs <- sapply(trimmedP(), function(x)metaData(x)$Strain)
     labs <- factor(labs)
     new2 <- NULL
     newPeaks <- NULL
     for (i in seq_along(levels(labs))) {
       specSubset <- (which(labs == levels(labs)[[i]]))
+<<<<<<< HEAD
       if (length(specSubset) > 1) {  #If there are replicates: bin replicates and then merge based on percent presence
         # Bin protein peaks
         new <- binPeaks(trimmedP()[specSubset], tolerance =.002,method="relaxed")
         new <- filterPeaks(new,minFrequency=input$percentPresenceP/100)
+=======
+      if (length(specSubset) > 1) {
+        new <- filterPeaks(trimmedP()[specSubset],minFrequency=input$percentPresenceP/100)
+>>>>>>> parent of 1d4c8d5... move binning to individual samples before percent peak abundance filter
         new<-mergeMassPeaks(new,method="mean")
         new2 <- c(new2, new)
-      } else{ # If there are no replcates, return the one spectrum
+      } else{
         new2 <- c(new2, trimmedP()[specSubset])
       }
 
