@@ -6,7 +6,8 @@ addNewLibrary <- function(samplesToAdd, newDatabase, IDBacAppLocation){
 
 # Which samples had strain info inputs in the table
 # This function just looks in "samplesToAdd" for any row that contains a column with a string vector of length > 0
-toAdd <-  which(sapply(as.data.frame(nchar(t(samplesToAdd)[2:9, ])), sum) > 0)
+  jh<<-samplesToAdd
+toAdd <-  which(sapply(as.data.frame(nchar(t(samplesToAdd)[-1, ])), sum) > 0)
 
 # Character vector of only samples to be added to SQL DB (Samples with MetaInfo)
 toAdd <- as.character(samplesToAdd[,1])[toAdd]
@@ -47,9 +48,10 @@ mzXmlSpectraLocation <- list.files(paste0(IDBacAppLocation, "/Converted_To_mzXML
 mzXMLSampleIDs <- unlist(lapply(mzXmlSpectraLocation, function(x) strsplit(basename(x), ".mz")[[1]][[1]]))
 mzXmlSpectra <- lapply(mzXmlSpectraLocation, function(x) mzR::openMSfile(x))
 names(mzXmlSpectra) <- mzXMLSampleIDs
-
+az1<<-mzXmlSpectra
+az3<<-toAdd
 mzXmlSpectra <- mzXmlSpectra[which(names(mzXmlSpectra) %in% toAdd)]
-
+az2<<-mzXmlSpectra
 samplesWithMetadata <- samplesToAdd[which((samplesToAdd$Strain_ID) %in% toAdd), ]
 
 for(i in 1:length(rdsFiles)){
@@ -96,8 +98,9 @@ for(i in 1:length(rdsFiles)){
 
 
 # serialize rds contents
-rdsContents <- sapply(rdsContents, function(x) memCompress(serialize(x, NULL), type="gzip"))
-
+  yup<<- rdsContents
+rdsContents <- lapply(rdsContents, function(x) memCompress(serialize(rdsContents, NULL, xdr = FALSE), type="gzip"))
+yup3 <<- rdsContents
 onemzXmlSpectra <- mzXmlSpectra[i]
 instrumentInfo <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrumentInfo(x)))
 
@@ -107,8 +110,9 @@ instrumentInfo <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrument
 #       matrix[ , 2] == Intensity
 onemzXmlSpectra <- lapply(onemzXmlSpectra, function(x) mzR::peaks(x))
 
+yup2 <<-onemzXmlSpectra
 # serialize rds contents
-onemzXmlSpectra <- lapply(onemzXmlSpectra, function(x) memCompress(serialize(onemzXmlSpectra, NULL), type= "gzip"))
+onemzXmlSpectra <- lapply(onemzXmlSpectra, function(x) memCompress(serialize(onemzXmlSpectra, NULL, xdr = FALSE), type= "gzip"))
 
 # Now we have 3 pieces of info
 #
