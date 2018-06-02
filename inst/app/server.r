@@ -1632,13 +1632,14 @@ function(input,output,session){
 
   output$hclustPlot <- renderPlot({
 
+
     par(mar=c(5,5,5,input$dendparmar))
 
     if (input$kORheight=="1"){
       dendro() %>% color_branches(k=input$kClusters, col = as.vector(colorBlindPalette$col[1:input$kClusters])) %>% plot(horiz=TRUE,lwd=8)
     } else if (input$kORheight=="2"){
 
-      dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8)
+      dendro() %>% color_branches(h=input$height)  %>%  plot(horiz=TRUE,lwd=8)
       abline(v=input$height,lty=2)
 
     } else if (input$kORheight=="3"){
@@ -1709,6 +1710,17 @@ function(input,output,session){
 
   )
 
+
+
+
+# Searching against Databases
+
+
+
+
+
+
+
   # -----------------
   # Create Heir ui
   output$Heirarchicalui <-  renderUI({
@@ -1734,38 +1746,50 @@ function(input,output,session){
 
       sidebarLayout(
         sidebarPanel(style = "background-color:#7777770d",
-                     #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
-                     #                    choices = levels(phyla)),
-                     selectInput("distance", label = h5(strong("Distance Algorithm")),
-                                 choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
-                                 selected = "euclidean"),
-                     selectInput("clustering", label = h5(strong("Clustering Algorithm")),
-                                 choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
-                                 selected = "ward.D2"),
 
-                     radioButtons("booled", label = h5(strong("Include peak intensities, or use presence/absence?")),
-                                  choices = list("Presence/Absence" = 1, "Intensities" = 2),
-                                  selected = 2),
-                     numericInput("hclustHeight", label = h5(strong("Expand Tree")),value = 750,step=50,min=100),
-                     numericInput("dendparmar",label=h5(strong("Adjust right margin of dendrogram")),value=20),
+                     tabsetPanel(id= "HierarchicalSidebarTabs", type="tabs",
+                                 tabPanel("Hierarchical Clustering Settings", value="hierSettings",
+                                         #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
+                                         #                    choices = levels(phyla)),
+                                         selectInput("distance", label = h5(strong("Distance Algorithm")),
+                                                     choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
+                                                     selected = "euclidean"),
+                                         selectInput("clustering", label = h5(strong("Clustering Algorithm")),
+                                                     choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
+                                                     selected = "ward.D2"),
 
-                     radioButtons("kORheight", label = h5(strong("Color clusters based on:")),
-                                  choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-Defined Categories in Excel Sheet" = 3),
-                                  selected = 1),
+                                         radioButtons("booled", label = h5(strong("Include peak intensities, or use presence/absence?")),
+                                                      choices = list("Presence/Absence" = 1, "Intensities" = 2),
+                                                      selected = 2),
+                                         numericInput("hclustHeight", label = h5(strong("Expand Tree")),value = 750,step=50,min=100),
+                                         numericInput("dendparmar",label=h5(strong("Adjust right margin of dendrogram")),value=20),
 
-                     uiOutput("groupui"),
-                     uiOutput("hclustui"),
-                     uiOutput("sampleGroupColoringui"),
+                                         radioButtons("kORheight", label = h5(strong("Color clusters based on:")),
+                                                      choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-Defined Categories in Excel Sheet" = 3),
+                                                      selected = 1),
 
-                     br(),
-                     h4("Suggestions for Reporting Protein Analysis:"),
-                     uiOutput("proteinReport"),
-                     br(),
-                     downloadButton("downloadHeirSVG",label="Save Dendrogram as SVG"),
-                     br(),
-                     br(),
-                     downloadButton("downloadHierarchical","Save as Newick File")
-        ),
+                                         uiOutput("groupui"),
+                                         uiOutput("hclustui"),
+                                         uiOutput("sampleGroupColoringui"),
+
+                                         br(),
+                                         h4("Suggestions for Reporting Protein Analysis:"),
+                                         uiOutput("proteinReport"),
+                                         br(),
+                                         downloadButton("downloadHeirSVG",label="Save Dendrogram as SVG"),
+                                         br(),
+                                         br(),
+                                         downloadButton("downloadHierarchical","Save as Newick File")
+                                ),
+                                tabPanel("Library Search", value="hierLibrarySearch",
+                                    p("This is for searching against user-created libraries")
+
+                                )
+
+
+
+         )),
+
         mainPanel("Hierarchical Clustering",plotOutput("hclustPlot"))
 
       )
