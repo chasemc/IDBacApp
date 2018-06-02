@@ -916,7 +916,7 @@ function(input,output,session){
   # Return Peak Intensity Matrix
 
   trimmedP <- reactive({
-    all <-unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
+    all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
 
     # Check if protein spectra exist
     validate(
