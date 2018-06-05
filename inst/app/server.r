@@ -1782,15 +1782,22 @@ function(input,output,session){
                                           downloadButton("downloadHierarchical","Save as Newick File")
                                  ),
                                  tabPanel("Library Search", value="hierLibrarySearch",
-                                          p("This is for searching against user-created libraries")
+                                          p("This is for searching against user-created libraries"),
+                                          uiOutput("availableLibraries"),
+
+                                          actionButton(inputId = "startLibrarySearch",
+                                                       label= "Press to Search Library")
 
                                  )
 
 
 
                      )),
-
-        mainPanel("Hierarchical Clustering",plotOutput("hclustPlot"))
+        mainPanel("Hierarchical Clustering",
+                  column(width = 4,
+                  tableOutput("librarySearchResultsTable")),
+                  column(8,
+                        plotOutput("hclustPlot")))
 
       )
     }
@@ -2731,6 +2738,73 @@ function(input,output,session){
     rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
       hot_col("Strain_ID", readOnly = TRUE)
   })
+
+
+
+
+
+
+  #------------------------------------------------------------------------------------------------------------
+
+  #-------------------------------------- Library Search
+
+
+  # Load library search function:
+  source("librarySearch.r")
+
+
+
+ # If library search tab is selected within the protein hierarchical clustering page, diplay this UI
+  output$availableLibraries  <- renderUI({
+    if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
+      radioButtons(inputId = "selectedSearchLibrary",
+                   label= "Existing Libraries",
+                   choiceNames = basename(libraries()),
+                   choiceValues = as.list(libraries())
+      )
+    }
+
+  })
+
+
+#
+#   output$searchLibrary  <- renderUI({
+#       actionButton(inputId = "startLibrarySearch",
+#                    label= "Press to Search Library")
+#
+#
+#
+#   })
+#
+
+
+
+
+  librarySearchResults <- reactive({
+   isolate(
+     aa<<- idbacDirectory$filePath
+    bb<<- input$selectedSearchLibrary
+                            databaseSearch(idbacPath = idbacDirectory$filePath, databasePath = input$selectedSearchLibrary)
+    )
+  })
+
+  output$librarySearchResultsTable <- renderTable({
+    print(3)
+    input$startLibrarySearch
+    ww<<- librarySearchResults()
+ww
+    })
+
+
+
+
+
+
+
+
+
+
+
 
 
 
