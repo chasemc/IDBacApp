@@ -30,9 +30,14 @@ libSpec <- db %>%
   dplyr::select(c(Strain_ID,rds))
 
 
-
-
 unknownProteinPeakFiles <- list.files(paste0(idbacPath, "\\Peak_Lists"),full.names = TRUE, pattern = "SummedProteinSpectra.rds")
+unknownStrainIDs <- unlist(strsplit(basename(unknownProteinPeakFiles), "_SummedProteinSpectra.rds"))
+
+
+# should be in order already, but:
+orderOfUnknowns <- base::match(unknownStrainIDs, libResults$unknown)
+orderOfLibrary  <- base::match(unknownStrainIDs, libResults$unknown)
+
 
  #Decompress blob
  libProteinPeaks <- memDecompress(libProteinPeaks[[1]][[1]], type="gzip")
@@ -44,3 +49,6 @@ unknownProteinPeakFiles <- list.files(paste0(idbacPath, "\\Peak_Lists"),full.nam
  libProteinPeaks <- libProteinPeaks[grep("ProteinPeaks", names(libProteinPeaks))]
 
 
+
+
+}
