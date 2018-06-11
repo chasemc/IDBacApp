@@ -140,7 +140,7 @@ The following section is written for a Bruker-autoflex™ model instrument, inst
 ---
 ---
 <H1 align="center"> IDBac Software Installation </H1>
-The IDBac software, MALDI plate sample template, and example data may be downloaded [here](https://drive.google.com/open?id=0B0n1AhTXfxHqSmJFSHEyWjdaNmM)
+The IDBac software, MALDI plate sample template, and example data may be downloaded [here](https://chasemc.github.io/IDBac/) 
 
 
 
