@@ -2781,18 +2781,15 @@ function(input,output,session){
 
 
   librarySearchResults <- reactive({
-   isolate(
-     aa<<- idbacDirectory$filePath
-    bb<<- input$selectedSearchLibrary
-                            databaseSearch(idbacPath = idbacDirectory$filePath, databasePath = input$selectedSearchLibrary)
+    isolate(
+    databaseSearch(idbacPath = idbacDirectory$filePath, databasePath = input$selectedSearchLibrary)
     )
   })
 
   output$librarySearchResultsTable <- renderTable({
-    print(3)
     input$startLibrarySearch
-    ww<<- librarySearchResults()
-ww
+    ww <- databaseSearch(idbacPath = idbacDirectory$filePath, databasePath = input$selectedSearchLibrary)
+    ww
     })
 
 
