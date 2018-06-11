@@ -13,3 +13,21 @@ packrat/lib*/
 /inst/app/R-3.4.4-win.exe
 /inst/app/Rtools34.exe
 /inst/app/packageLibrary/
+inst/app/database.html
+inst/app/database.Rmd
+inst/app/myDB
+inst/app/SpectraLibrary/1.sqlite
+inst/app/SpectraLibrary/2.sqlite
+inst/app/SpectraLibrary/3.sqlite
+inst/app/SpectraLibrary/6.sqlite
+inst/app/SpectraLibrary/a1.sqlite
+inst/app/SpectraLibrary/c.sqlite
+inst/app/SpectraLibrary/Default Library.sqlite
+inst/app/SpectraLibrary/e.sqlite
+inst/app/SpectraLibrary/exampleDatabase.sqlite
+inst/app/SpectraLibrary/f.sqlite
+inst/app/SpectraLibrary/gfb.sqlite
+inst/app/SpectraLibrary/sd.sqlite
+inst/app/SpectraLibrary/sw.sqlite
+*.sqlite
+.Rproj.user
