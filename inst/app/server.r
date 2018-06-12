@@ -46,7 +46,7 @@ Install_And_Load(Required_Packages)
 colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",rainbow(1000)))
 
 source('colored_Dots.R', echo=TRUE)
-source('LibraryCreation.R', echo=TRUE)
+source('LibrarySearchPlots.R', echo=TRUE)
 
 
 # Reactive variable returning the user-chosen working directory as string
@@ -1057,7 +1057,7 @@ function(input,output,session){
     lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
     rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
     rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
-
+    plot1 <<-  recordPlot()
     observe({
       brush <- input$plot2_brush
       if (!is.null(brush)) {
@@ -2750,7 +2750,7 @@ function(input,output,session){
 
 
   # Load library search function:
-  source("librarySearch.r")
+  #source("librarySearch.r")
 
 
 
@@ -2788,7 +2788,8 @@ function(input,output,session){
 
   output$librarySearchResultsTable <- renderTable({
     input$startLibrarySearch
-    ww <- databaseSearch(idbacPath = idbacDirectory$filePath, databasePath = input$selectedSearchLibrary)
+    ww <<- databaseSearch(idbacPath = idbacDirectory$filePath,
+                          databasePath = input$selectedSearchLibrary)
     ww
     })
 
