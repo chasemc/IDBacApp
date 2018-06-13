@@ -1,5 +1,3 @@
-
-
 # The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the UI function(input, output,session) {
 
 # Function to Install and Load R Packages
@@ -1869,8 +1867,10 @@ function(input,output,session){
         minLoc<-input$plot_brush$ymin
         maxLoc<-input$plot_brush$ymax
 
+        asd<<-location_of_Heirarchical_Leaves
+        ddd <<- dendro()
         # See undernath for explanation of each column
-        threeColTable<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
+        threeColTable <- data.frame(seq(1:length(labels(dendro()))), rep(1:length(labels(dendro()))) ,labels(dendro()))
         #note: because rotated tree, x is actually y, y is actually x
         #column 1= y-values of dendrogram leaves
         #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
