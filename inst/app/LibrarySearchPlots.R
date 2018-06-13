@@ -169,7 +169,6 @@ databaseSearch <- function(idbacPath, databasePath){
 
 
 
-  # Get unknown sample IDs based on the rds file
   unknownStrainIDs <- unlist(strsplit(basename(unknownProteinPeakFiles), "_ProteinPeaks.rds"))
 
 
@@ -187,83 +186,123 @@ databaseSearch <- function(idbacPath, databasePath){
 
   allScores <- do.call(rbind, allScores)
   allScores <- cbind(unknown = unknownStrainIDs, allScores)
+  allScores <- allScores[order((allScores$score)), ]
 
 
   #----------------------------------------------------------------------------
   #----------------------------------------------------------------------------
   # create plots
+
+  #eg of (t(allScores))
+  # [,1]           [,2]
+  # unknown         "114A-1"       "114A-2"
+  # librarySpectrum "114A-2"       "114A-2"
+  # score           "7.240327e-01" "2.220446e-16"
+
+
   lapply(as.data.frame(t(allScores)), function(sampLibids){
-    peaksSampleOne <- unknownProcessing(sampLibids[[1]])
+    unknownStrain <- unknownProcessing(sampLibids[[1]])            # sampLibids[[1]] = id of unknonw strain
     # Perform cosine similarity search across all library spectra
     # Process single library strain
-    peaksSampleTwo <- libraryProcessing(sampLibids[[2]])
+    libraryStrain <- libraryProcessing(sampLibids[[2]])            # sampLibids[[2]] = id of unknown strain
     # Bin one unknown and one library spectra (strict = one peak per bin)
-    binned <- MALDIquant::binPeaks(c(peaksSampleTwo[[1]], peaksSampleOne[[1]]), tolerance = 0.02, method = "strict")
-
-
-
+    binned <- MALDIquant::binPeaks(c(unknownStrain[[1]], libraryStrain[[1]]), tolerance = 0.02, method = "strict")
 
   # Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
-  p1b <- as.data.frame(cbind(binned[[1]]@mass, binned[[1]]@intensity))
-  p1b <- as.data.frame(cbind(binned[[1]]@mass, binned[[1]]@intensity))
-  p2b <- as.data.frame(cbind(binned[[2]]@mass, binned[[2]]@intensity))
-  p2b <- as.data.frame(cbind(binned[[2]]@mass, binned[[2]]@intensity))
+  # binned[[1]] = unknown
+  # binned[[2]] = library
+    unknownStrain <- as.data.frame(cbind(binned[[1]]@mass, binned[[1]]@intensity))
+  libraryStrain <- as.data.frame(cbind(binned[[2]]@mass, binned[[2]]@intensity))
+
 
 
   # Color all positive peaks red
-  p3b<-data.frame(p1b,rep("red",length = length(p1b$V1)), stringsAsFactors = F)
-  colnames(p3b) <- c("Mass", "Intensity", "Color")
+  unknownStrain <- data.frame(unknownStrain,rep("red",length = length(unknownStrain$V1)), stringsAsFactors = F)
+  colnames(unknownStrain) <- c("Mass", "Intensity", "Color")
 
 
   # Color all negative peaks grey
-  p4b <- data.frame(p2b, rep("grey", length = length(p2b$V1)), stringsAsFactors = F)
-  colnames(p4b) <- c("Mass", "Intensity", "Color")
+  libraryStrain <- data.frame(libraryStrain, rep("grey", length = length(libraryStrain$V1)), stringsAsFactors = F)
+  colnames(libraryStrain) <- c("Mass", "Intensity", "Color")
 
   # Color all peak matches blue for positive peaks
-  p3b$Color[which(p3b$Mass %in% intersect(p3b$Mass, p4b$Mass))] <- "blue"
-
-
-
-
+  unknownStrain$Color[which(unknownStrain$Mass %in% intersect(unknownStrain$Mass, libraryStrain$Mass))] <- "blue"
 
 
 
 
   # get full spectra
   # Return the "rds" SQL blob for the individual strain
-  meanSpectrumSampleTwo <-  libSpec %>%
+  librarySpectrum <-  libSpec %>%
     filter(Strain_ID == sampLibids[[2]]) %>%
     select(rds) %>%
     collect()
   #Decompress blob
-  dfg<<-meanSpectrumSampleTwo
-  meanSpectrumSampleTwo <- memDecompress(unlist(meanSpectrumSampleTwo), type="gzip")
+  librarySpectrum <- memDecompress(unlist(librarySpectrum), type="gzip")
   # Unserialize blob
-  meanSpectrumSampleTwo <- unserialize(meanSpectrumSampleTwo, NULL)
+  librarySpectrum <- unserialize(librarySpectrum, NULL)
   # Unlist rds file list
-  meanSpectrumSampleTwo <- unlist(meanSpectrumSampleTwo, recursive = TRUE)
+  librarySpectrum <- unlist(librarySpectrum, recursive = TRUE)
   # Return only protein peak MALDIquant objects
-  meanSpectrumSampleTwo <- meanSpectrumSampleTwo[grep("SummedProteinSpectra", names(meanSpectrumSampleTwo))][[1]]
+  librarySpectrum <- librarySpectrum[grep("SummedProteinSpectra", names(librarySpectrum))][[1]]
 
 
   # read unknown dull spectrum
-  meanSpectrumSampleOne <- list.files(paste0(idbacPath, "\\Peak_Lists"),full.names = TRUE, pattern = "_SummedProteinSpectra.rds")
-  unknownSpectrum <- unlist(strsplit(basename(meanSpectrumSampleOne), "_SummedProteinSpectra.rds"))
+  unknownSpectrum <- list.files(paste0(idbacPath, "\\Peak_Lists"),full.names = TRUE, pattern = "_SummedProteinSpectra.rds")
+  unknownSpectrumBase <- unlist(strsplit(basename(unknownSpectrum), "_SummedProteinSpectra.rds"))
 
 
-  meanSpectrumSampleOne <- readRDS(meanSpectrumSampleOne[which(unknownSpectrum == sampLibids[[1]])])
+  unknownSpectrum <- readRDS(unknownSpectrum[which(unknownSpectrumBase == sampLibids[[1]])])
 
-asd<<-meanSpectrumSampleOne
 
-asdf <<-meanSpectrumSampleTwo
 
-  #Create peak plots and color each peak according to whether it occurs in the other spectrum
-  plot(meanSpectrumSampleOne@mass,meanSpectrumSampleOne@intensity,ylim=c(-max(meanSpectrumSampleTwo@intensity),max(meanSpectrumSampleOne@intensity)),type="l",col=adjustcolor("Black", alpha=0.3),xlab="m/z",ylab="Intensity")
-  lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
-  rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
-  rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
+p <- ggplot() +
+  geom_line(aes(x = unknownSpectrum@mass,
+                y = unknownSpectrum@intensity)) +
+  geom_line(aes(x = librarySpectrum@mass,
+                y = -librarySpectrum@intensity)) + # invert spectrum intensity
+  geom_bar(aes(x = unknownStrain$Mass,
+               y = ((unknownStrain$Intensity) * max(unknownSpectrum@intensity)/max(unknownStrain$Intensity))), # invert spectrum intensity
+               fill = unknownStrain$Color,
+               stat = "identity",
+               width = 10) +
+  geom_bar(aes(x = libraryStrain$Mass,
+               y = -((libraryStrain$Intensity) * max(librarySpectrum@intensity) / max(libraryStrain$Intensity))),
+               fill = libraryStrain$Color,
+               stat ="identity",
+               width = 10) +
+  coord_cartesian(ylim = c(-max(librarySpectrum@intensity), max(unknownSpectrum@intensity))) +
+  xlab(expression(italic("m/z"))) +
+  ylab("Intensity")
 
-  recordPlot()
+annotation <- paste0("Top- Searched Specrum: ", sampLibids[[1]], "\n",
+                     "Bottom- Closest Library Spectrum: ", sampLibids[[2]])
+
+  p2 <- ggplot() +
+    annotate("text",
+             x = 1,
+             y = 1,
+             label = annotation) +
+             theme_void()
+
+
+  filtered <-db %>%
+    filter(Strain_ID == sampLibids[[2]]) %>%
+    select(-c("manufacturer",
+              "model",
+              "ionisation",
+              "analyzer",
+              "detector",
+              "Protein_Replicates",
+              "Small_Molecule_Replicates",
+              "mzXML",
+              "rds")) %>%
+    collect()
+
+
+
+
+return(list(mainPlot = p, annotation = p2, libMeta = filtered))
 
   })
 

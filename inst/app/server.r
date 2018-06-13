@@ -45,7 +45,7 @@ colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00",
 
 source('colored_Dots.R', echo=TRUE)
 source('LibrarySearchPlots.R', echo=TRUE)
-
+source('LibraryCreation.R', echo=TRUE)
 
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
@@ -1782,6 +1782,7 @@ function(input,output,session){
                                  tabPanel("Library Search", value="hierLibrarySearch",
                                           p("This is for searching against user-created libraries"),
                                           uiOutput("availableLibraries"),
+                                          downloadButton("report", "Generate report"),
 
                                           actionButton(inputId = "startLibrarySearch",
                                                        label= "Press to Search Library")
@@ -2786,12 +2787,6 @@ function(input,output,session){
     )
   })
 
-  output$librarySearchResultsTable <- renderTable({
-    input$startLibrarySearch
-    ww <<- databaseSearch(idbacPath = idbacDirectory$filePath,
-                          databasePath = input$selectedSearchLibrary)
-    ww
-    })
 
 
 
@@ -2799,10 +2794,29 @@ function(input,output,session){
 
 
 
+output$report <- downloadHandler(
+  # For PDF output, change this to "report.pdf"
+  filename = "LibrarySearchPlots.html",
+  content = function(file) {
+    # Copy the report file to a temporary directory before processing it, in
+    # case we don't have write permissions to the current working dir (which
+    # can happen when deployed).
+    tempReport <- file.path(tempdir(), "LibrarySearchPlots.Rmd")
+    file.copy("LibrarySearchPlots.Rmd", tempReport, overwrite = TRUE)
 
+    # Set up parameters to pass to Rmd document
+    params <- list( ww= databaseSearch(idbacPath = idbacDirectory$filePath,
+                                     databasePath = input$selectedSearchLibrary))
 
-
-
+    # Knit the document, passing in the `params` list, and eval it in a
+    # child of the global environment (this isolates the code in the document
+    # from the code in this app).
+    rmarkdown::render(tempReport, output_file = file,
+                      params = params,
+                      envir = new.env(parent = globalenv())
+    )
+  }
+)
 
 
 
