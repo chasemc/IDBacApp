@@ -914,19 +914,34 @@ function(input,output,session){
   # Return Peak Intensity Matrix
 
   trimmedP <- reactive({
-    all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
 
+    if(length(input$libraryInjection) == 0){
+    all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
     # Check if protein spectra exist
     validate(
       need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
            tab at the top of the page.")
       )
-
     # Bin protein peaks
     all <- binPeaks(all, tolerance =.002,method="relaxed")
-
-
     trim(all, c(input$lowerMass, input$upperMass))
+
+    }else{ # library injection is selected
+
+    all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
+    # Check if protein spectra exist
+    validate(
+      need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
+           tab at the top of the page.")
+    )
+    # Bin protein peaks
+    all <- binPeaks(all, tolerance =.002,method="relaxed")
+    trim(all, c(input$lowerMass, input$upperMass))
+
+    }
+
+
+
   })
 
 
@@ -1055,7 +1070,6 @@ function(input,output,session){
     lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
     rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
     rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
-    plot1 <<-  recordPlot()
     observe({
       brush <- input$plot2_brush
       if (!is.null(brush)) {
@@ -1783,6 +1797,7 @@ function(input,output,session){
                                           p("This is for searching against user-created libraries"),
                                           uiOutput("availableLibraries"),
                                           downloadButton("report", "Generate report"),
+                                          uiOutput("libraryInjectionLibrarySelect"),
 
                                           actionButton(inputId = "startLibrarySearch",
                                                        label= "Press to Search Library")
@@ -1867,9 +1882,6 @@ function(input,output,session){
         location_of_Heirarchical_Leaves<-get_nodes_xy(dendro())
         minLoc<-input$plot_brush$ymin
         maxLoc<-input$plot_brush$ymax
-
-        asd<<-location_of_Heirarchical_Leaves
-        ddd <<- dendro()
         # See undernath for explanation of each column
         threeColTable <- data.frame(seq(1:length(labels(dendro()))), rep(1:length(labels(dendro()))) ,labels(dendro()))
         #note: because rotated tree, x is actually y, y is actually x
@@ -2819,8 +2831,21 @@ output$report <- downloadHandler(
 )
 
 
+#---------------------------------------
+# Library Injection
 
 
+
+output$libraryInjectionLibrarySelect  <- renderUI({
+  if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
+    checkboxGroupInput(inputId = "libraryInjection",
+                 label= "Select Library to Inject",
+                 choiceNames = basename(libraries()),
+                 choiceValues = as.list(libraries())
+    )
+  }
+
+})
 
 
 
