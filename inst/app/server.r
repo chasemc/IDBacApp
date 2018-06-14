@@ -929,6 +929,76 @@ function(input,output,session){
     }else{ # library injection is selected
 
     all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
+
+
+    # connect to user-specified database
+    dbcon <- DBI::dbConnect(RSQLite::SQLite(), input$libraryInjection)
+
+    # Connect dplyr to database
+    db <- dplyr::tbl(dbcon, "IDBacDatabase")
+
+    # Return the "rds" SQL blob for the individual strain
+
+    libSpec <- db %>%
+      #filter(Strain_ID == "114A-2") %>%
+      dplyr::select(c(Strain_ID,rds))
+
+    libD <- libSearchResultIDsForDendro()
+
+
+
+    libProteinPeaks <-  libSpec %>%
+      dplyr::filter(Strain_ID %in% libD) %>%
+      dplyr::select(rds) %>%
+      collect()
+    libProteinPeaks <- as.list(libProteinPeaks)[[1]]
+    libProteinPeaks <-  lapply(libProteinPeaks, function(x){
+    #Decompress blob
+    libProteinPeaks <- memDecompress(x, type="gzip")
+    # Unserialize blob
+    libProteinPeaks <- unserialize(libProteinPeaks, NULL)
+    # Unlist rds file list
+    libProteinPeaks <- unlist(libProteinPeaks, recursive = TRUE)
+    # Return only protein peak MALDIquant objects
+    libProteinPeaks <- libProteinPeaks[grep("ProteinPeaks", names(libProteinPeaks))]
+    })
+
+
+    libProteinPeaks <-  lapply(w, function(x){
+      #Decompress blob
+      libProteinPeaks <- memDecompress(x, type="gzip")
+      # Unserialize blob
+      libProteinPeaks <- unserialize(libProteinPeaks, NULL)
+      # Unlist rds file list
+      libProteinPeaks <- unlist(libProteinPeaks, recursive = TRUE)
+      # Return only protein peak MALDIquant objects
+      libProteinPeaks <- libProteinPeaks[grep("ProteinPeaks", names(libProteinPeaks))]
+    })
+
+
+
+    libProteinPeaks <- unlist(libProteinPeaks, recursive = TRUE)
+
+    for(i in 1:length(libProteinPeaks)){
+
+      libProteinPeaks[[i]]@metaData$Strain <- paste0("Lib: ", libProteinPeaks[[i]]@metaData$Strain)
+
+    }
+
+
+
+
+    all <- c(all,  unlist(libProteinPeaks, recursive = TRUE))
+all2<<-all
+
+    # Bin protein peaks
+    all <- binPeaks(all, tolerance =.002,method="relaxed")
+    trim(all, c(input$lowerMass, input$upperMass))
+
+
+
+
+
     # Check if protein spectra exist
     validate(
       need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
@@ -1410,9 +1480,9 @@ function(input,output,session){
       dir.create(cacheDir)
     }
 
-    ret<- if(req(input$distance)=="cosineD"){
+    if(req(input$distance)=="cosineD"){
 
-      if(!file.exists(cacheFile)){
+      if(!file.exists(cacheFile) || input$initateInjection == "TRUE"){
 
         #Cosine Distance Matrix Function
         cosineD <- function(x) {
@@ -1431,7 +1501,7 @@ function(input,output,session){
         dend<-  readRDS(cacheFile)
       }
     }else{
-      if(!file.exists(cacheFile)){
+      if(!file.exists(cacheFile) || input$initateInjection == "TRUE"){
         dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
         saveRDS(dend,cacheFile)
       }else{
@@ -1797,10 +1867,16 @@ function(input,output,session){
                                           p("This is for searching against user-created libraries"),
                                           uiOutput("availableLibraries"),
                                           downloadButton("report", "Generate report"),
+                                          radioButtons("librarySearchReport", label = h3("Generate Report?"),
+                                                       choices = list("Yes" = "TRUE", "No" = "FALSE"),
+                                                       selected = "FALSE"),
+                                          actionButton("librarySearch", "Search Library"),
                                           uiOutput("libraryInjectionLibrarySelect"),
-
                                           actionButton(inputId = "startLibrarySearch",
-                                                       label= "Press to Search Library")
+                                                       label= "Press to Search Library"),
+                                          radioButtons("initateInjection", label = h3("Start Injection"),
+                                                       choices = list("Yes" = "TRUE", "No" = "FALSE"),
+                                                       selected = "FALSE")
 
                                  )
 
@@ -1808,8 +1884,6 @@ function(input,output,session){
 
                      )),
         mainPanel("Hierarchical Clustering",
-                  column(width = 4,
-                  tableOutput("librarySearchResultsTable")),
                   column(8,
                         plotOutput("hclustPlot")))
 
@@ -2780,24 +2854,6 @@ function(input,output,session){
   })
 
 
-#
-#   output$searchLibrary  <- renderUI({
-#       actionButton(inputId = "startLibrarySearch",
-#                    label= "Press to Search Library")
-#
-#
-#
-#   })
-#
-
-
-
-
-  librarySearchResults <- reactive({
-    isolate(
-    databaseSearch(idbacPath = idbacDirectory$filePath, databasePath = input$selectedSearchLibrary)
-    )
-  })
 
 
 
@@ -2805,30 +2861,49 @@ function(input,output,session){
 
 
 
+librarySearchResults <- reactive({
+print("hi2")
+  databaseSearch(idbacPath = idbacDirectory$filePath,
+                 databasePath = input$selectedSearchLibrary,
+                 wantReport = input$librarySearchReport)
 
-output$report <- downloadHandler(
-  # For PDF output, change this to "report.pdf"
-  filename = "LibrarySearchPlots.html",
-  content = function(file) {
-    # Copy the report file to a temporary directory before processing it, in
-    # case we don't have write permissions to the current working dir (which
-    # can happen when deployed).
-    tempReport <- file.path(tempdir(), "LibrarySearchPlots.Rmd")
-    file.copy("LibrarySearchPlots.Rmd", tempReport, overwrite = TRUE)
 
-    # Set up parameters to pass to Rmd document
-    params <- list( ww= databaseSearch(idbacPath = idbacDirectory$filePath,
-                                     databasePath = input$selectedSearchLibrary))
+})
 
-    # Knit the document, passing in the `params` list, and eval it in a
-    # child of the global environment (this isolates the code in the document
-    # from the code in this app).
-    rmarkdown::render(tempReport, output_file = file,
-                      params = params,
-                      envir = new.env(parent = globalenv())
-    )
-  }
-)
+
+
+
+
+ libSearchResultIDsForDendro <-  reactive({
+   input$librarySearch
+
+   if(input$librarySearchReport == "FALSE"){
+
+
+    librarySearchResults <- librarySearchResults()
+    librarySearchResults <- do.call(rbind, librarySearchResults)
+    librarySearchResults <- as.data.frame(librarySearchResults)
+    # librarySearchResults
+    # Three column table:
+      # "libID"  "unkID"  "cosine"
+    librarySearchResults[, 1] <- unlist(librarySearchResults[, 1])
+    librarySearchResults[, 2] <- unlist(librarySearchResults[, 2])
+    librarySearchResults[, 3] <- unlist(librarySearchResults[, 3])
+
+    # only keep top hits and no duplicate library IDs
+    librarySearchResults <- librarySearchResults %>%
+                            filter(cosine < 0.3) %>%
+                            distinct(libID, .keep_all = TRUE)
+
+    # return list of Library IDs to Injecct
+    librarySearchResults[,1]
+
+}
+})
+
+
+
+
 
 
 #---------------------------------------
