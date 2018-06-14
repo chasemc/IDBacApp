@@ -20,12 +20,12 @@
 
 
 
-databaseSearch <- function(idbacPath, databasePath){
+databaseSearch <- function(idbacPath, databasePath, wantReport){
 
   # Inputs:
   # idbacPath     == idbacDirectory$filePath
   # databasePath  == input$selectedSearchLibrary        #.sqlite database path
-
+  # wantReport == Logical     if TRUE == make ggplots here... will be slower  if == FALSE don't make ggplots... faster
   # Returns:
   # Returns list of top hit matches. Each list element is one unknown sample, with one best cosine similarity score + lib sample ID
 
@@ -201,20 +201,21 @@ databaseSearch <- function(idbacPath, databasePath){
 
 
   lapply(as.data.frame(t(allScores)), function(sampLibids){
-    unknownStrain <- unknownProcessing(sampLibids[[1]])            # sampLibids[[1]] = id of unknonw strain
-    # Perform cosine similarity search across all library spectra
-    # Process single library strain
-    libraryStrain <- libraryProcessing(sampLibids[[2]])            # sampLibids[[2]] = id of unknown strain
-    # Bin one unknown and one library spectra (strict = one peak per bin)
-    binned <- MALDIquant::binPeaks(c(unknownStrain[[1]], libraryStrain[[1]]), tolerance = 0.02, method = "strict")
+
+
+    if(wantReport == "TRUE"){
+  unknownStrain <- unknownProcessing(sampLibids[[1]])            # sampLibids[[1]] = id of unknonw strain
+  # Perform cosine similarity search across all library spectra
+  # Process single library strain
+  libraryStrain <- libraryProcessing(sampLibids[[2]])            # sampLibids[[2]] = id of unknown strain
+  # Bin one unknown and one library spectra (strict = one peak per bin)
+  binned <- MALDIquant::binPeaks(c(unknownStrain[[1]], libraryStrain[[1]]), tolerance = 0.02, method = "strict")
 
   # Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
   # binned[[1]] = unknown
   # binned[[2]] = library
-    unknownStrain <- as.data.frame(cbind(binned[[1]]@mass, binned[[1]]@intensity))
+  unknownStrain <- as.data.frame(cbind(binned[[1]]@mass, binned[[1]]@intensity))
   libraryStrain <- as.data.frame(cbind(binned[[2]]@mass, binned[[2]]@intensity))
-
-
 
   # Color all positive peaks red
   unknownStrain <- data.frame(unknownStrain,rep("red",length = length(unknownStrain$V1)), stringsAsFactors = F)
@@ -227,9 +228,6 @@ databaseSearch <- function(idbacPath, databasePath){
 
   # Color all peak matches blue for positive peaks
   unknownStrain$Color[which(unknownStrain$Mass %in% intersect(unknownStrain$Mass, libraryStrain$Mass))] <- "blue"
-
-
-
 
   # get full spectra
   # Return the "rds" SQL blob for the individual strain
@@ -253,7 +251,6 @@ databaseSearch <- function(idbacPath, databasePath){
 
 
   unknownSpectrum <- readRDS(unknownSpectrum[which(unknownSpectrumBase == sampLibids[[1]])])
-
 
 
 p <- ggplot() +
@@ -300,9 +297,24 @@ annotation <- paste0("Top- Searched Specrum: ", sampLibids[[1]], "\n",
     collect()
 
 
+# Return:
+  # Mirror plot (ggplot objcet)
+  # Annotation plot (ggplot object)
+  # Library match metadata (tibble)
+  # Closest library match ID (character)
+  # Unknown sample ID (character)
+  # Cosine Score
+
+return(list(mainPlot = p, annotation = p2, libMeta = filtered, libID = sampLibids[[2]], unkID = sampLibids[[1]], cosine = sampLibids[[3]]))
+    }else{ # wantReport == FALSE
+
+      return(list(libID = as.character(sampLibids[[2]]), unkID = as.character(sampLibids[[1]]), cosine = as.double(as.vector(sampLibids[[3]]))))
 
 
-return(list(mainPlot = p, annotation = p2, libMeta = filtered))
+}
+
+
+
 
   })
 
