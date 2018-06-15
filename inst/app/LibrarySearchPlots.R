@@ -297,15 +297,7 @@ annotation <- paste0("Top- Searched Specrum: ", sampLibids[[1]], "\n",
     collect()
 
 
-# Return:
-  # Mirror plot (ggplot objcet)
-  # Annotation plot (ggplot object)
-  # Library match metadata (tibble)
-  # Closest library match ID (character)
-  # Unknown sample ID (character)
-  # Cosine Score
 
-return(list(mainPlot = p, annotation = p2, libMeta = filtered, libID = sampLibids[[2]], unkID = sampLibids[[1]], cosine = sampLibids[[3]]))
     }else{ # wantReport == FALSE
 
       return(list(libID = as.character(sampLibids[[2]]), unkID = as.character(sampLibids[[1]]), cosine = as.double(as.vector(sampLibids[[3]]))))
