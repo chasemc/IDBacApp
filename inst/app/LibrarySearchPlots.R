@@ -31,11 +31,63 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
 
 
 
+  # Get "Unknown" strain protein peak files
+  unknownProteinPeakFiles <- list.files(paste0(idbacPath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds")
+
+  unknownStrainIDs <- unlist(strsplit(basename(unknownProteinPeakFiles), "_ProteinPeaks.rds"))
+
+
+
+
+
+  # This function processes unknown spectra, one at a time (to save RAM)
+  # read rds protein peaks file (so we can bin against library spectrum later), bin and filter percent presence based on user input
+  # return single MALDIquant object of protein peaks
+  unknownProcessing <-  function(unknownProteinPeakFiles){
+
+    unknownSpectrum <- unlist(lapply(unknownProteinPeakFiles, function(x) readRDS(x)))
+
+    labs <- sapply(unknownSpectrum, function(x)metaData(x)$Strain)
+    labs <- factor(labs)
+    new2 <- NULL
+    newPeaks <- NULL
+    for (i in seq_along(levels(labs))) {
+      specSubset <- (which(labs == levels(labs)[[i]]))
+      if (length(specSubset) > 1) {
+        unknownSpectrum <- MALDIquant::trim(unknownSpectrum, c(3000,15000))
+        unknownSpectrum <- MALDIquant::binPeaks(unknownSpectrum, tolerance = .002, method = "relaxed")
+        new <- filterPeaks(unknownSpectrum[specSubset],minFrequency= 0/100)
+        new<-mergeMassPeaks(new,method="mean")
+        new2 <- c(new2, new)
+      } else{
+        new2 <- c(new2, unknownSpectrum[specSubset])
+      }
+
+    }
+    unknownSpectrum <- new2
+
+  }
+
+
+  unknowns <- unknownProcessing(unknownProteinPeakFiles=unknownProteinPeakFiles)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   # This is the workhorse of the searching.
   # Takes a list of unknown *Sample IDs* as input
 
-  searchLibrary<- function(unk, databasePathin){
+  searchLibrary <- function(unk, databasePathin){
     .libPaths("C:/Users/chase/Documents/IDBacPackages")
 
     library(dplyr)
@@ -91,38 +143,6 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
     }
 
 
-    # This function processes unknown spectra, one at a time (to save RAM)
-    # read rds protein peaks file (so we can bin against library spectrum later), bin and filter percent presence based on user input
-    # return single MALDIquant object of protein peaks
-    unknownProcessing <-  function(singleSpec){
-
-
-      unknownSpectrum <- unlist(strsplit(basename(unknownProteinPeakFiles), "_ProteinPeaks.rds"))
-
-      unknownSpectrum <- readRDS(unknownProteinPeakFiles[which(unknownSpectrum == singleSpec)])
-
-      labs <- sapply(unknownSpectrum, function(x)metaData(x)$Strain)
-      labs <- factor(labs)
-      new2 <- NULL
-      newPeaks <- NULL
-      for (i in seq_along(levels(labs))) {
-        specSubset <- (which(labs == levels(labs)[[i]]))
-        if (length(specSubset) > 1) {
-          unknownSpectrum <- MALDIquant::trim(unknownSpectrum, c(3000,15000))
-          unknownSpectrum <- MALDIquant::binPeaks(unknownSpectrum, tolerance = .002, method = "relaxed")
-          new <- filterPeaks(unknownSpectrum[specSubset],minFrequency= 0/100)
-          new<-mergeMassPeaks(new,method="mean")
-          new2 <- c(new2, new)
-        } else{
-          new2 <- c(new2, unknownSpectrum[specSubset])
-        }
-
-      }
-      unknownSpectrum <- new2
-
-    }
-
-
 
     # connect to user-specified database
     dbcon <- DBI::dbConnect(RSQLite::SQLite(), databasePathin)
@@ -153,13 +173,13 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
       as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
     }
     # Process single unknown sample spectrum
-    unk1 <- unknownProcessing(unk)
+    unk1 <- unk
     # Perform cosine similarity search across all library spectra
     qq <-lapply(libStrainIDs, function(lib){
       # Process single library strain
       lib1 <- libraryProcessing(lib)
       # Bin one unknown and one library spectra (strict = one peak per bin)
-      a <- MALDIquant::binPeaks(c(lib1[[1]], unk1[[1]]), tolerance = 0.02, method = "strict")
+      a <- MALDIquant::binPeaks(c(lib1[[1]], unk1), tolerance = 0.02, method = "strict")
       # Turn into a matrix, rows = samples, columns = binned peaks, cells = peak intensity
       b <- MALDIquant::intensityMatrix(a)
       # Get sample names of the two spectra
@@ -167,26 +187,22 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
       # Replace NA values with 0
       b[is.na(b)] <- 0
       # Perform cosine similarity function
-      cosineD(b)
+      qq <- cosineD(b)
+      qq <- as.matrix(qq)
+      qq <- as.data.frame(qq)
+      qq[upper.tri(qq, diag = TRUE)] <- 1
+      min(qq) # return min cosine score
     })
-    # This collects all lib search results for one unknown spectrum and turn in a tbl
-    # Colums: "spec" = library sample ID, "score" = cosine similarity score
-    match <- dplyr::bind_cols(librarySpectrum=sapply(qq, function(x) labels(x)[[1]]), score= unlist(qq))
+
+
+
+    # This collects all lib search results for one unknown spectrum and turns into a tbl
+    # Colums: "librarySpectrum" = library sample ID, "score" = cosine similarity score
+bind_cols(librarySpectrum = libStrainIDs, cosine = unlist(qq))
     # Return only the closest library match
-    match %>% na.omit %>% filter(score == min(score))
+
 
   }
-
-
-
-
-
-  # Get "Unknown" strain protein peak files
-  unknownProteinPeakFiles <- list.files(paste0(idbacPath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds")
-
-  unknownStrainIDs <- unlist(strsplit(basename(unknownProteinPeakFiles), "_ProteinPeaks.rds"))
-
-
 
 
 
@@ -196,33 +212,24 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
 
   # Run the library search. Inputs: "unknownStrainIDs" ; "searchLibrary" = function
   # Returns list of top hit matches. Each list element = 1 unknown sample, with 1 best cosine similarity score = lib sample ID
-  #allScores <- lapply(unknownStrainIDs, searchLibrary, databasePathin = databasePath)
+  allScores <- searchLibrary(unknowns, databasePathin = databasePath)
 
-
-
-        try(numCores <- parallel::detectCores())
-
-        if(exists("numCores") & numCores > 2){
-        numCores <- parallel::makeCluster(numCores-1)
-
-        allScores <- parallel::parLapply(numCores, unknownStrainIDs, searchLibrary, databasePathin = databasePath)
-
-        parallel::stopCluster(numCores)
-        }
-
-
-
-
+#
+#
+#         try(numCores <- parallel::detectCores())
+#
+#         if(exists("numCores") & numCores > 2){
+#         numCores <- parallel::makeCluster(numCores-1)
+#
+#         allScores <- parallel::parLapply(numCores, unknownStrainIDs, searchLibrary, databasePathin = databasePath)
+#
+#         parallel::stopCluster(numCores)
+#         }
 
 
 
 
 
-
-
-  allScores <- do.call(rbind, allScores)
-  allScores <- cbind(unknown = unknownStrainIDs, allScores)
-  allScores <- allScores[order((allScores$score)), ]
 
 
   #----------------------------------------------------------------------------
@@ -236,10 +243,9 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
   # score           "7.240327e-01" "2.220446e-16"
 
 
-  lapply(as.data.frame(t(allScores)), function(sampLibids){
 
 
-    if(wantReport == "TRUE"){
+ if(wantReport == "TRUE"){
   unknownStrain <- unknownProcessing(sampLibids[[1]])            # sampLibids[[1]] = id of unknonw strain
   # Perform cosine similarity search across all library spectra
   # Process single library strain
@@ -336,15 +342,13 @@ annotation <- paste0("Top- Searched Specrum: ", sampLibids[[1]], "\n",
 
     }else{ # wantReport == FALSE
 
-      return(list(libID = as.character(sampLibids[[2]]), unkID = as.character(sampLibids[[1]]), cosine = as.double(as.vector(sampLibids[[3]]))))
+
+      return(allScores)
 
 
 }
 
 
-
-
-  })
 
 
 
