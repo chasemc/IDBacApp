@@ -1,52 +1,5 @@
 # The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the UI function(input, output,session) {
 
-# Function to Install and Load R Packages
-Install_And_Load <- function(Required_Packages)
-{
-  Remaining_Packages <-
-    Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-  
-  
-  if (length(Remaining_Packages))
-  {
-    install.packages(Remaining_Packages)
-    
-  }
-  for (package_name in Required_Packages)
-  {
-    library(package_name,
-            character.only = TRUE,
-            quietly = TRUE)
-    
-  }
-}
-
-# Required packages to install and load
-Required_Packages = c("Rtsne")
-
-
-# Install and Load Packages
-Install_And_Load(Required_Packages)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #  Load colored_Dots.R function
 
@@ -101,13 +54,13 @@ function(input,output,session){
       spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
 
 
-      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, mzR::fileName)), function(x)strsplit(x, "\\\\")[[1]][1])))[[1]]
-      spectraImport <- lapply(1:length(spectraImport), function(x) MALDIquant::createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
+      names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "\\\\")[[1]][1])))[[1]]
+      spectraImport <- lapply(1:length(spectraImport), function(x)createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
     } else{
       spectraImport <- lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
       spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
       names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "\\\\")[[1]][1])))[[1]]
-      spectraImport <- MALDIquant::createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
+      spectraImport <- createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
       spectraImport<- list(spectraImport)
     }
 
@@ -117,10 +70,10 @@ function(input,output,session){
     for (i in 1:length(spectraImport)) {
       spectraImport[[i]]@metaData$Strain <- sampleNames
     }
-    labs <- sapply(spectraImport, function(x) MALDIquant::metaData(x)$Strain)[[1]]
+    labs <- sapply(spectraImport, function(x) metaData(x)$Strain)[[1]]
     # Separate protein and small molecule spectra
     #Find protein set
-    separateSpectra <- sapply(spectraImport, function(x)max(MALDIquant::mass(x)))
+    separateSpectra <- sapply(spectraImport, function(x)max(mass(x)))
     proteinSpectra <- spectraImport[which(separateSpectra > 10000)]
     smallSpectra <- spectraImport[which(!separateSpectra > 10000)]
     # Cleanup
@@ -129,20 +82,20 @@ function(input,output,session){
     # Average and save Protein Spectra  as RDS (Used to display a single spectra per sample in the protein spectra comparison plots)
     # Also, process spectra and peak pick individually and save as RDS
     if(length(proteinSpectra) > 0){
-      averaged <- MALDIquant::averageMassSpectra(proteinSpectra, method = "mean")
+      averaged <- averageMassSpectra(proteinSpectra, method = "mean")
       saveRDS(averaged, paste0(idbacDir,"\\\\Peak_Lists\\\\", averaged@metaData$Strain[[1]], "_", "SummedProteinSpectra.rds"))
       remove(averaged)
       gc()
       # Why square root transformation and not log:
-      #  Anal Bioanal Chem. 2011 Jul; 401(1): 167–181.
+      #  Anal Bioanal Chem. 2011 Jul; 401(1): 167â181.
       # Published online 2011 Apr 12. doi:  10.1007/s00216-011-4929-z
       #"Especially for multivariate treatment of MALDI imaging data, the square root transformation can be considered for the data preparation
       #because for all three intensity groups in Table 1, the variance is approximately constant."
 
-      proteinSpectra <- MALDIquant::transformIntensity(proteinSpectra, method = "sqrt")
-      proteinSpectra <- MALDIquant::smoothIntensity(proteinSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
-      proteinSpectra <- MALDIquant::removeBaseline(proteinSpectra, method = "TopHat")
-      proteinSpectra <- MALDIquant::detectPeaks(proteinSpectra, method = "MAD", halfWindowSize = 20, SNR = 4)
+      proteinSpectra <- transformIntensity(proteinSpectra, method = "sqrt")
+      proteinSpectra <- smoothIntensity(proteinSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
+      proteinSpectra <- removeBaseline(proteinSpectra, method = "TopHat")
+      proteinSpectra <- detectPeaks(proteinSpectra, method = "MAD", halfWindowSize = 20, SNR = 4)
       saveRDS(proteinSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "ProteinPeaks.rds"))
       # Average and save Small Molecule Spectra as RDS (Used to display a single spectra per sample in the protein spectra comparison plots)
       # Also, process spectra and peak pick individually and save as RDS
@@ -150,14 +103,14 @@ function(input,output,session){
     if(length(smallSpectra) > 0){
       ############
       #Spectra Preprocessing, Peak Picking
-      averaged <- MALDIquant::averageMassSpectra(smallSpectra, method = "mean")
+      averaged <- averageMassSpectra(smallSpectra, method = "mean")
       saveRDS(averaged, paste0(idbacDir,"/Peak_Lists/", averaged@metaData$Strain[[1]], "_", "SummedSmallMoleculeSpectra.rds"))
       remove(averaged)
       gc()
-      smallSpectra <- MALDIquant::smoothIntensity(smallSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
-      smallSpectra <- MALDIquant::removeBaseline(smallSpectra, method = "TopHat")
+      smallSpectra <- smoothIntensity(smallSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
+      smallSpectra <- removeBaseline(smallSpectra, method = "TopHat")
       #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
-      smallSpectra <- MALDIquant::detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
+      smallSpectra <- detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
       saveRDS(smallSpectra, paste0(idbacDir, "\\\\Peak_Lists\\\\", labs, "_", "SmallMoleculePeaks.rds"))
 
     }
@@ -1221,46 +1174,6 @@ function(input,output,session){
   ################################################
   # This creates the Plotly PCA plot and the calculation required for such.
 
- pcoaCalculation <- reactive({
-    if(req(input$distance)=="cosineD"){
-
-
-        #Cosine Distance Matrix Function
-        cosineD <- function(x) {
-          as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
-        }
-        # Perform cosine similarity function
-        dend <- proteinMatrix() %>% cosineD
-        # Convert NA to 1
-        dend[which(is.na(dend))] <- 1
-        # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
-
-    }else{
-        dend <- proteinMatrix() %>% dist(method=input$distance)
-        dend[which(is.na(dend))] <- 1
-
-    }
-
-    pc <- as.data.frame(cmdscale(dend, k=10))
-    pc<-pc[,1:3]
-    colnames(pc) <- c("Dimension A", "Dimension B", "Dimension C")
-    pc["nam"] <- row.names(pc)
-    pc
-  })
-
-  output$pcoaPlot <- renderPlotly({
-    pcoaDat <- pcoaCalculation()
-
-    colorsToUse <- colorMatch()
-    d34<<-colorsToUse
-    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
-    pcoaDat <- merge(pcoaDat, colorsToUse, by="nam")
-    pcoaDat <- merge(pcoaDat,colorBlindPalette,by="fac")
-
-
-    plot_ly(data=pcoaDat,x=pcoaDat$"Dimension A",y=pcoaDat$"Dimension B",z=pcoaDat$"Dimension C",type="scatter3d",mode="markers",hoverinfo = 'text',text=pcoaDat$nam, color = I(pcoaDat$col))
-  })
-
 
   #PCA Calculation
 
@@ -1270,7 +1183,7 @@ function(input,output,session){
     pc <- log(proteinMatrix())
     pc[is.infinite(pc)]<-.000001
 
-    pc <- PCA(pc, graph=FALSE, ncp = 50)
+    pc <- PCA(pc,graph=FALSE)
     pc <- pc$ind$coord
     pc <- as.data.frame(pc)
     nam <- row.names(pc)
@@ -1278,7 +1191,7 @@ function(input,output,session){
   })
 
 
-  colorMatch <- reactive({
+  pcaWithColor <- reactive({
     pc <- pcaCalculation()
     # Based on user selection, color PCA based on dendrogram groupings
     if(!is.null(isolate(input$kORheight))){
@@ -1291,58 +1204,23 @@ function(input,output,session){
       }else{
         # No factors, everthing colored black
         fac <- rep(1,length(labels(dendro())))
-        names(fac)<-labels(dendro())
       }
-
-      fac
-												
-				
+      pc <- cbind.data.frame(pc,fac)
+      pc <- merge(pc,colorBlindPalette,by="fac")
+      return(pc)
     }
 
-  })
-
-  output$pcaPlot <- renderPlotly({
-
-    pcaDat <- pcaCalculation()
-    colorsToUse <- colorMatch()
-    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
-    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
-    pcaDat <- merge(pcaDat,colorBlindPalette,by="fac")
-
-    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam ,color = I(pcaDat$col))
-  })
 
 
 
 
-
-  tsneCalculation <- reactive({
-asd123<<-pcaCalculation()
-  d<- Rtsne(pcaCalculation(), pca=FALSE, dims=3, perplexity = input$tsnePerplexity,theta = input$tsneTheta, max_iter = input$tsneIterations)
-  d <- as.data.frame(d$Y)
-  d <- cbind.data.frame(as.vector(pcaCalculation()$nam),d)
-  colnames(d) <- c("nam","Dim.1","Dim.2","Dim.3")
-
-  as.data.frame(d)
 
   })
 
-  output$tsnePlot <- renderPlotly({
-    pcaDat <- tsneCalculation()
-
-    colorsToUse <- colorMatch()
-    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
-    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
-    pcaDat <- merge(pcaDat,colorBlindPalette,by="fac")
-    p1<<-pcaDat
-
-
-    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam,color = I(pcaDat$col))
+  output$pcaplot <- renderPlotly({
+    pcaDat <- pcaWithColor()
+    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam ,color = pcaDat$col)
   })
-
-
-
-
 
   # -----------------
   # Create PCA ui
@@ -1368,27 +1246,14 @@ asd123<<-pcaCalculation()
     }else{
       mainPanel(width=12,
 
-
-                fluidRow(
-                  column(width=6,
-                  p("PCOA: Provides Three-Dimensional View of Distances (Based upon Distance Algorithm Chosen"),
-                  plotlyOutput("pcoaPlot",width="100%",height="800px")),
-                  column(width=6,
-                  p("Principle Components Analysis: Provides a dimension reduction of the peak intensity/presence matrix"),
-                  plotlyOutput("pcaPlot",width="100%",height="800px"))
-                ),
-                p("t-SNE"),
-                numericInput("tsnePerplexity", label = h5(strong("t-SNE Perplexity")), value = 30, step=10, min = 0, max = 300),
-                numericInput("tsneTheta", label = h5(strong("t-SNE Theta")), value = .5, step=.1, max = 1, min=0),
-                numericInput("tsneIterations", label = h5(strong("t-SNE Iterations")), value = 1000, step = 50),
-                fluidRow( plotlyOutput("tsnePlot",width="100%",height="800px"))
-
+                fluidRow( plotlyOutput("pcaplot",width="100%",height="800px"))
                 # br(),
                 # fluidRow(      rglwidgetOutput("pcaplot3d"))
       )
     }
 
   })
+
 
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
@@ -1488,7 +1353,7 @@ asd123<<-pcaCalculation()
     sampleMappings<-read_excel(input$sampleMap$datapath,1)
     #selected column
     # if(any(is.na(sampleMappings[input$sampleFactorMapChosenAttribute]))){
-    sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector %>% c(.,"Missing_in_Excel")
+    sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector %>% c(.,"Missing in Excel")
     # }else{
     #   sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector
     # }
@@ -1543,7 +1408,7 @@ asd123<<-pcaCalculation()
 
 
           # Make a new factor for any missing values the user didn't supply
-          joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing_in_Excel")
+          joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing in Excel")
           colnames(joinedData) <- c(idCol, sampCol)
 
 
@@ -1585,6 +1450,10 @@ asd123<<-pcaCalculation()
           a <- cbind(colorNew = colorsChosen, idc = levs())
           b <- cbind(idc = sampleFactors)
           colorsToreplace <- merge(a, b, by="idc")
+
+          d1<<-dendro()
+          b2<<-bigList
+          d3<<-colorsToreplace
 
           for (z in colorsToreplace[,1]){
 
@@ -1647,8 +1516,7 @@ asd123<<-pcaCalculation()
     par(mar=c(5,5,5,input$dendparmar))
 
     if (input$kORheight=="1"){
-	df2<<-dendro()
-      dendro() %>% color_branches(k=input$kClusters, col = as.vector(colorBlindPalette$col[1:input$kClusters])) %>% plot(horiz=TRUE,lwd=8)
+      dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8)
     } else if (input$kORheight=="2"){
 
       dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8)
@@ -1852,7 +1720,7 @@ asd123<<-pcaCalculation()
         maxLoc<-input$plot_brush$ymax
 
         # See undernath for explanation of each column
-        threeColTable<-data.frame(location_of_Heirarchical_Leaves[location_of_Heirarchical_Leaves[,2]==0,],labels(dendro()))
+        threeColTable <- data.frame(seq(1:length(labels(dendro()))), rep(1:length(labels(dendro()))) ,labels(dendro()))
         #note: because rotated tree, x is actually y, y is actually x
         #column 1= y-values of dendrogram leaves
         #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
@@ -1996,8 +1864,6 @@ asd123<<-pcaCalculation()
     peaksaNames <- factor(temp)
 
     rownames(smallNetwork) <- paste(peaksaNames)
-#---- Note for Chase: attributes(smallNetwork) contain vectors of masses, this will cause slow-downs
-																									
     bool <- smallNetwork
     bool[is.na(bool)] <- 0
     bool <- as.data.frame(bool)
@@ -2376,10 +2242,10 @@ asd123<<-pcaCalculation()
 
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
-   session$onSessionEnded(function() {
-      stopApp()
-      q("no")
-    })
+  session$onSessionEnded(function() {
+    stopApp()
+    q("no")
+  })
 
 
 
