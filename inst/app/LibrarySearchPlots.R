@@ -114,31 +114,9 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
       # Return only protein peak MALDIquant objects
       libProteinPeaks <- libProteinPeaks[grep("ProteinPeaks", names(libProteinPeaks))]
 
-      # Get sample IDs contained in the metadata *within* the rds MALDIquant protein peaks object
-      labs <- sapply(libProteinPeaks, function(x)metaData(x)$Strain)
-      # Change to facter
-      labs <- factor(labs)
-      # Setup for-loop
-      new2 <- NULL
-      newPeaks <- NULL
-      # If libProteinPeaks contains more than one sample ID (it shouldn't), make sure to bin and
-      # filter peaks only within the sample sample
-      for (i in seq_along(levels(labs))) {
-        specSubset <- (which(labs == levels(labs)[[i]]))
-        if (length(specSubset) > 1) { # ie if there is > 1 protein spectrum (replicate)
           libProteinPeaks <- MALDIquant::trim(libProteinPeaks, c(3000,15000))
-          # See here for info on "tolerance" value
-          # https://github.com/sgibb/MALDIquant/issues/56#issuecomment-388133351
           libProteinPeaks <- MALDIquant::binPeaks(libProteinPeaks, tolerance = .002, method = "relaxed")
-          new <- filterPeaks(libProteinPeaks[specSubset], minFrequency= 0/100)
-          new <- mergeMassPeaks(new, method="mean")
-          new2 <- c(new2, new)
-        } else{ # If there is only one spectrum
-          new2 <- c(new2, libProteinPeaks[specSubset])
-        }
-
-      }
-      libProteinPeaks <- new2
+          libProteinPeaks <- mergeMassPeaks(new, method="sum")
 
     }
 
