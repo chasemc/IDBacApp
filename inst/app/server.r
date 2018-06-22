@@ -945,7 +945,7 @@ function(input,output,session){
       #filter(Strain_ID == "114A-2") %>%
       dplyr::select(c(Strain_ID,rds))
 
-    libD <- libSearchResultIDsForDendro()
+    libD <- libSearchResultIDsForDendro()$librarySpectrum
 
      libProteinPeaks <-  libSpec %>%
       dplyr::filter(Strain_ID %in% libD) %>%
@@ -2867,6 +2867,7 @@ function(input,output,session){
 librarySearchResults <- reactive({
   input$libraryInjection
   input$initateInjection
+
   databaseSearch(idbacPath = idbacDirectory$filePath,
                  databasePath = input$libraryInjection,
                  wantReport = input$librarySearchReport)
@@ -2884,23 +2885,12 @@ librarySearchResults <- reactive({
    if(input$librarySearchReport == "FALSE"){
 
 
-    librarySearchResults <- librarySearchResults()
-    librarySearchResults <- do.call(rbind, librarySearchResults)
-    librarySearchResults <- as.data.frame(librarySearchResults)
-    # librarySearchResults
-    # Three column table:
-      # "libID"  "unkID"  "cosine"
-    librarySearchResults[, 1] <- unlist(librarySearchResults[, 1])
-    librarySearchResults[, 2] <- unlist(librarySearchResults[, 2])
-    librarySearchResults[, 3] <- unlist(librarySearchResults[, 3])
-
+sdvmio<<-librarySearchResults()
     # only keep top hits and no duplicate library IDs
-    librarySearchResults <- librarySearchResults %>%
-                            filter(cosine < 0.3) %>%
-                            distinct(libID, .keep_all = TRUE)
-
+    librarySearchResults <- librarySearchResults() %>%
+                            filter(cosine < 0.3)
     # return list of Library IDs to Injecct
-    librarySearchResults[,1]
+    librarySearchResults
 
 }
 })
