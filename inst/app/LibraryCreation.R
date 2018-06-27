@@ -1,19 +1,23 @@
-addNewLibrary <- function(samplesToAdd, newDatabase, IDBacAppLocation){
+addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
-# samplesToAdd == Sample table displayed in IDBac that User adds metadata to
+# samplesToAdd:
+   # Sample table displayed in IDBac that User adds metadata to
+# newDatabase
+   # Name of new database
+# selectedIDBacDataFolder
+  # File path of where the selected IDBac folder w/data resides
 
-###  Add function to check for existing sample IDs
+#  Add function to check for existing sample IDs
 
 # Which samples had strain info inputs in the table
 # This function just looks in "samplesToAdd" for any row that contains a column with a string vector of length > 0
-  jh<<-samplesToAdd
 toAdd <-  which(sapply(as.data.frame(nchar(t(samplesToAdd)[-1, ])), sum) > 0)
 
 # Character vector of only samples to be added to SQL DB (Samples with MetaInfo)
 toAdd <- as.character(samplesToAdd[,1])[toAdd]
 
 # List rds files currently available
-rdsFiles <- list.files(paste0(IDBacAppLocation, "\\Peak_Lists"),
+rdsFiles <- list.files(paste0(selectedIDBacDataFolder, "\\Peak_Lists"),
                        pattern = "ProteinPeaks.rds|_SummedProteinSpectra.rds|_SmallMoleculePeaks.rds",
                        full.names = TRUE)
 
@@ -44,7 +48,7 @@ rdsFiles <- rdsFiles[which(names(rdsFiles) %in% toAdd)]
 
 #--------------- mzXML files
 # Get Instrument info
-mzXmlSpectraLocation <- list.files(paste0(IDBacAppLocation, "/Converted_To_mzXML"), full.names = TRUE)
+mzXmlSpectraLocation <- list.files(paste0(selectedIDBacDataFolder, "/Converted_To_mzXML"), full.names = TRUE)
 mzXMLSampleIDs <- unlist(lapply(mzXmlSpectraLocation, function(x) strsplit(basename(x), ".mz")[[1]][[1]]))
 mzXmlSpectra <- lapply(mzXmlSpectraLocation, function(x) mzR::openMSfile(x))
 names(mzXmlSpectra) <- mzXMLSampleIDs

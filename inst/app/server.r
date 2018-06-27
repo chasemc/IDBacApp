@@ -1466,7 +1466,7 @@ function(input,output,session){
 
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
-
+    wjkln <<- proteinMatrix()
     if (input$booled == "1") {
       booled<-"_UsedIntenstites"
     }
@@ -2024,6 +2024,7 @@ function(input,output,session){
 
   # -----------------
   trimmedSM <- reactive({
+    dfg<<- small_Binned_Matrix()
     trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
   })
 
@@ -2562,7 +2563,7 @@ function(input,output,session){
         newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", input$newDatabaseName, ".sqlite"))
       )
       isolate(
-        addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
+        addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
       )
       DBI::dbDisconnect(newDatabase)
     }else{
@@ -2588,7 +2589,7 @@ function(input,output,session){
     # After initiating the database
     newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", isolate(input$newDatabaseName),".sqlite"))
     DBI::dbRemoveTable(newDatabase, "IDBacDatabase")
-    addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
+    addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
     DBI::dbDisconnect(newDatabase)
   })
 
@@ -2783,7 +2784,7 @@ function(input,output,session){
   observeEvent(input$saveAppendDatabase2, {
     # After initiating the database
     newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$appendLibPanelRadiosSelected))
-    addNewLibrary(samplesToAdd = createNewLibraryTable2(), newDatabase = newDatabase,  IDBacAppLocation = idbacDirectory$filePath)
+    addNewLibrary(samplesToAdd = createNewLibraryTable2(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
   })
 
 
