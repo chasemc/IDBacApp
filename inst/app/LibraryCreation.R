@@ -1,3 +1,5 @@
+# Add function to check for existing sample IDs
+
 addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
 # samplesToAdd:
@@ -7,20 +9,21 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 # selectedIDBacDataFolder
   # File path of where the selected IDBac folder w/data resides
 
-#  Add function to check for existing sample IDs
+
 
 # Which samples had strain info inputs in the table
-# This function just looks in "samplesToAdd" for any row that contains a column with a string vector of length > 0
-toAdd <-  which(sapply(as.data.frame(nchar(t(samplesToAdd)[-1, ])), sum) > 0)
+# This function looks in "samplesToAdd" for any row that contains a column with a string vector with length > 0
+toAdd <- which(sapply(as.data.frame(nchar(t(samplesToAdd)[-1, ])), sum) > 0)
 
-# Character vector of only samples to be added to SQL DB (Samples with MetaInfo)
-toAdd <- as.character(samplesToAdd[,1])[toAdd]
-
+# Character vector of only sample IDs to be added to the database (Samples with MetaInfo)
+toAdd <- as.character(samplesToAdd[ , 1])[toAdd]
 # List rds files currently available
-rdsFiles <- list.files(paste0(selectedIDBacDataFolder, "\\Peak_Lists"),
+rdsFiles <- list.files(paste0(selectedIDBacDataFolder, "/Peak_Lists"),
                        pattern = "ProteinPeaks.rds|_SummedProteinSpectra.rds|_SmallMoleculePeaks.rds",
                        full.names = TRUE)
 
+# Only paths of samples to be added
+rdsFiles <- rdsFiles[grep(paste0("/", toAdd , "_", collapse = "|"), rdsFiles)]
 # Example rds file name ->   "Sample-XYZ_SummedSmallMoleculeSpectra.rds"  ...  "Sample-XYZ" + "_SummedSmallMoleculeSpectra.rds"
 # Get the sample IDs from the rds filename
 
@@ -28,10 +31,19 @@ filesNoPath <- basename(rdsFiles)
 lastUnderscore <- unlist(lapply(filesNoPath, function(x) tail(which(strsplit(x[[1]], "")[[1]] %in% "_"),1)))
 lengthString <- unlist(lapply(filesNoPath, nchar))
 
-rdsSampleIDs <- stringr::str_sub(filesNoPath, 1, lastUnderscore - 1) # Get just sample IDs
+rdsSampleIDs <- stringr::str_sub(filesNoPath, 1, lastUnderscore - 1) # Get only sample IDs
+
+
+
+
+
+
+# At minimum we will require a ProteinPeaks.rds file
+proteinPeaksRDS <- filesNoPath[grep("ProteinPeaks.rds", filesNoPath)]
+
 
 # Get the rds type (eg "ProteinPeaks" or "SmallMoleculePeaks") from the rds filename
-rdsType <- stringr::str_sub(filesNoPath, lastUnderscore + 1, lengthString) # Get just sample types
+rdsType <- stringr::str_sub(filesNoPath, lastUnderscore + 1, lengthString) # Get only sample types
 # Combine into a dataframe
 rdsFiles <- cbind.data.frame(rdsFiles, rdsSampleIDs, rdsType)
 # Split based on sample ID
@@ -41,124 +53,101 @@ rdsFiles <- split(rdsFiles, rdsSampleIDs)
 # Column 2 -> Sample IDs (taken from the rds file name)
 # Column 3 -> rds type (eg "ProteinPeaks" or "SmallMoleculePeaks") (taken from the rds filename)
 
+# convert into list of lists
+rdsFiles <- lapply(rdsFiles, function(x)split(x, x$rdsType))
 
-# Get RDS files that had metadata inserted by the user
-
-rdsFiles <- rdsFiles[which(names(rdsFiles) %in% toAdd)]
 
 #--------------- mzXML files
 # Get Instrument info
 mzXmlSpectraLocation <- list.files(paste0(selectedIDBacDataFolder, "/Converted_To_mzXML"), full.names = TRUE)
-mzXMLSampleIDs <- unlist(lapply(mzXmlSpectraLocation, function(x) strsplit(basename(x), ".mz")[[1]][[1]]))
-mzXmlSpectra <- lapply(mzXmlSpectraLocation, function(x) mzR::openMSfile(x))
-names(mzXmlSpectra) <- mzXMLSampleIDs
-az1<<-mzXmlSpectra
-az3<<-toAdd
-mzXmlSpectra <- mzXmlSpectra[which(names(mzXmlSpectra) %in% toAdd)]
-az2<<-mzXmlSpectra
+
+# Only paths of samples to be added
+mzXmlSpectraLocation <- mzXmlSpectraLocation[grep(paste0("/", toAdd , ".mzXML", collapse = "|"), mzXmlSpectraLocation)]
+
+
+for (i in 1:length(toAdd)){
+
+  rdsFiles[[i]]$mzXML <- mzXmlSpectraLocation[[i]]
+
+}
+
+
+kdslmf <<- rdsFiles
+
+
 samplesWithMetadata <- samplesToAdd[which((samplesToAdd$Strain_ID) %in% toAdd), ]
 
-for(i in 1:length(rdsFiles)){
-
-  rdsContents <- sapply(as.character(rdsFiles[i][[1]][,1]), function(x) readRDS(x))
-  # Make names of list elements correspond to rds file it came from
-  # "ProteinPeaks.rds"         "SmallMoleculePeaks.rds"   "SummedProteinSpectra.rds"
-  names(rdsContents) <- as.character(rdsFiles[i][[1]][,3])
-  # nest list into a one-element list that will be named the sample ID
-  rdsContents <- setNames(list(rdsContents), names(rdsFiles[i]))
-  # eg ->  rdsContents$`172-1`$ProteinPeaks.rds
 
 
-# What remains is rdsContents, which is a list the length of the number sample IDs,
-#  > names(rdsContents)
-# [1] "172-1"  "172-10" "172-11" "172-7"
-
-# Each sample ID list element contains 3 lists each names based on the type of rds
-# > names(rdsContents$`172-1`)
-# [1] "ProteinPeaks.rds"         "SmallMoleculePeaks.rds"   "SummedProteinSpectra.rds"
-
-
-# Each rds-type list element contains a list of MALDIquant objects for that sample and that rds type
-# > rdsContents$`172-1`$ProteinPeaks.rds
-#  [[1]]
-#  S4 class type            : MassPeaks
-#  Number of m/z values     : 144
-#  Range of m/z values      : 1919.939 - 10444.253
-#  Range of intensity values: 2.682e+00 - 1.082e+02
-#  Range of snr values      : 4.032 - 162.6
-#  Memory usage             : 4.914 KiB
-#
-#  [[2]]
-#  S4 class type            : MassPeaks
-#  Number of m/z values     : 133
-#  Range of m/z values      : 1919.939 - 9506.526
-#  Range of intensity values: 2.541e+00 - 7.357e+01
-#  Range of snr values      : 4.039 - 116.964
-#  Memory usage             : 4.656 KiB
+for(yeppy in rdsFiles){
 
 
 
 
 
+# This doesn't load spectra, only a pointer
+  onemzXmlSpectra <- lapply(yeppy$mzXML, function(x) mzR::openMSfile(x))
 
-# serialize rds contents
-  yup<<- rdsContents
-rdsContents <- lapply(rdsContents, function(x) memCompress(serialize(rdsContents, NULL, xdr = FALSE), type="gzip"))
-yup3 <<- rdsContents
-onemzXmlSpectra <- mzXmlSpectra[i]
+
 instrumentInfo <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrumentInfo(x)))
 
-# mzR::peaks will get mzml spectra and then we'll create a serialized blob
-#    This winds up being a list (each element = a different spectrum) of two-column matrices
-#       matrix[ , 1] == m/z
-#       matrix[ , 2] == Intensity
-onemzXmlSpectra <- lapply(onemzXmlSpectra, function(x) mzR::peaks(x))
 
-yup2 <<-onemzXmlSpectra
-# serialize rds contents
-onemzXmlSpectra <- lapply(onemzXmlSpectra, function(x) memCompress(serialize(onemzXmlSpectra, NULL, xdr = FALSE), type= "gzip"))
-
-# Now we have 3 pieces of info
-#
-# instrumentInfo    = character columns
-# rdsContents       = blob
-# mzXmlSpectra      = blob
+# read in mzxml file
+onemzXmlSpectra <- xml2::read_xml(yeppy$mzXML)
+# serialize so we can insert into DB
+onemzXmlSpectra <- xml2::xml_serialize(onemzXmlSpectra, NULL)
+# compress
+onemzXmlSpectra <- memCompress(onemzXmlSpectra, type = "gzip")
 
 
-# Make connection to database
-# Probably need to make multiple "x.sqlite" DBs for each library created so people can easily share
 
 
 # Commented-out columns are already present
 
 sqlDataFrame <- data.frame(# "Strain_ID" = "",
-                       #   "Genbank_Accession" = "",
-                       #  "Kingdom" = "",
-                       #   "Phylum"  = "",
-                       #    "Class"   = "",
-                       #    "Order"   = "",
-                       #    "Family"  = "",
-                       #   "Genus"   = "",
-                       #  "Species" = "",
-                       #   "Strain"  = "",
-                          "manufacturer" = instrumentInfo[[1]]$manufacturer,
-                          "model"        = instrumentInfo[[1]]$model,
-                          "ionisation"   = instrumentInfo[[1]]$ionisation,
-                          "analyzer"     = instrumentInfo[[1]]$analyzer,
-                          "detector"     = instrumentInfo[[1]]$detector,
-                          "Protein_Replicates"   = NA,
-                          "Small_Molecule_Replicates" = NA,
-                          "mzXML"   = NA,
-                          "rds"     = NA
+  #   "Genbank_Accession" = "",
+  #  "Kingdom" = "",
+  #   "Phylum"  = "",
+  #    "Class"   = "",
+  #    "Order"   = "",
+  #    "Family"  = "",
+  #   "Genus"   = "",
+  #  "Species" = "",
+  #   "Strain"  = "",
+  "manufacturer" = instrumentInfo[[1]]$manufacturer,
+  "model"        = instrumentInfo[[1]]$model,
+  "ionisation"   = instrumentInfo[[1]]$ionisation,
+  "analyzer"     = instrumentInfo[[1]]$analyzer,
+  "detector"     = instrumentInfo[[1]]$detector,
+  "Protein_Replicates"   = NA,
+  "Small_Molecule_Replicates" = NA,
+  "mzXML"   = NA,
+  "proteinPeaksRDS"     = NA,
+  "proteinSummedSpectrumRDS"     = NA,
+  "smallMoleculePeaksRDS"     = NA
+
 )
 
+
+# Create SQL Database structure
 sqlDataFrame <- cbind.data.frame(samplesWithMetadata[i, ], sqlDataFrame)
 
-sqlDataFrame$rds <- list(rdsContents[1][[1]])
 
-sqlDataFrame$mzXML <- list(onemzXmlSpectra[1][[1]])
+# Insert "rds" files into SQL
 
+# serialize rds contents
+rdsContents <- memCompress(serialize(readRDS(file.path(yeppy$ProteinPeaks.rds$rdsFiles)), NULL, xdr = FALSE), type="gzip")
+sqlDataFrame$proteinPeaksRDS <- list(rdsContents)
+#--
+rdsContents <- memCompress(serialize(readRDS(file.path(yeppy$SummedProteinSpectra.rds$rdsFiles)), NULL, xdr = FALSE), type="gzip")
+sqlDataFrame$proteinSummedSpectrumRDS <- list(rdsContents)
+#--
+rdsContents <- memCompress(serialize(readRDS(file.path(yeppy$SmallMoleculePeaks.rds$rdsFiles)), NULL, xdr = FALSE), type="gzip")
+sqlDataFrame$smallMoleculePeaksRDS <- list(rdsContents)
+# Insert "mzXML" files into SQL
+sqlDataFrame$mzXML <- list(onemzXmlSpectra)
 
+# Creates database if one isn't present, otherwise appends to it
 DBI::dbWriteTable(newDatabase, "IDBacDatabase", sqlDataFrame[1, ], append = TRUE , overwrite = FALSE)
 
 
