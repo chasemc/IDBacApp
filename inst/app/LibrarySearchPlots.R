@@ -98,27 +98,71 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
     # This function processes library spectra, one at a time (to save RAM)
     # read SQLite, bin and filter percent presence based on user input
     # return single MALDIquant object of protein peaks
-    libraryProcessing <-  function(singleLibSpec){
+    libraryProcessing <-  function(){
+
 
       # Return the "rds" SQL blob for the individual strain
       libProteinPeaks <-  libSpec %>%
-        filter(Strain_ID == singleLibSpec) %>%
         select(rds) %>%
         collect()
-      #Decompress blob
-      libProteinPeaks <- memDecompress(libProteinPeaks[[1]][[1]], type="gzip")
+      libProteinPeaks <-   unlist(lapply(as.list(libProteinPeaks)[[1]], function(x){
+
+       #Decompress blob
+      libProteinPeaks <- memDecompress(x, type="gzip")
       # Unserialize blob
       libProteinPeaks <- unserialize(libProteinPeaks, NULL)
       # Unlist rds file list
       libProteinPeaks <- unlist(libProteinPeaks, recursive = TRUE)
       # Return only protein peak MALDIquant objects
       libProteinPeaks <- libProteinPeaks[grep("ProteinPeaks", names(libProteinPeaks))]
+}))
 
-          libProteinPeaks <- MALDIquant::trim(libProteinPeaks, c(3000,15000))
-          libProteinPeaks <- MALDIquant::binPeaks(libProteinPeaks, tolerance = .002, method = "relaxed")
-          libProteinPeaks <- mergeMassPeaks(new, method="sum")
+
+      # Get sample IDs contained in the metadata *within* the rds MALDIquant protein peaks object
+      labs <- sapply(libProteinPeaks, function(x)metaData(x)$Strain)
+      # Change to facter
+      labs <- factor(labs)
+      # Setup for-loop
+      new2 <- NULL
+      newPeaks <- NULL
+      for (i in seq_along(levels(labs))) {
+        specSubset <- (which(labs == levels(labs)[[i]]))
+        if (length(specSubset) > 1) { # ie if there is > 1 protein spectrum (replicate)
+          new <- MALDIquant::trim(libProteinPeaks[specSubset], c(3000,15000))
+          # See here for info on "tolerance" value
+          # https://github.com/sgibb/MALDIquant/issues/56#issuecomment-388133351
+          new <- MALDIquant::binPeaks(new, tolerance = .002, method = "relaxed")
+          new <- mergeMassPeaks(new, method="mean")
+          new2 <- c(new2, new)
+        } else{ # If there is only one spectrum
+          new2 <- c(new2, libProteinPeaks[specSubset])
+        }
+
+      }
+      libProteinPeaks <- new2
 
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -153,11 +197,13 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
     # Process single unknown sample spectrum
     unk1 <- unk
     # Perform cosine similarity search across all library spectra
-    qq <-lapply(libStrainIDs, function(lib){
-      # Process single library strain
-      lib1 <- libraryProcessing(lib)
+
+      lib1 <- libraryProcessing()
+      l1 <<- lib1
+      l2 <<- unk1
+
       # Bin one unknown and one library spectra (strict = one peak per bin)
-      a <- MALDIquant::binPeaks(c(lib1[[1]], unk1), tolerance = 0.02, method = "strict")
+      a <- MALDIquant::binPeaks(c(lib1, unk1), tolerance = 0.02, method = "strict")
       # Turn into a matrix, rows = samples, columns = binned peaks, cells = peak intensity
       b <- MALDIquant::intensityMatrix(a)
       # Get sample names of the two spectra
@@ -166,11 +212,13 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
       b[is.na(b)] <- 0
       # Perform cosine similarity function
       qq <- cosineD(b)
+
+      q1 <<- qq
+
       qq <- as.matrix(qq)
       qq <- as.data.frame(qq)
       qq[upper.tri(qq, diag = TRUE)] <- 1
       min(qq) # return min cosine score
-    })
 
 
 
@@ -181,7 +229,6 @@ bind_cols(librarySpectrum = libStrainIDs, cosine = unlist(qq))
 
 
   }
-
 
 
 
