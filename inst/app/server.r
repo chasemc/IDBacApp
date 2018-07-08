@@ -916,103 +916,88 @@ function(input,output,session){
   trimmedP <- reactive({
 
     if(length(input$libraryInjection) == 0){
-    all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
-    # Check if protein spectra exist
-    validate(
-      need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
-           tab at the top of the page.")
-      )
-    # Bin protein peaks
-    all <- binPeaks(all, tolerance =.002,method="relaxed")
-    trim(all, c(input$lowerMass, input$upperMass))
+      all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
+      # Check if protein spectra exist
+      validate(
+        need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
+             tab at the top of the page.")
+        )
+      # Bin protein peaks
+      all <- binPeaks(all, tolerance =.002,method="relaxed")
+      trim(all, c(input$lowerMass, input$upperMass))
 
     }else{ # library injection is selected
 
-    all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
+      all <- unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
 
 
 
-    libProteinPeaks <- lapply(input$libraryInjection, function(libraries){
-     # connect to user-specified database
-    dbcon <- DBI::dbConnect(RSQLite::SQLite(), libraries)
+      libProteinPeaks <- lapply(input$libraryInjection, function(libraries){
+        # connect to user-specified database
+        dbcon <- DBI::dbConnect(RSQLite::SQLite(), libraries)
 
-    # Connect dplyr to database
-    db <- dplyr::tbl(dbcon, "IDBacDatabase")
+        # Connect dplyr to database
+        db <- dplyr::tbl(dbcon, "IDBacDatabase")
 
-    # Return the "rds" SQL blob for the individual strain
+        # Return the "rds" SQL blob for the individual strain
 
-    libSpec <- db %>%
-      #filter(Strain_ID == "114A-2") %>%
-      dplyr::select(c(Strain_ID,rds))
+        libD <- libSearchResultIDsForDendro()
 
-    libD <- libSearchResultIDsForDendro()$librarySpectrum
-
-     libProteinPeaks <-  libSpec %>%
-      dplyr::filter(Strain_ID %in% libD) %>%
-      dplyr::select(rds) %>%
-      collect()
-    libProteinPeaks <- as.list(libProteinPeaks)[[1]]
-    # Get the protein peak "rds" file
-    libProteinPeaks <-  lapply(libProteinPeaks, function(x){
-    #Decompress blob
-    libProteinPeaks <- memDecompress(x, type="gzip")
-    # Unserialize blob
-    libProteinPeaks <- unserialize(libProteinPeaks, NULL)
-    # Unlist rds file list
-    libProteinPeaks <- unlist(libProteinPeaks, recursive = TRUE)
-    # Return only protein peak MALDIquant objects
-    libProteinPeaks <- libProteinPeaks[grep("ProteinPeaks", names(libProteinPeaks))]
-    })
+        libProteinPeaks <-  db %>%
+          dplyr::filter(Strain_ID %in% libD) %>%
+          dplyr::select(proteinPeaksRDS) %>%
+          collect()
+        libProteinPeaks <- as.list(libProteinPeaks)[[1]]
+        # Get the protein peak "rds" file
+        libProteinPeaks <-  lapply(libProteinPeaks, function(x){
+          #Decompress blob
+          libProteinPeaks <- memDecompress(x, type="gzip")
+          # Unserialize blob
+          libProteinPeaks <- unserialize(libProteinPeaks, NULL)
+          # Unlist rds file list
+          libProteinPeaks <- unlist(libProteinPeaks, recursive = TRUE)
+        })
 
 
-    libProteinPeaks <- unlist(libProteinPeaks, recursive = TRUE)
-    oldID <- as.character(lapply(libProteinPeaks, function(x) x@metaData$Strain))
+        libProteinPeaks <- unlist(libProteinPeaks, recursive = TRUE)
+        oldID <- as.character(lapply(libProteinPeaks, function(x) x@metaData$Strain))
 
-    meta <<- db %>%
-            dplyr::select(c("Strain_ID", input$libraryMetadataColumns)) %>%
-            collect()
+        meta <- db %>%
+          dplyr::select(c("Strain_ID", input$libraryMetadataColumns)) %>%
+          collect()
 
-    rowIndex <<- match(oldID, meta$Strain_ID)
-
-
+        rowIndex <- match(oldID, meta$Strain_ID)
 
 
 
         if(length(libProteinPeaks) > 0){
 
-      for(i in 1:length(libProteinPeaks)){
+          for(i in 1:length(libProteinPeaks)){
 
-        # Vector of selected metaData
-        # as.character(meta[rowIndex[[i]], -1])
+            # Vector of selected metaData
+            # as.character(meta[rowIndex[[i]], -1])
+            libProteinPeaks[[i]]@metaData$Strain <- paste0("Library Hit: ", libProteinPeaks[[i]]@metaData$Strain, "_", paste0(as.character(meta[rowIndex[[i]], -1]), collapse = "_"))
 
+          }}
 
+        libProteinPeaks
+      })
 
-      libProteinPeaks[[i]]@metaData$Strain <- paste0("Library Hit: ", libProteinPeaks[[i]]@metaData$Strain, "_", paste0(as.character(meta[rowIndex[[i]], -1]), collapse = "_"))
-
-    }}
-
-    libProteinPeaks
-    })
-
-    all <- c(all,  unlist(libProteinPeaks, recursive = TRUE))
-
-
-    # Bin protein peaks
-    all <- binPeaks(all, tolerance =.002,method="relaxed")
-    trim(all, c(input$lowerMass, input$upperMass))
+      all <- c(all,  unlist(libProteinPeaks, recursive = TRUE))
 
 
 
 
 
-    # Check if protein spectra exist
-    validate(
-      need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
-           tab at the top of the page.")
-    )
-    # Bin protein peaks
-    all <- binPeaks(all, tolerance =.002,method="relaxed")
-    trim(all, c(input$lowerMass, input$upperMass))
+
+      # Check if protein spectra exist
+      validate(
+        need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
+             tab at the top of the page.")
+        )
+      # Bin protein peaks
+      all <- binPeaks(all, tolerance =.002,method="relaxed")
+      trim(all, c(input$lowerMass, input$upperMass))
 
     }
 
@@ -1466,7 +1451,7 @@ function(input,output,session){
 
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
-    wjkln <<- proteinMatrix()
+awerty<<-proteinMatrix()
     if (input$booled == "1") {
       booled<-"_UsedIntenstites"
     }
@@ -1888,7 +1873,7 @@ function(input,output,session){
                      )),
         mainPanel("Hierarchical Clustering",
                   column(8,
-                        plotOutput("hclustPlot")))
+                         plotOutput("hclustPlot")))
 
       )
     }
@@ -2024,7 +2009,6 @@ function(input,output,session){
 
   # -----------------
   trimmedSM <- reactive({
-    dfg<<- small_Binned_Matrix()
     trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
   })
 
@@ -2626,7 +2610,7 @@ function(input,output,session){
                        "Protein_Replicates",
                        "Small_Molecule_Replicates",
                        "mzXML",
-                       "rds")) %>%
+                       "proteinPeaksRDS")) %>%
       dplyr::collect()
 
     if ((!is.null(input$hot2)) && modifiedLibraryEnvironmentTracking$value == input$modifyLibPanelRadiosSelected) {
@@ -2681,7 +2665,7 @@ function(input,output,session){
                        "Protein_Replicates",
                        "Small_Molecule_Replicates",
                        "mzXML",
-                       "rds")) %>%
+                       "proteinPeaksRDS")) %>%
       colnames()
 
 
@@ -2739,7 +2723,7 @@ function(input,output,session){
                        "Protein_Replicates",
                        "Small_Molecule_Replicates",
                        "mzXML",
-                       "rds")) %>%
+                       "proteinPeaksRDS")) %>%
       dplyr::collect()
 
 
@@ -2845,7 +2829,7 @@ function(input,output,session){
 
 
 
- # If library search tab is selected within the protein hierarchical clustering page, diplay this UI
+  # If library search tab is selected within the protein hierarchical clustering page, diplay this UI
   output$availableLibraries  <- renderUI({
     if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
       radioButtons(inputId = "selectedSearchLibrary",
@@ -2864,98 +2848,101 @@ function(input,output,session){
 
 
 
-
-librarySearchResults <- reactive({
-  input$libraryInjection
-  input$initateInjection
-
-  databaseSearch(idbacPath = idbacDirectory$filePath,
-                 databasePath = input$libraryInjection,
-                 wantReport = input$librarySearchReport)
+  librarySearchResults <- reactive({
+    input$libraryInjection
+    input$initateInjection
+    databaseSearch(idbacPath = idbacDirectory$filePath,
+                   databasePath = input$libraryInjection,
+                   wantReport = input$librarySearchReport)
 
 
-})
+  })
 
 
 
 
 
- libSearchResultIDsForDendro <-  reactive({
-   input$librarySearch
+  libSearchResultIDsForDendro <-  reactive({
+    input$librarySearch
 
-   if(input$librarySearchReport == "FALSE"){
-
-
-sdvmio<<-librarySearchResults()
-    # only keep top hits and no duplicate library IDs
-    librarySearchResults <- librarySearchResults() %>%
-                            filter(cosine < 0.3)
-    # return list of Library IDs to Injecct
-    librarySearchResults
-
-}
-})
+    if(input$librarySearchReport == "FALSE"){
 
 
+       # only keep top hits and no duplicate library IDs
+       librarySearchResults <- librarySearchResults() %>%
+         filter(Score < 50) %>%
+         distinct(Lib_ID, .keep_all = TRUE)
 
 
+      # only keep top hits and no duplicate library IDs
+#      librarySearchResults <- librarySearchResults()
 
+            # return vector of Library IDs to Injecct
+      as.vector(unlist(librarySearchResults[,1]))
 
-#---------------------------------------
-# Library Injection
-
-
-
-output$libraryInjectionLibrarySelect  <- renderUI({
-  if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
-    checkboxGroupInput(inputId = "libraryInjection",
-                 label= "Select Library to Inject",
-                 choiceNames = basename(libraries()),
-                 choiceValues = as.list(libraries())
-    )
-  }
-
-})
+    }
+  })
 
 
 
 
 
 
- output$libraryMetadataColumnsSelection  <- renderUI({
-   if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
+  #---------------------------------------
+  # Library Injection
+
+
+
+  output$libraryInjectionLibrarySelect  <- renderUI({
+    if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
+      checkboxGroupInput(inputId = "libraryInjection",
+                         label= "Select Library to Inject",
+                         choiceNames = basename(libraries()),
+                         choiceValues = as.list(libraries())
+      )
+    }
+
+  })
+
+
+
+
+
+
+  output$libraryMetadataColumnsSelection  <- renderUI({
+    if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
 
 
       checkboxGroupInput(inputId = "libraryMetadataColumns",
-                        label= "Select Library Columns",
-                        choiceNames =  DBI::dbConnect(RSQLite::SQLite(), input$libraryInjection) %>%
-                          dplyr::tbl(., "IDBacDatabase") %>%
-                          select(-c("Strain_ID",
-                                    "manufacturer",
-                                    "model",
-                                    "ionisation",
-                                    "analyzer",
-                                    "detector",
-                                    "Protein_Replicates",
-                                    "Small_Molecule_Replicates",
-                                    "mzXML",
-                                    "rds")) %>%  colnames(),
-                        choiceValues = as.list( DBI::dbConnect(RSQLite::SQLite(), input$libraryInjection) %>%
-                                                  dplyr::tbl(., "IDBacDatabase") %>%
-                                                  select(-c("Strain_ID",
-                                                            "manufacturer",
-                                                            "model",
-                                                            "ionisation",
-                                                            "analyzer",
-                                                            "detector",
-                                                            "Protein_Replicates",
-                                                            "Small_Molecule_Replicates",
-                                                            "mzXML",
-                                                            "rds")) %>%  colnames())
-     )
-   }
+                         label= "Select Library Columns",
+                         choiceNames =  DBI::dbConnect(RSQLite::SQLite(), input$libraryInjection) %>%
+                           dplyr::tbl(., "IDBacDatabase") %>%
+                           select(-c("Strain_ID",
+                                     "manufacturer",
+                                     "model",
+                                     "ionisation",
+                                     "analyzer",
+                                     "detector",
+                                     "Protein_Replicates",
+                                     "Small_Molecule_Replicates",
+                                     "mzXML",
+                                     "proteinPeaksRDS")) %>%  colnames(),
+                         choiceValues = as.list( DBI::dbConnect(RSQLite::SQLite(), input$libraryInjection) %>%
+                                                   dplyr::tbl(., "IDBacDatabase") %>%
+                                                   select(-c("Strain_ID",
+                                                             "manufacturer",
+                                                             "model",
+                                                             "ionisation",
+                                                             "analyzer",
+                                                             "detector",
+                                                             "Protein_Replicates",
+                                                             "Small_Molecule_Replicates",
+                                                             "mzXML",
+                                                             "proteinPeaksRDS")) %>%  colnames())
+      )
+    }
 
- })
+  })
 
 
 
