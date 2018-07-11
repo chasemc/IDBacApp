@@ -9,7 +9,7 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 # selectedIDBacDataFolder
   # File path of where the selected IDBac folder w/data resides
 
-
+jjjk<<-samplesToAdd
 
 # Which samples had strain info inputs in the table
 # This function looks in "samplesToAdd" for any row that contains a column with a string vector with length > 0
@@ -73,10 +73,18 @@ for (i in 1:length(toAdd)){
 
 
 kdslmf <<- rdsFiles
-
-
+wwe<<-samplesToAdd
+wwr <<- toAdd
 samplesWithMetadata <- samplesToAdd[which((samplesToAdd$Strain_ID) %in% toAdd), ]
 
+orderToAdd <- sapply(samplesWithMetadata$Strain_ID, function(x) which(x == toAdd))
+
+
+for (i in orderToAdd){
+
+  rdsFiles[[i]]$Meta <- samplesWithMetadata[i,]
+
+}
 
 
 for(yeppy in rdsFiles){
@@ -128,10 +136,8 @@ sqlDataFrame <- data.frame(# "Strain_ID" = "",
 
 )
 
-
 # Create SQL Database structure
-sqlDataFrame <- cbind.data.frame(samplesWithMetadata[i, ], sqlDataFrame)
-
+sqlDataFrame <- cbind.data.frame(yeppy$Meta, sqlDataFrame)
 
 # Insert "rds" files into SQL
 
