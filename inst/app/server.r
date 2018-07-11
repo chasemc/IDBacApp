@@ -1311,15 +1311,28 @@ function(input,output,session){
   })
 
   output$pcoaPlot <- renderPlotly({
-    pcoaDat <- pcoaCalculation()
+    pcaDat <- pcoaCalculation()
 
-    colorsToUse <- colorMatch()
-    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
-    pcoaDat <- merge(pcoaDat, colorsToUse, by="nam")
-    pcoaDat <- merge(pcoaDat,colorBlindPalette,by="fac")
+    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+
+    if(any(is.na(as.vector(colorsToUse)))){
+      colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+    }
+
+    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
+    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
 
 
-    plot_ly(data=pcoaDat,x=pcoaDat$"Dimension A",y=pcoaDat$"Dimension B",z=pcoaDat$"Dimension C",type="scatter3d",mode="markers",hoverinfo = 'text',text=pcoaDat$nam, color = I(pcoaDat$col))
+
+    plot_ly(data = pcaDat,
+            x = ~`Dimension A`,
+            y = ~`Dimension B`,
+            z = ~`Dimension C`,
+            type = "scatter3d",
+            mode = "markers",
+            marker = list(color = ~fac),
+            hoverinfo = 'text',
+            text = ~nam)
   })
 
 
@@ -1365,12 +1378,26 @@ function(input,output,session){
   output$pcaPlot <- renderPlotly({
 
     pcaDat <- pcaCalculation()
-    colorsToUse <- colorMatch()
-    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
-    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
-    pcaDat <- merge(pcaDat,colorBlindPalette,by="fac")
+    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
 
-    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam ,color = I(pcaDat$col))
+    if(any(is.na(as.vector(colorsToUse)))){
+      colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+    }
+
+    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
+    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
+
+
+
+plot_ly(data = pcaDat,
+        x = ~Dim.1,
+        y = ~Dim.2,
+        z = ~Dim.3,
+        type = "scatter3d",
+        mode = "markers",
+        marker = list(color = ~fac),
+        hoverinfo = 'text',
+        text = ~nam)
   })
 
 
@@ -1389,14 +1416,26 @@ function(input,output,session){
 
   output$tsnePlot <- renderPlotly({
     pcaDat <- tsneCalculation()
+    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
 
-    colorsToUse <- colorMatch()
-    colorsToUse <- cbind.data.frame(fac=colorsToUse,nam=(names(colorsToUse)))
+    if(any(is.na(as.vector(colorsToUse)))){
+      colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+    }
+
+    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
     pcaDat <- merge(pcaDat, colorsToUse, by="nam")
-    pcaDat <- merge(pcaDat,colorBlindPalette,by="fac")
 
 
-    plot_ly(data=pcaDat,x=pcaDat$Dim.1,y=pcaDat$Dim.2,z=pcaDat$Dim.3,type="scatter3d",mode="markers",hoverinfo = 'text',text=pcaDat$nam,color = I(pcaDat$col))
+
+    plot_ly(data = pcaDat,
+            x = ~Dim.1,
+            y = ~Dim.2,
+            z = ~Dim.3,
+            type = "scatter3d",
+            mode = "markers",
+            marker = list(color = ~fac),
+            hoverinfo = 'text',
+            text = ~nam)
   })
 
 
@@ -1565,136 +1604,38 @@ awerty<<-proteinMatrix()
 
 
   # -----------------
-
+# Color the Protein Dendrogram
   coloredDend <- reactive({
 
-    toReturn <- list(dend=NULL,bigMatrix=NULL,shortenedNames=NULL)
-
-    # if user selects to customize group samples
+#
+#     # if user selects to customize group samples
+#     if (input$kORheight =="3"){
+#       if(!is.null(input$sampleMap$datapath)){
+#         if(input$colDotsOrColDend == "1"){
+source("coloringDendrogram.r")
     if (input$kORheight =="3"){
-      if(!is.null(input$sampleMap$datapath)){
-        if(input$colDotsOrColDend == "1"){
-
-
-
-
-          # This is the user-provided excel sheet, columns represent factors, rows are samples
-          # One column will be user-selected to match to names in the dendrogram
-          # Another column will be user-selected to color/dot the dendrogram
-          # Stored as data frame
-          groupFile <- as.data.frame(read_excel(input$sampleMap$datapath,1,na = c("","NA")))
-          # User-chosen column that will be grepped against the dendrogram labels
-          idCol <- input$sampleFactorMapChosenIDColumn
-          # User-chosen column that represents a factor
-          sampCol <- input$sampleFactorMapChosenAttribute
-          # Get the dendrogram labels
-          dendLabels <- labels(dendro())
-
-          # Collapse all strings to exclude spaces. People have a hard time with spaces :(
-          dendLabels                <- gsub(" ","",as.character(dendLabels))
-          groupFile[,idCol]         <- gsub(" ","",as.character(unlist(groupFile[,idCol])))
-          groupFile<-groupFile
-          # Convert to data frame
-          dendLabels <- cbind.data.frame(tomerge = dendLabels, stringsAsFactors=F)
-          groupFile  <- cbind.data.frame(tomerge= groupFile[,idCol], toan= groupFile[,sampCol], stringsAsFactors=F)
-          # Merge dendrogram labels with selected excel id column
-          joinedData <- merge(dendLabels, groupFile, by="tomerge", all.x = TRUE,sort=F)
-
-
-          # Make a new factor for any missing values the user didn't supply
-          joinedData[which(is.na(joinedData[,"toan"])),"toan"] <- paste0("Missing_in_Excel")
-          colnames(joinedData) <- c(idCol, sampCol)
-
-
-          colsel<- sampCol
-
-          # small Contains two columns, one with the IDs and one with the factors
-          small <- cbind.data.frame(idCol=joinedData[,idCol],colsel=joinedData[,colsel])
-          colnames(small) <- c(idCol,colsel)
-
-
-          groupedList <- split(small,factor(small[colsel][[1]]))
-
-          dendLabels <- as.data.frame(dendLabels)
-          colnames(dendLabels) <- idCol
-          bigList<-lapply(1:length(groupedList),function(x)merge(dendLabels,groupedList[[x]],by=idCol,all.x = TRUE,sort=F))
-
-          labels(bigList)<-labels(groupedList)
-
-          # make sure colums are vectors, not factors
-          bigList <- lapply(bigList,function(x)sapply(x,as.vector))
-
-          for(x in 1:length(bigList)){
-            # Make factor match black Hex (Must be black, because will be replaced later with chosen colors)
-            bigList[[x]][,colsel][which(!is.na(as.vector(bigList[[x]][,colsel])))]<-"#000000"
-            # Make NA values fully transparent HEX
-            bigList[[x]][,colsel][which(is.na(bigList[[x]][,colsel]))]<-"#00000000"
-          }
-
-
-
-          sampleFactors <- names(bigList)
-
-
-          #get colors chosen
-          #  colorsChosen <- sapply(1:length(sampleFactors),function(x)input[[paste0("factor-",x,"_",sampleFactors[[x]])]])
-
-          colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
-
-          a <- cbind(colorNew = colorsChosen, idc = levs())
-          b <- cbind(idc = sampleFactors)
-          colorsToreplace <- merge(a, b, by="idc")
-
-          for (z in colorsToreplace[,1]){
-
-            bigList[z][[1]][,2][bigList[z][[1]][,2] =="#000000"] <- as.vector(colorsToreplace[which(colorsToreplace[,1] == z),2])
-
-          }
-
-
-          # Dendlabels was changed to a DF, so let's just re-do
-          dendLabels <- gsub(" ","",labels(dendro()))
-
-          # Make sure factors are in same order as in dendlist
-          bigList <- lapply(bigList,function(q) q[order(match(q[,1],dendLabels)),] )
-
-
-
-
-
-
-          toReturn$dend <- dendro() %>% set("labels_cex",1 )
-          shortenedNames <- dendro()
-          labels(shortenedNames) <- strtrim(labels(shortenedNames),20)
-          toReturn$bigMatrix <- sapply(bigList,function(x)cbind(x[,2]))
-          toReturn$shortenedNames <- shortenedNames
-        }else{
-          sampleMappings <- as.data.frame(read_excel(input$sampleMap$datapath,1))
-          sampleFactors <- sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>% as.vector %>% gsub(" ","", . )
-          sampleIDs1 <- cbind.data.frame(sampleFactorID=sampleMappings[[input$sampleFactorMapChosenIDColumn]],chosenFactor=sampleMappings[[input$sampleFactorMapChosenAttribute]])
-
-          # get colors chosen
-          colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
-          # zz <- cbind.data.frame(colorsChosen,sampleFactors)
-          a1 <- cbind(colorNew = colorsChosen, chosenFactor = levs())
-          b1 <- cbind(chosenFactor = sampleFactors)
-          colorsToreplace <- merge(a1, b1, by="chosenFactor")
-
-          # Merge excel sample IDs and factor with colors chosen by user in-app
-          excelData <- merge(sampleIDs1,colorsToreplace,by="chosenFactor")
-
-          # Collapse strings to exclude spaces
-          excelData$sampleFactorID <- gsub(" ","",excelData$sampleFactorID)
-          dendroLabels <- gsub(" ","",labels(dendro()))
-          dendColor <- as.vector(excelData$colorNew[match(dendroLabels,excelData$sampleFactorID)])
-          dendColor[is.na(dendColor)]<-"#000000"
-          toReturn$dend <-  dendro() %>% color_labels(labels=labels(dendro()),col=dendColor) }
-        #dendro %>% set("labels_cex", c(2,1)) %>% plot
-
-        #If no sample map is selected, run this:
-      }
+      colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
     }
-    toReturn
+
+
+    coloringDendrogram(
+        useDots          = if(input$colDotsOrColDend == "1"){TRUE}else{FALSE},
+        useKMeans        = if(input$kORheight=="1"){TRUE}else{FALSE},
+        cutByHeight      = if(input$kORheight=="2"){TRUE}else{FALSE},
+        userColor        = if(input$kORheight=="3"){TRUE}else{FALSE},
+        excelFilePath    = input$sampleMap$datapath,
+        chosenIdColumn   = input$sampleFactorMapChosenIDColumn,
+        chosenMetaColumn = input$sampleFactorMapChosenAttribute,
+        dendrogram       = dendro(),
+        cutHeight        = input$height,
+        cutK             = input$kClusters,
+        chosenColorsMeta = levs(),
+        colorsChosen     = colorsChosen
+    )
+
+
+
+
   })
 
 
@@ -1707,18 +1648,15 @@ awerty<<-proteinMatrix()
     par(mar=c(5,5,5,input$dendparmar))
 
     if (input$kORheight=="1"){
-      dendro() %>% color_branches(k=input$kClusters, col = as.vector(colorBlindPalette$col[1:input$kClusters])) %>% plot(horiz=TRUE,lwd=8)
-    } else if (input$kORheight=="2"){
-
-      dendro() %>% color_branches(h=input$height)  %>%  plot(horiz=TRUE,lwd=8)
+      coloredDend()$dend %>% plot(horiz=TRUE,lwd=8)
+    }else if (input$kORheight=="2"){
+      coloredDend()$dend  %>%  plot(horiz=TRUE,lwd=8)
       abline(v=input$height,lty=2)
-
-    } else if (input$kORheight=="3"){
+    }else if (input$kORheight=="3"){
 
       if(is.null(input$sampleMap$datapath)){
-
         # No sample mapping selected
-        dendro() %>% plot(horiz=TRUE,lwd=8)}else{
+        dendro()$dend %>% plot(horiz = TRUE,lwd = 8)}else{
           if(input$colDotsOrColDend == "1"){
 
             coloredDend()$dend  %>%  plot(.,horiz=T)
