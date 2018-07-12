@@ -43,9 +43,7 @@ Install_And_Load(Required_Packages)
 
 colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", rainbow(1000)))
 
-source('colored_Dots.R', echo=TRUE)
-source('LibrarySearchPlots.R', echo=TRUE)
-source('LibraryCreation.R', echo=TRUE)
+
 
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
@@ -783,8 +781,7 @@ function(input,output,session){
 
   trimmedP <- reactive({
 
-source("trimProteinSpectra.r")
-    trimProteinSpectra(injectLibrary = input$libraryInjection,
+    IDBacApp::trimProteinSpectra(injectLibrary = input$libraryInjection,
                        idsToInject = libSearchResultIDsForDendro(),
                        addToLibraryDendroLabel = input$libraryMetadataColumns,
                        spectraPath = idbacDirectory$filePath,
@@ -802,8 +799,7 @@ source("trimProteinSpectra.r")
   # Only include peaks occurring in specified percentage of replicates (groups determined by sample names)
   collapsedPeaksP <- reactive({
 
-  source("collapseProteinReplicates.r")
-    collpaseProteinReplicates(trimmedProteinPeakList = trimmedP(),
+    IDBacApp::collpaseProteinReplicates(trimmedProteinPeakList = trimmedP(),
                               proteinPercentPresence = input$percentPresenceP)
 
 
@@ -814,9 +810,9 @@ source("trimProteinSpectra.r")
   # -----------------
   proteinMatrix <- reactive({
 
-    source("proteinPeaksToMatrix.r")
 
-    proteinPeaksToMatrix(bool = input$booled,
+
+    IDBacApp::proteinPeaksToMatrix(bool = input$booled,
                          proteinPeaks = collapsedPeaksP())
 
 
@@ -1388,13 +1384,13 @@ awerty<<-proteinMatrix()
 #     if (input$kORheight =="3"){
 #       if(!is.null(input$sampleMap$datapath)){
 #         if(input$colDotsOrColDend == "1"){
-source("coloringDendrogram.r")
+
     if (input$kORheight =="3"){
       colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
     }
 
 
-    coloringDendrogram(
+    IDBacApp::coloringDendrogram(
         useDots          = if(input$colDotsOrColDend == "1"){TRUE}else{FALSE},
         useKMeans        = if(input$kORheight=="1"){TRUE}else{FALSE},
         cutByHeight      = if(input$kORheight=="2"){TRUE}else{FALSE},
@@ -1436,7 +1432,7 @@ source("coloringDendrogram.r")
           if(input$colDotsOrColDend == "1"){
 
             coloredDend()$dend  %>%  plot(.,horiz=T)
-            colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
+            IDBacApp::colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
                          rowLabels = names(coloredDend()$bigMatrix), horiz=T, sort_by_labels_order = FALSE)
           }else{
 
@@ -1471,7 +1467,7 @@ source("coloringDendrogram.r")
         if(input$colDotsOrColDend == "1"){
 
           coloredDend()$dend  %>%  plot(.,horiz=T)
-          colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
+          IDBacApp::colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
                        rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE)
         }else{
           coloredDend()$dend  %>%  plot(.,horiz=T)
@@ -1920,7 +1916,7 @@ source("coloringDendrogram.r")
       isolate(abline(v=input$height,lty=2))
     } else if (input$kORheight=="3"){
       if(input$colDotsOrColDend == "1"){
-        colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
+        IDBacApp::colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
                      rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE)
       }else{
         coloredDend()$dend  %>%  plot(.,horiz=T)
@@ -2261,7 +2257,7 @@ source("coloringDendrogram.r")
         newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", input$newDatabaseName, ".sqlite"))
       )
       isolate(
-        addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
+        IDBacApp::addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
       )
       DBI::dbDisconnect(newDatabase)
     }else{
@@ -2287,7 +2283,7 @@ source("coloringDendrogram.r")
     # After initiating the database
     newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", isolate(input$newDatabaseName),".sqlite"))
     DBI::dbRemoveTable(newDatabase, "IDBacDatabase")
-    addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
+    IDBacApp::addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
     DBI::dbDisconnect(newDatabase)
   })
 
@@ -2482,7 +2478,7 @@ source("coloringDendrogram.r")
   observeEvent(input$saveAppendDatabase2, {
     # After initiating the database
     newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$appendLibPanelRadiosSelected))
-    addNewLibrary(samplesToAdd = createNewLibraryTable2(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
+    IDBacApp::addNewLibrary(samplesToAdd = createNewLibraryTable2(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
   })
 
 
@@ -2565,7 +2561,7 @@ source("coloringDendrogram.r")
   librarySearchResults <- reactive({
     input$libraryInjection
     input$initateInjection
-    databaseSearch(idbacPath = idbacDirectory$filePath,
+    IDBacApp::databaseSearch(idbacPath = idbacDirectory$filePath,
                    databasePath = input$libraryInjection,
                    wantReport = input$librarySearchReport)
 
