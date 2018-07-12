@@ -12,15 +12,15 @@ trimProteinSpectra <- function(injectLibrary,
 
 
 if(length(injectLibrary) == 0){
-  all <- unlist(sapply(list.files(paste0(spectraPath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
+  all <- unlist(sapply(list.files(paste0(spectraPath, "\\Peak_Lists"), full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
   # Check if protein spectra exist
-  validate(
-    need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
+  shiny::validate(
+    shiny::need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
          tab at the top of the page.")
     )
   # Bin protein peaks
-  all <- binPeaks(all, tolerance = massTolerance, method="relaxed")
-  trim(all, c(lowerMassCutoff, upperMassCutoff))
+  all <- MALDIquant::binPeaks(all, tolerance = massTolerance, method="relaxed")
+  MALDIquant::trim(all, c(lowerMassCutoff, upperMassCutoff))
 
 }else{ # library injection is selected
 
@@ -85,13 +85,13 @@ if(length(injectLibrary) == 0){
 
 
   # Check if protein spectra exist
-  validate(
-    need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
+  shiny::validate(
+    shiny::need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
          tab at the top of the page.")
     )
   # Bin protein peaks
-  all <- binPeaks(all, tolerance = massTolerance, method="relaxed")
-  trim(all, c(lowerMassCutoff, upperMassCutoff))
+  all <- MALDIquant::binPeaks(all, tolerance = massTolerance, method="relaxed")
+  MALDIquant::trim(all, c(lowerMassCutoff, upperMassCutoff))
 
 }
 
