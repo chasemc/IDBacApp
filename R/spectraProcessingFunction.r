@@ -1,50 +1,38 @@
 # -----------------
-spectraProcessingFunction <- function(z,idbacDir) {
+spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
   strReverse <- function(x) {
     sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
   }
 
+  # Find sample name (fileName)
+  sampleName <- tools::file_path_sans_ext(basename(rawDataFilePaths))
 
   # This code reads in mzXML files much faster than the MALDIquant functions, requires mzR
 
+  spectraImport <- mzR::openMSfile(file = rawDataFilePaths)
+
   # First, check if there are more than one spectra stored in the mzXML file
   # If there are, make sure to de-nest and create separate MALDiquant objects
-  if ( length(mzR::header(mzR::openMSfile(file = z))$seqNum) > 1) {
-    spectraImport <- sapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
-    spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
+    spectraImport <- mzR::peaks(spectraImport)
+    spectraImport <- lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[, 1],
+                                                                                                intensity = x[, 2],
+                                                                                                metaData = list(File = rawDataFilePaths,
+                                                                                                                Strain = sampleName)))
 
-
-    names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, mzR::fileName)), function(x)strsplit(x, "\\\\")[[1]][1])))[[1]]
-    spectraImport <- lapply(1:length(spectraImport), function(x) MALDIquant::createMassSpectrum(mass = spectraImport[[x]][, 1],intensity = spectraImport[[x]][, 2],metaData = list(File = names)))
-  } else{
-    spectraImport <- lapply(z, function(x)mzR::peaks(mzR::openMSfile(file = x)))
-    spectraList <- lapply(z, function(x)(mzR::openMSfile(file = x)))
-    names <- strReverse(unlist(lapply(strReverse(sapply(spectraList, fileName)), function(x)strsplit(x, "\\\\")[[1]][1])))[[1]]
-    spectraImport <- MALDIquant::createMassSpectrum(mass = spectraImport[[1]][, 1],intensity = spectraImport[[1]][, 2],metaData = list(File = names))
-    spectraImport<- list(spectraImport)
-  }
-
-  # Find sample names (fileNames)
-  sampleNames <- strsplit(names, ".mz")[[1]][1]
-
-  for (i in 1:length(spectraImport)) {
-    spectraImport[[i]]@metaData$Strain <- sampleNames
-  }
-  labs <- sapply(spectraImport, function(x) MALDIquant::metaData(x)$Strain)[[1]]
   # Separate protein and small molecule spectra
   #Find protein set
-  separateSpectra <- sapply(spectraImport, function(x)max(MALDIquant::mass(x)))
+  separateSpectra <- unlist(lapply(spectraImport, function(x)max(MALDIquant::mass(x))))
   proteinSpectra <- spectraImport[which(separateSpectra > 10000)]
   smallSpectra <- spectraImport[which(!separateSpectra > 10000)]
   # Cleanup
-  remove(separateSpectra,spectraImport)
+  remove(separateSpectra, spectraImport)
 
   # Average and save Protein Spectra  as RDS (Used to display a single spectra per sample in the protein spectra comparison plots)
   # Also, process spectra and peak pick individually and save as RDS
   if(length(proteinSpectra) > 0){
     averaged <- MALDIquant::averageMassSpectra(proteinSpectra, method = "mean")
-    saveRDS(averaged, paste0(idbacDir,"\\\\Peak_Lists\\\\", averaged@metaData$Strain[[1]], "_", "SummedProteinSpectra.rds"))
+    saveRDS(averaged, file.path(idbacDirectory, "Peak_Lists", paste0(averaged@metaData$Strain[[1]], "_", "SummedProteinSpectra.rds")))
     remove(averaged)
     gc()
     # Why square root transformation and not log:
@@ -57,7 +45,7 @@ spectraProcessingFunction <- function(z,idbacDir) {
     proteinSpectra <- MALDIquant::smoothIntensity(proteinSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
     proteinSpectra <- MALDIquant::removeBaseline(proteinSpectra, method = "TopHat")
     proteinSpectra <- MALDIquant::detectPeaks(proteinSpectra, method = "MAD", halfWindowSize = 20, SNR = 4)
-    saveRDS(proteinSpectra, paste0(idbacDir, "/Peak_Lists/", labs, "_", "ProteinPeaks.rds"))
+    saveRDS(proteinSpectra, file.path(idbacDirectory, "Peak_Lists", paste0(sampleName, "_", "ProteinPeaks.rds")))
     # Average and save Small Molecule Spectra as RDS (Used to display a single spectra per sample in the protein spectra comparison plots)
     # Also, process spectra and peak pick individually and save as RDS
   }
@@ -65,14 +53,14 @@ spectraProcessingFunction <- function(z,idbacDir) {
     ############
     #Spectra Preprocessing, Peak Picking
     averaged <- MALDIquant::averageMassSpectra(smallSpectra, method = "mean")
-    saveRDS(averaged, paste0(idbacDir,"/Peak_Lists/", averaged@metaData$Strain[[1]], "_", "SummedSmallMoleculeSpectra.rds"))
+    saveRDS(averaged, file.path(idbacDirectory,"Peak_Lists", paste0(averaged@metaData$Strain[[1]], "_", "SummedSmallMoleculeSpectra.rds")))
     remove(averaged)
     gc()
     smallSpectra <- MALDIquant::smoothIntensity(smallSpectra, method = "SavitzkyGolay", halfWindowSize = 20)
     smallSpectra <- MALDIquant::removeBaseline(smallSpectra, method = "TopHat")
     #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
     smallSpectra <- MALDIquant::detectPeaks(smallSpectra, method = "SuperSmoother", halfWindowSize = 20, SNR = 1)
-    saveRDS(smallSpectra, paste0(idbacDir, "\\\\Peak_Lists\\\\", labs, "_", "SmallMoleculePeaks.rds"))
+    saveRDS(smallSpectra, file.path(idbacDirectory, "Peak_Lists", paste0(sampleName, "_", "SmallMoleculePeaks.rds")))
 
   }
 
