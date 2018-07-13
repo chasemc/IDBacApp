@@ -799,7 +799,7 @@ function(input,output,session){
   # Only include peaks occurring in specified percentage of replicates (groups determined by sample names)
   collapsedPeaksP <- reactive({
 
-    IDBacApp::collpaseProteinReplicates(trimmedProteinPeakList = trimmedP(),
+    IDBacApp::collapseProteinReplicates(trimmedProteinPeakList = trimmedP(),
                               proteinPercentPresence = input$percentPresenceP)
 
 
@@ -1126,6 +1126,8 @@ function(input,output,session){
 
   colorMatch <- reactive({
     pc <- pcaCalculation()
+
+
     # Based on user selection, color PCA based on dendrogram groupings
     if(!is.null(isolate(input$kORheight))){
       if(input$kORheight=="2"){
@@ -1262,7 +1264,13 @@ plot_ly(data = pcaDat,
 
   #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   dendro <- reactive({
-awerty<<-proteinMatrix()
+
+
+
+    awerty<<-proteinMatrix()
+
+
+
     if (input$booled == "1") {
       booled<-"_UsedIntenstites"
     }
