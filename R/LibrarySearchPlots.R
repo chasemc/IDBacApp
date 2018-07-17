@@ -1,6 +1,6 @@
 
 
-# Libraries that must be installed:
+# Packages that must be installed:
 #library(dplyr)
 #library(RSQLite)
 #library(DBI)
@@ -20,12 +20,6 @@
 
 
 databaseSearch <- function(idbacPath, databasePath, wantReport){
-
-
-  a11 <<- idbacPath
-  a12 <<- databasePath
-  a13 <<- wantReport
-
 
 
   # Inputs:
