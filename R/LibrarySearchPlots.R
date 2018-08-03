@@ -143,7 +143,7 @@ databaseSearch <- function(idbacPath, databasePath, wantReport){
       remove(a)
       b[is.na(b)] <- 0
       # Perform cosine similarity function
-      b <- wordspace:: dist.matrix(b, method = "cosine")
+      b <- wordspace::dist.matrix(b, method = "cosine")
 
       b <- as.data.frame(b[-c(1:lqq), 1:lqq])
 
