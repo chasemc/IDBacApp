@@ -1,5 +1,5 @@
 # Add function to check for existing sample IDs
-
+ 
 addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
 # samplesToAdd:
