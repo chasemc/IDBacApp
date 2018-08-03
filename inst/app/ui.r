@@ -5,31 +5,6 @@
 # Changes Zenodo DOI
 zenodoId <- "1203781"
 
-library("Rcpp")
-library("devtools")
-library("svglite")
-library("shinyjs")
-library("mzR")
-library("plotly")
-library("colourpicker")
-library("shiny")
-library("MALDIquant")
-library("MALDIquantForeign")
-library("readxl")
-library("networkD3")
-library("ape")
-library("FactoMineR")
-library("dendextend")
-library("networkD3")
-library("reshape2")
-library("plyr")
-library("igraph")
-
-library("RSQLite")
-library("DBI")
-library("dbplyr")
-library("dplyr")
-library("rhandsontable")
 
 # The UI section of the Shiny app provides the "User Interface" and is the means of user interaction.
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.

@@ -22,7 +22,31 @@ Install_And_Load <- function(Required_Packages)
 }
 
 # Required packages to install and load
-Required_Packages = c("Rtsne")
+Required_Packages = c("Rcpp",
+                      "devtools",
+                      "svglite",
+                      "shinyjs",
+                      "mzR",
+                      "plotly",
+                      "colourpicker",
+                      "shiny",
+                      "MALDIquant",
+                      "MALDIquantForeign",
+                      "readxl",
+                      "networkD3",
+                      "ape",
+                      "FactoMineR",
+                      "dendextend",
+                      "networkD3",
+                      "reshape2",
+                      "plyr",
+                      "igraph",
+                      "RSQLite",
+                      "DBI",
+                      "dbplyr",
+                      "dplyr",
+                      "rhandsontable",
+                      "Rtsne")
 
 
 # Install and Load Packages
@@ -529,6 +553,8 @@ function(input,output,session){
 
     fullZ <- dlply(fullZ, .(UserInput.x))
     # Allow spaces in filepathe
+    ww <<-fullZ
+
     for (i in 1:length(fullZ)){
       fullZ[[i]]$UserInput.y <- shQuote(fullZ[[i]]$UserInput.y)
     }
@@ -574,7 +600,7 @@ function(input,output,session){
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands <- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
-        paste0(file.path(pwizFolderLocation, "msconvert.exe"),
+        paste0(shQuote(file.path(pwizFolderLocation, "msconvert.exe")),
                # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
                " ",
                paste0(x$UserInput.y, collapse = "", sep=" "),
@@ -582,7 +608,7 @@ function(input,output,session){
                " -o ",
                shQuote(outp),
                " --outfile ",
-               paste0(x$UserInput.x[1],".mzXML")
+               shQuote(paste0(x$UserInput.x[1],".mzXML"))
         )
       }
       )
@@ -1266,11 +1292,6 @@ plot_ly(data = pcaDat,
   dendro <- reactive({
 
 
-
-    awerty<<-proteinMatrix()
-
-
-
     if (input$booled == "1") {
       booled<-"_UsedIntenstites"
     }
@@ -1316,7 +1337,7 @@ plot_ly(data = pcaDat,
         dend<-  readRDS(cacheFile)
       }
     }
-
+u <<- dend
     dend
   })
 
@@ -1397,7 +1418,6 @@ plot_ly(data = pcaDat,
       colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
     }
 
-
     IDBacApp::coloringDendrogram(
         useDots          = if(input$colDotsOrColDend == "1"){TRUE}else{FALSE},
         useKMeans        = if(input$kORheight=="1"){TRUE}else{FALSE},
@@ -1424,7 +1444,7 @@ plot_ly(data = pcaDat,
 
   output$hclustPlot <- renderPlot({
 
-
+aws <<- coloredDend()
     par(mar=c(5,5,5,input$dendparmar))
 
     if (input$kORheight=="1"){
@@ -2054,7 +2074,9 @@ plot_ly(data = pcaDat,
       Sys.sleep(.75)
 
       # Currently installed version
-      local_version <- tryCatch(packageVersion("IDBacApp"),error = function(x) paste("Installed version is latest version"), finally = function(x)packageVersion("IDBacApp"))
+      local_version <- tryCatch(packageVersion("IDBacApp"),
+                                error = function(x) paste("Installed version is latest version"),
+                                finally = function(x)packageVersion("IDBacApp"))
 
       showModal(modalDialog(
         title = "IDBac Update",
@@ -2132,7 +2154,7 @@ plot_ly(data = pcaDat,
             }
           )
 
-        }else if(compareVersion(as.character(local_version),as.character(latestStableVersion)) == -1) {
+        }else if(compareVersion(as.character(local_version), as.character(latestStableVersion)) == -1) {
 
           showModal(modalDialog(
             title = "IDBac Update",
@@ -2251,6 +2273,22 @@ plot_ly(data = pcaDat,
   # Display the new Library as an editable table
   output$hot <- rhandsontable::renderRHandsontable({
     DF <- createNewLibraryTable()
+
+    DF %>% select(c("Strain_ID",
+                    "Genbank_Accession",
+                    "Kingdom",
+                    "Phylum",
+                    "Class",
+                    "Order",
+                    "Family",
+                    "Genus",
+                    "Species",
+                    "Strain")) %>%
+      return(.) -> DF
+
+
+
+
     rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
       hot_col("Strain_ID", readOnly = TRUE)
   })
@@ -2343,6 +2381,17 @@ plot_ly(data = pcaDat,
   # Display the new Library as an editable table
   output$hot2 <- rhandsontable::renderRHandsontable({
     DF <- modifyLibraryTable()
+    DF %>% select(c("Strain_ID",
+                    "Genbank_Accession",
+                    "Kingdom",
+                    "Phylum",
+                    "Class",
+                    "Order",
+                    "Family",
+                    "Genus",
+                    "Species",
+                    "Strain")) %>%
+      return(.) -> DF
     rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
       hot_col("Strain_ID", readOnly = TRUE)
   })
@@ -2457,6 +2506,17 @@ plot_ly(data = pcaDat,
   # Display the new Library as an editable table
   output$hot3 <- rhandsontable::renderRHandsontable({
     DF <- appendToLibraryTable()
+    DF %>% select(c("Strain_ID",
+                    "Genbank_Accession",
+                    "Kingdom",
+                    "Phylum",
+                    "Class",
+                    "Order",
+                    "Family",
+                    "Genus",
+                    "Species",
+                    "Strain")) %>%
+      return(.) -> DF
     rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
       hot_col("Strain_ID", readOnly = TRUE)
   })
@@ -2528,6 +2588,17 @@ plot_ly(data = pcaDat,
   # Display the new Library as an editable table
   output$hott <- rhandsontable::renderRHandsontable({
     DF <- createNewLibraryTable2()
+    DF %>% select(c("Strain_ID",
+                    "Genbank_Accession",
+                    "Kingdom",
+                    "Phylum",
+                    "Class",
+                    "Order",
+                    "Family",
+                    "Genus",
+                    "Species",
+                    "Strain")) %>%
+      return(.) -> DF
     rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
       hot_col("Strain_ID", readOnly = TRUE)
   })
@@ -2588,7 +2659,7 @@ plot_ly(data = pcaDat,
 
        # only keep top hits and no duplicate library IDs
        librarySearchResults <- librarySearchResults() %>%
-         filter(Score < 50) %>%
+         filter(Score < 30) %>%
          distinct(Lib_ID, .keep_all = TRUE)
 
 
