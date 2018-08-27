@@ -1,0 +1,10 @@
+Option Explicit													' Make sure that all variables are declared before they are used
+
+Sub Main
+	UndoAllProcessing()											' Make sure that further processing starts from the raw data
+
+
+	ReplaceCalibration											' Replace current calibration with calibration from the flexAnalysis calibration buffer
+
+	Save														' Save the result spectrum
+End Sub
