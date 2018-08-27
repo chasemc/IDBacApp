@@ -17,7 +17,6 @@ Install_And_Load <- function(Required_Packages)
     library(package_name,
             character.only = TRUE,
             quietly = TRUE)
-
   }
 }
 
@@ -849,7 +848,7 @@ function(input,output,session){
   ################################################
   #This creates the Inverse Peak Comparison plot that compares two user-selected spectra() and the calculation required for such.
   listOfDataframesForInversePeakComparisonPlot <- reactive({
-
+    ert <<- collapsedPeaksP()
     #Selects the peaks to plot based on user-input
     peaksSampleOne<-collapsedPeaksP()[[grep(paste0("^",input$Spectra1,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
     peaksSampleTwo<-collapsedPeaksP()[[grep(paste0("^",input$Spectra2,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
@@ -902,21 +901,36 @@ function(input,output,session){
   # -----------------
   output$inversePeakComparisonPlot <- renderPlot({
 
-    temp<- listOfDataframesForInversePeakComparisonPlot()
+    temp <- listOfDataframesForInversePeakComparisonPlot()
     meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
     meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
-    p1b <-temp$p1b
-    p2b <-temp$p2b
-    p3b <-temp$p3b
-    p4b <-temp$p4b
+    p3b <-temp$peaksSpecOne
+    p4b <-temp$peaksSpecTwo
 
     remove(temp)
 
     #Create peak plots and color each peak according to whether it occurs in the other spectrum
-    plot(meanSpectrumSampleOne@mass,meanSpectrumSampleOne@intensity,ylim=c(-max(meanSpectrumSampleTwo@intensity),max(meanSpectrumSampleOne@intensity)),type="l",col=adjustcolor("Black", alpha=0.3),xlab="m/z",ylab="Intensity")
-    lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
-    rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
-    rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
+    plot(x = meanSpectrumSampleOne@mass,
+         y = meanSpectrumSampleOne@intensity,
+         ylim = c(-max(meanSpectrumSampleTwo@intensity),
+                  max(meanSpectrumSampleOne@intensity)),
+         type = "l",
+         col = adjustcolor("Black", alpha=0.3),
+         xlab = "m/z",
+         ylab = "Intensity")
+    lines(x = meanSpectrumSampleTwo@mass,
+          y = -meanSpectrumSampleTwo@intensity)
+    rect(xleft = p3b$Mass - 0.5,
+         ybottom = 0,
+         xright = p3b$Mass + 0.5,
+         ytop = ((p3b$Intensity) * max(meanSpectrumSampleOne@intensity) / max(p3b$Intensity)),
+         border = p3b$Color)
+    rect(xleft = p4b$Mass - 0.5,
+         ybottom = 0,
+         xright = p4b$Mass + 0.5,
+         ytop = -((p4b$Intensity) * max(meanSpectrumSampleTwo@intensity) / max(p4b$Intensity)),
+         border = p4b$Color)
+
     observe({
       brush <- input$plot2_brush
       if (!is.null(brush)) {
@@ -924,7 +938,8 @@ function(input,output,session){
         ranges2$y <- c(brush$ymin, brush$ymax)
       }else{
         ranges2$x <- NULL
-        ranges2$y <- c(-max(meanSpectrumSampleTwo@intensity),max(meanSpectrumSampleOne@intensity))
+        ranges2$y <- c(-max(meanSpectrumSampleTwo@intensity),
+                       max(meanSpectrumSampleOne@intensity))
       }
     })
   })
@@ -1669,7 +1684,7 @@ aws <<- coloredDend()
       labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
 
       if(is.null(input$plot_brush$ymin)){
-        if(length(smallPeaks()) >= 10){
+        if(length(smallPeaks()) >= 100){
           combinedSmallMolPeaks <- smallPeaks()[1:sample.int(10,1)]
           # Also get matrix sample for subtraction
           combinedSmallMolPeaks <- c(combinedSmallMolPeaks,smallPeaks()[grep(paste0("Matrix",collapse="|"), labs,ignore.case=TRUE)])
@@ -1747,7 +1762,7 @@ aws <<- coloredDend()
 
   # -----------------
   trimmedSM <- reactive({
-    trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
+   trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
   })
 
   # -----------------
@@ -1827,6 +1842,8 @@ aws <<- coloredDend()
     peaksaNames <- factor(temp)
 
     rownames(smallNetwork) <- paste(peaksaNames)
+
+    www <<-smallNetwork
     #---- Note for Chase: attributes(smallNetwork) contain vectors of masses, this will cause slow-downs
 
     bool <- smallNetwork
@@ -1853,6 +1870,7 @@ aws <<- coloredDend()
     bool$Weight <- as.numeric(bool$Weight)
 
     bool
+
   })
 
   # -----------------
