@@ -10,19 +10,25 @@ trimProteinSpectra <- function(injectLibrary,
 
 
 
-
-if(length(injectLibrary) == 0){
-  all <- unlist(sapply(list.files(paste0(spectraPath, "\\Peak_Lists"), full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
-  # Check if protein spectra exist
+if(length(injectLibrary) == 0){      # If user selects to inject library:
+  # Get protein peak file locations
+  all <- list.files(paste0(spectraPath, "\\Peak_Lists"), full.names = TRUE, pattern = "ProteinPeaks.rds")
+  # Read Protein peak files into R
+  all <- unlist(sapply(all, readRDS))
+  # If no protein spectra were loaded, warn the user to go back and try again
   shiny::validate(
     shiny::need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
          tab at the top of the page.")
     )
   # Bin protein peaks
-  all <- MALDIquant::binPeaks(all, tolerance = massTolerance, method="relaxed")
+  all <- MALDIquant::binPeaks(all,
+                              tolerance = massTolerance,
+                              method = "relaxed")
+  # Trim masses to user-specified lower and upper bounds and return as the result of the function
   MALDIquant::trim(all, c(lowerMassCutoff, upperMassCutoff))
 
 }else{ # library injection is selected
+
 
   all <- unlist(sapply(list.files(paste0(spectraPath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
 
