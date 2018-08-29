@@ -1,5 +1,5 @@
 # Add function to check for existing sample IDs
- 
+
 addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
 # samplesToAdd:
@@ -9,7 +9,7 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 # selectedIDBacDataFolder
   # File path of where the selected IDBac folder w/data resides
 
-jjjk<<-samplesToAdd
+
 
 # Which samples had strain info inputs in the table
 # This function looks in "samplesToAdd" for any row that contains a column with a string vector with length > 0
