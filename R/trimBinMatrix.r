@@ -1,5 +1,5 @@
 
-trimProteinSpectra <- function(injectLibrary,
+trimBinProtein <- function(injectLibrary, # Library path
                                idsToInject,
                                addToLibraryDendroLabel,
                                spectraPath,
@@ -25,12 +25,15 @@ if(length(injectLibrary) == 0){      # If user selects to inject library:
                               tolerance = massTolerance,
                               method = "relaxed")
   # Trim masses to user-specified lower and upper bounds and return as the result of the function
-  MALDIquant::trim(all, c(lowerMassCutoff, upperMassCutoff))
+  MALDIquant::trim(all,
+                   c(lowerMassCutoff, upperMassCutoff))
 
 }else{ # library injection is selected
 
-
-  all <- unlist(sapply(list.files(paste0(spectraPath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds"), readRDS))
+  # Get protein peak file locations for the non-library spectra
+  all <- list.files(paste0(spectraPath, "\\Peak_Lists"),full.names = TRUE, pattern = "ProteinPeaks.rds")
+  # Read Protein peak files into R
+  all <- unlist(sapply(all, readRDS))
 
 
 
@@ -41,15 +44,14 @@ if(length(injectLibrary) == 0){      # If user selects to inject library:
     # Connect dplyr to database
     db <- dplyr::tbl(dbcon, "IDBacDatabase")
 
-    # Return the "rds" SQL blob for the individual strain
-
-    libD <- idsToInject
+    # Return the SQL blob for the individual strain protein peaks MALDIquant object
 
     libProteinPeaks <-  db %>%
-      dplyr::filter(Strain_ID %in% libD) %>%
+      dplyr::filter(Strain_ID %in% idsToInject) %>%
       dplyr::select(proteinPeaksRDS) %>%
       collect()
     libProteinPeaks <- as.list(libProteinPeaks)[[1]]
+
     # Get the protein peak "rds" file
     libProteinPeaks <-  lapply(libProteinPeaks, function(x){
       #Decompress blob
