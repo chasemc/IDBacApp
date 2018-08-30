@@ -901,11 +901,11 @@ function(input,output,session){
   # -----------------
   output$inversePeakComparisonPlot <- renderPlot({
 
-    temp <- listOfDataframesForInversePeakComparisonPlot()
+    temp <<- listOfDataframesForInversePeakComparisonPlot()
     meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
     meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
-    p3b <-temp$peaksSpecOne
-    p4b <-temp$peaksSpecTwo
+    p3b <<-temp$p3b
+    p4b <<-temp$p4b
 
     remove(temp)
 
@@ -2022,7 +2022,9 @@ aws <<- coloredDend()
                                hover = "plot_hover",
                                brush = "plot_brush")
              ),column(width=7,style ="padding: 14px 0px; margin:0%",
-                      simpleNetworkOutput("metaboliteAssociationNetwork")
+                      absolutePanel(fixed=TRUE,width ="50%",
+
+                      simpleNetworkOutput("metaboliteAssociationNetwork"))
              )))
   })
 
