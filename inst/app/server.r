@@ -805,8 +805,9 @@ function(input,output,session){
   # Return Peak Intensity Matrix
 
   trimmedP <- reactive({
-
-    IDBacApp::trimProteinSpectra(injectLibrary = input$libraryInjection,
+# Trims and bins protein peak lists
+# If DB insertion is selected, will trim and bin user samples along with DB samples
+    IDBacApp::trimBinProtein(injectLibrary = input$libraryInjection,
                        idsToInject = libSearchResultIDsForDendro(),
                        addToLibraryDendroLabel = input$libraryMetadataColumns,
                        spectraPath = idbacDirectory$filePath,
