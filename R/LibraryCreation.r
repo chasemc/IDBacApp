@@ -102,6 +102,9 @@ instrumentInfo <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrument
 
 # read in mzxml file
 onemzXmlSpectra <- xml2::read_xml(yeppy$mzXML)
+# Create hash of mzXMLs
+mzXMLhash <- digest::digest(onemzXmlSpectra)
+
 # serialize so we can insert into DB
 onemzXmlSpectra <- xml2::xml_serialize(onemzXmlSpectra, NULL)
 # compress
@@ -132,31 +135,70 @@ sqlDataFrame <- data.frame(# "Strain_ID" = "",
   "mzXML"   = NA,
   "proteinPeaksRDS"     = NA,
   "proteinSummedSpectrumRDS"     = NA,
-  "smallMoleculePeaksRDS"     = NA
+  "mzXMLhash"   = mzXMLhash,
+  "proteinPeaksRDShash"     = NA,
+  "proteinSummedSpectrumRDShash"     = NA,
+  "smallMoleculePeaksRDShash"     = NA
 
 )
 
 # Create SQL Database structure
 sqlDataFrame <- cbind.data.frame(yeppy$Meta, sqlDataFrame)
 
-# Insert "rds" files into SQL
+#--
+#--
 
-# serialize rds contents
-rdsContents <- memCompress(serialize(readRDS(file.path(yeppy$ProteinPeaks.rds$rdsFiles)), NULL, xdr = FALSE), type="gzip")
-sqlDataFrame$proteinPeaksRDS <- list(rdsContents)
+# Insert "rds" files into SQL with hash
+
+
+
+addtoDB <- function(inputData, hashID, colID){
+
+                # Read raw (or processed) data
+                readIn <- file.path(data)
+                readIn <- readRDS(readIn)
+                sqlDataFrame[[hashID]] <- digest::digest(readIn)
+
+                readIn <- memCompress(serialize(object = readIn,
+                                                connection = NULL,
+                                                xdr = FALSE),
+                                      type="gzip")
+                sqlDataFrame[[colID]] <- list(readIn)
+            }
+
+# Add protein peaks to database
+addtoDB(inputData = yeppy$ProteinPeaks.rds$rdsFiles,
+        hashID = "proteinPeaksRDShash",
+        colID = "proteinPeaksRDS")
+# Add summed protein spectra to database
+addtoDB(inputData = SummedProteinSpectra.rds$rdsFiles,
+        hashID = "proteinSummedSpectrumRDShash",
+        colID = "proteinSummedSpectrumRDS")
+
+# Add small molecule peaks to database
+addtoDB(inputData = yeppy$SmallMoleculePeaks.rds$rdsFiles,
+        hashID = "smallMoleculePeaksRDShash",
+        colID = "smallMoleculePeaksRDS")
+
+
+
+
 #--
-rdsContents <- memCompress(serialize(readRDS(file.path(yeppy$SummedProteinSpectra.rds$rdsFiles)), NULL, xdr = FALSE), type="gzip")
-sqlDataFrame$proteinSummedSpectrumRDS <- list(rdsContents)
-#--
-rdsContents <- memCompress(serialize(readRDS(file.path(yeppy$SmallMoleculePeaks.rds$rdsFiles)), NULL, xdr = FALSE), type="gzip")
-sqlDataFrame$smallMoleculePeaksRDS <- list(rdsContents)
+
 # Insert "mzXML" files into SQL
 sqlDataFrame$mzXML <- list(onemzXmlSpectra)
 
+
+#--
+#--
+
+
 # Creates database if one isn't present, otherwise appends to it
-DBI::dbWriteTable(newDatabase, "IDBacDatabase", sqlDataFrame[1, ], append = TRUE , overwrite = FALSE)
-
-
+DBI::dbWriteTable(conn =newDatabase,
+                  name = "IDBacDatabase",
+                  sqlDataFrame[1, ],
+                  append = TRUE ,
+                  overwrite = FALSE)
 }
 
 }
