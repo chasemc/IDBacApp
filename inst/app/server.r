@@ -2274,6 +2274,7 @@ aws <<- coloredDend()
     # Create the data frame structure for the "database"
     currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
                                          "Genbank_Accession" = "",
+                                         "NCBI_TaxID" = "",
                                          "Kingdom" = "",
                                          "Phylum"= "",
                                          "Class" = "",

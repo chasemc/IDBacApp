@@ -11,11 +11,11 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
 
 
-# Which samples had strain info inputs in the table
+# Detect which samples had metadata entered
 # This function looks in "samplesToAdd" for any row that contains a column with a string vector with length > 0
 toAdd <- which(sapply(as.data.frame(nchar(t(samplesToAdd)[-1, ])), sum) > 0)
 
-# Character vector of only sample IDs to be added to the database (Samples with MetaInfo)
+# Character vector of sample IDs to be added to the database (Samples with MetaInfo)
 toAdd <- as.character(samplesToAdd[ , 1])[toAdd]
 # List rds files currently available
 rdsFiles <- list.files(paste0(selectedIDBacDataFolder, "/Peak_Lists"),
@@ -39,7 +39,7 @@ rdsSampleIDs <- stringr::str_sub(filesNoPath, 1, lastUnderscore - 1) # Get only 
 
 
 # At minimum we will require a ProteinPeaks.rds file
-proteinPeaksRDS <- filesNoPath[grep("ProteinPeaks.rds", filesNoPath)]
+proteinPeaksRDS <- [grep("ProteinPeaks.rds", filesNoPath)]
 
 
 # Get the rds type (eg "ProteinPeaks" or "SmallMoleculePeaks") from the rds filename
@@ -113,10 +113,11 @@ onemzXmlSpectra <- memCompress(onemzXmlSpectra, type = "gzip")
 
 
 
-# Commented-out columns are already present
+# Commented-out columns are already present / what user was presented and filled-in
 
 sqlDataFrame <- data.frame(# "Strain_ID" = "",
   #   "Genbank_Accession" = "",
+  #   "NCBI_TaxID = ""
   #  "Kingdom" = "",
   #   "Phylum"  = "",
   #    "Class"   = "",
@@ -151,18 +152,28 @@ sqlDataFrame <- cbind.data.frame(yeppy$Meta, sqlDataFrame)
 # Insert "rds" files into SQL with hash
 
 
+# This function takes data that will be turned into a blob object in the SQL table
+# It creates a unique hash for the object which is will be inserted as a column with
+# the same header as the object, except with "hash" appended.
+# It also binzrizes and compresses
+
 
 addtoDB <- function(inputData, hashID, colID){
 
-                # Read raw (or processed) data
+                # Path of raw (or processed) data
                 readIn <- file.path(data)
+                # Read raw (or processed) data
                 readIn <- readRDS(readIn)
+                # Create hash
                 sqlDataFrame[[hashID]] <- digest::digest(readIn)
-
+                # Binarize and  compress
                 readIn <- memCompress(serialize(object = readIn,
                                                 connection = NULL,
-                                                xdr = FALSE),
+                                                ascii = FALSE,
+                                                xdr = FALSE,
+                                                version = 3),
                                       type="gzip")
+                # Insert into SQL as type blob
                 sqlDataFrame[[colID]] <- list(readIn)
             }
 
@@ -194,10 +205,10 @@ sqlDataFrame$mzXML <- list(onemzXmlSpectra)
 
 
 # Creates database if one isn't present, otherwise appends to it
-DBI::dbWriteTable(conn =newDatabase,
+DBI::dbWriteTable(conn = newDatabase,
                   name = "IDBacDatabase",
                   sqlDataFrame[1, ],
-                  append = TRUE ,
+                  append = TRUE,
                   overwrite = FALSE)
 }
 
