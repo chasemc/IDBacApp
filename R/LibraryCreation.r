@@ -3,21 +3,64 @@
 addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
 # samplesToAdd:
-   # Sample table displayed in IDBac that User adds metadata to
+   # Sample table displayed in IDBac that user interactively adds metadata to
+   # This is returned to R as a data.frame
 # newDatabase
    # Name of new database
 # selectedIDBacDataFolder
-  # File path of where the selected IDBac folder w/data resides
+  # File path where the selected IDBac folder w/data resides
+
+#------
+  # SQLite data table structure
+
+  # Commented-out columns are already present / what user was presented and filled-in
+  sqlDataFrame <- data.frame(# "Strain_ID" = "",
+    #   "Genbank_Accession" = "",
+    #   "NCBI_TaxID = ""
+    #  "Kingdom" = "",
+    #   "Phylum"  = "",
+    #    "Class"   = "",
+    #    "Order"   = "",
+    #    "Family"  = "",
+    #   "Genus"   = "",
+    #  "Species" = "",
+    #   "Strain"  = "",
+    "manufacturer" = instrumentInfo[[1]]$manufacturer,
+    "model"        = instrumentInfo[[1]]$model,
+    "ionisation"   = instrumentInfo[[1]]$ionisation,
+    "analyzer"     = instrumentInfo[[1]]$analyzer,
+    "detector"     = instrumentInfo[[1]]$detector,
+    "Protein_Replicates"   = NA,
+    "Small_Molecule_Replicates" = NA,
+    "mzXML"   = NA,
+    "proteinPeaksRDS"     = NA,
+    "proteinSummedSpectrumRDS"     = NA,
+    "mzXMLhash"   = mzXMLhash,
+    "proteinPeaksRDShash"     = NA,
+    "proteinSummedSpectrumRDShash"     = NA,
+    "smallMoleculePeaksRDShash"     = NA
+
+  )
 
 
 
-# Detect which samples had metadata entered
-# This function looks in "samplesToAdd" for any row that contains a column with a string vector with length > 0
-toAdd <- which(sapply(as.data.frame(nchar(t(samplesToAdd)[-1, ])), sum) > 0)
+
+# Detect which rows of rhandsontable had metadata entered
+# This function looks in "samplesToAdd" for rows with a non-empty column(s)
+toAdd <- apply(samplesToAdd[, -1],
+               MARGIN = 1,
+               FUN= function(x){
+                    sum(x != "")}
+               ) > 0
 
 # Character vector of sample IDs to be added to the database (Samples with MetaInfo)
-toAdd <- as.character(samplesToAdd[ , 1])[toAdd]
-# List rds files currently available
+toAdd <- as.character(samplesToAdd[toAdd, 1])
+
+
+##-------------------
+#If changing from rds type to intermediate sql , this part will need changing:
+
+# List rds files, with paths, currently available
 rdsFiles <- list.files(paste0(selectedIDBacDataFolder, "/Peak_Lists"),
                        pattern = "ProteinPeaks.rds|_SummedProteinSpectra.rds|_SmallMoleculePeaks.rds",
                        full.names = TRUE)
@@ -39,7 +82,7 @@ rdsSampleIDs <- stringr::str_sub(filesNoPath, 1, lastUnderscore - 1) # Get only 
 
 
 # At minimum we will require a ProteinPeaks.rds file
-proteinPeaksRDS <- [grep("ProteinPeaks.rds", filesNoPath)]
+proteinPeaksRDS <- filesNoPath[grep("ProteinPeaks.rds", filesNoPath)]
 
 
 # Get the rds type (eg "ProteinPeaks" or "SmallMoleculePeaks") from the rds filename
@@ -72,9 +115,8 @@ for (i in 1:length(toAdd)){
 }
 
 
-kdslmf <<- rdsFiles
-wwe<<-samplesToAdd
-wwr <<- toAdd
+
+
 samplesWithMetadata <- samplesToAdd[which((samplesToAdd$Strain_ID) %in% toAdd), ]
 
 orderToAdd <- sapply(samplesWithMetadata$Strain_ID, function(x) which(x == toAdd))
@@ -115,33 +157,26 @@ onemzXmlSpectra <- memCompress(onemzXmlSpectra, type = "gzip")
 
 # Commented-out columns are already present / what user was presented and filled-in
 
-sqlDataFrame <- data.frame(# "Strain_ID" = "",
-  #   "Genbank_Accession" = "",
-  #   "NCBI_TaxID = ""
-  #  "Kingdom" = "",
-  #   "Phylum"  = "",
-  #    "Class"   = "",
-  #    "Order"   = "",
-  #    "Family"  = "",
-  #   "Genus"   = "",
-  #  "Species" = "",
-  #   "Strain"  = "",
-  "manufacturer" = instrumentInfo[[1]]$manufacturer,
-  "model"        = instrumentInfo[[1]]$model,
-  "ionisation"   = instrumentInfo[[1]]$ionisation,
-  "analyzer"     = instrumentInfo[[1]]$analyzer,
-  "detector"     = instrumentInfo[[1]]$detector,
-  "Protein_Replicates"   = NA,
-  "Small_Molecule_Replicates" = NA,
-  "mzXML"   = NA,
-  "proteinPeaksRDS"     = NA,
-  "proteinSummedSpectrumRDS"     = NA,
-  "mzXMLhash"   = mzXMLhash,
-  "proteinPeaksRDShash"     = NA,
-  "proteinSummedSpectrumRDShash"     = NA,
-  "smallMoleculePeaksRDShash"     = NA
 
-)
+  "manufacturer" = instrumentInfo[[1]]$manufacturer
+  "model"        = instrumentInfo[[1]]$model
+  "ionisation"   = instrumentInfo[[1]]$ionisation
+  "analyzer"     = instrumentInfo[[1]]$analyzer
+  "detector"     = instrumentInfo[[1]]$detector
+
+
+
+  sqlDataFrame[ , "manufacturer"] <-
+  sqlDataFrame[ , "model"] <-
+  sqlDataFrame[ , "analyzer"] <-
+  sqlDataFrame[ , "detector"] <-
+
+
+
+
+
+
+
 
 # Create SQL Database structure
 sqlDataFrame <- cbind.data.frame(yeppy$Meta, sqlDataFrame)
