@@ -519,7 +519,7 @@ function(input,output,session){
       # When only analyzing one maldi plate this handles finding the raw data directories and the excel map
       # excelMap is a dataframe (it's "Sheet1" of the excel template)
       excelTable <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
-      # excelTable takes the sample location and name from excelTable, and also converts the location to the same name-format as Bruker (A1 -> 0-A1)
+      # excelTable takes the sample location and name from excelTable, and also converts the location to the same name-format as Bruker (A1 -> 0_A1)
       excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
       # List the raw data files (for Bruker MALDI files this means pointing to a directory, not an individual file)
       fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
