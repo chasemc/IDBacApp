@@ -15,8 +15,8 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
   # First, check if there are more than one spectra stored in the mzXML file
   # If there are, make sure to de-nest and create separate MALDiquant objects
     spectraImport <- mzR::peaks(spectraImport)
-    spectraImport <- lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[, 1],
-                                                                                                intensity = x[, 2],
+    spectraImport <- lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[ , 1],
+                                                                                                intensity = x[ , 2],
                                                                                                 metaData = list(File = rawDataFilePaths,
                                                                                                                 Strain = sampleName)))
 
