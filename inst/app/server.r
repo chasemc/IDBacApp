@@ -1608,16 +1608,10 @@ aws <<- coloredDend()
                                  ),
                                  tabPanel("Library Search", value="hierLibrarySearch",
                                           p("This is for searching against user-created libraries"),
-                                          uiOutput("availableLibraries"),
-                                          downloadButton("report", "Generate report"),
-                                          radioButtons("librarySearchReport", label = h3("Generate Report?"),
-                                                       choices = list("Yes" = "TRUE", "No" = "FALSE"),
-                                                       selected = "FALSE"),
-                                          actionButton("librarySearch", "Search Library"),
+
                                           uiOutput("libraryInjectionLibrarySelect"),
                                           uiOutput("libraryMetadataColumnsSelection"),
-                                          actionButton(inputId = "startLibrarySearch",
-                                                       label= "Press to Search Library"),
+
                                           radioButtons("initateInjection", label = h3("Start Injection"),
                                                        choices = list("Yes" = "TRUE", "No" = "FALSE"),
                                                        selected = "FALSE")
@@ -2640,31 +2634,13 @@ aws <<- coloredDend()
 
 
 
-  # If library search tab is selected within the protein hierarchical clustering page, diplay this UI
-  output$availableLibraries  <- renderUI({
-    if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
-      radioButtons(inputId = "selectedSearchLibrary",
-                   label= "Existing Libraries",
-                   choiceNames = basename(libraries()),
-                   choiceValues = as.list(libraries())
-      )
-    }
-
-  })
-
-
-
-
-
-
-
 
   librarySearchResults <- reactive({
     input$libraryInjection
     input$initateInjection
     IDBacApp::databaseSearch(idbacPath = idbacDirectory$filePath,
                    databasePath = input$libraryInjection,
-                   wantReport = input$librarySearchReport)
+                   wantReport = FALSE)
 
 
   })
@@ -2674,10 +2650,7 @@ aws <<- coloredDend()
 
 
   libSearchResultIDsForDendro <-  reactive({
-    input$librarySearch
-
-    if(input$librarySearchReport == "FALSE"){
-
+    a <- input$librarySearch
 
        # only keep top hits and no duplicate library IDs
        librarySearchResults <- librarySearchResults() %>%
@@ -2691,7 +2664,6 @@ aws <<- coloredDend()
             # return vector of Library IDs to Injecct
       as.vector(unlist(librarySearchResults[,1]))
 
-    }
   })
 
 
