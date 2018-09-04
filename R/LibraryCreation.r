@@ -15,31 +15,30 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
   # Commented-out columns are already present / what user was presented and filled-in
   sqlDataFrame <- data.frame(# "Strain_ID" = "",
-    #   "Genbank_Accession" = "",
-    #   "NCBI_TaxID = ""
-    #  "Kingdom" = "",
-    #   "Phylum"  = "",
-    #    "Class"   = "",
-    #    "Order"   = "",
-    #    "Family"  = "",
-    #   "Genus"   = "",
-    #  "Species" = "",
-    #   "Strain"  = "",
-    "manufacturer" = instrumentInfo[[1]]$manufacturer,
-    "model"        = instrumentInfo[[1]]$model,
-    "ionisation"   = instrumentInfo[[1]]$ionisation,
-    "analyzer"     = instrumentInfo[[1]]$analyzer,
-    "detector"     = instrumentInfo[[1]]$detector,
-    "Protein_Replicates"   = NA,
-    "Small_Molecule_Replicates" = NA,
-    "mzXML"   = NA,
-    "proteinPeaksRDS"     = NA,
+    #   "Genbank_Accession"        = "",
+    #   "NCBI_TaxID                = ""
+    #   "Kingdom"                  = "",
+    #   "Phylum"                   = "",
+    #   "Class"                    = "",
+    #   "Order"                    = "",
+    #   "Family"                   = "",
+    #   "Genus"                    = "",
+    #   "Species"                  = "",
+    #   "Strain"                   = "",
+    "manufacturer"                 = NA,
+    "model"                        = NA,
+    "ionisation"                   = NA,
+    "analyzer"                     = NA,
+    "detector"                     = NA,
+    "Protein_Replicates"           = NA,
+    "Small_Molecule_Replicates"    = NA,
+    "mzXML"                        = NA,
+    "proteinPeaksRDS"              = NA,
     "proteinSummedSpectrumRDS"     = NA,
-    "mzXMLhash"   = mzXMLhash,
-    "proteinPeaksRDShash"     = NA,
-    "proteinSummedSpectrumRDShash"     = NA,
-    "smallMoleculePeaksRDShash"     = NA
-
+    "mzXMLhash"                    = NA,
+    "proteinPeaksRDShash"          = NA,
+    "proteinSummedSpectrumRDShash" = NA,
+    "smallMoleculePeaksRDShash"    = NA
   )
 
 
@@ -47,9 +46,9 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
 # Detect which rows of rhandsontable had metadata entered
 # This function looks in "samplesToAdd" for rows with a non-empty column(s)
-toAdd <- apply(samplesToAdd[, -1],
+toAdd <- apply(samplesToAdd[ , -1],
                MARGIN = 1,
-               FUN= function(x){
+               FUN = function(x){
                     sum(x != "")}
                ) > 0
 
@@ -58,19 +57,23 @@ toAdd <- as.character(samplesToAdd[toAdd, 1])
 
 
 ##-------------------
-#If changing from rds type to intermediate sql , this part will need changing:
+# If changing from rds files to rsqlite for storing peaklists, this part will need changing:
 
 # List rds files, with paths, currently available
 rdsFiles <- list.files(paste0(selectedIDBacDataFolder, "/Peak_Lists"),
                        pattern = "ProteinPeaks.rds|_SummedProteinSpectra.rds|_SmallMoleculePeaks.rds",
                        full.names = TRUE)
 
-# Only paths of samples to be added
-rdsFiles <- rdsFiles[grep(paste0("/", toAdd , "_", collapse = "|"), rdsFiles)]
+r1 <<- rdsFiles
+r2<<- toAdd
+# Get the Sample ID's of the RDS files to be added
+rdsFiles <- rdsFiles[grep(paste0("/", toAdd, "_", collapse = "|"), rdsFiles)]
+
 # Example rds file name ->   "Sample-XYZ_SummedSmallMoleculeSpectra.rds"  ...  "Sample-XYZ" + "_SummedSmallMoleculeSpectra.rds"
 # Get the sample IDs from the rds filename
 
 filesNoPath <- basename(rdsFiles)
+
 lastUnderscore <- unlist(lapply(filesNoPath, function(x) tail(which(strsplit(x[[1]], "")[[1]] %in% "_"),1)))
 lengthString <- unlist(lapply(filesNoPath, nchar))
 
@@ -139,7 +142,7 @@ for(yeppy in rdsFiles){
   onemzXmlSpectra <- lapply(yeppy$mzXML, function(x) mzR::openMSfile(x))
 
 
-instrumentInfo <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrumentInfo(x)))
+instrumentInformation <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrumentInfo(x)))
 
 
 # read in mzxml file
@@ -155,21 +158,13 @@ onemzXmlSpectra <- memCompress(onemzXmlSpectra, type = "gzip")
 
 
 
-# Commented-out columns are already present / what user was presented and filled-in
 
-
-  "manufacturer" = instrumentInfo[[1]]$manufacturer
-  "model"        = instrumentInfo[[1]]$model
-  "ionisation"   = instrumentInfo[[1]]$ionisation
-  "analyzer"     = instrumentInfo[[1]]$analyzer
-  "detector"     = instrumentInfo[[1]]$detector
-
-
-
-  sqlDataFrame[ , "manufacturer"] <-
-  sqlDataFrame[ , "model"] <-
-  sqlDataFrame[ , "analyzer"] <-
-  sqlDataFrame[ , "detector"] <-
+  sqlDataFrame[ , "manufacturer"] <- instrumentInformation[[1]]$manufacturer
+  sqlDataFrame[ , "model"] <- instrumentInformation[[1]]$model
+  sqlDataFrame[ , "ionisation"] <- instrumentInformation[[1]]$ionisation
+  sqlDataFrame[ , "analyzer"] <- instrumentInformation[[1]]$analyzer
+  sqlDataFrame[ , "detector"] <- instrumentInformation[[1]]$detector
+  sqlDataFrame[ , "mzXMLhash"] <- mzXMLhash
 
 
 
@@ -196,11 +191,11 @@ sqlDataFrame <- cbind.data.frame(yeppy$Meta, sqlDataFrame)
 addtoDB <- function(inputData, hashID, colID){
 
                 # Path of raw (or processed) data
-                readIn <- file.path(data)
+                readIn <- file.path(inputData)
                 # Read raw (or processed) data
                 readIn <- readRDS(readIn)
                 # Create hash
-                sqlDataFrame[[hashID]] <- digest::digest(readIn)
+                sqlDataFrame[[hashID]] <<- digest::digest(readIn)
                 # Binarize and  compress
                 readIn <- memCompress(serialize(object = readIn,
                                                 connection = NULL,
@@ -209,7 +204,7 @@ addtoDB <- function(inputData, hashID, colID){
                                                 version = 3),
                                       type="gzip")
                 # Insert into SQL as type blob
-                sqlDataFrame[[colID]] <- list(readIn)
+                sqlDataFrame[[colID]] <<- list(readIn)
             }
 
 # Add protein peaks to database
@@ -217,7 +212,7 @@ addtoDB(inputData = yeppy$ProteinPeaks.rds$rdsFiles,
         hashID = "proteinPeaksRDShash",
         colID = "proteinPeaksRDS")
 # Add summed protein spectra to database
-addtoDB(inputData = SummedProteinSpectra.rds$rdsFiles,
+addtoDB(inputData = yeppy$SummedProteinSpectra.rds$rdsFiles,
         hashID = "proteinSummedSpectrumRDShash",
         colID = "proteinSummedSpectrumRDS")
 
@@ -234,17 +229,16 @@ addtoDB(inputData = yeppy$SmallMoleculePeaks.rds$rdsFiles,
 # Insert "mzXML" files into SQL
 sqlDataFrame$mzXML <- list(onemzXmlSpectra)
 
-
 #--
 #--
 
 
 # Creates database if one isn't present, otherwise appends to it
 DBI::dbWriteTable(conn = newDatabase,
-                  name = "IDBacDatabase",
-                  sqlDataFrame[1, ],
-                  append = TRUE,
-                  overwrite = FALSE)
+                  name = "IDBacDatabase", # SQLite table to insert into
+                  sqlDataFrame[1, ], # Insert single row into DB
+                  append = TRUE, # Append to existing table
+                  overwrite = FALSE) # Do not overwrite
 }
 
 }
