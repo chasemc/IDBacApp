@@ -2709,7 +2709,13 @@ aws <<- coloredDend()
                                      "Protein_Replicates",
                                      "Small_Molecule_Replicates",
                                      "mzXML",
-                                     "proteinPeaksRDS")) %>%  colnames(),
+                                     "proteinPeaksRDS",
+                                     "proteinSummedSpectrumRDS",
+                                     "smallMoleculePeaksRDS",
+                                     "mzXMLhash",
+                                     "proteinPeaksRDShash",
+                                     "proteinSummedSpectrumRDShash",
+                                     "smallMoleculePeaksRDShash")) %>%  colnames(),
                          choiceValues = as.list( DBI::dbConnect(RSQLite::SQLite(), input$libraryInjection) %>%
                                                    dplyr::tbl(., "IDBacDatabase") %>%
                                                    select(-c("Strain_ID",
@@ -2721,7 +2727,13 @@ aws <<- coloredDend()
                                                              "Protein_Replicates",
                                                              "Small_Molecule_Replicates",
                                                              "mzXML",
-                                                             "proteinPeaksRDS")) %>%  colnames())
+                                                             "proteinPeaksRDS",
+                                                             "smallMoleculePeaksRDS",
+                                                             "proteinSummedSpectrumRDS",
+                                                             "mzXMLhash",
+                                                             "proteinPeaksRDShash",
+                                                             "proteinSummedSpectrumRDShash",
+                                                             "smallMoleculePeaksRDShash")) %>%  colnames())
       )
     }
 

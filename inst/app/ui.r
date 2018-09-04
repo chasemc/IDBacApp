@@ -46,7 +46,7 @@ navbarPage(collapsible=T,
                             tags$li(
                               p(("Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function"),br(),
                                 "Chase M. Clark, Maria S. Costa, Laura M. Sanchez, Brian T. Murphy;
-                                bioRxiv 215350; doi:",a(href="https://doi.org/10.1101/215350", target="_blank", "10.1101/215350"))
+                                PNAS May 8, 2018 115 (19) 4981-4986; doi:",a(href="https://doi.org/10.1073/pnas.1801247115", target="_blank", "10.1073/pnas.1801247115"))
                               )
                             )
                           ),
