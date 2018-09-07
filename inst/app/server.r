@@ -603,6 +603,7 @@ function(input,output,session){
                # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
                " ",
                paste0(x$UserInput.y, collapse = "", sep=" "),
+              # "--noindex --mzXML --merge -z",
                "--noindex --mzXML --merge -z",
                " -o ",
                shQuote(outp),
@@ -705,7 +706,7 @@ function(input,output,session){
                        for(i in 1:lengthProgress){
                          incProgress(1/lengthProgress)
 
-                         spectraProcessingFunction(fileList[i],idbacDirectory$filePath)
+                         IDBacApp::spectraProcessingFunction(fileList[i],idbacDirectory$filePath)
 
                        }
 
@@ -849,6 +850,7 @@ function(input,output,session){
   ################################################
   #This creates the Inverse Peak Comparison plot that compares two user-selected spectra() and the calculation required for such.
   listOfDataframesForInversePeakComparisonPlot <- reactive({
+    ww<<- session$ns
     ert <<- collapsedPeaksP()
     #Selects the peaks to plot based on user-input
     peaksSampleOne<-collapsedPeaksP()[[grep(paste0("^",input$Spectra1,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
