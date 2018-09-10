@@ -3,12 +3,6 @@
 addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
 
-  nope1 <<- samplesToAdd
-  nope2 <<- newDatabase
-  nope3 <<- selectedIDBacDataFolder
-
-
-
   # samplesToAdd:
   # Sample table displayed in IDBac that user interactively adds metadata to
   # This is returned to R as a data.frame
@@ -109,18 +103,25 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
   for (i in orderToAdd){
 
     rdsFiles[[i]]$Meta <- samplesWithMetadata[i,]
-
   }
 
-  n <<- length(rdsFiles)
-  swe<<-rdsFiles
 
-  withProgress(message = 'Adding entries to database',
-               detail = 'Adding entry: ', value = 0, {
+  count <- new.env()
+  count$n <- 1
+  count$nt <- length(rdsFiles)
+
+
+
+   withProgress(message = '',value = 0, {
 
   for(yeppy in rdsFiles){
-    incProgress(1/yeppy, detail = paste0(yeppy, " of ", n))
-
+    incProgress(1 / length(rdsFiles),
+                detail = paste0(as.character(yeppy$Meta$Strain_ID),
+                                "          ",
+                                count$n,
+                                " of ",
+                                count$nt))
+    count$n <- count$n + 1
 
 
 
