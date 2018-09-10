@@ -112,9 +112,17 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
   }
 
+  n <<- length(rdsFiles)
+  swe<<-rdsFiles
 
+  withProgress(message = 'Adding entries to database',
+               detail = 'Adding entry: ', value = 0, {
 
   for(yeppy in rdsFiles){
+    incProgress(1/yeppy, detail = paste0(yeppy, " of ", n))
+
+
+
 
     sqlDF <- new.env()
     # Commented-out columns are already present / what user was presented and filled-in
@@ -266,5 +274,6 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
     # saveRDS(sqlDF$sqlDataFrame[1, ], paste0("C:/Users/chase/Documents/GitHub/IDBac_App/inst/app/SpectraLibrary/a/", a, ".rds" ))
 
   }
+               })
 
 }
