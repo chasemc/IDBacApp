@@ -2654,10 +2654,15 @@ aws <<- coloredDend()
   libSearchResultIDsForDendro <-  reactive({
     a <- input$librarySearch
 
+
+   ffw <<- do.call(rbind.data.frame,unlist(librarySearchResults(), recursive = FALSE))
+
+
+
        # only keep top hits and no duplicate library IDs
-       librarySearchResults <- librarySearchResults() %>%
+       librarySearchResults <- ffw %>%
          filter(Score < 30) %>%
-         distinct(Lib_ID, .keep_all = TRUE)
+         distinct(Lib_ID, Unknown, .keep_all = TRUE)
 
 
       # only keep top hits and no duplicate library IDs
