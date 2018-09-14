@@ -2039,7 +2039,9 @@ function(input,output,session){
                                hover = "plot_hover",
                                brush = "plot_brush")
              ),column(width=7,style ="padding: 14px 0px; margin:0%",
-                      simpleNetworkOutput("metaboliteAssociationNetwork")
+                      absolutePanel(fixed=TRUE,width ="50%",
+                                    
+                      simpleNetworkOutput("metaboliteAssociationNetwork"))
              )))
   })
 
