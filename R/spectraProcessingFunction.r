@@ -1,7 +1,6 @@
 # -----------------
 spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
-  qwew<<-rawDataFilePathsrawDataFilePaths
   # "rawDataFilePaths" is one mzXML path
   # "idbacDirectory"  is the path of the IDBac data directory
 
@@ -83,7 +82,7 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
   filesha1 <- IDBacApp::findmzXMLfilesha1(rawDataFilePaths)$filesha1
 
-  check <- length(acquisitonInfo$Acqu) == length(acquisitonInfo$AcquisitonDate) &&
+  check <- length(acquisitonInfo$Acqu) == length(acquisitonInfo$AcquisitionDate) &&
     length(acquisitonInfo$Acqu) == length(acquisitonInfo$filesha1) &&
     length(acquisitonInfo$Acqu) == length(acquisitonInfo$MassError) &&
     length(acquisitonInfo$Acqu) == length(filesha1)
@@ -109,8 +108,16 @@ for(oneReplicate in 1:length(filesha1)){
   sqlDataFrame$IndividualSpectra$SHA1 <- sha1 # only one
   sqlDataFrame$IndividualSpectra$Strain_ID <- sampleName # only one
   sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[oneReplicate]]
-  sqlDataFrame$IndividualSpectra$AcquisitonDate <- acquisitonInfo$AcquisitonDate[[oneReplicate]]
-  sqlDataFrame$IndividualSpectra$Acqu <- list(acquisitonInfo$Acqu[[oneReplicate]])
+  sqlDataFrame$IndividualSpectra$AcquisitionDate <- acquisitonInfo$AcquisitionDate[[oneReplicate]]
+
+
+  acquisitonInfo$Acqu[[oneReplicate]] %>%
+    serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+    memCompress(., type="gzip") %>%
+    list(.) %>%
+  return(.) -> sqlDataFrame$IndividualSpectra$Acqu
+
+
 
 
 
@@ -147,7 +154,16 @@ for(oneReplicate in 1:length(filesha1)){
 
 if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spectrum
 
-  sqlDataFrame$IndividualSpectra$proteinSummedSpectrumRDS <- list(MALDIquant::averageMassSpectra(spectraImport, method = "mean"))
+
+
+
+    MALDIquant::averageMassSpectra(spectraImport, method = "mean") %>%
+      serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+      memCompress(., type="gzip") %>%
+      list(.) %>%
+    return(.) -> sqlDataFrame$IndividualSpectra$proteinSummedSpectrumRDS
+
+
   sqlDataFrame$IndividualSpectra$proteinSummedSpectrumRDShash <- digest::digest(sqlDataFrame$IndividualSpectra$proteinSummedSpectrumRDS, algo= "sha256")
 
     # Why square root transformation and not log:
@@ -161,6 +177,9 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
       MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
       MALDIquant::removeBaseline(., method = "TopHat") %>%
       MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 4) %>%
+      serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+      memCompress(., type="gzip") %>%
+      list(.) %>%
   return(.) -> sqlDataFrame$IndividualSpectra$proteinPeaksRDS
 
 
@@ -171,7 +190,12 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
   }else{
     ############
     #Spectra Preprocessing, Peak Picking
-    sqlDataFrame$IndividualSpectra$smallMoleculeSummedSpectrumRDS <- list(MALDIquant::averageMassSpectra(spectraImport, method = "mean"))
+    list(MALDIquant::averageMassSpectra(spectraImport, method = "mean")) %>%
+      serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+      memCompress(., type="gzip") %>%
+      list(.) %>%
+    return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculeSummedSpectrumRDS
+
     sqlDataFrame$IndividualSpectra$smallMoleculeSummedSpectrumhash <- digest::digest(sqlDataFrame$IndividualSpectra$smallMoleculeSummedSpectrumRDS, algo= "sha256")
 
     spectraImport %>%
@@ -179,6 +203,9 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
       MALDIquant::removeBaseline(., method = "TopHat") %>%
       #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
       MALDIquant::detectPeaks(., method = "SuperSmoother", halfWindowSize = 20, SNR = 1) %>%
+      serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+      memCompress(., type="gzip") %>%
+      list(.) %>%
     return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculePeaksRDS
 
 
