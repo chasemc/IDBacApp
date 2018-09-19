@@ -12,7 +12,7 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
 
   # Connect to SQL backend
-  db_con <- DBI::dbConnect(RSQLite::SQLite(), paste0("file:///C:/Users/chase/Desktop/",  "hi2.sqlite"))
+  db_con <- DBI::dbConnect(RSQLite::SQLite(), paste0("C:/Users/CMC/Desktop/",  "hi2.sqlite"))
 
   # Generate base SQL table
   sqlDataFrame <- IDBacApp::sqlTableArchitecture()
@@ -63,8 +63,6 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
 
 
-  # Remove sqlDataFrame$XML from memory
-  sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
   #----------------------------------------------
   #----------------------------------------------
@@ -77,7 +75,10 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
 
 
-    acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePaths)
+  acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePaths,
+                                                    sqlDataFrame$XML$manufacturer)
+  # Remove sqlDataFrame$XML from memory
+  sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
 
   filesha1 <- IDBacApp::findmzXMLfilesha1(rawDataFilePaths)$filesha1
