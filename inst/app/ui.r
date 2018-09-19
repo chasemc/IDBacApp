@@ -87,6 +87,8 @@ navbarPage(collapsible=T,
                ),fluidRow(tags$hr(size=20)),
                fluidRow(  uiOutput("ui1"))
              )),
+           tabPanel("SQL",
+                    uiOutput("sqlUI")),
 
            tabPanel("Compare Two Samples (Protein)",
                     uiOutput("inversepeakui")),

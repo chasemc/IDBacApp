@@ -1,29 +1,24 @@
 
 trimBinProtein <- function(injectLibrary, # Library path
-                               idsToInject,
-                               addToLibraryDendroLabel,
-                               spectraPath,
-                               lowerMassCutoff,
-                               upperMassCutoff,
-                               massTolerance){
+                           idsToInject,
+                           addToLibraryDendroLabel,
+                           spectraID,
+                           lowerMassCutoff,
+                           upperMassCutoff,
+                           massTolerance,
+                           sqlDB){
+
+db <- dplyr::tbl(userDBCon, "IndividualSpectra")
+
+
+if(length(injectLibrary) == 0){      # If library injection is not selected:
 
 
 
+  all <- lapply(c(spectraID), function(x) IDBacApp::collapseProteinReplicates2(db = dplyr::tbl(userDBCon, "IndividualSpectra"),
+                                                                              strain = x))
 
-if(length(injectLibrary) == 0){      # If user selects to inject library:
-  # Get protein peak file locations
-  all <- list.files(paste0(spectraPath, "\\Peak_Lists"), full.names = TRUE, pattern = "ProteinPeaks.rds")
-  # Read Protein peak files into R
-  all <- unlist(sapply(all, readRDS))
-  # If no protein spectra were loaded, warn the user to go back and try again
-  shiny::validate(
-    shiny::need(!is.null(all),"The hierarchical clustering and PCA analyses require you to first visit the \"Compare Two Samples (Protein)\"
-         tab at the top of the page.")
-    )
-  # Bin protein peaks
-  all <- MALDIquant::binPeaks(all,
-                              tolerance = massTolerance,
-                              method = "relaxed")
+AQW2<<-allB
   # Trim masses to user-specified lower and upper bounds and return as the result of the function
   MALDIquant::trim(all,
                    c(lowerMassCutoff, upperMassCutoff))
