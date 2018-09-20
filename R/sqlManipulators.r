@@ -18,8 +18,8 @@ getProteinPeakData <-  function(db, filesha1){
               var <- enquo(filesha1)
               db %>%
                 filter(filesha1 %in% rlang::eval_tidy(var)) %>%
-                filter(proteinPeaksRDS != "NA") %>%
-                select(proteinPeaksRDS) %>%
+                filter(proteinPeaks != "NA") %>%
+                select(proteinPeaks) %>%
                 collect() %>%
               return(.) -> p
 
@@ -41,6 +41,26 @@ collapseProteinReplicates <- function(db, filesha1, proteinPercentPresence){
 
 
 
+proteiny <- function(fileshas,
+                     db,
+                     proteinPercentPresence,
+                     lowerMassCutoff,
+                     upperMassCutoff){
 
 
 
+          # get filesha1 and strain ids
+          db %>%
+            filter(filesha1 %in% fileshas) %>%
+            filter(proteinPeaks != "NA") %>%
+            select(filesha1, Strain_ID) %>%
+            collect %>%
+            return(.) -> ids
+
+          split(ids$filesha1, ids$Strain_ID) %>%
+            lapply(function(x) IDBacApp::collapseProteinReplicates(db = db,
+                                                                    filesha1 = x,
+                                                                    proteinPercentPresence = proteinPercentPresence)) %>%
+            MALDIquant::trim(., c(lowerMassCutoff,
+                                  upperMassCutoff))
+}

@@ -12,7 +12,8 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
 
   # Connect to SQL backend
-  db_con <- DBI::dbConnect(RSQLite::SQLite(), paste0("C:/Users/CMC/Desktop/",  "hi2.sqlite"))
+  db_con <- DBI::dbConnect(RSQLite::SQLite(), paste0("C:/Users/chase/Desktop/",  "hi2.sqlite"))
+
 
   # Generate base SQL table
   sqlDataFrame <- IDBacApp::sqlTableArchitecture()
@@ -77,16 +78,13 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
   acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePaths,
                                                     sqlDataFrame$XML$manufacturer)
-  # Remove sqlDataFrame$XML from memory
-  sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
+  sqlDataFrame$XML <-NULL # Free up memory
 
-  filesha1 <- IDBacApp::findmzXMLfilesha1(rawDataFilePaths)$filesha1
 
   check <- length(acquisitonInfo$Acqu) == length(acquisitonInfo$AcquisitionDate) &&
     length(acquisitonInfo$Acqu) == length(acquisitonInfo$filesha1) &&
-    length(acquisitonInfo$Acqu) == length(acquisitonInfo$MassError) &&
-    length(acquisitonInfo$Acqu) == length(filesha1)
+    length(acquisitonInfo$Acqu) == length(acquisitonInfo$MassError)
 
 
 
@@ -99,13 +97,13 @@ if(check == FALSE){
 #------------------------------
 
 
-for(oneReplicate in 1:length(filesha1)){
+for(oneReplicate in 1:length(acquisitonInfo$filesha1)){
 
   # Reset
   sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
 
-  sqlDataFrame$IndividualSpectra$filesha1 <- filesha1[[oneReplicate]]
+  sqlDataFrame$IndividualSpectra$filesha1 <- acquisitonInfo$filesha1[[oneReplicate]]
   sqlDataFrame$IndividualSpectra$SHA1 <- sha1 # only one
   sqlDataFrame$IndividualSpectra$Strain_ID <- sampleName # only one
   sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[oneReplicate]]
@@ -158,14 +156,14 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
 
 
 
-    MALDIquant::averageMassSpectra(spectraImport, method = "mean") %>%
+    spectraImport %>%
       serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
       memCompress(., type="gzip") %>%
       list(.) %>%
-    return(.) -> sqlDataFrame$IndividualSpectra$proteinSummedSpectrumRDS
+    return(.) -> sqlDataFrame$IndividualSpectra$proteinSpectrum
 
 
-  sqlDataFrame$IndividualSpectra$proteinSummedSpectrumRDShash <- digest::digest(sqlDataFrame$IndividualSpectra$proteinSummedSpectrumRDS, algo= "sha256")
+  sqlDataFrame$IndividualSpectra$proteinSpectrumHash <- digest::digest(sqlDataFrame$IndividualSpectra$proteinSpectrum, algo= "sha256")
 
     # Why square root transformation and not log:
     #  Anal Bioanal Chem. 2011 Jul; 401(1): 167–181.
@@ -181,23 +179,23 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
       serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
       memCompress(., type="gzip") %>%
       list(.) %>%
-  return(.) -> sqlDataFrame$IndividualSpectra$proteinPeaksRDS
+  return(.) -> sqlDataFrame$IndividualSpectra$proteinPeaks
 
 
-  sqlDataFrame$IndividualSpectra$proteinPeaksRDShash <- digest::digest(sqlDataFrame$IndividualSpectra$proteinPeaksRDS, algo= "sha256")
+  sqlDataFrame$IndividualSpectra$proteinPeaksHash <- digest::digest(sqlDataFrame$IndividualSpectra$proteinPeaks, algo= "sha256")
 
 
 
   }else{
     ############
     #Spectra Preprocessing, Peak Picking
-    list(MALDIquant::averageMassSpectra(spectraImport, method = "mean")) %>%
+    spectraImport %>%
       serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
       memCompress(., type="gzip") %>%
       list(.) %>%
-    return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculeSummedSpectrumRDS
+    return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculeSpectrum
 
-    sqlDataFrame$IndividualSpectra$smallMoleculeSummedSpectrumhash <- digest::digest(sqlDataFrame$IndividualSpectra$smallMoleculeSummedSpectrumRDS, algo= "sha256")
+    sqlDataFrame$IndividualSpectra$smallMoleculeSpectrumHash <- digest::digest(sqlDataFrame$IndividualSpectra$smallMoleculeSpectrum, algo= "sha256")
 
     spectraImport %>%
       MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
@@ -207,10 +205,10 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
       serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
       memCompress(., type="gzip") %>%
       list(.) %>%
-    return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculePeaksRDS
+    return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculePeaks
 
 
-    sqlDataFrame$IndividualSpectra$smallMoleculePeaksRDShash <- digest::digest(sqlDataFrame$IndividualSpectra$smallMoleculePeaksRDS, algo= "sha256")
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksHash <- digest::digest(sqlDataFrame$IndividualSpectra$smallMoleculePeaks, algo= "sha256")
 
   }
 

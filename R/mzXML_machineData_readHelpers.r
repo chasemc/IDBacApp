@@ -24,22 +24,6 @@ findmzXMLsha1 <- function(singlemzXMLpath){
   sha
 }
 
-findmzXMLfilesha1 <- function(singlemzXMLpath){
-
-  sha <- new.env(parent = parent.frame())
-
-# This has to be done here in case "findAcquisitionInfo" isn't called
-  singlemzXMLpath %>%
-    xml2::read_xml() %>%
-    xml2::xml_ns_strip() %>%
-    xml2::xml_find_all(., "//mzXML/msRun/parentFile" ) %>%
-    xml2::xml_attrs() %>%
-    lapply(., function(x) as.character(x["fileSha1"])) %>%
-    unlist() %>%
-    return(.) -> sha$filesha1
-
-  sha
-}
 
 
 
@@ -62,6 +46,7 @@ findAcquisitionInfo <- function(singlemzXMLpath,
 
 
   files <- unlist(lapply(p, function(x) as.character(x["fileName"])))
+  files <-  gsub("file://", "", files)
   files <- dirname(files)
   sha$rawFilePaths <- files
   sha$filesha1 <- unlist(lapply(p, function(x) as.character(x["fileSha1"])))
@@ -77,8 +62,8 @@ findAcquisitionInfo <- function(singlemzXMLpath,
       sha$Acqu <- lapply(files, function(x)  read.delim(file.path(x,"acqu"), sep="\n")) # Find Acqu file
       sha$MassError <- unlist(lapply(sha$Acqu, function(x) as.character(x[grep("Masserr", x[,1]),]))) #Parse the Acqu file for the mass error row
       sha$MassError <- unlist(lapply(sha$MassError, function(x) as.numeric(strsplit(x, "##\\$Masserr= " )[[1]][[2]])))
-      sha$AcquisitonDate <- unlist(lapply(sha$Acqu, function(x) as.character(x[grep("##\\$AQ_DATE", x[,1]),]))) #Parse the Acqu file for the mass error row
-      sha$AcquisitonDate <- unlist(lapply(sha$AcquisitonDate, function(x) gsub('^.*<\\s*|\\s*.>.*$', '', x)))
+      sha$AcquisitionDate <- unlist(lapply(sha$Acqu, function(x) as.character(x[grep("##\\$AQ_DATE", x[,1]),]))) #Parse the Acqu file for the mass error row
+      sha$AcquisitionDate <- unlist(lapply(sha$AcquisitionDate, function(x) gsub('^.*<\\s*|\\s*.>.*$', '', x)))
     }
   }
     }, error = (function(e) warning(e)))

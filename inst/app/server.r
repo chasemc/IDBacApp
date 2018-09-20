@@ -1,6 +1,6 @@
 userDBCon <- pool::dbPool(drv = RSQLite::SQLite(),
                           #dbname = selectedSQLPath()
-                          dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
+                          dbname = "C:/Users/chase/Desktop/hi2.sqlite"
 )
 
 
@@ -701,7 +701,7 @@ function(input,output,session){
       pwizFolderLocation <- installed.packages(c(.libPaths(), applibpath))
       pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
       pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, "proteowizardinstallation", "pwiz")
-      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18178.286a49f7d" #delete
+      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d" #delete
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands <- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -878,7 +878,7 @@ function(input,output,session){
     db <- dplyr::tbl(userDBCon, "IndividualSpectra")
 
     db %>%
-      filter(proteinPeaksRDS != "NA") %>%
+      filter(proteinPeaks != "NA") %>%
       select(Strain_ID) %>%
       distinct() %>%
       collect() %>%
@@ -899,28 +899,14 @@ function(input,output,session){
 
 
 
+
+
+
+
   # -----------------
   collapsedPeaksP <- reactive({
 
-    # Given a character vector of filesha1
-
-    # connect to sql
-    db <- dplyr::tbl(userDBCon, "IndividualSpectra")
-
-    # get filesha1 and strain ids
-    db %>%
-      filter(filesha1 %in% sdfgggegergegergegergergergerg) %>%
-      filter(proteinPeaksRDS != "NA") %>%
-      select(filesha1, Strain_ID) %>%
-      collect %>%
-      return(.) -> ids
-
-    split(ids$filesha1, ids$Strain_ID) %>%
-      lapply(function(x) IDBacApp::collapseProteinReplicates2(db = db,
-                                                              filesha1 = x,
-                                                              proteinPercentPresence = input$percentPresenceP)) %>%
-      MALDIquant::trim(., c(input$lowerMassCutoff,
-                            input$upperMassCutoff))
+    proteiny
 
 
 
@@ -944,17 +930,59 @@ function(input,output,session){
   ################################################
   #This creates the Inverse Peak Comparison plot that compares two user-selected inverseComparisonNames() and the calculation required for such.
   listOfDataframesForInversePeakComparisonPlot <- reactive({
-    ww<<- session$ns
-    ert <<- collapsedPeaksP()
-    #Selects the peaks to plot based on user-input
-    peaksSampleOne<-collapsedPeaksP()[[grep(paste0("^",input$Spectra1,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
-    peaksSampleTwo<-collapsedPeaksP()[[grep(paste0("^",input$Spectra2,"$"),sapply(seq(1,length(collapsedPeaksP()),by=1),function(x)metaData(collapsedPeaksP()[[x]])$Strain))]]
 
 
-    #pSNR= the User-Selected Signal to Noise Ratio for protein
+     mirrorPlotEnv <- new.env(parent = parent.frame())
+
+    # connect to sql
+    db <- dplyr::tbl(userDBCon, "IndividualSpectra")
+
+    # get sample 1 peaks
+    db %>%
+      filter(Strain_ID %in% input$Spectra1) %>%
+      filter(proteinPeaks != "NA") %>%
+      select(filesha1) %>%
+      pull %>%
+      IDBacApp::proteiny(fileshas = .,
+                         db = db,
+                         proteinPercentPresence = input$percentPresenceP,
+                         lowerMassCutoff = input$lowerMassCutoff,
+                         upperMassCutoff = input$upperMassCutoff) %>%
+      return(.) -> mirrorPlotEnv$peaksSampleOne
+
+
+    # get sample 2 peaks
+    db %>%
+      filter(Strain_ID %in% input$Spectra2) %>%
+      filter(proteinPeaks != "NA") %>%
+      select(filesha1) %>%
+      pull %>%
+      IDBacApp::proteiny(fileshas = .,
+                         db = db,
+                         proteinPercentPresence = input$percentPresenceP,
+                         lowerMassCutoff = input$lowerMassCutoff,
+                         upperMassCutoff = input$upperMassCutoff) %>%
+      return(.) -> mirrorPlotEnv$peaksSampleTwo
+
+
+
+    db %>%
+      filter(Strain_ID %in% input$Spectra1) %>%
+      filter(proteinSpectrum != "NA") %>%
+      select(filesha1) %>%
+      pull %>%
+
+      i
+
+
+
+
+
+
+     #pSNR= the User-Selected Signal to Noise Ratio for protein
 
     #Create a MALDIquant massObject from the selected peaks
-    peaksSampleOne@mass<-peaksSampleOne@mass[which(peaksSampleOne@snr>input$pSNR)]
+    mirrorPlotEnv$peaksSampleOne$mass<-peaksSampleOne@mass[which(peaksSampleOne@snr>input$pSNR)]
     peaksSampleOne@intensity<-peaksSampleOne@intensity[which(peaksSampleOne@snr>input$pSNR)]
     peaksSampleOne@snr<-peaksSampleOne@snr[which(peaksSampleOne@snr>input$pSNR)]
     peaksSampleTwo@mass<-peaksSampleTwo@mass[which(peaksSampleTwo@snr>input$pSNR)]

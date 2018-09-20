@@ -40,21 +40,25 @@ sqlDataFrame$XML <- data.frame("SHA1" = NA,
 
 
 
+
+
+
 sqlDataFrame$IndividualSpectra <- data.frame("filesha1" = NA,
                                              "SHA1" = NA,
                                              "Strain_ID" = NA,
                                              "MassError" = NA,
                                              "AcquisitionDate" = NA,
                                              "Acqu" = NA,
-                                             "proteinPeaksRDS"              = NA,
-                                             "proteinSummedSpectrumRDS"     = NA,
-                                             "smallMoleculePeaksRDS"        = NA,
-                                             "smallMoleculeSummedSpectrumRDS" = NA,
-                                             "proteinPeaksRDShash"          = NA,
-                                             "proteinSummedSpectrumRDShash" = NA,
-                                             "smallMoleculePeaksRDShash"    = NA,
-                                             "smallMoleculeSummedSpectrumhash" = NA
-                                             )
+                                             "proteinPeaks"              = NA,
+                                             "proteinSpectrum"     = NA,
+                                             "smallMoleculePeaks"        = NA,
+                                             "smallMoleculeSpectrum" = NA,
+                                             "proteinPeaksHash"          = NA,
+                                             "proteinSpectrumHash" = NA,
+                                             "smallMoleculePeaksHash"    = NA,
+                                             "smallMoleculeSpectrumHash" = NA
+)
+
 
 
 sqlDataFrame
