@@ -8,18 +8,25 @@ trimBinProtein <- function(injectLibrary, # Library path
                            massTolerance,
                            sqlDB){
 
-db <- dplyr::tbl(userDBCon, "IndividualSpectra")
+db <- dplyr::tbl(sqlDB, "IndividualSpectra")
 
 
 if(length(injectLibrary) == 0){      # If library injection is not selected:
 
+# get filesha1 and strain ids
+  db %>%
+    filter(proteinPeaksRDS != "NA") %>%
+    select(filesha1, Strain_ID) %>%
+    collect %>%
+    return(.) -> ids
+# group filesha1 for lapply
+  ids <- split(ids$filesha1, ids$Strain_ID)
 
+  all <- lapply(ids, function(x) IDBacApp::collapseProteinReplicates2(db = db,
+                                                                               filesha1 = x))
 
-  all <- lapply(c(spectraID), function(x) IDBacApp::collapseProteinReplicates2(db = dplyr::tbl(userDBCon, "IndividualSpectra"),
-                                                                              strain = x))
-
-AQW2<<-allB
-  # Trim masses to user-specified lower and upper bounds and return as the result of the function
+alw<<-all
+    # Trim masses to user-specified lower and upper bounds and return as the result of the function
   MALDIquant::trim(all,
                    c(lowerMassCutoff, upperMassCutoff))
 

@@ -1,3 +1,12 @@
+userDBCon <- pool::dbPool(drv = RSQLite::SQLite(),
+                          #dbname = selectedSQLPath()
+                          dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
+)
+
+
+#delete
+#chase change to id
+
 # The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the UI function(input, output,session) {
 
 # Function to Install and Load R Packages
@@ -45,7 +54,8 @@ Required_Packages = c("Rcpp",
                       "dbplyr",
                       "dplyr",
                       "rhandsontable",
-                      "Rtsne")
+                      "Rtsne",
+                      "pool")
 
 
 # Install and Load Packages
@@ -70,6 +80,102 @@ colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00",
 
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
+
+
+
+  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
+  observe({
+    output$sqlUI <- renderUI({
+      fluidRow(
+        column(12,
+               br(),
+               br(),
+               fluidRow(
+                 column(12, offset = 3,
+                        h3("Starting with a Single MALDI Plate of Raw Data"))), br(), br(),
+               column(5
+
+               ),
+               column(1
+               ),
+               column(5, style = "background-color:#7777770d",
+                      fluidRow(
+                        h3("Workflow Pane", align="center")),
+
+                      actionButton("selectedSQL",
+                                   label = "Select SQL"),
+                      fluidRow(column(12,
+                                      verbatimTextOutput("selectedSQLText",
+                                                         placeholder = TRUE)))
+
+
+
+               )
+        )
+      )
+    })
+
+})
+  # -----------------
+  # Reactive variable returning the user-chosen location of the raw MALDI files as string
+  selectedSQLPath <- reactive({
+    if (input$selectedSQL > 0) {
+      choose.files()
+    }
+  })
+
+  output$selectedSQLText <- renderPrint(selectedSQLPath())
+
+
+# #Create database connection
+#  observeEvent(input$selectedSQL,{
+#   if(exists("userDBCon")){
+#     pool::poolClose(userDBCon)
+#   }
+# userDBCon <- pool::dbPool(drv = RSQLite::SQLite(),
+#                           #dbname = selectedSQLPath()
+#                           dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
+#                           )
+# })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -595,7 +701,7 @@ function(input,output,session){
       pwizFolderLocation <- installed.packages(c(.libPaths(), applibpath))
       pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
       pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, "proteowizardinstallation", "pwiz")
-
+      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18178.286a49f7d" #delete
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands <- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -768,29 +874,15 @@ function(input,output,session){
   #   unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
   # })
 
-  spectra <- reactive({
+  inverseComparisonNames <- reactive({
+    db <- dplyr::tbl(userDBCon, "IndividualSpectra")
 
-    # Return Full File Path of all averaged protein spectra RDS
-    vectorFilePaths <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"), full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
-    # Return only file name of all averaged protein spectra RDS
-    vectorFileNames <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"), full.names=FALSE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
-    # Keep only the sample name from file names
-    vectorFileNames <- unlist(strsplit(vectorFileNames, "_SummedProteinSpectra.rds"))
-    temp            <- cbind.data.frame(paths = vectorFilePaths, names = vectorFileNames)
-
-    lapply(temp,as.vector)
-
-
-    # The output is list of length 2: file paths of protein spectra rds files (full spectra, not just peaks) and the samples names
-    #
-    # > spectra()
-    #                                                                               paths   names
-    #   C:\\Users\\chase\\Desktop\\New folder\\Peak_Lists/114A-1_SummedProteinSpectra.rds  114A-1
-    #   C:\\Users\\chase\\Desktop\\New folder\\Peak_Lists/114A-2_SummedProteinSpectra.rds  114A-2
-    #   C:\\Users\\chase\\Desktop\\New folder\\Peak_Lists/114A-3_SummedProteinSpectra.rds  114A-3
-    #   C:\\Users\\chase\\Desktop\\New folder\\Peak_Lists/114A-4_SummedProteinSpectra.rds  114A-4
-    #   C:\\Users\\chase\\Desktop\\New folder\\Peak_Lists/114B-1_SummedProteinSpectra.rds  114B-1
-    #   C:\\Users\\chase\\Desktop\\New folder\\Peak_Lists/114B-10_SummedProteinSpectra.rds 114B-10
+    db %>%
+      filter(proteinPeaksRDS != "NA") %>%
+      select(Strain_ID) %>%
+      distinct() %>%
+      collect() %>%
+      pull()
   })
 
 
@@ -805,29 +897,31 @@ function(input,output,session){
   # Also, bin then trim
   # Return Peak Intensity Matrix
 
-  trimmedP <- reactive({
-# Trims and bins protein peak lists
-# If DB insertion is selected, will trim and bin user samples along with DB samples
-    IDBacApp::trimBinProtein(injectLibrary = input$libraryInjection,
-                       idsToInject = libSearchResultIDsForDendro(),
-                       addToLibraryDendroLabel = input$libraryMetadataColumns,
-                       spectraPath = idbacDirectory$filePath,
-                       lowerMassCutoff = input$lowerMass,
-                       upperMassCutoff = input$upperMass,
-                       massTolerance = 0.002
-                       )
-
-
-  })
-
 
 
   # -----------------
-  # Only include peaks occurring in specified percentage of replicates (groups determined by sample names)
   collapsedPeaksP <- reactive({
 
-    IDBacApp::collapseProteinReplicates(trimmedProteinPeakList = trimmedP(),
-                              proteinPercentPresence = input$percentPresenceP)
+    # Given a character vector of filesha1
+
+    # connect to sql
+    db <- dplyr::tbl(userDBCon, "IndividualSpectra")
+
+    # get filesha1 and strain ids
+    db %>%
+      filter(filesha1 %in% sdfgggegergegergegergergergerg) %>%
+      filter(proteinPeaksRDS != "NA") %>%
+      select(filesha1, Strain_ID) %>%
+      collect %>%
+      return(.) -> ids
+
+    split(ids$filesha1, ids$Strain_ID) %>%
+      lapply(function(x) IDBacApp::collapseProteinReplicates2(db = db,
+                                                              filesha1 = x,
+                                                              proteinPercentPresence = input$percentPresenceP)) %>%
+      MALDIquant::trim(., c(input$lowerMassCutoff,
+                            input$upperMassCutoff))
+
 
 
   })
@@ -848,7 +942,7 @@ function(input,output,session){
 
   # -----------------
   ################################################
-  #This creates the Inverse Peak Comparison plot that compares two user-selected spectra() and the calculation required for such.
+  #This creates the Inverse Peak Comparison plot that compares two user-selected inverseComparisonNames() and the calculation required for such.
   listOfDataframesForInversePeakComparisonPlot <- reactive({
     ww<<- session$ns
     ert <<- collapsedPeaksP()
@@ -867,12 +961,9 @@ function(input,output,session){
     peaksSampleTwo@intensity<-peaksSampleTwo@intensity[which(peaksSampleTwo@snr>input$pSNR)]
     peaksSampleTwo@snr<-peaksSampleTwo@snr[which(peaksSampleTwo@snr>input$pSNR)]
 
-    #Selects the spectra to plot based on user-input
-    # meanSpectrumSampleOne<-spectra()[[grep(paste0(input$Spectra1,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
-    # meanSpectrumSampleTwo<-spectra()[[grep(paste0(input$Spectra2,"$"),sapply(seq(1,length(spectra()),by=1),function(x)metaData(spectra()[[x]])$Strain))]]
 
-    meanSpectrumSampleOne<-readRDS(spectra()$paths[[which(input$Spectra1 ==  spectra()$names)]])
-    meanSpectrumSampleTwo<-readRDS(spectra()$paths[[which(input$Spectra2 == spectra()$names)]])
+    meanSpectrumSampleOne<-readRDS(inverseComparisonNames()$paths[[which(input$Spectra1 ==  inverseComparisonNames()$names)]])
+    meanSpectrumSampleTwo<-readRDS(inverseComparisonNames()$paths[[which(input$Spectra2 == inverseComparisonNames()$names)]])
 
 
     #Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
@@ -1034,31 +1125,31 @@ function(input,output,session){
   # Create peak comparison ui
   output$inversepeakui <-  renderUI({
 
-    if(is.null(input$rawORreanalyze)){
-      fluidPage(
-
-        h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
-        br(),
-        h4("Troubleshooting:"),
-        tags$ul(
-          tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab"),
-          tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
-                  named \"Peak_Lists\""),
-          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
-        )
-
-      )
-
-    }else{
+    # if(is.null(input$rawORreanalyze)){
+    #   fluidPage(
+    #
+    #     h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
+    #     br(),
+    #     h4("Troubleshooting:"),
+    #     tags$ul(
+    #       tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab"),
+    #       tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
+    #               named \"Peak_Lists\""),
+    #       tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
+    #     )
+    #
+    #   )
+    #
+    # }else{
 
 
 
       sidebarLayout(
         sidebarPanel(width = 3, style = "background-color:#7777770d",
                      selectInput("Spectra1", label=h5(strong("Spectrum 1 (up)"), br(), "(Peak matches to bottom spectrum are blue, non-matches are red)"),
-                                 choices = spectra()$names),
+                                 choices = inverseComparisonNames()),
                      selectInput("Spectra2", label=h5(strong("Spectrum 2 (down)")),
-                                 choices = spectra()$names),
+                                 choices = inverseComparisonNames()),
                      downloadButton("downloadInverse",label="Download Main Plot"),
                      downloadButton("downloadInverseZoom",label="Download Zoomed Plot"),
                      numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
@@ -1081,7 +1172,7 @@ function(input,output,session){
         )
                      )
 
-    }
+  #  }
   })
 
 

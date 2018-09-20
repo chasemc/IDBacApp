@@ -9,15 +9,15 @@
 # where rds was before
 
 
-
+#need to get and collapse small and protein in diff functions b/c binpeak tolerance
 
 getProteinPeakData <-  function(db, filesha1){
 
   # "db" = dplyr connection to SQLite DB
-  # "
+
               var <- enquo(filesha1)
               db %>%
-                filter(filesha1 %in% !!var) %>%
+                filter(filesha1 %in% rlang::eval_tidy(var)) %>%
                 filter(proteinPeaksRDS != "NA") %>%
                 select(proteinPeaksRDS) %>%
                 collect() %>%
@@ -28,12 +28,19 @@ getProteinPeakData <-  function(db, filesha1){
             unlist(lapply(p, function(x) unserialize(memDecompress(x, type= "gzip")))  )
 }
 
-#
-collapseProteinReplicates2 <- function(db, filesha1){
+
+collapseProteinReplicates <- function(db, filesha1, proteinPercentPresence){
                                 IDBacApp::getProteinPeakData(db, filesha1) %>%
+                                  MALDIquant::filterPeaks(.,
+                                                          minFrequency = proteinPercentPresence / 100) %>%
                                   MALDIquant::binPeaks(., tolerance = .002) %>%
                                   MALDIquant::mergeMassPeaks()
-                             }
+}
 
 
-#lapply(c("172-1","172-10"), collapse)
+
+
+
+
+
+
