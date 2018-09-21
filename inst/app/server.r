@@ -906,7 +906,7 @@ function(input,output,session){
   # -----------------
   collapsedPeaksP <- reactive({
 
-    proteiny
+  IDBacApp::proteiny()
 
 
 
@@ -937,6 +937,10 @@ function(input,output,session){
     # connect to sql
     db <- dplyr::tbl(userDBCon, "IndividualSpectra")
 
+
+
+
+
     # get sample 1 peaks
     db %>%
       filter(Strain_ID %in% input$Spectra1) %>%
@@ -946,8 +950,8 @@ function(input,output,session){
       IDBacApp::proteiny(fileshas = .,
                          db = db,
                          proteinPercentPresence = input$percentPresenceP,
-                         lowerMassCutoff = input$lowerMassCutoff,
-                         upperMassCutoff = input$upperMassCutoff) %>%
+                         lowerMassCutoff = input$lowerMass,
+                         upperMassCutoff = input$upperMass) %>%
       return(.) -> mirrorPlotEnv$peaksSampleOne
 
 
@@ -960,59 +964,71 @@ function(input,output,session){
       IDBacApp::proteiny(fileshas = .,
                          db = db,
                          proteinPercentPresence = input$percentPresenceP,
-                         lowerMassCutoff = input$lowerMassCutoff,
-                         upperMassCutoff = input$upperMassCutoff) %>%
+                         lowerMassCutoff = input$lowerMass,
+                         upperMassCutoff = input$upperMass) %>%
       return(.) -> mirrorPlotEnv$peaksSampleTwo
 
+    aa<<-  mirrorPlotEnv$peaksSampleTwo
+
+    mirrorPlotEnv$peaksSampleTwo <- mirrorPlotEnv$peaksSampleTwo[[1]]
+    mirrorPlotEnv$peaksSampleOne <- mirrorPlotEnv$peaksSampleOne[[1]]
+
+    # pSNR= the User-Selected Signal to Noise Ratio for protein
+    mirrorPlotEnv$SampleOneSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleOne) >= input$pSNR)
+    mirrorPlotEnv$SampleTwoSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleTwo) >= input$pSNR)
+
+
+    mirrorPlotEnv$peaksSampleOne@mass <- mirrorPlotEnv$peaksSampleOne@mass[mirrorPlotEnv$SampleOneSNR]
+    mirrorPlotEnv$peaksSampleOne@snr <- mirrorPlotEnv$peaksSampleOne@snr[mirrorPlotEnv$SampleOneSNR]
+    mirrorPlotEnv$peaksSampleOne@intensity <- mirrorPlotEnv$peaksSampleOne@intensity[mirrorPlotEnv$SampleOneSNR]
+
+    mirrorPlotEnv$peaksSampleTwo@mass <- mirrorPlotEnv$peaksSampleTwo@mass[mirrorPlotEnv$SampleTwoSNR]
+    mirrorPlotEnv$peaksSampleTwo@snr <- mirrorPlotEnv$peaksSampleTwo@snr[mirrorPlotEnv$SampleTwoSNR]
+    mirrorPlotEnv$peaksSampleTwo@intensity <- mirrorPlotEnv$peaksSampleTwo@intensity[mirrorPlotEnv$SampleTwoSNR]
+
+
+    temp <- binPeaks(list(mirrorPlotEnv$peaksSampleOne ,mirrorPlotEnv$peaksSampleTwo), tolerance = .02)
+
+    mirrorPlotEnv$peaksSampleOne <- temp[[1]]
+    mirrorPlotEnv$peaksSampleTwo <- temp[[2]]
+
+
+    mirrorPlotEnv$SampleOneColors <- rep("red", length(mirrorPlotEnv$peaksSampleOne@mass))
+
+    temp <- mirrorPlotEnv$peaksSampleOne@mass %in% mirrorPlotEnv$peaksSampleTwo@mass
+    mirrorPlotEnv$SampleOneColors[temp] <- "blue"
+    remove(temp)
+
+
+
+    db %>%
+        filter(Strain_ID %in% input$Spectra2) %>%
+        filter(proteinSpectrum != "NA") %>%
+        select(proteinSpectrum) %>%
+        pull %>%
+        lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
+        unlist(., recursive = TRUE) %>%
+        MALDIquant::averageMassSpectra(., method = "mean") %>%
+        return(.) -> mirrorPlotEnv$spectrumSampleTwo
 
 
     db %>%
       filter(Strain_ID %in% input$Spectra1) %>%
       filter(proteinSpectrum != "NA") %>%
-      select(filesha1) %>%
+      select(proteinSpectrum) %>%
       pull %>%
-
-      i
-
-
-
-
+      lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
+      unlist(., recursive = TRUE) %>%
+      MALDIquant::averageMassSpectra(., method = "mean") %>%
+      return(.) -> mirrorPlotEnv$spectrumSampleOne
 
 
-     #pSNR= the User-Selected Signal to Noise Ratio for protein
-
-    #Create a MALDIquant massObject from the selected peaks
-    mirrorPlotEnv$peaksSampleOne$mass<-peaksSampleOne@mass[which(peaksSampleOne@snr>input$pSNR)]
-    peaksSampleOne@intensity<-peaksSampleOne@intensity[which(peaksSampleOne@snr>input$pSNR)]
-    peaksSampleOne@snr<-peaksSampleOne@snr[which(peaksSampleOne@snr>input$pSNR)]
-    peaksSampleTwo@mass<-peaksSampleTwo@mass[which(peaksSampleTwo@snr>input$pSNR)]
-    peaksSampleTwo@intensity<-peaksSampleTwo@intensity[which(peaksSampleTwo@snr>input$pSNR)]
-    peaksSampleTwo@snr<-peaksSampleTwo@snr[which(peaksSampleTwo@snr>input$pSNR)]
 
 
-    meanSpectrumSampleOne<-readRDS(inverseComparisonNames()$paths[[which(input$Spectra1 ==  inverseComparisonNames()$names)]])
-    meanSpectrumSampleTwo<-readRDS(inverseComparisonNames()$paths[[which(input$Spectra2 == inverseComparisonNames()$names)]])
 
 
-    #Create dataframes for peak plots and color each peak according to whether it occurs in the other spectrum
-    p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
-    p1b<-as.data.frame(cbind(peaksSampleOne@mass,peaksSampleOne@intensity))
-    p2b<-as.data.frame(cbind(peaksSampleTwo@mass,peaksSampleTwo@intensity))
-    p2b<-as.data.frame(cbind(peaksSampleTwo@mass,peaksSampleTwo@intensity))
 
-
-    p3b<-data.frame(p1b,rep("red",length=length(p1b$V1)),stringsAsFactors = F)
-    colnames(p3b)<-c("Mass","Intensity","Color")
-
-    p4b<-data.frame(p2b,rep("grey",length=length(p2b$V1)),stringsAsFactors = F)
-    colnames(p4b)<-c("Mass","Intensity","Color")
-    p3b$Color[which(p3b$Mass %in% intersect(p3b$Mass,p4b$Mass))]<-"blue"
-
-
-    a<-(list(meanSpectrumSampleOne,meanSpectrumSampleTwo,p1b,p2b,p3b,p4b))
-    names(a)<-c("meanSpectrumSampleOne","meanSpectrumSampleTwo","p1b","p2b","p3b","p4b")
-    return(a)
-
+   mirrorPlotEnv
 
   })
 
@@ -1023,90 +1039,119 @@ function(input,output,session){
   # -----------------
   output$inversePeakComparisonPlot <- renderPlot({
 
-    temp <<- listOfDataframesForInversePeakComparisonPlot()
-    meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
-    meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
-    p3b <<-temp$p3b
-    p4b <<-temp$p4b
+    mirrorPlotEnv <- listOfDataframesForInversePeakComparisonPlot()
 
-    remove(temp)
+
 
     #Create peak plots and color each peak according to whether it occurs in the other spectrum
-    plot(x = meanSpectrumSampleOne@mass,
-         y = meanSpectrumSampleOne@intensity,
-         ylim = c(-max(meanSpectrumSampleTwo@intensity),
-                  max(meanSpectrumSampleOne@intensity)),
+    plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
+         y = mirrorPlotEnv$spectrumSampleOne@intensity,
+         ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
+                  max(mirrorPlotEnv$spectrumSampleOne@intensity)),
          type = "l",
          col = adjustcolor("Black", alpha=0.3),
          xlab = "m/z",
          ylab = "Intensity")
-    lines(x = meanSpectrumSampleTwo@mass,
-          y = -meanSpectrumSampleTwo@intensity)
-    rect(xleft = p3b$Mass - 0.5,
+    lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
+          y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
+    rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
          ybottom = 0,
-         xright = p3b$Mass + 0.5,
-         ytop = ((p3b$Intensity) * max(meanSpectrumSampleOne@intensity) / max(p3b$Intensity)),
-         border = p3b$Color)
-    rect(xleft = p4b$Mass - 0.5,
+         xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
+         ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
+         border = mirrorPlotEnv$SampleOneColors)
+    rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
          ybottom = 0,
-         xright = p4b$Mass + 0.5,
-         ytop = -((p4b$Intensity) * max(meanSpectrumSampleTwo@intensity) / max(p4b$Intensity)),
-         border = p4b$Color)
+         xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
+         ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
+         border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
 
     observe({
+
       brush <- input$plot2_brush
       if (!is.null(brush)) {
         ranges2$x <- c(brush$xmin, brush$xmax)
         ranges2$y <- c(brush$ymin, brush$ymax)
       }else{
         ranges2$x <- NULL
-        ranges2$y <- c(-max(meanSpectrumSampleTwo@intensity),
-                       max(meanSpectrumSampleOne@intensity))
+        ranges2$y <- c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
+                       max(mirrorPlotEnv$spectrumSampleOne@intensity))
       }
     })
   })
 
+
+
   # -----------------
   output$inversePeakComparisonPlotZoom <- renderPlot({
-    temp<- listOfDataframesForInversePeakComparisonPlot()
-    meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
-    meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
-    p1b <-temp$p1b
-    p2b <-temp$p2b
-    p3b <-temp$p3b
-    p4b <-temp$p4b
-    remove(temp)
-    plot(meanSpectrumSampleOne@mass,meanSpectrumSampleOne@intensity,type="l",col=adjustcolor("Black", alpha=0.3), xlim = ranges2$x, ylim = ranges2$y,xlab="m/z",ylab="Intensity")
-    lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
-    rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
-    rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
+    mirrorPlotEnv <- listOfDataframesForInversePeakComparisonPlot()
+
+    plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
+         y = mirrorPlotEnv$spectrumSampleOne@intensity,
+
+         xlim = ranges2$x, ylim = ranges2$y,
+         type = "l",
+         col = adjustcolor("Black", alpha=0.3),
+         xlab = "m/z",
+         ylab = "Intensity")
+    lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
+          y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
+    rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
+         ybottom = 0,
+         xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
+         ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
+         border = mirrorPlotEnv$SampleOneColors)
+    rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
+         ybottom = 0,
+         xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
+         ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
+         border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+
+
+
 
   })
 
   # -----------------
   #observeEvent(input$downloadInverse,{
   output$downloadInverse <- downloadHandler(
+
+
     filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,".svg")},
     content = function(file1){
-      temp<- listOfDataframesForInversePeakComparisonPlot()
-      meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
-      meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
 
-      p3b <-temp$p3b
-      p4b <-temp$p4b
-
-      remove(temp)
 
 
       #svg(filename=paste0(input$Spectra1,"_",input$Spectra1,".svg"))
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
+
+      mirrorPlotEnv <- listOfDataframesForInversePeakComparisonPlot()
+
+
+
       #Create peak plots and color each peak according to whether it occurs in the other spectrum
-      plot(meanSpectrumSampleOne@mass,meanSpectrumSampleOne@intensity,ylim=c(-max(meanSpectrumSampleTwo@intensity),max(meanSpectrumSampleOne@intensity)),type="l",col=adjustcolor("Black", alpha=0.3),xlab="m/z",ylab="Intensity")
-      lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
-      rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
-      rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
-      legend(max(meanSpectrumSampleOne@mass)*.6,max(meanSpectrumSampleOne@intensity)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
+      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
+           y = mirrorPlotEnv$spectrumSampleOne@intensity,
+           ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
+                    max(mirrorPlotEnv$spectrumSampleOne@intensity)),
+           type = "l",
+           col = adjustcolor("Black", alpha=0.3),
+           xlab = "m/z",
+           ylab = "Intensity")
+      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
+            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
+      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
+           ybottom = 0,
+           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
+           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
+           border = mirrorPlotEnv$SampleOneColors)
+      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
+           ybottom = 0,
+           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
+           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
+           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+
+       legend(max(mirrorPlotEnv$spectrumSampleOne@mass)*.6,max(max(mirrorPlotEnv$spectrumSampleOne@intensity))*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
              col=c("black", "black"), lty=1:1, cex=1)
 
       dev.off()
@@ -1121,26 +1166,38 @@ function(input,output,session){
     filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")},
     content = function(file1){
 
-      temp<- listOfDataframesForInversePeakComparisonPlot()
-      meanSpectrumSampleOne <-temp$meanSpectrumSampleOne
-      meanSpectrumSampleTwo <-temp$meanSpectrumSampleTwo
-      p1b <-temp$p1b
-      p2b <-temp$p2b
-      p3b <-temp$p3b
-      p4b <-temp$p4b
-      remove(temp)
+
 
 
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
 
-      plot(meanSpectrumSampleOne@mass,meanSpectrumSampleOne@intensity,type="l",col=adjustcolor("Black", alpha=0.3), xlim = ranges2$x, ylim = ranges2$y,xlab="m/z",ylab="Intensity")
-      lines(meanSpectrumSampleTwo@mass,-meanSpectrumSampleTwo@intensity)
-      rect(xleft=p3b$Mass-.5, ybottom=0, xright=p3b$Mass+.5, ytop=((p3b$Intensity)*max(meanSpectrumSampleOne@intensity)/max(p3b$Intensity)),border=p3b$Color)
-      rect(xleft=p4b$Mass-.5, ybottom=0, xright=p4b$Mass+.5, ytop=-((p4b$Intensity)*max(meanSpectrumSampleTwo@intensity)/max(p4b$Intensity)),border=p4b$Color)
+      mirrorPlotEnv <- listOfDataframesForInversePeakComparisonPlot()
+
+      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
+           y = mirrorPlotEnv$spectrumSampleOne@intensity,
+
+           xlim = ranges2$x, ylim = ranges2$y,
+           type = "l",
+           col = adjustcolor("Black", alpha=0.3),
+           xlab = "m/z",
+           ylab = "Intensity")
+      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
+            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
+      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
+           ybottom = 0,
+           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
+           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
+           border = mirrorPlotEnv$SampleOneColors)
+      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
+           ybottom = 0,
+           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
+           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
+           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
 
 
-      legend(max(meanSpectrumSampleOne@mass)*.6,max(meanSpectrumSampleOne@intensity)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
+
+      legend(max(ranges2$x).85, max(ranges2$y)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
              col=c("black", "black"), lty=1:1, cex=1)
 
       dev.off()
@@ -1175,9 +1232,9 @@ function(input,output,session){
       sidebarLayout(
         sidebarPanel(width = 3, style = "background-color:#7777770d",
                      selectInput("Spectra1", label=h5(strong("Spectrum 1 (up)"), br(), "(Peak matches to bottom spectrum are blue, non-matches are red)"),
-                                 choices = inverseComparisonNames()),
+                                 choices = inverseComparisonNames()), selected = inverseComparisonNames()[[1]] ,
                      selectInput("Spectra2", label=h5(strong("Spectrum 2 (down)")),
-                                 choices = inverseComparisonNames()),
+                                 choices = inverseComparisonNames(), selected=inverseComparisonNames()[[1]]),
                      downloadButton("downloadInverse",label="Download Main Plot"),
                      downloadButton("downloadInverseZoom",label="Download Zoomed Plot"),
                      numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
