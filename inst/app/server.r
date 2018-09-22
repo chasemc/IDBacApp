@@ -1,6 +1,6 @@
 userDBCon <- pool::dbPool(drv = RSQLite::SQLite(),
                           #dbname = selectedSQLPath()
-                          dbname = "C:/Users/chase/Desktop/hi2.sqlite"
+                          dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
 )
 
 
@@ -701,7 +701,7 @@ function(input,output,session){
       pwizFolderLocation <- installed.packages(c(.libPaths(), applibpath))
       pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
       pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, "proteowizardinstallation", "pwiz")
-      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d" #delete
+      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18178.286a49f7d" #delete
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands <- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -812,7 +812,9 @@ function(input,output,session){
                        for(i in 1:lengthProgress){
                          incProgress(1/lengthProgress)
 
-                         IDBacApp::spectraProcessingFunction(fileList[i],idbacDirectory$filePath)
+                         IDBacApp::spectraProcessingFunction(fileList[i],
+                                                             idbacDirectory$filePath,
+                                                             userDBCon = userDBCon)
 
                        }
 
@@ -968,10 +970,6 @@ function(input,output,session){
                          upperMassCutoff = input$upperMass) %>%
       return(.) -> mirrorPlotEnv$peaksSampleTwo
 
-    aa<<-  mirrorPlotEnv$peaksSampleTwo
-
-    mirrorPlotEnv$peaksSampleTwo <- mirrorPlotEnv$peaksSampleTwo[[1]]
-    mirrorPlotEnv$peaksSampleOne <- mirrorPlotEnv$peaksSampleOne[[1]]
 
     # pSNR= the User-Selected Signal to Noise Ratio for protein
     mirrorPlotEnv$SampleOneSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleOne) >= input$pSNR)
@@ -1197,7 +1195,7 @@ function(input,output,session){
 
 
 
-      legend(max(ranges2$x).85, max(ranges2$y)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
+      legend(max(ranges2$x)*.85, max(ranges2$y)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
              col=c("black", "black"), lty=1:1, cex=1)
 
       dev.off()

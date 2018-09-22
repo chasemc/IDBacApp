@@ -1,5 +1,5 @@
 # -----------------
-spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
+spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory, userDBCon){
 
   # "rawDataFilePaths" is one mzXML path
   # "idbacDirectory"  is the path of the IDBac data directory
@@ -11,8 +11,6 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
   sampleName <- tools::file_path_sans_ext(basename(rawDataFilePaths))
 
 
-  # Connect to SQL backend
-  db_con <- DBI::dbConnect(RSQLite::SQLite(), paste0("C:/Users/chase/Desktop/",  "hi2.sqlite"))
 
 
   # Generate base SQL table
@@ -55,7 +53,7 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory){
 
 
   # Write to SQL DB
-  DBI::dbWriteTable(conn = db_con,
+  DBI::dbWriteTable(conn = userDBCon,
                     name = "XML", # SQLite table to insert into
                     sqlDataFrame$XML[1, ], # Insert single row into DB
                     append = TRUE, # Append to existing table
@@ -216,7 +214,7 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
 
 
   # Write to SQL DB
-  DBI::dbWriteTable(conn = db_con,
+  DBI::dbWriteTable(conn = userDBCon,
                     name = "IndividualSpectra", # SQLite table to insert into
                     sqlDataFrame$IndividualSpectra[1, ], # Insert single row into DB
                     append = TRUE, # Append to existing table
@@ -232,8 +230,6 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
 
 
 
-
-DBI::dbDisconnect(db_con)
 
 
 

@@ -31,9 +31,10 @@ getProteinPeakData <-  function(db, filesha1){
 
 collapseProteinReplicates <- function(db, filesha1, proteinPercentPresence){
                                 IDBacApp::getProteinPeakData(db, filesha1) %>%
-                                  MALDIquant::filterPeaks(.,
+                                MALDIquant::binPeaks(., tolerance = .002) %>%
+                                MALDIquant::filterPeaks(.,
                                                           minFrequency = proteinPercentPresence / 100) %>%
-                                  MALDIquant::binPeaks(., tolerance = .002) %>%
+
                                   MALDIquant::mergeMassPeaks()
 }
 
@@ -53,14 +54,10 @@ proteiny <- function(fileshas,
           db %>%
             filter(filesha1 %in% fileshas) %>%
             filter(proteinPeaks != "NA") %>%
-            select(filesha1, Strain_ID) %>%
-            collect %>%
-            return(.) -> ids
-
-          split(ids$filesha1, ids$Strain_ID) %>%
-            lapply(function(x) IDBacApp::collapseProteinReplicates(db = db,
-                                                                    filesha1 = x,
-                                                                    proteinPercentPresence = proteinPercentPresence)) %>%
+            pull(filesha1) %>%
+                        IDBacApp::collapseProteinReplicates(db = db,
+                                                filesha1 = .,
+                                                proteinPercentPresence = proteinPercentPresence) %>%
             MALDIquant::trim(., c(lowerMassCutoff,
                                   upperMassCutoff))
 }
