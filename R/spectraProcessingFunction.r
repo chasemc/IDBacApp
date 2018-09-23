@@ -45,8 +45,9 @@ spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory, userDBCon
   # Get mzxml, serialize, compress, for insert to SQL
 
 
-  xml2::read_xml(rawDataFilePaths) %>%
-    xml2::xml_serialize(., NULL) %>%
+  rawDataFilePaths %>%
+    readLines %>%
+    serialize(., NULL) %>%
     memCompress(., type = "gzip") %>%
     list(.) %>%
     return(.) -> sqlDataFrame$XML$XML
@@ -173,7 +174,7 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
       MALDIquant::transformIntensity(., method = "sqrt") %>%
       MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
       MALDIquant::removeBaseline(., method = "TopHat") %>%
-      MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 4) %>%
+suppressWarnings(MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 4, supp) )%>%
       serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
       memCompress(., type="gzip") %>%
       list(.) %>%
@@ -199,7 +200,7 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
       MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
       MALDIquant::removeBaseline(., method = "TopHat") %>%
       #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
-      MALDIquant::detectPeaks(., method = "SuperSmoother", halfWindowSize = 20, SNR = 1) %>%
+    suppressWarnings(MALDIquant::detectPeaks(., method = "SuperSmoother", halfWindowSize = 20, SNR = 1)) %>%
       serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
       memCompress(., type="gzip") %>%
       list(.) %>%

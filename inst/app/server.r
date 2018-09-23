@@ -908,7 +908,90 @@ function(input,output,session){
   # -----------------
   collapsedPeaksP <- reactive({
 
-  IDBacApp::proteiny()
+
+    # connect to sql
+    db <- dplyr::tbl(userDBCon, "IndividualSpectra")
+
+
+      db %>%
+      filter(proteinPeaks != "NA") %>%
+      pull(Strain_ID) %>%
+      unique -> p
+
+      #
+      # combn(x = .,
+      #     m = 2,
+      #     simplify = T) -> p
+      #
+
+
+
+
+
+ qq <-     function(twoSampIDs){
+
+
+   db %>%
+     filter(proteinPeaks != "NA") %>%
+     filter(Strain_ID %in% twoSampIDs) %>%
+     select(filesha1,Strain_ID) %>%
+     collect %$%
+     split(filesha1,Strain_ID) %>%
+      lapply(function(x) IDBacApp::proteiny(fileshas = x,
+                                            db = db,
+                                            proteinPercentPresence = input$percentPresenceP,
+                                            lowerMassCutoff = input$lowerMass,
+                                            upperMassCutoff = input$upperMass)) %>%
+      MALDIquant::binPeaks(., tolerance = .002) %>%
+      # MALDIquant::intensityMatrix() %>%
+      # replace(., is.na(.), 0) %>%
+      # # coop::tcosine() %>%
+      # .[[2]] %>%
+     return(.)
+
+      }
+
+ p %>%
+   qq()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1204,8 +1287,9 @@ function(input,output,session){
 
     })
 
-  # -----------------
   # Create peak comparison ui
+   # -----------------
+
   output$inversepeakui <-  renderUI({
 
     # if(is.null(input$rawORreanalyze)){
@@ -1259,20 +1343,16 @@ function(input,output,session){
   })
 
 
-  # -----------------
-  ################################################
   # This creates the Plotly PCA plot and the calculation required for such.
+  # -----------------
 
   pcoaCalculation <- reactive({
     if(req(input$distance)=="cosineD"){
 
 
-      #Cosine Distance Matrix Function
-      cosineD <- function(x) {
-        as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
-      }
+
       # Perform cosine similarity function
-      dend <- proteinMatrix() %>% cosineD
+      dend <- proteinMatrix() %>% coop::tcosine() %>% magrittr::subtract(1,.) %>% as.dist
       # Convert NA to 1
       dend[which(is.na(dend))] <- 1
       # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
@@ -1500,17 +1580,15 @@ plot_ly(data = pcaDat,
     if(!dir.exists(cacheDir)){
       dir.create(cacheDir)
     }
+    print(cacheDir)
 
     if(req(input$distance)=="cosineD"){
 
       if(!file.exists(cacheFile) || input$initateInjection == "TRUE"){
 
-        #Cosine Distance Matrix Function
-        cosineD <- function(x) {
-          as.dist(1 - x%*%t(x)/(sqrt(rowSums(x^2) %*% t(rowSums(x^2)))))
-        }
+dj<<-proteinMatrix()
         # Perform cosine similarity function
-        dend <- proteinMatrix() %>% cosineD
+        dend <- proteinMatrix() %>% coop::tcosine() %>% magrittr::subtract(1,.) %>% as.dist
         # Convert NA to 1
         dend[which(is.na(dend))]<-1
         # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
@@ -1636,7 +1714,6 @@ u <<- dend
 
   output$hclustPlot <- renderPlot({
 
-aws <<- coloredDend()
     par(mar=c(5,5,5,input$dendparmar))
 
     if (input$kORheight=="1"){
