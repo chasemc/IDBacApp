@@ -20,8 +20,7 @@ coloringDendrogram <- function(useDots,
 
   colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", rainbow(1000)))
 
-
-  toReturn <- list(dend=NULL, bigMatrix=NULL, shortenedNames=NULL)
+  toReturn <- new.env(parent = new.env())
 
   if(userColor == TRUE){
 
@@ -155,9 +154,9 @@ coloringDendrogram <- function(useDots,
   }
 
 
-adend <<- toReturn
+ toReturn
 
-return(toReturn)
+
 
 
   #If no sample map is selected, run this:

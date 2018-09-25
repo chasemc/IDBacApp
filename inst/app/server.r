@@ -1,6 +1,6 @@
 userDBCon <- pool::dbPool(drv = RSQLite::SQLite(),
                           #dbname = selectedSQLPath()
-                          dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
+                          dbname = "C:/Users/chase/Desktop/hi2.sqlite"
 )
 
 
@@ -922,9 +922,7 @@ function(input,output,session){
                                            db = db,
                                            proteinPercentPresence = input$percentPresenceP,
                                            lowerMassCutoff = input$lowerMass,
-                                           upperMassCutoff = input$upperMass)) %>%
-     unname
-
+                                           upperMassCutoff = input$upperMass))
 
 
 
@@ -1370,7 +1368,6 @@ function(input,output,session){
 
   pcaCalculation <- reactive({
 
-
     pc <- log(proteinMatrix())
     pc[is.infinite(pc)]<-.000001
 
@@ -1378,7 +1375,7 @@ function(input,output,session){
     pc <- pc$ind$coord
     pc <- as.data.frame(pc)
     nam <- row.names(pc)
-    pc <- cbind(pc,nam)
+    cbind(pc,nam)
   })
 
 
@@ -1409,9 +1406,9 @@ function(input,output,session){
 
   output$pcaPlot <- renderPlotly({
 
-    pcaDat <- pcaCalculation()
-    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
-
+    pcaDat <<- pcaCalculation()
+    colorsToUse <<- dendextend::leaf_colors(coloredDend()$dend)
+cdd<<-coloredDend()
     if(any(is.na(as.vector(colorsToUse)))){
       colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
     }
@@ -1428,7 +1425,7 @@ plot_ly(data = pcaDat,
         type = "scatter3d",
         mode = "markers",
         marker = list(color = ~fac),
-        hoverinfo = 'text',
+        #hoverinfo = 'text',
         text = ~nam)
   })
 
@@ -1531,74 +1528,47 @@ plot_ly(data = pcaDat,
       booled<-"_UsedPresenceAbsence"
     }
 
-
-    cacheDir<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\")
     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
                       "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
 
-    # Create the cache directory if it doesn't exist
-    if(!dir.exists(cacheDir)){
-      dir.create(cacheDir)
-    }
-    print(cacheDir)
+    tyr<<-proteinDistance()
 
-    if(req(input$distance)=="cosineD"){
+    proteinDistance() %>%
+      hclust(method=input$clustering) %>%
+      as.dendrogram
 
-      if(!file.exists(cacheFile) || input$initateInjection == "TRUE"){
 
+    })
 
 
 
 
 
-z <- t(collapsedPeaksP())
+proteinDistance <- reactive({
+  IDBacApp::proteinDistanceMatrix(peakList = collapsedPeaksP(),
+                                  method = input$distance)
 
-zz<- combn(x = z,
-           m = 2,
-           simplify = T)
-
-za<-as.data.frame(zz)
-
-zad <- unlist(lapply(za, function(x){
-
-  x %>%
-    MALDIquant::binPeaks(., tolerance = .002) %>%
-    MALDIquant::intensityMatrix() %>%
-    replace(., is.na(.), 0) %>%
-    coop::tcosine() %>%
-    .[[2]]
-
-}))
-zad <- as.numeric(zad)
-mat <- matrix(nrow = length(pp), ncol = length(pp))
-mat[lower.tri(mat)] <- zad
-dend <- as.dist(mat)
+})
 
 
 
-# Perform cosine similarity function
 
-        # Convert NA to 1
-        dend[which(is.na(dend))]<-1
-        # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
-        dend<- dend %>% hclust(method=input$clustering) %>% as.dendrogram
-        # Cache results (insignificant for small trees, helpful for larger trees)
-        saveRDS(dend,cacheFile)
 
-      }else{
-        dend<-  readRDS(cacheFile)
-      }
-    }else{
-      if(!file.exists(cacheFile) || input$initateInjection == "TRUE"){
-        dend <- proteinMatrix() %>% dist(method=input$distance) %>% hclust(method=input$clustering) %>% as.dendrogram
-        saveRDS(dend,cacheFile)
-      }else{
-        dend<-  readRDS(cacheFile)
-      }
-    }
-u <<- dend
-    dend
-  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   #User input changes the height of the main hierarchical clustering plot
   plotHeight <- reactive({
