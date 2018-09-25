@@ -174,7 +174,7 @@ if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spect
       MALDIquant::transformIntensity(., method = "sqrt") %>%
       MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
       MALDIquant::removeBaseline(., method = "TopHat") %>%
-suppressWarnings(MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 4, supp) )%>%
+MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 4) %>%
       serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
       memCompress(., type="gzip") %>%
       list(.) %>%
@@ -200,7 +200,7 @@ suppressWarnings(MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20,
       MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
       MALDIquant::removeBaseline(., method = "TopHat") %>%
       #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
-    suppressWarnings(MALDIquant::detectPeaks(., method = "SuperSmoother", halfWindowSize = 20, SNR = 1)) %>%
+    MALDIquant::detectPeaks(., method = "SuperSmoother", halfWindowSize = 20, SNR = 1) %>%
       serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
       memCompress(., type="gzip") %>%
       list(.) %>%

@@ -53,7 +53,6 @@ proteiny <- function(fileshas,
           # get filesha1 and strain ids
           db %>%
             filter(filesha1 %in% fileshas) %>%
-            filter(proteinPeaks != "NA") %>%
             pull(filesha1) %>%
                         IDBacApp::collapseProteinReplicates(db = db,
                                                 filesha1 = .,

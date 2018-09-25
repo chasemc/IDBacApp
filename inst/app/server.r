@@ -913,57 +913,17 @@ function(input,output,session){
     db <- dplyr::tbl(userDBCon, "IndividualSpectra")
 
 
-      db %>%
-      filter(proteinPeaks != "NA") %>%
-      pull(Strain_ID) %>%
-      unique -> p
-
-      #
-      # combn(x = .,
-      #     m = 2,
-      #     simplify = T) -> p
-      #
-
-
-
-
-
- qq <-     function(twoSampIDs){
-
-
    db %>%
      filter(proteinPeaks != "NA") %>%
-     filter(Strain_ID %in% twoSampIDs) %>%
      select(filesha1,Strain_ID) %>%
      collect %$%
      split(filesha1,Strain_ID) %>%
-      lapply(function(x) IDBacApp::proteiny(fileshas = x,
-                                            db = db,
-                                            proteinPercentPresence = input$percentPresenceP,
-                                            lowerMassCutoff = input$lowerMass,
-                                            upperMassCutoff = input$upperMass)) %>%
-      MALDIquant::binPeaks(., tolerance = .002) %>%
-      # MALDIquant::intensityMatrix() %>%
-      # replace(., is.na(.), 0) %>%
-      # # coop::tcosine() %>%
-      # .[[2]] %>%
-     return(.)
-
-      }
-
- p %>%
-   qq()
-
-
-
-
-
-
-
-
-
-
-
+     lapply(function(x) IDBacApp::proteiny(fileshas = x,
+                                           db = db,
+                                           proteinPercentPresence = input$percentPresenceP,
+                                           lowerMassCutoff = input$lowerMass,
+                                           upperMassCutoff = input$upperMass)) %>%
+     unname
 
 
 
@@ -1586,9 +1546,38 @@ plot_ly(data = pcaDat,
 
       if(!file.exists(cacheFile) || input$initateInjection == "TRUE"){
 
-dj<<-proteinMatrix()
-        # Perform cosine similarity function
-        dend <- proteinMatrix() %>% coop::tcosine() %>% magrittr::subtract(1,.) %>% as.dist
+
+
+
+
+
+z <- t(collapsedPeaksP())
+
+zz<- combn(x = z,
+           m = 2,
+           simplify = T)
+
+za<-as.data.frame(zz)
+
+zad <- unlist(lapply(za, function(x){
+
+  x %>%
+    MALDIquant::binPeaks(., tolerance = .002) %>%
+    MALDIquant::intensityMatrix() %>%
+    replace(., is.na(.), 0) %>%
+    coop::tcosine() %>%
+    .[[2]]
+
+}))
+zad <- as.numeric(zad)
+mat <- matrix(nrow = length(pp), ncol = length(pp))
+mat[lower.tri(mat)] <- zad
+dend <- as.dist(mat)
+
+
+
+# Perform cosine similarity function
+
         # Convert NA to 1
         dend[which(is.na(dend))]<-1
         # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
@@ -1831,7 +1820,7 @@ u <<- dend
                                           #                    choices = levels(phyla)),
                                           selectInput("distance", label = h5(strong("Distance Algorithm")),
                                                       choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
-                                                      selected = "euclidean"),
+                                                      selected = "cosine"),
                                           selectInput("clustering", label = h5(strong("Clustering Algorithm")),
                                                       choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
                                                       selected = "ward.D2"),
