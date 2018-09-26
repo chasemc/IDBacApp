@@ -1,6 +1,7 @@
+
 userDBCon <- pool::dbPool(drv = RSQLite::SQLite(),
                           #dbname = selectedSQLPath()
-                          dbname = "C:/Users/chase/Desktop/hi2.sqlite"
+                          dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
 )
 
 
@@ -1814,6 +1815,7 @@ proteinDistance <- reactive({
                                           uiOutput("proteinReport"),
                                           br(),
                                           downloadButton("downloadHeirSVG",label="Save Dendrogram as SVG"),
+                                          actionButton("tester",label="tester"),
                                           br(),
                                           br(),
                                           downloadButton("downloadHierarchical","Save as Newick File")
@@ -1874,6 +1876,54 @@ proteinDistance <- reactive({
           uiOutput("sampleFactorMapColors"))
         )
     })
+
+
+
+
+
+
+  datafile <- callModule(IDBacApp::hierMeta, "datafile", labels(dendro()))
+
+
+
+  observeEvent(input$tester, {
+    showModal(modalDialog(IDBacApp::hierMetaOutput("datafile", "User data (.csv format)"),
+              size="l"))
+
+
+  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   # -----------------
