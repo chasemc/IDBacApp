@@ -1937,14 +1937,14 @@ proteinDistance <- reactive({
   smallPeaks <- reactive({
     # connect to sql
 
-    strains <- c("114A-1","114A-4")
+    strains <- c("114A-1")
 
     sqlQ <- glue::glue_sql("
                            SELECT `filesha1`, `Strain_ID`
                            FROM (SELECT *
                            FROM `IndividualSpectra`
                            WHERE (`Strain_ID` IN ({vars*})))
-                           WHERE (`proteinPeaks` IS NOT NULL)",
+                           WHERE (`smallMoleculePeaks` IS NOT NULL)",
                            vars = strains,
                            .con = userDBCon
     )
@@ -1953,15 +1953,15 @@ proteinDistance <- reactive({
     sqlQ <- DBI::dbSendQuery(conn, sqlQ)
 
     sqlQ <- DBI::dbFetch(sqlQ)
-
     split(sqlQ$filesha1,
-          sqlQ$Strain_ID) %>%
-      lapply(function(x){
+          sqlQ$Strain_ID) ->pol
+
+      lapply(pol,function(x){
         IDBacApp::collapseSmallMolReplicates(fileshas = x,
                                         db = userDBCon,
-                                        smallMolPercentPresence = input$percentPresenceP,
-                                        lowerMassCutoff = input$lowerMass,
-                                        upperMassCutoff = input$upperMass) %>% unname
+                                        smallMolPercentPresence = input$percentPresenceSM,
+                                        lowerMassCutoff = input$lowerMassSM,
+                                        upperMassCutoff = input$upperMassSM) %>% unname
 
       })
     #pool::poolReturn(conn)
@@ -1973,13 +1973,15 @@ proteinDistance <- reactive({
   small_Binned_Matrix<-reactive({
 
 
-    if(!is.null(input$Spectra1)){  # Check if there are protein spectra if TRUE, display dendro and use in analysis
+    if(!is.null(input$Spectra1)){  # Check if there are protein spectra if TRUE, display protein dendrogram and use to subset strains
 
-      labs <- sapply(smallPeaks(), function(x)metaData(x)$Strain)
+      labs <- sapply(smallPeaks(), function(x) metaData(x)$Strain)
 
-      if(is.null(input$plot_brush$ymin)){
+      if(is.null(input$plot_brush$ymin)){ # If there is a protein dendrogram: Don't ovrwhelm the browser by displaying everthing.
+
         if(length(smallPeaks()) >= 100){
-          combinedSmallMolPeaks <- smallPeaks()[1:sample.int(10,1)]
+
+          combinedSmallMolPeaks <- smallPeaks()[1:sample.int(10, 1)] # If more than 100 strains present, only display 10 to start
           # Also get matrix sample for subtraction
           combinedSmallMolPeaks <- c(combinedSmallMolPeaks,smallPeaks()[grep(paste0("Matrix",collapse="|"), labs,ignore.case=TRUE)])
 
@@ -2263,11 +2265,11 @@ proteinDistance <- reactive({
                                          label = h5(strong("Upper Mass Cutoff")),
                                          value = 2000,
                                          step = 20,
-                                         max = round(max(sapply(smallPeaks(),function(x)max(MALDIquant::mass(x)))), digits = -1)),
+                                         max = 3000,
                             numericInput("lowerMassSM",
                                          label = h5(strong("Lower Mass Cutoff")),value = 200,
                                          step = 20,
-                                         min = round(min(sapply(smallPeaks(), function(x)min(MALDIquant::mass(x)))), digits = -1)),
+                                         min = 3000),
                             numericInput("hclustHeightNetwork",
                                          label = h5(strong("Expand Tree")),
                                          value = 750,

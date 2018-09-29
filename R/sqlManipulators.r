@@ -84,21 +84,19 @@ collapseProteinReplicates <- function(db,
 getSmallMolPeakData <-   function(db, fileshas){
 
   sqlQ <- glue::glue_sql("
-                          SELECT `proteinPeaks`
+                          SELECT `smallMoleculePeaks`
                           FROM (SELECT *
                                   FROM `IndividualSpectra`
-                                WHERE (`filesha1` IN ({airports*})))
-                          WHERE (`proteinPeaks` IS NOT NULL)",
-                         airports = fileshas,
+                                WHERE (`filesha1` IN ({shas*})))
+                          WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                         shas = fileshas,
                          .con = db
   )
 
   conn <- pool::poolCheckout(db)
   airport <- DBI::dbSendQuery(conn, sqlQ)
-
   p <- DBI::dbFetch(airport)
   pool::poolReturn(conn)
-
   p <- unname(unlist(p, recursive = FALSE))
   unlist(lapply(p, function(x) unserialize(memDecompress(x, type= "gzip")))  )
 
