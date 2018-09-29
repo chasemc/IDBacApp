@@ -56,7 +56,8 @@ Required_Packages = c("Rcpp",
                       "dplyr",
                       "rhandsontable",
                       "Rtsne",
-                      "pool")
+                      "pool",
+                      "magrittr")
 
 
 # Install and Load Packages
@@ -914,16 +915,26 @@ function(input,output,session){
     db <- dplyr::tbl(userDBCon, "IndividualSpectra")
 
 
+
    db %>%
      filter(proteinPeaks != "NA") %>%
      select(filesha1,Strain_ID) %>%
      collect %$%
-     split(filesha1,Strain_ID) %>%
-     lapply(function(x) IDBacApp::proteiny(fileshas = x,
-                                           db = db,
+     split(filesha1,Strain_ID) -> temp
+
+   temp %>%
+     lapply(function(x){
+       library(magrittr)
+       library(dplyr)
+
+       IDBacApp::collapseProteinReplicates(fileshas = x,
+                                           db = userDBCon,
                                            proteinPercentPresence = input$percentPresenceP,
                                            lowerMassCutoff = input$lowerMass,
-                                           upperMassCutoff = input$upperMass))
+                                           upperMassCutoff = input$upperMass)})
+
+})
+#Lapply above should really be looked at and consider replacinng with  parallel::parLapply()
 
 
 
@@ -950,11 +961,6 @@ function(input,output,session){
 
 
 
-
-
-
-
-  })
 
 
 
@@ -991,8 +997,8 @@ function(input,output,session){
       filter(proteinPeaks != "NA") %>%
       select(filesha1) %>%
       pull %>%
-      IDBacApp::proteiny(fileshas = .,
-                         db = db,
+      IDBacApp::collapseProteinReplicates(fileshas = .,
+                         db = userDBCon,
                          proteinPercentPresence = input$percentPresenceP,
                          lowerMassCutoff = input$lowerMass,
                          upperMassCutoff = input$upperMass) %>%
@@ -1005,8 +1011,8 @@ function(input,output,session){
       filter(proteinPeaks != "NA") %>%
       select(filesha1) %>%
       pull %>%
-      IDBacApp::proteiny(fileshas = .,
-                         db = db,
+      IDBacApp::collapseProteinReplicates(fileshas = .,
+                         db = userDBCon,
                          proteinPercentPresence = input$percentPresenceP,
                          lowerMassCutoff = input$lowerMass,
                          upperMassCutoff = input$upperMass) %>%
@@ -1368,11 +1374,13 @@ function(input,output,session){
   #PCA Calculation
 
   pcaCalculation <- reactive({
-
+aaw<<-proteinMatrix()
     pc <- log(proteinMatrix())
     pc[is.infinite(pc)]<-.000001
 
-    pc <- PCA(pc, graph=FALSE, ncp = 50)
+    pc <- PCA(pc,
+              graph = FALSE,
+              ncp = 50, scale.unit = T)
     pc <- pc$ind$coord
     pc <- as.data.frame(pc)
     nam <- row.names(pc)
@@ -1407,9 +1415,8 @@ function(input,output,session){
 
   output$pcaPlot <- renderPlotly({
 
-    pcaDat <<- pcaCalculation()
-    colorsToUse <<- dendextend::leaf_colors(coloredDend()$dend)
-cdd<<-coloredDend()
+    pcaDat <- pcaCalculation()
+    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
     if(any(is.na(as.vector(colorsToUse)))){
       colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
     }
@@ -1928,8 +1935,38 @@ proteinDistance <- reactive({
 
   # -----------------
   smallPeaks <- reactive({
-    unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SmallMoleculePeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
-  })
+    # connect to sql
+
+    strains <- c("114A-1","114A-4")
+
+    sqlQ <- glue::glue_sql("
+                           SELECT `filesha1`, `Strain_ID`
+                           FROM (SELECT *
+                           FROM `IndividualSpectra`
+                           WHERE (`Strain_ID` IN ({vars*})))
+                           WHERE (`proteinPeaks` IS NOT NULL)",
+                           vars = strains,
+                           .con = userDBCon
+    )
+
+    conn <- pool::poolCheckout(userDBCon)
+    sqlQ <- DBI::dbSendQuery(conn, sqlQ)
+
+    sqlQ <- DBI::dbFetch(sqlQ)
+
+    split(sqlQ$filesha1,
+          sqlQ$Strain_ID) %>%
+      lapply(function(x){
+        IDBacApp::collapseSmallMolReplicates(fileshas = x,
+                                        db = userDBCon,
+                                        smallMolPercentPresence = input$percentPresenceP,
+                                        lowerMassCutoff = input$lowerMass,
+                                        upperMassCutoff = input$upperMass) %>% unname
+
+      })
+    #pool::poolReturn(conn)
+
+    })
 
 
   # -----------------
@@ -1997,23 +2034,23 @@ proteinDistance <- reactive({
       #
       combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
       #For now, matrix peaks are all picked at SNR > 6
-      combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
-      combinedSmallMolPeaksm@intensity<-combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr>6)]
-      combinedSmallMolPeaksm@snr<-combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr>6)]
-      combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
-      combinedSmallMolPeaks<-c(combinedSmallMolPeaksm,combinedSmallMolPeaks)
+      combinedSmallMolPeaksm@mass <- combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr > 6)]
+      combinedSmallMolPeaksm@intensity <- combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr > 6)]
+      combinedSmallMolPeaksm@snr <- combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr > 6)]
+      combinedSmallMolPeaks <- combinedSmallMolPeaks[which(!grepl(paste0("Matrix", collapse="|"), sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
+      combinedSmallMolPeaks <- c(combinedSmallMolPeaksm,combinedSmallMolPeaks)
 
     }else{
-      combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
+      combinedSmallMolPeaks <- combinedSmallMolPeaks[which(!grepl(paste0("Matrix", collapse="|"), sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
     }
 
 
     for (i in 1:length(combinedSmallMolPeaks)){
-      combinedSmallMolPeaks[[i]]@mass<-combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
-      combinedSmallMolPeaks[[i]]@intensity<-combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
-      combinedSmallMolPeaks[[i]]@snr<-combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
+      combinedSmallMolPeaks[[i]]@mass <- combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr > input$smSNR)]
+      combinedSmallMolPeaks[[i]]@intensity <- combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr > input$smSNR)]
+      combinedSmallMolPeaks[[i]]@snr <- combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr > input$smSNR)]
     }
-    binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
+    binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x))) != 0)], tolerance = .002)
   })
 
 
@@ -2023,7 +2060,7 @@ proteinDistance <- reactive({
   })
 
   # -----------------
-  subSelect<-reactive({
+  subSelect <- reactive({
 
     # process for MAN creation
 
@@ -2088,6 +2125,7 @@ proteinDistance <- reactive({
   # -----------------
 
   smallMolNetworkDataFrame <- reactive({
+
 
     smallNetwork <- intensityMatrix(subSelect())
     temp <- NULL
@@ -2168,37 +2206,6 @@ proteinDistance <- reactive({
   })
 
 
-  # # -----------------
-  # #This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the clustering page.
-  # output$Clusters <- renderText({
-  #
-  #   # Display text of how many clusters were created.
-  #   if (is.null(input$kORheight)){
-  #   }else if (input$kORheight=="2"){
-  #     isolate(   paste("You have Created ", length(unique(cutree(dendro(),h=input$height)))," Cluster(s)"))
-  #   }
-  #   else if (input$kORheight=="1"){
-  #     isolate( paste("You have Created ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)"))
-  #   }
-  # })
-
-
-  # -----------------
-  # ##This displays the number of clusters created on the hierarchical clustering tab- displays text at top of the networking page.
-  # output$Clusters2 <- renderText({
-  #   # Display text of how many clusters were created.
-  #
-  #   if(!is.null(input$Spectra1)){
-  #
-  #     if(input$kORheight=="2"){
-  #       paste("You have ", length(unique(cutree(dendro(),h=input$height)))," Cluster(s)")
-  #     }
-  #     else{
-  #       paste("You have ", length(unique(cutree(dendro(),k=input$kClusters)))," Cluster(s)")
-  #     }
-  #
-  #   }
-  # })
 
 
   # -----------------
@@ -2234,22 +2241,50 @@ proteinDistance <- reactive({
     fluidPage(
       column(width=3,
              fluidRow(
-               sidebarPanel(style='padding:30px',width="100%",
-                            radioButtons("matrixSamplePresent", label = h5(strong("Do you have a matrix blank?")),
+               sidebarPanel(style = 'padding:30px',
+                            width = "100%",
+                            radioButtons("matrixSamplePresent",
+                                         label = h5(strong("Do you have a matrix blank?")),
                                          choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
                                          selected = 1),
-                            numericInput("percentPresenceSM", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
-                            numericInput("smSNR", label = h5(strong("Signal To Noise Cutoff")),value = 4,step=.5,min=1.5,max=100),
-
-
-                            numericInput("upperMassSM", label = h5(strong("Upper Mass Cutoff")),value = 2000,step=20,max=round(max(sapply(smallPeaks(),function(x)max(mass(x)))),digits=-1)),
-                            numericInput("lowerMassSM", label = h5(strong("Lower Mass Cutoff")),value = 200,step=20,min=round(min(sapply(smallPeaks(),function(x)min(mass(x)))),digits=-1)),
-                            numericInput("hclustHeightNetwork", label = h5(strong("Expand Tree")),value = 750,step=50,min=100),
-                            numericInput("dendparmar2",label=h5(strong("Adjust right margin of dendrogram")),value=5),
-                            downloadButton("downloadSmallMolNetworkData", label = "Download Current Network Data", value = FALSE),
+                            numericInput("percentPresenceSM",
+                                         label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
+                                         value = 70,
+                                         step = 10,
+                                         min = 0,
+                                         max = 100),
+                            numericInput("smSNR",
+                                         label = h5(strong("Signal To Noise Cutoff")),
+                                         value = 4,
+                                         step = 0.5,
+                                         min = 1.5,
+                                         max = 100),
+                            numericInput("upperMassSM",
+                                         label = h5(strong("Upper Mass Cutoff")),
+                                         value = 2000,
+                                         step = 20,
+                                         max = round(max(sapply(smallPeaks(),function(x)max(MALDIquant::mass(x)))), digits = -1)),
+                            numericInput("lowerMassSM",
+                                         label = h5(strong("Lower Mass Cutoff")),value = 200,
+                                         step = 20,
+                                         min = round(min(sapply(smallPeaks(), function(x)min(MALDIquant::mass(x)))), digits = -1)),
+                            numericInput("hclustHeightNetwork",
+                                         label = h5(strong("Expand Tree")),
+                                         value = 750,
+                                         step = 50,
+                                         min = 100),
+                            numericInput("dendparmar2",
+                                         label = h5(strong("Adjust right margin of dendrogram")),
+                                         value = 5),
+                            downloadButton("downloadSmallMolNetworkData",
+                                           label = "Download Current Network Data",
+                                           value = FALSE),
                             br(),
-                            p(strong("Hint 1:"), "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
-                            p(strong("Hint 2:"), "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),br()
+                            p(strong("Hint 1:"),
+                              "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
+                            p(strong("Hint 2:"),
+                              "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),
+                            br()
 
                )),
 
@@ -2513,6 +2548,12 @@ proteinDistance <- reactive({
     )
   })
 
+
+
+
+
+
+
   #-----------  Creating a new library
 
   createNewLibraryTable <- reactive({
@@ -2567,8 +2608,12 @@ proteinDistance <- reactive({
 
 
 
-    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
-      hot_col("Strain_ID", readOnly = TRUE)
+    rhandsontable::rhandsontable(DF,
+                                 useTypes = FALSE,
+                                 selectCallback = TRUE,
+                                 contextMenu = FALSE) %>%
+      hot_col("Strain_ID",
+              readOnly = TRUE)
   })
 
   observeEvent(input$saveBtn, {

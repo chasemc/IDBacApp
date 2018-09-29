@@ -6,7 +6,7 @@ hierMetaOutput <- function(id, label = "Sample Metadata Input") {
   ns <- NS(id)
 
 
-  tagList(
+  tagList(tags$style(HTML(".htMenu { z-index: 1051; }")),
     rHandsontableOutput(ns("metaTable"))
   )
 
@@ -30,11 +30,11 @@ hierMeta <- function(input, output, session, sampleIDs) {
 
         currentlyLoadedSamples <-  data.frame(Strain_ID = sampleIDs, `Property 1` = rep("",length(sampleIDs)))
             rhandsontable::rhandsontable(currentlyLoadedSamples,
-                                         useTypes = FALSE,
-                                         contextMenu = TRUE ) %>%
+                                          useTypes = FALSE,
+                                          contextMenu = TRUE ) %>%
+              hot_col("Strain_ID", readOnly = TRUE) %>%
               hot_context_menu(allowRowEdit = FALSE,
                                allowColEdit = TRUE)
-
 
 
 
