@@ -6,8 +6,6 @@ proteinDistanceMatrix <- function(peakList, method){
 
 
 
-
-
   # Takes as input a flat-list of MALDIquant S4 MassPeaks objects
 
 # Create native R distance matrix from cosine scores

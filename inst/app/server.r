@@ -939,38 +939,13 @@ function(input,output,session){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   # -----------------
   proteinMatrix <- reactive({
 
 
-
+MALDIquant::binPeaks(collapsedPeaksP(), method = "strict", tolerance = .02) %>%
     IDBacApp::proteinPeaksToMatrix(bool = input$booled,
-                         proteinPeaks = collapsedPeaksP())
+                         proteinPeaks = .)
 
 
   })
@@ -1996,9 +1971,7 @@ proteinDistance <- reactive({
                            strainIds = c(combinedSmallMolPeaks,combinedSmallMolPeaksAll, matrixID),
                            .con = userDBCon
     )
-a1<<-combinedSmallMolPeaks
-a2<<-combinedSmallMolPeaksAll
-a3<<-matrixID
+
 
     conn <- pool::poolCheckout(userDBCon)
 
@@ -2013,7 +1986,21 @@ a3<<-matrixID
                                            smallMolPercentPresence = input$percentPresenceSM,
                                            lowerMassCutoff = input$lowerMassSM,
                                            upperMassCutoff = input$upperMassSM) %>% unname
-    })
+    }) -> sqlQ
+
+    for(i in 1:length(sqlQ)){
+
+    snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)
+
+
+    sqlQ[[i]]@mass <- sqlQ[[i]]@mass[snr1]
+    sqlQ[[i]]@snr <- sqlQ[[i]]@snr[snr1]
+    sqlQ[[i]]@intensity <- sqlQ[[i]]@intensity[snr1]
+    }
+
+
+
+    sqlQ
 
 
 
@@ -2030,13 +2017,20 @@ a3<<-matrixID
 
     binned <- binPeaks(selectedSmallMolPeakList(), method = "relaxed", tolerance = .002)
 
-    # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
-    if(input$matrixSamplePresent == 1){
-
-
-
       #Next, find which ID contains "matrix", in any capitalization
       matrixIndex <- grep("^matrix",labs,ignore.case=TRUE)
+
+   if(length(matrixIndex) == 0){
+
+     peaksa <- binned
+
+   }
+      if(input$matrixSamplePresent == 1){
+
+        validate(
+          need(length(matrixIndex) > 0, "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to the left." )
+        )
+      # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
 
       #----------------------------------------------------------------------------
       #peaksa = all samples but remove the matrix sample from the list
@@ -2044,19 +2038,8 @@ a3<<-matrixID
       #peaksb = matrix blank sample
       peaksb <- binned[[matrixIndex]]
 
-      for (i in 1:length(peaksa)){
 
-        # setdiff to find which peaks are
-        commonIons <- which(!peaksa[[i]]@mass %in% setdiff(peaksa[[i]]@mass,peaksb@mass))
-        if(length(commonIons)!=0){   # Without this if statement, peaksa values will be set to 0 if no matrix matches are found == BAD
-          peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
-          peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
-          peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
-        }
-      }
 
-    }else{ # no matrix subtraction
-      peaksa <- binned
     }
 
     peaksa
