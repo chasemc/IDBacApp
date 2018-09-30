@@ -11,7 +11,7 @@ proteinMatrixInnard <- intensityMatrix(proteinPeaks)
 rownames(proteinMatrixInnard) <- paste(proteinSamples)
 proteinMatrixInnard[is.na(proteinMatrixInnard)] <- 0
 
-if(length(bool)==0){
+if(bool == "0"){
   proteinMatrixInnard
 }else if (bool == "1") {
   ifelse(proteinMatrixInnard > 0, 1, 0)

@@ -1671,8 +1671,6 @@ proteinDistance <- reactive({
     )
 
 
-
-
   })
 
 
@@ -1911,200 +1909,140 @@ proteinDistance <- reactive({
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   # -----------------
-  smallPeaks <- reactive({
-    # connect to sql
+  selectedSmallMolPeakList <- reactive({
 
-    strains <- c("114A-1")
+    combinedSmallMolPeaks <- NULL
+    combinedSmallMolPeaksAll <- NULL
+    matrixID <- NULL
 
-    sqlQ <- glue::glue_sql("
-                           SELECT `filesha1`, `Strain_ID`
-                           FROM (SELECT *
-                           FROM `IndividualSpectra`
-                           WHERE (`Strain_ID` IN ({vars*})))
-                           WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                           vars = strains,
-                           .con = userDBCon
-    )
+    if(!is.null(dendro())){  # Check if there are protein spectra if TRUE, display protein dendrogram and use to subset strains
 
-    conn <- pool::poolCheckout(userDBCon)
-    sqlQ <- DBI::dbSendQuery(conn, sqlQ)
+      if(is.null(input$plot_brush$ymin)){ # If there is a protein dendrogram and user hasn't brushed:
+                                          # Don't ovrwhelm the browser by displaying everthing when page loads
 
-    sqlQ <- DBI::dbFetch(sqlQ)
-    split(sqlQ$filesha1,
-          sqlQ$Strain_ID) ->pol
-
-      lapply(pol,function(x){
-        IDBacApp::collapseSmallMolReplicates(fileshas = x,
-                                        db = userDBCon,
-                                        smallMolPercentPresence = input$percentPresenceSM,
-                                        lowerMassCutoff = input$lowerMassSM,
-                                        upperMassCutoff = input$upperMassSM) %>% unname
-
-      })
-    #pool::poolReturn(conn)
-
-    })
-
-
-  # -----------------
-  small_Binned_Matrix<-reactive({
-
-
-    if(!is.null(input$Spectra1)){  # Check if there are protein spectra if TRUE, display protein dendrogram and use to subset strains
-
-      labs <- sapply(smallPeaks(), function(x) metaData(x)$Strain)
-
-      if(is.null(input$plot_brush$ymin)){ # If there is a protein dendrogram: Don't ovrwhelm the browser by displaying everthing.
-
-        if(length(smallPeaks()) >= 100){
-
-          combinedSmallMolPeaks <- smallPeaks()[1:sample.int(10, 1)] # If more than 100 strains present, only display 10 to start
-          # Also get matrix sample for subtraction
-          combinedSmallMolPeaks <- c(combinedSmallMolPeaks,smallPeaks()[grep(paste0("Matrix",collapse="|"), labs,ignore.case=TRUE)])
-
+        if(length(labels(dendro())) >= 25){
+          # If more than 25 strains present, only display 10 to start, otherwise display all
+          # Get random 10 strain IDs from dendrogram
+          combinedSmallMolPeaks <- labels(dendro())[1:sample.int(10, 1)]
         }else{
-          combinedSmallMolPeaks <- smallPeaks()
+          combinedSmallMolPeaks <- labels(dendro())
         }
       }else{
-        #This takes a brush selection over the heirarchical clustering plot within the MAN tab and uses this selection of samples for MAN analysis
-        location_of_Heirarchical_Leaves<-get_nodes_xy(dendro())
-        minLoc<-input$plot_brush$ymin
-        maxLoc<-input$plot_brush$ymax
-        # See undernath for explanation of each column
-        threeColTable <- data.frame(seq(1:length(labels(dendro()))), rep(1:length(labels(dendro()))) ,labels(dendro()))
-        #note: because rotated tree, x is actually y, y is actually x
-        #column 1= y-values of dendrogram leaves
-        #column 2= node x-values we selected for only leaves by only returning nodes with x-values of 0
-        #column 3= leaf labels
 
-        # w = pull out the selected sample(s) indices based on the brush
-        w<- which(threeColTable[,1] > minLoc & threeColTable[,1] < maxLoc)
-        # w = pull out the selected brushed sample(s)
-        brushed<-as.vector(threeColTable[,3][w])
-        # get indices of all sample names for small molecule peak lists
-        labs<-as.vector(sapply(smallPeaks(),function(x)metaData(x)$Strain))
-        # only return small moleule peak lists which were brushed, strict grep
-
-        combinedSmallMolPeaks<-smallPeaks()[grep(paste0(c(paste0("^",brushed,"$"),"Matrix"),collapse="|"), labs,ignore.case=TRUE)]
-
+        combinedSmallMolPeaks <- IDBacApp::networkViaBrushedDendrogram(dendrogram = dendro(),
+                                                                       brushYmin = input$plot_brush$ymin,
+                                                                       brushYmax = input$plot_brush$ymax)
       }
-      #if(length(grep("Matrix",sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))==0){"No Matrix Blank!!!!!!!"}else{
-      #find matrix spectra
-
-    }else{ # If !is.null(input$Spectra1 == TRUE then there are no protein spectra, run only MAN analysis
-      combinedSmallMolPeaks<-smallPeaks()
 
 
+    }else{
+
+      # retrieve all Strain_IDs in db, check for matrix.
+      combinedSmallMolPeaksAll <- glue::glue_sql("
+                             SELECT DISTINCT `Strain_ID`
+                             FROM `IndividualSpectra`
+                             WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                             .con = userDBCon
+      )
+
+      conn <- pool::poolCheckout(userDBCon)
+      combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
+      combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
     }
 
-    # input$matrixSamplePresent (Whether there is a matrix sample)  1=Yes   2=No
-    if(input$matrixSamplePresent ==1){
-      # combinedsmallMolPeaksm  will contain all samples containing word matrix
-      combinedSmallMolPeaksm<-combinedSmallMolPeaks[grep(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE)]
+    # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
+    if(input$matrixSamplePresent == 1){
+
+      if(!exists("combinedSmallMolPeaksAll")){
+      # retrieve all Strain_IDs in db, check for matrix.
+        combinedSmallMolPeaksAll <- glue::glue_sql("
+                             SELECT DISTINCT `Strain_ID`
+                             FROM `IndividualSpectra`
+                             WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                             .con = userDBCon
+        )
+
+      conn <- pool::poolCheckout(userDBCon)
+      combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
+      combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
+      }
+
+# Get sample IDs that begin with "matrix" (need this to search sql db)
+# Also give opportunity to later add ability for letting user interactively select which sample is the blank
+      matrixID <- grep("^matrix",
+                       combinedSmallMolPeaksAll,
+                          ignore.case = TRUE,
+                          value = TRUE)
+
 
       # Check if there is a matrix sample
       validate(
-        need(combinedSmallMolPeaksm != "", "It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
+        need(length(matrixID) == 0, "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to left." )
       )
 
-      # At least for now, replicate matrix samples are merged into a consensus peak list.
-      # Make sure we haven't reduced the mass object down to S4
-      if(typeof(combinedSmallMolPeaksm)=="S4"){combinedSmallMolPeaksm<- list(combinedSmallMolPeaksm)}
-      #
-      combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
-      #For now, matrix peaks are all picked at SNR > 6
-      combinedSmallMolPeaksm@mass <- combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr > 6)]
-      combinedSmallMolPeaksm@intensity <- combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr > 6)]
-      combinedSmallMolPeaksm@snr <- combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr > 6)]
-      combinedSmallMolPeaks <- combinedSmallMolPeaks[which(!grepl(paste0("Matrix", collapse="|"), sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
-      combinedSmallMolPeaks <- c(combinedSmallMolPeaksm,combinedSmallMolPeaks)
-
     }else{
-      combinedSmallMolPeaks <- combinedSmallMolPeaks[which(!grepl(paste0("Matrix", collapse="|"), sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
+# Don't add matrix blank to sample ID vector (leave as NULL)
     }
 
 
-    for (i in 1:length(combinedSmallMolPeaks)){
-      combinedSmallMolPeaks[[i]]@mass <- combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr > input$smSNR)]
-      combinedSmallMolPeaks[[i]]@intensity <- combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr > input$smSNR)]
-      combinedSmallMolPeaks[[i]]@snr <- combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr > input$smSNR)]
-    }
-    binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x))) != 0)], tolerance = .002)
+    # retrieve small mol peaks, filesha1, and strain_id , given Strain_ID.
+    sqlQ <- glue::glue_sql("
+                       SELECT `filesha1`, `Strain_ID`
+                       FROM (SELECT *
+                       FROM `IndividualSpectra`
+                       WHERE (`Strain_ID` IN ({strainIds*})))
+                       WHERE (`smallMoleculePeaks` != 'NA')",
+                           strainIds = c(combinedSmallMolPeaks,combinedSmallMolPeaksAll, matrixID),
+                           .con = userDBCon
+    )
+a1<<-combinedSmallMolPeaks
+a2<<-combinedSmallMolPeaksAll
+a3<<-matrixID
+
+    conn <- pool::poolCheckout(userDBCon)
+
+    sqlQ <- DBI::dbSendQuery(conn, sqlQ)
+
+    sqlQ <- DBI::dbFetch(sqlQ)
+
+    split(sqlQ$filesha1, sqlQ$Strain_ID) %>%
+    lapply(., function(x){
+      IDBacApp::collapseSmallMolReplicates(fileshas = x,
+                                           db = userDBCon,
+                                           smallMolPercentPresence = input$percentPresenceSM,
+                                           lowerMassCutoff = input$lowerMassSM,
+                                           upperMassCutoff = input$upperMassSM) %>% unname
+    })
+
+
+
   })
 
 
-  # -----------------
-  trimmedSM <- reactive({
-   trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
-  })
+
+
 
   # -----------------
-  subSelect <- reactive({
+  subtractMatrixBlank <- reactive({
 
-    # process for MAN creation
+    labs <- labels(selectedSmallMolPeakList())
 
-    #Get sample IDs from MALDIquant spectra
-    labs <- sapply(trimmedSM(), function(x)metaData(x)$Strain)
-    labs <- factor(labs)
-    new2 <- NULL
-    newPeaks <- NULL
+    binned <- binPeaks(selectedSmallMolPeakList(), method = "relaxed", tolerance = .002)
 
-    #Merge specctra based on frequency of presence.  For peaks above threshold, keep the mean intensity
-    for (i in seq_along(levels(labs))) {
-      specSubset <- which(labs == levels(labs)[[i]])
-      if (length(specSubset) > 1) {
-        new <-suppressWarnings(filterPeaks(trimmedSM()[specSubset],minFrequency=input$percentPresenceSM/100))
-        new<-mergeMassPeaks(new,method="mean")
-        new2 <- c(new2, new)
-      } else{
-        new2 <- c(new2, trimmedSM()[specSubset])
-      }
-
-    }
-
-    combinedSmallMolPeaks <- new2
+    # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
+    if(input$matrixSamplePresent == 1){
 
 
-    #This section deals with whether to remove a matrix blank or not, as decided by user, defaults to remove blank
-    if(input$matrixSamplePresent ==1){
 
-      #Removing Peaks which share the m/z as peaks that are in the Matrix Blank
-
-      #----------------------------------------------------------------------------
-      #Find the matrix sample index
-      #First, get all sample IDs
-      labs <- sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain)
       #Next, find which ID contains "matrix", in any capitalization
-      matrixIndex <- grep(paste0("Matrix",collapse="|"),labs,ignore.case=TRUE)
+      matrixIndex <- grep("^matrix",labs,ignore.case=TRUE)
 
       #----------------------------------------------------------------------------
       #peaksa = all samples but remove the matrix sample from the list
-      peaksa <- combinedSmallMolPeaks[-matrixIndex]
+      peaksa <- binned[-matrixIndex]
       #peaksb = matrix blank sample
-      peaksb <- combinedSmallMolPeaks[[matrixIndex]]
+      peaksb <- binned[[matrixIndex]]
 
       for (i in 1:length(peaksa)){
 
@@ -2117,8 +2055,8 @@ proteinDistance <- reactive({
         }
       }
 
-    }else{
-      peaksa<-combinedSmallMolPeaks
+    }else{ # no matrix subtraction
+      peaksa <- binned
     }
 
     peaksa
@@ -2129,10 +2067,10 @@ proteinDistance <- reactive({
   smallMolNetworkDataFrame <- reactive({
 
 
-    smallNetwork <- intensityMatrix(subSelect())
+    smallNetwork <- intensityMatrix(subtractMatrixBlank())
     temp <- NULL
-    for (i in 1:length(subSelect())){
-      temp <- c(temp,subSelect()[[i]]@metaData$Strain)
+    for (i in 1:length(subtractMatrixBlank())){
+      temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
     }
 
 
@@ -2187,8 +2125,8 @@ proteinDistance <- reactive({
     temp <- NULL
 
 
-    for (i in 1:length(subSelect())){
-      temp <- c(temp,subSelect()[[i]]@metaData$Strain)
+    for (i in 1:length(subtractMatrixBlank())){
+      temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
     }
 
     a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
@@ -2265,7 +2203,7 @@ proteinDistance <- reactive({
                                          label = h5(strong("Upper Mass Cutoff")),
                                          value = 2000,
                                          step = 20,
-                                         max = 3000,
+                                         max = 3000),
                             numericInput("lowerMassSM",
                                          label = h5(strong("Lower Mass Cutoff")),value = 200,
                                          step = 20,
@@ -2325,7 +2263,7 @@ proteinDistance <- reactive({
   # -----------------
   # Output a paragraph about which paramters were used to create the currently-displayed MAN
   output$manReport<-renderUI({
-    p("This MAN was created by analyzing ",tags$code(length(subSelect())), " samples,",if(input$matrixSamplePresent==1){("subtracting a matrix blank,")}else{},
+    p("This MAN was created by analyzing ",tags$code(length(subtractMatrixBlank())), " samples,",if(input$matrixSamplePresent==1){("subtracting a matrix blank,")}else{},
       "and retaining peaks with a signal to noise ratio above ",tags$code(input$smSNR)," and occurring in greater than ",tags$code(input$percentPresenceSM),"% of replicate spectra.
       Peaks occuring below ",tags$code(input$lowerMassSM)," m/z or above ",tags$code(input$upperMassSM)," m/z were removed from the analysis. ")
   })

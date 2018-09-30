@@ -94,11 +94,17 @@ getSmallMolPeakData <-   function(db, fileshas){
   )
 
   conn <- pool::poolCheckout(db)
-  airport <- DBI::dbSendQuery(conn, sqlQ)
-  p <- DBI::dbFetch(airport)
+  temp <- DBI::dbSendQuery(conn, sqlQ)
+  temp <- DBI::dbFetch(temp)
   pool::poolReturn(conn)
-  p <- unname(unlist(p, recursive = FALSE))
-  unlist(lapply(p, function(x) unserialize(memDecompress(x, type= "gzip")))  )
+  temp <- unname(unlist(temp,
+                        recursive = FALSE))
+  unlist(lapply(temp,
+                function(x){
+                  unserialize(memDecompress(x,
+                                            type= "gzip"))
+                })
+         )
 
 }
 
@@ -108,19 +114,20 @@ collapseSmallMolReplicates <- function(db,
                                        smallMolPercentPresence,
                                        lowerMassCutoff,
                                        upperMassCutoff){
-
-  IDBacApp::getSmallMolPeakData(db,
-                               fileshas) %>%
+  fileshas %>%
+    IDBacApp::getSmallMolPeakData(db = db,
+                                        fileshas = .) %>%
     MALDIquant::binPeaks(.,
-                         tolerance = .02) %>%
+                         tolerance = .02,
+                         method = "relaxed") %>%
     MALDIquant::filterPeaks(.,
-                            minFrequency = smallMolPercentPresence / 100) %>%
-    MALDIquant::mergeMassPeaks() %>%
-    MALDIquant::trim(.,
-                     c(lowerMassCutoff,
-                       upperMassCutoff))
-
-
+                            minFrequency = smallMolPercentPresence / 100,
+                            mergeWhitelists = FALSE) %>%
+    MALDIquant::mergeMassPeaks(.,
+                               method = "sum") %>%
+    MALDIquant::trim(object = .,
+                     range = c(lowerMassCutoff,
+                               upperMassCutoff))
 }
 
 
