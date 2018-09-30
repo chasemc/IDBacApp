@@ -1,8 +1,4 @@
 
-userDBCon <- pool::dbPool(drv = RSQLite::SQLite(),
-                          #dbname = selectedSQLPath()
-                          dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
-)
 
 
 #delete
@@ -121,6 +117,9 @@ function(input,output,session){
   # -----------------
   # Reactive variable returning the user-chosen location of the raw MALDI files as string
   selectedSQLPath <- reactive({
+    if(exists("userDBCon()")){
+           pool::poolClose(userDBCon())
+         }
     if (input$selectedSQL > 0) {
       choose.files()
     }
@@ -131,16 +130,31 @@ function(input,output,session){
 
 # #Create database connection
 #  observeEvent(input$selectedSQL,{
-#   if(exists("userDBCon")){
-#     pool::poolClose(userDBCon)
+#   if(exists("userDBCon()")){
+#     pool::poolClose(userDBCon())
 #   }
-# userDBCon <- pool::dbPool(drv = RSQLite::SQLite(),
-#                           #dbname = selectedSQLPath()
-#                           dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
+# userDBCon() <<- pool::dbPool(drv = RSQLite::SQLite(),
+#                           dbname = selectedSQLPath()
+#                           #dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
 #                           )
+#
+#
+#
 # })
 
 
+
+  userDBCon <- reactive({
+
+
+
+    pool::dbPool(drv = RSQLite::SQLite(),
+                            dbname = selectedSQLPath()
+                            #dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
+                            )
+
+
+  })
 
 
 
@@ -816,7 +830,7 @@ function(input,output,session){
 
                          IDBacApp::spectraProcessingFunction(fileList[i],
                                                              idbacDirectory$filePath,
-                                                             userDBCon = userDBCon)
+                                                             userDBCon = userDBCon())
 
                        }
 
@@ -879,7 +893,8 @@ function(input,output,session){
   # })
 
   inverseComparisonNames <- reactive({
-    db <- dplyr::tbl(userDBCon, "IndividualSpectra")
+    asw2<<-userDBCon()
+    db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
 
     db %>%
       filter(proteinPeaks != "NA") %>%
@@ -912,7 +927,7 @@ function(input,output,session){
 
 
     # connect to sql
-    db <- dplyr::tbl(userDBCon, "IndividualSpectra")
+    db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
 
 
 
@@ -928,7 +943,7 @@ function(input,output,session){
        library(dplyr)
 
        IDBacApp::collapseProteinReplicates(fileshas = x,
-                                           db = userDBCon,
+                                           db = userDBCon(),
                                            proteinPercentPresence = input$percentPresenceP,
                                            lowerMassCutoff = input$lowerMass,
                                            upperMassCutoff = input$upperMass)})
@@ -960,7 +975,7 @@ MALDIquant::binPeaks(collapsedPeaksP(), method = "strict", tolerance = .02) %>%
      mirrorPlotEnv <- new.env(parent = parent.frame())
 
     # connect to sql
-    db <- dplyr::tbl(userDBCon, "IndividualSpectra")
+    db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
 
 
 
@@ -973,7 +988,7 @@ MALDIquant::binPeaks(collapsedPeaksP(), method = "strict", tolerance = .02) %>%
       select(filesha1) %>%
       pull %>%
       IDBacApp::collapseProteinReplicates(fileshas = .,
-                         db = userDBCon,
+                         db = userDBCon(),
                          proteinPercentPresence = input$percentPresenceP,
                          lowerMassCutoff = input$lowerMass,
                          upperMassCutoff = input$upperMass) %>%
@@ -987,7 +1002,7 @@ MALDIquant::binPeaks(collapsedPeaksP(), method = "strict", tolerance = .02) %>%
       select(filesha1) %>%
       pull %>%
       IDBacApp::collapseProteinReplicates(fileshas = .,
-                         db = userDBCon,
+                         db = userDBCon(),
                          proteinPercentPresence = input$percentPresenceP,
                          lowerMassCutoff = input$lowerMass,
                          upperMassCutoff = input$upperMass) %>%
@@ -1918,10 +1933,10 @@ proteinDistance <- reactive({
                              SELECT DISTINCT `Strain_ID`
                              FROM `IndividualSpectra`
                              WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                             .con = userDBCon
+                             .con = userDBCon()
       )
 
-      conn <- pool::poolCheckout(userDBCon)
+      conn <- pool::poolCheckout(userDBCon())
       combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
       combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
     }
@@ -1935,10 +1950,10 @@ proteinDistance <- reactive({
                              SELECT DISTINCT `Strain_ID`
                              FROM `IndividualSpectra`
                              WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                             .con = userDBCon
+                             .con = userDBCon()
         )
 
-      conn <- pool::poolCheckout(userDBCon)
+      conn <- pool::poolCheckout(userDBCon())
       combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
       combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
       }
@@ -1969,11 +1984,11 @@ proteinDistance <- reactive({
                        WHERE (`Strain_ID` IN ({strainIds*})))
                        WHERE (`smallMoleculePeaks` != 'NA')",
                            strainIds = c(combinedSmallMolPeaks,combinedSmallMolPeaksAll, matrixID),
-                           .con = userDBCon
+                           .con = userDBCon()
     )
 
 
-    conn <- pool::poolCheckout(userDBCon)
+    conn <- pool::poolCheckout(userDBCon())
 
     sqlQ <- DBI::dbSendQuery(conn, sqlQ)
 
@@ -1982,7 +1997,7 @@ proteinDistance <- reactive({
     split(sqlQ$filesha1, sqlQ$Strain_ID) %>%
     lapply(., function(x){
       IDBacApp::collapseSmallMolReplicates(fileshas = x,
-                                           db = userDBCon,
+                                           db = userDBCon(),
                                            smallMolPercentPresence = input$percentPresenceSM,
                                            lowerMassCutoff = input$lowerMassSM,
                                            upperMassCutoff = input$upperMassSM) %>% unname
