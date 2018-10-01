@@ -69,15 +69,18 @@ navbarPage(collapsible=T,theme = "css.css",
                         )
              ))),
            tabPanel(
-             "PreProcessing",
+             "Starting With Raw Data",
              fluidPage(
                fluidRow(style = "background-color:#7777770d",
 
                         column(width=3,
-                               radioButtons("startingWith", label = h3("I am:"),
+                               radioButtons("startingWith",
+                                            label = "",
                                             choices = list("Starting with raw data files" = 1,
-                                                           "Starting with peak list files (.txt or .csv)" = 2,
-                                                           "Re-analyzing data already processed with IDBac" = 3),selected=0,inline=FALSE,width="100%")),
+                                                           "Starting with peak list files (.txt or .csv)" = 2),
+                                                           selected = 0,
+                                                           inline = FALSE,
+                                                           width = "100%")),
                         column(width=1,
                                fluidRow(),fluidRow(  uiOutput("arrowPNG")),fluidRow()),
                         column(width=4,

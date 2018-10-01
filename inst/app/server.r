@@ -1,12 +1,15 @@
+tempDirectory <- tempdir()  # Different per session
+print(tempDirectory)
 
 
-  a <-   as.list(list.files("C:/Users/chase/Desktop",
-                            pattern = ".sqlite",
-                            full.names = TRUE))
-  names(a) <- tools::file_path_sans_ext(list.files("C:/Users/chase/Desktop", pattern = ".sqlite"))
+a <-   as.list(list.files(getwd(),
+                          pattern = ".sqlite",
+                          full.names = TRUE))
+names(a) <- tools::file_path_sans_ext(list.files(getwd(), pattern = ".sqlite"))
 
 
-  availableExperiments <- a
+
+  availableExperiments <-a
 
 #delete
 #chase change to id
@@ -91,7 +94,7 @@ function(input,output,session){
   #This "observe" event creates the SQL tab UI.
   observe({
     output$sqlUI <- renderUI({
-      fluidRow(
+    fluidRow(
         column(12,
                column(8,
                       style = "background-color:#7777770d",
@@ -99,17 +102,14 @@ function(input,output,session){
                                    label = h3("Analyze Previous Experiment"),
                                    choices = availableExperiments,
                                    selected = 0
-                                   ),
-                      fluidRow(
-                        column(12,
-                               p("Location of experiment file:"),
-                               verbatimTextOutput("selectedSQLText",
-                                                  placeholder = TRUE)
-                               )
-                        )
-                      )
+                      ),
+                      p("Location of experiment file:"),
+                      verbatimTextOutput("selectedSQLText",
+                                         placeholder = TRUE)
+
                )
         )
+      )
       })
     })
 
@@ -117,8 +117,7 @@ function(input,output,session){
 
 
 
-  output$selectedSQLText <- renderPrint(input$selectExperiment
-  )
+  output$selectedSQLText <- renderPrint(input$selectExperiment)
 
 
 # #Create database connection
@@ -162,10 +161,12 @@ function(input,output,session){
 
 
 
+newExperimentSqlite <- reactive({
 
+ pool::dbPool(drv = RSQLite::SQLite(),
+              dbname = paste0(input$newExperimentName, ".sqlite"))
 
-
-
+  })
 
 
 
@@ -237,6 +238,9 @@ function(input,output,session){
 
 
 
+
+
+
   # -----------------
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   observe({
@@ -286,34 +290,37 @@ function(input,output,session){
                         fluidRow(
                           h3("Workflow Pane", align="center")),
                         br(),
-                        p(strong("1: Working Directory")),
-                        actionButton("selectedWorkingDirectory",
-                                     label = "Click to select your Working Directory"),
-                        fluidRow(column(12,
-                                        verbatimTextOutput("selectedWorkingDirectoryText",
-                                                           placeholder = TRUE))),
+                        column(12, align="center",
+                               p(strong("1: Enter a Name for this New Experiment")),
+                               textInput("newExperimentName",
+                                         label = ""),
+                               tags$hr(size=20)),
                         br(),
-                        p(strong("2: Raw Data")),
+                        p(strong("2: Click to select the location of your RAW data"), align= "center"),
+                        column(12, align="center",
                         actionButton("rawFileDirectory",
-                                     label = "Click to select the location of your RAW data"),
-                        fluidRow(column(12,
-                                        verbatimTextOutput("rawFileDirectory",
-                                                           placeholder = TRUE))),
+                                     label = "Raw Data Folder"),
+                        verbatimTextOutput("rawFileDirectory",
+                                           placeholder = TRUE),
+                        tags$hr(size=20)),
                         br(),
-                        p(strong("3:", "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files.")),
-                        fileInput('excelFile',
-                                  label = NULL ,
-                                  accept =c('.xlsx','.xls')),
-                        p(strong("4:","Click \"Convert to mzXML\" to begin spectra conversion.")),
-                        actionButton("run",
-                                     label = "Convert to mzXML"),
+                        column(12, align="center",
+                               p(strong("3:", "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files.")),
+                               fileInput('excelFile',
+                                         label = NULL ,
+                                         accept =c('.xlsx','.xls')),
+                               tags$hr(size=20)),
+                        column(12, align="center",
+                               p(strong("4:","Click \"Convert to mzXML\" to begin spectra conversion.")),
+                               actionButton("run",
+                                            label = "Convert to mzXML"),
+                               tags$hr(size=20)),
                         br(),
                         br(),
                         br(),
                         br(),
-                        p(strong("Note:","If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise.")),
-                        actionButton("beginPeakProcessing",
-                                     label = "Process mzXML spectra")
+                        p(strong("Note:","If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."))
+
 
                  )
           )
@@ -361,10 +368,10 @@ function(input,output,session){
                           h3("Workflow Pane", align="center")),
                         br(),
                         p(strong("1:"), " Your Working Directory is where files will be created."),
-                        actionButton("selectedWorkingDirectory",
+                        actionButton("newExperimentName",
                                      label = "Click to select your Working Directory"),
                         fluidRow(column(12,
-                                        verbatimTextOutput("selectedWorkingDirectoryText",
+                                        verbatimTextOutput("newExperimentNameText",
                                                            placeholder = TRUE))),
                         br(),
                         p(strong("2:"), "Your RAW data will be one folder that contains folders for each MALDI plate."),
@@ -375,9 +382,7 @@ function(input,output,session){
                                                            placeholder = TRUE))),
                         br(),
                         actionButton("run",
-                                     label = "Convert to mzXML"),
-                        actionButton("beginPeakProcessing2",
-                                     label = "Process mzXML")
+                                     label = "Convert to mzXML")
                  )
                         )
         )
@@ -460,14 +465,14 @@ function(input,output,session){
                         style = "background-color:#7777770d",
                         h3("Workflow Pane", align = "center"),
                         br(),
-                        p(strong("1: "), actionButton("selectedWorkingDirectory",
+                        p(strong("1: "), actionButton("newExperimentName",
                                                       label = "Click to select where to create a working directory")),
                         p("Selected Location:"),
                         fluidRow(column(12,
-                                        verbatimTextOutput("selectedWorkingDirectoryText",
+                                        verbatimTextOutput("newExperimentNameText",
                                                            placeholder = TRUE))),
                         br(),
-                        p(strong("2: "), actionButton("createBlankSelectedWorkingDirectoryFolders",
+                        p(strong("2: "), actionButton("createBlanknewExperimentNameFolders",
                                                       label = "Click to create a blank working directory")),
                         br(),
                         p(strong("3:"), "Place the mzXML files that you wish to analyze into:"),
@@ -483,20 +488,7 @@ function(input,output,session){
   })
 
 
-  # -----------------
-  # Lets the user choose the directory which the IDBac working directory will be located in
-  selectedDirectory <- reactive({
-    if(is.null(input$selectedWorkingDirectory)){
-      return("No Folder Selected")
-    }else if (input$selectedWorkingDirectory > 0){
-      choose.dir()
-    }
-  })
 
-
-  # -----------------
-  # Shows the user which directory they chose for the IDBac working directory
-  output$selectedWorkingDirectoryText <- renderPrint(selectedDirectory())
 
 
   # -----------------
@@ -508,27 +500,8 @@ function(input,output,session){
     tail(uniquifiedIDBacs, 1)
   })
 
-  # -----------------
-  # Creates the IDBac Directory structure, Uniquifies the  "IDBac" folder according to what folders are present in the selected directory
-  idbacuniquedir <- eventReactive(input$createBlankSelectedWorkingDirectoryFolders, {
-    dir.create(paste0(selectedDirectory(), "\\", uniquifiedIDBac()))
-    dir.create(paste0(selectedDirectory(), "\\", uniquifiedIDBac(), "\\Converted_To_mzXML"))
-    dir.create(paste0(selectedDirectory(), "\\", uniquifiedIDBac(), "\\Sample_Spreadsheet_Map"))
-    dir.create(paste0(selectedDirectory(), "\\", uniquifiedIDBac(), "\\Peak_Lists"))
-    dir.create(paste0(selectedDirectory(), "\\", uniquifiedIDBac(), "\\Saved_MANs"))
-    return(paste0(selectedDirectory(), "\\", uniquifiedIDBac()))
-  })
 
 
-  # -----------------
-  # Shows the user where the created, uniquified, IDBac folder was created
-  observeEvent(input$createBlankSelectedWorkingDirectoryFolders,{
-    output$whereConvert <- renderText({
-      paste0(idbacuniquedir(), "\\Converted_To_mzXML")
-    })
-    # save path of where mzxml files will be
-    idbacDirectory$filePath <- idbacuniquedir()
-  })
 
 
   # -----------------
@@ -542,38 +515,8 @@ function(input,output,session){
   })
 
 
-  # -----------------
-  # Display which directory was selected
-  output$idbacDirectoryOut <- renderPrint(pressedidbacDirectoryButton())
 
 
-  # Create NULL instance
-  idbacDirectory <- reactiveValues(filePath = NULL)
-
-
-  # Reactive events to trigger the creation of the "idbacDirectory" reactive variable
-  # This variable is used in lieu of setting a working directory, therefore should point to the main working folder
-  observeEvent(input$createBlankSelectedWorkingDirectoryFolders, {
-    idbacDirectory$filePath <- idbacuniquedir()
-  })
-
-
-  observeEvent(input$selectedWorkingDirectory, {
-    idbacDirectory$filePath <- paste0(selectedDirectory(), "/",uniquifiedIDBac())
-  })
-
-
-  observeEvent(input$idbacDirectoryButton, {
-    idbacDirectory$filePath <- pressedidbacDirectoryButton()
-  })
-
-
-
-  # -----------------
-  # This function revereses a provided string
-  strReverse <- function(x){
-    sapply(lapply(strsplit(x, NULL), rev), paste, collapse = "")
-  }
 
 
   # -----------------
@@ -686,22 +629,16 @@ function(input,output,session){
     if (is.null(input$run)){}else if(input$run > 0) {
 
 
-      # Create the proper directory structure, and make sure main directory name is unique so there is no overwriting
-      dir.create(paste0(selectedDirectory(), "/", uniquifiedIDBac()))
-      dir.create(paste0(selectedDirectory(), "/", uniquifiedIDBac(), "/Converted_To_mzXML"))
-      dir.create(paste0(selectedDirectory(), "/", uniquifiedIDBac(), "/Sample_Spreadsheet_Map"))
-      dir.create(paste0(selectedDirectory(), "/", uniquifiedIDBac(), "/Peak_Lists"))
-      dir.create(paste0(selectedDirectory(), "/", uniquifiedIDBac(), "/Saved_MANs"))
 
 
       # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
       # contents of each element are file paths to the raw data for that sample
-      fullZ <- spectraConversion()
+      fullZ <<- spectraConversion()
       # fullZ$UserInput.x = sample name
       # fullZ$UserInput.y = file locations
 
       # outp is the filepath of where to save the created mzXML files
-      outp <- file.path(paste0(selectedDirectory(), "\\", uniquifiedIDBac(), "\\Converted_To_mzXML"))
+      outp <<- tempDirectory
 
 
 
@@ -711,9 +648,9 @@ function(input,output,session){
       pwizFolderLocation <- installed.packages(c(.libPaths(), applibpath))
       pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
       pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, "proteowizardinstallation", "pwiz")
-      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18178.286a49f7d" #delete
+      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d" #delete
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
-      msconvertCmdLineCommands <- lapply(fullZ, function(x){
+      msconvertCmdLineCommands <<- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
         paste0(shQuote(file.path(pwizFolderLocation, "msconvert.exe")),
                # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
@@ -767,7 +704,6 @@ function(input,output,session){
       title = "Important message",
       "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.", br(),
       "To check what has been converted, you can navigate to:",
-      paste0(selectedDirectory(), "/", uniquifiedIDBac(), "/Converted_To_mzXML"),
       easyClose = FALSE, size="l",
       footer = ""
     ))
@@ -780,10 +716,8 @@ function(input,output,session){
   popup2<-reactive({
     showModal(modalDialog(
       title = "Conversion Complete",
-      paste0(nrow(ldply(spectraConversion()))," files were converted into ", length(list.files(paste0(selectedDirectory(), "/", uniquifiedIDBac(), "/Converted_To_mzXML"))),
-             " open data format files."), br(),
+      paste0(" files were converted into open data format files."), br(),
       "To check what has been converted you can navigate to:",
-      paste0(selectedDirectory(), "/", uniquifiedIDBac(), "/Converted_To_mzXML"),
       easyClose = TRUE,
       footer = tagList(actionButton("beginPeakProcessingModal", "Click to continue with Peak Processing"), modalButton("Close"))
     ))
@@ -797,11 +731,11 @@ function(input,output,session){
   # Call the Spectra processing function when the spectra processing button is pressed
   observeEvent({
     c(input$beginPeakProcessing,
-      input$beginPeakProcessing2,
+      input$beginPeakProcessing,
       input$beginPeakProcessingModal,
       input$beginPeakProcessingAgain)},{
 
-        fileList <- normalizePath(list.files(list.dirs(paste0(idbacDirectory$filePath,"/Converted_To_mzXML")),pattern = ".mz", full.names = TRUE,ignore.case = TRUE))
+        fileList <- normalizePath(list.files(tempDirectory, pattern = ".mz", full.names = TRUE,ignore.case = TRUE))
 
 
         popup3()
@@ -822,9 +756,8 @@ function(input,output,session){
                        for(i in 1:lengthProgress){
                          incProgress(1/lengthProgress)
 
-                         IDBacApp::spectraProcessingFunction(fileList[i],
-                                                             idbacDirectory$filePath,
-                                                             userDBCon = userDBCon())
+                         IDBacApp::spectraProcessingFunction(rawDataFilePaths = fileList[i],
+                                                             userDBCon = newExperimentSqlite())
 
                        }
 
@@ -861,9 +794,6 @@ function(input,output,session){
       title = "Important message",
       "When spectra processing is complete you will be able to begin with the data analysis",br(),
       "To check the progress, observe the progress bar at bottom right or navigate to the following directory, where four files will be created per sample ",
-      paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Peak_Lists"),
-
-
       easyClose = FALSE, size="l",footer=""
     ))
   })
@@ -1519,9 +1449,9 @@ plot_ly(data = pcaDat,
     else{
       booled<-"_UsedPresenceAbsence"
     }
-
-    cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
-                      "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
+#
+#     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
+#                       "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
 
     tyr<<-proteinDistance()
 

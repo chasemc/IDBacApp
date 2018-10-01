@@ -1,7 +1,6 @@
 # -----------------
-spectraProcessingFunction <- function(rawDataFilePaths,idbacDirectory, userDBCon){
+spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
 
-  # "rawDataFilePaths" is one mzXML path
   # "idbacDirectory"  is the path of the IDBac data directory
 
   # Open connection to mzXML but don't read
