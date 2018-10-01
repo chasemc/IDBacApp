@@ -121,10 +121,9 @@ collapseSmallMolReplicates <- function(db,
                          tolerance = .02,
                          method = "relaxed") %>%
     MALDIquant::filterPeaks(.,
-                            minFrequency = smallMolPercentPresence / 100,
-                            mergeWhitelists = FALSE) %>%
+                            minFrequency = smallMolPercentPresence / 100) %>%
     MALDIquant::mergeMassPeaks(.,
-                               method = "sum") %>%
+                               method = "mean") %>%
     MALDIquant::trim(object = .,
                      range = c(lowerMassCutoff,
                                upperMassCutoff))

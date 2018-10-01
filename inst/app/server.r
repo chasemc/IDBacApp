@@ -1,9 +1,9 @@
 
 
-  a <-   as.list(list.files("C:/Users/CMC/Desktop",
+  a <-   as.list(list.files("C:/Users/chase/Desktop",
                             pattern = ".sqlite",
                             full.names = TRUE))
-  names(a) <- tools::file_path_sans_ext(list.files("C:/Users/CMC/Desktop", pattern = ".sqlite"))
+  names(a) <- tools::file_path_sans_ext(list.files("C:/Users/chase/Desktop", pattern = ".sqlite"))
 
 
   availableExperiments <- a
@@ -93,37 +93,25 @@ function(input,output,session){
     output$sqlUI <- renderUI({
       fluidRow(
         column(12,
-               br(),
-               br(),
-               fluidRow(
-                 column(12, offset = 3,
-                        h3("Starting with a Single MALDI Plate of Raw Data"))), br(), br(),
-               column(5
-
-               ),
-               column(1
-               ),
-               column(5, style = "background-color:#7777770d",
-                      fluidRow(
-                        h3("Workflow Pane", align="center")),
+               column(8,
+                      style = "background-color:#7777770d",
                       radioButtons("selectExperiment",
-                                   label = h3("Select Experiment"),
+                                   label = h3("Analyze Previous Experiment"),
                                    choices = availableExperiments,
-                                   selected = 0),
-
-
-                      fluidRow(column(12,
-                                      verbatimTextOutput("selectedSQLText",
-                                                         placeholder = TRUE)))
-
-
-
+                                   selected = 0
+                                   ),
+                      fluidRow(
+                        column(12,
+                               p("Location of experiment file:"),
+                               verbatimTextOutput("selectedSQLText",
+                                                  placeholder = TRUE)
+                               )
+                        )
+                      )
                )
         )
-      )
+      })
     })
-
-})
 
 
 
@@ -2127,19 +2115,18 @@ proteinDistance <- reactive({
 
   # -----------------
   subtractMatrixBlank <- reactive({
-
+qqw<<-selectedSmallMolPeakList()
     labs <- labels(selectedSmallMolPeakList())
 
-    binned <- binPeaks(selectedSmallMolPeakList(), method = "relaxed", tolerance = .002)
+    binned <- binPeaks(selectedSmallMolPeakList(), method = "strict", tolerance = 0.0002)
 
       #Next, find which ID contains "matrix", in any capitalization
       matrixIndex <- grep("^matrix",labs,ignore.case=TRUE)
 
-   if(length(matrixIndex) == 0){
 
-     peaksa <- binned
+     peaksa <<- binned
 
-   }
+
       if(input$matrixSamplePresent == 1){
 
         validate(
@@ -2153,6 +2140,15 @@ proteinDistance <- reactive({
       #peaksb = matrix blank sample
       peaksb <- binned[[matrixIndex]]
 
+      for (i in 1:length(peaksa)){
+      commonIons <- which(!is.element(peaksa[[i]]@mass, peaksb@mass))
+      if(length(commonIons)!=0){   # Without this if statement, peaksa values will be set to 0 if no matrix matches are found == BAD
+        peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
+        peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
+        peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
+      }
+
+}
 
 
     }

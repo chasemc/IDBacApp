@@ -1,6 +1,5 @@
 
 proteinDistanceMatrix <- function(peakList, method){
-  aws2<<-peakList
   if(method == "cosineD"){
 
     peakList %>%
@@ -13,7 +12,7 @@ proteinDistanceMatrix <- function(peakList, method){
 
       rownames(p) <- labels(peakList)
 
-      as.dist(p)
+      1- as.dist(p)
 
 
   }else{
