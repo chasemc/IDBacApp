@@ -1,0 +1,59 @@
+
+
+
+```{r echo=FALSE}
+    paste0("This dendrogram was created by analyzing ", length(labels(dendro())), " samples, and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analyses.", "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
+  
+```
+
+Principle Components Analysis Results (First Three Components)
+```{r echo=FALSE}
+
+    pcaDat <- pcaCalculation()
+    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+    if(any(is.na(as.vector(colorsToUse)))){
+      colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+    }
+
+    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
+    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
+
+
+
+plot_ly(data = pcaDat,
+        x = ~Dim.1,
+        y = ~Dim.2,
+        z = ~Dim.3,
+        type = "scatter3d",
+        mode = "markers",
+        marker = list(color = ~fac),
+        #hoverinfo = 'text',
+        text = ~nam)
+```
+
+
+
+
+```{r echo=FALSE}
+  temp <- NULL
+
+
+    for (i in 1:length(subtractMatrixBlank())){
+      temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
+    }
+
+    a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
+    a<-igraph::simplify(a)
+    wc <- fastgreedy.community(a)
+    b <- igraph_to_networkD3(a, group = (wc$membership + 1))
+    z <- b$links
+    zz <- b$nodes
+
+    biggerSampleNodes<-rep(1,times=length(zz[,1]))
+    zz<-cbind(zz,biggerSampleNodes)
+    zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
+    forceNetwork(Links = z, Nodes = zz, Source = "source",Nodesize = "biggerSampleNodes",
+                 Target = "target", NodeID = "name",
+                 Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
+```
+

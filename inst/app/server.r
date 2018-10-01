@@ -1,5 +1,12 @@
 
 
+  a <-   as.list(list.files("C:/Users/CMC/Desktop",
+                            pattern = ".sqlite",
+                            full.names = TRUE))
+  names(a) <- tools::file_path_sans_ext(list.files("C:/Users/CMC/Desktop", pattern = ".sqlite"))
+
+
+  availableExperiments <- a
 
 #delete
 #chase change to id
@@ -81,7 +88,7 @@ function(input,output,session){
 
 
 
-  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
+  #This "observe" event creates the SQL tab UI.
   observe({
     output$sqlUI <- renderUI({
       fluidRow(
@@ -99,9 +106,12 @@ function(input,output,session){
                column(5, style = "background-color:#7777770d",
                       fluidRow(
                         h3("Workflow Pane", align="center")),
+                      radioButtons("selectExperiment",
+                                   label = h3("Select Experiment"),
+                                   choices = availableExperiments,
+                                   selected = 0),
 
-                      actionButton("selectedSQL",
-                                   label = "Select SQL"),
+
                       fluidRow(column(12,
                                       verbatimTextOutput("selectedSQLText",
                                                          placeholder = TRUE)))
@@ -114,18 +124,13 @@ function(input,output,session){
     })
 
 })
-  # -----------------
-  # Reactive variable returning the user-chosen location of the raw MALDI files as string
-  selectedSQLPath <- reactive({
-    if(exists("userDBCon()")){
-           pool::poolClose(userDBCon())
-         }
-    if (input$selectedSQL > 0) {
-      choose.files()
-    }
-  })
 
-  output$selectedSQLText <- renderPrint(selectedSQLPath())
+
+
+
+
+  output$selectedSQLText <- renderPrint(input$selectExperiment
+  )
 
 
 # #Create database connection
@@ -144,12 +149,13 @@ function(input,output,session){
 
 
 
+
+
   userDBCon <- reactive({
 
-
-
+ #  isolate( input$percentPresenceP )
     pool::dbPool(drv = RSQLite::SQLite(),
-                            dbname = selectedSQLPath()
+                            dbname = input$selectExperiment
                             #dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
                             )
 
@@ -1784,6 +1790,11 @@ proteinDistance <- reactive({
                                  tabPanel("Hierarchical Clustering Settings", value="hierSettings",
                                           #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
                                           #                    choices = levels(phyla)),
+
+                                          radioButtons('format', 'Document format', c('HTML'),
+                                                       inline = TRUE),
+                                          downloadButton('downloadReport'),
+
                                           selectInput("distance", label = h5(strong("Distance Algorithm")),
                                                       choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
                                                       selected = "cosine"),
@@ -1844,6 +1855,95 @@ proteinDistance <- reactive({
       Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
       "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
   )
+
+
+
+
+  output$downloadReport <- downloadHandler(
+    filename = function() {
+      paste('my-report', sep = '.', switch(
+        input$format,  HTML = 'html'
+      ))
+    },
+
+    content = function(file) {
+      src <- normalizePath('report.Rmd')
+
+      # temporarily switch to the temp dir, in case you do not have write
+      # permission to the current working directory
+      owd <- setwd(tempdir())
+      on.exit(setwd(owd))
+      file.copy(src, 'report.Rmd', overwrite = TRUE)
+
+      library(rmarkdown)
+      out <- render('C:/Users/CMC/Documents/GitHub/IDBac_App/ResultsReport.Rmd', switch(
+        input$format,
+        HTML = html_document()
+      ))
+      file.rename(out, file)
+    }
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
