@@ -47,9 +47,9 @@ navbarPage(collapsible=T,theme = "css.css",
                               p(("Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function"),br(),
                                 "Chase M. Clark, Maria S. Costa, Laura M. Sanchez, Brian T. Murphy;
                                 PNAS May 8, 2018 115 (19) 4981-4986; doi:",a(href="https://doi.org/10.1073/pnas.1801247115", target="_blank", "10.1073/pnas.1801247115"))
-                              )
                             )
-                          ),
+                          )
+                        ),
                         tags$ul(
                           tags$li(
                             p("Software:")
@@ -66,8 +66,8 @@ navbarPage(collapsible=T,theme = "css.css",
 
                         h4("Select \"PreProcessing\" above to begin", align="center")
 
-                        )
-             ))),
+                 )
+               ))),
            tabPanel(
              "Starting With Raw Data",
              fluidPage(
@@ -78,9 +78,9 @@ navbarPage(collapsible=T,theme = "css.css",
                                             label = "",
                                             choices = list("Starting with raw data files" = 1,
                                                            "Starting with peak list files (.txt or .csv)" = 2),
-                                                           selected = 0,
-                                                           inline = FALSE,
-                                                           width = "100%")),
+                                            selected = 0,
+                                            inline = FALSE,
+                                            width = "100%")),
                         column(width=1,
                                fluidRow(),fluidRow(  uiOutput("arrowPNG")),fluidRow()),
                         column(width=4,
@@ -103,5 +103,6 @@ navbarPage(collapsible=T,theme = "css.css",
                     uiOutput("MANui")),
            tabPanel("In-House Spectra Libraries",
                     uiOutput("libraryTab"))
+
 
            )

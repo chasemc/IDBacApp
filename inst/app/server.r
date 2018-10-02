@@ -1,5 +1,5 @@
 tempDirectory <- tempdir()  # Different per session
-print(tempDirectory)
+
 
 
 a <-   as.list(list.files(getwd(),
@@ -8,8 +8,18 @@ a <-   as.list(list.files(getwd(),
 names(a) <- tools::file_path_sans_ext(list.files(getwd(), pattern = ".sqlite"))
 
 
-
   availableExperiments <-a
+
+
+
+  shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
+    if (is.null(data))
+      NULL
+    else
+      list(left=as.character(data$left), right=as.character(data$right))
+  }, force = TRUE)
+
+
 
 #delete
 #chase change to id
@@ -94,7 +104,8 @@ function(input,output,session){
   #This "observe" event creates the SQL tab UI.
   observe({
     output$sqlUI <- renderUI({
-    fluidRow(
+    fluidPage(
+      fluidRow(
         column(12,
                column(8,
                       style = "background-color:#7777770d",
@@ -109,37 +120,37 @@ function(input,output,session){
 
                )
         )
+      ), fluidRow(
+        radioButtons("selectMixNmatchExperiment",
+                     label = p("Select samples from previous experiment to transfer to a new experiment. "),
+                     choices = availableExperiments,
+                     selected = 0
+        ),
+        uiOutput("chosenp"),
+        verbatimTextOutput("selection"),
+        br(),
+        textInput("nameformixNmatch",
+                  label = "Enter name for new experiment")
       )
-      })
+    )
+
+
+
+
     })
 
-
+})
 
 
 
   output$selectedSQLText <- renderPrint(input$selectExperiment)
 
 
-# #Create database connection
-#  observeEvent(input$selectedSQL,{
-#   if(exists("userDBCon()")){
-#     pool::poolClose(userDBCon())
-#   }
-# userDBCon() <<- pool::dbPool(drv = RSQLite::SQLite(),
-#                           dbname = selectedSQLPath()
-#                           #dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
-#                           )
-#
-#
-#
-# })
-
-
 
 
 
   userDBCon <- reactive({
-
+# This pool is used when selecting to analyze a previous experiment
  #  isolate( input$percentPresenceP )
     pool::dbPool(drv = RSQLite::SQLite(),
                             dbname = input$selectExperiment
@@ -150,6 +161,58 @@ function(input,output,session){
   })
 
 
+ newExperimentSqlite <- reactive({
+ # This pool is used when creating an entirely new "experiment" .sqlite db
+  pool::dbPool(drv = RSQLite::SQLite(),
+               dbname = input$newExperimentName)
+
+   })
+
+
+
+
+mixNmatchOldDatabase <- reactive({
+  # This pool is used when mix an matching "experiment" .sqlite db
+
+
+   pool::dbPool(drv = RSQLite::SQLite(),
+               dbname = input$selectMixNmatchExperiment)
+
+})
+
+
+
+output$chosenp <- renderUI({
+
+  IDBacApp::chooserInput("mychooser", "Available frobs", "Selected frobs",
+                         oldnames(), c(), size = 10, multiple = TRUE
+   )
+})
+
+
+  output$selection <- renderPrint(
+    input$mychooser
+  )
+
+
+oldnames <- reactive({
+
+
+  combinedSmallMolPeaksAll <- glue::glue_sql("
+                             SELECT DISTINCT `Strain_ID`
+                                             FROM `IndividualSpectra`",
+                                             .con = mixNmatchOldDatabase()
+  )
+
+  conn <- pool::poolCheckout(mixNmatchOldDatabase())
+  combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
+  combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
+
+
+  combinedSmallMolPeaksAll
+
+
+})
 
 
 
@@ -158,25 +221,17 @@ function(input,output,session){
 
 
 
-
-
-
-newExperimentSqlite <- reactive({
-
- pool::dbPool(drv = RSQLite::SQLite(),
-              dbname = paste0(input$newExperimentName, ".sqlite"))
-
-  })
+# Create mix N match sqlite
 
 
 
 
+newmixNmatchExperimentSqlite <- reactive({
+  # This pool is used when creating an entirely new mix N match "experiment" .sqlite db
+  pool::dbPool(drv = RSQLite::SQLite(),
+               dbname = input$nameformixNmatch)
 
-
-
-
-
-
+})
 
 
 
@@ -648,7 +703,7 @@ newExperimentSqlite <- reactive({
       pwizFolderLocation <- installed.packages(c(.libPaths(), applibpath))
       pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
       pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, "proteowizardinstallation", "pwiz")
-      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d" #delete
+      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands <<- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -762,8 +817,8 @@ newExperimentSqlite <- reactive({
                        }
 
                      })
-
-
+        pool::poolClose(newExperimentSqlite())
+        print(newExperimentSqlite)
         popup4()
 
 
