@@ -80,9 +80,9 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
   sqlDataFrame$XML <-NULL # Free up memory
 
 
-  check <- length(acquisitonInfo$Acqu) == length(acquisitonInfo$AcquisitionDate) &&
-    length(acquisitonInfo$Acqu) == length(acquisitonInfo$filesha1) &&
-    length(acquisitonInfo$Acqu) == length(acquisitonInfo$MassError)
+  check <- length(acquisitonInfo$Instrument_MetaFile) == length(acquisitonInfo$AcquisitionDate) &&
+    length(acquisitonInfo$Instrument_MetaFile) == length(acquisitonInfo$filesha1) &&
+    length(acquisitonInfo$Instrument_MetaFile) == length(acquisitonInfo$MassError)
 
 
 
@@ -108,7 +108,7 @@ for(oneReplicate in 1:length(acquisitonInfo$filesha1)){
   sqlDataFrame$IndividualSpectra$AcquisitionDate <- acquisitonInfo$AcquisitionDate[[oneReplicate]]
 
 
-  acquisitonInfo$Acqu[[oneReplicate]] %>%
+  acquisitonInfo$Instrument_MetaFile[[oneReplicate]] %>%
     serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
     memCompress(., type="gzip") %>%
     list(.) %>%

@@ -34,7 +34,8 @@ sqlDataFrame$XML <- data.frame("SHA1" = NA,
                          "model"                        = NA,
                          "ionisation"                   = NA,
                          "analyzer"                     = NA,
-                         "detector"                     = NA
+                         "detector"                     = NA,
+                         "Instrument_MetaFile" = NA
 
                         )
 
@@ -48,7 +49,6 @@ sqlDataFrame$IndividualSpectra <- data.frame("filesha1" = NA,
                                              "Strain_ID" = NA,
                                              "MassError" = NA,
                                              "AcquisitionDate" = NA,
-                                             "Acqu" = NA,
                                              "proteinPeaks"              = NA,
                                              "proteinSpectrum"     = NA,
                                              "smallMoleculePeaks"        = NA,

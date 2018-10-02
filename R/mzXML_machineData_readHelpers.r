@@ -59,10 +59,10 @@ findAcquisitionInfo <- function(singlemzXMLpath,
   if(manufacturer == "Bruker Daltonics"){
     files <- files[which(file.exists(files))]
     if(length(files) > 0){
-      sha$Acqu <- lapply(files, function(x)  read.delim(file.path(x,"acqu"), sep="\n")) # Find Acqu file
-      sha$MassError <- unlist(lapply(sha$Acqu, function(x) as.character(x[grep("Masserr", x[,1]),]))) #Parse the Acqu file for the mass error row
+      sha$Instrument_MetaFile  <- lapply(files, function(x)  read.delim(file.path(x,"acqu"), sep="\n")) # Find Acqu file
+      sha$MassError <- unlist(lapply(sha$Instrument_MetaFile , function(x) as.character(x[grep("Masserr", x[,1]),]))) #Parse the Acqu file for the mass error row
       sha$MassError <- unlist(lapply(sha$MassError, function(x) as.numeric(strsplit(x, "##\\$Masserr= " )[[1]][[2]])))
-      sha$AcquisitionDate <- unlist(lapply(sha$Acqu, function(x) as.character(x[grep("##\\$AQ_DATE", x[,1]),]))) #Parse the Acqu file for the mass error row
+      sha$AcquisitionDate <- unlist(lapply(sha$Instrument_MetaFile , function(x) as.character(x[grep("##\\$AQ_DATE", x[,1]),]))) #Parse the Acqu file for the mass error row
       sha$AcquisitionDate <- unlist(lapply(sha$AcquisitionDate, function(x) gsub('^.*<\\s*|\\s*.>.*$', '', x)))
     }
   }
