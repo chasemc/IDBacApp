@@ -142,6 +142,7 @@ function(input,output,session){
       )),tabPanel("Add/Modify Strain Attributes",
                   p("s"),
                   actionButton("searchNCBI","Search NCBI"),
+                  actionButton("saven","save"),
                   rHandsontableOutput("metaTable")
       )
 
@@ -243,7 +244,7 @@ newmixNmatchExperimentSqlite <- reactive({
 
 })
 
-
+qwerty <- reactiveValues()
 
 #----
 # MetaData rHandosontable
@@ -252,12 +253,11 @@ newmixNmatchExperimentSqlite <- reactive({
 
 observeEvent(input$searchNCBI,{
 
-aqw <- metaTableIn()
+aqw <<- metaTableIn()
 
 ind <- is.na(aqw[-1,]$Genbank_Accession)
 aqw <- as.character(aqw[-1,]$Genbank_Accession[!ind])
-print(aqw)
-print(typeof(aqw))
+
 a <- lapply(aqw, traits::ncbi_byid)
 
 genus <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[1]])
@@ -283,9 +283,13 @@ taxo<-lapply(a, function(x){
  q2
 
  })
+qw <- rep(NA, length(ind))
+qw[!ind] <- genus
+qwerty$a <- qw
+qw <- rep(NA, length(ind))
 
-
-
+qw[!ind] <- dna_16s
+qwerty$dna <- qw
 
 })
 
@@ -349,7 +353,16 @@ metaTableIn <-   reactive({
 
 
 
+observeEvent(input$saven,{
+  awe <- metaTableIn()[-1,]
+  awe$Genus  <- qwerty$a
+  awe$dna_16S  <- qwerty$dna
 
+  qw<<-awe
+
+
+
+})
 
 
 
