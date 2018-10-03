@@ -15,6 +15,16 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
   # Generate base SQL table
   sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
+  sqlDataFrame$metaData$Strain_ID <- sampleName
+
+
+  # Write to SQL DB
+  DBI::dbWriteTable(conn = userDBCon,
+                    name = "metaData", # SQLite table to insert into
+                    sqlDataFrame$metaData[1, ], # Insert single row into DB
+                    append = TRUE, # Append to existing table
+                    overwrite = FALSE) # Do not overwrite
+
 
 
   #----------------------------------------------

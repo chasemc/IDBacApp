@@ -126,12 +126,11 @@ function(input,output,session){
 
 
 
-      ),             tabPanel("Create Experiment from Other Experiments",
-
+      ), tabPanel("Create Experiment from Other Experiments",
       column(12,
-             style = "background-color:#7777770d",
+             style = "background-color: #7777770d",
         radioButtons("selectMixNmatchExperiment",
-                     label = p("Select samples from previous experiment to transfer to a new experiment. "),
+                     label = p("Select samples from previous experiment to transfer to a new experiment."),
                      choices = availableExperiments,
                      selected = 0
         ),
@@ -140,7 +139,15 @@ function(input,output,session){
         br(),
         textInput("nameformixNmatch",
                   label = "Enter name for new experiment")
-      )))
+      )),tabPanel("Add/Modify Strain Attributes",
+                  p("s"),
+                  actionButton("searchNCBI","Search NCBI"),
+                  rHandsontableOutput("metaTable")
+      )
+
+
+
+      )
     )
 
 
@@ -149,6 +156,16 @@ function(input,output,session){
     })
 
 })
+
+
+#
+# observeEvent(input$searchNCBI,{
+#   print(1)
+#    aas<<-rhandsontable::hot_to_r( sampMetaDataTable())
+#
+#
+#   })
+#
 
 
 
@@ -173,7 +190,7 @@ function(input,output,session){
  newExperimentSqlite <- reactive({
  # This pool is used when creating an entirely new "experiment" .sqlite db
   pool::dbPool(drv = RSQLite::SQLite(),
-               dbname = input$newExperimentName)
+               dbname = paste0(input$newExperimentName, ".sqlite"))
 
    })
 
@@ -205,22 +222,8 @@ output$chosenp <- renderUI({
 
 
 oldnames <- reactive({
-
-
-  combinedSmallMolPeaksAll <- glue::glue_sql("
-                             SELECT DISTINCT `Strain_ID`
-                                             FROM `IndividualSpectra`",
-                                             .con = mixNmatchOldDatabase()
-  )
-
-  conn <- pool::poolCheckout(mixNmatchOldDatabase())
-  combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
-  combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
-
-
-  combinedSmallMolPeaksAll
-
-
+  getAllStrain_IDsfromSQL(databaseConnection = mixNmatchOldDatabase(),
+                          table = "IndividualSpectra")
 })
 
 
@@ -233,14 +236,173 @@ oldnames <- reactive({
 # Create mix N match sqlite
 
 
-
-
 newmixNmatchExperimentSqlite <- reactive({
   # This pool is used when creating an entirely new mix N match "experiment" .sqlite db
   pool::dbPool(drv = RSQLite::SQLite(),
                dbname = input$nameformixNmatch)
 
 })
+
+
+
+#----
+# MetaData rHandosontable
+
+# Display the new Library as an editable table
+
+observeEvent(input$searchNCBI,{
+
+aqw <- metaTableIn()
+
+ind <- is.na(aqw[-1,]$Genbank_Accession)
+aqw <- as.character(aqw[-1,]$Genbank_Accession[!ind])
+print(aqw)
+print(typeof(aqw))
+a <- lapply(aqw, traits::ncbi_byid)
+
+genus <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[1]])
+
+species <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[2]])
+
+
+dna_16s <- lapply(a, function(x){
+  if(as.numeric(x$length) < 2000){
+    x$sequence
+  }else{NA}
+
+})
+
+taxo<-lapply(a, function(x){
+
+ q <- taxize::classification(x$taxon,
+                         db="ncbi",
+                         return_id = FALSE)[[1]]
+
+ q2 <- as.list(q$name)
+ names(q2) <- q$rank
+ q2
+
+ })
+
+
+
+
+})
+
+output$metaTable <- rhandsontable::renderRHandsontable({
+
+
+
+  rhandsontable::rhandsontable(metaTableIn(),
+                               useTypes = FALSE,
+                               contextMenu = TRUE ) %>%
+    hot_col("Strain_ID", readOnly = TRUE) %>%
+    rhandsontable::hot_row(1,  readOnly = TRUE) %>%
+    hot_context_menu(allowRowEdit = FALSE,
+                     allowColEdit = TRUE) %>%
+    hot_cols(colWidths = 100) %>%
+    hot_rows(rowHeights = 25)
+})
+
+
+
+metaTableIn <-   reactive({
+  if (!is.null(input$metaTable)) {
+    rhandsontable::hot_to_r(input$metaTable)
+  } else {
+
+  dbQuery <- glue::glue_sql("SELECT *
+                            FROM ({tab*})",
+                            tab = "metaData",
+                            .con = userDBCon())
+
+  conn <- pool::poolCheckout(userDBCon())
+  dbQuery <- DBI::dbSendQuery(conn, dbQuery)
+  dbQuery <- DBI::dbFetch(dbQuery)
+
+  exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
+                                      "Genbank_Accession"            = "KY858228",
+                                      "NCBI_TaxID"                   = "446370",
+                                      "Kingdom"                      = "Bacteria",
+                                      "Phylum"                       = "Firmicutes",
+                                      "Class"                        = "Bacilli",
+                                      "Order"                        = "Bacillales",
+                                      "Family"                       = "Paenibacillaceae",
+                                      "Genus"                        = "Paenibacillus",
+                                      "Species"                      = "telluris",
+                                      "MALDI_Matrix"                 = "CHCA",
+                                      "DSM_Agar_Media"               = "1054_Fresh",
+                                      "Cultivation_Temp_Celsius"     = "27",
+                                      "Cultivation_Time_Days"        = "10",
+                                      "Cultivation_Other"            = "",
+                                      "User"                         = "Chase Clark",
+                                      "User_ORCID"                   = "0000-0001-6439-9397",
+                                      "PI_FirstName_LastName"        = "Brian Murphy",
+                                      "PI_ORCID"                     = "0000-0002-1372-3887",
+                                      "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
+  )
+
+ rbind(exampleMetaData, dbQuery)
+
+}
+  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

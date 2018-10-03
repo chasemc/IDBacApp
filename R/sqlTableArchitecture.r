@@ -3,7 +3,7 @@ sqlTableArchitecture <- function(){
 
   sqlDataFrame <- new.env(parent = parent.frame())
 
-  sqlDataFrame$metaData <- data.frame("Strain_ID"              = NA,
+  sqlDataFrame$metaData <- data.frame("Strain_ID"                    = NA,
                                       "Genbank_Accession"            = NA,
                                       "NCBI_TaxID"                   = NA,
                                       "Kingdom"                      = NA,
@@ -13,17 +13,16 @@ sqlTableArchitecture <- function(){
                                       "Family"                       = NA,
                                       "Genus"                        = NA,
                                       "Species"                      = NA,
-                                      "Strain"                       = NA,
                                       "MALDI_Matrix"                 = NA,
-                                      "Agar_Media"                   = NA,
+                                      "DSM_Agar_Media"               = NA,
                                       "Cultivation_Temp_Celsius"     = NA,
                                       "Cultivation_Time_Days"        = NA,
                                       "Cultivation_Other"            = NA,
-                                      "Agar_Media"                   = NA,
                                       "User"                         = NA,
+                                      "User_ORCID"                   = NA,
                                       "PI_FirstName_LastName"        = NA,
                                       "PI_ORCID"                     = NA,
-                                      "16S"                          = NA
+                                      "dna_16S"                      = NA
   )
 
 
