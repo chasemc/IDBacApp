@@ -105,22 +105,31 @@ function(input,output,session){
   observe({
     output$sqlUI <- renderUI({
     fluidPage(
-      fluidRow(
-        column(12,
-               column(8,
+      p("After processing your raw data, your named experiment will appear here."),
+      p("IDBac analyses work at the unit of \"Experiments\", which is simply a collection
+        of samples."),
+      p("Use this ..... to select which experiment to analyze, or to \"mix and match\" experiments,
+         by transferring samples from one experiment to another"),
+      tabsetPanel(
+                  tabPanel("Analyze a Previous Experiment",
+
+               column(12,
                       style = "background-color:#7777770d",
                       radioButtons("selectExperiment",
-                                   label = h3("Analyze Previous Experiment"),
+                                   label = h3("Select a Previous Experiment"),
                                    choices = availableExperiments,
-                                   selected = 0
-                      ),
+                                   selected = 0, width= "100%"
+                      )),
                       p("Location of experiment file:"),
                       verbatimTextOutput("selectedSQLText",
                                          placeholder = TRUE)
 
-               )
-        )
-      ), fluidRow(
+
+
+      ),             tabPanel("Create Experiment from Other Experiments",
+
+      column(12,
+             style = "background-color:#7777770d",
         radioButtons("selectMixNmatchExperiment",
                      label = p("Select samples from previous experiment to transfer to a new experiment. "),
                      choices = availableExperiments,
@@ -131,7 +140,7 @@ function(input,output,session){
         br(),
         textInput("nameformixNmatch",
                   label = "Enter name for new experiment")
-      )
+      )))
     )
 
 
@@ -908,13 +917,22 @@ newmixNmatchExperimentSqlite <- reactive({
     # connect to sql
     db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
 
+#
+#
+#    db %>%
+#      filter(proteinPeaks != "NA") %>%
+#      select(filesha1,Strain_ID) %>%
+#      collect %$%
+#      split(filesha1,Strain_ID) -> temp
+    db %>%
+           filter(proteinPeaks != "NA") %>%
+           select(filesha1,Strain_ID) %>%
+           filter(Strain_ID %in% input$myProteinchooser$right) %>%
+           collect %$%
+           split(filesha1,Strain_ID) -> temp
 
 
-   db %>%
-     filter(proteinPeaks != "NA") %>%
-     select(filesha1,Strain_ID) %>%
-     collect %$%
-     split(filesha1,Strain_ID) -> temp
+
 
    temp %>%
      lapply(function(x){
@@ -1763,10 +1781,11 @@ proteinDistance <- reactive({
                                  tabPanel("Hierarchical Clustering Settings", value="hierSettings",
                                           #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
                                           #                    choices = levels(phyla)),
+                                          p("Move strains between boxes by clicking the strain's name
+                                            and then an arrow. Strains in the right box will be used for analysis."),
 
-                                          radioButtons('format', 'Document format', c('HTML'),
-                                                       inline = TRUE),
-                                          downloadButton('downloadReport'),
+                                          uiOutput("chooseProteinSamples"),
+                                          verbatimTextOutput("selectedProteinSamples"),
 
                                           selectInput("distance", label = h5(strong("Distance Algorithm")),
                                                       choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
@@ -1797,7 +1816,10 @@ proteinDistance <- reactive({
                                           actionButton("tester",label="tester"),
                                           br(),
                                           br(),
-                                          downloadButton("downloadHierarchical","Save as Newick File")
+                                          downloadButton("downloadHierarchical","Save as Newick File"),
+                                          radioButtons('format', 'Document format', c('HTML'),
+                                                       inline = TRUE),
+                                          downloadButton('downloadReport')
                                  ),
                                  tabPanel("Library Search", value="hierLibrarySearch",
                                           p("This is for searching against user-created libraries"),
@@ -1867,6 +1889,39 @@ proteinDistance <- reactive({
 
 
 
+
+  output$chooseProteinSamples <- renderUI({
+
+    IDBacApp::chooserInput("myProteinchooser", "Available frobs", "Selected frobs",
+                           availableProtein(), c(), size = 10, multiple = TRUE
+    )
+  })
+
+
+  output$selectedProteinSamples <- renderPrint(
+    input$myProteinchooser
+  )
+
+
+  availableProtein <- reactive({
+
+
+    combinedSmallMolPeaksAll <- glue::glue_sql("
+                             SELECT DISTINCT `Strain_ID`
+                                             FROM `IndividualSpectra`
+                                               WHERE (`proteinPeaks` IS NOT NULL)",
+                                               .con = userDBCon()
+    )
+
+    conn <- pool::poolCheckout(userDBCon())
+    combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
+    combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
+
+
+    combinedSmallMolPeaksAll
+
+
+  })
 
 
 
