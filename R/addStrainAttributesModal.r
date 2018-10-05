@@ -88,7 +88,8 @@ dbqueryReactive <- reactive({
       hot_context_menu(allowRowEdit = FALSE,
                        allowColEdit = TRUE) %>%
       hot_cols(colWidths = 100) %>%
-      hot_rows(rowHeights = 25)
+      hot_rows(rowHeights = 25) %>%
+      hot_cols(fixedColumnsLeft = 1)
 
 
 
