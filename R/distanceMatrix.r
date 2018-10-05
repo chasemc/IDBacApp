@@ -47,7 +47,7 @@ awq2<<-peakList
 
 for(i in 1:length(peakList)){
 
-  if(length(peakList[[i]]@intensity) < 10){}else{
+  if(length(peakList[[i]]@intensity) < 100){}else{
   snr1 <-  order(peakList[[i]]@intensity, decreasing = TRUE)[1:100]
   peakList[[i]]@mass <- peakList[[i]]@mass[snr1]
   peakList[[i]]@snr <- peakList[[i]]@snr[snr1]
@@ -57,44 +57,41 @@ for(i in 1:length(peakList)){
 
   # Takes as input a flat-list of MALDIquant S4 MassPeaks objects
 
-# Create native R distance matrix from cosine scores
-mat <- matrix(nrow = length(peakList), ncol = length(peakList))
 
 
-# Create a pairwise combinations of samples (returns list of list, where each sublist is a pair combination)
-z <- combn(x = peakList,
-            m = 2,
-            simplify = F)
+tc <- rep(NA, choose(length(peakList),2))
+for(i in seq_along(tc)){
 
+  ind <-     combinadic(length(peakList), # number samples
+                                  2, # pairwise
+                                  i) # index
 
-
-binMat <- function(x){
-
-  zz <- MALDIquant::binPeaks(x, method = "relaxed", tolerance = .02)
+  zz <- MALDIquant::binPeaks(peakList[ind], method = "relaxed", tolerance = .02)
   mass <- unlist(lapply(zz, function(x) x@mass))
   uniqueMass <- sort.int(unique(mass))
 
   n <- lengths(zz)
   r <- rep.int(seq_along(zz), n)
-  i <- findInterval(mass, uniqueMass)
+  i2 <- findInterval(mass, uniqueMass)
   m <- matrix(0, nrow = length(zz), ncol = length(uniqueMass),
               dimnames = list(NULL, uniqueMass))
-  m[cbind(r, i)] <- 1
+  m[cbind(r, i2)] <- 1
+  tc[i] <- coop::tcosine(m)[[2]]
 
-  coop::tcosine(m)[[2]]
+
 }
 
-numCores <- parallel::detectCores()
-cl <- parallel::makeCluster(numCores-1)
- z <- parallel::parLapply(cl,
-                    z,
-                    binMat)
-parallel::stopCluster(cl)
 
 
 
 
-mat[lower.tri(mat)] <- unlist(z)
+
+
+    # Create native R distance matrix from cosine scores
+    mat <- matrix(nrow = length(peakList), ncol = length(peakList))
+
+
+mat[lower.tri(mat)] <- tc
 diztance <- as.dist(mat)
 
 
@@ -133,4 +130,33 @@ diztance <- as.dist(mat)
   labels(diztance) <- names(peakList)
   diztance
 
-}
+  }
+
+
+
+
+  combinadic <- function(n, r, i) {
+
+    # http://msdn.microsoft.com/en-us/library/aa289166(VS.71).aspx
+    # http://en.wikipedia.org/wiki/Combinadic
+
+    if(i < 1 | i > choose(n,r)) stop("'i' must be 0 < i <= n!/(n-r)!")
+
+    largestV <- function(n, r, i) {
+      #v <- n-1
+      v <- n                                  # Adjusted for one-based indexing
+      #while(choose(v,r) > i) v <- v-1
+      while(choose(v,r) >= i) v <- v-1        # Adjusted for one-based indexing
+      return(v)
+    }
+
+    res <- rep(NA,r)
+    for(j in 1:r) {
+      res[j] <- largestV(n,r,i)
+      i <- i-choose(res[j],r)
+      n <- res[j]
+      r <- r-1
+    }
+    res <- res + 1
+    return(res)
+  }

@@ -1542,7 +1542,7 @@ MALDIquant::binPeaks(collapsedPeaksP(), method = "strict", tolerance = .02) %>%
     if(req(input$distance)=="cosineD"){
 
 
-
+      pmat <<- proteinMatrix()
       # Perform cosine similarity function
       dend <- proteinMatrix() %>% coop::tcosine() %>% magrittr::subtract(1,.) %>% as.dist
       # Convert NA to 1
@@ -1780,7 +1780,7 @@ plot_ly(data = pcaDat,
 
 
 proteinDistance <- reactive({
-  IDBacApp::proteinDistanceMatrix2(peakList = collapsedPeaksP(),
+  IDBacApp::proteinDistanceMatrix(peakList = collapsedPeaksP(),
                                   method = input$distance)
 
 })
