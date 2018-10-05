@@ -143,6 +143,7 @@ function(input,output,session){
                   p("s"),
                   actionButton("searchNCBI","Search NCBI"),
                   actionButton("saven","save"),
+                  actionButton("pop22","pop"),
                   rHandsontableOutput("metaTable")
       )
 
@@ -244,21 +245,23 @@ newmixNmatchExperimentSqlite <- reactive({
 
 })
 
-qwerty <- reactiveValues()
+qwerty <- reactiveValues(rtab = data.frame("Strain_ID" = "dumb"))
 
-#----
-# MetaData rHandosontable
 
-# Display the new Library as an editable table
+
+
 
 observeEvent(input$searchNCBI,{
 
-aqw <<- metaTableIn()
+aqw <<-  rhandsontable::hot_to_r(input$metaTable)
+for(i in 1:ncol(aqw)){
+  aqw[ ,i] <- as.character(aqw[ ,i])
+}
 
 ind <- is.na(aqw[-1,]$Genbank_Accession)
-aqw <- as.character(aqw[-1,]$Genbank_Accession[!ind])
+providedAccessions <- as.character(aqw[-1,]$Genbank_Accession[!ind])
 
-a <- lapply(aqw, traits::ncbi_byid)
+a <- lapply(providedAccessions, traits::ncbi_byid)
 
 genus <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[1]])
 
@@ -274,30 +277,45 @@ dna_16s <- lapply(a, function(x){
 
 taxo<-lapply(a, function(x){
 
- q <- taxize::classification(x$taxon,
-                         db="ncbi",
-                         return_id = FALSE)[[1]]
+  q <- taxize::classification(x$taxon,
+                              db="ncbi",
+                              return_id = FALSE)[[1]]
 
- q2 <- as.list(q$name)
- names(q2) <- q$rank
- q2
-
- })
-qw <- rep(NA, length(ind))
-qw[!ind] <- genus
-qwerty$a <- qw
-qw <- rep(NA, length(ind))
-
-qw[!ind] <- dna_16s
-qwerty$dna <- qw
+  q2 <- as.list(q$name)
+  names(q2) <- q$rank
+  q2
 
 })
 
+taxo <- do.call(rbind.data.frame, taxo)
+for(i in 1:ncol(taxo)){
+  taxo[ ,i] <- as.character(taxo[ ,i])
+}
+
+# get rhandsontable minus the example row
+awe <-  aqw[-1, ]
+# ind is a logical vector of rows with input accessions
+
+awe$Kingdom[!ind] <- taxo$superkingdom
+awe$Phylum[!ind] <- taxo$phylum
+awe$Class[!ind] <- taxo$class
+awe$Order[!ind] <- taxo$order
+awe$Family[!ind] <- taxo$family
+awe$Genus[!ind] <- taxo$genus
+awe$Species[!ind] <- taxo$species
+
+awe$dna_16S[!ind] <- unlist(dna_16s)
+
+AQS<<-awe
+
+qwerty$rtab <- rbind(rhandsontable::hot_to_r(input$metaTable)[1, ], awe)
+
+})
+
+
 output$metaTable <- rhandsontable::renderRHandsontable({
 
-
-
-  rhandsontable::rhandsontable(metaTableIn(),
+  rhandsontable::rhandsontable(qwerty$rtab,,
                                useTypes = FALSE,
                                contextMenu = TRUE ) %>%
     hot_col("Strain_ID", readOnly = TRUE) %>%
@@ -305,15 +323,23 @@ output$metaTable <- rhandsontable::renderRHandsontable({
     hot_context_menu(allowRowEdit = FALSE,
                      allowColEdit = TRUE) %>%
     hot_cols(colWidths = 100) %>%
-    hot_rows(rowHeights = 25)
+    hot_rows(rowHeights = 25) %>%
+    hot_cols(fixedColumnsLeft = 1)
+
+
 })
 
 
 
-metaTableIn <-   reactive({
-  if (!is.null(input$metaTable)) {
-    rhandsontable::hot_to_r(input$metaTable)
-  } else {
+
+
+
+
+observeEvent(input$pop22,{
+
+  if (is.null(input$metaTable)){
+  qwerty$rtab <-  rhandsontable::hot_to_r(input$metaTable)
+  }else {
 
   dbQuery <- glue::glue_sql("SELECT *
                             FROM ({tab*})",
@@ -346,25 +372,23 @@ metaTableIn <-   reactive({
                                       "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
   )
 
- rbind(exampleMetaData, dbQuery)
+  qwerty$rtab <- rbind(exampleMetaData, dbQuery)
+
+
 
 }
   })
 
 
-
-observeEvent(input$saven,{
-  awe <- metaTableIn()[-1,]
-  awe$Genus  <- qwerty$a
-  awe$dna_16S  <- qwerty$dna
-
-  qw<<-awe
-
-
-
-})
-
-
+#
+#
+#
+#
+# observeEvent(input$saven,{
+#
+#
+#
+# })
 
 
 
