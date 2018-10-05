@@ -586,7 +586,7 @@ observeEvent(input$saven,{
                                         offset = 3,
                                         h3("Instructions"))),
                         br(),
-                        p(strong("1:")," This directs where on your computeryou would like to create an IDBac working directory."),
+                        p(strong("1:")," This directs where on your computer you would like to create an IDBac working directory."),
                         p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
                         img(src="WorkingDirectory.png", style="width:322px;height:164px"),
                         p("If there is already an \"IDBac\" folder present in the working directory,
@@ -606,22 +606,36 @@ observeEvent(input$saven,{
                         fluidRow(
                           h3("Workflow Pane", align="center")),
                         br(),
-                        p(strong("1:"), " Your Working Directory is where files will be created."),
-                        actionButton("newExperimentName",
-                                     label = "Click to select your Working Directory"),
+                        column(12, align="center",
+                               p(strong("1: Enter a Name for this New Experiment")),
+                               textInput("newExperimentName",
+                                         label = ""),
+                               tags$hr(size=20)),
                         fluidRow(column(12,
                                         verbatimTextOutput("newExperimentNameText",
                                                            placeholder = TRUE))),
                         br(),
                         p(strong("2:"), "Your RAW data will be one folder that contains folders for each MALDI plate."),
+                        br(),
+                        p(strong("2: Click to select the location of your RAW data"), align= "center"),
+
+
                         actionButton("multipleMaldiRawFileDirectory",
                                      label = "Click to select the location of your RAW data"),
                         fluidRow(column(12,
                                         verbatimTextOutput("multipleMaldiRawFileDirectory",
                                                            placeholder = TRUE))),
                         br(),
-                        actionButton("run",
-                                     label = "Convert to mzXML")
+
+                        column(12, align="center",
+                               p(strong("4:","Click \"Convert to mzXML\" to begin spectra conversion.")),
+                               actionButton("run",
+                                            label = "Convert to mzXML"),
+                               tags$hr(size=20))
+
+
+
+
                  )
                         )
         )
@@ -887,7 +901,8 @@ observeEvent(input$saven,{
       pwizFolderLocation <- installed.packages(c(.libPaths(), applibpath))
       pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
       pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, "proteowizardinstallation", "pwiz")
-      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+      #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+      pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
       #Command-line MSConvert, converts from proprietary vendor data to open mzXML
       msconvertCmdLineCommands <<- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
@@ -918,17 +933,43 @@ observeEvent(input$saven,{
 
       lengthProgress <- length(msconvertCmdLineCommands)
 
-      withProgress(message = 'Conversion in progress',
-                   detail = 'This may take a while...', value = 0, {
+      # withProgress(message = 'Conversion in progress',
+      #              detail = 'This may take a while...', value = 0, {
+      #
+      #                for(i in 1:lengthProgress){
+      #                  incProgress(1/lengthProgress)
+      #
+      #                  functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
+      #
+      #                }
+      #
+      #              })
 
-                     for(i in 1:lengthProgress){
-                       incProgress(1/lengthProgress)
+# TODO: Add parallel msconvert UI
 
-                       functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
+          numCores <- parallel::detectCores()
+          cl <- parallel::makeCluster(numCores)
+          parallel::parLapply(cl,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
+          parallel::stopCluster(cl)
 
-                     }
+      #Single process with sapply instead of parsapply
+      #sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
 
-                   })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       popup2()
 
@@ -1715,7 +1756,7 @@ plot_ly(data = pcaDat,
 
 
 proteinDistance <- reactive({
-  IDBacApp::proteinDistanceMatrix(peakList = collapsedPeaksP(),
+  IDBacApp::proteinDistanceMatrix2(peakList = collapsedPeaksP(),
                                   method = input$distance)
 
 })
