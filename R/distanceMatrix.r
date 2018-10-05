@@ -38,12 +38,23 @@ proteinDistanceMatrix <- function(peakList, method){
 
 
 
-  proteinDistanceMatrix2 <- function(){
+  proteinDistanceMatrix2 <- function(peakList, method){
 
   if(method == "cosineD"){
 
 
-aws2<<-peakList
+awq2<<-peakList
+
+for(i in 1:length(peakList)){
+
+  if(length(peakList[[i]]@intensity) < 10){}else{
+  snr1 <-  order(peakList[[i]]@intensity, decreasing = TRUE)[1:100]
+  peakList[[i]]@mass <- peakList[[i]]@mass[snr1]
+  peakList[[i]]@snr <- peakList[[i]]@snr[snr1]
+  peakList[[i]]@intensity <- peakList[[i]]@intensity[snr1]
+  }
+}
+
   # Takes as input a flat-list of MALDIquant S4 MassPeaks objects
 
 # Create native R distance matrix from cosine scores
@@ -56,11 +67,10 @@ z <- combn(x = peakList,
             simplify = F)
 
 
-z <- lapply(z, function(x){ binPeaks(x, method = "relaxed", tolerance = .02)})
 
+binMat <- function(x){
 
-z <-lapply(z, function(zz){
-
+  zz <- MALDIquant::binPeaks(x, method = "relaxed", tolerance = .02)
   mass <- unlist(lapply(zz, function(x) x@mass))
   uniqueMass <- sort.int(unique(mass))
 
@@ -70,16 +80,21 @@ z <-lapply(z, function(zz){
   m <- matrix(0, nrow = length(zz), ncol = length(uniqueMass),
               dimnames = list(NULL, uniqueMass))
   m[cbind(r, i)] <- 1
-  m
-})
+
+  coop::tcosine(m)[[2]]
+}
+
+numCores <- parallel::detectCores()
+cl <- parallel::makeCluster(numCores-1)
+ z <- parallel::parLapply(cl,
+                    z,
+                    binMat)
+parallel::stopCluster(cl)
 
 
-z <- unlist(lapply(qq, function(x) coop::tcosine(x)[[2]]))
 
 
-
-
-mat[lower.tri(mat)] <- z
+mat[lower.tri(mat)] <- unlist(z)
 diztance <- as.dist(mat)
 
 
