@@ -34,19 +34,38 @@ parseDelimitedMS <- function(proteinDirectory = NULL,
 
     keys <- unique(labels(c(proteinFiles, smallMolFiles)))
 
-    for(i in keys){
-
-      toMerge <- unlist(c(proteinFiles[i],
-                          smallMolFiles[i]))
-
-      mzmlPath <- normalizePath(file.path(exportDirectory,
-                                          paste0(i,
-                                                 ".mzML")),
-                                mustWork = FALSE)
-
-      MALDIquantForeign::exportMzMl(as.list(toMerge),
-                                    mzmlPath)
 
 
-    }
+    lengthProgress <- length(keys)
+    count <- 0
+
+    withProgress(message = 'Conversion in progress',
+                              detail = 'This may take a while...', value = 0, {
+
+
+
+
+
+                                for(i in keys){
+                                  incProgress(1/lengthProgress)
+
+                                  toMerge <- unlist(c(proteinFiles[i],
+                                                      smallMolFiles[i]))
+
+                                  mzmlPath <- normalizePath(file.path(exportDirectory,
+                                                                      paste0(i,
+                                                                             ".mzML")),
+                                                            mustWork = FALSE)
+
+                                  MALDIquantForeign::exportMzMl(as.list(toMerge),
+                                                                mzmlPath)
+
+
+                                }
+
+
+                              })
+
+
+
 }

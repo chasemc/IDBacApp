@@ -510,12 +510,70 @@ observeEvent(input$pop22,{
     if (is.null(input$startingWith)){}else if(input$startingWith == 2){
       output$ui1<-renderUI({
         fluidRow(
-          p(".txt and .csv support coming soon!")
+          p(".txt and .csv support coming soon!"),
+          actionButton("delimitedDirectoryP",
+                       label = "Raw Data P Folder"),
+          actionButton("delimitedDirectorySM",
+                       label = "Raw Data SM Folder"),
+          actionButton("runDelim",
+                       label = "Convert to mzML"),
+          verbatimTextOutput("delimitedLocationPo",
+                             placeholder = TRUE),
+          verbatimTextOutput("delimitedLocationSMo",
+                             placeholder = TRUE)
+
+
+
         )
       })
 
     }
   })
+
+
+
+
+  # -----------------
+  # Reactive variable returning the user-chosen location of the raw delim files as string
+  delimitedLocationP <- reactive({
+    if (input$delimitedDirectoryP > 0) {
+      choose.dir()
+    }
+  }) # -----------------
+  # Reactive variable returning the user-chosen location of the raw delim files as string
+  delimitedLocationSM <- reactive({
+    if (input$delimitedDirectorySM > 0) {
+      choose.dir()
+    }
+  })
+  # -----------------
+  # Creates text showing the user which directory they chose for raw files
+  output$delimitedLocationSMo <- renderText({
+    if (is.null(delimitedLocationSM())) {
+      return("No Folder Selected")} else{
+        folders <- NULL
+        foldersInFolder <- list.files(delimitedLocationSM(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
+        for (i in 1:length(foldersInFolder)) {
+          folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+        }
+        folders
+      }
+  })
+  # -----------------
+  # Creates text showing the user which directory they chose for raw files
+  output$delimitedLocationPo <- renderText({
+    if (is.null(delimitedLocationP())) {
+      return("No Folder Selected")} else{
+        folders <- NULL
+        foldersInFolder <- list.files(delimitedLocationP(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
+        for (i in 1:length(foldersInFolder)) {
+          folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+        }
+        folders
+      }
+  })
+
+
 
 
 
@@ -901,16 +959,11 @@ observeEvent(input$pop22,{
 
 
   # -----------------
-  observe({
-    # If user chooses to convert files...
-    if (is.null(input$run)){}else if(input$run > 0) {
-
-
-
+  observeEvent(input$run,{
 
       # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
       # contents of each element are file paths to the raw data for that sample
-      fullZ <<- spectraConversion()
+      fullZ <- spectraConversion()
       # fullZ$UserInput.x = sample name
       # fullZ$UserInput.y = file locations
 
@@ -928,18 +981,18 @@ observeEvent(input$pop22,{
       #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
       pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
       #Command-line MSConvert, converts from proprietary vendor data to open mzML
-      msconvertCmdLineCommands <<- lapply(fullZ, function(x){
+      msconvertCmdLineCommands <- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
         paste0(shQuote(file.path(pwizFolderLocation, "msconvert.exe")),
                # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzML files will be saved
                " ",
                paste0(x$UserInput.y, collapse = "", sep=" "),
               # "--noindex --mzML --merge -z",
-               "--noindex --mzML --merge -z",
+               "--noindex --mzML --merge -z  --32",
                " -o ",
                shQuote(outp),
                " --outfile ",
-               shQuote(paste0(x$UserInput.x[1],".mzML"))
+               shQuote(paste0(x$UserInput.x[1], ".mzML"))
         )
       }
       )
@@ -980,26 +1033,57 @@ observeEvent(input$pop22,{
       #sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
       popup2()
 
 
-    }
   })
+
+
+
+
+
+
+
+  #hellop
+  # -----------------
+  observeEvent(input$runDelim,{
+
+aaq<<-delimitedLocationP()
+aaq2<<-delimitedLocationSM()
+
+    IDBacApp::parseDelimitedMS(proteinDirectory = delimitedLocationP(),
+                               smallMolDirectory = delimitedLocationSM(),
+                               exportDirectory =  tempdir())
+
+    popup1()
+
+
+    popup2()
+
+
+  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
