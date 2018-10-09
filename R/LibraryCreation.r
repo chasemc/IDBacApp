@@ -76,17 +76,17 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
   rdsFiles <- lapply(rdsFiles, function(x)split(x, x$rdsType))
 
 
-  #--------------- mzXML files
+  #--------------- mzML files
   # Get Instrument info
-  mzXmlSpectraLocation <- list.files(paste0(selectedIDBacDataFolder, "/Converted_To_mzXML"), full.names = TRUE)
+  mzMLSpectraLocation <- list.files(paste0(selectedIDBacDataFolder, "/Converted_To_mzML"), full.names = TRUE)
 
   # Only paths of samples to be added
-  mzXmlSpectraLocation <- mzXmlSpectraLocation[grep(paste0("/", toAdd , ".mzXML", collapse = "|"), mzXmlSpectraLocation)]
+  mzMLSpectraLocation <- mzMLSpectraLocation[grep(paste0("/", toAdd , ".mzML", collapse = "|"), mzMLSpectraLocation)]
 
 
   for (i in 1:length(toAdd)){
 
-    rdsFiles[[i]]$mzXML <- mzXmlSpectraLocation[[i]]
+    rdsFiles[[i]]$mzML <- mzMLSpectraLocation[[i]]
 
   }
 
@@ -145,11 +145,11 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
       "detector"                     = NA,
       "Protein_Replicates"           = NA,
       "Small_Molecule_Replicates"    = NA,
-      "mzXML"                        = NA,
+      "mzML"                        = NA,
       "proteinPeaksRDS"              = NA,
       "proteinSummedSpectrumRDS"     = NA,
       "smallMoleculePeaksRDS"        = NA,
-      "mzXMLhash"                    = NA,
+      "mzMLhash"                    = NA,
       "proteinPeaksRDShash"          = NA,
       "proteinSummedSpectrumRDShash" = NA,
       "smallMoleculePeaksRDShash"    = NA
@@ -159,21 +159,21 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
 
     # This doesn't load spectra, only a pointer
-    onemzXmlSpectra <- lapply(yeppy$mzXML, function(x) mzR::openMSfile(x))
+    onemzMLSpectra <- lapply(yeppy$mzML, function(x) mzR::openMSfile(x))
 
 
-    instrumentInformation <- lapply(onemzXmlSpectra, function(x) data.frame(mzR::instrumentInfo(x)))
+    instrumentInformation <- lapply(onemzMLSpectra, function(x) data.frame(mzR::instrumentInfo(x)))
 
 
-    # read in mzxml file
-    onemzXmlSpectra <- xml2::read_xml(yeppy$mzXML)
-    # Create hash of mzXMLs
-    mzXMLhash <- digest::digest(onemzXmlSpectra)
+    # read in mzML file
+    onemzMLSpectra <- xml2::read_xml(yeppy$mzML)
+    # Create hash of mzMLs
+    mzMLhash <- digest::digest(onemzMLSpectra)
 
     # serialize so we can insert into DB
-    onemzXmlSpectra <- xml2::xml_serialize(onemzXmlSpectra, NULL)
+    onemzMLSpectra <- xml2::xml_serialize(onemzMLSpectra, NULL)
     # compress
-    onemzXmlSpectra <- memCompress(onemzXmlSpectra, type = "gzip")
+    onemzMLSpectra <- memCompress(onemzMLSpectra, type = "gzip")
 
 
 
@@ -184,7 +184,7 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
     sqlDF$sqlDataFrame[ , "ionisation"] <- instrumentInformation[[1]]$ionisation
     sqlDF$sqlDataFrame[ , "analyzer"] <- instrumentInformation[[1]]$analyzer
     sqlDF$sqlDataFrame[ , "detector"] <- instrumentInformation[[1]]$detector
-    sqlDF$sqlDataFrame[ , "mzXMLhash"] <- mzXMLhash
+    sqlDF$sqlDataFrame[ , "mzMLhash"] <- mzMLhash
 
 
 
@@ -252,8 +252,8 @@ addNewLibrary <- function(samplesToAdd, newDatabase, selectedIDBacDataFolder){
 
     #--
 
-    # Insert "mzXML" files into SQL
-    sqlDF$sqlDataFrame$mzXML <- list(onemzXmlSpectra)
+    # Insert "mzML" files into SQL
+    sqlDF$sqlDataFrame$mzML <- list(onemzMLSpectra)
 
     #--
     #--

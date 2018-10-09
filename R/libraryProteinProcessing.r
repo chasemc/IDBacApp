@@ -49,7 +49,7 @@ processProteinLibSpec <- function(spectra){
 getLibraryProteinSpectrum <-  function(singleLibSpec, dbConnection){
 
 
-  # "singleLibSpec" is a character vector of mzXML hex.
+  # "singleLibSpec" is a character vector of mzML hex.
   # hese should correspond to the Entries in the "Strain_ID" column of the SQLite database
   # "dbConnection" is a DBI connection to an SQLite database
 

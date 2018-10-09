@@ -3,8 +3,8 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
 
   # "idbacDirectory"  is the path of the IDBac data directory
 
-  # Open connection to mzXML but don't read
-  mzxml_con <- mzR::openMSfile(file = rawDataFilePaths)
+  # Open connection to mzML but don't read
+  mzML_con <- mzR::openMSfile(file = rawDataFilePaths)
 
   # Find sample name (fileName)
   sampleName <- tools::file_path_sans_ext(basename(rawDataFilePaths))
@@ -32,7 +32,7 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
   # Create SQL "XML" table entry
 
   # Get instrument Info
-  instInfo <- mzR::instrumentInfo(mzxml_con)
+  instInfo <- mzR::instrumentInfo(mzML_con)
 
   sqlDataFrame$XML$manufacturer  <- instInfo$manufacturer
   sqlDataFrame$XML$model         <- instInfo$model
@@ -43,15 +43,15 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
   remove(instInfo)
 
 
-  # Get mzxml sha and filesha1
-  sha1 <- IDBacApp::findmzXMLsha1(rawDataFilePaths)$sha1
+  # Get mzML sha and filesha1
+  sha1 <- IDBacApp::findmzMLsha1(rawDataFilePaths)$sha1
 
 
   sqlDataFrame$XML$SHA1 <- sha1
 
 
 
-  # Get mzxml, serialize, compress, for insert to SQL
+  # Get mzML, serialize, compress, for insert to SQL
 
 
   rawDataFilePaths %>%
@@ -135,7 +135,7 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
 
 
 
-    spectraImport <- mzR::peaks(mzxml_con, scans = oneReplicate)
+    spectraImport <- mzR::peaks(mzML_con, scans = oneReplicate)
 
     if(typeof(spectraImport) == "list"){
 

@@ -574,9 +574,9 @@ observeEvent(input$pop22,{
                                          accept =c('.xlsx','.xls')),
                                tags$hr(size=20)),
                         column(12, align="center",
-                               p(strong("4:","Click \"Convert to mzXML\" to begin spectra conversion.")),
+                               p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
                                actionButton("run",
-                                            label = "Convert to mzXML"),
+                                            label = "Convert to mzML"),
                                tags$hr(size=20)),
                         br(),
                         br(),
@@ -652,9 +652,9 @@ observeEvent(input$pop22,{
                         br(),
 
                         column(12, align="center",
-                               p(strong("4:","Click \"Convert to mzXML\" to begin spectra conversion.")),
+                               p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
                                actionButton("run",
-                                            label = "Convert to mzXML"),
+                                            label = "Convert to mzML"),
                                tags$hr(size=20))
 
 
@@ -690,7 +690,7 @@ observeEvent(input$pop22,{
                                p("This will be the folder, originally named \"IDBac\", that was created when you analyzed data the first time."),
                                p("It contains the folders:"),
                                tags$ul(
-                                 tags$li("Converted_To_mzXML"),
+                                 tags$li("Converted_To_mzML"),
                                  tags$li("Peak_Lists"),
                                  tags$li("Saved_MANs")
                                ),
@@ -752,11 +752,11 @@ observeEvent(input$pop22,{
                         p(strong("2: "), actionButton("createBlanknewExperimentNameFolders",
                                                       label = "Click to create a blank working directory")),
                         br(),
-                        p(strong("3:"), "Place the mzXML files that you wish to analyze into:"),
+                        p(strong("3:"), "Place the mzML files that you wish to analyze into:"),
                         p(verbatimTextOutput("whereConvert")),
-                        p(strong("4:"), "Select \"Process mzXML\" to process mzXML files for analysis"),
+                        p(strong("4:"), "Select \"Process mzML\" to process mzML files for analysis"),
                         actionButton("beginPeakProcessingAgain",
-                                     label = "Process mzXML spectra")
+                                     label = "Process mzML spectra")
                  )
           )
         )
@@ -849,7 +849,7 @@ observeEvent(input$pop22,{
 
   # -----------------
   # Spectra conversion
-  #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzXML
+  #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
   spectraConversion<-reactive({
     if(input$rawORreanalyze == 1){
       # When only analyzing one maldi plate this handles finding the raw data directories and the excel map
@@ -914,7 +914,7 @@ observeEvent(input$pop22,{
       # fullZ$UserInput.x = sample name
       # fullZ$UserInput.y = file locations
 
-      # outp is the filepath of where to save the created mzXML files
+      # outp is the filepath of where to save the created mzML files
       outp <<- tempDirectory
 
 
@@ -927,19 +927,19 @@ observeEvent(input$pop22,{
       pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, "proteowizardinstallation", "pwiz")
       #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
       pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
-      #Command-line MSConvert, converts from proprietary vendor data to open mzXML
+      #Command-line MSConvert, converts from proprietary vendor data to open mzML
       msconvertCmdLineCommands <<- lapply(fullZ, function(x){
         #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
         paste0(shQuote(file.path(pwizFolderLocation, "msconvert.exe")),
-               # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzXML files will be saved
+               # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzML files will be saved
                " ",
                paste0(x$UserInput.y, collapse = "", sep=" "),
-              # "--noindex --mzXML --merge -z",
-               "--noindex --mzXML --merge -z",
+              # "--noindex --mzML --merge -z",
+               "--noindex --mzML --merge -z",
                " -o ",
                shQuote(outp),
                " --outfile ",
-               shQuote(paste0(x$UserInput.x[1],".mzXML"))
+               shQuote(paste0(x$UserInput.x[1],".mzML"))
         )
       }
       )
@@ -2876,12 +2876,12 @@ qqw<<-selectedSmallMolPeakList()
     currentlyLoadedSamples <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
     # Character vector of protein peak sample names
     currentlyLoadedSamples <- as.character(strsplit(currentlyLoadedSamples,"_ProteinPeaks.rds"))
-    # Check for mzXML files
-    mzXMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzXML"), full.names = FALSE)
-    mzXMLfiles <- unlist(strsplit(mzXMLfiles, ".mzXML"))
-    nonMissingmzXML <- which(currentlyLoadedSamples %in% mzXMLfiles)
-    missingmzXML <- which(! currentlyLoadedSamples %in% mzXMLfiles)
-    currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzXML]
+    # Check for mzML files
+    mzMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzML"), full.names = FALSE)
+    mzMLfiles <- unlist(strsplit(mzMLfiles, ".mzML"))
+    nonMissingmzML <- which(currentlyLoadedSamples %in% mzMLfiles)
+    missingmzML <- which(! currentlyLoadedSamples %in% mzMLfiles)
+    currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzML]
     # Create the data frame structure for the "database"
     currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
                                          "Genbank_Accession" = "",
@@ -3002,7 +3002,7 @@ qqw<<-selectedSmallMolPeakList()
                        "detector",
                        "Protein_Replicates",
                        "Small_Molecule_Replicates",
-                       "mzXML",
+                       "mzML",
                        "proteinPeaksRDS")) %>%
       dplyr::collect()
 
@@ -3068,7 +3068,7 @@ qqw<<-selectedSmallMolPeakList()
                        "detector",
                        "Protein_Replicates",
                        "Small_Molecule_Replicates",
-                       "mzXML",
+                       "mzML",
                        "proteinPeaksRDS")) %>%
       colnames()
 
@@ -3126,7 +3126,7 @@ qqw<<-selectedSmallMolPeakList()
                        "detector",
                        "Protein_Replicates",
                        "Small_Molecule_Replicates",
-                       "mzXML",
+                       "mzML",
                        "proteinPeaksRDS")) %>%
       dplyr::collect()
 
@@ -3196,12 +3196,12 @@ qqw<<-selectedSmallMolPeakList()
     currentlyLoadedSamples <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
     # Character vector of protein peak sample names
     currentlyLoadedSamples <- as.character(strsplit(currentlyLoadedSamples,"_ProteinPeaks.rds"))
-    # Check for mzXML files
-    mzXMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzXML"), full.names = FALSE)
-    mzXMLfiles <- unlist(strsplit(mzXMLfiles, ".mzXML"))
-    nonMissingmzXML <- which(currentlyLoadedSamples %in% mzXMLfiles)
-    missingmzXML <- which(! currentlyLoadedSamples %in% mzXMLfiles)
-    currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzXML]
+    # Check for mzML files
+    mzMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzML"), full.names = FALSE)
+    mzMLfiles <- unlist(strsplit(mzMLfiles, ".mzML"))
+    nonMissingmzML <- which(currentlyLoadedSamples %in% mzMLfiles)
+    missingmzML <- which(! currentlyLoadedSamples %in% mzMLfiles)
+    currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzML]
     # Create the data frame structure for the "database"
     currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
                                          "Genbank_Accession" = "",
@@ -3334,11 +3334,11 @@ qqw<<-selectedSmallMolPeakList()
                                      "detector",
                                      "Protein_Replicates",
                                      "Small_Molecule_Replicates",
-                                     "mzXML",
+                                     "mzML",
                                      "proteinPeaksRDS",
                                      "proteinSummedSpectrumRDS",
                                      "smallMoleculePeaksRDS",
-                                     "mzXMLhash",
+                                     "mzMLhash",
                                      "proteinPeaksRDShash",
                                      "proteinSummedSpectrumRDShash",
                                      "smallMoleculePeaksRDShash")) %>%  colnames(),
@@ -3352,11 +3352,11 @@ qqw<<-selectedSmallMolPeakList()
                                                              "detector",
                                                              "Protein_Replicates",
                                                              "Small_Molecule_Replicates",
-                                                             "mzXML",
+                                                             "mzML",
                                                              "proteinPeaksRDS",
                                                              "smallMoleculePeaksRDS",
                                                              "proteinSummedSpectrumRDS",
-                                                             "mzXMLhash",
+                                                             "mzMLhash",
                                                              "proteinPeaksRDShash",
                                                              "proteinSummedSpectrumRDShash",
                                                              "smallMoleculePeaksRDShash")) %>%  colnames())
