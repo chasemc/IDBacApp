@@ -1746,6 +1746,51 @@ function(input,output,session){
 
     }
 
+
+
+
+    combinedSmallMolPeaks <- monoisotopicPeaks(combinedSmallMolPeaks, tolerance = .002,  minCor=0.90, size=2)
+
+for (i in 1:length(combinedSmallMolPeaks)){
+  combinedSmallMolPeaks[[i]]@mass<-combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
+  combinedSmallMolPeaks[[i]]@intensity<-combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
+  combinedSmallMolPeaks[[i]]@snr<-combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
+}
+
+    # -----------------
+    combinedSmallMolPeaks <-   trim(combinedSmallMolPeaks,c(input$lowerMassSM,input$upperMassSM))
+
+
+    # -----------------
+sss<<-smallPeaks()
+
+
+    # process for MAN creation
+
+    #Get sample IDs from MALDIquant spectra
+labs <- unlist(lapply(unname(combinedSmallMolPeaks), function(x)metaData(x)$Strain))
+labs <- factor(labs)
+    new2 <- NULL
+    newPeaks <- NULL
+
+    #Merge specctra based on frequency of presence.  For peaks above threshold, keep the mean intensity
+    for (i in seq_along(levels(labs))) {
+      specSubset <- which(labs == levels(labs)[[i]])
+      if (length(specSubset) > 1) {
+
+       asd <-  MALDIquant::binPeaks(combinedSmallMolPeaks[specSubset], tolerance = .02, method = "strict")
+
+        new <-suppressWarnings(filterPeaks(asd,minFrequency=input$percentPresenceSM/100))
+        new<-mergeMassPeaks(new,method="mean")
+        new2 <- c(new2, new)
+      } else{
+        new2 <- c(new2, combinedSmallMolPeaks[specSubset])
+      }
+
+    }
+    combinedSmallMolPeaks <-new2
+
+
     # input$matrixSamplePresent (Whether there is a matrix sample)  1=Yes   2=No
     if(input$matrixSamplePresent ==1){
       # combinedsmallMolPeaksm  will contain all samples containing word matrix
@@ -1756,62 +1801,25 @@ function(input,output,session){
         need(combinedSmallMolPeaksm != "", "It seems that you don't have a sample containing \"Matrix\" in its name to use for a matrix blank.  Try selecting \"No\" under \"Do you have a matrix blank\" to left, or checking your sample names/data." )
       )
 
-      # At least for now, replicate matrix samples are merged into a consensus peak list.
-      # Make sure we haven't reduced the mass object down to S4
-      if(typeof(combinedSmallMolPeaksm)=="S4"){combinedSmallMolPeaksm<- list(combinedSmallMolPeaksm)}
-      #
-      combinedSmallMolPeaksm<-mergeMassPeaks(combinedSmallMolPeaksm)
-      #For now, matrix peaks are all picked at SNR > 6
-      combinedSmallMolPeaksm@mass<-combinedSmallMolPeaksm@mass[which(combinedSmallMolPeaksm@snr>6)]
-      combinedSmallMolPeaksm@intensity<-combinedSmallMolPeaksm@intensity[which(combinedSmallMolPeaksm@snr>6)]
-      combinedSmallMolPeaksm@snr<-combinedSmallMolPeaksm@snr[which(combinedSmallMolPeaksm@snr>6)]
-      combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
-      combinedSmallMolPeaks<-c(combinedSmallMolPeaksm,combinedSmallMolPeaks)
+
 
     }else{
-      combinedSmallMolPeaks<-combinedSmallMolPeaks[which(!grepl(paste0("Matrix",collapse="|"),sapply(combinedSmallMolPeaks, function(x)metaData(x)$Strain),ignore.case=TRUE))]
     }
+    zq<<-combinedSmallMolPeaks
 
 
-    for (i in 1:length(combinedSmallMolPeaks)){
-      combinedSmallMolPeaks[[i]]@mass<-combinedSmallMolPeaks[[i]]@mass[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
-      combinedSmallMolPeaks[[i]]@intensity<-combinedSmallMolPeaks[[i]]@intensity[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
-      combinedSmallMolPeaks[[i]]@snr<-combinedSmallMolPeaks[[i]]@snr[which(combinedSmallMolPeaks[[i]]@snr>input$smSNR)]
-    }
-    binPeaks(combinedSmallMolPeaks[which(sapply(combinedSmallMolPeaks,function(x)length(mass(x)))!=0)],tolerance=.002)
+
+    binPeaks(combinedSmallMolPeaks,
+             tolerance=.02,
+             method = "strict")
   })
 
 
-  # -----------------
-  trimmedSM <- reactive({
-    trim(small_Binned_Matrix(),c(input$lowerMassSM,input$upperMassSM))
-  })
 
-  # -----------------
-  subSelect<-reactive({
+  subSelect<-reactive({0
 
-    # process for MAN creation
 
-    #Get sample IDs from MALDIquant spectra
-    labs <- sapply(trimmedSM(), function(x)metaData(x)$Strain)
-    labs <- factor(labs)
-    new2 <- NULL
-    newPeaks <- NULL
-
-    #Merge specctra based on frequency of presence.  For peaks above threshold, keep the mean intensity
-    for (i in seq_along(levels(labs))) {
-      specSubset <- which(labs == levels(labs)[[i]])
-      if (length(specSubset) > 1) {
-        new <-suppressWarnings(filterPeaks(trimmedSM()[specSubset],minFrequency=input$percentPresenceSM/100))
-        new<-mergeMassPeaks(new,method="mean")
-        new2 <- c(new2, new)
-      } else{
-        new2 <- c(new2, trimmedSM()[specSubset])
-      }
-
-    }
-
-    combinedSmallMolPeaks <- new2
+    combinedSmallMolPeaks <- small_Binned_Matrix()
 
 
     #This section deals with whether to remove a matrix blank or not, as decided by user, defaults to remove blank
@@ -1860,7 +1868,7 @@ function(input,output,session){
       temp <- c(temp,subSelect()[[i]]@metaData$Strain)
     }
 
-
+    bip <<- smallNetwork
     peaksaNames <- factor(temp)
 
     rownames(smallNetwork) <- paste(peaksaNames)
@@ -1906,6 +1914,9 @@ function(input,output,session){
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
     temp <- NULL
 
+    smallMolNetworkDataFrame1 <<- smallMolNetworkDataFrame()
+    subSelect1 <<-subSelect()
+
 
     for (i in 1:length(subSelect())){
       temp <- c(temp,subSelect()[[i]]@metaData$Strain)
@@ -1921,9 +1932,20 @@ function(input,output,session){
     biggerSampleNodes<-rep(1,times=length(zz[,1]))
     zz<-cbind(zz,biggerSampleNodes)
     zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
-    forceNetwork(Links = z, Nodes = zz, Source = "source",Nodesize = "biggerSampleNodes",
-                 Target = "target", NodeID = "name",
-                 Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
+    forceNetwork(Links = z,
+                 Nodes = zz,
+                 Value = smallMolNetworkDataFrame()$Weight,
+                 Source = "source",
+                 Nodesize = "biggerSampleNodes",
+                 Target = "target",
+                 NodeID = "name",
+                 Group = "group",
+                 opacity = 1,
+                 opacityNoHover=1,
+                 zoom = TRUE,
+                 linkDistance = JS("function(d) { return Math.sqrt(d.value)  }"),
+                 charge = -400,
+                 linkWidth = 2)
 
   })
 
@@ -2040,7 +2062,7 @@ function(input,output,session){
                                brush = "plot_brush")
              ),column(width=7,style ="padding: 14px 0px; margin:0%",
                       absolutePanel(fixed=TRUE,width ="50%",
-                                    
+
                       simpleNetworkOutput("metaboliteAssociationNetwork"))
              )))
   })
@@ -2244,10 +2266,10 @@ function(input,output,session){
 
 
   #  The following code is necessary to stop the R backend when the user closes the browser window
-  session$onSessionEnded(function() {
-    stopApp()
-    q("no")
-  })
+  # session$onSessionEnded(function() {
+  #   stopApp()
+  #   q("no")
+  # })
 
 
 
