@@ -1440,6 +1440,77 @@ proteinDistance <- reactive({
 })
 
 
+#------------------------------------------------------------------------------
+# Protein PCA, PCoA, and t-SNE calculation and plotting
+#------------------------------------------------------------------------------
+
+
+# Create protein 3-d plots UI
+#----
+output$PCAui <-  renderUI({
+  
+  if(is.null(input$Spectra1)){
+    fluidPage(
+      h1(" There is no data to display",
+         img(src = "errors/hit3.gif",
+             width = "200" ,
+             height = "100")),
+      br(),
+      h4("Troubleshooting:"),
+      tags$ul(
+        tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visit the
+                \"Compare Two Samples\" tab."),
+        tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
+                named \"Peak_Lists\""),
+        tags$li("If it seems there is a bug in the software, this can be reported on the", 
+                a(href = "https://github.com/chasemc/IDBacApp/issues",
+                  target = "_blank", "IDBac Issues Page at GitHub.",
+                  img(border = "0",
+                      title = "https://github.com/chasemc/IDBacApp/issues", 
+                      src = "GitHub.png", 
+                      width = "25",
+                      height = "25")))
+        )
+      )
+    } else {
+    mainPanel(width = 12,
+              fluidRow(
+                column(width = 6,
+                       p("PCOA: Provides Three-Dimensional View of Distances (Based upon Distance Algorithm Chosen)"),
+                       plotlyOutput("pcoaPlot",
+                                    width = "100%",
+                                    height = "800px")),
+                column(width = 6,
+                       p("Principle Components Analysis: Provides a dimension reduction of the peak intensity/presence matrix"),
+                       plotlyOutput("pcaPlot",
+                                    width = "100%",
+                                    height = "800px"))),
+              p("t-SNE"),
+              numericInput("tsnePerplexity",
+                           label = h5(strong("t-SNE Perplexity")), 
+                           value = 30, 
+                           step = 10,
+                           min = 0,
+                           max = 300),
+              numericInput("tsneTheta",
+                           label = h5(strong("t-SNE Theta")),
+                           value = 0.5, 
+                           step = 0.1,
+                           max = 1,
+                           min = 0),
+              numericInput("tsneIterations",
+                           label = h5(strong("t-SNE Iterations")),
+                           value = 1000,
+                           step = 50),
+              fluidRow(plotlyOutput("tsnePlot",
+                                    width = "100%",
+                                    height = "800px"))
+    )
+      }
+  
+})
+
+
 # PCoA Calculation
 #----
 pcoaCalculation <- reactive({
@@ -1449,7 +1520,7 @@ pcoaCalculation <- reactive({
   
   pc <- as.data.frame(stats::cmdscale((proteinDistance()), k=10))
   pc <- pc[,1:3]
-  colnames(pc) <- c("Dim.1", "Dim.2", "Dim.3")
+  colnames(pc) <- c("Dim1", "Dim2", "Dim3")
   pc["nam"] <- row.names(pc)
   pc
 })
@@ -1472,9 +1543,9 @@ output$pcoaPlot <- renderPlotly({
                   by = "nam")
 
   plot_ly(data = pcaDat,
-          x = ~Dim.1,
-          y = ~Dim.2,
-          z = ~Dim.3,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
           type = "scatter3d",
           mode = "markers",
           marker = list(color = ~fac),
@@ -1500,352 +1571,347 @@ pcaCalculation <- reactive({
     pc <- log10(proteinMatrix())
     # Replace infinites
     pc[is.infinite(pc)] <- .000001
-
-    pc <- PCA(pc,
-              graph = FALSE,
-              ncp = 50, scale.unit = T)
+    pc <- FactoMineR::PCA(pc,
+                          graph = FALSE,
+                          ncp = 50,
+                          scale.unit = T)
     pc <- pc$ind$coord
     pc <- as.data.frame(pc)
     nam <- row.names(pc)
     cbind(pc,nam)
   })
 
-
+# Match colors by sample across all protein-data graphs
+#----
   colorMatch <- reactive({
     pc <- pcaCalculation()
 
-
     # Based on user selection, color PCA based on dendrogram groupings
     if(!is.null(isolate(input$kORheight))){
-      if(input$kORheight=="2"){
+      if(input$kORheight == "2"){
         # Colors chosen by cutting dendrogram at user-chosen height
-        fac <- cutree(dendro(),h=input$height)
-      }else if (input$kORheight=="1"){
+        fac <- stats::cutree(dendro(),
+                      h = input$height)
+      }else if (input$kORheight == "1"){
         # Colors chosen by user-selected "k" of k-means
-        fac <- cutree(dendro(),k=input$kClusters)
+        fac <- stats::cutree(dendro(),
+                             k = input$kClusters)
       }else{
         # No factors, everthing colored black
-        fac <- rep(1,length(labels(dendro())))
-        names(fac)<-labels(dendro())
+        fac <- rep(1, length(labels(dendro())))
+        names(fac) <- labels(dendro())
       }
-
       fac
-
-
     }
+})
 
-  })
-
-  output$pcaPlot <- renderPlotly({
-
-    pcaDat <- pcaCalculation()
-    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
-    if(any(is.na(as.vector(colorsToUse)))){
-      colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
-    }
-
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
-    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
-
-
-
-plot_ly(data = pcaDat,
-        x = ~Dim.1,
-        y = ~Dim.2,
-        z = ~Dim.3,
-        type = "scatter3d",
-        mode = "markers",
-        marker = list(color = ~fac),
-        #hoverinfo = 'text',
-        text = ~nam)
-  })
-
-
-
-
-
-  tsneCalculation <- reactive({
-    d<- Rtsne(pcaCalculation(), pca=FALSE, dims=3, perplexity = input$tsnePerplexity,theta = input$tsneTheta, max_iter = input$tsneIterations)
-    d <- as.data.frame(d$Y)
-    d <- cbind.data.frame(as.vector(pcaCalculation()$nam),d)
-    colnames(d) <- c("nam","Dim.1","Dim.2","Dim.3")
-
-    as.data.frame(d)
-
-  })
-
-  output$tsnePlot <- renderPlotly({
-    pcaDat <- tsneCalculation()
-    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
-
-    if(any(is.na(as.vector(colorsToUse)))){
-      colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
-    }
-
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
-    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
-
-
-
-    plot_ly(data = pcaDat,
-            x = ~Dim.1,
-            y = ~Dim.2,
-            z = ~Dim.3,
-            type = "scatter3d",
-            mode = "markers",
-            marker = list(color = ~fac),
-            hoverinfo = 'text',
-            text = ~nam)
-  })
-
-
-
-
-
-
-
-# Create PCA ui
+  
+# Output Plotly plot of PCA results
 #----
-output$PCAui <-  renderUI({
+output$pcaPlot <- renderPlotly({
 
-  if(is.null(input$Spectra1)){
-    fluidPage(
-
-      h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
-
-      br(),
-      h4("Troubleshooting:"),
-      tags$ul(
-        tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visit the
-                \"Compare Two Samples\" tab."),
-        tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
-                named \"Peak_Lists\""),
-        tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
-      )
-
-    )
-
-  }else{
-    mainPanel(width=12,
-
-
-              fluidRow(
-                column(width=6,
-                       p("PCOA: Provides Three-Dimensional View of Distances (Based upon Distance Algorithm Chosen)"),
-                       plotlyOutput("pcoaPlot",width="100%",height="800px")),
-                column(width=6,
-                       p("Principle Components Analysis: Provides a dimension reduction of the peak intensity/presence matrix"),
-                       plotlyOutput("pcaPlot",width="100%",height="800px"))
-              ),
-              p("t-SNE"),
-              numericInput("tsnePerplexity", label = h5(strong("t-SNE Perplexity")), value = 30, step=10, min = 0, max = 300),
-              numericInput("tsneTheta", label = h5(strong("t-SNE Theta")), value = .5, step=.1, max = 1, min=0),
-              numericInput("tsneIterations", label = h5(strong("t-SNE Iterations")), value = 1000, step = 50),
-              fluidRow( plotlyOutput("tsnePlot",width="100%",height="800px"))
-
-              # br(),
-              # fluidRow(      rglwidgetOutput("pcaplot3d"))
-    )
+  colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+  
+  if(any(is.na(as.vector(colorsToUse)))){
+    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
   }
+
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
+                                  nam = (names(colorsToUse)))
+  
+  pcaDat <- merge(pcaCalculation(),
+                  colorsToUse, 
+                  by = "nam")
+  
+  plot_ly(data = pcaDat,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
+          type = "scatter3d",
+          mode = "markers",
+          marker = list(color = ~fac),
+          #hoverinfo = 'text',
+          text = ~nam)
+})
+
+
+# Calculate tSNE based on PCA calculation already performed
+#----
+tsneCalculation <- reactive({
+  d <- Rtsne::Rtsne(pcaCalculation(),
+                    pca = FALSE,
+                    dims = 3,
+                    perplexity = input$tsnePerplexity,
+                    theta = input$tsneTheta, 
+                    max_iter = input$tsneIterations)
+  d <- as.data.frame(d$Y)
+  d <- cbind.data.frame(as.vector(pcaCalculation()$nam),
+                        d)
+  colnames(d) <- c("nam", "Dim1", "Dim2", "Dim3")
+
+  as.data.frame(d)
+})
+
+
+# Output Plotly plot of tSNE results
+#----
+output$tsnePlot <- renderPlotly({
+
+  colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+
+  if(any(is.na(as.vector(colorsToUse)))){
+    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+  }
+
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
+                                  nam = (names(colorsToUse)))
+  pcaDat <- merge(tsneCalculation(), 
+                  colorsToUse,
+                  by="nam")
+
+  plot_ly(data = pcaDat,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
+          type = "scatter3d",
+          mode = "markers",
+          marker = list(color = ~fac),
+          hoverinfo = 'text',
+          text = ~nam)
+})
+
+
+
+#------------------------------------------------------------------------------
+# Protein Hierarchical clustering calculation and plotting
+#------------------------------------------------------------------------------
+
+
+#User input changes the height/length of the main dendrogram
+#----
+plotHeight <- reactive({
+  return(as.numeric(input$hclustHeight))
+})
+
+
+#----
+output$hclustui <- renderUI({
+  if(input$kORheight!="2"){return(NULL)}else{
+    numericInput("height", 
+                 label = h5(strong("Cut Tree at Height")),
+                 value = .5,
+                 step=.1,
+                 min=0)}
+})
+
+
+#----
+output$groupui <- renderUI({
+  if(input$kORheight=="1"){
+    numericInput("kClusters", 
+                 label = h5(strong("Number of Groups")),
+                 value = 1,
+                 step=1,
+                 min=1)}
+})
+
+
+#----
+sampleFactorMapColumns <- reactive({
+  sampleMappings <- variable.names(read_excel(input$sampleMap$datapath,
+                                              sheet = 1,
+                                              range = cell_rows(1)))
+})
+
+
+#----
+output$sampleMapColumns1 <- renderUI({
+  selectInput("sampleFactorMapChosenIDColumn",
+              label = h5("Select a Group Mapping"),
+              choices = as.list(sampleFactorMapColumns()))
+})
+
+
+#----
+output$sampleMapColumns2 <- renderUI({
+  selectInput("sampleFactorMapChosenAttribute",
+              label = h5("Select a Group Mapping"),
+              choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,
+                                                                sampleFactorMapColumns(),
+                                                                ignore.case = TRUE)]))
+})
+
+
+#----
+levs <- reactive({
+  sampleMappings <- read_excel(input$sampleMap$datapath, 1)
+  #selected column
+
+  sampleMappings[input$sampleFactorMapChosenAttribute] %>% 
+    unique %>%
+    unlist %>% 
+    as.vector %>% 
+    c(.,"Missing_in_Excel")
+})
+
+
+#----
+output$sampleFactorMapColors <- renderUI({
+  column(3,
+         lapply(1:length(levs()),
+                function(x){
+                  do.call(colourInput,
+                          list(paste0("factor-",
+                                      gsub(" ",
+                                           "",
+                                           levs()[[x]])),
+                               levs()[[x]],
+                               value="blue",
+                               allowTransparent=T))
+         })
+  )
+})
+
+
+# Color the Protein Dendrogram
+#----
+coloredDend <- reactive({
+
+  if (input$kORheight =="3"){
+    colorsChosen <- sapply(1:length(levs()),
+                           function(x){
+                               input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]]
+                             })
+  }
+
+  IDBacApp::coloringDendrogram(
+      useDots          = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
+      useKMeans        = if(input$kORheight == "1"){TRUE} else {FALSE},
+      cutByHeight      = if(input$kORheight == "2"){TRUE} else {FALSE},
+      userColor        = if(input$kORheight == "3"){TRUE} else {FALSE},
+      excelFilePath    = input$sampleMap$datapath,
+      chosenIdColumn   = input$sampleFactorMapChosenIDColumn,
+      chosenMetaColumn = input$sampleFactorMapChosenAttribute,
+      dendrogram       = dendro(),
+      cutHeight        = input$height,
+      cutK             = input$kClusters,
+      chosenColorsMeta = levs(),
+      colorsChosen     = colorsChosen
+  )
+
 
 })
 
 
 
+# Output the dendrogram
+#----
+output$hclustPlot <- renderPlot({
 
+  par(mar = c(5, 5, 5, input$dendparmar))
 
+  if (input$kORheight == "1"){
+    
+    coloredDend()$dend %>%
+      plot(horiz = TRUE, lwd = 8)
+    
+  }else if (input$kORheight == "2"){
+    
+    coloredDend()$dend  %>%  
+      plot(horiz = TRUE, lwd = 8)
+    
+    abline(v = input$height, lty = 2)
+    
+  }else if (input$kORheight == "3"){
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  #User input changes the height of the main hierarchical clustering plot
-  plotHeight <- reactive({
-    return(as.numeric(input$hclustHeight))
-  })
-
-
-  # -----------------
-  output$hclustui <-  renderUI({
-    if(input$kORheight!="2"){return(NULL)}else{
-      numericInput("height", label = h5(strong("Cut Tree at Height")),value = .5,step=.1,min=0)}
-  })
-
-  # -----------------
-  output$groupui <-  renderUI({
-    if(input$kORheight=="1"){
-      numericInput("kClusters", label = h5(strong("Number of Groups")),value = 1,step=1,min=1)}
-  })
-
-  # -----------------
-  sampleFactorMapColumns<-reactive({
-    sampleMappings<-variable.names(read_excel(input$sampleMap$datapath,sheet=1,range=cell_rows(1)))
-
-  })
-
-
-  # -----------------
-  output$sampleMapColumns1<-renderUI({
-    selectInput("sampleFactorMapChosenIDColumn", label = h5("Select a Group Mapping"),
-                choices = as.list(sampleFactorMapColumns()))
-  })
-
-
-  # -----------------
-  output$sampleMapColumns2<-renderUI({
-
-
-    selectInput("sampleFactorMapChosenAttribute", label = h5("Select a Group Mapping"),
-                choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,sampleFactorMapColumns(),ignore.case = TRUE)]))
-  })
-
-
-  # -----------------
-  levs<-reactive({
-    sampleMappings<-read_excel(input$sampleMap$datapath,1)
-    #selected column
-    # if(any(is.na(sampleMappings[input$sampleFactorMapChosenAttribute]))){
-    sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector %>% c(.,"Missing_in_Excel")
-    # }else{
-    #   sampleMappings[input$sampleFactorMapChosenAttribute] %>% unique %>% unlist %>%  as.vector
-    # }
-  })
-
-  # -----------------
-  output$sampleFactorMapColors<-renderUI({
-
-    column(3,
-           lapply(1:length(levs()),function(x){
-             do.call(colourInput,list(paste0("factor-",gsub(" ","",levs()[[x]])),levs()[[x]],value="blue",allowTransparent=T))
-           })
-    )
-  })
-
-
-  # -----------------
-# Color the Protein Dendrogram
-  coloredDend <- reactive({
-
-#
-#     # if user selects to customize group samples
-#     if (input$kORheight =="3"){
-#       if(!is.null(input$sampleMap$datapath)){
-#         if(input$colDotsOrColDend == "1"){
-
-    if (input$kORheight =="3"){
-      colorsChosen <- sapply(1:length(levs()), function(x) input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]])
-    }
-
-    IDBacApp::coloringDendrogram(
-        useDots          = if(input$colDotsOrColDend == "1"){TRUE}else{FALSE},
-        useKMeans        = if(input$kORheight=="1"){TRUE}else{FALSE},
-        cutByHeight      = if(input$kORheight=="2"){TRUE}else{FALSE},
-        userColor        = if(input$kORheight=="3"){TRUE}else{FALSE},
-        excelFilePath    = input$sampleMap$datapath,
-        chosenIdColumn   = input$sampleFactorMapChosenIDColumn,
-        chosenMetaColumn = input$sampleFactorMapChosenAttribute,
-        dendrogram       = dendro(),
-        cutHeight        = input$height,
-        cutK             = input$kClusters,
-        chosenColorsMeta = levs(),
-        colorsChosen     = colorsChosen
-    )
-
-
-  })
-
-
-  # -----------------
-  #Create the hierarchical clustering plot as well as the calculations needed for such.
-
-  output$hclustPlot <- renderPlot({
-
-    par(mar=c(5,5,5,input$dendparmar))
-
-    if (input$kORheight=="1"){
-      coloredDend()$dend %>% plot(horiz=TRUE,lwd=8)
-    }else if (input$kORheight=="2"){
-      coloredDend()$dend  %>%  plot(horiz=TRUE,lwd=8)
-      abline(v=input$height,lty=2)
-    }else if (input$kORheight=="3"){
-
-      if(is.null(input$sampleMap$datapath)){
-        # No sample mapping selected
-        dendro()$dend %>% plot(horiz = TRUE,lwd = 8)}else{
-          if(input$colDotsOrColDend == "1"){
-
-            coloredDend()$dend  %>%  plot(.,horiz=T)
-            IDBacApp::colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
-                         rowLabels = names(coloredDend()$bigMatrix), horiz=T, sort_by_labels_order = FALSE)
-          }else{
-
-            coloredDend()$dend  %>%  plot(., horiz=T)
-          }
-        }
-    }
-  }, height=plotHeight)
-
-  # -----------------
-  #observeEvent(input$downloadInverse,{
-  output$downloadHeirSVG <- downloadHandler(
-    filename = function(){paste0("Dendrogram.svg")},
-    content = function(file1){
-      # svg(filename=paste0(input$Spectra1,"_",input$Spectra1,".svg"))
-      svglite::svglite(file1, width = 10, height = plotHeight()/100, bg = "white",
-                       pointsize = 12, standalone = TRUE)
-
-      par(mar=c(5,5,5,input$dendparmar))
-
-      if (input$kORheight=="1"){
-        dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8)
-
-      } else if (input$kORheight=="2"){
-
-        dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8)
-        abline(v=input$height,lty=2)
-
-      } else if (input$kORheight=="3"){
-
-        par(mar=c(5,5,5,input$dendparmar))
+    if(is.null(input$sampleMap$datapath)){
+      # No sample mapping selected
+      dendro()$dend %>%
+        plot(horiz = TRUE, lwd = 8)
+      } else {
         if(input$colDotsOrColDend == "1"){
-
-          coloredDend()$dend  %>%  plot(.,horiz=T)
-          IDBacApp::colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
-                       rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE)
-        }else{
-          coloredDend()$dend  %>%  plot(.,horiz=T)
+        
+          coloredDend()$dend %>%  
+            plot(.,horiz=T)
+          
+          IDBacApp::colored_dots(coloredDend()$bigMatrix, 
+                                 coloredDend()$shortenedNames,
+                                 rowLabels = names(coloredDend()$bigMatrix),
+                                 horiz = T,
+                                 sort_by_labels_order = FALSE)
+        } else {
+          coloredDend()$dend  %>%
+            plot(., horiz = T)
         }
       }
-      dev.off()
-      if (file.exists(paste0(file1, ".svg")))
-        file.rename(paste0(file1, ".svg"), file1)
-    })
-
-  # -----------------
-  output$downloadHierarchical <- downloadHandler(
+  }
+}, height = plotHeight)
 
 
-    filename = function() {
-      paste0(Sys.Date(), ".newick")
-    },
-    content = function(file) {
-      ape::write.tree(as.phylo(dendro()), file=file)
+# Download svg of dendrogram
+#----
+output$downloadHeirSVG <- downloadHandler(
+  filename = function(){paste0("Dendrogram.svg")},
+  content = function(file1){
+    
+    svglite::svglite(file1, 
+                     width = 10,
+                     height = plotHeight() / 100,
+                     bg = "white",
+                     pointsize = 12, 
+                     standalone = TRUE)
+
+    par(mar = c(5, 5, 5, input$dendparmar))
+
+    if (input$kORheight == "1"){
+      
+      dendro() %>% 
+        color_branches(k = input$kClusters) %>% 
+        plot(horiz = TRUE, lwd = 8)
+
+    } else if (input$kORheight == "2"){
+
+      dendro() %>% 
+        color_branches(h = input$height) %>%
+        plot(horiz = TRUE, lwd = 8)
+      abline(v = input$height,
+             lty = 2)
+
+    } else if (input$kORheight == "3"){
+
+      par(mar = c(5, 5, 5, input$dendparmar))
+      if(input$colDotsOrColDend == "1"){
+
+        coloredDend()$dend  %>%
+          plot(., horiz = T)
+        IDBacApp::colored_dots(coloredDend()$bigMatrix,
+                               coloredDend()$shortenedNames,
+                               rowLabels = names(coloredDend()$bigMatrix),
+                               horiz = T,
+                               sort_by_labels_order = FALSE)
+      }else{
+        coloredDend()$dend  %>%  
+          plot(., horiz = T)
+      }
     }
+    dev.off()
+    if (file.exists(paste0(file1, ".svg")))
+      file.rename(paste0(file1, ".svg"), file1)
+})
 
-  )
+
+# Download dendrogram as Newick
+#----
+output$downloadHierarchical <- downloadHandler(
+
+  filename = function() {
+    paste0(Sys.Date(), ".newick")
+  },
+  content = function(file) {
+    ape::write.tree(as.phylo(dendro()), file=file)
+  }
+
+)
 
 
 
