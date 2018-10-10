@@ -41,6 +41,7 @@ Install_And_Load <- function(Required_Packages)
 }
 
 # Required packages to install and load
+#----
 Required_Packages = c("Rcpp",
                       "devtools",
                       "svglite",
@@ -73,6 +74,7 @@ Required_Packages = c("Rcpp",
 # Install and Load Packages
 Install_And_Load(Required_Packages)
 
+#----
 colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", rainbow(1000)))
 
 
@@ -1272,7 +1274,9 @@ output$inversePeakComparisonPlotZoom <- renderPlot({
 output$downloadInverse <- downloadHandler(
   filename = function(){
     paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,".svg")
-    }, content = function(file1){
+    
+    }, 
+  content = function(file1){
 
     svglite::svglite(file1,
                      width = 10,
@@ -1321,7 +1325,8 @@ output$downloadInverse <- downloadHandler(
 # Download svg of zoomed mirror plot
 #----
 output$downloadInverseZoom <- downloadHandler(
-  filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")},
+  filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")
+    },
   content = function(file1){
 
     svglite::svglite(file1, width = 10, height = 8, bg = "white",
@@ -1807,6 +1812,85 @@ and then an arrow. Strains in the right box will be used for analysis."),
 })
 
 
+# UI of paragraph explaining which variables were used
+#----
+output$proteinReport<-renderUI(
+  p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
+    and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
+    Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
+    "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
+)
+
+
+# Markdown report generation and download
+#----
+output$downloadReport <- downloadHandler(
+  filename = function() {
+    paste('my-report', sep = '.', switch(
+      input$format,  HTML = 'html'
+    ))
+  },
+  content = function(file) {
+    src <- normalizePath('report.Rmd')
+    
+    # temporarily switch to the temp dir, in case you do not have write
+    # permission to the current working directory
+    owd <- setwd(tempdir())
+    on.exit(setwd(owd))
+    file.copy(src, 'report.Rmd', overwrite = TRUE)
+    
+    library(rmarkdown)
+    out <- render('C:/Users/CMC/Documents/GitHub/IDBac_App/ResultsReport.Rmd', switch(
+      input$format,
+      HTML = html_document()
+    ))
+    file.rename(out, file)
+  }
+)
+
+
+# UI for coloring samples by user input metadata
+#----
+output$sampleGroupColoringui <- renderUI(
+  
+  if(input$kORheight == "3"){
+    tags$div(
+      p("To color samples according to user-defined groupings..."),
+      p("To use this function, create a different excel file and list all of your sample names in
+        different rows of a single column. In other columns you may add additional characteristics
+        of your samples (eg. media type, genus, sample location), with one characteristic per column.
+        You will have the option to color code your hierarchical clustering plot
+        based on these characteristics, which will appear in the drop-down list below."),
+      radioButtons("colDotsOrColDend", 
+                   label = h5("Color dend or dots:"),
+                   choices = list("dots" = 1, 
+                                  "no dots" = 2),
+                   selected = 1),
+      p("Click the blue boxes under a factor (below) to change the color of the factor."),
+      fileInput('sampleMap',
+                label = "Sample Mapping",
+                accept = c('.xlsx', '.xls')),
+      uiOutput("sampleMapColumns1"),
+      uiOutput("sampleMapColumns2"),
+      fluidRow(
+        uiOutput("sampleFactorMapColors"))
+      )
+})
+
+
+# MODAL for metadata input re: dendrogram 
+#----
+datafile <- callModule(IDBacApp::hierMeta, "datafile", labels(dendro()))
+
+
+# Invoke metadata modal
+#----
+observeEvent(input$tester, {
+  showModal(modalDialog(IDBacApp::hierMetaOutput("datafile", "User data (.csv format)"),
+                        size="l"))
+})
+
+
 #User input changes the height/length of the main dendrogram
 #----
 plotHeight <- reactive({
@@ -1971,7 +2055,8 @@ output$hclustPlot <- renderPlot({
 # Download svg of dendrogram
 #----
 output$downloadHeirSVG <- downloadHandler(
-  filename = function(){paste0("Dendrogram.svg")},
+  filename = function(){paste0("Dendrogram.svg")
+    },
   content = function(file1){
     
     svglite::svglite(file1, 
@@ -2017,7 +2102,8 @@ output$downloadHeirSVG <- downloadHandler(
     dev.off()
     if (file.exists(paste0(file1, ".svg")))
       file.rename(paste0(file1, ".svg"), file1)
-})
+}
+)
 
 
 # Download dendrogram as Newick
@@ -2030,317 +2116,184 @@ output$downloadHierarchical <- downloadHandler(
   content = function(file) {
     ape::write.tree(as.phylo(dendro()), file=file)
   }
-
 )
 
 
+# Select samples for input into dendrogram
+#----
+output$chooseProteinSamples <- renderUI({
+
+  IDBacApp::chooserInput("myProteinchooser",
+                         "Available frobs", 
+                         "Selected frobs",
+                         availableProtein(),
+                         c(),
+                         size = 10, 
+                         multiple = TRUE
+  )
+})
 
 
-  # -----------------
-  output$proteinReport<-renderUI(
-    p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
-      and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
-      Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
-      "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
+#TODO: delete
+#----
+output$selectedProteinSamples <- renderPrint(
+  input$myProteinchooser
+)
+
+
+# Check which samples can be used for protein analysis, return Sample Names
+#----
+availableProtein <- reactive({
+
+  combinedSmallMolPeaksAll <- glue::glue_sql("
+                                              SELECT DISTINCT `Strain_ID`
+                                              FROM `IndividualSpectra`
+                                              WHERE (`proteinPeaks` IS NOT NULL)",
+                                            .con = userDBCon()
   )
 
+  conn <- pool::poolCheckout(userDBCon())
+  combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
+  combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
+  pool::poolClose(conn)
+
+  combinedSmallMolPeaksAll
+})
 
 
 
-  output$downloadReport <- downloadHandler(
-    filename = function() {
-      paste('my-report', sep = '.', switch(
-        input$format,  HTML = 'html'
-      ))
-    },
 
-    content = function(file) {
-      src <- normalizePath('report.Rmd')
 
-      # temporarily switch to the temp dir, in case you do not have write
-      # permission to the current working directory
-      owd <- setwd(tempdir())
-      on.exit(setwd(owd))
-      file.copy(src, 'report.Rmd', overwrite = TRUE)
 
-      library(rmarkdown)
-      out <- render('C:/Users/CMC/Documents/GitHub/IDBac_App/ResultsReport.Rmd', switch(
-        input$format,
-        HTML = html_document()
-      ))
-      file.rename(out, file)
+
+
+#------------------------------------------------------------------------------
+# Small molecule data processing
+#------------------------------------------------------------------------------
+
+
+
+# -----------------
+selectedSmallMolPeakList <- reactive({
+
+  combinedSmallMolPeaks <- NULL
+  combinedSmallMolPeaksAll <- NULL
+  matrixID <- NULL
+
+  if(!is.null(dendro())){  # Check if there are protein spectra if TRUE, display protein dendrogram and use to subset strains
+
+    if(is.null(input$plot_brush$ymin)){ # If there is a protein dendrogram and user hasn't brushed:
+                                        # Don't ovrwhelm the browser by displaying everthing when page loads
+
+      if(length(labels(dendro())) >= 25){
+        # If more than 25 strains present, only display 10 to start, otherwise display all
+        # Get random 10 strain IDs from dendrogram
+        combinedSmallMolPeaks <- labels(dendro())[1:sample.int(10, 1)]
+      }else{
+        combinedSmallMolPeaks <- labels(dendro())
+      }
+    }else{
+
+      combinedSmallMolPeaks <- IDBacApp::networkViaBrushedDendrogram(dendrogram = dendro(),
+                                                                     brushYmin = input$plot_brush$ymin,
+                                                                     brushYmax = input$plot_brush$ymax)
     }
-  )
 
 
+  }else{
 
-
-
-
-
-
-
-
-
-
-  output$chooseProteinSamples <- renderUI({
-
-    IDBacApp::chooserInput("myProteinchooser", "Available frobs", "Selected frobs",
-                           availableProtein(), c(), size = 10, multiple = TRUE
-    )
-  })
-
-
-  output$selectedProteinSamples <- renderPrint(
-    input$myProteinchooser
-  )
-
-
-  availableProtein <- reactive({
-
-
+    # retrieve all Strain_IDs in db, check for matrix.
     combinedSmallMolPeaksAll <- glue::glue_sql("
-                             SELECT DISTINCT `Strain_ID`
-                                             FROM `IndividualSpectra`
-                                               WHERE (`proteinPeaks` IS NOT NULL)",
-                                               .con = userDBCon()
+                           SELECT DISTINCT `Strain_ID`
+                           FROM `IndividualSpectra`
+                           WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                           .con = userDBCon()
     )
 
     conn <- pool::poolCheckout(userDBCon())
     combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
     combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
+  }
 
+  # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
+  if(input$matrixSamplePresent == 1){
 
-    combinedSmallMolPeaksAll
-
-
-  })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  # -----------------
-  output$sampleGroupColoringui <-   renderUI(
-
-    if(input$kORheight == "3"){
-      tags$div(
-        p("To color samples according to user-defined groupings..."),
-        p("To use this function, create a different excel file and list all of your sample names in
-          different rows of a single column. In other columns you may add additional characteristics
-          of your samples (eg. media type, genus, sample location), with one characteristic per column.
-          You will have the option to color code your hierarchical clustering plot
-          based on these characteristics, which will appear in the drop-down list below."),
-        radioButtons("colDotsOrColDend", label = h5("Color dend or dots:"),
-                     choices = list("dots" = 1, "no dots" = 2),
-                     selected = 1),
-        p("Click the blue boxes under a factor (below) to change the color of the factor."),
-        fileInput('sampleMap', label = "Sample Mapping" , accept =c('.xlsx','.xls')),
-        uiOutput("sampleMapColumns1"),
-        uiOutput("sampleMapColumns2"),
-        fluidRow(
-          uiOutput("sampleFactorMapColors"))
-        )
-    })
-
-
-
-
-
-
-  datafile <- callModule(IDBacApp::hierMeta, "datafile", labels(dendro()))
-
-
-
-  observeEvent(input$tester, {
-    showModal(modalDialog(IDBacApp::hierMetaOutput("datafile", "User data (.csv format)"),
-              size="l"))
-
-
-  })
-
-
-
-
-
-
-
-
-
-
-
-
-  # -----------------
-  selectedSmallMolPeakList <- reactive({
-
-    combinedSmallMolPeaks <- NULL
-    combinedSmallMolPeaksAll <- NULL
-    matrixID <- NULL
-
-    if(!is.null(dendro())){  # Check if there are protein spectra if TRUE, display protein dendrogram and use to subset strains
-
-      if(is.null(input$plot_brush$ymin)){ # If there is a protein dendrogram and user hasn't brushed:
-                                          # Don't ovrwhelm the browser by displaying everthing when page loads
-
-        if(length(labels(dendro())) >= 25){
-          # If more than 25 strains present, only display 10 to start, otherwise display all
-          # Get random 10 strain IDs from dendrogram
-          combinedSmallMolPeaks <- labels(dendro())[1:sample.int(10, 1)]
-        }else{
-          combinedSmallMolPeaks <- labels(dendro())
-        }
-      }else{
-
-        combinedSmallMolPeaks <- IDBacApp::networkViaBrushedDendrogram(dendrogram = dendro(),
-                                                                       brushYmin = input$plot_brush$ymin,
-                                                                       brushYmax = input$plot_brush$ymax)
-      }
-
-
-    }else{
-
-      # retrieve all Strain_IDs in db, check for matrix.
+    if(!exists("combinedSmallMolPeaksAll")){
+    # retrieve all Strain_IDs in db, check for matrix.
       combinedSmallMolPeaksAll <- glue::glue_sql("
-                             SELECT DISTINCT `Strain_ID`
-                             FROM `IndividualSpectra`
-                             WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                             .con = userDBCon()
+                           SELECT DISTINCT `Strain_ID`
+                           FROM `IndividualSpectra`
+                           WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                           .con = userDBCon()
       )
 
-      conn <- pool::poolCheckout(userDBCon())
-      combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
-      combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
+    conn <- pool::poolCheckout(userDBCon())
+    combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
+    combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
     }
-
-    # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
-    if(input$matrixSamplePresent == 1){
-
-      if(!exists("combinedSmallMolPeaksAll")){
-      # retrieve all Strain_IDs in db, check for matrix.
-        combinedSmallMolPeaksAll <- glue::glue_sql("
-                             SELECT DISTINCT `Strain_ID`
-                             FROM `IndividualSpectra`
-                             WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                             .con = userDBCon()
-        )
-
-      conn <- pool::poolCheckout(userDBCon())
-      combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
-      combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
-      }
 
 # Get sample IDs that begin with "matrix" (need this to search sql db)
 # Also give opportunity to later add ability for letting user interactively select which sample is the blank
-      matrixID <- grep("^matrix",
-                       combinedSmallMolPeaksAll,
-                          ignore.case = TRUE,
-                          value = TRUE)
+    matrixID <- grep("^matrix",
+                     combinedSmallMolPeaksAll,
+                        ignore.case = TRUE,
+                        value = TRUE)
 
 
-      # Check if there is a matrix sample
-      validate(
-        need(length(matrixID) == 0, "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to left." )
-      )
-
-    }else{
-# Don't add matrix blank to sample ID vector (leave as NULL)
-    }
-
-
-    # retrieve small mol peaks, filesha1, and strain_id , given Strain_ID.
-    sqlQ <- glue::glue_sql("
-                       SELECT `filesha1`, `Strain_ID`
-                       FROM (SELECT *
-                       FROM `IndividualSpectra`
-                       WHERE (`Strain_ID` IN ({strainIds*})))
-                       WHERE (`smallMoleculePeaks` != 'NA')",
-                           strainIds = c(combinedSmallMolPeaks,combinedSmallMolPeaksAll, matrixID),
-                           .con = userDBCon()
+    # Check if there is a matrix sample
+    validate(
+      need(length(matrixID) == 0, "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to left." )
     )
 
-
-    conn <- pool::poolCheckout(userDBCon())
-
-    sqlQ <- DBI::dbSendQuery(conn, sqlQ)
-
-    sqlQ <- DBI::dbFetch(sqlQ)
-
-    split(sqlQ$filesha1, sqlQ$Strain_ID) %>%
-    lapply(., function(x){
-      IDBacApp::collapseSmallMolReplicates(fileshas = x,
-                                           db = userDBCon(),
-                                           smallMolPercentPresence = input$percentPresenceSM,
-                                           lowerMassCutoff = input$lowerMassSM,
-                                           upperMassCutoff = input$upperMassSM) %>% unname
-    }) -> sqlQ
-
-    for(i in 1:length(sqlQ)){
-
-    snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)
+  }else{
+# Don't add matrix blank to sample ID vector (leave as NULL)
+  }
 
 
-    sqlQ[[i]]@mass <- sqlQ[[i]]@mass[snr1]
-    sqlQ[[i]]@snr <- sqlQ[[i]]@snr[snr1]
-    sqlQ[[i]]@intensity <- sqlQ[[i]]@intensity[snr1]
-    }
+  # retrieve small mol peaks, filesha1, and strain_id , given Strain_ID.
+  sqlQ <- glue::glue_sql("
+                     SELECT `filesha1`, `Strain_ID`
+                     FROM (SELECT *
+                     FROM `IndividualSpectra`
+                     WHERE (`Strain_ID` IN ({strainIds*})))
+                     WHERE (`smallMoleculePeaks` != 'NA')",
+                         strainIds = c(combinedSmallMolPeaks,combinedSmallMolPeaksAll, matrixID),
+                         .con = userDBCon()
+  )
+
+
+  conn <- pool::poolCheckout(userDBCon())
+
+  sqlQ <- DBI::dbSendQuery(conn, sqlQ)
+
+  sqlQ <- DBI::dbFetch(sqlQ)
+
+  split(sqlQ$filesha1, sqlQ$Strain_ID) %>%
+  lapply(., function(x){
+    IDBacApp::collapseSmallMolReplicates(fileshas = x,
+                                         db = userDBCon(),
+                                         smallMolPercentPresence = input$percentPresenceSM,
+                                         lowerMassCutoff = input$lowerMassSM,
+                                         upperMassCutoff = input$upperMassSM) %>% unname
+  }) -> sqlQ
+
+  for(i in 1:length(sqlQ)){
+
+  snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)
+
+
+  sqlQ[[i]]@mass <- sqlQ[[i]]@mass[snr1]
+  sqlQ[[i]]@snr <- sqlQ[[i]]@snr[snr1]
+  sqlQ[[i]]@intensity <- sqlQ[[i]]@intensity[snr1]
+  }
 
 
 
-    sqlQ
+  sqlQ
 
 
 
-  })
+})
 
 
 
