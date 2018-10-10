@@ -30,9 +30,13 @@ library("igraph")
 #tags$body(background = "rotatingPCA.gif",
 navbarPage(collapsible=T,
   "IDBac",
+
   tabPanel(
     "Introduction",
     fluidPage(
+      tags$head(
+    tags$script(src = "C:/Users/chase/Documents/GitHub/IDBac_App/inst/app/tippy.all.min.js")
+    ),
       shinyjs::useShinyjs(),
       fluidRow(
         column(3,

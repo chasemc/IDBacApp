@@ -1911,7 +1911,7 @@ labs <- factor(labs)
 
   # -----------------
   #This creates the network plot and calculations needed for such.
-  output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+  output$metaboliteAssociationNetwork <- renderForceNetwork({
     temp <- NULL
 
     smallMolNetworkDataFrame1 <<- smallMolNetworkDataFrame()
@@ -1932,20 +1932,30 @@ labs <- factor(labs)
     biggerSampleNodes<-rep(1,times=length(zz[,1]))
     zz<-cbind(zz,biggerSampleNodes)
     zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
-    forceNetwork(Links = z,
-                 Nodes = zz,
-                 Value = smallMolNetworkDataFrame()$Weight,
-                 Source = "source",
-                 Nodesize = "biggerSampleNodes",
-                 Target = "target",
-                 NodeID = "name",
-                 Group = "group",
-                 opacity = 1,
-                 opacityNoHover=1,
-                 zoom = TRUE,
-                 linkDistance = JS("function(d) { return Math.sqrt(d.value)  }"),
-                 charge = -400,
-                 linkWidth = 2)
+    fn<- networkD3::forceNetwork(Links = z,
+                            Nodes = zz,
+                            Value = smallMolNetworkDataFrame()$Weight,
+                            Source = "source",
+                            Nodesize = "biggerSampleNodes",
+                            Target = "target",
+                            NodeID = "name",
+                            Group = "group",
+                            opacity = 1,
+                            opacityNoHover=1,
+                            zoom = TRUE,
+                            linkDistance = JS("function(d) { return Math.sqrt(d.value)  }"),
+                            charge = -200,
+                            linkWidth = 1,
+                            fontSize = 9)
+
+    fn$x$nodes$value <- zz$name
+    onRender(fn, 'function(el, x) {
+                        d3.selectAll(".node circle, .link")
+             .attr("title", function(d) { return d.value; });
+             tippy("[title]");
+  }'
+)
+    fn
 
   })
 
