@@ -1687,6 +1687,126 @@ output$tsnePlot <- renderPlotly({
 #------------------------------------------------------------------------------
 
 
+# Create Heir ui
+#----
+output$Heirarchicalui <-  renderUI({
+  
+  if(is.null(input$Spectra1)){
+    fluidPage(
+      h1(" There is no data to display",
+         img(src = "errors/hit3.gif",
+             width = "200",
+             height = "100")),
+      br(),
+      h4("Troubleshooting:"),
+      tags$ul(
+        tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the
+                \"Compare Two Samples\" tab."),
+        tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
+                named \"Peak_Lists\""),
+        tags$li("If it seems there is a bug in the software, this can be reported on the",
+                a(href = "https://github.com/chasemc/IDBacApp/issues",
+                  target = "_blank",
+                  "IDBac Issues Page at GitHub.",
+                  img(border = "0", 
+                      title = "https://github.com/chasemc/IDBacApp/issues",
+                      src = "GitHub.png",
+                      width = "25",
+                      height = "25")))
+        )
+      )
+    } else {
+    
+    sidebarLayout(
+      sidebarPanel(style = "background-color:#7777770d",
+                   tabsetPanel(id = "HierarchicalSidebarTabs", 
+                               type = "tabs",
+                               tabPanel("Hierarchical Clustering Settings",
+                                        value = "hierSettings", p("Move strains between boxes by clicking the strain's name
+and then an arrow. Strains in the right box will be used for analysis."),
+                                        uiOutput("chooseProteinSamples"),
+                                        verbatimTextOutput("selectedProteinSamples"),
+                                        selectInput("distance", 
+                                                    label = h5(strong("Distance Algorithm")),
+                                                    choices = list("cosine" = "cosineD",
+                                                                   "euclidean" = "euclidean",
+                                                                   "maximum" = "maximum",
+                                                                   "manhattan" = "manhattan",
+                                                                   "canberra" = "canberra",
+                                                                   "binary" = "binary",
+                                                                   "minkowski"= "minkowski"),
+                                                    selected = "cosine"),
+                                        selectInput("clustering", 
+                                                    label = h5(strong("Clustering Algorithm")),
+                                                    choices = list("ward.D" = "ward.D",
+                                                                   "ward.D2" = "ward.D2",
+                                                                   "single" = "single", 
+                                                                   "complete" = "complete",
+                                                                   "average (UPGMA)" = "average",
+                                                                   "mcquitty (WPGMA)" = "mcquitty",
+                                                                   "median (WPGMC)" = "median",
+                                                                   "centroid (UPGMC)" = "centroid"),
+                                                    selected = "ward.D2"),
+                                        radioButtons("booled", 
+                                                     label = h5(strong("Include peak intensities, or use presence/absence?")),
+                                                     choices = list("Presence/Absence" = 1, 
+                                                                    "Intensities" = 2),
+                                                     selected = 2),
+                                        numericInput("hclustHeight", 
+                                                     label = h5(strong("Expand Tree")),
+                                                     value = 750,
+                                                     step = 50,
+                                                     min = 100),
+                                        numericInput("dendparmar",
+                                                     label = h5(strong("Adjust right margin of dendrogram")),
+                                                     value = 20),
+                                        radioButtons("kORheight", 
+                                                     label = h5(strong("Color clusters based on:")),
+                                                     choices = list("Specified Number of Groups" = 1, 
+                                                                    "Height (x-axis value)" = 2,
+                                                                    "User-Defined Categories in Excel Sheet" = 3),
+                                                     selected = 1),
+                                        uiOutput("groupui"),
+                                        uiOutput("hclustui"),
+                                        uiOutput("sampleGroupColoringui"),
+                                        br(),
+                                        h4("Suggestions for Reporting Protein Analysis:"),
+                                        uiOutput("proteinReport"),
+                                        br(),
+                                        downloadButton("downloadHeirSVG",
+                                                       label = "Save Dendrogram as SVG"),
+                                        actionButton("tester", 
+                                                     label = "tester"),
+                                        br(),
+                                        br(),
+                                        downloadButton("downloadHierarchical",
+                                                       "Save as Newick File"),
+                                        radioButtons('format',
+                                                     'Document format', 
+                                                     c('HTML'),
+                                                     inline = TRUE),
+                                        downloadButton('downloadReport')),
+                               tabPanel("Library Search",
+                                        value="hierLibrarySearch",
+                                        p("This is for searching against user-created libraries"),
+                                        uiOutput("libraryInjectionLibrarySelect"),
+                                        uiOutput("libraryMetadataColumnsSelection"),
+                                        radioButtons("initateInjection", 
+                                                     label = h3("Start Injection"),
+                                                     choices = list("Yes" = "TRUE",
+                                                                    "No" = "FALSE"),
+                                                     selected = "FALSE")
+                                        )
+                               )
+                   ),
+      mainPanel("Hierarchical Clustering",
+                column(8,
+                       plotOutput("hclustPlot")))
+    )
+      }
+})
+
+
 #User input changes the height/length of the main dendrogram
 #----
 plotHeight <- reactive({
@@ -1914,106 +2034,6 @@ output$downloadHierarchical <- downloadHandler(
 )
 
 
-
-
-  # Searching against Databases
-
-
-
-
-
-
-
-  # -----------------
-  # Create Heir ui
-  output$Heirarchicalui <-  renderUI({
-
-    if(is.null(input$Spectra1)){
-      fluidPage(
-
-        h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
-
-        br(),
-        h4("Troubleshooting:"),
-        tags$ul(
-          tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the
-                  \"Compare Two Samples\" tab."),
-          tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
-                  named \"Peak_Lists\""),
-          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
-        )
-
-      )
-
-    }else{
-
-      sidebarLayout(
-        sidebarPanel(style = "background-color:#7777770d",
-
-                     tabsetPanel(id= "HierarchicalSidebarTabs", type="tabs",
-                                 tabPanel("Hierarchical Clustering Settings", value="hierSettings",
-                                          #checkboxGroupInput("Library", label=h5("Inject Library Phylum"),
-                                          #                    choices = levels(phyla)),
-                                          p("Move strains between boxes by clicking the strain's name
-                                            and then an arrow. Strains in the right box will be used for analysis."),
-
-                                          uiOutput("chooseProteinSamples"),
-                                          verbatimTextOutput("selectedProteinSamples"),
-
-                                          selectInput("distance", label = h5(strong("Distance Algorithm")),
-                                                      choices = list("cosine"="cosineD","euclidean"="euclidean","maximum"="maximum","manhattan"="manhattan","canberra"="canberra", "binary"="binary","minkowski"="minkowski"),
-                                                      selected = "cosine"),
-                                          selectInput("clustering", label = h5(strong("Clustering Algorithm")),
-                                                      choices = list("ward.D"="ward.D","ward.D2"="ward.D2", "single"="single", "complete"="complete", "average (UPGMA)"="average", "mcquitty (WPGMA)"="mcquitty", "median (WPGMC)"="median","centroid (UPGMC)"="centroid"),
-                                                      selected = "ward.D2"),
-
-                                          radioButtons("booled", label = h5(strong("Include peak intensities, or use presence/absence?")),
-                                                       choices = list("Presence/Absence" = 1, "Intensities" = 2),
-                                                       selected = 2),
-                                          numericInput("hclustHeight", label = h5(strong("Expand Tree")),value = 750,step=50,min=100),
-                                          numericInput("dendparmar",label=h5(strong("Adjust right margin of dendrogram")),value=20),
-
-                                          radioButtons("kORheight", label = h5(strong("Color clusters based on:")),
-                                                       choices = list("Specified Number of Groups" = 1, "Height (x-axis value)" = 2, "User-Defined Categories in Excel Sheet" = 3),
-                                                       selected = 1),
-
-                                          uiOutput("groupui"),
-                                          uiOutput("hclustui"),
-                                          uiOutput("sampleGroupColoringui"),
-
-                                          br(),
-                                          h4("Suggestions for Reporting Protein Analysis:"),
-                                          uiOutput("proteinReport"),
-                                          br(),
-                                          downloadButton("downloadHeirSVG",label="Save Dendrogram as SVG"),
-                                          actionButton("tester",label="tester"),
-                                          br(),
-                                          br(),
-                                          downloadButton("downloadHierarchical","Save as Newick File"),
-                                          radioButtons('format', 'Document format', c('HTML'),
-                                                       inline = TRUE),
-                                          downloadButton('downloadReport')
-                                 ),
-                                 tabPanel("Library Search", value="hierLibrarySearch",
-                                          p("This is for searching against user-created libraries"),
-
-                                          uiOutput("libraryInjectionLibrarySelect"),
-                                          uiOutput("libraryMetadataColumnsSelection"),
-
-                                          radioButtons("initateInjection", label = h3("Start Injection"),
-                                                       choices = list("Yes" = "TRUE", "No" = "FALSE"),
-                                                       selected = "FALSE")
-
-                                 )
-
-                     )),
-        mainPanel("Hierarchical Clustering",
-                  column(8,
-                         plotOutput("hclustPlot")))
-
-      )
-    }
-  })
 
 
   # -----------------
