@@ -19,7 +19,9 @@ shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
 #delete
 #chase change to id
 
-# The server portion of the Shiny app serves as the backend, performing data processing and creating the visualizations to be displayed as specified in the UI function(input, output,session) {
+# The server portion of the Shiny app serves as the backend, 
+# performing data processing and creating the visualizations 
+# to be displayed as specified in the UI function(input, output,session){}
 
 # Function to Install and Load R Packages
 Install_And_Load <- function(Required_Packages)
@@ -524,73 +526,74 @@ observe({
                       br(),
                       p(strong("1:")," This directs where on your computer you would like to create an IDBac working directory."),
                       p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
-                      img(src="WorkingDirectory.png", style="width:322px;height:164px"),
+                      img(src = "WorkingDirectory.png",
+                          style = "width:322px;height:164px"),
                       p("If there is already an \"IDBac\" folder present in the working directory,
-                        files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
+                        files will be added into the already-present IDBac folder ", strong("and any samples with the same name will be overwritten.")),
                       br(),
                       p(strong("2:"),"The RAW data file will be one folder that contains individual folders for each
                         MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
                         containing protein data and the other containing small molecule data:"),
-                      img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
+                      img(src = "Multi-MALDI-Plate.png", 
+                          style = "width:410px;height:319px"),
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                      img(src="window.png",width="100%")
+                      img(src = "window.png",
+                          width = "100%")
                       ),
-               column(1
-               ),
+               column(1),
                column(5,
                       style = "background-color:#7777770d",
                       fluidRow(
-                        h3("Workflow Pane", align="center")),
+                        h3("Workflow Pane", align = "center")),
                       br(),
-                      column(12, align="center",
+                      column(12, align = "center",
                              p(strong("1: Enter a Name for this New Experiment")),
                              textInput("newExperimentName",
                                        label = ""),
-                             tags$hr(size=20)),
-                      fluidRow(column(12,
-                                      verbatimTextOutput("newExperimentNameText",
-                                                         placeholder = TRUE))),
+                             tags$hr(size = 20)),
+                      fluidRow(
+                        column(12,
+                               verbatimTextOutput("newExperimentNameText",
+                                                  placeholder = TRUE))),
                       br(),
                       p(strong("2:"), "Your RAW data will be one folder that contains folders for each MALDI plate."),
                       br(),
                       p(strong("2: Click to select the location of your RAW data"), align= "center"),
-
-
                       actionButton("multipleMaldiRawFileDirectory",
                                    label = "Click to select the location of your RAW data"),
                       fluidRow(column(12,
                                       verbatimTextOutput("multipleMaldiRawFileDirectory",
                                                          placeholder = TRUE))),
                       br(),
-
-                      column(12, align="center",
+                      column(12, align = "center",
                              p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
                              actionButton("run",
                                           label = "Convert to mzML"),
-                             tags$hr(size=20))
-
-
-
-
-               )
+                             tags$hr(size = 20))
                       )
-      )
+               )
+        )
     })
-  }
+    }
 })
 
-# -----------------
+
 #This "observe" event creates the UI element for re-analyzing data
+#----
 observe({
-  if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 2){
-    output$ui1<-renderUI({
+  if (is.null(input$rawORreanalyze)){
+    # Intentionally Blank
+  }else if (input$rawORreanalyze == 2){
+    output$ui1 <- renderUI({
       fluidRow(
         column(12,
                br(),
                br(),
                fluidRow(
-                 column(12,offset=3,
-                        h3("Re-Analyze Data That You Already Converted with IDBac"))), br(), br(),
+                 column(12,offset = 3,
+                        h3("Re-Analyze Data That You Already Converted with IDBac"))), 
+               br(),
+               br(),
                column(12,
                       br(),
                       column(5,
@@ -608,17 +611,18 @@ observe({
                              ),
                              br(),
                              tags$b("Example:"), br(),
-                             img(src="WorkingDirectory_ReAnalysis.png", style="width:322px;height:164px"),
+                             img(src="WorkingDirectory_ReAnalysis.png", style = "width:322px;height:164px"),
                              br(),br(),
                              p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                             img(src="window.png",width="100%")
+                             img(src = "window.png",
+                                 width = "100%")
                       ),
-                      column(1
-                      ),
+                      column(1),
                       column(5,
                              style = "background-color:#7777770d",
                              fluidRow(
-                               h3("Workflow Pane", align="center")),
+                               h3("Workflow Pane", 
+                                  align="center")),
                              p(strong("1:"), "Select the folder containing your data"),
                              actionButton("idbacDirectoryButton",
                                           label = "Click to select the data directory"),
@@ -628,41 +632,46 @@ observe({
                              br(),
                              p(strong("2:"), "You can now reanalyze your data by proceeding through the tabs at the top of the page. (\"Inverse Peak Comparison\", etc)      ")
                       )
+                      )
                )
-
         )
-      )
     })
-  }
+    }
 })
 
 
 
-# -----------------
+#----
 observe({
-  if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 4){
-    output$ui1<-renderUI({
+  if (is.null(input$rawORreanalyze)){
+    # Intentionally Blank
+  }else if (input$rawORreanalyze == 4){
+    output$ui1 <- renderUI({
       fluidRow(
         column(12,
                br(),
                br(),
                fluidRow(
                  column(width = 12,
-                        h3("Customizing which samples to analyze", align = "center"))), br(), br(),
+                        h3("Customizing which samples to analyze", align = "center"))),
+               br(),
+               br(),
                column(width = 4),
                column(width = 4,
                       style = "background-color:#7777770d",
                       h3("Workflow Pane", align = "center"),
                       br(),
-                      p(strong("1: "), actionButton("newExperimentName",
-                                                    label = "Click to select where to create a working directory")),
+                      p(strong("1: "), 
+                        actionButton("newExperimentName",
+                                     label = "Click to select where to create a working directory")),
                       p("Selected Location:"),
                       fluidRow(column(12,
                                       verbatimTextOutput("newExperimentNameText",
                                                          placeholder = TRUE))),
                       br(),
-                      p(strong("2: "), actionButton("createBlanknewExperimentNameFolders",
-                                                    label = "Click to create a blank working directory")),
+                      p(strong("2: "),
+                        actionButton("createBlanknewExperimentNameFolders",
+                                     label = "Click to create a blank working directory")),
                       br(),
                       p(strong("3:"), "Place the mzML files that you wish to analyze into:"),
                       p(verbatimTextOutput("whereConvert")),
@@ -670,75 +679,71 @@ observe({
                       actionButton("beginPeakProcessingAgain",
                                    label = "Process mzML spectra")
                )
+               )
         )
-      )
     })
+    }
+})
+
+# Find if "IDBac" exists in selected folder and then uniquify if necessary
+#----
+uniquifiedIDBac <- reactive({
+  req(selectedDirectory())
+  uniquifiedIDBacs <- list.dirs(selectedDirectory(), 
+                                recursive = F,
+                                full.names = F)
+  uniquifiedIDBacs <- make.unique(c(uniquifiedIDBacs, "IDBac"), 
+                                  sep = "-")
+  tail(uniquifiedIDBacs, 1)
+})
+
+
+# When ReAnalyzing data, and need to select the "IDBac" folder directly
+#----
+pressedidbacDirectoryButton <- reactive({
+  if(is.null(input$idbacDirectoryButton)){
+    return("No Folder Selected")
+  } else if (input$idbacDirectoryButton > 0){
+    choose.dir()
   }
 })
 
 
+# Reactive variable returning the user-chosen location of the raw MALDI files as string
+#----
+rawFilesLocation <- reactive({
+  if (input$rawFileDirectory > 0) {
+    choose.dir()
+  }
+})
 
 
-
-  # -----------------
-  # Find if "IDBac" exists in selected folder and then uniquify if necessary
-  uniquifiedIDBac <- reactive({
-    req(selectedDirectory())
-    uniquifiedIDBacs <- list.dirs(selectedDirectory(), recursive = F, full.names = F)
-    uniquifiedIDBacs <- make.unique(c(uniquifiedIDBacs, "IDBac"), sep = "-")
-    tail(uniquifiedIDBacs, 1)
-  })
-
-
-
-
-
-  # -----------------
-  # When ReAnalyzing data, and need to select the "IDBac" folder directly
-  pressedidbacDirectoryButton <- reactive({
-    if(is.null(input$idbacDirectoryButton)){
-      return("No Folder Selected")
-    }else if (input$idbacDirectoryButton > 0){
-      choose.dir()
-    }
-  })
-
-
-
-
-
-
-  # -----------------
-  # Reactive variable returning the user-chosen location of the raw MALDI files as string
-  rawFilesLocation <- reactive({
-    if (input$rawFileDirectory > 0) {
-      choose.dir()
-    }
-  })
-
-
-  # -----------------
-  # Creates text showing the user which directory they chose for raw files
-  output$rawFileDirectory <- renderText({
-    if (is.null(rawFilesLocation())) {
-      return("No Folder Selected")} else{
-        folders <- NULL
-        foldersInFolder <- list.dirs(rawFilesLocation(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
-        for (i in 1:length(foldersInFolder)) {
-          folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-        }
-        folders
+# Creates text showing the user which directory they chose for raw files
+#----
+output$rawFileDirectory <- renderText({
+  if (is.null(rawFilesLocation())) {
+    return("No Folder Selected")
+  } else {
+      folders <- NULL
+      # Get the folders contained within the chosen folder.
+      foldersInFolder <- list.dirs(rawFilesLocation(),
+                                   recursive = FALSE,
+                                   full.names = FALSE) 
+      for (i in 1:length(foldersInFolder)) {
+        folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
       }
-  })
-
-
-  # -----------------
-  # Reactive variable returning the user-chosen location of the raw MALDI files as string
-  multipleMaldiRawFileLocation <- reactive({
-    if (input$multipleMaldiRawFileDirectory > 0) {
-      choose.dir()
+      folders
     }
-  })
+})
+
+
+# -----------------
+# Reactive variable returning the user-chosen location of the raw MALDI files as string
+multipleMaldiRawFileLocation <- reactive({
+  if (input$multipleMaldiRawFileDirectory > 0) {
+    choose.dir()
+  }
+})
 
 
   # -----------------
