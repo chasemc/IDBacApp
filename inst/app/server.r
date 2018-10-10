@@ -1029,55 +1029,60 @@ popup4 <- reactive({
 
 
 #------------------------------------------------------------------------------
-# Protein processing
-#------------------------------------------------------------------------------
-
-# Merge and trim protein replicates
-#----
-collapsedPeaksP <- reactive({
-  
-  # For each sample:
-  # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
-  # merge into a single peak list per sample
-  # trim m/z based on user input
-  # connect to sql
-  db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
-  
-  
-  db %>%
-    filter(proteinPeaks != "NA") %>%
-    select(filesha1,Strain_ID) %>%
-    filter(Strain_ID %in% input$myProteinchooser$right) %>%
-    collect %$%
-    split(filesha1,Strain_ID) -> temp
-  
-  #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
-  temp %>%
-    lapply(., 
-           function(x){
-             IDBacApp::collapseProteinReplicates(fileshas = x,
-                                                 db = userDBCon(),
-                                                 proteinPercentPresence = input$percentPresenceP,
-                                                 lowerMassCutoff = input$lowerMass,
-                                                 upperMassCutoff = input$upperMass)
-           })
-})
-
-# Bin peaks across all protein samples and turn into intensity matrix
-#----
-proteinMatrix <- reactive({
-  MALDIquant::binPeaks(collapsedPeaksP(),
-                       method = "strict",
-                       tolerance = .02) %>%
-    IDBacApp::proteinPeaksToMatrix(bool = input$booled,
-                                   proteinPeaks = .)
-})
-
-
-
-#------------------------------------------------------------------------------
 # Mirror Plots
 #------------------------------------------------------------------------------
+
+# Mirror plot UI
+#----
+output$inversepeakui <-  renderUI({
+  
+  sidebarLayout(
+    sidebarPanel(width = 3, style = "background-color:#7777770d",
+                 selectInput("Spectra1", label = h5(strong("Spectrum 1 (up)"), 
+                                                    br(),
+                                                    "(Peak matches to bottom spectrum are blue, non-matches are red)"),
+                             choices = inverseComparisonNames()), 
+                 selected = inverseComparisonNames()[[1]] ,
+                 selectInput("Spectra2", 
+                             label = h5(strong("Spectrum 2 (down)")),
+                             choices = inverseComparisonNames(),
+                             selected = inverseComparisonNames()[[1]]),
+                 downloadButton("downloadInverse", 
+                                label = "Download Main Plot"),
+                 downloadButton("downloadInverseZoom", 
+                                label = "Download Zoomed Plot"),
+                 numericInput("percentPresenceP", 
+                              label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
+                 numericInput("pSNR",
+                              label = h5(strong("Signal To Noise Cutoff")),
+                              value = 4,
+                              step= 0.5,
+                              min = 1.5,
+                              max = 100),
+                 numericInput("lowerMass", 
+                              label = h5(strong("Lower Mass Cutoff")),
+                              value = 3000,
+                              step = 50),
+                 numericInput("upperMass", 
+                              label = h5(strong("Upper Mass Cutoff")),
+                              value = 15000,
+                              step = 50),
+                 p("Note: Mass Cutoff and Percent Replicate values selected here will be used in all later analyses."),
+                 p("Note 2: Displayed spectra represent the mean spectrum for a sample. Example: if you observe a peak
+                   in your mean spectrum but it isn't represented as a red or blue line, then either it doesn't occur often enough across your replicates
+                   or its signal to noise ratio is less than what is selected.")
+                 ),
+    mainPanel(
+      fluidRow(plotOutput("inversePeakComparisonPlot",
+                          brush = brushOpts(
+                            id = "plot2_brush",
+                            resetOnNew = TRUE)),
+               h3("Click and Drag on the plot above to zoom (Will zoom in plot below)"),
+               plotOutput("inversePeakComparisonPlotZoom")
+      )
+    )
+                 )
+})
 
 # Retrieve all available sample names that have protein peak data
 # Used to display inputs for user to select for mirror plots
@@ -1358,123 +1363,124 @@ output$downloadInverseZoom <- downloadHandler(
 
   })
 
-  # Create peak comparison ui
-   # -----------------
 
-  output$inversepeakui <-  renderUI({
+#------------------------------------------------------------------------------
+# Protein processing
+#------------------------------------------------------------------------------
 
-    # if(is.null(input$rawORreanalyze)){
-    #   fluidPage(
-    #
-    #     h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
-    #     br(),
-    #     h4("Troubleshooting:"),
-    #     tags$ul(
-    #       tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab"),
-    #       tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
-    #               named \"Peak_Lists\""),
-    #       tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
-    #     )
-    #
-    #   )
-    #
-    # }else{
+# Merge and trim protein replicates
+#----
+collapsedPeaksP <- reactive({
+  
+  # For each sample:
+  # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
+  # merge into a single peak list per sample
+  # trim m/z based on user input
+  # connect to sql
+  db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
+  
+  
+  db %>%
+    filter(proteinPeaks != "NA") %>%
+    select(filesha1,Strain_ID) %>%
+    filter(Strain_ID %in% input$myProteinchooser$right) %>%
+    collect %$%
+    split(filesha1,Strain_ID) -> temp
+  
+  #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
+  temp %>%
+    lapply(., 
+           function(x){
+             IDBacApp::collapseProteinReplicates(fileshas = x,
+                                                 db = userDBCon(),
+                                                 proteinPercentPresence = input$percentPresenceP,
+                                                 lowerMassCutoff = input$lowerMass,
+                                                 upperMassCutoff = input$upperMass)
+           })
+})
 
-
-
-      sidebarLayout(
-        sidebarPanel(width = 3, style = "background-color:#7777770d",
-                     selectInput("Spectra1", label=h5(strong("Spectrum 1 (up)"), br(), "(Peak matches to bottom spectrum are blue, non-matches are red)"),
-                                 choices = inverseComparisonNames()), selected = inverseComparisonNames()[[1]] ,
-                     selectInput("Spectra2", label=h5(strong("Spectrum 2 (down)")),
-                                 choices = inverseComparisonNames(), selected=inverseComparisonNames()[[1]]),
-                     downloadButton("downloadInverse",label="Download Main Plot"),
-                     downloadButton("downloadInverseZoom",label="Download Zoomed Plot"),
-                     numericInput("percentPresenceP", label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
-                     numericInput("pSNR", label = h5(strong("Signal To Noise Cutoff")),value = 4,step=.5,min=1.5,max=100),
-                     numericInput("lowerMass", label = h5(strong("Lower Mass Cutoff")),value = 3000,step=50),
-                     numericInput("upperMass", label = h5(strong("Upper Mass Cutoff")),value = 15000,step=50),
-                     p("Note: Mass Cutoff and Percent Replicate values selected here will be used in all later analyses."),
-                     p("Note 2: Displayed spectra represent the mean spectrum for a sample. Example: if you observe a peak
-                       in your mean spectrum but it isn't represented as a red or blue line, then either it doesn't occur often enough across your replicates
-                       or its signal to noise ratio is less than what is selected.")
-                     ),
-        mainPanel(
-          fluidRow(plotOutput("inversePeakComparisonPlot",
-                              brush = brushOpts(
-                                id = "plot2_brush",
-                                resetOnNew = TRUE)),
-                   h3("Click and Drag on the plot above to zoom (Will zoom in plot below)"),
-                   plotOutput("inversePeakComparisonPlotZoom")
-          )
-        )
-                     )
-
-  #  }
-  })
-
-
-  # This creates the Plotly PCA plot and the calculation required for such.
-  # -----------------
-
-  pcoaCalculation <- reactive({
-    if(req(input$distance)=="cosineD"){
-
-
-      pmat <<- proteinMatrix()
-      # Perform cosine similarity function
-      dend <- proteinMatrix() %>% coop::tcosine() %>% magrittr::subtract(1,.) %>% as.dist
-      # Convert NA to 1
-      dend[which(is.na(dend))] <- 1
-      # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
-
-    }else{
-      dend <- proteinMatrix() %>% dist(method=input$distance)
-      dend[which(is.na(dend))] <- 1
-
-    }
-
-    pc <- as.data.frame(cmdscale(dend, k=10))
-    pc<-pc[,1:3]
-    colnames(pc) <- c("Dim.1", "Dim.2", "Dim.3")
-    pc["nam"] <- row.names(pc)
-    pc
-  })
-
-  output$pcoaPlot <- renderPlotly({
-    pcaDat <- pcoaCalculation()
-
-    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
-
-    if(any(is.na(as.vector(colorsToUse)))){
-      colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
-    }
-
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
-    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
+# Bin peaks across all protein samples and turn into intensity matrix
+#----
+proteinMatrix <- reactive({
+  MALDIquant::binPeaks(collapsedPeaksP(),
+                       method = "strict",
+                       tolerance = .02) %>%
+    IDBacApp::proteinPeaksToMatrix(bool = input$booled,
+                                   proteinPeaks = .)
+})
 
 
 
-    plot_ly(data = pcaDat,
-            x = ~Dim.1,
-            y = ~Dim.2,
-            z = ~Dim.3,
-            type = "scatter3d",
-            mode = "markers",
-            marker = list(color = ~fac),
-            hoverinfo = 'text',
-            text = ~nam) %>%
-            layout(
-            xaxis = list(
-              title = ""
-            ),
-            yaxis = list(
-              title = " "
-            ),
-            zaxis = list(
-              title = ""
-            ))
-  })
+
+
+
+
+
+
+  
+  
+  
+  
+
+# PCoA Calculation
+#----
+pcoaCalculation <- reactive({
+  if(req(input$distance) == "cosineD"){
+
+    pmat <<- proteinMatrix()
+    # Perform cosine similarity function
+    dend <- proteinMatrix() %>% coop::tcosine() %>% magrittr::subtract(1,.) %>% as.dist
+    # Convert NA to 1
+    dend[which(is.na(dend))] <- 1
+    # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
+
+  }else{
+    dend <- proteinMatrix() %>% dist(method=input$distance)
+    dend[which(is.na(dend))] <- 1
+
+  }
+
+  pc <- as.data.frame(cmdscale(dend, k=10))
+  pc<-pc[,1:3]
+  colnames(pc) <- c("Dim.1", "Dim.2", "Dim.3")
+  pc["nam"] <- row.names(pc)
+  pc
+})
+
+output$pcoaPlot <- renderPlotly({
+  pcaDat <- pcoaCalculation()
+
+  colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+
+  if(any(is.na(as.vector(colorsToUse)))){
+    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+  }
+
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
+  pcaDat <- merge(pcaDat, colorsToUse, by="nam")
+
+
+
+  plot_ly(data = pcaDat,
+          x = ~Dim.1,
+          y = ~Dim.2,
+          z = ~Dim.3,
+          type = "scatter3d",
+          mode = "markers",
+          marker = list(color = ~fac),
+          hoverinfo = 'text',
+          text = ~nam) %>%
+          layout(
+          xaxis = list(
+            title = ""
+          ),
+          yaxis = list(
+            title = " "
+          ),
+          zaxis = list(
+            title = ""
+          ))
+})
 
 
   #PCA Calculation
