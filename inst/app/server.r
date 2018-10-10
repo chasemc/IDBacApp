@@ -1274,7 +1274,6 @@ output$downloadInverse <- downloadHandler(
     paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,".svg")
     }, content = function(file1){
 
-    
     svglite::svglite(file1,
                      width = 10,
                      height = 8, 
@@ -1378,8 +1377,7 @@ collapsedPeaksP <- reactive({
   # trim m/z based on user input
   # connect to sql
   db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
-  
-  
+
   db %>%
     filter(proteinPeaks != "NA") %>%
     select(filesha1,Strain_ID) %>%
@@ -1399,6 +1397,7 @@ collapsedPeaksP <- reactive({
            })
 })
 
+
 # Bin peaks across all protein samples and turn into intensity matrix
 #----
 proteinMatrix <- reactive({
@@ -1410,45 +1409,55 @@ proteinMatrix <- reactive({
 })
 
 
-
-
-
-
-
-
-
+#Create the hierarchical clustering based upon the user input for distance method and clustering technique
+#----
+dendro <- reactive({
   
+  if (input$booled == "1") {
+    booled<-"_UsedIntenstites"
+  }
+  else{
+    booled<-"_UsedPresenceAbsence"
+  }
+  #TODO: add cache back with SQL system
+  #
+  #     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
+  #                       "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
   
+  proteinDistance() %>%
+    hclust(method=input$clustering) %>%
+    as.dendrogram
+})
+
+
+
+# Turn collapsed peak list into a distance matrix
+#----
+proteinDistance <- reactive({
+  IDBacApp::proteinDistanceMatrix(peakList = collapsedPeaksP(),
+                                  method = input$distance)
   
-  
+})
+
 
 # PCoA Calculation
 #----
 pcoaCalculation <- reactive({
-  if(req(input$distance) == "cosineD"){
 
-    pmat <<- proteinMatrix()
-    # Perform cosine similarity function
-    dend <- proteinMatrix() %>% coop::tcosine() %>% magrittr::subtract(1,.) %>% as.dist
-    # Convert NA to 1
-    dend[which(is.na(dend))] <- 1
-    # Hierarchical clustering using the chosen agglomeration method, convert to as.dendrogram object for dendextend functionality
-
-  }else{
-    dend <- proteinMatrix() %>% dist(method=input$distance)
-    dend[which(is.na(dend))] <- 1
-
-  }
-
-  pc <- as.data.frame(cmdscale(dend, k=10))
-  pc<-pc[,1:3]
+  # number of samples should be greater than k
+  shiny::req(nrow(as.matrix(proteinDistance())) > 10)
+  
+  pc <- as.data.frame(stats::cmdscale((proteinDistance()), k=10))
+  pc <- pc[,1:3]
   colnames(pc) <- c("Dim.1", "Dim.2", "Dim.3")
   pc["nam"] <- row.names(pc)
   pc
 })
 
+
+# output Plotly plot of PCoA results
+#----
 output$pcoaPlot <- renderPlotly({
-  pcaDat <- pcoaCalculation()
 
   colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
 
@@ -1456,10 +1465,11 @@ output$pcoaPlot <- renderPlotly({
     colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
   }
 
-  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
-  pcaDat <- merge(pcaDat, colorsToUse, by="nam")
-
-
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
+                                  nam = (names(colorsToUse)))
+  pcaDat <- merge(pcoaCalculation(),
+                  colorsToUse,
+                  by = "nam")
 
   plot_ly(data = pcaDat,
           x = ~Dim.1,
@@ -1483,12 +1493,13 @@ output$pcoaPlot <- renderPlotly({
 })
 
 
-  #PCA Calculation
-
-  pcaCalculation <- reactive({
-aaw<<-proteinMatrix()
-    pc <- log(proteinMatrix())
-    pc[is.infinite(pc)]<-.000001
+# PCA Calculation
+#----
+pcaCalculation <- reactive({
+  
+    pc <- log10(proteinMatrix())
+    # Replace infinites
+    pc[is.infinite(pc)] <- .000001
 
     pc <- PCA(pc,
               graph = FALSE,
@@ -1591,84 +1602,55 @@ plot_ly(data = pcaDat,
 
 
 
-  # -----------------
-  # Create PCA ui
-  output$PCAui <-  renderUI({
 
-    if(is.null(input$Spectra1)){
-      fluidPage(
 
-        h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
+# Create PCA ui
+#----
+output$PCAui <-  renderUI({
 
-        br(),
-        h4("Troubleshooting:"),
-        tags$ul(
-          tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visit the
-                  \"Compare Two Samples\" tab."),
-          tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
-                  named \"Peak_Lists\""),
-          tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
-        )
+  if(is.null(input$Spectra1)){
+    fluidPage(
 
+      h1(" There is no data to display",img(src="errors/hit3.gif",width="200" ,height="100")),
+
+      br(),
+      h4("Troubleshooting:"),
+      tags$ul(
+        tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visit the
+                \"Compare Two Samples\" tab."),
+        tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
+                named \"Peak_Lists\""),
+        tags$li("If it seems there is a bug in the software, this can be reported on the" , a(href="https://github.com/chasemc/IDBacApp/issues",target="_blank","IDBac Issues Page at GitHub.", img(border="0", title="https://github.com/chasemc/IDBacApp/issues", src="GitHub.png", width="25" ,height="25")))
       )
 
-    }else{
-      mainPanel(width=12,
+    )
+
+  }else{
+    mainPanel(width=12,
 
 
-                fluidRow(
-                  column(width=6,
-                         p("PCOA: Provides Three-Dimensional View of Distances (Based upon Distance Algorithm Chosen)"),
-                         plotlyOutput("pcoaPlot",width="100%",height="800px")),
-                  column(width=6,
-                         p("Principle Components Analysis: Provides a dimension reduction of the peak intensity/presence matrix"),
-                         plotlyOutput("pcaPlot",width="100%",height="800px"))
-                ),
-                p("t-SNE"),
-                numericInput("tsnePerplexity", label = h5(strong("t-SNE Perplexity")), value = 30, step=10, min = 0, max = 300),
-                numericInput("tsneTheta", label = h5(strong("t-SNE Theta")), value = .5, step=.1, max = 1, min=0),
-                numericInput("tsneIterations", label = h5(strong("t-SNE Iterations")), value = 1000, step = 50),
-                fluidRow( plotlyOutput("tsnePlot",width="100%",height="800px"))
+              fluidRow(
+                column(width=6,
+                       p("PCOA: Provides Three-Dimensional View of Distances (Based upon Distance Algorithm Chosen)"),
+                       plotlyOutput("pcoaPlot",width="100%",height="800px")),
+                column(width=6,
+                       p("Principle Components Analysis: Provides a dimension reduction of the peak intensity/presence matrix"),
+                       plotlyOutput("pcaPlot",width="100%",height="800px"))
+              ),
+              p("t-SNE"),
+              numericInput("tsnePerplexity", label = h5(strong("t-SNE Perplexity")), value = 30, step=10, min = 0, max = 300),
+              numericInput("tsneTheta", label = h5(strong("t-SNE Theta")), value = .5, step=.1, max = 1, min=0),
+              numericInput("tsneIterations", label = h5(strong("t-SNE Iterations")), value = 1000, step = 50),
+              fluidRow( plotlyOutput("tsnePlot",width="100%",height="800px"))
 
-                # br(),
-                # fluidRow(      rglwidgetOutput("pcaplot3d"))
-      )
-    }
-
-  })
-
-  #Create the hierarchical clustering based upon the user input for distance method and clustering technique
-  dendro <- reactive({
-
-
-    if (input$booled == "1") {
-      booled<-"_UsedIntenstites"
-    }
-    else{
-      booled<-"_UsedPresenceAbsence"
-    }
-#
-#     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
-#                       "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
-
-    tyr<<-proteinDistance()
-
-    proteinDistance() %>%
-      hclust(method=input$clustering) %>%
-      as.dendrogram
-
-
-    })
-
-
-
-
-
-proteinDistance <- reactive({
-  IDBacApp::proteinDistanceMatrix(peakList = collapsedPeaksP(),
-                                  method = input$distance)
+              # br(),
+              # fluidRow(      rglwidgetOutput("pcaplot3d"))
+    )
+  }
 
 })
+
+
 
 
 
