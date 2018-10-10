@@ -770,49 +770,76 @@ output$multipleMaldiRawFileDirectory <- renderText({
 })
 
 
-
-# -----------------
 # Spectra conversion
 #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
-spectraConversion<-reactive({
+#----
+spectraConversion <- reactive({
   if(input$rawORreanalyze == 1){
     # When only analyzing one maldi plate this handles finding the raw data directories and the excel map
     # excelMap is a dataframe (it's "Sheet1" of the excel template)
     excelTable <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
+    
     # excelTable takes the sample location and name from excelTable, and also converts the location to the same name-format as Bruker (A1 -> 0_A1)
-    excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
-    # List the raw data files (for Bruker MALDI files this means pointing to a directory, not an individual file)
-    fullZ <- list.dirs(list.dirs(rawFilesLocation(), recursive = FALSE), recursive = FALSE)
-    # Get folder name from fullZ for merging with excel table names
-    fullZ <- cbind.data.frame(fullZ, unlist(lapply(fullZ, function(x) strsplit(x, "/")[[1]][[3]])))
+    excelTable <- cbind.data.frame(paste0("0_", excelTable$Key),
+                                   excelTable$Value)
+   
+     # List the raw data files (for Bruker MALDI files this means pointing to a directory, not an individual file)
+    fullZ <- list.dirs(list.dirs(rawFilesLocation(), 
+                                 recursive = FALSE), 
+                       recursive = FALSE)
+   
+     # Get folder name from fullZ for merging with excel table names
+    fullZ <- cbind.data.frame(fullZ, 
+                              unlist(lapply(fullZ, 
+                                            function(x) strsplit(x, "/")[[1]][[3]])))
     colnames(fullZ) <- c("UserInput", "ExcelCell")
     colnames(excelTable) <- c("ExcelCell", "UserInput")
+    
     # Merge to connect filenames in excel sheet to file paths
-    fullZ <- merge(excelTable, fullZ, by = c("ExcelCell"))
+    fullZ <- merge(excelTable,
+                   fullZ,
+                   by = c("ExcelCell"))
     fullZ[,3] <- normalizePath(as.character(fullZ[ , 3]))
-  }else if(input$rawORreanalyze == 3){
+    
+  } else if(input$rawORreanalyze == 3) {
+    
     # When analyzing more han one MALDI plate this handles finding the raw data directories and the excel map
-    mainDirectory <- list.dirs(multipleMaldiRawFileLocation(), recursive = F)
-    lapped <- lapply(mainDirectory, function(x) list.files(x, recursive = F, full.names = T))
+    mainDirectory <- list.dirs(multipleMaldiRawFileLocation(),
+                               recursive = F)
+    lapped <- lapply(mainDirectory,
+                     function(x) list.files(x, 
+                                            recursive = F, 
+                                            full.names = T))
     collectfullZ <- NULL
+    
     # For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
     for (i in 1:length(lapped)){
+      
       excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
-      excelTable <- cbind.data.frame(paste0("0_", excelTable$Key), excelTable$Value)
-      fullZ <- list.dirs(lapped[[i]], recursive = F)
-      fullZ <- cbind.data.frame(fullZ, unlist(lapply(fullZ, function(x) strsplit(x, "/")[[1]][[4]])))
+      excelTable <- cbind.data.frame(paste0("0_", 
+                                            excelTable$Key),
+                                     excelTable$Value)
+      fullZ <- list.dirs(lapped[[i]],
+                         recursive = F)
+      fullZ <- cbind.data.frame(fullZ,
+                                unlist(lapply(fullZ, 
+                                              function(x) strsplit(x, "/")[[1]][[4]])))
       colnames(fullZ) <- c("UserInput", "ExcelCell")
       colnames(excelTable) <- c("ExcelCell", "UserInput")
-      fullZ <- merge(excelTable, fullZ, by = c("ExcelCell"))
+      fullZ <- merge(excelTable,
+                     fullZ,
+                     by = c("ExcelCell"))
       fullZ[ , 3] <- normalizePath(as.character(fullZ[ , 3]))
       collectfullZ <- c(collectfullZ, list(fullZ))
+    
     }
-    fullZ <- ldply(collectfullZ, data.frame)
+    
+    fullZ <- ldply(collectfullZ, data.frame)  #TODO Look into converting to base::
+    
   }
 
   fullZ <- dlply(fullZ, .(UserInput.x))
-  # Allow spaces in filepathe
-  ww <<-fullZ
+  # Allow spaces in filepath
 
   for (i in 1:length(fullZ)){
     fullZ[[i]]$UserInput.y <- shQuote(fullZ[[i]]$UserInput.y)
@@ -824,7 +851,7 @@ spectraConversion<-reactive({
 })
 
 
-# -----------------
+#----
 observeEvent(input$run,{
 
     # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
@@ -834,25 +861,33 @@ observeEvent(input$run,{
     # fullZ$UserInput.y = file locations
 
     # outp is the filepath of where to save the created mzML files
-    outp <<- tempDirectory
-
-
-
+    outp <- tempDirectory
+    
     # Find the location of the proteowizard libraries
+    # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
     appwd <- getwd()
-    applibpath <- file.path(appwd, "library")
-    pwizFolderLocation <- installed.packages(c(.libPaths(), applibpath))
+    applibpath <- file.path(appwd,
+                            "library")
+    pwizFolderLocation <- installed.packages(c(.libPaths(),
+                                               applibpath))
     pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
-    pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, "proteowizardinstallation", "pwiz")
+    pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, 
+                                    "proteowizardinstallation", 
+                                    "pwiz")
+    
     #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
     pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+    
     #Command-line MSConvert, converts from proprietary vendor data to open mzML
     msconvertCmdLineCommands <- lapply(fullZ, function(x){
       #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
-      paste0(shQuote(file.path(pwizFolderLocation, "msconvert.exe")),
+      paste0(shQuote(file.path(pwizFolderLocation,
+                               "msconvert.exe")),
              # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzML files will be saved
              " ",
-             paste0(x$UserInput.y, collapse = "", sep=" "),
+             paste0(x$UserInput.y, 
+                    collapse = "",
+                    sep=" "),
             # "--noindex --mzML --merge -z",
              "--noindex --mzML --merge -z  --32",
              " -o ",
@@ -863,409 +898,387 @@ observeEvent(input$run,{
     }
     )
 
-
     functionTOrunMSCONVERTonCMDline<-function(x){
-
       system(command = as.character(x))
     }
 
-
-
     popup1()
-
 
     lengthProgress <- length(msconvertCmdLineCommands)
 
-    # withProgress(message = 'Conversion in progress',
-    #              detail = 'This may take a while...', value = 0, {
-    #
-    #                for(i in 1:lengthProgress){
-    #                  incProgress(1/lengthProgress)
-    #
-    #                  functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
-    #
-    #                }
-    #
-    #              })
+     withProgress(message = 'Conversion in progress',
+                  detail = 'This may take a while...', value = 0, {
+                    for(i in 1:lengthProgress){
+                      incProgress(1/lengthProgress)
+                      functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
+                      }
+                  })
 
 # TODO: Add parallel msconvert UI
 
-        numCores <- parallel::detectCores()
-        cl <- parallel::makeCluster(numCores)
-        parallel::parLapply(cl,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
-        parallel::stopCluster(cl)
+        # numCores <- parallel::detectCores()
+        # cl <- parallel::makeCluster(numCores)
+        # parallel::parLapply(cl,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
+        # parallel::stopCluster(cl)
 
     #Single process with sapply instead of parsapply
     #sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
 
 
     popup2()
-
-
 })
 
 
+# Run raw data processing on delimited-type input files
+#----
+observeEvent(input$runDelim,{
+ 
+  popup1()
+
+  IDBacApp::parseDelimitedMS(proteinDirectory = delimitedLocationP(),
+                             smallMolDirectory = delimitedLocationSM(),
+                             exportDirectory =  tempdir())
+  popup2()
+})
 
 
+# Modal to display while converting to mzML
+#----
+popup1 <- reactive({
+  showModal(modalDialog(
+    title = "Important message",
+    "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
+    br(),
+    "To check what has been converted, you can navigate to:",
+    easyClose = FALSE, size="l",
+    footer = ""))
+})
 
 
-
-  #hellop
-  # -----------------
-  observeEvent(input$runDelim,{
-
-aaq<<-delimitedLocationP()
-aaq2<<-delimitedLocationSM()
-
-    IDBacApp::parseDelimitedMS(proteinDirectory = delimitedLocationP(),
-                               smallMolDirectory = delimitedLocationSM(),
-                               exportDirectory =  tempdir())
-
-    popup1()
-
-
-    popup2()
+# Popup summarizing the final status of the conversion
+#----
+popup2 <- reactive({
+  showModal(modalDialog(
+    title = "Conversion Complete",
+    paste0(" files were converted into open data format files."),
+    br(),
+    "To check what has been converted you can navigate to:",
+    easyClose = TRUE,
+    footer = tagList(actionButton("beginPeakProcessingModal", 
+                                  "Click to continue with Peak Processing"),
+                     modalButton("Close"))
+  ))
+})
 
 
-  })
+# Call the Spectra processing function when the spectra processing button is pressed
+#----
+observeEvent({
+  c(input$beginPeakProcessing,
+    input$beginPeakProcessing,
+    input$beginPeakProcessingModal,
+    input$beginPeakProcessingAgain)},{
 
+      fileList <- normalizePath(list.files(tempDirectory,
+                                           pattern = ".mz", 
+                                           full.names = TRUE,
+                                           ignore.case = TRUE))
+      popup3()
 
+      lengthProgress <- length(fileList)
 
+      withProgress(message = 'Processing in progress',
+                   detail = 'This may take a while...',
+                   value = 0, {
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  popup1<-reactive({
-    showModal(modalDialog(
-      title = "Important message",
-      "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.", br(),
-      "To check what has been converted, you can navigate to:",
-      easyClose = FALSE, size="l",
-      footer = ""
-    ))
-  })
-
-
-
-  # -----------------
-  # Popup summarizing the final status of the conversion
-  popup2<-reactive({
-    showModal(modalDialog(
-      title = "Conversion Complete",
-      paste0(" files were converted into open data format files."), br(),
-      "To check what has been converted you can navigate to:",
-      easyClose = TRUE,
-      footer = tagList(actionButton("beginPeakProcessingModal", "Click to continue with Peak Processing"), modalButton("Close"))
-    ))
-  })
-
-
-
-
-
-  # -----------------
-  # Call the Spectra processing function when the spectra processing button is pressed
-  observeEvent({
-    c(input$beginPeakProcessing,
-      input$beginPeakProcessing,
-      input$beginPeakProcessingModal,
-      input$beginPeakProcessingAgain)},{
-
-        fileList <- normalizePath(list.files(tempDirectory, pattern = ".mz", full.names = TRUE,ignore.case = TRUE))
-
-
-        popup3()
-
-        #   numCores <- detectCores()
-        #   cl <- makeCluster(numCores)
-        #   parSapply(cl,fileList,spectraProcessingFunction)
-        #   stopCluster(cl)
-
-        #Single process with sapply instead of parsapply
-        #sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
-
-        lengthProgress <- length(fileList)
-
-        withProgress(message = 'Processing in progress',
-                     detail = 'This may take a while...', value = 0, {
-
-                       for(i in 1:lengthProgress){
-                         incProgress(1/lengthProgress)
-
-                         IDBacApp::spectraProcessingFunction(rawDataFilePaths = fileList[i],
-                                                             userDBCon = newExperimentSqlite())
-
+                     for(i in 1:lengthProgress){
+                       incProgress(1/lengthProgress)
+                       IDBacApp::spectraProcessingFunction(rawDataFilePaths = fileList[i],
+                                                           userDBCon = newExperimentSqlite())
                        }
 
-                     })
-        pool::poolClose(newExperimentSqlite())
-        print(newExperimentSqlite)
-        popup4()
-
-
-      })
-
-
-
-  # -----------------
-  # Popup displaying where to find files being created during spectra processing. No status bar -parallel
-  # popup3<-reactive({
-  #   showModal(modalDialog(
-  #     title = "Important message",
-  #     "When spectra processing is complete you will be able to begin with the data analysis",br(),
-  #     "IDBac uses parallel processing to make these computations faster, unfortunately this means we can't show a progress bar.",br(),
-  #     "This also means your computer might be slow during the computations.",br(),
-  #     "The step allows for fast interaction during the various data analysis",
-  #     "To check the progress, you can navigate to the following directory, where four files will be created per sample ",
-  #     paste0(selectedDirectory(), "/",uniquifiedIDBac(),"/Peak_Lists"),
-  #
-  #
-  #     easyClose = FALSE, size="l",footer=""
-  #   ))
-  # })
-
-
-  popup3<-reactive({
-    showModal(modalDialog(
-      title = "Important message",
-      "When spectra processing is complete you will be able to begin with the data analysis",br(),
-      "To check the progress, observe the progress bar at bottom right or navigate to the following directory, where four files will be created per sample ",
-      easyClose = FALSE, size="l",footer=""
-    ))
-  })
-
-
-
-  # -----------------
-  # Popup notifying user when spectra processing is complete
-  popup4<-reactive({
-    showModal(modalDialog(
-      title = "Spectra Processing is Now Complete",
-      br(),
-      easyClose = TRUE,
-      footer = modalButton("Continue to Data Analysis by visiting consecutive tabs at the top of the page.")))
-  })
-
-  # -----------------
-  # Read into R, the summed Protein Spectra (subset this (only need two at a time! monkeys)
-  # spectra <- reactive({
-  #   unlist(sapply(list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names=TRUE)[grep(".SummedProteinSpectra.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))], readRDS))
-  # })
-
-  inverseComparisonNames <- reactive({
-    asw2<<-userDBCon()
-    db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
-
-    db %>%
-      filter(proteinPeaks != "NA") %>%
-      select(Strain_ID) %>%
-      distinct() %>%
-      collect() %>%
-      pull()
-  })
-
-
-
-
-
-
-
-
-  # -----------------
-  # Read into R, Protein peak lists (subset this! monkeys)
-  # Also, bin then trim
-  # Return Peak Intensity Matrix
-
-
-
-
-
-
-
-  # -----------------
-  collapsedPeaksP <- reactive({
-
-
-    # connect to sql
-    db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
-
-#
-#
-#    db %>%
-#      filter(proteinPeaks != "NA") %>%
-#      select(filesha1,Strain_ID) %>%
-#      collect %$%
-#      split(filesha1,Strain_ID) -> temp
-    db %>%
-           filter(proteinPeaks != "NA") %>%
-           select(filesha1,Strain_ID) %>%
-           filter(Strain_ID %in% input$myProteinchooser$right) %>%
-           collect %$%
-           split(filesha1,Strain_ID) -> temp
-
-
-
-
-   temp %>%
-     lapply(function(x){
-       library(magrittr)
-       library(dplyr)
-
-       IDBacApp::collapseProteinReplicates(fileshas = x,
-                                           db = userDBCon(),
-                                           proteinPercentPresence = input$percentPresenceP,
-                                           lowerMassCutoff = input$lowerMass,
-                                           upperMassCutoff = input$upperMass)})
-
+                   })
+      pool::poolClose(newExperimentSqlite())
+      popup4()
 })
-#Lapply above should really be looked at and consider replacinng with  parallel::parLapply()
 
 
+# Modal displayed while speactra -> peak processing is ocurring
+#----
+popup3 <- reactive({
+  showModal(modalDialog(
+    title = "Important message",
+    "When spectra processing is complete you will be able to begin with the data analysis",
+    br(),
+    "To check the progress, observe the progress bar at bottom right or navigate to the following directory, where four files will be created per sample ",
+    easyClose = FALSE, 
+    size = "l",
+    footer = ""))
+})
 
 
-  # -----------------
-  proteinMatrix <- reactive({
+# Popup notifying user when spectra processing is complete
+#----
+popup4 <- reactive({
+  showModal(modalDialog(
+    title = "Spectra Processing is Now Complete",
+    br(),
+    easyClose = TRUE,
+    footer = modalButton("Continue to Data Analysis by visiting consecutive tabs at the top of the page.")))
+})
 
 
-MALDIquant::binPeaks(collapsedPeaksP(), method = "strict", tolerance = .02) %>%
+#------------------------------------------------------------------------------
+# Protein processing
+#------------------------------------------------------------------------------
+
+# Merge and trim protein replicates
+#----
+collapsedPeaksP <- reactive({
+  
+  # For each sample:
+  # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
+  # merge into a single peak list per sample
+  # trim m/z based on user input
+  # connect to sql
+  db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
+  
+  
+  db %>%
+    filter(proteinPeaks != "NA") %>%
+    select(filesha1,Strain_ID) %>%
+    filter(Strain_ID %in% input$myProteinchooser$right) %>%
+    collect %$%
+    split(filesha1,Strain_ID) -> temp
+  
+  #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
+  temp %>%
+    lapply(., 
+           function(x){
+             IDBacApp::collapseProteinReplicates(fileshas = x,
+                                                 db = userDBCon(),
+                                                 proteinPercentPresence = input$percentPresenceP,
+                                                 lowerMassCutoff = input$lowerMass,
+                                                 upperMassCutoff = input$upperMass)
+           })
+})
+
+# Bin peaks across all protein samples and turn into intensity matrix
+#----
+proteinMatrix <- reactive({
+  MALDIquant::binPeaks(collapsedPeaksP(),
+                       method = "strict",
+                       tolerance = .02) %>%
     IDBacApp::proteinPeaksToMatrix(bool = input$booled,
-                         proteinPeaks = .)
-
-
-  })
-
-
-  # -----------------
-  ################################################
-  #This creates the Inverse Peak Comparison plot that compares two user-selected inverseComparisonNames() and the calculation required for such.
-  listOfDataframesForInversePeakComparisonPlot <- reactive({
-
-
-     mirrorPlotEnv <- new.env(parent = parent.frame())
-
-    # connect to sql
-    db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
+                                   proteinPeaks = .)
+})
 
 
 
+#------------------------------------------------------------------------------
+# Mirror Plots
+#------------------------------------------------------------------------------
+
+# Retrieve all available sample names that have protein peak data
+# Used to display inputs for user to select for mirror plots
+#----
+inverseComparisonNames <- reactive({
+  db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
+  db %>%
+    filter(proteinPeaks != "NA") %>%
+    select(Strain_ID) %>%
+    distinct() %>%
+    collect() %>%
+    pull()
+})
 
 
-    # get sample 1 peaks
-    db %>%
-      filter(Strain_ID %in% input$Spectra1) %>%
-      filter(proteinPeaks != "NA") %>%
-      select(filesha1) %>%
-      pull %>%
-      IDBacApp::collapseProteinReplicates(fileshas = .,
-                         db = userDBCon(),
-                         proteinPercentPresence = input$percentPresenceP,
-                         lowerMassCutoff = input$lowerMass,
-                         upperMassCutoff = input$upperMass) %>%
-      return(.) -> mirrorPlotEnv$peaksSampleOne
+#This retrieves data a processes/formats it for the mirror plots
+#----
+dataForInversePeakComparisonPlot <- reactive({
+
+   mirrorPlotEnv <- new.env(parent = parent.frame())
+
+  # connect to sql
+  db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
+
+  # get protein peak data for the 1st mirror plot selection
+  db %>%
+    filter(Strain_ID %in% input$Spectra1) %>%
+    filter(proteinPeaks != "NA") %>%
+    select(filesha1) %>%
+    pull %>%
+    IDBacApp::collapseProteinReplicates(fileshas = .,
+                       db = userDBCon(),
+                       proteinPercentPresence = input$percentPresenceP,
+                       lowerMassCutoff = input$lowerMass,
+                       upperMassCutoff = input$upperMass) %>%
+    return(.) -> mirrorPlotEnv$peaksSampleOne
 
 
-    # get sample 2 peaks
-    db %>%
+  # get protein peak data for the 2nd mirror plot selection
+  db %>%
+    filter(Strain_ID %in% input$Spectra2) %>%
+    filter(proteinPeaks != "NA") %>%
+    select(filesha1) %>%
+    pull %>%
+    IDBacApp::collapseProteinReplicates(fileshas = .,
+                       db = userDBCon(),
+                       proteinPercentPresence = input$percentPresenceP,
+                       lowerMassCutoff = input$lowerMass,
+                       upperMassCutoff = input$upperMass) %>%
+    return(.) -> mirrorPlotEnv$peaksSampleTwo
+
+
+  # pSNR= the User-Selected Signal to Noise Ratio for protein
+  
+  # Remove peaks from the two peak lists that are less than the chosen SNR cutoff
+  mirrorPlotEnv$SampleOneSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleOne) >= input$pSNR)
+  mirrorPlotEnv$SampleTwoSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleTwo) >= input$pSNR)
+
+
+  mirrorPlotEnv$peaksSampleOne@mass <- mirrorPlotEnv$peaksSampleOne@mass[mirrorPlotEnv$SampleOneSNR]
+  mirrorPlotEnv$peaksSampleOne@snr <- mirrorPlotEnv$peaksSampleOne@snr[mirrorPlotEnv$SampleOneSNR]
+  mirrorPlotEnv$peaksSampleOne@intensity <- mirrorPlotEnv$peaksSampleOne@intensity[mirrorPlotEnv$SampleOneSNR]
+
+  mirrorPlotEnv$peaksSampleTwo@mass <- mirrorPlotEnv$peaksSampleTwo@mass[mirrorPlotEnv$SampleTwoSNR]
+  mirrorPlotEnv$peaksSampleTwo@snr <- mirrorPlotEnv$peaksSampleTwo@snr[mirrorPlotEnv$SampleTwoSNR]
+  mirrorPlotEnv$peaksSampleTwo@intensity <- mirrorPlotEnv$peaksSampleTwo@intensity[mirrorPlotEnv$SampleTwoSNR]
+
+  # Binpeaks for the two samples so we can color code similar peaks within the plot
+  mirrorPlotEnv$peaksSampleOne <- binPeaks(mirrorPlotEnv$peaksSampleOne, tolerance = .02)
+  mirrorPlotEnv$peaksSampleTwo <- binPeaks(mirrorPlotEnv$peaksSampleTwo, tolerance = .02)
+
+  # Set all peak colors for positive spectrum as red
+  mirrorPlotEnv$SampleOneColors <- rep("red", length(mirrorPlotEnv$peaksSampleOne@mass))
+  # Which peaks top samaple one are also in the bottom sample:
+  temp <- mirrorPlotEnv$peaksSampleOne@mass %in% mirrorPlotEnv$peaksSampleTwo@mass
+  # Color matching peaks in positive spectrum blue
+  mirrorPlotEnv$SampleOneColors[temp] <- "blue"
+  remove(temp)
+
+  # Retrieve the full spectra for each of the samples and average them
+  db %>%
       filter(Strain_ID %in% input$Spectra2) %>%
-      filter(proteinPeaks != "NA") %>%
-      select(filesha1) %>%
-      pull %>%
-      IDBacApp::collapseProteinReplicates(fileshas = .,
-                         db = userDBCon(),
-                         proteinPercentPresence = input$percentPresenceP,
-                         lowerMassCutoff = input$lowerMass,
-                         upperMassCutoff = input$upperMass) %>%
-      return(.) -> mirrorPlotEnv$peaksSampleTwo
-
-
-    # pSNR= the User-Selected Signal to Noise Ratio for protein
-    mirrorPlotEnv$SampleOneSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleOne) >= input$pSNR)
-    mirrorPlotEnv$SampleTwoSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleTwo) >= input$pSNR)
-
-
-    mirrorPlotEnv$peaksSampleOne@mass <- mirrorPlotEnv$peaksSampleOne@mass[mirrorPlotEnv$SampleOneSNR]
-    mirrorPlotEnv$peaksSampleOne@snr <- mirrorPlotEnv$peaksSampleOne@snr[mirrorPlotEnv$SampleOneSNR]
-    mirrorPlotEnv$peaksSampleOne@intensity <- mirrorPlotEnv$peaksSampleOne@intensity[mirrorPlotEnv$SampleOneSNR]
-
-    mirrorPlotEnv$peaksSampleTwo@mass <- mirrorPlotEnv$peaksSampleTwo@mass[mirrorPlotEnv$SampleTwoSNR]
-    mirrorPlotEnv$peaksSampleTwo@snr <- mirrorPlotEnv$peaksSampleTwo@snr[mirrorPlotEnv$SampleTwoSNR]
-    mirrorPlotEnv$peaksSampleTwo@intensity <- mirrorPlotEnv$peaksSampleTwo@intensity[mirrorPlotEnv$SampleTwoSNR]
-
-
-    temp <- binPeaks(list(mirrorPlotEnv$peaksSampleOne ,mirrorPlotEnv$peaksSampleTwo), tolerance = .02)
-
-    mirrorPlotEnv$peaksSampleOne <- temp[[1]]
-    mirrorPlotEnv$peaksSampleTwo <- temp[[2]]
-
-
-    mirrorPlotEnv$SampleOneColors <- rep("red", length(mirrorPlotEnv$peaksSampleOne@mass))
-
-    temp <- mirrorPlotEnv$peaksSampleOne@mass %in% mirrorPlotEnv$peaksSampleTwo@mass
-    mirrorPlotEnv$SampleOneColors[temp] <- "blue"
-    remove(temp)
-
-
-
-    db %>%
-        filter(Strain_ID %in% input$Spectra2) %>%
-        filter(proteinSpectrum != "NA") %>%
-        select(proteinSpectrum) %>%
-        pull %>%
-        lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
-        unlist(., recursive = TRUE) %>%
-        MALDIquant::averageMassSpectra(., method = "mean") %>%
-        return(.) -> mirrorPlotEnv$spectrumSampleTwo
-
-
-    db %>%
-      filter(Strain_ID %in% input$Spectra1) %>%
       filter(proteinSpectrum != "NA") %>%
       select(proteinSpectrum) %>%
       pull %>%
       lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
       unlist(., recursive = TRUE) %>%
       MALDIquant::averageMassSpectra(., method = "mean") %>%
-      return(.) -> mirrorPlotEnv$spectrumSampleOne
+      return(.) -> mirrorPlotEnv$spectrumSampleTwo
 
 
+  db %>%
+    filter(Strain_ID %in% input$Spectra1) %>%
+    filter(proteinSpectrum != "NA") %>%
+    select(proteinSpectrum) %>%
+    pull %>%
+    lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
+    unlist(., recursive = TRUE) %>%
+    MALDIquant::averageMassSpectra(., method = "mean") %>%
+    return(.) -> mirrorPlotEnv$spectrumSampleOne
 
 
+# Return the entire saved environment
+ mirrorPlotEnv
+
+})
 
 
+#Used in the the inverse-peak plot for zooming
+#----
+ranges2 <- reactiveValues(x = NULL, y = NULL)
 
-   mirrorPlotEnv
 
+# Output for the non-zoomed mirror plot
+#----
+output$inversePeakComparisonPlot <- renderPlot({
+
+  mirrorPlotEnv <- dataForInversePeakComparisonPlot()
+
+  #Create peak plots and color each peak according to whether it occurs in the other spectrum
+  plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
+       y = mirrorPlotEnv$spectrumSampleOne@intensity,
+       ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
+                max(mirrorPlotEnv$spectrumSampleOne@intensity)),
+       type = "l",
+       col = adjustcolor("Black", alpha=0.3),
+       xlab = "m/z",
+       ylab = "Intensity")
+  lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
+        y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
+  rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
+       ybottom = 0,
+       xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
+       ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
+       border = mirrorPlotEnv$SampleOneColors)
+  rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
+       ybottom = 0,
+       xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
+       ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
+       border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+
+  # Watch for brushing of the top mirror plot
+  observe({
+    brush <- input$plot2_brush
+    if (!is.null(brush)) {
+      ranges2$x <- c(brush$xmin, brush$xmax)
+      ranges2$y <- c(brush$ymin, brush$ymax)
+    }else{
+      ranges2$x <- NULL
+      ranges2$y <- c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
+                     max(mirrorPlotEnv$spectrumSampleOne@intensity))
+    }
   })
-
-  # -----------------
-  #Used in the the inverse-peak plot for zooming
-  ranges2 <- reactiveValues(x = NULL, y = NULL)
-
-  # -----------------
-  output$inversePeakComparisonPlot <- renderPlot({
-
-    mirrorPlotEnv <- listOfDataframesForInversePeakComparisonPlot()
+})
 
 
+# Output the zoomed mirror plot
+#----
+output$inversePeakComparisonPlotZoom <- renderPlot({
+  
+  mirrorPlotEnv <- dataForInversePeakComparisonPlot()
 
+  plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
+       y = mirrorPlotEnv$spectrumSampleOne@intensity,
+       xlim = ranges2$x, ylim = ranges2$y,
+       type = "l",
+       col = adjustcolor("Black", alpha=0.3),
+       xlab = "m/z",
+       ylab = "Intensity")
+  lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
+        y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
+  rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
+       ybottom = 0,
+       xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
+       ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
+       border = mirrorPlotEnv$SampleOneColors)
+  rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
+       ybottom = 0,
+       xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
+       ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
+       border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+})
+
+
+# Download svg of top mirror plot
+#----
+output$downloadInverse <- downloadHandler(
+  filename = function(){
+    paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,".svg")
+    }, content = function(file1){
+
+    
+    svglite::svglite(file1,
+                     width = 10,
+                     height = 8, 
+                     bg = "white",
+                     pointsize = 12,
+                     standalone = TRUE)
+
+    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
+    
     #Create peak plots and color each peak according to whether it occurs in the other spectrum
     plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
          y = mirrorPlotEnv$spectrumSampleOne@intensity,
@@ -1287,30 +1300,33 @@ MALDIquant::binPeaks(collapsedPeaksP(), method = "strict", tolerance = .02) %>%
          xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
          ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
          border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+     legend(max(mirrorPlotEnv$spectrumSampleOne@mass) * .6,
+            max(max(mirrorPlotEnv$spectrumSampleOne@intensity)) * .7,
+            legend = c(paste0("Top: ", input$Spectra1), 
+                       paste0("Bottom: ", input$Spectra2)),
+           col = c("black", "black"),
+           lty = 1:1,
+           cex = 1)
 
-    observe({
-
-      brush <- input$plot2_brush
-      if (!is.null(brush)) {
-        ranges2$x <- c(brush$xmin, brush$xmax)
-        ranges2$y <- c(brush$ymin, brush$ymax)
-      }else{
-        ranges2$x <- NULL
-        ranges2$y <- c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                       max(mirrorPlotEnv$spectrumSampleOne@intensity))
-      }
-    })
-  })
+    dev.off()
+    if (file.exists(paste0(file1, ".svg")))
+      file.rename(paste0(file1, ".svg"), file1)
+})
 
 
+# Download svg of zoomed mirror plot
+#----
+output$downloadInverseZoom <- downloadHandler(
+  filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")},
+  content = function(file1){
 
-  # -----------------
-  output$inversePeakComparisonPlotZoom <- renderPlot({
-    mirrorPlotEnv <- listOfDataframesForInversePeakComparisonPlot()
+    svglite::svglite(file1, width = 10, height = 8, bg = "white",
+                     pointsize = 12, standalone = TRUE)
+
+    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
 
     plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
          y = mirrorPlotEnv$spectrumSampleOne@intensity,
-
          xlim = ranges2$x, ylim = ranges2$y,
          type = "l",
          col = adjustcolor("Black", alpha=0.3),
@@ -1328,106 +1344,19 @@ MALDIquant::binPeaks(collapsedPeaksP(), method = "strict", tolerance = .02) %>%
          xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
          ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
          border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+    legend(max(ranges2$x) * .85,
+           max(ranges2$y) * .7, 
+           legend = c(paste0("Top: ", input$Spectra1),
+                    paste0("Bottom: ", input$Spectra2)),
+           col = c("black", "black"),
+           lty = 1:1,
+           cex = 1)
 
-
-
+    dev.off()
+    if (file.exists(paste0(file1, ".svg")))
+      file.rename(paste0(file1, ".svg"), file1)
 
   })
-
-  # -----------------
-  #observeEvent(input$downloadInverse,{
-  output$downloadInverse <- downloadHandler(
-
-
-    filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,".svg")},
-    content = function(file1){
-
-
-
-      #svg(filename=paste0(input$Spectra1,"_",input$Spectra1,".svg"))
-      svglite::svglite(file1, width = 10, height = 8, bg = "white",
-                       pointsize = 12, standalone = TRUE)
-
-      mirrorPlotEnv <- listOfDataframesForInversePeakComparisonPlot()
-
-
-
-      #Create peak plots and color each peak according to whether it occurs in the other spectrum
-      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-           y = mirrorPlotEnv$spectrumSampleOne@intensity,
-           ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                    max(mirrorPlotEnv$spectrumSampleOne@intensity)),
-           type = "l",
-           col = adjustcolor("Black", alpha=0.3),
-           xlab = "m/z",
-           ylab = "Intensity")
-      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-           border = mirrorPlotEnv$SampleOneColors)
-      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
-
-       legend(max(mirrorPlotEnv$spectrumSampleOne@mass)*.6,max(max(mirrorPlotEnv$spectrumSampleOne@intensity))*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
-             col=c("black", "black"), lty=1:1, cex=1)
-
-      dev.off()
-      if (file.exists(paste0(file1, ".svg")))
-        file.rename(paste0(file1, ".svg"), file1)
-
-    })
-
-  # -----------------
-  #observeEvent(input$downloadInverse,{
-  output$downloadInverseZoom <- downloadHandler(
-    filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")},
-    content = function(file1){
-
-
-
-
-      svglite::svglite(file1, width = 10, height = 8, bg = "white",
-                       pointsize = 12, standalone = TRUE)
-
-      mirrorPlotEnv <- listOfDataframesForInversePeakComparisonPlot()
-
-      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-           y = mirrorPlotEnv$spectrumSampleOne@intensity,
-
-           xlim = ranges2$x, ylim = ranges2$y,
-           type = "l",
-           col = adjustcolor("Black", alpha=0.3),
-           xlab = "m/z",
-           ylab = "Intensity")
-      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-           border = mirrorPlotEnv$SampleOneColors)
-      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
-
-
-
-      legend(max(ranges2$x)*.85, max(ranges2$y)*.7, legend=c(paste0("Top: ",input$Spectra1), paste0("Bottom: ",input$Spectra2)),
-             col=c("black", "black"), lty=1:1, cex=1)
-
-      dev.off()
-      if (file.exists(paste0(file1, ".svg")))
-        file.rename(paste0(file1, ".svg"), file1)
-
-    })
 
   # Create peak comparison ui
    # -----------------
