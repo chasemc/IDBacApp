@@ -1,24 +1,19 @@
 tempDirectory <- tempdir()  # Different per session
 
-
-
 a <-   as.list(list.files(getwd(),
                           pattern = ".sqlite",
                           full.names = TRUE))
+
 names(a) <- tools::file_path_sans_ext(list.files(getwd(), pattern = ".sqlite"))
 
+availableExperiments <-a
 
-  availableExperiments <-a
-
-
-
-  shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
-    if (is.null(data))
-      NULL
-    else
+shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
+  if (is.null(data)){
+    NULL
+  }else{
       list(left=as.character(data$left), right=as.character(data$right))
-  }, force = TRUE)
-
+  }}, force = TRUE)
 
 
 #delete
@@ -31,12 +26,9 @@ Install_And_Load <- function(Required_Packages)
 {
   Remaining_Packages <-
     Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-
-
   if (length(Remaining_Packages))
   {
     install.packages(Remaining_Packages)
-
   }
   for (package_name in Required_Packages)
   {
@@ -79,27 +71,11 @@ Required_Packages = c("Rcpp",
 # Install and Load Packages
 Install_And_Load(Required_Packages)
 
-
-
-
-
-
-
-
-
-
-#  Load colored_Dots.R function
-
-
-
 colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", rainbow(1000)))
-
 
 
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
-
-
 
   #This "observe" event creates the SQL tab UI.
   observe({
@@ -112,715 +88,593 @@ function(input,output,session){
          by transferring samples from one experiment to another"),
       tabsetPanel(
                   tabPanel("Analyze a Previous Experiment",
-
                column(12,
                       style = "background-color:#7777770d",
                       radioButtons("selectExperiment",
                                    label = h3("Select a Previous Experiment"),
                                    choices = availableExperiments,
-                                   selected = 0, width= "100%"
-                      )),
-                      p("Location of experiment file:"),
-                      verbatimTextOutput("selectedSQLText",
-                                         placeholder = TRUE)
-
-
-
-      ), tabPanel("Create Experiment from Other Experiments",
-      column(12,
-             style = "background-color: #7777770d",
-        radioButtons("selectMixNmatchExperiment",
-                     label = p("Select samples from previous experiment to transfer to a new experiment."),
-                     choices = availableExperiments,
-                     selected = 0
-        ),
-        uiOutput("chosenp"),
-        verbatimTextOutput("selection"),
-        br(),
-        textInput("nameformixNmatch",
-                  label = "Enter name for new experiment")
-      )),tabPanel("Add/Modify Strain Attributes",
-                  p("s"),
-                  actionButton("searchNCBI","Search NCBI"),
-                  actionButton("saven","save"),
-                  actionButton("pop22","pop"),
-                  rHandsontableOutput("metaTable")
-      )
-
-
-
-      )
-    )
-
-
-
-
+                                   selected = 0,
+                                   width= "100%")),
+               p("Location of experiment file:"),
+               verbatimTextOutput("selectedSQLText",
+                                  placeholder = TRUE)),
+               tabPanel("Create Experiment from Other Experiments",
+                        column(12,
+                               style = "background-color: #7777770d",
+                               radioButtons("selectMixNmatchExperiment",
+                                            label = p("Select samples from previous experiment to transfer to a new experiment."),
+                                            choices = availableExperiments,
+                                            selected = 0),
+                               uiOutput("chosenp"),
+                               verbatimTextOutput("selection"),
+                               br(),
+                               textInput("nameformixNmatch",
+                                         label = "Enter name for new experiment"))),
+               tabPanel("Add/Modify Strain Attributes",
+                        p("s"),
+                        actionButton("searchNCBI",
+                                     "Search NCBI"),
+                        actionButton("saven",
+                                     "save"),
+                        actionButton("pop22",
+                                     "pop"),
+                        rHandsontableOutput("metaTable"))))
     })
-
 })
 
 
-#
-# observeEvent(input$searchNCBI,{
-#   print(1)
-#    aas<<-rhandsontable::hot_to_r( sampMetaDataTable())
-#
-#
-#   })
-#
+#----
+output$selectedSQLText <- renderPrint(input$selectExperiment)
 
 
-
-  output$selectedSQLText <- renderPrint(input$selectExperiment)
-
-
-
-
-
-  userDBCon <- reactive({
-# This pool is used when selecting to analyze a previous experiment
- #  isolate( input$percentPresenceP )
-    pool::dbPool(drv = RSQLite::SQLite(),
-                            dbname = input$selectExperiment
-                            #dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
-                            )
+#----
+userDBCon <- reactive({
+  # This pool is used when selecting to analyze a previous experiment
+  #  isolate( input$percentPresenceP )
+  pool::dbPool(drv = RSQLite::SQLite(),
+               dbname = input$selectExperiment
+               #dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
+               )
+})
 
 
-  })
-
-
- newExperimentSqlite <- reactive({
- # This pool is used when creating an entirely new "experiment" .sqlite db
+#----
+newExperimentSqlite <- reactive({
+  # This pool is used when creating an entirely new "experiment" .sqlite db
   pool::dbPool(drv = RSQLite::SQLite(),
                dbname = paste0(input$newExperimentName, ".sqlite"))
-
-   })
-
+})
 
 
-
+#----
 mixNmatchOldDatabase <- reactive({
   # This pool is used when mix an matching "experiment" .sqlite db
-
-
    pool::dbPool(drv = RSQLite::SQLite(),
                dbname = input$selectMixNmatchExperiment)
-
 })
 
 
-
+#----
 output$chosenp <- renderUI({
-
-  IDBacApp::chooserInput("mychooser", "Available frobs", "Selected frobs",
-                         oldnames(), c(), size = 10, multiple = TRUE
-   )
+  IDBacApp::chooserInput("mychooser",
+                         "Available frobs",
+                         "Selected frobs",
+                         oldnames(),
+                         c(),
+                         size = 10,
+                         multiple = TRUE)
 })
 
 
-  output$selection <- renderPrint(
+#----
+output$selection <- renderPrint(
     input$mychooser
-  )
+)
 
 
+#----
 oldnames <- reactive({
   getAllStrain_IDsfromSQL(databaseConnection = mixNmatchOldDatabase(),
                           table = "IndividualSpectra")
 })
 
 
-
-
-
-
-
-
-# Create mix N match sqlite
-
-
+#Create mix N match sqlite
+#----
 newmixNmatchExperimentSqlite <- reactive({
   # This pool is used when creating an entirely new mix N match "experiment" .sqlite db
   pool::dbPool(drv = RSQLite::SQLite(),
                dbname = input$nameformixNmatch)
-
 })
 
-qwerty <- reactiveValues(rtab = data.frame("Strain_ID" = "dumb"))
+
+#----
+qwerty <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
 
 
+#----
+observeEvent(input$searchNCBI, {
+  aqw <-  rhandsontable::hot_to_r(input$metaTable)
+  for(i in 1:ncol(aqw)){
+    aqw[ ,i] <- as.character(aqw[ ,i])
+  }
 
+  ind <- is.na(aqw[-1,]$Genbank_Accession)
+  providedAccessions <- as.character(aqw[-1,]$Genbank_Accession[!ind])
+  a <- lapply(providedAccessions, traits::ncbi_byid)
+  genus <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[1]])
+  species <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[2]])
+  dna_16s <- lapply(a, function(x){
+                                   if(as.numeric(x$length) < 2000){
+                                      x$sequence
+                                   }else{NA}
+                    })
 
+  taxo <- lapply(a, function(x){
+                                q <- taxize::classification(x$taxon,
+                                db="ncbi",
+                                return_id = FALSE)[[1]]
+                                q2 <- as.list(q$name)
+                                names(q2) <- q$rank
+                                q2
+                })
 
-observeEvent(input$searchNCBI,{
+  taxo <- do.call(rbind.data.frame, taxo)
+  for(i in 1:ncol(taxo)){
+    taxo[ ,i] <- as.character(taxo[ ,i])
+  }
 
-aqw <<-  rhandsontable::hot_to_r(input$metaTable)
-for(i in 1:ncol(aqw)){
-  aqw[ ,i] <- as.character(aqw[ ,i])
-}
+  # get rhandsontable minus the example row
+  awe <-  aqw[-1, ]
+  # ind is a logical vector of rows with input accessions
+  awe$Kingdom[!ind] <- taxo$superkingdom
+  awe$Phylum[!ind] <- taxo$phylum
+  awe$Class[!ind] <- taxo$class
+  awe$Order[!ind] <- taxo$order
+  awe$Family[!ind] <- taxo$family
+  awe$Genus[!ind] <- taxo$genus
+  awe$Species[!ind] <- taxo$species
+  awe$dna_16S[!ind] <- unlist(dna_16s)
 
-ind <- is.na(aqw[-1,]$Genbank_Accession)
-providedAccessions <- as.character(aqw[-1,]$Genbank_Accession[!ind])
-
-a <- lapply(providedAccessions, traits::ncbi_byid)
-
-genus <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[1]])
-
-species <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[2]])
-
-
-dna_16s <- lapply(a, function(x){
-  if(as.numeric(x$length) < 2000){
-    x$sequence
-  }else{NA}
-
-})
-
-taxo<-lapply(a, function(x){
-
-  q <- taxize::classification(x$taxon,
-                              db="ncbi",
-                              return_id = FALSE)[[1]]
-
-  q2 <- as.list(q$name)
-  names(q2) <- q$rank
-  q2
-
-})
-
-taxo <- do.call(rbind.data.frame, taxo)
-for(i in 1:ncol(taxo)){
-  taxo[ ,i] <- as.character(taxo[ ,i])
-}
-
-# get rhandsontable minus the example row
-awe <-  aqw[-1, ]
-# ind is a logical vector of rows with input accessions
-
-awe$Kingdom[!ind] <- taxo$superkingdom
-awe$Phylum[!ind] <- taxo$phylum
-awe$Class[!ind] <- taxo$class
-awe$Order[!ind] <- taxo$order
-awe$Family[!ind] <- taxo$family
-awe$Genus[!ind] <- taxo$genus
-awe$Species[!ind] <- taxo$species
-
-awe$dna_16S[!ind] <- unlist(dna_16s)
-
-AQS<<-awe
-
+# Update reactive value
 qwerty$rtab <- rbind(rhandsontable::hot_to_r(input$metaTable)[1, ], awe)
 
 })
 
 
+#----
 output$metaTable <- rhandsontable::renderRHandsontable({
 
-  rhandsontable::rhandsontable(qwerty$rtab,,
+  rhandsontable::rhandsontable(qwerty$rtab,
                                useTypes = FALSE,
                                contextMenu = TRUE ) %>%
-    hot_col("Strain_ID", readOnly = TRUE) %>%
-    rhandsontable::hot_row(1,  readOnly = TRUE) %>%
+    hot_col("Strain_ID",
+            readOnly = TRUE) %>%
+    rhandsontable::hot_row(1,
+                           readOnly = TRUE) %>%
     hot_context_menu(allowRowEdit = FALSE,
                      allowColEdit = TRUE) %>%
     hot_cols(colWidths = 100) %>%
     hot_rows(rowHeights = 25) %>%
     hot_cols(fixedColumnsLeft = 1)
 
-
 })
 
 
 
-
-
-
-
+#----
 observeEvent(input$pop22,{
 
   if (is.null(input$metaTable)){
-  qwerty$rtab <-  rhandsontable::hot_to_r(input$metaTable)
-  }else {
-
-  dbQuery <- glue::glue_sql("SELECT *
-                            FROM ({tab*})",
-                            tab = "metaData",
-                            .con = userDBCon())
-
-  conn <- pool::poolCheckout(userDBCon())
-  dbQuery <- DBI::dbSendQuery(conn, dbQuery)
-  dbQuery <- DBI::dbFetch(dbQuery)
-
-  exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
-                                      "Genbank_Accession"            = "KY858228",
-                                      "NCBI_TaxID"                   = "446370",
-                                      "Kingdom"                      = "Bacteria",
-                                      "Phylum"                       = "Firmicutes",
-                                      "Class"                        = "Bacilli",
-                                      "Order"                        = "Bacillales",
-                                      "Family"                       = "Paenibacillaceae",
-                                      "Genus"                        = "Paenibacillus",
-                                      "Species"                      = "telluris",
-                                      "MALDI_Matrix"                 = "CHCA",
-                                      "DSM_Agar_Media"               = "1054_Fresh",
-                                      "Cultivation_Temp_Celsius"     = "27",
-                                      "Cultivation_Time_Days"        = "10",
-                                      "Cultivation_Other"            = "",
-                                      "User"                         = "Chase Clark",
-                                      "User_ORCID"                   = "0000-0001-6439-9397",
-                                      "PI_FirstName_LastName"        = "Brian Murphy",
-                                      "PI_ORCID"                     = "0000-0002-1372-3887",
-                                      "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
-  )
-
-  qwerty$rtab <- rbind(exampleMetaData, dbQuery)
-
-
-
-}
-  })
-
-
-#
-#
-#
-#
-# observeEvent(input$saven,{
-#
-#
-#
-# })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  observe({
-    if (is.null(input$startingWith)){}else{
-
-      output$arrowPNG<-renderUI({
-        img(src="arrowRight.png")
-
-      })
-    }
-  })
-
-  observe({
-    if (is.null(input$startingWith)){}else{
-      output$startingWithUI<-renderUI({
-        if(input$startingWith == 1){
-          radioButtons("rawORreanalyze",
-                       label = h3("Begin by selecting an option below:"),
-                       choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
-                                      "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3),
-                       selected = 0,
-                       inline = FALSE,
-                       width = "100%")
-        }else if(input$startingWith == 2){
-          radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
-                       choices = list("Select here if you want to use .txt peak list files" = 5,
-                                      "Select here if you want to use .csv peak list files" = 6),
-                       selected = 0,
-                       inline = FALSE,
-                       width = "100%")
-        }else if(input$startingWith == 3){
-          radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
-                       choices = list("Select here if you have already converted data with IDBac and want to re-analyze all of it" = 2,
-                                      "Select here if you have already converted data with IDBac and want to re-analyze select files" = 4),
-                       selected = 0,
-                       inline = FALSE,
-                       width = "100%")
-        }
-
-      })
-    }
-  })
-
-
-
-
-
-
-
-
-
-  # -----------------
-  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
-  observe({
-    if (is.null(input$startingWith)){}else if(input$startingWith == 2){
-      output$ui1<-renderUI({
-        fluidRow(
-          p(".txt and .csv support coming soon!"),
-          actionButton("delimitedDirectoryP",
-                       label = "Raw Data P Folder"),
-          actionButton("delimitedDirectorySM",
-                       label = "Raw Data SM Folder"),
-          actionButton("runDelim",
-                       label = "Convert to mzML"),
-          verbatimTextOutput("delimitedLocationPo",
-                             placeholder = TRUE),
-          verbatimTextOutput("delimitedLocationSMo",
-                             placeholder = TRUE)
-
-
-
+    qwerty$rtab <-  rhandsontable::hot_to_r(input$metaTable)
+    } else {
+
+        dbQuery <- glue::glue_sql("SELECT *
+                                  FROM ({tab*})",
+                                  tab = "metaData",
+                                  .con = userDBCon())
+
+        conn <- pool::poolCheckout(userDBCon())
+        dbQuery <- DBI::dbSendQuery(conn, dbQuery)
+        dbQuery <- DBI::dbFetch(dbQuery)
+
+        exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
+                                            "Genbank_Accession"            = "KY858228",
+                                            "NCBI_TaxID"                   = "446370",
+                                            "Kingdom"                      = "Bacteria",
+                                            "Phylum"                       = "Firmicutes",
+                                            "Class"                        = "Bacilli",
+                                            "Order"                        = "Bacillales",
+                                            "Family"                       = "Paenibacillaceae",
+                                            "Genus"                        = "Paenibacillus",
+                                            "Species"                      = "telluris",
+                                            "MALDI_Matrix"                 = "CHCA",
+                                            "DSM_Agar_Media"               = "1054_Fresh",
+                                            "Cultivation_Temp_Celsius"     = "27",
+                                            "Cultivation_Time_Days"        = "10",
+                                            "Cultivation_Other"            = "",
+                                            "User"                         = "Chase Clark",
+                                            "User_ORCID"                   = "0000-0001-6439-9397",
+                                            "PI_FirstName_LastName"        = "Brian Murphy",
+                                            "PI_ORCID"                     = "0000-0002-1372-3887",
+                                            "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
         )
-      })
 
-    }
-  })
-
-
-
-
-  # -----------------
-  # Reactive variable returning the user-chosen location of the raw delim files as string
-  delimitedLocationP <- reactive({
-    if (input$delimitedDirectoryP > 0) {
-      choose.dir()
-    }
-  }) # -----------------
-  # Reactive variable returning the user-chosen location of the raw delim files as string
-  delimitedLocationSM <- reactive({
-    if (input$delimitedDirectorySM > 0) {
-      choose.dir()
-    }
-  })
-  # -----------------
-  # Creates text showing the user which directory they chose for raw files
-  output$delimitedLocationSMo <- renderText({
-    if (is.null(delimitedLocationSM())) {
-      return("No Folder Selected")} else{
-        folders <- NULL
-        foldersInFolder <- list.files(delimitedLocationSM(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
-        for (i in 1:length(foldersInFolder)) {
-          folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-        }
-        folders
-      }
-  })
-  # -----------------
-  # Creates text showing the user which directory they chose for raw files
-  output$delimitedLocationPo <- renderText({
-    if (is.null(delimitedLocationP())) {
-      return("No Folder Selected")} else{
-        folders <- NULL
-        foldersInFolder <- list.files(delimitedLocationP(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
-        for (i in 1:length(foldersInFolder)) {
-          folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-        }
-        folders
+        qwerty$rtab <- rbind(exampleMetaData, dbQuery)
       }
   })
 
 
-
-
-
-  # -----------------
-  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
-  observe({
-    if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 1){
-      output$ui1 <- renderUI({
-        fluidRow(
-          column(12,
-                 br(),
-                 br(),
-                 fluidRow(
-                   column(12, offset = 3,
-                          h3("Starting with a Single MALDI Plate of Raw Data"))), br(), br(),
-                 column(5,
-                        fluidRow(column(5,
-                                        offset = 3,
-                                        h3("Instructions"))),
-                        br(),
-                        p(strong("1: Working Directory")," This directs where on your computer you would like to create an IDBac working directory."),
-                        p("In the folder you select, IDBac will create sub-folders within a main directory named \"IDBac\":"),
-                        img(src="WorkingDirectory.png", style="width:60%;height:60%"),
-                        br(),
-                        p(strong("2: Raw Data"),"Your RAW data is a single folder that contains: one subfolder containing protein
-                          data and one subfolder containing small-molecule data"),
-                        img(src="Single-MALDI-Plate.png", style="width:60%;height:60%"),
-                        br(),
-                        p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                        img(src="window.png",width="100%")
-                        ),
-                 column(1
-                 ),
-                 column(5, style = "background-color:#7777770d",
-                        fluidRow(
-                          h3("Workflow Pane", align="center")),
-                        br(),
-                        column(12, align="center",
-                               p(strong("1: Enter a Name for this New Experiment")),
-                               textInput("newExperimentName",
-                                         label = ""),
-                               tags$hr(size=20)),
-                        br(),
-                        p(strong("2: Click to select the location of your RAW data"), align= "center"),
-                        column(12, align="center",
-                        actionButton("rawFileDirectory",
-                                     label = "Raw Data Folder"),
-                        verbatimTextOutput("rawFileDirectory",
-                                           placeholder = TRUE),
-                        tags$hr(size=20)),
-                        br(),
-                        column(12, align="center",
-                               p(strong("3:", "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files.")),
-                               fileInput('excelFile',
-                                         label = NULL ,
-                                         accept =c('.xlsx','.xls')),
-                               tags$hr(size=20)),
-                        column(12, align="center",
-                               p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
-                               actionButton("run",
-                                            label = "Convert to mzML"),
-                               tags$hr(size=20)),
-                        br(),
-                        br(),
-                        br(),
-                        br(),
-                        p(strong("Note:","If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."))
-
-
-                 )
-          )
-        )
-      })
-    }
+#----
+observe({
+  if (is.null(input$startingWith)){
+    # Intentionally Blank
+  } else {
+    output$arrowPNG<-renderUI({
+      img(src="arrowRight.png")
   })
+  }
+})
 
 
-  # -----------------
-  #This "observe" event creates the UI element for analyzing multiple MALDI plates, based on user-input.
-  observe({
-    if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 3){
-      output$ui1<-renderUI({
-        fluidRow(
-          column(12,
-                 br(),
-                 br(),
-                 fluidRow(
-                   column(12,offset=3,
-                          h3("Starting with Multiple MALDI Plates of Raw Data"))), br(), br(),
-                 column(5,
-                        fluidRow(column(5,
-                                        offset = 3,
-                                        h3("Instructions"))),
-                        br(),
-                        p(strong("1:")," This directs where on your computer you would like to create an IDBac working directory."),
-                        p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
-                        img(src="WorkingDirectory.png", style="width:322px;height:164px"),
-                        p("If there is already an \"IDBac\" folder present in the working directory,
-                          files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
-                        br(),
-                        p(strong("2:"),"The RAW data file will be one folder that contains individual folders for each
-                          MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
-                          containing protein data and the other containing small molecule data:"),
-                        img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
-                        p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                        img(src="window.png",width="100%")
-                        ),
-                 column(1
-                 ),
-                 column(5,
-                        style = "background-color:#7777770d",
-                        fluidRow(
-                          h3("Workflow Pane", align="center")),
-                        br(),
-                        column(12, align="center",
-                               p(strong("1: Enter a Name for this New Experiment")),
-                               textInput("newExperimentName",
-                                         label = ""),
-                               tags$hr(size=20)),
-                        fluidRow(column(12,
-                                        verbatimTextOutput("newExperimentNameText",
-                                                           placeholder = TRUE))),
-                        br(),
-                        p(strong("2:"), "Your RAW data will be one folder that contains folders for each MALDI plate."),
-                        br(),
-                        p(strong("2: Click to select the location of your RAW data"), align= "center"),
+#----
+observe({
+  if (is.null(input$startingWith)){
+    # Intentionally Blank
+  }else{
+    output$startingWithUI<-renderUI({
+      if(input$startingWith == 1){
+        radioButtons("rawORreanalyze",
+                     label = h3("Begin by selecting an option below:"),
+                     choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
+                                    "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3),
+                     selected = 0,
+                     inline = FALSE,
+                     width = "100%")
+      }else if(input$startingWith == 2){
+        radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
+                     choices = list("Select here if you want to use .txt peak list files" = 5,
+                                    "Select here if you want to use .csv peak list files" = 6),
+                     selected = 0,
+                     inline = FALSE,
+                     width = "100%")
+      }else if(input$startingWith == 3){
+        radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
+                     choices = list("Select here if you have already converted data with IDBac and want to re-analyze all of it" = 2,
+                                    "Select here if you have already converted data with IDBac and want to re-analyze select files" = 4),
+                     selected = 0,
+                     inline = FALSE,
+                     width = "100%")
+      }
+
+    })
+  }
+})
 
 
-                        actionButton("multipleMaldiRawFileDirectory",
-                                     label = "Click to select the location of your RAW data"),
-                        fluidRow(column(12,
-                                        verbatimTextOutput("multipleMaldiRawFileDirectory",
-                                                           placeholder = TRUE))),
-                        br(),
+#----
+#This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
+observe({
+  if (is.null(input$startingWith)){
+    # Intentionally Blank
+    } else if (input$startingWith == 2){
+    output$ui1<-renderUI({
+      fluidRow(
+        p(".txt and .csv support coming soon!"),
+        actionButton("delimitedDirectoryP",
+                     label = "Raw Data P Folder"),
+        actionButton("delimitedDirectorySM",
+                     label = "Raw Data SM Folder"),
+        actionButton("runDelim",
+                     label = "Convert to mzML"),
+        verbatimTextOutput("delimitedLocationPo",
+                           placeholder = TRUE),
+        verbatimTextOutput("delimitedLocationSMo",
+                           placeholder = TRUE)
+      )
+    })
 
-                        column(12, align="center",
-                               p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
-                               actionButton("run",
-                                            label = "Convert to mzML"),
-                               tags$hr(size=20))
+  }
+})
 
 
+# Reactive variable returning the user-chosen location of the raw delim files as string
+#----
+delimitedLocationP <- reactive({
+  if (input$delimitedDirectoryP > 0) {
+    choose.dir()
+  }
+})
 
 
-                 )
-                        )
-        )
-      })
+# Reactive variable returning the user-chosen location of the raw delim files as string
+#----
+delimitedLocationSM <- reactive({
+  if (input$delimitedDirectorySM > 0) {
+    choose.dir()
+  }
+})
+
+
+# Creates text showing the user which directory they chose for raw files
+#----
+output$delimitedLocationSMo <- renderText({
+  if (is.null(delimitedLocationSM())) {
+    return("No Folder Selected")} else{
+      folders <- NULL
+      foldersInFolder <- list.files(delimitedLocationSM(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
+      for (i in 1:length(foldersInFolder)) {
+        folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+      }
+      folders
     }
-  })
+})
 
-  # -----------------
-  #This "observe" event creates the UI element for re-analyzing data
-  observe({
-    if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 2){
-      output$ui1<-renderUI({
-        fluidRow(
-          column(12,
-                 br(),
-                 br(),
-                 fluidRow(
-                   column(12,offset=3,
-                          h3("Re-Analyze Data That You Already Converted with IDBac"))), br(), br(),
-                 column(12,
-                        br(),
-                        column(5,
-                               fluidRow(column(5,
-                                               offset = 3,
-                                               h3("Instructions"))),
-                               br(),
-                               p("Left-click the button to the right to select your previously-analyzed data."),
-                               p("This will be the folder, originally named \"IDBac\", that was created when you analyzed data the first time."),
-                               p("It contains the folders:"),
-                               tags$ul(
-                                 tags$li("Converted_To_mzML"),
-                                 tags$li("Peak_Lists"),
-                                 tags$li("Saved_MANs")
-                               ),
-                               br(),
-                               tags$b("Example:"), br(),
-                               img(src="WorkingDirectory_ReAnalysis.png", style="width:322px;height:164px"),
-                               br(),br(),
-                               p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                               img(src="window.png",width="100%")
-                        ),
-                        column(1
-                        ),
-                        column(5,
-                               style = "background-color:#7777770d",
-                               fluidRow(
-                                 h3("Workflow Pane", align="center")),
-                               p(strong("1:"), "Select the folder containing your data"),
-                               actionButton("idbacDirectoryButton",
-                                            label = "Click to select the data directory"),
-                               fluidRow(column(12,
-                                 verbatimTextOutput("idbacDirectoryOut",
-                                                    placeholder = TRUE))),
-                               br(),
-                               p(strong("2:"), "You can now reanalyze your data by proceeding through the tabs at the top of the page. (\"Inverse Peak Comparison\", etc)      ")
-                        )
-                 )
 
-          )
-        )
-      })
+# Creates text showing the user which directory they chose for raw files
+#----
+output$delimitedLocationPo <- renderText({
+  if (is.null(delimitedLocationP())) {
+    return("No Folder Selected")} else{
+      folders <- NULL
+      foldersInFolder <- list.files(delimitedLocationP(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
+      for (i in 1:length(foldersInFolder)) {
+        folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+      }
+      folders
     }
-  })
+})
 
 
-
-  # -----------------
-  observe({
-    if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 4){
-      output$ui1<-renderUI({
-        fluidRow(
-          column(12,
-                 br(),
-                 br(),
-                 fluidRow(
-                   column(width = 12,
-                          h3("Customizing which samples to analyze", align = "center"))), br(), br(),
-                 column(width = 4),
-                 column(width = 4,
-                        style = "background-color:#7777770d",
-                        h3("Workflow Pane", align = "center"),
-                        br(),
-                        p(strong("1: "), actionButton("newExperimentName",
-                                                      label = "Click to select where to create a working directory")),
-                        p("Selected Location:"),
-                        fluidRow(column(12,
-                                        verbatimTextOutput("newExperimentNameText",
-                                                           placeholder = TRUE))),
-                        br(),
-                        p(strong("2: "), actionButton("createBlanknewExperimentNameFolders",
-                                                      label = "Click to create a blank working directory")),
-                        br(),
-                        p(strong("3:"), "Place the mzML files that you wish to analyze into:"),
-                        p(verbatimTextOutput("whereConvert")),
-                        p(strong("4:"), "Select \"Process mzML\" to process mzML files for analysis"),
-                        actionButton("beginPeakProcessingAgain",
-                                     label = "Process mzML spectra")
-                 )
-          )
+#This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
+#----
+observe({
+  if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 1){
+    output$ui1 <- renderUI({
+      fluidRow(
+        column(12,
+               br(),
+               br(),
+               fluidRow(
+                 column(12, offset = 3,
+                        h3("Starting with a Single MALDI Plate of Raw Data"))),
+               br(),
+               br(),
+               column(5,
+                      fluidRow(
+                        column(5,offset = 3,
+                               h3("Instructions"))),
+                      br(),
+                      p(strong("1: Working Directory"), " This directs where on your computer you would like to create an IDBac working directory."),
+                      p("In the folder you select, IDBac will create sub-folders within a main directory named \"IDBac\":"),
+                      img(src = "WorkingDirectory.png",
+                          style = "width:60%;height:60%"),
+                      br(),
+                      p(strong("2: Raw Data"), "Your RAW data is a single folder that contains: one subfolder containing protein
+                        data and one subfolder containing small-molecule data"),
+                      img(src = "Single-MALDI-Plate.png",
+                          style = "width:60%;height:60%"),
+                      br(),
+                      p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+                      img(src = "window.png",
+                          width = "100%")
+                      ),
+               column(1),
+               column(5, style = "background-color:#7777770d",
+                      fluidRow(
+                        h3("Workflow Pane",
+                           align="center")),
+                      br(),
+                      column(12, align="center",
+                             p(strong("1: Enter a Name for this New Experiment")),
+                             textInput("newExperimentName",
+                                       label = ""),
+                             tags$hr(size=20)),
+                      br(),
+                      p(strong("2: Click to select the location of your RAW data"), align= "center"),
+                      column(12, align="center",
+                      actionButton("rawFileDirectory",
+                                   label = "Raw Data Folder"),
+                      verbatimTextOutput("rawFileDirectory",
+                                         placeholder = TRUE),
+                      tags$hr(size = 20)),
+                      br(),
+                      column(12, align = "center",
+                             p(strong("3:", "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files.")),
+                             fileInput('excelFile',
+                                       label = NULL ,
+                                       accept = c('.xlsx','.xls')),
+                             tags$hr(size = 20)),
+                      column(12, align = "center",
+                             p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
+                             actionButton("run",
+                                          label = "Convert to mzML"),
+                             tags$hr(size = 20)),
+                      br(),
+                      br(),
+                      br(),
+                      br(),
+                      p(strong("Note:","If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."))
+               )
         )
-      })
-    }
-  })
+      )
+    })
+  }
+})
+
+
+#This "observe" event creates the UI element for analyzing multiple MALDI plates, based on user-input.
+#----
+observe({
+  if (is.null(input$rawORreanalyze)){
+    # Intentionally Blank
+  }else if (input$rawORreanalyze == 3){
+    output$ui1<-renderUI({
+      fluidRow(
+        column(12,
+               br(),
+               br(),
+               fluidRow(
+                 column(12,offset=3,
+                        h3("Starting with Multiple MALDI Plates of Raw Data"))), br(), br(),
+               column(5,
+                      fluidRow(column(5,
+                                      offset = 3,
+                                      h3("Instructions"))),
+                      br(),
+                      p(strong("1:")," This directs where on your computer you would like to create an IDBac working directory."),
+                      p("In the folder you select- IDBac will create folders within a main directory named \"IDBac\":"),
+                      img(src="WorkingDirectory.png", style="width:322px;height:164px"),
+                      p("If there is already an \"IDBac\" folder present in the working directory,
+                        files will be added into the already-present IDBac folder ",strong("and any samples with the same name will be overwritten.")),
+                      br(),
+                      p(strong("2:"),"The RAW data file will be one folder that contains individual folders for each
+                        MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
+                        containing protein data and the other containing small molecule data:"),
+                      img(src="Multi-MALDI-Plate.png", style="width:410px;height:319px"),
+                      p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+                      img(src="window.png",width="100%")
+                      ),
+               column(1
+               ),
+               column(5,
+                      style = "background-color:#7777770d",
+                      fluidRow(
+                        h3("Workflow Pane", align="center")),
+                      br(),
+                      column(12, align="center",
+                             p(strong("1: Enter a Name for this New Experiment")),
+                             textInput("newExperimentName",
+                                       label = ""),
+                             tags$hr(size=20)),
+                      fluidRow(column(12,
+                                      verbatimTextOutput("newExperimentNameText",
+                                                         placeholder = TRUE))),
+                      br(),
+                      p(strong("2:"), "Your RAW data will be one folder that contains folders for each MALDI plate."),
+                      br(),
+                      p(strong("2: Click to select the location of your RAW data"), align= "center"),
+
+
+                      actionButton("multipleMaldiRawFileDirectory",
+                                   label = "Click to select the location of your RAW data"),
+                      fluidRow(column(12,
+                                      verbatimTextOutput("multipleMaldiRawFileDirectory",
+                                                         placeholder = TRUE))),
+                      br(),
+
+                      column(12, align="center",
+                             p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
+                             actionButton("run",
+                                          label = "Convert to mzML"),
+                             tags$hr(size=20))
+
+
+
+
+               )
+                      )
+      )
+    })
+  }
+})
+
+# -----------------
+#This "observe" event creates the UI element for re-analyzing data
+observe({
+  if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 2){
+    output$ui1<-renderUI({
+      fluidRow(
+        column(12,
+               br(),
+               br(),
+               fluidRow(
+                 column(12,offset=3,
+                        h3("Re-Analyze Data That You Already Converted with IDBac"))), br(), br(),
+               column(12,
+                      br(),
+                      column(5,
+                             fluidRow(column(5,
+                                             offset = 3,
+                                             h3("Instructions"))),
+                             br(),
+                             p("Left-click the button to the right to select your previously-analyzed data."),
+                             p("This will be the folder, originally named \"IDBac\", that was created when you analyzed data the first time."),
+                             p("It contains the folders:"),
+                             tags$ul(
+                               tags$li("Converted_To_mzML"),
+                               tags$li("Peak_Lists"),
+                               tags$li("Saved_MANs")
+                             ),
+                             br(),
+                             tags$b("Example:"), br(),
+                             img(src="WorkingDirectory_ReAnalysis.png", style="width:322px;height:164px"),
+                             br(),br(),
+                             p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+                             img(src="window.png",width="100%")
+                      ),
+                      column(1
+                      ),
+                      column(5,
+                             style = "background-color:#7777770d",
+                             fluidRow(
+                               h3("Workflow Pane", align="center")),
+                             p(strong("1:"), "Select the folder containing your data"),
+                             actionButton("idbacDirectoryButton",
+                                          label = "Click to select the data directory"),
+                             fluidRow(column(12,
+                               verbatimTextOutput("idbacDirectoryOut",
+                                                  placeholder = TRUE))),
+                             br(),
+                             p(strong("2:"), "You can now reanalyze your data by proceeding through the tabs at the top of the page. (\"Inverse Peak Comparison\", etc)      ")
+                      )
+               )
+
+        )
+      )
+    })
+  }
+})
+
+
+
+# -----------------
+observe({
+  if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 4){
+    output$ui1<-renderUI({
+      fluidRow(
+        column(12,
+               br(),
+               br(),
+               fluidRow(
+                 column(width = 12,
+                        h3("Customizing which samples to analyze", align = "center"))), br(), br(),
+               column(width = 4),
+               column(width = 4,
+                      style = "background-color:#7777770d",
+                      h3("Workflow Pane", align = "center"),
+                      br(),
+                      p(strong("1: "), actionButton("newExperimentName",
+                                                    label = "Click to select where to create a working directory")),
+                      p("Selected Location:"),
+                      fluidRow(column(12,
+                                      verbatimTextOutput("newExperimentNameText",
+                                                         placeholder = TRUE))),
+                      br(),
+                      p(strong("2: "), actionButton("createBlanknewExperimentNameFolders",
+                                                    label = "Click to create a blank working directory")),
+                      br(),
+                      p(strong("3:"), "Place the mzML files that you wish to analyze into:"),
+                      p(verbatimTextOutput("whereConvert")),
+                      p(strong("4:"), "Select \"Process mzML\" to process mzML files for analysis"),
+                      actionButton("beginPeakProcessingAgain",
+                                   label = "Process mzML spectra")
+               )
+        )
+      )
+    })
+  }
+})
 
 
 
