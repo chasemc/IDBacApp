@@ -11,7 +11,7 @@ availableExperiments <-a
 shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
   if (is.null(data)){
     NULL
-  }else{
+  } else {
       list(left=as.character(data$left), right=as.character(data$right))
   }}, force = TRUE)
 
@@ -211,7 +211,7 @@ observeEvent(input$searchNCBI, {
   dna_16s <- lapply(a, function(x){
                                    if(as.numeric(x$length) < 2000){
                                       x$sequence
-                                   }else{NA}
+                                   } else {NA}
                     })
 
   taxo <- lapply(a, function(x){
@@ -325,7 +325,7 @@ observe({
 observe({
   if (is.null(input$startingWith)){
     # Intentionally Blank
-  }else{
+  } else {
     output$startingWithUI<-renderUI({
       if(input$startingWith == 1){
         radioButtons("rawORreanalyze",
@@ -335,14 +335,14 @@ observe({
                      selected = 0,
                      inline = FALSE,
                      width = "100%")
-      }else if(input$startingWith == 2){
+      } else if(input$startingWith == 2){
         radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
                      choices = list("Select here if you want to use .txt peak list files" = 5,
                                     "Select here if you want to use .csv peak list files" = 6),
                      selected = 0,
                      inline = FALSE,
                      width = "100%")
-      }else if(input$startingWith == 3){
+      } else if(input$startingWith == 3){
         radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
                      choices = list("Select here if you have already converted data with IDBac and want to re-analyze all of it" = 2,
                                     "Select here if you have already converted data with IDBac and want to re-analyze select files" = 4),
@@ -404,7 +404,7 @@ delimitedLocationSM <- reactive({
 #----
 output$delimitedLocationSMo <- renderText({
   if (is.null(delimitedLocationSM())) {
-    return("No Folder Selected")} else{
+    return("No Folder Selected")} else {
       folders <- NULL
       foldersInFolder <- list.files(delimitedLocationSM(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
       for (i in 1:length(foldersInFolder)) {
@@ -419,7 +419,7 @@ output$delimitedLocationSMo <- renderText({
 #----
 output$delimitedLocationPo <- renderText({
   if (is.null(delimitedLocationP())) {
-    return("No Folder Selected")} else{
+    return("No Folder Selected")} else {
       folders <- NULL
       foldersInFolder <- list.files(delimitedLocationP(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
       for (i in 1:length(foldersInFolder)) {
@@ -433,7 +433,7 @@ output$delimitedLocationPo <- renderText({
 #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
 #----
 observe({
-  if (is.null(input$rawORreanalyze)){}else if (input$rawORreanalyze == 1){
+  if (is.null(input$rawORreanalyze)){} else if (input$rawORreanalyze == 1){
     output$ui1 <- renderUI({
       fluidRow(
         column(12,
@@ -512,7 +512,7 @@ observe({
 observe({
   if (is.null(input$rawORreanalyze)){
     # Intentionally Blank
-  }else if (input$rawORreanalyze == 3){
+  } else if (input$rawORreanalyze == 3){
     output$ui1<-renderUI({
       fluidRow(
         column(12,
@@ -585,7 +585,7 @@ observe({
 observe({
   if (is.null(input$rawORreanalyze)){
     # Intentionally Blank
-  }else if (input$rawORreanalyze == 2){
+  } else if (input$rawORreanalyze == 2){
     output$ui1 <- renderUI({
       fluidRow(
         column(12,
@@ -646,7 +646,7 @@ observe({
 observe({
   if (is.null(input$rawORreanalyze)){
     # Intentionally Blank
-  }else if (input$rawORreanalyze == 4){
+  } else if (input$rawORreanalyze == 4){
     output$ui1 <- renderUI({
       fluidRow(
         column(12,
@@ -755,7 +755,7 @@ multipleMaldiRawFileLocation <- reactive({
 output$multipleMaldiRawFileDirectory <- renderText({
   if (is.null(multipleMaldiRawFileLocation())){
     return("No Folder Selected")
-  }else{
+  } else {
     folders <- NULL
     # Get the folders contained within the chosen folder.
     foldersInFolder <- list.dirs(multipleMaldiRawFileLocation(),
@@ -1232,7 +1232,7 @@ output$inversePeakComparisonPlot <- renderPlot({
     if (!is.null(brush)) {
       ranges2$x <- c(brush$xmin, brush$xmax)
       ranges2$y <- c(brush$ymin, brush$ymax)
-    }else{
+    } else {
       ranges2$x <- NULL
       ranges2$y <- c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
                      max(mirrorPlotEnv$spectrumSampleOne@intensity))
@@ -1421,7 +1421,7 @@ dendro <- reactive({
   if (input$booled == "1") {
     booled<-"_UsedIntenstites"
   }
-  else{
+  else {
     booled<-"_UsedPresenceAbsence"
   }
   #TODO: add cache back with SQL system
@@ -1597,11 +1597,11 @@ pcaCalculation <- reactive({
         # Colors chosen by cutting dendrogram at user-chosen height
         fac <- stats::cutree(dendro(),
                       h = input$height)
-      }else if (input$kORheight == "1"){
+      } else if (input$kORheight == "1"){
         # Colors chosen by user-selected "k" of k-means
         fac <- stats::cutree(dendro(),
                              k = input$kClusters)
-      }else{
+      } else {
         # No factors, everthing colored black
         fac <- rep(1, length(labels(dendro())))
         names(fac) <- labels(dendro())
@@ -1900,7 +1900,7 @@ plotHeight <- reactive({
 
 #----
 output$hclustui <- renderUI({
-  if(input$kORheight!="2"){return(NULL)}else{
+  if(input$kORheight!="2"){return(NULL)} else {
     numericInput("height", 
                  label = h5(strong("Cut Tree at Height")),
                  value = .5,
@@ -2019,14 +2019,14 @@ output$hclustPlot <- renderPlot({
     coloredDend()$dend %>%
       plot(horiz = TRUE, lwd = 8)
     
-  }else if (input$kORheight == "2"){
+  } else if (input$kORheight == "2"){
     
     coloredDend()$dend  %>%  
       plot(horiz = TRUE, lwd = 8)
     
     abline(v = input$height, lty = 2)
     
-  }else if (input$kORheight == "3"){
+  } else if (input$kORheight == "3"){
 
     if(is.null(input$sampleMap$datapath)){
       # No sample mapping selected
@@ -2094,7 +2094,7 @@ output$downloadHeirSVG <- downloadHandler(
                                rowLabels = names(coloredDend()$bigMatrix),
                                horiz = T,
                                sort_by_labels_order = FALSE)
-      }else{
+      } else {
         coloredDend()$dend  %>%  
           plot(., horiz = T)
       }
@@ -2162,16 +2162,9 @@ availableProtein <- reactive({
 
 
 
-
-
-
-
-
 #------------------------------------------------------------------------------
 # Small molecule data processing
 #------------------------------------------------------------------------------
-
-
 
 # -----------------
 selectedSmallMolPeakList <- reactive({
@@ -2189,18 +2182,15 @@ selectedSmallMolPeakList <- reactive({
         # If more than 25 strains present, only display 10 to start, otherwise display all
         # Get random 10 strain IDs from dendrogram
         combinedSmallMolPeaks <- labels(dendro())[1:sample.int(10, 1)]
-      }else{
+      } else {
         combinedSmallMolPeaks <- labels(dendro())
       }
-    }else{
-
+    } else {
       combinedSmallMolPeaks <- IDBacApp::networkViaBrushedDendrogram(dendrogram = dendro(),
                                                                      brushYmin = input$plot_brush$ymin,
                                                                      brushYmax = input$plot_brush$ymax)
     }
-
-
-  }else{
+  } else {
 
     # retrieve all Strain_IDs in db, check for matrix.
     combinedSmallMolPeaksAll <- glue::glue_sql("
@@ -2245,7 +2235,7 @@ selectedSmallMolPeakList <- reactive({
       need(length(matrixID) == 0, "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to left." )
     )
 
-  }else{
+  } else {
 # Don't add matrix blank to sample ID vector (leave as NULL)
   }
 
@@ -2296,27 +2286,26 @@ selectedSmallMolPeakList <- reactive({
 })
 
 
+#----
+subtractMatrixBlank <- reactive({
+   
+      labs <- labels(selectedSmallMolPeakList())
 
-
-
-  # -----------------
-  subtractMatrixBlank <- reactive({
-qqw<<-selectedSmallMolPeakList()
-    labs <- labels(selectedSmallMolPeakList())
-
-    binned <- binPeaks(selectedSmallMolPeakList(), method = "strict", tolerance = 0.0002)
+      binned <- binPeaks(selectedSmallMolPeakList(), 
+                         method = "strict", 
+                         tolerance = 0.0002)
 
       #Next, find which ID contains "matrix", in any capitalization
-      matrixIndex <- grep("^matrix",labs,ignore.case=TRUE)
-
-
-     peaksa <<- binned
-
+      matrixIndex <- grep("^matrix",
+                          labs,
+                          ignore.case=TRUE)
+     peaksa <- binned
 
       if(input$matrixSamplePresent == 1){
 
         validate(
-          need(length(matrixIndex) > 0, "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to the left." )
+          need(length(matrixIndex) > 0, 
+               "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to the left." )
         )
       # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
 
@@ -2328,44 +2317,34 @@ qqw<<-selectedSmallMolPeakList()
 
       for (i in 1:length(peaksa)){
       commonIons <- which(!is.element(peaksa[[i]]@mass, peaksb@mass))
-      if(length(commonIons)!=0){   # Without this if statement, peaksa values will be set to 0 if no matrix matches are found == BAD
+      if(length(commonIons) != 0){   # Without this if statement, peaksa values will be set to 0 if no matrix matches are found == BAD
         peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
         peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
         peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
       }
-
 }
-
-
     }
-
     peaksa
-  })
+})
 
-  # -----------------
 
-  smallMolNetworkDataFrame <- reactive({
-
+#----
+smallMolNetworkDataFrame <- reactive({
 
     smallNetwork <- intensityMatrix(subtractMatrixBlank())
     temp <- NULL
+    
     for (i in 1:length(subtractMatrixBlank())){
       temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
     }
-
 
     peaksaNames <- factor(temp)
 
     rownames(smallNetwork) <- paste(peaksaNames)
 
-    www <<-smallNetwork
-    #---- Note for Chase: attributes(smallNetwork) contain vectors of masses, this will cause slow-downs
-
     bool <- smallNetwork
     bool[is.na(bool)] <- 0
     bool <- as.data.frame(bool)
-
-
     bool <-  ifelse(bool > 0,1,0)
     bool <- bool
     bool <- as.data.frame(bool)
@@ -2386,212 +2365,232 @@ qqw<<-selectedSmallMolPeakList()
 
     bool
 
-  })
+})
 
-  # -----------------
+#----
 
-  output$downloadSmallMolNetworkData <- downloadHandler(
-    filename = function(){"SmallMolecule_Network.csv"},
-    content = function(file){
+output$downloadSmallMolNetworkData <- downloadHandler(
+  filename = function(){"SmallMolecule_Network.csv"
+    },
+  content = function(file){
+    write.csv(as.matrix(smallMolNetworkDataFrame()),
+              file,
+              row.names = FALSE)
+  }
+)
 
-      write.csv(as.matrix(smallMolNetworkDataFrame()),file,row.names = FALSE)
+
+#This creates the network plot and calculations needed for such.
+#----
+output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+  temp <- NULL
+
+
+  for (i in 1:length(subtractMatrixBlank())){
+    temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
+  }
+
+  a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
+  a<-igraph::simplify(a)
+  wc <- fastgreedy.community(a)
+  b <- igraph_to_networkD3(a, group = (wc$membership + 1))
+  z <- b$links
+  zz <- b$nodes
+
+  biggerSampleNodes<-rep(1,times=length(zz[,1]))
+  zz<-cbind(zz,biggerSampleNodes)
+  zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
+  forceNetwork(Links = z, Nodes = zz, Source = "source",Nodesize = "biggerSampleNodes",
+               Target = "target", NodeID = "name",
+               Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
+
+})
+
+
+
+
+# -----------------
+# User input changes the height of the heirarchical clustering plot within the network analysis pane
+plotHeightHeirNetwork <- reactive({
+  return(as.numeric(input$hclustHeightNetwork))
+})
+
+# -----------------
+# Plot MAN Dendrogram
+
+output$netheir <- renderPlot({
+  par(mar = c(5, 5, 5, input$dendparmar2))
+  
+  if (input$kORheight == "1"){
+    isolate(dendro() %>% 
+              color_branches(k = input$kClusters) %>%
+              plot(horiz = TRUE, lwd = 8))
+  } else if (input$kORheight == "2"){
+    isolate(dendro() %>% 
+              color_branches(h = input$height) %>%
+              plot(horiz = TRUE, lwd = 8))
+    isolate(abline(v = input$height, lty = 2))
+  } else if (input$kORheight == "3"){
+    if(input$colDotsOrColDend == "1"){
+      IDBacApp::colored_dots(coloredDend()$bigMatrix,
+                             coloredDend()$shortenedNames,
+                             rowLabels = names(coloredDend()$bigMatrix),
+                             horiz = T,
+                             sort_by_labels_order = FALSE)
+    } else {
+      coloredDend()$dend %>%
+        plot(., horiz = T)
     }
-  )
+  }
+}, height = plotHeightHeirNetwork)
 
 
-  # -----------------
-  #This creates the network plot and calculations needed for such.
-  output$metaboliteAssociationNetwork <- renderSimpleNetwork({
-    temp <- NULL
+# Create MAN UI
+#----
+output$MANui <-  renderUI({
 
+  fluidPage(
+    column(width = 3,
+           fluidRow(
+             sidebarPanel(style = 'padding:30px',
+                          width = "100%",
+                          radioButtons("matrixSamplePresent",
+                                       label = h5(strong("Do you have a matrix blank?")),
+                                       choices = list("Yes" = 1, 
+                                                      "No (Also Turns Off Matrix Subtraction)" = 2),
+                                       selected = 1),
+                          numericInput("percentPresenceSM",
+                                       label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
+                                       value = 70,
+                                       step = 10,
+                                       min = 0,
+                                       max = 100),
+                          numericInput("smSNR",
+                                       label = h5(strong("Signal To Noise Cutoff")),
+                                       value = 4,
+                                       step = 0.5,
+                                       min = 1.5,
+                                       max = 100),
+                          numericInput("upperMassSM",
+                                       label = h5(strong("Upper Mass Cutoff")),
+                                       value = 2000,
+                                       step = 20,
+                                       max = 3000),
+                          numericInput("lowerMassSM",
+                                       label = h5(strong("Lower Mass Cutoff")),
+                                       value = 200,
+                                       step = 20,
+                                       min = 3000),
+                          numericInput("hclustHeightNetwork",
+                                       label = h5(strong("Expand Tree")),
+                                       value = 750,
+                                       step = 50,
+                                       min = 100),
+                          numericInput("dendparmar2",
+                                       label = h5(strong("Adjust right margin of dendrogram")),
+                                       value = 5),
+                          downloadButton("downloadSmallMolNetworkData",
+                                         label = "Download Current Network Data",
+                                         value = FALSE),
+                          br(),
+                          p(strong("Hint 1:"),
+                            "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
+                          p(strong("Hint 2:"),
+                            "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),
+                          br()
 
-    for (i in 1:length(subtractMatrixBlank())){
-      temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
-    }
-
-    a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
-    a<-igraph::simplify(a)
-    wc <- fastgreedy.community(a)
-    b <- igraph_to_networkD3(a, group = (wc$membership + 1))
-    z <- b$links
-    zz <- b$nodes
-
-    biggerSampleNodes<-rep(1,times=length(zz[,1]))
-    zz<-cbind(zz,biggerSampleNodes)
-    zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
-    forceNetwork(Links = z, Nodes = zz, Source = "source",Nodesize = "biggerSampleNodes",
-                 Target = "target", NodeID = "name",
-                 Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
-
-  })
-
-
-
-
-  # -----------------
-  # User input changes the height of the heirarchical clustering plot within the network analysis pane
-  plotHeightHeirNetwork <- reactive({
-    return(as.numeric(input$hclustHeightNetwork))
-  })
-
-  # -----------------
-  # Plot MAN Dendrogram
-
-  output$netheir <- renderPlot({
-    par(mar=c(5,5,5,input$dendparmar2))
-    if (input$kORheight=="1"){
-      isolate(dendro() %>% color_branches(k=input$kClusters) %>% plot(horiz=TRUE,lwd=8))
-    } else if (input$kORheight=="2"){
-      isolate(dendro() %>% color_branches(h=input$height)  %>% plot(horiz=TRUE,lwd=8))
-      isolate(abline(v=input$height,lty=2))
-    } else if (input$kORheight=="3"){
-      if(input$colDotsOrColDend == "1"){
-        IDBacApp::colored_dots(coloredDend()$bigMatrix, coloredDend()$shortenedNames,
-                     rowLabels = names(coloredDend()$bigMatrix),horiz=T,sort_by_labels_order = FALSE)
-      }else{
-        coloredDend()$dend  %>%  plot(.,horiz=T)
-      }
-    }
-  },height=plotHeightHeirNetwork)
-
-  # -----------------
-  # Create MAN ui
-  output$MANui <-  renderUI({
-
-    fluidPage(
-      column(width=3,
-             fluidRow(
-               sidebarPanel(style = 'padding:30px',
-                            width = "100%",
-                            radioButtons("matrixSamplePresent",
-                                         label = h5(strong("Do you have a matrix blank?")),
-                                         choices = list("Yes" = 1, "No (Also Turns Off Matrix Subtraction)" = 2),
-                                         selected = 1),
-                            numericInput("percentPresenceSM",
-                                         label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
-                                         value = 70,
-                                         step = 10,
-                                         min = 0,
-                                         max = 100),
-                            numericInput("smSNR",
-                                         label = h5(strong("Signal To Noise Cutoff")),
-                                         value = 4,
-                                         step = 0.5,
-                                         min = 1.5,
-                                         max = 100),
-                            numericInput("upperMassSM",
-                                         label = h5(strong("Upper Mass Cutoff")),
-                                         value = 2000,
-                                         step = 20,
-                                         max = 3000),
-                            numericInput("lowerMassSM",
-                                         label = h5(strong("Lower Mass Cutoff")),value = 200,
-                                         step = 20,
-                                         min = 3000),
-                            numericInput("hclustHeightNetwork",
-                                         label = h5(strong("Expand Tree")),
-                                         value = 750,
-                                         step = 50,
-                                         min = 100),
-                            numericInput("dendparmar2",
-                                         label = h5(strong("Adjust right margin of dendrogram")),
-                                         value = 5),
-                            downloadButton("downloadSmallMolNetworkData",
-                                           label = "Download Current Network Data",
-                                           value = FALSE),
-                            br(),
-                            p(strong("Hint 1:"),
-                              "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
-                            p(strong("Hint 2:"),
-                              "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),
-                            br()
-
-               )),
-
-
-             fluidRow(
-               sidebarPanel(width="100%",
-                            p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network.\"
-                              while selected- this saves a .csv file of the currently-displayed
-                              network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
-                              While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
-                              means this box is checked and the file is open in another program, either uncheck or close the file."),
-                            br(),
-                            h4("Suggestions for Reporting MAN Analysis:"),
-                            uiOutput("manReport"),
-                            br(),
-                            h4("Suggestions for Reporting Protein Analysis"),
-                            uiOutput("proteinReport2")
-                            )
              )),
+           fluidRow(
+             sidebarPanel(width = "100%",
+                          p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network.\"
+                            while selected- this saves a .csv file of the currently-displayed
+                            network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
+                            While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
+                            means this box is checked and the file is open in another program, either uncheck or close the file."),
+                          br(),
+                          h4("Suggestions for Reporting MAN Analysis:"),
+                          uiOutput("manReport"),
+                          br(),
+                          h4("Suggestions for Reporting Protein Analysis"),
+                          uiOutput("proteinReport2")
+                          )
+             )
+           ),
+    column(width = 9,
+           column(width = 5,
+                  style ="padding: 14px 0px; margin:0%",
+                  plotOutput("netheir",
+                             width = "100%",
+                             height = "100%",
+                             click = "plot_click",
+                             dblclick = "plot_dblclick",
+                             hover = "plot_hover",
+                             brush = "plot_brush")),
+           column(width = 7, style ="padding: 14px 0px; margin:0%",
+                  AbsolutePanel(fixed = TRUE,
+                                width = "50%",
+                                simpleNetworkOutput("metaboliteAssociationNetwork"))
+           )))
+})
 
 
-      column(width=9,
-             column(width=5,style ="padding: 14px 0px; margin:0%",
-                    plotOutput("netheir",width="100%",height="100%",
-                               click = "plot_click",
-                               dblclick = "plot_dblclick",
-                               hover = "plot_hover",
-                               brush = "plot_brush")
-             ),column(width=7,style ="padding: 14px 0px; margin:0%",
-                      absolutePanel(fixed=TRUE,width ="50%",
+# Output a paragraph about which paramters were used to create the currently-displayed MAN
+#----
+output$manReport <- renderUI({
+  p("This MAN was created by analyzing ", tags$code(length(subtractMatrixBlank())), " samples,", if(input$matrixSamplePresent==1){("subtracting a matrix blank,")} else {},
+    "and retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), " and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
+    Peaks occuring below ", tags$code(input$lowerMassSM), " m/z or above ", tags$code(input$upperMassSM), " m/z were removed from the analysis. ")
+})
 
-                      simpleNetworkOutput("metaboliteAssociationNetwork"))
-             )))
-  })
 
-  # -----------------
-  # Output a paragraph about which paramters were used to create the currently-displayed MAN
-  output$manReport<-renderUI({
-    p("This MAN was created by analyzing ",tags$code(length(subtractMatrixBlank())), " samples,",if(input$matrixSamplePresent==1){("subtracting a matrix blank,")}else{},
-      "and retaining peaks with a signal to noise ratio above ",tags$code(input$smSNR)," and occurring in greater than ",tags$code(input$percentPresenceSM),"% of replicate spectra.
-      Peaks occuring below ",tags$code(input$lowerMassSM)," m/z or above ",tags$code(input$upperMassSM)," m/z were removed from the analysis. ")
-  })
+# Output a paragraph about which parameters were used to create the currently-displayed dendrogram
+#----
+output$proteinReport2 <- renderUI({
 
-  # -----------------
-  # Output a paragraph about which parameters were used to create the currently-displayed dendrogram
-  output$proteinReport2<-renderUI({
+  if(length(labels(dendro())) == 0){
+    p("No Protein Data to Display")
+  } else {
+    p("This dendrogram was created by analyzing ", tags$code(length(labels(dendro()))), " samples,
+      and retaining peaks with a signal to noise ratio above ", tags$code(input$pSNR)," and occurring in greater than ", tags$code(input$percentPresenceP),"% of replicate spectra.
+      Peaks occuring below ", tags$code(input$lowerMass), " m/z or above ", tags$code(input$upperMass), " m/z were removed from the analyses. ",
+      "For clustering spectra, ", tags$code(input$distance), " distance and ", tags$code(input$clustering), " algorithms were used.")
+  }
+})
 
-    if(length(labels(dendro()))==0){
-      p("No Protein Data to Display")
-    }else{
-      p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
-        and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
-        Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
-        "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
+
+
+#------------------------------------------------------------------------------
+# Updating IDBac
+#------------------------------------------------------------------------------
+
+
+# Updating IDBac Functions
+#----
+observeEvent(input$updateIDBac,{
+  withConsoleRedirect <- function(containerId, expr) {
+    # Change type="output" to type="message" to catch stderr
+    # (messages, warnings, and errors) instead of stdout.
+    txt <- capture.output(results <- expr, type = "message")
+    if (length(txt) > 0) {
+      insertUI(paste0("#", containerId), where = "beforeEnd",
+               ui = paste0(txt, "\n", collapse = "")
+      )
     }
-
-  })
-
-
-  # Updating IDBac Functions
-  #--------------------------------------
-
-  observeEvent(input$updateIDBac,{
-    withConsoleRedirect <- function(containerId, expr) {
-      # Change type="output" to type="message" to catch stderr
-      # (messages, warnings, and errors) instead of stdout.
-      txt <- capture.output(results <- expr, type = "message")
-      if (length(txt) > 0) {
-        insertUI(paste0("#", containerId), where = "beforeEnd",
-                 ui = paste0(txt, "\n", collapse = "")
-        )
-      }
-      results
-    }
-
+    results
+  }
 
     showModal(modalDialog(
       title = "IDBac Update",
       tags$li(paste0("Checking for Internet Connection: ")),
       tags$li(paste0("Installed Version: ")),
       tags$li(paste0("Latest Stable Release: ")),
-      easyClose = FALSE, size="l",footer="",fade=FALSE
+      easyClose = FALSE, 
+      size = "l",
+      footer = "",
+      fade = FALSE
     ))
 
-
-
-    internetPing <-  !suppressWarnings(system(paste("ping -n 1", "www.google.com")))
+    internetPing <- !suppressWarnings(system(paste("ping -n 1", "www.google.com")))
 
     if (internetPing == TRUE){
       internetPingResponse <- "Successful"
@@ -2600,7 +2599,10 @@ qqw<<-selectedSmallMolPeakList()
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ")),
         tags$li(paste0("Latest Stable Release: ")),
-        easyClose = FALSE, size="l",footer="",fade=FALSE
+        easyClose = FALSE,
+        size = "l",
+        footer = "",
+        fade = FALSE
       ))
 
       Sys.sleep(.75)
@@ -2608,14 +2610,17 @@ qqw<<-selectedSmallMolPeakList()
       # Currently installed version
       local_version <- tryCatch(packageVersion("IDBacApp"),
                                 error = function(x) paste("Installed version is latest version"),
-                                finally = function(x)packageVersion("IDBacApp"))
+                                finally = function(x) packageVersion("IDBacApp"))
 
       showModal(modalDialog(
         title = "IDBac Update",
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ", local_version)),
         tags$li(paste0("Latest Stable Release: ")),
-        easyClose = FALSE, size="l",footer="",fade=FALSE
+        easyClose = FALSE,
+        size = "l",
+        footer = "",
+        fade = FALSE
       ))
 
       Sys.sleep(.75)
@@ -2625,7 +2630,10 @@ qqw<<-selectedSmallMolPeakList()
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ", local_version)),
         tags$li(paste0("Latest Stable Release: ")),
-        easyClose = FALSE, size="l",footer="",fade=FALSE
+        easyClose = FALSE,
+        size = "l",
+        footer = "",
+        fade = FALSE
       ))
 
       Sys.sleep(.75)
@@ -2634,7 +2642,9 @@ qqw<<-selectedSmallMolPeakList()
       getLatestStableVersion <- function(){
         base_url <- "https://api.github.com/repos/chasemc/IDBacApp/releases/latest"
         response <- httr::GET(base_url)
-        parsed_response <- httr::content(response, "parsed", encoding = "utf-8")
+        parsed_response <- httr::content(response, 
+                                         "parsed",
+                                         encoding = "utf-8")
         parsed_response$tag_name
       }
 
@@ -2645,7 +2655,10 @@ qqw<<-selectedSmallMolPeakList()
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ", local_version)),
         tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
-        easyClose = FALSE, size="l",footer="",fade=FALSE
+        easyClose = FALSE,
+        size = "l",
+        footer = "",
+        fade = FALSE
       ))
 
       if (class(latestStableVersion) == "try-error"){
@@ -2656,15 +2669,24 @@ qqw<<-selectedSmallMolPeakList()
           tags$li(paste0("Installed Version: ", local_version)),
           tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
           tags$li("Unable to connect to IDBac GitHub repository"),
-          easyClose = TRUE, size="l",footer="",fade=FALSE
+          easyClose = TRUE, 
+          size = "l",
+          footer = "",
+          fade = FALSE
         ))
 
-      }else{
+      } else {
         # Check current version # and the latest github version. If github v is higher, download and install
         # For more info on version comparison see: https://community.rstudio.com/t/comparing-string-version-numbers/6057/6
         downFunc <- function() {
-          devtools::install_github(paste0("chasemc/IDBacApp@",latestStableVersion), force=TRUE, quiet = F, quick=T)
-          message(tags$span(style="color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
+          devtools::install_github(paste0("chasemc/IDBacApp@",
+                                          latestStableVersion),
+                                   force = TRUE,
+                                   quiet = F, 
+                                   quick = T)
+          message(
+            tags$span(
+              style = "color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
         }
 
         if(as.character(local_version) == "Installed version is latest version"){
@@ -2676,17 +2698,23 @@ qqw<<-selectedSmallMolPeakList()
             tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
             tags$li("Updating to latest version... (please be patient)"),
             pre(id = "console"),
-            easyClose = FALSE, size="l",footer="",fade=FALSE
+            easyClose = FALSE,
+            size = "l",
+            footer = "",
+            fade = FALSE
           ))
 
           withCallingHandlers(
             downFunc(),
             message = function(m) {
-              shinyjs::html("console", m$message, TRUE)
+              shinyjs::html("console",
+                            m$message, 
+                            TRUE)
             }
           )
 
-        }else if(compareVersion(as.character(local_version), as.character(latestStableVersion)) == -1) {
+        } else if(compareVersion(as.character(local_version), 
+                                 as.character(latestStableVersion)) == -1) {
 
           showModal(modalDialog(
             title = "IDBac Update",
@@ -2695,17 +2723,22 @@ qqw<<-selectedSmallMolPeakList()
             tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
             tags$li("Updating to latest version... (please be patient)"),
             pre(id = "console"),
-            easyClose = FALSE, size="l",footer="",fade=FALSE
+            easyClose = FALSE, 
+            size = "l",
+            footer = "",
+            fade = FALSE
           ))
 
           withCallingHandlers(
             downFunc(),
             message = function(m) {
-              shinyjs::html("console", m$message, TRUE)
+              shinyjs::html("console", 
+                            m$message,
+                            TRUE)
             }
           )
 
-        }else{
+        } else {
 
           showModal(modalDialog(
             title = "IDBac Update",
@@ -2713,12 +2746,15 @@ qqw<<-selectedSmallMolPeakList()
             tags$li(paste0("Installed Version: ", local_version)),
             tags$li(paste0("Latest Stable Release: ", latestStableVersion)),
             tags$li("Latest Version is Already Installed"),
-            easyClose = TRUE, size="l",fade=FALSE,footer = modalButton("Close")
+            easyClose = TRUE,
+            size = "l",
+            fade = FALSE,
+            footer = modalButton("Close")
           ))
         }
       }
 
-    }else{
+    } else {
       # if internet ping is false:
 
       internetPingResponse <- "Unable to Connect"
@@ -2727,7 +2763,10 @@ qqw<<-selectedSmallMolPeakList()
         tags$li(paste0("Checking for Internet Connection: ", internetPingResponse)),
         tags$li(paste0("Installed Version: ")),
         tags$li(paste0("Latest Stable Release: ")),
-        easyClose = FALSE, size="l",footer="",fade=FALSE
+        easyClose = FALSE,
+        size = "l",
+        footer = "",
+        fade = FALSE
       ))
 
     }
@@ -2736,11 +2775,9 @@ qqw<<-selectedSmallMolPeakList()
 
 
 
-
-
-  #------------------------------------------------------------------------------------------------------------
-
-  #-------------------------------------- In-house library generation code:
+#------------------------------------------------------------------------------
+# In-house library generation code:
+#------------------------------------------------------------------------------
 
 
   # The UI for the library editing/creation tab
@@ -2849,7 +2886,7 @@ qqw<<-selectedSmallMolPeakList()
         IDBacApp::addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
       )
       DBI::dbDisconnect(newDatabase)
-    }else{
+    } else {
       print("2")
       showModal(popupDBCreation())
     }
