@@ -1,19 +1,56 @@
 
+binnRdefined <- function (x, ppm){
+  
+  # Create a vector entry for every unique element
+  longVector <- seq(from = 2000,
+                    to = 15000,
+                    by = 1)
+  # length of vector that will be created
+  nx <- length(longVector)
+  # Adjust ppm to decimal tolarance across long vector
+  toll <- ppm / 10e5 * longVector
+  # Iterate over the provided list of vectors
+  lapply(x, function(vec){
+    
+    matches <- rep(0, nx)
+    ry <- 1:length(vec)
+    for (i in seq_along(vec)) {
+      # returns abs diff across entire long vector
+      dif <- abs(longVector - vec[i])
+      matches[which(dif <= toll)] <- 1
+    }
+    
+    matches
+    
+  })
+}
+
+
+
+
 proteinDistanceMatrix <- function(peakList, method){
   if(method == "cosineD"){
-
-    peakList %>%
-      MALDIquant::binPeaks(., method = "strict", tolerance = 2) %>%
-      MALDIquant::intensityMatrix() %>%
-      replace(., is.na(.), 0) %>%
+    
+    
+    binvec <- lapply(peakList, function(x){
+      
+      x@mass
+      
+    })
+    
+    
+    binvec %>% 
+      IDBacApp::binnRdefined(., 2000) %>% 
+      do.call(rbind, .) %>% 
       coop::tcosine(.) -> p
+    
+   
 
 
 
       rownames(p) <- labels(peakList)
 
-      1- as.dist(p)
-
+as.dist(p)
 
   }else{
 
@@ -27,6 +64,8 @@ proteinDistanceMatrix <- function(peakList, method){
 
     rownames(p) <- labels(peakList)
 
+    p <- 1 - p
+    
     as.dist(p)
 
 
@@ -160,3 +199,82 @@ diztance <- as.dist(mat)
     res <- res + 1
     return(res)
   }
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  proteinDistanceMatrix3 <- function(peakList, method){
+    if(method == "cosineD"){
+      
+      
+      
+      
+      
+      z <- lapply(peakList, function(x){
+        
+        x@mass
+        
+        
+      })
+      
+      
+      fullz <- unique(unlist(z))
+      
+      
+      zq <- lapply(z, function(x){
+        temp <- Hmisc::find.matches(fullz, x, maxmatch=1, tol=10)$matches
+        temp[temp > 0] <- 1
+        temp
+      })
+      
+      
+      zqq <- do.call(rbind, zq)
+      zz<-coop::tcosine(zqq)
+      rownames(zz) <- c("11", "1", "7", "10")
+      colnames(zz) <- c("11", "1", "7", "10")
+      
+    
+      
+      
+      
+      rownames(p) <- labels(peakList)
+      
+      1- as.dist(p)
+      
+      
+    }else{
+      
+      peakList %>%
+        MALDIquant::binPeaks(., method = "relaxed", tolerance = .02) %>%
+        MALDIquant::intensityMatrix() %>%
+        replace(., is.na(.), 0) %>%
+        dist(., method = method) %>%
+        as.matrix -> p
+      
+      
+      rownames(p) <- labels(peakList)
+      
+      as.dist(p)
+      
+      
+      
+    }
+  }
+  

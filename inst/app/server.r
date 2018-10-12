@@ -1122,7 +1122,6 @@ dataForInversePeakComparisonPlot <- reactive({
                        upperMassCutoff = input$upperMass) %>%
     return(.) -> mirrorPlotEnv$peaksSampleOne
 
-
   # get protein peak data for the 2nd mirror plot selection
   db %>%
     filter(Strain_ID %in% input$Spectra2) %>%
@@ -1153,9 +1152,14 @@ dataForInversePeakComparisonPlot <- reactive({
   mirrorPlotEnv$peaksSampleTwo@intensity <- mirrorPlotEnv$peaksSampleTwo@intensity[mirrorPlotEnv$SampleTwoSNR]
 
   # Binpeaks for the two samples so we can color code similar peaks within the plot
-  mirrorPlotEnv$peaksSampleOne <- binPeaks(mirrorPlotEnv$peaksSampleOne, tolerance = .02)
-  mirrorPlotEnv$peaksSampleTwo <- binPeaks(mirrorPlotEnv$peaksSampleTwo, tolerance = .02)
+ temp <- binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .02)
 
+
+ 
+ mirrorPlotEnv$peaksSampleOne <- temp[[1]]
+ mirrorPlotEnv$peaksSampleTwo <- temp[[2]]
+ 
+ 
   # Set all peak colors for positive spectrum as red
   mirrorPlotEnv$SampleOneColors <- rep("red", length(mirrorPlotEnv$peaksSampleOne@mass))
   # Which peaks top samaple one are also in the bottom sample:
@@ -1439,6 +1443,7 @@ dendro <- reactive({
 # Turn collapsed peak list into a distance matrix
 #----
 proteinDistance <- reactive({
+  aa <<-collapsedPeaksP()
   IDBacApp::proteinDistanceMatrix(peakList = collapsedPeaksP(),
                                   method = input$distance)
   
@@ -1578,7 +1583,7 @@ pcaCalculation <- reactive({
     pc[is.infinite(pc)] <- .000001
     pc <- FactoMineR::PCA(pc,
                           graph = FALSE,
-                          ncp = 50,
+                          ncp = 3,
                           scale.unit = T)
     pc <- pc$ind$coord
     pc <- as.data.frame(pc)
@@ -1624,14 +1629,15 @@ output$pcaPlot <- renderPlotly({
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
                                   nam = (names(colorsToUse)))
   
-  pcaDat <- merge(pcaCalculation(),
+  pcaDat <<- merge(pcaCalculation(),
                   colorsToUse, 
                   by = "nam")
   
+
   plot_ly(data = pcaDat,
-          x = ~Dim1,
-          y = ~Dim2,
-          z = ~Dim3,
+          x = ~Dim.1,
+          y = ~Dim.2,
+          z = ~Dim.3,
           type = "scatter3d",
           mode = "markers",
           marker = list(color = ~fac),
@@ -2155,7 +2161,6 @@ availableProtein <- reactive({
   conn <- pool::poolCheckout(userDBCon())
   combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
   combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
-  pool::poolClose(conn)
 
   combinedSmallMolPeaksAll
 })
@@ -2527,7 +2532,7 @@ output$MANui <-  renderUI({
                              hover = "plot_hover",
                              brush = "plot_brush")),
            column(width = 7, style ="padding: 14px 0px; margin:0%",
-                  AbsolutePanel(fixed = TRUE,
+                  absolutePanel(fixed = TRUE,
                                 width = "50%",
                                 simpleNetworkOutput("metaboliteAssociationNetwork"))
            )))
