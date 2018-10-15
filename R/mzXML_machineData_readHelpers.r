@@ -48,7 +48,9 @@ findmzMLsha1 <- function(singlemzMLpath){
   findAcquisitionInfo <- function(rawFilepaths,
                                 manufacturer){
 
-  
+    if(!exists("sha")){
+      sha <- new.env(parent = parent.frame())
+    }
   
   files <-  gsub("file://", "", rawFilepaths)
   files <- dirname(files)

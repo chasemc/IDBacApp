@@ -1,24 +1,24 @@
 # -----------------
-spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
+spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 
-  # "idbacDirectory"  is the path of the IDBac data directory
+  aaq1<<-rawDataFilePath
+  aaq2<<-userDBCon
+  
 
-  # Open connection to mzML but don't read
-  mzML_con <- mzR::openMSfile(file = rawDataFilePaths)
-
-  # Find sample name (fileName)
-  sampleName <- tools::file_path_sans_ext(basename(rawDataFilePaths))
-
-
-
-
+  # Open connection to single mzML file, but don't read (memory pointer)
+  mzML_con <- mzR::openMSfile(file = rawDataFilePath)
   # Generate base SQL table
   sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
+  # Find sample name (fileName)
+  sampleName <- tools::file_path_sans_ext(basename(rawDataFilePath))
+ 
+  
+  # Make "sampleName" the "Strain_ID".
   sqlDataFrame$metaData$Strain_ID <- sampleName
 
 
-  # Write to SQL DB
+  # Write to SQL DB  (There is no sample level metadata to add at this point)
   DBI::dbWriteTable(conn = userDBCon,
                     name = "metaData", # SQLite table to insert into
                     sqlDataFrame$metaData[1, ], # Insert single row into DB
@@ -43,26 +43,31 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
   remove(instInfo)
 
 
-  # Get mzML sha and filesha1
-  sha1 <- IDBacApp::findmzMLsha1(rawDataFilePaths)
+  
 
+  filesha1 <- xml2::read_xml(rawDataFilePath)
+  filesha1 <- xml2::xml_serialize(filesha1, NULL)
+  filesha1 <- digest::sha1(pp)
+  
+  
 
-  sqlDataFrame$XML$SHA1 <- sha1$sha1
+  sqlDataFrame$XML$SHA1 <- filesha1
 
 
 
   # Get mzML, serialize, compress, for insert to SQL
 
 
-  rawDataFilePaths %>%
+  rawDataFilePath %>%
     readLines %>%
     serialize(., NULL) %>%
     memCompress(., type = "gzip") %>%
     list(.) %>%
     return(.) -> sqlDataFrame$XML$XML
 
-
-  acquisitonInfo <- IDBacApp::findAcquisitionInfo(sha1$rawDataFilePaths,
+  # Find individual spectra SHA and raw data filepath from mzML
+  sha1 <- IDBacApp::findmzMLsha1(rawDataFilePath)
+  acquisitonInfo <- IDBacApp::findAcquisitionInfo(sha1$rawDataFilePath,
                                                   sha1$manufacturer)
 
 
