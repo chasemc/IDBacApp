@@ -40,6 +40,7 @@ start_app <- function(
 
   # If a repo has been provided, use the app in your package
   if (config$app_repo[[1]] != "none") {
+
     app_path <- file.path(system.file(package = config$appname), "app")
 
     # flexdashboard
@@ -48,11 +49,11 @@ start_app <- function(
         Sys.setenv(RSTUDIO_PANDOC = gsub("\\\\", "/", reg_paths$pandoc))
       }
       rmarkdown::run(file.path(app_path, config$flex_file),
-        shiny_args = list(host = '0.0.0.0', launch.browser = launch_browser,
-                          port = 1984))
+                                       port = 1984))
 
       # Shiny
     } else {
+
       shiny::runApp(app_path, launch.browser = T, port = 1984)
     }
 
@@ -64,12 +65,20 @@ start_app <- function(
       }
 
       rmarkdown::run(paste0("./", config$flex_file),
-        shiny_args = list(host = '0.0.0.0', launch.browser = T,
-                          port = 1984))
+                     shiny_args = list(host = '0.0.0.0', launch.browser = T,
+                                       port = 1984))
 
       # Shiny
     } else {
-      shiny::runApp("./", launch.browser = T, port = 1984)
+      app_path <- file.path(getwd(),"packageLibrary/IDBacApp/app")
+      if(dir.exists(app_path)){
+        shiny::runApp(app_path, launch.browser = T, port = 1984)
+
+      }else{
+
+        shiny::runApp(getwd(), launch.browser = T, port = 1984)
+      }
+
     }
   }
 }
