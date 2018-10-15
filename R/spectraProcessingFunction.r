@@ -44,10 +44,10 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
 
 
   # Get mzML sha and filesha1
-  sha1 <- IDBacApp::findmzMLsha1(rawDataFilePaths)$sha1
+  sha1 <- IDBacApp::findmzMLsha1(rawDataFilePaths)
 
 
-  sqlDataFrame$XML$SHA1 <- sha1
+  sqlDataFrame$XML$SHA1 <- sha1$sha1
 
 
 
@@ -62,8 +62,8 @@ spectraProcessingFunction <- function(rawDataFilePaths, userDBCon){
     return(.) -> sqlDataFrame$XML$XML
 
 
-  acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePaths,
-                                                  sqlDataFrame$XML$manufacturer)
+  acquisitonInfo <- IDBacApp::findAcquisitionInfo(sha1$rawDataFilePaths,
+                                                  sha1$manufacturer)
 
 
   acquisitonInfo$Instrument_MetaFile %>%

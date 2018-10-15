@@ -11,16 +11,26 @@
 
 
 findmzMLsha1 <- function(singlemzMLpath){
+  if(!exists("sha")){
+    sha <- new.env(parent = parent.frame())
+  }
+  
+  pp <- xml2::read_xml(singlemzMLpath)
+  pp <- xml2::xml_ns_strip(pp)
+  pp2 <- xml2::xml_find_all(pp,"//sourceFileList/sourceFile")  
+  pp1 <- xml2::xml_contents(pp2)
+  sha$sha1 <- grep("MS:1000569",pp1) # tag for sha1
+  sha$sha1 <- xml2::xml_attrs(pp1)[sha$sha1]  # get sha1 nodes
+  sha$sha1 <- unlist(lapply(sha$sha1, function(x) as.list(x)$value)) # get sha1 values
+  sha$rawFilePaths <- unlist(lapply(pp2, function(x) as.list(xml2::xml_attrs(x))$location)) # get raw filepath location
 
-  sha <- new.env(parent = parent.frame())
+  pp <- xml2::read_xml(singlemzMLpath)
+  pp <- xml2::xml_ns_strip(pp)
+  pp <- xml2::xml_find_all(pp,"//referenceableParamGroup/cvParam") 
 
-  singlemzMLpath %>%
-    xml2::read_xml() %>%
-    xml2::xml_ns_strip() %>%
-    xml2::xml_find_first(., "//mzML/sha1" ) %>%
-    xml2::xml_text() %>%
-    return(.) -> sha$sha1
-
+  sha$manufacturer <- as.list(xml2::xml_attrs(pp)[[1]])$name
+  
+  
   sha
 }
 
@@ -28,38 +38,32 @@ findmzMLsha1 <- function(singlemzMLpath){
 
 
 
-findAcquisitionInfo <- function(singlemzMLpath,
+
+
+
+
+
+
+
+  findAcquisitionInfo <- function(rawFilepaths,
                                 manufacturer){
 
-
-  sha <- new.env(parent = parent.frame())
-
-
-  # Finds the "fileName" (file path() for the fid, the "filetype" and the "fileSha1"
-  singlemzMLpath %>%
-    xml2::read_xml() %>%
-    xml2::xml_ns_strip() %>%
-    xml2::xml_find_all(., "//mzML/msRun/parentFile" ) %>%
-    xml2::xml_attrs() %>%
-    return(.) -> p
-
-
-
-  files <- unlist(lapply(p, function(x) as.character(x["fileName"])))
-  files <-  gsub("file://", "", files)
+  
+  
+  files <-  gsub("file://", "", rawFilepaths)
   files <- dirname(files)
-  sha$rawFilePaths <- files
-  sha$filesha1 <- unlist(lapply(p, function(x) as.character(x["fileSha1"])))
 
-
-  #Bruker only::
+  #gat Bruker flex series metadata:
 
   tryCatch({
 
-  if(manufacturer == "Bruker Daltonics"){
+  if(manufacturer == "Bruker Daltonics flex series"){
     files <- files[which(file.exists(files))]
     if(length(files) > 0){
-      sha$Instrument_MetaFile  <- lapply(files, function(x)  read.delim(file.path(x,"acqu"), sep="\n")) # Find Acqu file
+      
+      files <- list.files(files, pattern="acqus", recursive = TRUE, full.names = TRUE)
+      
+      sha$Instrument_MetaFile  <- lapply(files, function(x)  read.delim(x, sep="\n")) # Find Acqu file
       sha$MassError <- unlist(lapply(sha$Instrument_MetaFile , function(x) as.character(x[grep("Masserr", x[,1]),]))) #Parse the Acqu file for the mass error row
       sha$MassError <- unlist(lapply(sha$MassError, function(x) as.numeric(strsplit(x, "##\\$Masserr= " )[[1]][[2]])))
       sha$AcquisitionDate <- unlist(lapply(sha$Instrument_MetaFile , function(x) as.character(x[grep("##\\$AQ_DATE", x[,1]),]))) #Parse the Acqu file for the mass error row
