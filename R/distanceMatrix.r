@@ -49,7 +49,8 @@ proteinDistanceMatrix <- function(peakList, method){
 
 
       rownames(p) <- labels(peakList)
-
+      p <- 1 - p
+      
 as.dist(p)
 
   }else{
@@ -64,8 +65,7 @@ as.dist(p)
 
     rownames(p) <- labels(peakList)
 
-    p <- 1 - p
-    
+
     as.dist(p)
 
 

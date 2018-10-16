@@ -1,7 +1,7 @@
 
 
 # Given the path for a mzML file ("singlemzMLpath):
-  # "findmzMLsha" returns the mxML sha1 and fileSha1(s)
+  # "findmzMLsha" returns the mxML sha1 and spectrumSHA(s)
   # Assuming Bruker data, "findAcquisitionInfo" looks at the Acqu file and returns:
     # the Acqu file itself
     # the overall MassError
@@ -10,7 +10,7 @@
 
 
 
-findmzMLsha1 <- function(singlemzMLpath){
+findRawSHAandFile <- function(singlemzMLpath){
   if(!exists("sha")){
     sha <- new.env(parent = parent.frame())
   }
@@ -19,9 +19,9 @@ findmzMLsha1 <- function(singlemzMLpath){
   pp <- xml2::xml_ns_strip(pp)
   pp2 <- xml2::xml_find_all(pp,"//sourceFileList/sourceFile")  
   pp1 <- xml2::xml_contents(pp2)
-  sha$sha1 <- grep("MS:1000569",pp1) # tag for sha1
-  sha$sha1 <- xml2::xml_attrs(pp1)[sha$sha1]  # get sha1 nodes
-  sha$sha1 <- unlist(lapply(sha$sha1, function(x) as.list(x)$value)) # get sha1 values
+  sha$spectrumSHA <- grep("MS:1000569",pp1) # tag for sha1
+  sha$spectrumSHA <- xml2::xml_attrs(pp1)[sha$spectrumSHA]  # get sha1 nodes
+  sha$spectrumSHA <- unlist(lapply(sha$spectrumSHA, function(x) as.list(x)$value)) # get sha1 values
   sha$rawFilePaths <- unlist(lapply(pp2, function(x) as.list(xml2::xml_attrs(x))$location)) # get raw filepath location
 
   pp <- xml2::read_xml(singlemzMLpath)

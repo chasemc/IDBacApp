@@ -13,17 +13,17 @@ db <- dplyr::tbl(sqlDB, "IndividualSpectra")
 
 if(length(injectLibrary) == 0){      # If library injection is not selected:
 
-# get filesha1 and strain ids
+# get spectrumSHA and strain ids
   db %>%
     filter(proteinPeaksRDS != "NA") %>%
-    select(filesha1, Strain_ID) %>%
+    select(spectrumSHA, Strain_ID) %>%
     collect %>%
     return(.) -> ids
-# group filesha1 for lapply
-  ids <- split(ids$filesha1, ids$Strain_ID)
+# group spectrumSHA for lapply
+  ids <- split(ids$spectrumSHA, ids$Strain_ID)
 
   all <- lapply(ids, function(x) IDBacApp::collapseProteinReplicates2(db = db,
-                                                                               filesha1 = x))
+                                                                               spectrumSHA = x))
 
 alw<<-all
     # Trim masses to user-specified lower and upper bounds and return as the result of the function

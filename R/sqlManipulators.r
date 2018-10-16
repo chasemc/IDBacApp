@@ -16,7 +16,7 @@ getProteinPeakData <-  function(db, fileshas){
                           SELECT `proteinPeaks`
                           FROM (SELECT *
                                   FROM `IndividualSpectra`
-                                WHERE (`filesha1` IN ({airports*})))
+                                WHERE (`spectrumSHA` IN ({airports*})))
                           WHERE (`proteinPeaks` IS NOT NULL)",
                                                    airports = fileshas,
                                                    .con = db
@@ -61,7 +61,7 @@ getSmallMolPeakData <-   function(db, fileshas){
                           SELECT `smallMoleculePeaks`
                           FROM (SELECT *
                                   FROM `IndividualSpectra`
-                                WHERE (`filesha1` IN ({shas*})))
+                                WHERE (`spectrumSHA` IN ({shas*})))
                           WHERE (`smallMoleculePeaks` IS NOT NULL)",
                          shas = fileshas,
                          .con = db

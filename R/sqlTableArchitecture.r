@@ -27,7 +27,7 @@ sqlTableArchitecture <- function(){
 
 
 
-  sqlDataFrame$XML <- data.frame("SHA1" = NA,
+  sqlDataFrame$XML <- data.frame("mzMLSHA" = NA,
                                  "XML" = NA, # entire xml file as blob
                                  "manufacturer"                 = NA,
                                  "model"                        = NA,
@@ -42,19 +42,15 @@ sqlTableArchitecture <- function(){
 
 
 
-  sqlDataFrame$IndividualSpectra <- data.frame("filesha1" = NA,
-                                               "SHA1" = NA,
+  sqlDataFrame$IndividualSpectra <- data.frame("spectrumSHA" = NA,
+                                               "mzMLSHA" = NA,
                                                "Strain_ID" = NA,
                                                "MassError" = NA,
                                                "AcquisitionDate" = NA,
                                                "proteinPeaks"              = NA,
                                                "proteinSpectrum"     = NA,
                                                "smallMoleculePeaks"        = NA,
-                                               "smallMoleculeSpectrum" = NA,
-                                               "proteinPeaksHash"          = NA,
-                                               "proteinSpectrumHash" = NA,
-                                               "smallMoleculePeaksHash"    = NA,
-                                               "smallMoleculeSpectrumHash" = NA
+                                               "smallMoleculeSpectrum" = NA
   )
 
 

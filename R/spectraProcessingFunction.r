@@ -45,13 +45,13 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 
   
 
-  filesha1 <- xml2::read_xml(rawDataFilePath)
-  filesha1 <- xml2::xml_serialize(filesha1, NULL)
-  filesha1 <- digest::sha1(pp)
+  mzMLSHA <- xml2::read_xml(rawDataFilePath)
+  mzMLSHA <- xml2::xml_serialize(mzMLSHA, NULL)
+  mzMLSHA <- digest::sha1(mzMLSHA)
   
   
 
-  sqlDataFrame$XML$SHA1 <- filesha1
+  sqlDataFrame$XML$mzMLSHA <- mzMLSHA
 
 
 
@@ -66,11 +66,14 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
     return(.) -> sqlDataFrame$XML$XML
 
   # Find individual spectra SHA and raw data filepath from mzML
-  sha1 <- IDBacApp::findmzMLsha1(rawDataFilePath)
-  acquisitonInfo <- IDBacApp::findAcquisitionInfo(sha1$rawDataFilePath,
-                                                  sha1$manufacturer)
+  individualRawSpecSHA <- IDBacApp::findRawSHAandFile(rawDataFilePath)
+  
+  
+  # Find acquisitonInfo from mzML file
+  acquisitonInfo <- IDBacApp::findAcquisitionInfo(individualRawSpecSHA$rawDataFilePath,
+                                                  individualRawSpecSHA$manufacturer)
 
-
+  # Get acqus file as list of blobs
   acquisitonInfo$Instrument_MetaFile %>%
     serialize(object = .,
               connection = NULL,
@@ -105,11 +108,17 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 
 
 
+  
+  
+  
+  
+  
+  
+  
   sqlDataFrame$XML <-NULL # Free up memory
 
 
   check <- length(acquisitonInfo$Instrument_MetaFile) == length(acquisitonInfo$AcquisitionDate) &&
-    length(acquisitonInfo$Instrument_MetaFile) == length(acquisitonInfo$filesha1) &&
     length(acquisitonInfo$Instrument_MetaFile) == length(acquisitonInfo$MassError)
 
 
@@ -123,36 +132,36 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
   #------------------------------
 
 
-  for(oneReplicate in 1:length(acquisitonInfo$filesha1)){
+  for(individualSpectrum in 1:length(individualRawSpecSHA$spectrumSHA)){
 
     # Reset
     sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
 
-    sqlDataFrame$IndividualSpectra$filesha1 <- acquisitonInfo$filesha1[[oneReplicate]]
-    sqlDataFrame$IndividualSpectra$SHA1 <- sha1 # only one
-    sqlDataFrame$IndividualSpectra$Strain_ID <- sampleName # only one
-    sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[oneReplicate]]
-    sqlDataFrame$IndividualSpectra$AcquisitionDate <- acquisitonInfo$AcquisitionDate[[oneReplicate]]
+    sqlDataFrame$IndividualSpectra$mzMLSHA <- mzMLSHA
+    sqlDataFrame$IndividualSpectra$Strain_ID <- sampleName
+    sqlDataFrame$IndividualSpectra$spectrumSHA <- individualRawSpecSHA$spectrumSHA[[individualSpectrum]]
+    sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
+    sqlDataFrame$IndividualSpectra$AcquisitionDate <- acquisitonInfo$AcquisitionDate[[individualSpectrum]]
 
 
 
 
 
 
-    spectraImport <- mzR::peaks(mzML_con, scans = oneReplicate)
+    spectraImport <- mzR::peaks(mzML_con, scans = individualSpectrum)
 
     if(typeof(spectraImport) == "list"){
 
       spectraImport <- lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[ , 1],
                                                                                         intensity = x[ , 2],
-                                                                                        metaData = list(File = acquisitonInfo$rawFilePaths[[oneReplicate]],
+                                                                                        metaData = list(File = acquisitonInfo$rawFilePaths[[individualSpectrum]],
                                                                                                         Strain = sampleName)))
     } else if(typeof(spectraImport) == "double") {
 
       spectraImport <- MALDIquant::createMassSpectrum(mass = spectraImport[ , 1],
                                                       intensity = spectraImport[ , 2],
-                                                      metaData = list(File = acquisitonInfo$rawFilePaths[[oneReplicate]],
+                                                      metaData = list(File = acquisitonInfo$rawFilePaths[[individualSpectrum]],
                                                                       Strain = sampleName))
     }
 
@@ -183,8 +192,8 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
         return(.) -> sqlDataFrame$IndividualSpectra$proteinSpectrum
 
 
-      sqlDataFrame$IndividualSpectra$proteinSpectrumHash <- digest::digest(sqlDataFrame$IndividualSpectra$proteinSpectrum, algo= "sha256")
 
+      
       # Why square root transformation and not log:
       #  Anal Bioanal Chem. 2011 Jul; 401(1): 167–181.
       # Published online 2011 Apr 12. doi:  10.1007/s00216-011-4929-z
@@ -202,7 +211,6 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
         return(.) -> sqlDataFrame$IndividualSpectra$proteinPeaks
 
 
-      sqlDataFrame$IndividualSpectra$proteinPeaksHash <- digest::digest(sqlDataFrame$IndividualSpectra$proteinPeaks, algo= "sha256")
 
 
 
@@ -215,7 +223,6 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
         list(.) %>%
         return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculeSpectrum
 
-      sqlDataFrame$IndividualSpectra$smallMoleculeSpectrumHash <- digest::digest(sqlDataFrame$IndividualSpectra$smallMoleculeSpectrum, algo= "sha256")
 
       spectraImport %>%
         MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
@@ -228,8 +235,8 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
         return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculePeaks
 
 
-      sqlDataFrame$IndividualSpectra$smallMoleculePeaksHash <- digest::digest(sqlDataFrame$IndividualSpectra$smallMoleculePeaks, algo= "sha256")
 
+      
     }
 
     remove(spectraImport)

@@ -995,7 +995,7 @@ observeEvent({
 
                      for(i in 1:lengthProgress){
                        incProgress(1/lengthProgress)
-                       IDBacApp::spectraProcessingFunction(rawDataFilePaths = fileList[i],
+                       IDBacApp::spectraProcessingFunction(rawDataFilePath = fileList[i],
                                                            userDBCon = newExperimentSqlite())
                        }
 
@@ -1113,7 +1113,7 @@ dataForInversePeakComparisonPlot <- reactive({
   db %>%
     filter(Strain_ID %in% input$Spectra1) %>%
     filter(proteinPeaks != "NA") %>%
-    select(filesha1) %>%
+    select(spectrumSHA) %>%
     pull %>%
     IDBacApp::collapseProteinReplicates(fileshas = .,
                        db = userDBCon(),
@@ -1126,7 +1126,7 @@ dataForInversePeakComparisonPlot <- reactive({
   db %>%
     filter(Strain_ID %in% input$Spectra2) %>%
     filter(proteinPeaks != "NA") %>%
-    select(filesha1) %>%
+    select(spectrumSHA) %>%
     pull %>%
     IDBacApp::collapseProteinReplicates(fileshas = .,
                        db = userDBCon(),
@@ -1389,10 +1389,10 @@ collapsedPeaksP <- reactive({
 
   db %>%
     filter(proteinPeaks != "NA") %>%
-    select(filesha1,Strain_ID) %>%
+    select(spectrumSHA,Strain_ID) %>%
     filter(Strain_ID %in% input$myProteinchooser$right) %>%
     collect %$%
-    split(filesha1,Strain_ID) -> temp
+    split(spectrumSHA,Strain_ID) -> temp
   
   #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
   temp %>%
@@ -2245,9 +2245,9 @@ selectedSmallMolPeakList <- reactive({
   }
 
 
-  # retrieve small mol peaks, filesha1, and strain_id , given Strain_ID.
+  # retrieve small mol peaks, spectrumSHA, and strain_id , given Strain_ID.
   sqlQ <- glue::glue_sql("
-                     SELECT `filesha1`, `Strain_ID`
+                     SELECT `spectrumSHA`, `Strain_ID`
                      FROM (SELECT *
                      FROM `IndividualSpectra`
                      WHERE (`Strain_ID` IN ({strainIds*})))
@@ -2263,7 +2263,7 @@ selectedSmallMolPeakList <- reactive({
 
   sqlQ <- DBI::dbFetch(sqlQ)
 
-  split(sqlQ$filesha1, sqlQ$Strain_ID) %>%
+  split(sqlQ$spectrumSHA, sqlQ$Strain_ID) %>%
   lapply(., function(x){
     IDBacApp::collapseSmallMolReplicates(fileshas = x,
                                          db = userDBCon(),
@@ -2424,29 +2424,44 @@ plotHeightHeirNetwork <- reactive({
 # Plot MAN Dendrogram
 
 output$netheir <- renderPlot({
-  par(mar = c(5, 5, 5, input$dendparmar2))
+  par(mar = c(5, 5, 5, input$dendparmar))
   
   if (input$kORheight == "1"){
-    isolate(dendro() %>% 
-              color_branches(k = input$kClusters) %>%
-              plot(horiz = TRUE, lwd = 8))
+    
+    coloredDend()$dend %>%
+      plot(horiz = TRUE, lwd = 8)
+    
   } else if (input$kORheight == "2"){
-    isolate(dendro() %>% 
-              color_branches(h = input$height) %>%
-              plot(horiz = TRUE, lwd = 8))
-    isolate(abline(v = input$height, lty = 2))
+    
+    coloredDend()$dend  %>%  
+      plot(horiz = TRUE, lwd = 8)
+    
+    abline(v = input$height, lty = 2)
+    
   } else if (input$kORheight == "3"){
-    if(input$colDotsOrColDend == "1"){
-      IDBacApp::colored_dots(coloredDend()$bigMatrix,
-                             coloredDend()$shortenedNames,
-                             rowLabels = names(coloredDend()$bigMatrix),
-                             horiz = T,
-                             sort_by_labels_order = FALSE)
+    
+    if(is.null(input$sampleMap$datapath)){
+      # No sample mapping selected
+      dendro()$dend %>%
+        plot(horiz = TRUE, lwd = 8)
     } else {
-      coloredDend()$dend %>%
-        plot(., horiz = T)
+      if(input$colDotsOrColDend == "1"){
+        
+        coloredDend()$dend %>%  
+          plot(.,horiz=T)
+        
+        IDBacApp::colored_dots(coloredDend()$bigMatrix, 
+                               coloredDend()$shortenedNames,
+                               rowLabels = names(coloredDend()$bigMatrix),
+                               horiz = T,
+                               sort_by_labels_order = FALSE)
+      } else {
+        coloredDend()$dend  %>%
+          plot(., horiz = T)
+      }
     }
   }
+
 }, height = plotHeightHeirNetwork)
 
 
