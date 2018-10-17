@@ -1,57 +1,19 @@
 
-binnRdefined <- function (x, ppm){
-  
-  # Create a vector entry for every unique element
-  longVector <- seq(from = 2000,
-                    to = 15000,
-                    by = 1)
-  # length of vector that will be created
-  nx <- length(longVector)
-  # Adjust ppm to decimal tolarance across long vector
-  toll <- ppm / 10e5 * longVector
-  # Iterate over the provided list of vectors
-  lapply(x, function(vec){
-    
-    matches <- rep(0, nx)
-    ry <- 1:length(vec)
-    for (i in seq_along(vec)) {
-      # returns abs diff across entire long vector
-      dif <- abs(longVector - vec[i])
-      matches[which(dif <= toll)] <- 1
-    }
-    
-    matches
-    
-  })
-}
-
-
-
-
 proteinDistanceMatrix <- function(peakList, method){
   if(method == "cosineD"){
-    
-    
-    binvec <- lapply(peakList, function(x){
-      
-      x@mass
-      
-    })
-    
-    
-    binvec %>% 
-      IDBacApp::binnRdefined(., 2000) %>% 
-      do.call(rbind, .) %>% 
+
+    peakList %>%
+      MALDIquant::binPeaks(., method = "strict", tolerance = 2) %>%
+      MALDIquant::intensityMatrix() %>%
+      replace(., is.na(.), 0) %>%
       coop::tcosine(.) -> p
-    
-   
 
 
 
       rownames(p) <- labels(peakList)
-      p <- 1 - p
-      
-as.dist(p)
+
+      1- as.dist(p)
+
 
   }else{
 
@@ -64,7 +26,6 @@ as.dist(p)
 
 
     rownames(p) <- labels(peakList)
-
 
     as.dist(p)
 

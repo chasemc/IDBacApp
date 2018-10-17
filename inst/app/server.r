@@ -1443,7 +1443,12 @@ dendro <- reactive({
 # Turn collapsed peak list into a distance matrix
 #----
 proteinDistance <- reactive({
-  aa <<-collapsedPeaksP()
+  
+  validate(
+    need(length(collapsedPeaksP()) != 0, "Select samples to analyze on left" )
+  )
+  
+  
   IDBacApp::proteinDistanceMatrix(peakList = collapsedPeaksP(),
                                   method = input$distance)
   
@@ -1733,10 +1738,11 @@ output$Heirarchicalui <-  renderUI({
                    tabsetPanel(id = "HierarchicalSidebarTabs", 
                                type = "tabs",
                                tabPanel("Hierarchical Clustering Settings",
-                                        value = "hierSettings", p("Move strains between boxes by clicking the strain's name
-and then an arrow. Strains in the right box will be used for analysis."),
+                                        value = "hierSettings",
+                                        h5(strong("Select Samples")),
+                                        p("Move strains between boxes by clicking the strain's name
+                                          and then an arrow. Strains in the right box will be used for analysis."),
                                         uiOutput("chooseProteinSamples"),
-                                        verbatimTextOutput("selectedProteinSamples"),
                                         selectInput("distance", 
                                                     label = h5(strong("Distance Algorithm")),
                                                     choices = list("cosine" = "cosineD",
@@ -1810,9 +1816,8 @@ and then an arrow. Strains in the right box will be used for analysis."),
                                         )
                                )
                    ),
-      mainPanel("Hierarchical Clustering",
-                column(8,
-                       plotOutput("hclustPlot")))
+      mainPanel(align="center",
+                       plotOutput("hclustPlot"))
     )
       }
 })
@@ -2140,11 +2145,6 @@ output$chooseProteinSamples <- renderUI({
 })
 
 
-#TODO: delete
-#----
-output$selectedProteinSamples <- renderPrint(
-  input$myProteinchooser
-)
 
 
 # Check which samples can be used for protein analysis, return Sample Names
@@ -2372,6 +2372,53 @@ smallMolNetworkDataFrame <- reactive({
 
 })
 
+
+
+ppp <- reactive({
+  
+  
+  
+  
+  zz<<- intensityMatrix(subtractMatrixBlank())
+  zz[is.na(zz)] <- 0
+  zz[is.infinite(zz)] <-0
+  
+  
+  pc <- FactoMineR::PCA(zz,
+                        graph = FALSE,
+                        ncp = 3,
+                        scale.unit = T)
+  pc <- pc$ind$coord
+  pc <<- as.data.frame(pc)
+  nam <- row.names(pc)
+  pc <- cbind(pc,nam)
+  
+  colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam") 
+  pc
+})
+
+
+
+
+output$smallMolPca <- renderPlotly({
+  yep<<-as.data.frame(ppp())
+  plot_ly(data = yep,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
+          type = "scatter3d",
+          mode = "markers",
+#          marker = list(color = ~fac),
+          hoverinfo = 'text',
+          text = ~nam)  
+})
+
+
+
+
+
+
+
 #----
 
 output$downloadSmallMolNetworkData <- downloadHandler(
@@ -2546,11 +2593,19 @@ output$MANui <-  renderUI({
                              dblclick = "plot_dblclick",
                              hover = "plot_hover",
                              brush = "plot_brush")),
+           
+             
            column(width = 7, style ="padding: 14px 0px; margin:0%",
                   absolutePanel(fixed = TRUE,
                                 width = "50%",
-                                simpleNetworkOutput("metaboliteAssociationNetwork"))
-           )))
+                                plotlyOutput("smallMolPca",
+                                             width = "100%"
+                                            ),
+                                
+                                simpleNetworkOutput("metaboliteAssociationNetwork")))
+          
+           )
+           )
 })
 
 
