@@ -1442,6 +1442,27 @@ dendro <- reactive({
 
 # Turn collapsed peak list into a distance matrix
 #----
+
+binnedProtein <- reactive({
+aqw22<<-collapsedPeaksP()
+
+
+      binvec <- lapply(collapsedPeaksP(), function(x) x@mass)
+        
+        
+      IDBacApp::binnR(vectorlist = binvec,
+                                                 ppm = 2000,
+                                                 low = input$lowerMass,
+                                                 high = input$upperMass,
+                                                 increment = 1)
+        
+      })
+  
+  
+  
+  
+  
+
 proteinDistance <- reactive({
   
   validate(
@@ -1449,8 +1470,15 @@ proteinDistance <- reactive({
   )
   
   
-  IDBacApp::proteinDistanceMatrix(peakList = collapsedPeaksP(),
+  IDBacApp::proteinDistanceMatrix(binnedData = binnedProtein(),
                                   method = input$distance)
+  
+  
+  
+  
+  
+  
+  
   
 })
 
@@ -2028,6 +2056,7 @@ output$hclustPlot <- renderPlot({
   if (input$kORheight == "1"){
     
     coloredDend()$dend %>%
+      hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
   } else if (input$kORheight == "2"){
@@ -2376,10 +2405,10 @@ smallMolNetworkDataFrame <- reactive({
 
 ppp <- reactive({
   
+  aq6 <<- subtractMatrixBlank()
+  aq2 <<-calcNetwork()
   
-  
-  
-  zz<<- intensityMatrix(subtractMatrixBlank())
+  zz <<- intensityMatrix(subtractMatrixBlank())
   zz[is.na(zz)] <- 0
   zz[is.infinite(zz)] <-0
   
@@ -2389,11 +2418,16 @@ ppp <- reactive({
                         ncp = 3,
                         scale.unit = T)
   pc <- pc$ind$coord
-  pc <<- as.data.frame(pc)
-  nam <- row.names(pc)
+  pc <- as.data.frame(pc)
+  nam <- unlist(lapply(subtractMatrixBlank(), function(x) x@metaData$Strain))
   pc <- cbind(pc,nam)
+
+azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
+  azz <- match(nam, azz)
   
-  colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam") 
+  pc<- cbind(pc, as.vector(colorBlindPalette[calcNetwork()$wc$membership[azz], 2] ))
+  colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
+  lp3<<-pc
   pc
 })
 
@@ -2401,16 +2435,17 @@ ppp <- reactive({
 
 
 output$smallMolPca <- renderPlotly({
-  yep<<-as.data.frame(ppp())
-  plot_ly(data = yep,
-          x = ~Dim1,
-          y = ~Dim2,
-          z = ~Dim3,
-          type = "scatter3d",
-          mode = "markers",
-#          marker = list(color = ~fac),
-          hoverinfo = 'text',
-          text = ~nam)  
+  yep <- as.data.frame(ppp(), stringsAsFactors = FALSE)
+plot_ly(data = yep,
+        x = ~Dim1,
+        y = ~Dim2,
+        z = ~Dim3,
+        type = "scatter3d",
+        mode = "markers",
+        #          marker = list(color = ~fac),
+        hoverinfo = 'text',
+        text = ~nam, 
+        color = ~ I(color)  )
 })
 
 
@@ -2432,29 +2467,72 @@ output$downloadSmallMolNetworkData <- downloadHandler(
 )
 
 
+
+
+
+
+
 #This creates the network plot and calculations needed for such.
 #----
-output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+calcNetwork <- reactive({
+  net <- new.env(parent = parent.frame())
+  
   temp <- NULL
-
-
+  
+  
   for (i in 1:length(subtractMatrixBlank())){
     temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
   }
-
+  
   a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
   a<-igraph::simplify(a)
-  wc <- fastgreedy.community(a)
-  b <- igraph_to_networkD3(a, group = (wc$membership + 1))
+  wc <<- fastgreedy.community(a)
+  
+  b <- igraph_to_networkD3(a, group = (wc$membership)) # zero indexed
+ 
   z <- b$links
   zz <- b$nodes
-
+  
   biggerSampleNodes<-rep(1,times=length(zz[,1]))
   zz<-cbind(zz,biggerSampleNodes)
   zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
-  forceNetwork(Links = z, Nodes = zz, Source = "source",Nodesize = "biggerSampleNodes",
-               Target = "target", NodeID = "name",
-               Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
+  
+  net$z <- z
+  net$zz <- zz
+  net$wc <- wc
+  net$temp <- temp
+  net
+  
+})
+
+
+output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+    awq2<<-calcNetwork()
+    
+    
+    cbp <- as.vector(colorBlindPalette[1:100,2])
+    
+    
+    YourColors <- paste0('d3.scaleOrdinal()
+                         .domain([',paste0(shQuote(1:100), collapse = ", "),'])
+                         .range([', paste0(shQuote(cbp), collapse = ", "),' ])')
+    
+    
+    
+  
+  #awq2$zz$group <- rep(c(1,1,1,1,2,2,2,3,3,3),88)[1:length(awq2$zz$group)]
+  
+  forceNetwork(Links = awq2$z, 
+               Nodes = awq2$zz, 
+               Source = "source",
+               Nodesize = "biggerSampleNodes",
+               Target = "target",
+               NodeID = "name",
+               Group = "group",
+               opacity = 1,
+               opacityNoHover=.8, 
+               zoom = TRUE,
+               colourScale = JS(YourColors))
 
 })
 
