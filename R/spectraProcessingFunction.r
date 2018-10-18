@@ -132,8 +132,8 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
   #------------------------------
 
 
-  for(individualSpectrum in 1:length(individualRawSpecSHA$spectrumSHA)){
-
+  for(individualSpectrum in 1:nrow(mzR::header(mzML_con))){
+    print(individualSpectrum)
     # Reset
     sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 

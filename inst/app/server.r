@@ -313,7 +313,7 @@ observeEvent(input$pop22,{
 observe({
   if (is.null(input$startingWith)){
     # Intentionally Blank
-  } else {
+  } else { 
     output$arrowPNG<-renderUI({
       img(src="arrowRight.png")
   })
@@ -342,18 +342,170 @@ observe({
                      selected = 0,
                      inline = FALSE,
                      width = "100%")
-      } else if(input$startingWith == 3){
-        radioButtons("rawORreanalyze", label = h3("Begin by selecting an option below:"),
-                     choices = list("Select here if you have already converted data with IDBac and want to re-analyze all of it" = 2,
-                                    "Select here if you have already converted data with IDBac and want to re-analyze select files" = 4),
+      }else if(input$startingWith == 3){
+        radioButtons("mzmlInputFormat",label = h3("Begin by selecting an option below:"),
+                     choices = list("Select here if each individual mzXML/mzML file contains both protein and small molecule data." = 1,
+                                    "Select here if you have a folder containing mzXML/mzML protein data and/or a folder 
+                                    containing small molecule data." = 2),
                      selected = 0,
                      inline = FALSE,
                      width = "100%")
-      }
+      }  
+      
 
     })
   }
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+#This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
+#----
+observe({
+    if (is.null(input$startingWith)){} else if (input$startingWith == 3){
+    output$ui1 <- renderUI({
+      fluidRow(
+                 column(12, align = "center",
+                        h3("Starting with mzML or mzXML Data"),
+           
+               column(2),
+               column(8, style = "background-color:#7777770d", align = "center",
+                      fluidRow(
+                        h3("Workflow Pane",
+                           align="center")),
+                      br(),
+                      column(12, align="center",
+                             p(strong("1: Enter a Name for this New Experiment")),
+                             textInput("newExperimentName",
+                                       label = ""),
+                             tags$hr(size=20)),
+                      br(),
+                      p(strong("2: Click to select the location of your mzML files"), align= "center"),
+                      column(12, align="center",
+                             actionButton("mzmlRawFileDirectory",
+                                          label = "Raw Data Folder"),
+                             verbatimTextOutput("mzmlRawFileDirectory",
+                                                placeholder = TRUE),
+                             tags$hr(size = 20)),
+                      br(),
+                      p("Samples will be named according to the file name of the provided files"),
+                      br(),
+                      column(12, align = "center",
+                             p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
+                             actionButton("run",
+                                          label = "Process Data"),
+                             tags$hr(size = 20))
+
+                                     )
+      )
+        )
+    })
+  }
+})
+
+
+# Reactive variable returning the user-chosen location of the raw MALDI files as string
+#----
+mzmlRawFilesLocation <- reactive({
+  if (input$mzmlRawFileDirectory > 0) {
+    choose.dir()
+  }
+})
+
+
+# Creates text showing the user which directory they chose for raw files
+#----
+output$mzmlRawFileDirectory <- renderText({
+  if (is.null(mzmlRawFilesLocation())) {
+    return("No Folder Selected")
+  } else {
+    folders <- NULL
+    # Get the folders contained within the chosen folder.
+    foldersInFolder <- list.files(mzmlRawFilesLocation(),
+                                 recursive = TRUE,
+                                 full.names = FALSE,
+                                 pattern = ".mz") 
+    for (i in 1:length(foldersInFolder)) {
+      # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+      folders <- paste0(folders, 
+                        "\n",
+                        basename(foldersInFolder[[i]]))
+    }
+    return(folders)
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #----
@@ -370,7 +522,7 @@ observe({
         actionButton("delimitedDirectorySM",
                      label = "Raw Data SM Folder"),
         actionButton("runDelim",
-                     label = "Convert to mzML"),
+                     label = "Process Data"),
         verbatimTextOutput("delimitedLocationPo",
                            placeholder = TRUE),
         verbatimTextOutput("delimitedLocationSMo",
@@ -490,9 +642,9 @@ observe({
                                        accept = c('.xlsx','.xls')),
                              tags$hr(size = 20)),
                       column(12, align = "center",
-                             p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
+                             p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
                              actionButton("run",
-                                          label = "Convert to mzML"),
+                                          label = "Process Data"),
                              tags$hr(size = 20)),
                       br(),
                       br(),
@@ -568,9 +720,9 @@ observe({
                                                          placeholder = TRUE))),
                       br(),
                       column(12, align = "center",
-                             p(strong("4:","Click \"Convert to mzML\" to begin spectra conversion.")),
+                             p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
                              actionButton("run",
-                                          label = "Convert to mzML"),
+                                          label = "Process Data"),
                              tags$hr(size = 20))
                       )
                )
@@ -858,7 +1010,31 @@ observeEvent(input$run,{
 
     # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
     # contents of each element are file paths to the raw data for that sample
-    fullZ <- spectraConversion()
+   
+    
+   
+    if(!is.null(input$mzmlRawFileDirectory)){
+    
+    mzFileInput <<- list.files(mzmlRawFilesLocation(),
+                                  recursive = TRUE,
+                                  full.names = TRUE,
+                                  pattern = ".mz") 
+    mzFileInput <- normalizePath(mzFileInput, winslash = "/" )
+    
+    fullZ <- NULL
+     fullZ$UserInput.x <- basename(tools::file_path_sans_ext(mzFileInput))
+     fullZ$UserInput.y <- mzFileInput
+     
+     fullZ <- do.call(cbind.data.frame, fullZ)
+     fullZ <- split(fullZ, 1:nrow(fullZ))
+    
+    }else{
+      fullZ <- spectraConversion()
+    }
+    
+
+    
+    
     # fullZ$UserInput.x = sample name
     # fullZ$UserInput.y = file locations
 
@@ -887,7 +1063,7 @@ observeEvent(input$run,{
                                "msconvert.exe")),
              # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzML files will be saved
              " ",
-             paste0(x$UserInput.y, 
+             paste0(shQuote(x$UserInput.y), 
                     collapse = "",
                     sep=" "),
             # "--noindex --mzML --merge -z",
@@ -1444,8 +1620,6 @@ dendro <- reactive({
 #----
 
 binnedProtein <- reactive({
-aqw22<<-collapsedPeaksP()
-
 
       binvec <- lapply(collapsedPeaksP(), function(x) x@mass)
         
@@ -2062,6 +2236,7 @@ output$hclustPlot <- renderPlot({
   } else if (input$kORheight == "2"){
     
     coloredDend()$dend  %>%  
+      hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
     abline(v = input$height, lty = 2)
@@ -2071,11 +2246,13 @@ output$hclustPlot <- renderPlot({
     if(is.null(input$sampleMap$datapath)){
       # No sample mapping selected
       dendro()$dend %>%
+        hang.dendrogram %>% 
         plot(horiz = TRUE, lwd = 8)
       } else {
         if(input$colDotsOrColDend == "1"){
         
           coloredDend()$dend %>%  
+            hang.dendrogram %>% 
             plot(.,horiz=T)
           
           IDBacApp::colored_dots(coloredDend()$bigMatrix, 
@@ -2085,6 +2262,7 @@ output$hclustPlot <- renderPlot({
                                  sort_by_labels_order = FALSE)
         } else {
           coloredDend()$dend  %>%
+            hang.dendrogram %>% 
             plot(., horiz = T)
         }
       }
@@ -2128,6 +2306,7 @@ output$downloadHeirSVG <- downloadHandler(
       if(input$colDotsOrColDend == "1"){
 
         coloredDend()$dend  %>%
+          hang.dendrogram %>% 
           plot(., horiz = T)
         IDBacApp::colored_dots(coloredDend()$bigMatrix,
                                coloredDend()$shortenedNames,
@@ -2136,6 +2315,7 @@ output$downloadHeirSVG <- downloadHandler(
                                sort_by_labels_order = FALSE)
       } else {
         coloredDend()$dend  %>%  
+          hang.dendrogram %>% 
           plot(., horiz = T)
       }
     }
@@ -2554,11 +2734,13 @@ output$netheir <- renderPlot({
   if (input$kORheight == "1"){
     
     coloredDend()$dend %>%
+      hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
   } else if (input$kORheight == "2"){
     
     coloredDend()$dend  %>%  
+      hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
     abline(v = input$height, lty = 2)
@@ -2573,6 +2755,7 @@ output$netheir <- renderPlot({
       if(input$colDotsOrColDend == "1"){
         
         coloredDend()$dend %>%  
+          hang.dendrogram %>% 
           plot(.,horiz=T)
         
         IDBacApp::colored_dots(coloredDend()$bigMatrix, 
@@ -2582,6 +2765,7 @@ output$netheir <- renderPlot({
                                sort_by_labels_order = FALSE)
       } else {
         coloredDend()$dend  %>%
+          hang.dendrogram %>% 
           plot(., horiz = T)
       }
     }

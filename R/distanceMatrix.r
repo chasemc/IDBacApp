@@ -9,7 +9,6 @@ proteinDistanceMatrix <- function(binnedData, method){
       coop::tcosine(.) -> p
 
       rownames(p) <- nam
-weer<<-p
       1- as.dist(p)
 
 
