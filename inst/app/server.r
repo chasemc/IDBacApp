@@ -122,7 +122,7 @@ function(input,output,session){
                                      "save"),
                         actionButton("pop22",
                                      "pop"),
-                        rHandsontableOutput("metaTable"))))
+                        rHandsontableOutput("metaTable", height=800))))
     })
 })
 
@@ -246,6 +246,21 @@ qwerty$rtab <- rbind(rhandsontable::hot_to_r(input$metaTable)[1, ], awe)
 })
 
 
+
+observeEvent(input$saven,{
+  
+  dbWriteTable(userDBCon(),
+               "metaData",
+               rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove exmple row 
+               overwrite= TRUE)  
+  
+})
+
+
+
+
+
+
 #----
 output$metaTable <- rhandsontable::renderRHandsontable({
 
@@ -254,13 +269,15 @@ output$metaTable <- rhandsontable::renderRHandsontable({
                                contextMenu = TRUE ) %>%
     hot_col("Strain_ID",
             readOnly = TRUE) %>%
-    rhandsontable::hot_row(1,
-                           readOnly = TRUE) %>%
+    hot_row(1,
+            readOnly = TRUE) %>%
     hot_context_menu(allowRowEdit = FALSE,
                      allowColEdit = TRUE) %>%
     hot_cols(colWidths = 100) %>%
     hot_rows(rowHeights = 25) %>%
     hot_cols(fixedColumnsLeft = 1)
+  
+  
 
 })
 
