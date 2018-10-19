@@ -204,29 +204,49 @@ observeEvent(input$searchNCBI, {
   }
 
   ind <- is.na(aqw[-1,]$Genbank_Accession)
+
   providedAccessions <- as.character(aqw[-1,]$Genbank_Accession[!ind])
-  a <- lapply(providedAccessions, traits::ncbi_byid)
-  genus <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[1]])
-  species <- sapply(a, function(x) strsplit(x$taxon, " ")[[1]][[2]])
-  dna_16s <- lapply(a, function(x){
+  
+  ncbiResults <- lapply(as.list(providedAccessions), function(x){
+    try(traits::ncbi_byid(x),
+        silent = TRUE)
+  })
+  
+  
+  zerror <- unlist(lapply(ncbiResults, function(x) inherits(x, 'try-error')))
+ 
+  ind[!ind] <- zerror
+   
+  
+  ncbiResults <- ncbiResults[!zerror]
+  
+  
+  genus <- sapply(ncbiResults, function(x) strsplit(x$taxon, " ")[[1]][[1]])
+  species <- sapply(ncbiResults, function(x) strsplit(x$taxon, " ")[[1]][[2]])
+  dna_16s <- lapply(ncbiResults, function(x){
                                    if(as.numeric(x$length) < 2000){
                                       x$sequence
                                    } else {NA}
                     })
 
-  taxo <- lapply(a, function(x){
+  taxo <- lapply(ncbiResults, function(x){
                                 q <- taxize::classification(x$taxon,
                                 db="ncbi",
                                 return_id = FALSE)[[1]]
+                                
+                                if(!is.na(q)){
                                 q2 <- as.list(q$name)
                                 names(q2) <- q$rank
                                 q2
+                                } else {
+                                  NA
+                                }
                 })
 
-  taxo <- do.call(rbind.data.frame, taxo)
-  for(i in 1:ncol(taxo)){
-    taxo[ ,i] <- as.character(taxo[ ,i])
-  }
+
+    
+  keys <- unique(unlist(lapply(taxo, names)))
+  taxo <-  setNames(do.call(mapply, c(FUN=c, lapply(taxo, `[`, keys))), keys)
 
   # get rhandsontable minus the example row
   awe <-  aqw[-1, ]
