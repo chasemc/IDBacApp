@@ -1121,20 +1121,20 @@ observeEvent(input$run,{
 
     lengthProgress <- length(msconvertCmdLineCommands)
 
-     withProgress(message = 'Conversion in progress',
-                  detail = 'This may take a while...', value = 0, {
-                    for(i in 1:lengthProgress){
-                      incProgress(1/lengthProgress)
-                      functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
-                      }
-                  })
+     # withProgress(message = 'Conversion in progress',
+     #              detail = 'This may take a while...', value = 0, {
+     #                for(i in 1:lengthProgress){
+     #                  incProgress(1/lengthProgress)
+     #                  functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
+     #                  }
+     #              })
 
 # TODO: Add parallel msconvert UI
 
-        # numCores <- parallel::detectCores()
-        # cl <- parallel::makeCluster(numCores)
-        # parallel::parLapply(cl,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
-        # parallel::stopCluster(cl)
+        numCores <- parallel::detectCores()
+        cl <- parallel::makeCluster(numCores)
+        parallel::parLapply(cl,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
+        parallel::stopCluster(cl)
 
     #Single process with sapply instead of parsapply
     #sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
@@ -1201,19 +1201,107 @@ observeEvent({
       popup3()
 
       lengthProgress <- length(fileList)
+      
+      
+      
+      
+      sqlTableArchitecture <- IDBacApp::sqlTableArchitecture()
+      
+      # conn <- pool::poolCheckout(newExperimentSqlite())
+      # 
+      # 
+      # sqlIndividualSpectra <- glue::glue_sql("CREATE TABLE IndividualSpectra (
+      #                                        spectrumSHA TEXT PRIMARY KEY,
+      #                                        mzMLSHA TEXT,
+      #                                        Strain_ID TEXT,
+      #                                        MassError REAL,
+      #                                        AcquisitionDate TEXT,
+      #                                        proteinPeaks BLOB,
+      #                                        proteinSpectrum BLOB,
+      #                                        smallMoleculePeaks BLOB,
+      #                                        smallMoleculeSpectrum BLOB
+      #                                        )",
+      #                         .con = conn
+      # )
+      # 
+      # sqlmetaData <- glue::glue_sql("CREATE TABLE metaData (
+      #                               Strain_ID TEXT PRIMARY KEY,
+      #                                 Genbank_Accession TEXT,
+      #                                 NCBI_TaxID INTEGER,
+      #                                 Kingdom TEXT,
+      #                                 Phylum TEXT,
+      #                                 Class TEXT,
+      #                                 `Order` TEXT, 
+      #                                 Family TEXT,
+      #                                 Genus TEXT,
+      #                                 Species TEXT,
+      #                                 MALDI_Matrix TEXT,
+      #                                 DSM_Agar_Media TEXT,
+      #                                 Cultivation_Temp_Celsius REAL,
+      #                                 Cultivation_Time_Days REAL,
+      #                                 Cultivation_Other TEXT,
+      #                                 User TEXT,
+      #                                 User_ORCID TEXT,
+      #                                 PI_FirstName_LastName TEXT,
+      #                                 PI_ORCID TEXT,
+      #                                 dna_16S TEXT
+      #                               )",
+      #                               .con = conn
+      # )
+      # 
+      # 
+      # 
+      # sqlXML <- glue::glue_sql("CREATE TABLE XML (
+      #                          mzMLSHA TEXT PRIMARY KEY,
+      #                          XML BLOB,
+      #                          manufacturer TEXT,
+      #                          model TEXT,
+      #                          ionisation TEXT,
+      #                          analyzer TEXT,
+      #                          detector TEXT,
+      #                          Instrument_MetaFile BLOB
+      #                          )",
+      #                          .con = conn
+      # )
+      # 
+      # 
+      # 
+      # DBI::dbSendQuery(conn, sqlmetaData)
+      # DBI::dbSendQuery(conn, sqlXML)
+      # DBI::dbSendQuery(conn, sqlIndividualSpectra)
+      # 
+      # pool::poolReturn(conn)
+      # 
 
-      withProgress(message = 'Processing in progress',
-                   detail = 'This may take a while...',
-                   value = 0, {
+      # withProgress(message = 'Processing in progress',
+      #              detail = 'This may take a while...',
+      #              value = 0, {
+      # 
+      #                for(i in 1:lengthProgress){
+      #                  incProgress(1/lengthProgress)
+      #                  IDBacApp::spectraProcessingFunction(rawDataFilePath = fileList[i],
+      #                                                      userDBCon = newExperimentSqlite()) # pool connection
+      #                  }
+      # 
+      #              })
+      # 
+      
+      
+      aa2z <-newExperimentSqlite()
 
-                     for(i in 1:lengthProgress){
-                       incProgress(1/lengthProgress)
-                       IDBacApp::spectraProcessingFunction(rawDataFilePath = fileList[i],
-                                                           userDBCon = newExperimentSqlite())
-                       }
+      numCores <- parallel::detectCores()
+      cl <- parallel::makeCluster(numCores)
+      parallel::parLapply(cl,fileList, function(x)
+                          IDBacApp::spectraProcessingFunction(rawDataFilePath = x,
+                                          userDBCon = aa2z))
 
-                   })
-      pool::poolClose(newExperimentSqlite())
+      
+      
+    #  parallel::stopCluster(cl)
+      
+      
+
+   
       popup4()
 })
 
@@ -2955,7 +3043,6 @@ observeEvent(input$updateIDBac,{
 
     showModal(modalDialog(
       title = "IDBac Update",
-      tags$li(paste0("Checking for Internet Connection: ")),
       tags$li(paste0("Installed Version: ")),
       tags$li(paste0("Latest Stable Release: ")),
       easyClose = FALSE, 

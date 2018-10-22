@@ -1,9 +1,6 @@
 # -----------------
 spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
-
-  aaq1<<-rawDataFilePath
-  aaq2<<-userDBCon
-  
+library(magrittr)
 
   # Open connection to single mzML file, but don't read (memory pointer)
   mzML_con <- mzR::openMSfile(file = rawDataFilePath)
@@ -18,14 +15,19 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
   sqlDataFrame$metaData$Strain_ID <- sampleName
 
 
+  
+   conn <- pool::poolCheckout(userDBCon)
   # Write to SQL DB  (There is no sample level metadata to add at this point)
-  DBI::dbWriteTable(conn = userDBCon,
+  DBI::dbWriteTable(conn = conn,
                     name = "metaData", # SQLite table to insert into
                     sqlDataFrame$metaData[1, ], # Insert single row into DB
                     append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
 
+  pool::poolReturn(conn)
+  
 
+  
 
   #----------------------------------------------
   #----------------------------------------------
@@ -85,16 +87,19 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
     list(.) %>%
     return(.) -> sqlDataFrame$XML$Instrument_MetaFile
 
-
+  conn <- pool::poolCheckout(userDBCon)
+  
   # Write to SQL DB
-  DBI::dbWriteTable(conn = userDBCon,
+  DBI::dbWriteTable(conn = conn,
                     name = "XML", # SQLite table to insert into
                     sqlDataFrame$XML[1, ], # Insert single row into DB
                     append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
 
-
-
+  
+  pool::poolReturn(conn)
+ 
+  
 
 
   #----------------------------------------------
@@ -131,9 +136,9 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 
   #------------------------------
 
+indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
+#  for(individualSpectrum in 1:nrow(mzR::header(mzML_con))){
 
-  for(individualSpectrum in 1:nrow(mzR::header(mzML_con))){
-    print(individualSpectrum)
     # Reset
     sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
@@ -191,8 +196,7 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
         list(.) %>%
         return(.) -> sqlDataFrame$IndividualSpectra$proteinSpectrum
 
-
-
+      
       
       # Why square root transformation and not log:
       #  Anal Bioanal Chem. 2011 Jul; 401(1): 167–181.
@@ -210,8 +214,7 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
         list(.) %>%
         return(.) -> sqlDataFrame$IndividualSpectra$proteinPeaks
 
-
-
+    
 
 
     }else{
@@ -234,25 +237,35 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
         list(.) %>%
         return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculePeaks
 
-
+  
 
       
     }
 
-    remove(spectraImport)
+    
+    sqlDataFrame$IndividualSpectra[1, ]
+    
+})
 
 
+  
+
+   conn <- pool::poolCheckout(userDBCon)
+ 
+    for(i in seq_along(indspec)){
+       
     # Write to SQL DB
-    DBI::dbWriteTable(conn = userDBCon,
+    DBI::dbWriteTable(conn = conn,
                       name = "IndividualSpectra", # SQLite table to insert into
-                      sqlDataFrame$IndividualSpectra[1, ], # Insert single row into DB
+                      indspec[[i]], # Insert single row into DB
                       append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
-
-
-
-
 }
+    pool::poolReturn(conn)
+    
+
+
+
 
 
 
