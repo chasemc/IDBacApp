@@ -1,8 +1,8 @@
 # -----------------
 spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 library(magrittr)
-
-
+aaq1<-rawDataFilePath
+aaq2 <- userDBCon
   # Open connection to single mzML file, but don't read (memory pointer)
   mzML_con <- mzR::openMSfile(file = rawDataFilePath)
   # Generate base SQL table
@@ -49,7 +49,7 @@ library(magrittr)
   mzMLSHA <- readLines(rawDataFilePath)
 
   mzMLSHA %>%
-    serialize(., NULL)
+    serialize(., NULL) %>% 
   return(.) -> mzMLSHA
 
   mzMLSHA1 <- digest::sha1(mzMLSHA)
