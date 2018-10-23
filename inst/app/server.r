@@ -1273,29 +1273,29 @@ observeEvent({
       # pool::poolReturn(conn)
       # 
 
-      # withProgress(message = 'Processing in progress',
-      #              detail = 'This may take a while...',
-      #              value = 0, {
-      # 
-      #                for(i in 1:lengthProgress){
-      #                  incProgress(1/lengthProgress)
-      #                  IDBacApp::spectraProcessingFunction(rawDataFilePath = fileList[i],
-      #                                                      userDBCon = newExperimentSqlite()) # pool connection
-      #                  }
-      # 
-      #              })
-      # 
-      
-      
-      aa2z <-newExperimentSqlite()
+      withProgress(message = 'Processing in progress',
+                   detail = 'This may take a while...',
+                   value = 0, {
 
-      numCores <- parallel::detectCores()
-      cl <- parallel::makeCluster(numCores)
-      parallel::parLapply(cl,fileList, function(x)
-                          IDBacApp::spectraProcessingFunction(rawDataFilePath = x,
-                                          userDBCon = aa2z))
+                     for(i in 1:lengthProgress){
+                       incProgress(1/lengthProgress)
+                       IDBacApp::spectraProcessingFunction(rawDataFilePath = fileList[i],
+                                                           userDBCon = newExperimentSqlite()) # pool connection
+                       }
+
+                   })
 
       
+      
+      # aa2z <-newExperimentSqlite()
+      # 
+      # numCores <- parallel::detectCores()
+      # cl <- parallel::makeCluster(numCores)
+      # parallel::parLapply(cl,fileList, function(x)
+      #                     IDBacApp::spectraProcessingFunction(rawDataFilePath = x,
+      #                                     userDBCon = aa2z))
+      # 
+      # 
       
     #  parallel::stopCluster(cl)
       

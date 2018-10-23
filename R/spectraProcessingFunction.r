@@ -2,6 +2,7 @@
 spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 library(magrittr)
 
+
   # Open connection to single mzML file, but don't read (memory pointer)
   mzML_con <- mzR::openMSfile(file = rawDataFilePath)
   # Generate base SQL table
@@ -16,7 +17,7 @@ library(magrittr)
 
 
   
-   conn <- pool::poolCheckout(userDBCon)
+  conn <- pool::poolCheckout(userDBCon)
   # Write to SQL DB  (There is no sample level metadata to add at this point)
   DBI::dbWriteTable(conn = conn,
                     name = "metaData", # SQLite table to insert into
@@ -45,27 +46,32 @@ library(magrittr)
   remove(instInfo)
 
 
+  mzMLSHA <- readLines(rawDataFilePath)
+
+  mzMLSHA %>%
+    serialize(., NULL)
+  return(.) -> mzMLSHA
+
+  mzMLSHA1 <- digest::sha1(mzMLSHA)
+  
+  mzMLSHA %>%
+    memCompress(., type = "gzip") %>%
+    list(.) %>%
+    return(.) -> sqlDataFrame$XML$XML
+  
+ # mzMLSHA <- xml2::read_xml(rawDataFilePath)
+
+  
   
 
-  mzMLSHA <- xml2::read_xml(rawDataFilePath)
-  mzMLSHA <- xml2::xml_serialize(mzMLSHA, NULL)
-  mzMLSHA <- digest::sha1(mzMLSHA)
-  
-  
-
-  sqlDataFrame$XML$mzMLSHA <- mzMLSHA
+  sqlDataFrame$XML$mzMLSHA <- mzMLSHA1
 
 
 
   # Get mzML, serialize, compress, for insert to SQL
 
 
-  rawDataFilePath %>%
-    readLines %>%
-    serialize(., NULL) %>%
-    memCompress(., type = "gzip") %>%
-    list(.) %>%
-    return(.) -> sqlDataFrame$XML$XML
+
 
   # Find individual spectra SHA and raw data filepath from mzML
   individualRawSpecSHA <- IDBacApp::findRawSHAandFile(rawDataFilePath)
@@ -143,7 +149,7 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
     sqlDataFrame <- IDBacApp::sqlTableArchitecture()
 
 
-    sqlDataFrame$IndividualSpectra$mzMLSHA <- mzMLSHA
+    sqlDataFrame$IndividualSpectra$mzMLSHA <- mzMLSHA1
     sqlDataFrame$IndividualSpectra$Strain_ID <- sampleName
     sqlDataFrame$IndividualSpectra$spectrumSHA <- individualRawSpecSHA$spectrumSHA[[individualSpectrum]]
     sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
