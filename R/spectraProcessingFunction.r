@@ -49,15 +49,12 @@ aaq2 <- userDBCon
   mzMLSHA <- readLines(rawDataFilePath)
 
   mzMLSHA %>%
-    serialize(., NULL) %>% 
-  return(.) -> mzMLSHA
+    serialize(., NULL)  -> mzMLSHA
 
   mzMLSHA1 <- digest::sha1(mzMLSHA)
   
   mzMLSHA %>%
-    memCompress(., type = "gzip") %>%
-    list(.) %>%
-    return(.) -> sqlDataFrame$XML$XML
+    list(.)-> sqlDataFrame$XML$XML
   
  # mzMLSHA <- xml2::read_xml(rawDataFilePath)
 
@@ -88,10 +85,7 @@ aaq2 <- userDBCon
               ascii = FALSE,
               xdr = FALSE,
               version = 3) %>%
-    memCompress(.,
-                type="gzip") %>%
-    list(.) %>%
-    return(.) -> sqlDataFrame$XML$Instrument_MetaFile
+    list(.) -> sqlDataFrame$XML$Instrument_MetaFile
 
   conn <- pool::poolCheckout(userDBCon)
   
@@ -198,9 +192,7 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
 
       spectraImport %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
-        memCompress(., type="gzip") %>%
-        list(.) %>%
-        return(.) -> sqlDataFrame$IndividualSpectra$proteinSpectrum
+        list(.)  -> sqlDataFrame$IndividualSpectra$proteinSpectrum
 
       
       
@@ -216,9 +208,7 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
         MALDIquant::removeBaseline(., method = "TopHat") %>%
         MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 4) %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
-        memCompress(., type="gzip") %>%
-        list(.) %>%
-        return(.) -> sqlDataFrame$IndividualSpectra$proteinPeaks
+        list(.)  -> sqlDataFrame$IndividualSpectra$proteinPeaks
 
     
 
@@ -228,9 +218,7 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
       #Spectra Preprocessing, Peak Picking
       spectraImport %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
-        memCompress(., type="gzip") %>%
-        list(.) %>%
-        return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculeSpectrum
+        list(.) -> sqlDataFrame$IndividualSpectra$smallMoleculeSpectrum
 
 
       spectraImport %>%
@@ -239,9 +227,7 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
         #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
         MALDIquant::detectPeaks(., method = "SuperSmoother", halfWindowSize = 20, SNR = 1) %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
-        memCompress(., type="gzip") %>%
-        list(.) %>%
-        return(.) -> sqlDataFrame$IndividualSpectra$smallMoleculePeaks
+        list(.) -> sqlDataFrame$IndividualSpectra$smallMoleculePeaks
 
   
 
