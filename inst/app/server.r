@@ -137,7 +137,6 @@ userDBCon <- reactive({
   #  isolate( input$percentPresenceP )
   pool::dbPool(drv = RSQLite::SQLite(),
                dbname = input$selectExperiment
-               #dbname = "C:/Users/CMC/Desktop/hi2.sqlite"
                )
 })
 
