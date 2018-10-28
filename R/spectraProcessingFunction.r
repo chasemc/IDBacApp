@@ -133,7 +133,7 @@ aaq2 <- userDBCon
   }
 
 
-
+sds<<-individualRawSpecSHA
   #------------------------------
 
 indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){

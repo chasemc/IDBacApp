@@ -29,7 +29,9 @@ getProteinPeakData <-  function(db, fileshas){
   pool::poolReturn(conn)
 
   p <- unname(unlist(p, recursive = FALSE))
-  unlist(lapply(p, function(x) unserialize(memDecompress(x, type= "gzip")))  )
+  #unlist(lapply(p, function(x) unserialize(memDecompress(x, type= "gzip")))  )
+  unlist(lapply(p, function(x) unserialize(x)))
+  
 }
 
 
@@ -71,15 +73,17 @@ getSmallMolPeakData <-   function(db, fileshas){
   temp <- DBI::dbSendQuery(conn, sqlQ)
   temp <- DBI::dbFetch(temp)
   pool::poolReturn(conn)
-  temp <- unname(unlist(temp,
+   temp <- unname(unlist(temp,
                         recursive = FALSE))
-  unlist(lapply(temp,
-                function(x){
-                  unserialize(memDecompress(x,
-                                            type= "gzip"))
-                })
-         )
+  # unlist(lapply(temp,
+  #               function(x){
+  #                 unserialize(memDecompress(x,
+  #                                           type= "gzip"))
+  #               })
+  #        )
 
+   unlist(lapply(temp, function(x) unserialize(x)))
+   
 }
 
 
