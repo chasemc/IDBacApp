@@ -1,4 +1,4 @@
-sqlTableArchitecture <- function(){
+sqlTableArchitecture <- function(nrow){
 
 
   sqlDataFrame <- new.env(parent = parent.frame())

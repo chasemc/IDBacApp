@@ -1089,8 +1089,8 @@ observeEvent(input$run,{
                                     "proteowizardinstallation", 
                                     "pwiz")
     
-    pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-    #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+    #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+    pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
     
     #Command-line MSConvert, converts from proprietary vendor data to open mzML
     msconvertCmdLineCommands <- lapply(fullZ, function(x){
@@ -1474,8 +1474,7 @@ dataForInversePeakComparisonPlot <- reactive({
       filter(proteinSpectrum != "NA") %>%
       select(proteinSpectrum) %>%
       pull %>%
-    lapply(., function(x) unserialize(x)) %>% 
-   #   lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
+      lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
       unlist(., recursive = TRUE) %>%
       MALDIquant::averageMassSpectra(., method = "mean") %>%
       return(.) -> mirrorPlotEnv$spectrumSampleTwo
@@ -1486,9 +1485,7 @@ dataForInversePeakComparisonPlot <- reactive({
     filter(proteinSpectrum != "NA") %>%
     select(proteinSpectrum) %>%
     pull %>%
-    lapply(., function(x) unserialize(x)) %>% 
-    
-  #  lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
+    lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
     unlist(., recursive = TRUE) %>%
     MALDIquant::averageMassSpectra(., method = "mean") %>%
     return(.) -> mirrorPlotEnv$spectrumSampleOne

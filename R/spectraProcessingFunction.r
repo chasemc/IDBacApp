@@ -1,21 +1,23 @@
 # -----------------
 spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
-library(magrittr)
-aaq1<-rawDataFilePath
-aaq2 <- userDBCon
-  # Open connection to single mzML file, but don't read (memory pointer)
-  mzML_con <- mzR::openMSfile(file = rawDataFilePath)
+
+
+#------- Run once  
+
   # Generate base SQL table
   sqlDataFrame <- IDBacApp::sqlTableArchitecture()
-
-  # Find sample name (fileName)
-  sampleName <- tools::file_path_sans_ext(basename(rawDataFilePath))
- 
   
-  # Make "sampleName" the "Strain_ID".
-  sqlDataFrame$metaData$Strain_ID <- sampleName
-
-
+  
+  n <- length(rawDataFilePath)
+  
+#------- Metadata Table
+ 
+  # Vector of sample names
+  sqlDataFrame$metaData$Strain_ID <- tools::file_path_sans_ext(basename(rawDataFilePath))
+ 
+  ncol(sqlDataFrame$metaData)
+  
+  
   
   conn <- pool::poolCheckout(userDBCon)
   # Write to SQL DB  (There is no sample level metadata to add at this point)
@@ -28,15 +30,16 @@ aaq2 <- userDBCon
   pool::poolReturn(conn)
   
 
+#------- Create SQL "XML" table entry
+
+
+  # Make list of connections to mzML files, don't read (memory pointer)
+  mzML_con <- lapply(rawDataFilePath, function(x) mzR::openMSfile(x, backend = "pwiz"))
   
-
-  #----------------------------------------------
-  #----------------------------------------------
-  # Create SQL "XML" table entry
-
   # Get instrument Info
-  instInfo <- mzR::instrumentInfo(mzML_con)
-
+  instInfo <- lapply(mzML_con, mzR::instrumentInfo)
+  instInfo <- do.call(rbind.data.frame, c(instInfo, stringsAsFactors = F))
+  
   sqlDataFrame$XML$manufacturer  <- instInfo$manufacturer
   sqlDataFrame$XML$model         <- instInfo$model
   sqlDataFrame$XML$ionisation    <- instInfo$ionisation
