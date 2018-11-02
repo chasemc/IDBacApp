@@ -3,20 +3,19 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 
 
 #------- Run once  
-
-  # Generate base SQL table
-  sqlDataFrame <- IDBacApp::sqlTableArchitecture()
-  
-  
   n <- length(rawDataFilePath)
+  
+  # Generate base SQL table
+  sqlDataFrame <- IDBacApp::sqlTableArchitecture(nrow= n)
+  
+  
   
 #------- Metadata Table
  
   # Vector of sample names
   sqlDataFrame$metaData$Strain_ID <- tools::file_path_sans_ext(basename(rawDataFilePath))
  
-  ncol(sqlDataFrame$metaData)
-  
+
   
   
   conn <- pool::poolCheckout(userDBCon)
@@ -49,32 +48,18 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
   remove(instInfo)
 
 
-  mzMLSHA <- readLines(rawDataFilePath)
+  mzMLSHA <- lapply(rawDataFilePath, readLines)
 
-  mzMLSHA %>%
-    serialize(., NULL)  -> mzMLSHA
-
+  mzMLSHA  <- lapply(mzMLSHA, function(x) serialize(x, NULL))
   mzMLSHA1 <- digest::sha1(mzMLSHA)
-  
-  mzMLSHA %>%
-    list(.)-> sqlDataFrame$XML$XML
-  
- # mzMLSHA <- xml2::read_xml(rawDataFilePath)
-
+  mzMLSHA  <- lapply(mzMLSHA, function(x) memCompress(x, type = "gzip"))
   
   
-
-  sqlDataFrame$XML$mzMLSHA <- mzMLSHA1
-
-
-
-  # Get mzML, serialize, compress, for insert to SQL
-
-
-
+ sqlDataFrame$XML$XML <- mzMLSHA
+ sqlDataFrame$XML$mzMLSHA <- mzMLSHA1
 
   # Find individual spectra SHA and raw data filepath from mzML
-  individualRawSpecSHA <- IDBacApp::findRawSHAandFile(rawDataFilePath)
+  individualRawSpecSHA <- lapply(rawDataFilePath, IDBacApp::findRawSHAandFile)
   
   
   # Find acquisitonInfo from mzML file

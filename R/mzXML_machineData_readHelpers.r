@@ -12,7 +12,7 @@
 
 findRawSHAandFile <- function(singlemzMLpath){
   if(!exists("sha")){
-    sha <- new.env(parent = parent.frame())
+    sha <- list()
   }
   
   pp <- xml2::read_xml(singlemzMLpath)
@@ -62,7 +62,7 @@ findRawSHAandFile <- function(singlemzMLpath){
                                 manufacturer){
 
     if(!exists("sha")){
-      sha <- new.env(parent = parent.frame())
+      sha <- list()
     }
   
   files <-  gsub("file://", "", rawFilepaths)

@@ -3,56 +3,63 @@ sqlTableArchitecture <- function(nrow){
 
   sqlDataFrame <- new.env(parent = parent.frame())
 
-  sqlDataFrame$metaData <- data.frame("Strain_ID"                    = NA,
-                                      "Genbank_Accession"            = NA,
-                                      "NCBI_TaxID"                   = NA,
-                                      "Kingdom"                      = NA,
-                                      "Phylum"                       = NA,
-                                      "Class"                        = NA,
-                                      "Order"                        = NA,
-                                      "Family"                       = NA,
-                                      "Genus"                        = NA,
-                                      "Species"                      = NA,
-                                      "MALDI_Matrix"                 = NA,
-                                      "DSM_Agar_Media"               = NA,
-                                      "Cultivation_Temp_Celsius"     = NA,
-                                      "Cultivation_Time_Days"        = NA,
-                                      "Cultivation_Other"            = NA,
-                                      "User"                         = NA,
-                                      "User_ORCID"                   = NA,
-                                      "PI_FirstName_LastName"        = NA,
-                                      "PI_ORCID"                     = NA,
-                                      "dna_16S"                      = NA
-  )
+  sqlDataFrame$metaData <- c("Strain_ID",
+                                      "Genbank_Accession",
+                                      "NCBI_TaxID",
+                                      "Kingdom",
+                                      "Phylum",
+                                      "Class",
+                                      "Order",
+                                      "Family",
+                                      "Genus",
+                                      "Species",
+                                      "MALDI_Matrix",
+                                      "DSM_Agar_Media",
+                                      "Cultivation_Temp_Celsius",
+                                      "Cultivation_Time_Days",
+                                      "Cultivation_Other",
+                                      "User",
+                                      "User_ORCID",
+                                      "PI_FirstName_LastName",
+                                      "PI_ORCID",
+                                      "dna_16S")
+  
+  
+  sqlDataFrame$metaData <- as.data.frame(matrix(nrow = nrow,
+                                                ncol = length(sqlDataFrame$metaData), 
+                                                dimnames = list(NULL,sqlDataFrame$metaData)))
 
 
 
-  sqlDataFrame$XML <- data.frame("mzMLSHA" = NA,
-                                 "XML" = NA, # entire xml file as blob
-                                 "manufacturer"                 = NA,
-                                 "model"                        = NA,
-                                 "ionisation"                   = NA,
-                                 "analyzer"                     = NA,
-                                 "detector"                     = NA,
-                                 "Instrument_MetaFile"          = NA
-  )
+  sqlDataFrame$XML <- c("mzMLSHA",
+                        "XML", 
+                        "manufacturer",
+                        "model",
+                        "ionisation",
+                        "analyzer",
+                        "detector",
+                        "Instrument_MetaFile")
+
+
+  sqlDataFrame$XML <- as.data.frame(matrix(nrow = nrow,
+                                                ncol = length(sqlDataFrame$XML), 
+                                                dimnames = list(NULL,sqlDataFrame$XML)))
 
 
 
-
-
-
-  sqlDataFrame$IndividualSpectra <- data.frame("spectrumSHA" = NA,
-                                               "mzMLSHA" = NA,
-                                               "Strain_ID" = NA,
-                                               "MassError" = NA,
-                                               "AcquisitionDate" = NA,
-                                               "proteinPeaks"              = NA,
-                                               "proteinSpectrum"     = NA,
-                                               "smallMoleculePeaks"        = NA,
-                                               "smallMoleculeSpectrum" = NA
-  )
-
+  sqlDataFrame$IndividualSpectra <- c("spectrumSHA",
+                                               "mzMLSHA",
+                                               "Strain_ID",
+                                               "MassError",
+                                               "AcquisitionDate",
+                                               "proteinPeaks",
+                                               "proteinSpectrum",
+                                               "smallMoleculePeaks",
+                                               "smallMoleculeSpectrum")
+  
+  sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = 1,
+                                           ncol = length(sqlDataFrame$IndividualSpectra), 
+                                           dimnames = list(NULL,sqlDataFrame$IndividualSpectra)))
 
 
   sqlDataFrame
