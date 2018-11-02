@@ -2,7 +2,7 @@
 spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 
 
-#------- Run once  
+# Number of mzML files
   n <- length(rawDataFilePath)
   
   # Generate base SQL table
