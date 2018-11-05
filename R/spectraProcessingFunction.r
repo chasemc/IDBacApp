@@ -15,14 +15,14 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
   # Vector of sample names
   sqlDataFrame$metaData$Strain_ID <- tools::file_path_sans_ext(basename(rawDataFilePath))
  
-
+  ids <- sqlDataFrame$metaData$Strain_ID
   
   
   conn <- pool::poolCheckout(userDBCon)
   # Write to SQL DB  (There is no sample level metadata to add at this point)
   DBI::dbWriteTable(conn = conn,
                     name = "metaData", # SQLite table to insert into
-                    sqlDataFrame$metaData[1, ], # Insert single row into DB
+                    sqlDataFrame$metaData, # Insert single row into DB
                     append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
 
@@ -48,15 +48,13 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
   remove(instInfo)
 
 
-  mzMLSHA <- lapply(rawDataFilePath, readLines)
-
-  mzMLSHA  <- lapply(mzMLSHA, function(x) serialize(x, NULL))
-  mzMLSHA1 <- digest::sha1(mzMLSHA)
-  mzMLSHA  <- lapply(mzMLSHA, function(x) memCompress(x, type = "gzip"))
+  sqlDataFrame$XML$XML <- lapply(rawDataFilePath, readLines)
+  sqlDataFrame$XML$mzMLSHA <- unlist(lapply(sqlDataFrame$XML$XML, digest::sha1))
+  # XML file doeesn't get compressed because not much better compression with gzip after serialization
+  sqlDataFrame$XML$XML  <- lapply(sqlDataFrame$XML$XML, function(x) serialize(x, NULL))
+ 
   
-  
- sqlDataFrame$XML$XML <- mzMLSHA
- sqlDataFrame$XML$mzMLSHA <- mzMLSHA1
+  mzMLSHA1 <-sqlDataFrame$XML$mzMLSHA
 
   # Find individual spectra SHA and raw data filepath from mzML
   individualRawSpecSHA <- lapply(rawDataFilePath, IDBacApp::findRawSHAandFile)
@@ -66,6 +64,8 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
   acquisitonInfo <- IDBacApp::findAcquisitionInfo(individualRawSpecSHA$rawDataFilePath,
                                                   individualRawSpecSHA$manufacturer)
 
+  if(length(acquisitonInfo) > 0){ 
+    
   # Get acqus file as list of blobs
   acquisitonInfo$Instrument_MetaFile %>%
     serialize(object = .,
@@ -74,13 +74,15 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
               xdr = FALSE,
               version = 3) %>%
     list(.) -> sqlDataFrame$XML$Instrument_MetaFile
-
+}
   conn <- pool::poolCheckout(userDBCon)
+
+  
   
   # Write to SQL DB
   DBI::dbWriteTable(conn = conn,
                     name = "XML", # SQLite table to insert into
-                    sqlDataFrame$XML[1, ], # Insert single row into DB
+                    sqlDataFrame$XML, # Insert single row into DB
                     append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
 
@@ -99,15 +101,6 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 
 
 
-
-
-  
-  
-  
-  
-  
-  
-  
   sqlDataFrame$XML <-NULL # Free up memory
 
 
@@ -120,46 +113,62 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
     warning("spectraProcessingFunction.r: Acquisiton information elements are of different length")
   }
 
-
-sds<<-individualRawSpecSHA
+  
   #------------------------------
 
-indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
-#  for(individualSpectrum in 1:nrow(mzR::header(mzML_con))){
+
+
+
+
+
+
+
+
+
+
+
+
+
+# If there's only one mzml file then we need to turn into a list for lapply
+if(typeof(mzML_con) == "S4"){
+  mzML_con <- list(mzML_con)
+}
+
+  
+
+ wq <- lapply(base::seq_along(mzML_con),
+              function(yeah){
+                # Lapply over each spectrum inside an mzmL file
+                lapply(1:nrow(mzR::header(mzML_con[[yeah]])), 
+                       function(individualSpectrum){
 
     # Reset
-    sqlDataFrame <- IDBacApp::sqlTableArchitecture()
+    sqlDataFrame <- IDBacApp::sqlTableArchitecture(nrow = 1)
 
-
-    sqlDataFrame$IndividualSpectra$mzMLSHA <- mzMLSHA1
-    sqlDataFrame$IndividualSpectra$Strain_ID <- sampleName
-    sqlDataFrame$IndividualSpectra$spectrumSHA <- individualRawSpecSHA$spectrumSHA[[individualSpectrum]]
+        sqlDataFrame$IndividualSpectra$mzMLSHA <- mzMLSHA1[[yeah]]
+    sqlDataFrame$IndividualSpectra$Strain_ID <- ids[[yeah]]
+    sqlDataFrame$IndividualSpectra$spectrumSHA <- individualRawSpecSHA[[yeah]]$spectrumSHA[[individualSpectrum]]
     sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
     sqlDataFrame$IndividualSpectra$AcquisitionDate <- acquisitonInfo$AcquisitionDate[[individualSpectrum]]
 
 
 
 
-
-
-    spectraImport <- mzR::peaks(mzML_con, scans = individualSpectrum)
+    spectraImport <- mzR::peaks(mzML_con[[yeah]], scans = individualSpectrum)
 
     if(typeof(spectraImport) == "list"){
 
       spectraImport <- lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[ , 1],
                                                                                         intensity = x[ , 2],
                                                                                         metaData = list(File = acquisitonInfo$rawFilePaths[[individualSpectrum]],
-                                                                                                        Strain = sampleName)))
+                                                                                                        Strain = ids[[yeah]])))
     } else if(typeof(spectraImport) == "double") {
 
       spectraImport <- MALDIquant::createMassSpectrum(mass = spectraImport[ , 1],
                                                       intensity = spectraImport[ , 2],
                                                       metaData = list(File = acquisitonInfo$rawFilePaths[[individualSpectrum]],
-                                                                      Strain = sampleName))
+                                                                      Strain = ids[[yeah]]))
     }
-
-
-
 
 
     # Make sure to return spectraImport as a MassSpectrumList
@@ -172,14 +181,16 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
 
 
 
-
     if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spectrum
 
 
-
-
       spectraImport %>%
-        serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+        serialize(object = ., 
+                  connection = NULL,
+                  ascii = FALSE,
+                  xdr = FALSE,
+                  version = 3) %>%
+        memCompress(., type = "gzip") %>% 
         list(.)  -> sqlDataFrame$IndividualSpectra$proteinSpectrum
 
       
@@ -196,16 +207,17 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
         MALDIquant::removeBaseline(., method = "TopHat") %>%
         MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 4) %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+        memCompress(., type = "gzip") %>% 
         list(.)  -> sqlDataFrame$IndividualSpectra$proteinPeaks
 
-    
-
+      
 
     }else{
       ############
       #Spectra Preprocessing, Peak Picking
       spectraImport %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+        memCompress(., type = "gzip") %>% 
         list(.) -> sqlDataFrame$IndividualSpectra$smallMoleculeSpectrum
 
 
@@ -215,29 +227,35 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
         #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
         MALDIquant::detectPeaks(., method = "SuperSmoother", halfWindowSize = 20, SNR = 1) %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
+        memCompress(., type = "gzip") %>% 
         list(.) -> sqlDataFrame$IndividualSpectra$smallMoleculePeaks
 
-  
+
+      
+      
 
       
     }
 
     
-    sqlDataFrame$IndividualSpectra[1, ]
+   sqlDataFrame$IndividualSpectra[1, ]
     
 })
 
 
-  
 
-   conn <- pool::poolCheckout(userDBCon)
+})
+
+wqq <- unlist(wq, recursive = FALSE)
  
-    for(i in seq_along(indspec)){
-       
+    conn <- pool::poolCheckout(userDBCon)
+   
+  for(i in base::seq_along(wqq)){
+    
     # Write to SQL DB
     DBI::dbWriteTable(conn = conn,
                       name = "IndividualSpectra", # SQLite table to insert into
-                      indspec[[i]], # Insert single row into DB
+                      wqq[[i]], # Insert single row into DB
                       append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
 }
@@ -245,15 +263,11 @@ indspec <- lapply(1:nrow(mzR::header(mzML_con)), function(individualSpectrum){
     
 
 
-
-
-
-
-
-
-
-
-
-
-
 }
+
+
+
+
+
+
+

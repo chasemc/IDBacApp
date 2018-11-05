@@ -70,7 +70,7 @@ findRawSHAandFile <- function(singlemzMLpath){
 
   #gat Bruker flex series metadata:
 
-  tryCatch({
+  try({
 
   if(manufacturer == "Bruker Daltonics flex series"){
     files <- files[which(file.exists(files))]
@@ -85,7 +85,7 @@ findRawSHAandFile <- function(singlemzMLpath){
       sha$AcquisitionDate <- unlist(lapply(sha$AcquisitionDate, function(x) gsub('^.*<\\s*|\\s*.>.*$', '', x)))
     }
   }
-    }, error = (function(e) warning(e)))
+    })
 
 
   sha

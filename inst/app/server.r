@@ -1089,8 +1089,8 @@ observeEvent(input$run,{
                                     "proteowizardinstallation", 
                                     "pwiz")
     
-    #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-    pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+    pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+    #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
     
     #Command-line MSConvert, converts from proprietary vendor data to open mzML
     msconvertCmdLineCommands <- lapply(fullZ, function(x){
@@ -1204,8 +1204,7 @@ observeEvent({
       
       
       
-      sqlTableArchitecture <- IDBacApp::sqlTableArchitecture()
-      
+
       # conn <- pool::poolCheckout(newExperimentSqlite())
       # 
       # 
@@ -1272,18 +1271,22 @@ observeEvent({
       # pool::poolReturn(conn)
       # 
 
-      withProgress(message = 'Processing in progress',
-                   detail = 'This may take a while...',
-                   value = 0, {
-
-                     for(i in 1:lengthProgress){
-                       incProgress(1/lengthProgress)
-                       IDBacApp::spectraProcessingFunction(rawDataFilePath = fileList[i],
-                                                           userDBCon = newExperimentSqlite()) # pool connection
-                       }
-
-                   })
-
+      # withProgress(message = 'Processing in progress',
+      #              detail = 'This may take a while...',
+      #              value = 0, {
+      # 
+      #                for(i in 1:lengthProgress){
+      #                  incProgress(1/lengthProgress)
+      #                  IDBacApp::spectraProcessingFunction(rawDataFilePath = fileList[i],
+      #                                                      userDBCon = newExperimentSqlite()) # pool connection
+      #                  }
+      # 
+      #              })
+      
+      zs <<-fileList
+      zss<<-newExperimentSqlite()
+      IDBacApp::spectraProcessingFunction(rawDataFilePath = fileList,
+                                          userDBCon = newExperimentSqlite())
       
       
       # aa2z <-newExperimentSqlite()
