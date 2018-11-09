@@ -1,12 +1,18 @@
-tempDirectory <- tempdir()  # Different per session
 
-a <-   as.list(list.files(getwd(),
-                          pattern = ".sqlite",
-                          full.names = TRUE))
+# Setup working directories
+workingDirectory <- getwd()
+tempMZ <- file.path(workingDirectory, "temp_mzML")
+dir.create(tempMZ)
+# Cleanup mzML temp folder 
+file.remove(list.files(tempMZ,
+                       pattern = ".mzML",
+                       recursive = FALSE,
+                       full.names = TRUE))
 
-names(a) <- tools::file_path_sans_ext(list.files(getwd(), pattern = ".sqlite"))
 
-availableExperiments <-a
+
+
+
 
 shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
   if (is.null(data)){
@@ -96,7 +102,7 @@ function(input,output,session){
                       style = "background-color:#7777770d",
                       radioButtons("selectExperiment",
                                    label = h3("Select a Previous Experiment"),
-                                   choices = availableExperiments,
+                                   choices = availableExperiments(),
                                    selected = 0,
                                    width= "100%")),
                p("Location of experiment file:"),
@@ -107,7 +113,7 @@ function(input,output,session){
                                style = "background-color: #7777770d",
                                radioButtons("selectMixNmatchExperiment",
                                             label = p("Select samples from previous experiment to transfer to a new experiment."),
-                                            choices = availableExperiments,
+                                            choices = availableExperiments(),
                                             selected = 0),
                                uiOutput("chosenp"),
                                verbatimTextOutput("selection"),
@@ -127,6 +133,18 @@ function(input,output,session){
 })
 
 
+availableExperiments <- reactive({
+  tools::file_path_sans_ext(list.files(workingDirectory,
+                                       pattern = ".sqlite",
+                                       full.names = FALSE))
+  
+
+  
+})
+  
+  
+  
+  
 #----
 output$selectedSQLText <- renderPrint(input$selectExperiment)
 
@@ -135,6 +153,7 @@ output$selectedSQLText <- renderPrint(input$selectExperiment)
 userDBCon <- reactive({
   # This pool is used when selecting to analyze a previous experiment
   #  isolate( input$percentPresenceP )
+  req(input$selectExperiment)
   pool::dbPool(drv = RSQLite::SQLite(),
                dbname = input$selectExperiment
                )
@@ -1075,12 +1094,11 @@ observeEvent(input$run,{
     # fullZ$UserInput.y = file locations
 
     # outp is the filepath of where to save the created mzML files
-    outp <- tempDirectory
+    outp <- tempMZ
     
     # Find the location of the proteowizard libraries
     # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
-    appwd <- getwd()
-    applibpath <- file.path(appwd,
+    applibpath <- file.path(workingDirectory,
                             "library")
     pwizFolderLocation <- installed.packages(c(.libPaths(),
                                                applibpath))
@@ -1193,13 +1211,14 @@ observeEvent({
     input$beginPeakProcessingModal,
     input$beginPeakProcessingAgain)},{
 
-      rawDataFilePath <- normalizePath(list.files(tempDirectory,
+      rawDataFilePath <- normalizePath(list.files(tempMZ,
                                            pattern = ".mz", 
                                            full.names = TRUE,
                                            ignore.case = TRUE))
       popup3()
 
-      
+      aaz<<-rawDataFilePath
+      aaz2 <<- newExperimentSqlite()
            rawDataFilePath <- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
  
             lengthProgress <- length(rawDataFilePath)
@@ -1209,9 +1228,9 @@ observeEvent({
                    detail = 'This may take a while...',
                    value = 0, {
 
-                     for(i in 1:lengthProgress){
+                     for(i in base::seq_along(lengthProgress)){
                        incProgress(1/lengthProgress)
-                       IDBacApp::spectraProcessingFunction(rawDataFilePath = rawDataFilePath[i],
+                       IDBacApp::spectraProcessingFunction(rawDataFilePath = rawDataFilePath[[i]],
                                                            userDBCon = newExperimentSqlite()) # pool connection
                        }
 
@@ -1262,8 +1281,21 @@ popup4 <- reactive({
     title = "Spectra Processing is Now Complete",
     br(),
     easyClose = TRUE,
-    footer = modalButton("Continue to Data Analysis by visiting consecutive tabs at the top of the page.")))
+    tagList(actionButton("processToAnalysis", 
+                       "Click to continue"))
+  ))
+  
+  
+  
 })
+
+
+  observeEvent(input$processToAnalysis, {
+    updateTabsetPanel(session, "mainIDBacNav",
+                      selected = "sqlUiTab")
+    removeModal()
+  })
+
 
 
 #------------------------------------------------------------------------------
@@ -3271,7 +3303,7 @@ observeEvent(input$updateIDBac,{
   })
 
   observeEvent(input$saveBtn, {
-    appDirectory <- getwd() # Get the location of where IDBac is installed
+    appDirectory <- workingDirectory # Get the location of where IDBac is installed
     if (!dir.exists(file.path(appDirectory, "SpectraLibrary"))){  # If spectra library folder doesn't exist, create it
       dir.create(file.path(appDirectory, "SpectraLibrary"))
     }
@@ -3312,7 +3344,7 @@ observeEvent(input$updateIDBac,{
 
   #------------------------------------
   #------------------------------------ Modify an Existing Library
-  libraries <- function(){list.files(file.path(getwd(), "SpectraLibrary"), pattern=".sqlite", full.names = TRUE)}
+  libraries <- function(){list.files(file.path(workingDirectory, "SpectraLibrary"), pattern=".sqlite", full.names = TRUE)}
 
   output$modifyLibPanelRadios  <- renderUI({
     if(input$libraryTabs == "modifyLibPanel"){

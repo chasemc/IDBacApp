@@ -9,11 +9,13 @@ zenodoId <- "1203781"
 # The UI section of the Shiny app provides the "User Interface" and is the means of user interaction.
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
 #tags$body(background = "rotatingPCA.gif",
-navbarPage(collapsible = T, theme = "css.css",
-           "IDBac",
+navbarPage(collapsible = T,
+           theme = "css.css",
+           title = "IDBac",
+           id = "mainIDBacNav",
            tabPanel(
              "Introduction",
-             fluidPage(
+             
                shinyjs::useShinyjs(),
                fluidRow(
                  column(3,
@@ -91,7 +93,7 @@ navbarPage(collapsible = T, theme = "css.css",
                            align="center")
                         )
                  )
-               )
+               
              ),
            tabPanel(
              "Starting With Raw Data",
@@ -131,9 +133,11 @@ navbarPage(collapsible = T, theme = "css.css",
                )
              ),
            tabPanel("SQL",
+                    value = "sqlUiTab",
                     uiOutput("sqlUI")
                     ),
            tabPanel("Compare Two Samples (Protein)",
+                    value = "inversePeaks",
                     uiOutput("inversepeakui")
                     ),
            tabPanel("Hierarchical Clustering (Protein)",
