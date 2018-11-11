@@ -153,9 +153,17 @@ output$selectedSQLText <- renderPrint(input$selectExperiment)
 userDBCon <- reactive({
   # This pool is used when selecting to analyze a previous experiment
   #  isolate( input$percentPresenceP )
-  req(input$selectExperiment)
+  
+  fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
+                                       pattern = ".sqlite",
+                                       full.names = FALSE))
+  filePaths <- list.files(workingDirectory,
+                                       pattern = ".sqlite",
+                                       full.names = TRUE)
+  filePaths <- filePaths[which(fileNames == input$selectExperiment)]
+  
   pool::dbPool(drv = RSQLite::SQLite(),
-               dbname = input$selectExperiment
+               dbname = filePaths
                )
 })
 
@@ -1749,75 +1757,7 @@ proteinDistance <- reactive({
 })
 
 
-#------------------------------------------------------------------------------
-# Protein PCA, PCoA, and t-SNE calculation and plotting
-#------------------------------------------------------------------------------
 
-
-# Create protein 3-d plots UI
-#----
-output$PCAui <-  renderUI({
-  
-  if(is.null(input$Spectra1)){
-    fluidPage(
-      h1(" There is no data to display",
-         img(src = "errors/hit3.gif",
-             width = "200" ,
-             height = "100")),
-      br(),
-      h4("Troubleshooting:"),
-      tags$ul(
-        tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visit the
-                \"Compare Two Samples\" tab."),
-        tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
-                named \"Peak_Lists\""),
-        tags$li("If it seems there is a bug in the software, this can be reported on the", 
-                a(href = "https://github.com/chasemc/IDBacApp/issues",
-                  target = "_blank", "IDBac Issues Page at GitHub.",
-                  img(border = "0",
-                      title = "https://github.com/chasemc/IDBacApp/issues", 
-                      src = "GitHub.png", 
-                      width = "25",
-                      height = "25")))
-        )
-      )
-    } else {
-    mainPanel(width = 12,
-              fluidRow(
-                column(width = 6,
-                       p("PCOA: Provides Three-Dimensional View of Distances (Based upon Distance Algorithm Chosen)"),
-                       plotlyOutput("pcoaPlot",
-                                    width = "100%",
-                                    height = "800px")),
-                column(width = 6,
-                       p("Principle Components Analysis: Provides a dimension reduction of the peak intensity/presence matrix"),
-                       plotlyOutput("pcaPlot",
-                                    width = "100%",
-                                    height = "800px"))),
-              p("t-SNE"),
-              numericInput("tsnePerplexity",
-                           label = h5(strong("t-SNE Perplexity")), 
-                           value = 30, 
-                           step = 10,
-                           min = 0,
-                           max = 300),
-              numericInput("tsneTheta",
-                           label = h5(strong("t-SNE Theta")),
-                           value = 0.5, 
-                           step = 0.1,
-                           max = 1,
-                           min = 0),
-              numericInput("tsneIterations",
-                           label = h5(strong("t-SNE Iterations")),
-                           value = 1000,
-                           step = 50),
-              fluidRow(plotlyOutput("tsnePlot",
-                                    width = "100%",
-                                    height = "800px"))
-    )
-      }
-  
-})
 
 
 # PCoA Calculation
@@ -1940,8 +1880,19 @@ output$pcaPlot <- renderPlotly({
           type = "scatter3d",
           mode = "markers",
           marker = list(color = ~fac),
-          #hoverinfo = 'text',
+          hoverinfo = 'text',
+          bgcolor = ~fac,
           text = ~nam)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 })
 
 
@@ -2097,21 +2048,54 @@ output$Heirarchicalui <-  renderUI({
                                                      c('HTML'),
                                                      inline = TRUE),
                                         downloadButton('downloadReport')),
-                               tabPanel("Library Search",
-                                        value="hierLibrarySearch",
-                                        p("This is for searching against user-created libraries"),
-                                        uiOutput("libraryInjectionLibrarySelect"),
-                                        uiOutput("libraryMetadataColumnsSelection"),
-                                        radioButtons("initateInjection", 
-                                                     label = h3("Start Injection"),
-                                                     choices = list("Yes" = "TRUE",
-                                                                    "No" = "FALSE"),
-                                                     selected = "FALSE")
+                               tabPanel("PCA, PCoA, t-SNE ",
+                                        value="proteinScatters",
+                                        wellPanel(
+                                          p("Principle Components Analysis (PCA)"),
+                                          plotlyOutput("pcaPlot",
+                                                       width = "100%",
+                                                       height = "100%"),
+                                          tags$hr(),
+                                          p("Principle Coordinates Analysis (PCoA)"),
+                                          plotlyOutput("pcoaPlot",
+                                                       width = "100%",
+                                                       height = "100%"),
+                                          tags$hr(),
+                                                                p("t-SNE"),
+                                                                numericInput("tsnePerplexity",
+                                                                             label = h5(strong("t-SNE Perplexity")), 
+                                                                             value = 15, 
+                                                                             step = 10,
+                                                                             min = 0,
+                                                                             max = 300),
+                                                                numericInput("tsneTheta",
+                                                                             label = h5(strong("t-SNE Theta")),
+                                                                             value = 0.5, 
+                                                                             step = 0.1,
+                                                                             max = 1,
+                                                                             min = 0),
+                                                                numericInput("tsneIterations",
+                                                                             label = h5(strong("t-SNE Iterations")),
+                                                                             value = 1000,
+                                                                             step = 50),
+                                                                fluidRow(plotlyOutput("tsnePlot",
+                                                                                      width = "100%",
+                                                                                      height = "100%"))
+                                                                
+                                                                
+                                                                )
+                                        
+                                        
+                                        
+                                        
                                         )
                                )
                    ),
       mainPanel(align="center",
-                       plotOutput("hclustPlot"))
+                       plotOutput("hclustPlot")
+                
+                
+                )
     )
       }
 })
@@ -2677,6 +2661,7 @@ smallMolNetworkDataFrame <- reactive({
 
 ppp <- reactive({
   
+  if(length(subtractMatrixBlank()) > 9){
   aq6 <<- subtractMatrixBlank()
   aq2 <<-calcNetwork()
   
@@ -2701,12 +2686,16 @@ azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
   colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
   lp3<<-pc
   pc
+  }
+  FALSE
 })
 
 
 
 
 output$smallMolPca <- renderPlotly({
+  
+  req(ppp(), cancelOutput = FALSE)
   yep <- as.data.frame(ppp(), stringsAsFactors = FALSE)
 plot_ly(data = yep,
         x = ~Dim1,
@@ -2871,11 +2860,10 @@ output$netheir <- renderPlot({
 #----
 output$MANui <-  renderUI({
 
-  fluidPage(
-    column(width = 3,
-           fluidRow(
+  fluidPage(sidebarLayout(
+    
+  
              sidebarPanel(style = 'padding:30px',
-                          width = "100%",
                           radioButtons("matrixSamplePresent",
                                        label = h5(strong("Do you have a matrix blank?")),
                                        choices = list("Yes" = 1, 
@@ -2919,11 +2907,8 @@ output$MANui <-  renderUI({
                             "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
                           p(strong("Hint 2:"),
                             "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),
-                          br()
+                          br(),
 
-             )),
-           fluidRow(
-             sidebarPanel(width = "100%",
                           p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network.\"
                             while selected- this saves a .csv file of the currently-displayed
                             network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
@@ -2935,32 +2920,34 @@ output$MANui <-  renderUI({
                           br(),
                           h4("Suggestions for Reporting Protein Analysis"),
                           uiOutput("proteinReport2")
-                          )
-             )
-           ),
-    column(width = 9,
-           column(width = 5,
-                  style ="padding: 14px 0px; margin:0%",
+                          ),
+mainPanel(
+    column(width = 5,
+               #   style ="padding: 14px 0px; margin:0%",
                   plotOutput("netheir",
                              width = "100%",
                              height = "100%",
                              click = "plot_click",
                              dblclick = "plot_dblclick",
                              hover = "plot_hover",
-                             brush = "plot_brush")),
-           
-             
-           column(width = 7, style ="padding: 14px 0px; margin:0%",
-                  absolutePanel(fixed = TRUE,
-                                width = "50%",
-                                plotlyOutput("smallMolPca",
-                                             width = "100%"
-                                            ),
-                                
-                                simpleNetworkOutput("metaboliteAssociationNetwork")))
+                             brush = "plot_brush")
+           ),
+    column(width=6, style ="padding: 14px 0px; margin:0%",
+           absolutePanel(fixed = TRUE, width = "50%",
+                         tabsetPanel(type="tabs",           
+                                tabPanel(value = "smallMolMANUI","MAN",
+                                simpleNetworkOutput("metaboliteAssociationNetwork", width="100%")),
+                                tabPanel(value = "smallMolPCAUi","PCA",
+                                         plotlyOutput("smallMolPca",
+                                                      width = "100%"
+                                         )
+                           ))
           
-           )
-           )
+                          
+    
+    ))
+)
+  ))
 })
 
 

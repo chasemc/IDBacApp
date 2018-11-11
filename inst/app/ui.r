@@ -143,9 +143,6 @@ navbarPage(collapsible = T,
            tabPanel("Hierarchical Clustering (Protein)",
                     uiOutput("Heirarchicalui")
                     ),
-           tabPanel("PCA (Protein)",
-                    uiOutput("PCAui")
-                    ),
            tabPanel("Metabolite Association Network (Small-Molecule)",
                     uiOutput("MANui")
                     ),
