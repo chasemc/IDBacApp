@@ -447,11 +447,22 @@ observe({
                         h3("Workflow Pane",
                            align="center")),
                       br(),
-                      column(12, align="center",
+                      column(12,
+                      column(6,
                              p(strong("1: Enter a Name for this New Experiment")),
                              textInput("newExperimentName",
                                        label = ""),
                              tags$hr(size=20)),
+                      column(6,
+                             p(strong("1: Or select a previous experiment to add data to")),
+                             
+                             selectInput("newExperimentName",
+                                          label = "",
+                                          choices = availableExperiments(),
+                                          selected = 0,
+                                          width= "100%")
+                             )),
+                      
                       br(),
                       p(strong("2: Click to select the location of your mzML files"), align= "center"),
                       column(12, align="center",
@@ -991,80 +1002,14 @@ output$multipleMaldiRawFileDirectory <- renderText({
 #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
 #----
 spectraConversion <- reactive({
-  if(input$rawORreanalyze == 1){
-    # When only analyzing one maldi plate this handles finding the raw data directories and the excel map
-    # excelMap is a dataframe (it's "Sheet1" of the excel template)
-    excelTable <- as.data.frame(read_excel(paste0(input$excelFile$datapath), 2))
-    
-    # excelTable takes the sample location and name from excelTable, and also converts the location to the same name-format as Bruker (A1 -> 0_A1)
-    excelTable <- cbind.data.frame(paste0("0_", excelTable$Key),
-                                   excelTable$Value)
-   
-     # List the raw data files (for Bruker MALDI files this means pointing to a directory, not an individual file)
-    fullZ <- list.dirs(list.dirs(rawFilesLocation(), 
-                                 recursive = FALSE), 
-                       recursive = FALSE)
-   
-     # Get folder name from fullZ for merging with excel table names
-    fullZ <- cbind.data.frame(fullZ, 
-                              unlist(lapply(fullZ, 
-                                            function(x) strsplit(x, "/")[[1]][[3]])))
-    colnames(fullZ) <- c("UserInput", "ExcelCell")
-    colnames(excelTable) <- c("ExcelCell", "UserInput")
-    
-    # Merge to connect filenames in excel sheet to file paths
-    fullZ <- merge(excelTable,
-                   fullZ,
-                   by = c("ExcelCell"))
-    fullZ[,3] <- normalizePath(as.character(fullZ[ , 3]))
-    
-  } else if(input$rawORreanalyze == 3) {
-    
-    # When analyzing more han one MALDI plate this handles finding the raw data directories and the excel map
-    mainDirectory <- list.dirs(multipleMaldiRawFileLocation(),
-                               recursive = F)
-    lapped <- lapply(mainDirectory,
-                     function(x) list.files(x, 
-                                            recursive = F, 
-                                            full.names = T))
-    collectfullZ <- NULL
-    
-    # For annotation, look at the single-plate conversion above, the below is basically the same, but iterates over multiple plates, each plate must reside in its own directory.
-    for (i in 1:length(lapped)){
-      
-      excelTable <- as.data.frame(read_excel(lapped[[i]][grep(".xls",lapped[[i]])], 2))
-      excelTable <- cbind.data.frame(paste0("0_", 
-                                            excelTable$Key),
-                                     excelTable$Value)
-      fullZ <- list.dirs(lapped[[i]],
-                         recursive = F)
-      fullZ <- cbind.data.frame(fullZ,
-                                unlist(lapply(fullZ, 
-                                              function(x) strsplit(x, "/")[[1]][[4]])))
-      colnames(fullZ) <- c("UserInput", "ExcelCell")
-      colnames(excelTable) <- c("ExcelCell", "UserInput")
-      fullZ <- merge(excelTable,
-                     fullZ,
-                     by = c("ExcelCell"))
-      fullZ[ , 3] <- normalizePath(as.character(fullZ[ , 3]))
-      collectfullZ <- c(collectfullZ, list(fullZ))
-    
-    }
-    
-    fullZ <- ldply(collectfullZ, data.frame)  #TODO Look into converting to base::
-    
-  }
-
-  fullZ <- dlply(fullZ, .(UserInput.x))
-  # Allow spaces in filepath
-
-  for (i in 1:length(fullZ)){
-    fullZ[[i]]$UserInput.y <- shQuote(fullZ[[i]]$UserInput.y)
-  }
-  # return fullz to the "spectraConversion" reactive variable, this is  is a named list, where each element represents a sample and the element name is the sample name;
-  # contents of each element are file paths to the raw data for that sample
-  # This will be used by the spectra conversion observe function/event
-  fullZ
+  
+  
+  IDBacApp::excelMaptoPlateLocation(rawORreanalyze = input$rawORreanalyze,
+                                    excelFileLocation = input$excelFile$datapath,
+                                    rawFilesLocation = rawFilesLocation(),
+                                    multipleMaldiRawFileLocation = multipleMaldiRawFileLocation())
+  
+  
 })
 
 
@@ -1092,18 +1037,24 @@ observeEvent(input$run,{
      fullZ <- split(fullZ, 1:nrow(fullZ))
     
     }else{
-      fullZ <- spectraConversion()
+      fullZ <- IDBacApp::spectraConversion()
     }
     
-
-    
+  fullZ <- lapply(fullZ,
+                  function(x){
+                    cbind(x,
+                         tempFile = basename(tempfile(pattern = "", 
+                                        tmpdir = tempMZ,
+                                        fileext = "")
+                          ), stringsAsFactors = F)
+                    }
+                  )
+  
     
     # fullZ$UserInput.x = sample name
     # fullZ$UserInput.y = file locations
 
-    # outp is the filepath of where to save the created mzML files
-    outp <- tempMZ
-    
+ 
     # Find the location of the proteowizard libraries
     # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
     applibpath <- file.path(workingDirectory,
@@ -1119,7 +1070,7 @@ observeEvent(input$run,{
     #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
     
     #Command-line MSConvert, converts from proprietary vendor data to open mzML
-    msconvertCmdLineCommands <- lapply(fullZ, function(x){
+    msconvertCmdLineCommands <<- lapply(fullZ, function(x){
       #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
       paste0(shQuote(file.path(pwizFolderLocation,
                                "msconvert.exe")),
@@ -1131,9 +1082,9 @@ observeEvent(input$run,{
             # "--noindex --mzML --merge -z",
              "--noindex --mzML --merge -z  --32",
              " -o ",
-             shQuote(outp),
+             shQuote(tempMZ),
              " --outfile ",
-             shQuote(paste0(x$UserInput.x[1], ".mzML"))
+             shQuote(paste0(x$tempFile, ".mzML"))
       )
     }
     )
@@ -1686,11 +1637,9 @@ collapsedPeaksP <- reactive({
 # Bin peaks across all protein samples and turn into intensity matrix
 #----
 proteinMatrix <- reactive({
-  MALDIquant::binPeaks(collapsedPeaksP(),
-                       method = "strict",
-                       tolerance = .02) %>%
-    IDBacApp::proteinPeaksToMatrix(bool = input$booled,
-                                   proteinPeaks = .)
+ 
+ do.call(rbind, binnedProtein())
+
 })
 
 
