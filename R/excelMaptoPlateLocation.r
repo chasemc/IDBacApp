@@ -12,7 +12,8 @@ if(rawORreanalyze == 1){
   # excelTable takes the sample location and name from excelTable, and also converts the location to the same name-format as Bruker (A1 -> 0_A1)
   excelTable <- cbind.data.frame(paste0("0_", 
                                         excelTable$Key),
-                                 excelTable$Value)
+                                 excelTable$Value,
+                                 stringsAsFactors = FALSE)
   
   # List the raw data files (for Bruker MALDI files this means pointing to a directory, not an individual file)
   fullZ <- list.dirs(list.dirs(rawFilesLocation, 

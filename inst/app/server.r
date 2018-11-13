@@ -1019,103 +1019,31 @@ observeEvent(input$run,{
     # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
     # contents of each element are file paths to the raw data for that sample
    
-    
-   
-    if(!is.null(input$mzmlRawFileDirectory)){
-    
-    mzFileInput <<- list.files(mzmlRawFilesLocation(),
-                                  recursive = TRUE,
-                                  full.names = TRUE,
-                                  pattern = ".mz") 
-    mzFileInput <- normalizePath(mzFileInput, winslash = "/" )
-    
-    fullZ <- NULL
-     fullZ$UserInput.x <- basename(tools::file_path_sans_ext(mzFileInput))
-     fullZ$UserInput.y <- mzFileInput
-     
-     fullZ <- do.call(cbind.data.frame, fullZ)
-     fullZ <- split(fullZ, 1:nrow(fullZ))
-    
-    }else{
-      fullZ <- IDBacApp::spectraConversion()
-    }
-    
-  fullZ <- lapply(fullZ,
-                  function(x){
-                    cbind(x,
-                         tempFile = basename(tempfile(pattern = "", 
-                                        tmpdir = tempMZ,
-                                        fileext = "")
-                          ), stringsAsFactors = F)
-                    }
-                  )
+  # Find the location of the proteowizard libraries
+  # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
+  applibpath <- file.path(workingDirectory,
+                          "library")
+  pwizFolderLocation <- installed.packages(c(.libPaths(),
+                                             applibpath))
+  pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
+  pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, 
+                                  "proteowizardinstallation", 
+                                  "pwiz")
   
-    
-    # fullZ$UserInput.x = sample name
-    # fullZ$UserInput.y = file locations
-
- 
-    # Find the location of the proteowizard libraries
-    # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
-    applibpath <- file.path(workingDirectory,
-                            "library")
-    pwizFolderLocation <- installed.packages(c(.libPaths(),
-                                               applibpath))
-    pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
-    pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, 
-                                    "proteowizardinstallation", 
-                                    "pwiz")
-    
-    pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-    #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
-    
-    #Command-line MSConvert, converts from proprietary vendor data to open mzML
-    msconvertCmdLineCommands <<- lapply(fullZ, function(x){
-      #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
-      paste0(shQuote(file.path(pwizFolderLocation,
-                               "msconvert.exe")),
-             # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzML files will be saved
-             " ",
-             paste0(shQuote(x$UserInput.y), 
-                    collapse = "",
-                    sep=" "),
-            # "--noindex --mzML --merge -z",
-             "--noindex --mzML --merge -z  --32",
-             " -o ",
-             shQuote(tempMZ),
-             " --outfile ",
-             shQuote(paste0(x$tempFile, ".mzML"))
-      )
-    }
-    )
-
-    functionTOrunMSCONVERTonCMDline<-function(x){
-      system(command = as.character(x))
-    }
-
-    popup1()
-
-    lengthProgress <- length(msconvertCmdLineCommands)
-
-     # withProgress(message = 'Conversion in progress',
-     #              detail = 'This may take a while...', value = 0, {
-     #                for(i in 1:lengthProgress){
-     #                  incProgress(1/lengthProgress)
-     #                  functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
-     #                  }
-     #              })
-
-# TODO: Add parallel msconvert UI
-
-        numCores <- parallel::detectCores()
-        cl <- parallel::makeCluster(numCores)
-        parallel::parLapply(cl,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
-        parallel::stopCluster(cl)
-
-    #Single process with sapply instead of parsapply
-    #sapply(fileList,function(x)spectraProcessingFunction(x,idbacDirectory$filePath))
-
-
+  pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+  #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+  
+ IDBacApp::convertToMzml(mzmlRawFileDirectory = input$mzmlRawFileDirectory,
+                mzmlRawFilesLocation = mzmlRawFilesLocation(),
+                spectraConversion = spectraConversion(),
+                pwizFolderLocation = pwizFolderLocation)
+  
+  
+  
+  
+  
+  
+  
     popup2()
 })
 
@@ -1166,12 +1094,11 @@ popup2 <- reactive({
 #----
 observeEvent({
   c(input$beginPeakProcessing,
-    input$beginPeakProcessing,
     input$beginPeakProcessingModal,
     input$beginPeakProcessingAgain)},{
 
       rawDataFilePath <- normalizePath(list.files(tempMZ,
-                                           pattern = ".mz", 
+                                           pattern = ".mzML", 
                                            full.names = TRUE,
                                            ignore.case = TRUE))
       popup3()
