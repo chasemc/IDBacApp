@@ -4,55 +4,47 @@ convertToMzml <- function(mzmlRawFileDirectory,
                           pwizFolderLocation,
                           outDir){
 
+  
+  
 if(!is.null(mzmlRawFileDirectory)){
   
+  # vector of filepaths
+  mzfilePath <- normalizePath(mzmlRawFilesLocation, winslash = "/" )
   
-  mzFileInput <- normalizePath(mzmlRawFilesLocation, winslash = "/" )
-  
-  fullZ <- NULL
-  
-  fullZ$UserInput.x <- basename(tools::file_path_sans_ext(mzFileInput))
-  fullZ$UserInput.y <- mzFileInput
-  
-  fullZ <- do.call(cbind.data.frame, fullZ)
-  fullZ <- split(fullZ, 1:nrow(fullZ))
-  
+  # vector of file names, no extensions
+  filenames <- basename(tools::file_path_sans_ext(mzfilePath))
+
 }else{
-  
+  # Get names from excel
   fullZ <- spectraConversion
 }
 
-fullZ <- lapply(fullZ,
-                function(x){
-                  cbind(x,
-                        tempFile = basename(tempfile(pattern = "", 
-                                                     tmpdir = tempMZ,
-                                                     fileext = "")
-                        ), stringsAsFactors = F)
-                }
-)
+  
+  
+  tempNames <- tempfile(pattern = rep("", length(filenames)))
 
 
-# fullZ$UserInput.x = sample name
-# fullZ$UserInput.y = file locations
 
 
+list(mzfilePath = mzfilePath,
+     filenames = filenames,
+     tempNames = tempNames)
 
 
 #Command-line MSConvert, converts from proprietary vendor data to open mzML
-msconvertCmdLineCommands <<- lapply(fullZ, function(x){
+msconvertCmdLineCommands <- lapply(fullZ, function(x){
   #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
   paste0(shQuote(file.path(pwizFolderLocation,
                            "msconvert.exe")),
          # sets up the command to pass to MSConvert in commandline, with variables for the input files (x$UserInput.y) and for where the newly created mzML files will be saved
          " ",
-         paste0(shQuote(x$UserInput.y), 
+         paste0(shQuote(normalizePath(x$UserInput.y)), 
                 collapse = "",
                 sep=" "),
          # "--noindex --mzML --merge -z",
          "--noindex --mzML --merge -z  --32",
          " -o ",
-         shQuote(outDir),
+         shQuote(normalizePath(outDir)),
          " --outfile ",
          shQuote(paste0(x$tempFile, ".mzML"))
   )
@@ -63,7 +55,6 @@ functionTOrunMSCONVERTonCMDline<-function(x){
   system(command = as.character(x))
 }
 
-popup1()
 
 lengthProgress <- length(msconvertCmdLineCommands)
 

@@ -1039,7 +1039,7 @@ observeEvent(input$run,{
                             full.names = TRUE,
                             pattern = ".mz") 
   
-  
+  popup1()
  IDBacApp::convertToMzml(mzmlRawFileDirectory = input$mzmlRawFileDirectory,
                 mzmlRawFilesLocation = mzFileInput,
                 spectraConversion = spectraConversion(),
