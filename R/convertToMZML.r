@@ -1,16 +1,13 @@
 
 convertToMzml <- function(mzmlRawFileDirectory,
                           mzmlRawFilesLocation,
-                          pwizFolderLocation){
+                          pwizFolderLocation,
+                          outDir){
 
 if(!is.null(mzmlRawFileDirectory)){
   
-  mzFileInput <- list.files(mzmlRawFilesLocation,
-                             recursive = TRUE,
-                             full.names = TRUE,
-                             pattern = ".mz") 
   
-  mzFileInput <- normalizePath(mzFileInput, winslash = "/" )
+  mzFileInput <- normalizePath(mzmlRawFilesLocation, winslash = "/" )
   
   fullZ <- NULL
   
@@ -43,7 +40,7 @@ fullZ <- lapply(fullZ,
 
 
 #Command-line MSConvert, converts from proprietary vendor data to open mzML
-msconvertCmdLineCommands <- lapply(fullZ, function(x){
+msconvertCmdLineCommands <<- lapply(fullZ, function(x){
   #Finds the msconvert.exe program which is located the in pwiz folder which is two folders up ("..\\..\\") from the directory in which the IDBac shiny app initiates from
   paste0(shQuote(file.path(pwizFolderLocation,
                            "msconvert.exe")),
@@ -55,7 +52,7 @@ msconvertCmdLineCommands <- lapply(fullZ, function(x){
          # "--noindex --mzML --merge -z",
          "--noindex --mzML --merge -z  --32",
          " -o ",
-         shQuote(tempMZ),
+         shQuote(outDir),
          " --outfile ",
          shQuote(paste0(x$tempFile, ".mzML"))
   )

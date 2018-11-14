@@ -1033,10 +1033,18 @@ observeEvent(input$run,{
   pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
   #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
   
+  
+  mzFileInput <- list.files(mzmlRawFilesLocation(),
+                            recursive = TRUE,
+                            full.names = TRUE,
+                            pattern = ".mz") 
+  
+  
  IDBacApp::convertToMzml(mzmlRawFileDirectory = input$mzmlRawFileDirectory,
-                mzmlRawFilesLocation = mzmlRawFilesLocation(),
+                mzmlRawFilesLocation = mzFileInput,
                 spectraConversion = spectraConversion(),
-                pwizFolderLocation = pwizFolderLocation)
+                pwizFolderLocation = pwizFolderLocation,
+                outDir = tempMZ)
   
   
   
