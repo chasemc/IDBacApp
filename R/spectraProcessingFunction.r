@@ -26,7 +26,6 @@ spectraProcessingFunction <- function(rawDataFilePath, sample_ID, userDBCon){
                     append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
 
-  pool::poolReturn(conn)
   
 
 #------- Create SQL "XML" table entry
@@ -75,7 +74,6 @@ spectraProcessingFunction <- function(rawDataFilePath, sample_ID, userDBCon){
               version = 3) %>%
     list(.) -> sqlDataFrame$XML$Instrument_MetaFile
 }
-  conn <- pool::poolCheckout(userDBCon)
 
   
   
@@ -87,7 +85,6 @@ spectraProcessingFunction <- function(rawDataFilePath, sample_ID, userDBCon){
                     overwrite = FALSE) # Do not overwrite
 
   
-  pool::poolReturn(conn)
  
   
 
@@ -248,7 +245,6 @@ if(typeof(mzML_con) == "S4"){
 
 wqq <- unlist(wq, recursive = FALSE)
  
-    conn <- pool::poolCheckout(userDBCon)
    
   for(i in base::seq_along(wqq)){
     

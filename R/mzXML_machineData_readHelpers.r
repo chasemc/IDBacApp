@@ -29,7 +29,7 @@ findRawSHAandFile <- function(singlemzMLpath){
   pp <- xml2::xml_ns_strip(pp)
   pp <- xml2::xml_find_all(pp,"//referenceableParamGroup/cvParam") 
   
-  if(xml2::xml_length(pp) == 0){
+  if(length(pp) == 0){
     
     pp <- xml2::read_xml(singlemzMLpath)
     pp <- xml2::xml_ns_strip(pp)
@@ -48,17 +48,7 @@ findRawSHAandFile <- function(singlemzMLpath){
 }
 
 
-
-
-
-
-
-
-
-
-
-
-  findAcquisitionInfo <- function(rawFilepaths,
+findAcquisitionInfo <- function(rawFilepaths,
                                 manufacturer){
 
     if(!exists("sha")){

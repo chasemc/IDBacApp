@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<indexedmzML xmlns="http://psi.hupo.org/ms/mzml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://psi.hupo.org/ms/mzml http://psidev.info/files/ms/mzML/xsd/mzML1.1.2_idx.xsd">
+  <mzML xmlns="http://psi.hupo.org/ms/mzml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://psi.hupo.org/ms/mzml http://psidev.info/files/ms/mzML/xsd/mzML1.1.0.xsd" id="Protein_Data" version="1.1.0">
+    <cvList count="2">
+      <cv id="MS" fullName="Proteomics Standards Initiative Mass Spectrometry Ontology" version="4.0.1" URI="http://psidev.cvs.sourceforge.net/*checkout*/psidev/psi/psi-ms/mzML/controlledVocabulary/psi-ms.obo"/>
+      <cv id="UO" fullName="Unit Ontology" version="12:10:2011" URI="http://obo.cvs.sourceforge.net/*checkout*/obo/obo/ontology/phenotype/unit.obo"/>
+    </cvList>
+    <fileDescription>
+      <fileContent>
+        <cvParam cvRef="MS" accession="MS:1000579" name="MS1 spectrum" value=""/>
+      </fileContent>
+      <sourceFileList count="1">
+        <sourceFile id="Protein_Data_x002f_0_C1_x002f_1_x002f_1SLin_x002f_fid" name="fid" location="file://C:\Users\CMC\Desktop\Example-Data_Subset\Raw_Data - Copy (2)\Protein_Data\0_C1\1\1SLin">
+          <cvParam cvRef="MS" accession="MS:1000773" name="Bruker FID nativeID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000825" name="Bruker FID format" value=""/>
+          <cvParam cvRef="MS" accession="MS:1000569" name="SHA-1" value="405471c2e40caef728bf0773d6ce10ad5d1bbd29"/>
+        </sourceFile>
+      </sourceFileList>
+    </fileDescription>
+    <referenceableParamGroupList count="1">
+      <referenceableParamGroup id="CommonInstrumentParams">
+        <cvParam cvRef="MS" accession="MS:1001534" name="Bruker Daltonics flex series" value=""/>
+        <userParam name="instrument model" value="autoflex"/>
+      </referenceableParamGroup>
+    </referenceableParamGroupList>
+    <softwareList count="3">
+      <software id="CompassXtract" version="3.1.7">
+        <cvParam cvRef="MS" accession="MS:1000718" name="CompassXtract" value=""/>
+      </software>
+      <software id="FlexControl" version="unknown">
+        <cvParam cvRef="MS" accession="MS:1000540" name="FlexControl" value=""/>
+      </software>
+      <software id="pwiz_Reader_Bruker" version="3.0.9987">
+        <cvParam cvRef="MS" accession="MS:1000615" name="ProteoWizard software" value=""/>
+      </software>
+    </softwareList>
+    <instrumentConfigurationList count="1">
+      <instrumentConfiguration id="IC1">
+        <referenceableParamGroupRef ref="CommonInstrumentParams"/>
+        <componentList count="4">
+          <source order="1">
+            <cvParam cvRef="MS" accession="MS:1000075" name="matrix-assisted laser desorption ionization" value=""/>
+          </source>
+          <analyzer order="2">
+            <cvParam cvRef="MS" accession="MS:1000084" name="time-of-flight" value=""/>
+          </analyzer>
+          <detector order="3">
+            <cvParam cvRef="MS" accession="MS:1000114" name="microchannel plate detector" value=""/>
+          </detector>
+          <detector order="4">
+            <cvParam cvRef="MS" accession="MS:1000116" name="photomultiplier" value=""/>
+          </detector>
+        </componentList>
+        <softwareRef ref="FlexControl"/>
+      </instrumentConfiguration>
+    </instrumentConfigurationList>
+    <dataProcessingList count="1">
+      <dataProcessing id="pwiz_Reader_Bruker_conversion">
+        <processingMethod order="0" softwareRef="pwiz_Reader_Bruker">
+          <cvParam cvRef="MS" accession="MS:1000544" name="Conversion to mzML" value=""/>
+        </processingMethod>
+      </dataProcessing>
+    </dataProcessingList>
+    <run id="Protein_Data" defaultInstrumentConfigurationRef="IC1" startTimeStamp="2016-11-02T13:04:52Z">
+    </run>
+  </mzML>
+  <indexList count="2">
+    <index name="spectrum">
+    </index>
+    <index name="chromatogram">
+    </index>
+  </indexList>
+  <indexListOffset>3863</indexListOffset>
+  <fileChecksum>a571ef636236f7ad4e9f897f15b7efcb615d952a</fileChecksum>
+</indexedmzML>
