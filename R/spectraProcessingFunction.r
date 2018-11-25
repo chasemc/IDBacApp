@@ -1,5 +1,5 @@
 # -----------------
-spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
+spectraProcessingFunction <- function(rawDataFilePath, sample_ID, userDBCon){
 
 
 # Number of mzML files
@@ -13,7 +13,7 @@ spectraProcessingFunction <- function(rawDataFilePath, userDBCon){
 #------- Metadata Table
  
   # Vector of sample names
-  sqlDataFrame$metaData$Strain_ID <- tools::file_path_sans_ext(basename(rawDataFilePath))
+  sqlDataFrame$metaData$Strain_ID <- sample_ID
  
   ids <- sqlDataFrame$metaData$Strain_ID
   
@@ -181,7 +181,7 @@ if(typeof(mzML_con) == "S4"){
 
 
 
-    if(max(MALDIquant::mass(spectraImport[[1]])) > 10000){ # if it's a protein spectrum
+    if(max(MALDIquant::mass(spectraImport[[1]])) > 5000){ # if it's a protein spectrum
 
 
       spectraImport %>%

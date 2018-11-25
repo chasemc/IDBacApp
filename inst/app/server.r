@@ -454,13 +454,13 @@ observe({
                                        label = ""),
                              tags$hr(size=20)),
                       column(6,
-                             p(strong("1: Or select a previous experiment to add data to")),
+                             p(strong("1: Or select a previous experiment to add data to"))
                              
-                             selectInput("newExperimentName",
-                                          label = "",
-                                          choices = availableExperiments(),
-                                          selected = 0,
-                                          width= "100%")
+                             # selectInput("newExperimentName",
+                             #              label = "",
+                             #              choices = availableExperiments(),
+                             #              selected = 0,
+                             #              width= "100%")
                              )),
                       
                       br(),
@@ -1014,8 +1014,8 @@ spectraConversion <- reactive({
 
 
 #----
-observeEvent(input$run,{
-
+conversions <- reactive({
+isolate({
     # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
     # contents of each element are file paths to the raw data for that sample
    
@@ -1023,15 +1023,15 @@ observeEvent(input$run,{
   # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
   applibpath <- file.path(workingDirectory,
                           "library")
-  pwizFolderLocation <- installed.packages(c(.libPaths(),
+  msconvertLocation <- installed.packages(c(.libPaths(),
                                              applibpath))
-  pwizFolderLocation <- as.list(pwizFolderLocation[grep("proteowizardinstallation", pwizFolderLocation), ])
-  pwizFolderLocation <- file.path(pwizFolderLocation$LibPath, 
+  msconvertLocation <- as.list(msconvertLocation[grep("proteowizardinstallation", msconvertLocation), ])
+  msconvertLocation <- file.path(msconvertLocation$LibPath, 
                                   "proteowizardinstallation", 
                                   "pwiz")
   
-  pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-  #pwizFolderLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+  #msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
   
   
   mzFileInput <- list.files(mzmlRawFilesLocation(),
@@ -1040,21 +1040,30 @@ observeEvent(input$run,{
                             pattern = ".mz") 
   
   popup1()
- IDBacApp::convertToMzml(mzmlRawFileDirectory = input$mzmlRawFileDirectory,
-                mzmlRawFilesLocation = mzFileInput,
-                spectraConversion = spectraConversion(),
-                pwizFolderLocation = pwizFolderLocation,
-                outDir = tempMZ)
   
+  mzmlRawFileDirectory1 <<-input$mzmlRawFileDirectory
+  mzmlRawFilesLocation<<-mzFileInput
+  msconvertLocation<<-msconvertLocation
+  outDir<-tempMZ
   
+  conversions <- IDBacApp::convertToMzml(mzmlRawFileDirectory = input$mzmlRawFileDirectory,
+                                         mzmlRawFilesLocation = mzFileInput,
+                                         # spectraConversion = spectraConversion(),
+                                         msconvertLocation = file.path(msconvertLocation,"msconvert.exe"),
+                                         outDir = tempMZ)
+
+     return(conversions)
   
-  
-  
-  
-  
-    popup2()
+})
 })
 
+
+
+observeEvent(input$run,{
+ warning(conversions())
+  popup2()
+  
+})
 
 # Run raw data processing on delimited-type input files
 #----
@@ -1105,16 +1114,14 @@ observeEvent({
     input$beginPeakProcessingModal,
     input$beginPeakProcessingAgain)},{
 
-      rawDataFilePath <- normalizePath(list.files(tempMZ,
-                                           pattern = ".mzML", 
-                                           full.names = TRUE,
-                                           ignore.case = TRUE))
+      
       popup3()
 
-      aaz<<-rawDataFilePath
-      aaz2 <<- newExperimentSqlite()
-           rawDataFilePath <- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
- 
+      # Split into chunks. Each chunk will be consecutively loaded into RAM and processed
+       rawDataFilePath <- conversions()$tempNames
+       rawDataFilePath <- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
+       sampleNames <- conversions()$sampleNames
+       sampleNames <- split(sampleNames, ceiling(seq_along(rawDataFilePath) / 25))
             lengthProgress <- length(rawDataFilePath)
 
 
@@ -1125,6 +1132,7 @@ observeEvent({
                      for(i in base::seq_along(lengthProgress)){
                        incProgress(1/lengthProgress)
                        IDBacApp::spectraProcessingFunction(rawDataFilePath = rawDataFilePath[[i]],
+                                                           sample_ID = sampleNames[[i]],
                                                            userDBCon = newExperimentSqlite()) # pool connection
                        }
 
