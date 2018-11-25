@@ -2578,8 +2578,7 @@ azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
   colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
   lp3<<-pc
   pc
-  }
-  FALSE
+  }else{FALSE}
 })
 
 
@@ -2587,7 +2586,6 @@ azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
 
 output$smallMolPca <- renderPlotly({
   
-  req(ppp(), cancelOutput = FALSE)
   yep <- as.data.frame(ppp(), stringsAsFactors = FALSE)
 plot_ly(data = yep,
         x = ~Dim1,
