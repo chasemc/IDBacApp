@@ -1,26 +1,33 @@
+# require("IRanges")
 
-binnR <- function (vectorlist, ppm, low, high, increment){
+binnR <- function(vectorList,
+                  ppm, 
+                  refSeqStart,
+                  refSeqEnd){
   
-  # Create a vector entry for every unique element
-  longVector <- seq(from = low,
-                    to = high,
-                    by = increment)
-  # length of vector that will be created
-  nx <- length(longVector)
-  # Adjust ppm to decimal tolarance across long vector
-  toll <- ppm / 10e5 * longVector
-  # Iterate over the provided list of vectors
-  lapply(vectorlist, function(vec){
-    
-    matches <- rep(0, nx)
-    ry <- 1:length(vec)
-    for (i in seq_along(vec)) {
-      # returns abs diff across entire long vector
-      dif <- abs(longVector - vec[i])
-      matches[which(dif <= toll)] <- 1
-    }
-    
-    matches
+  # vectorList: A list of m/z vectors
+  # ppm: ppm tolerance 
+  # refSeqStart: the first m/z in the IRanges object
+  # refSeqEnd: the last m/z in the IRanges object
+  
+  scaleFactor <- ppm / 10e5 * refSeqStart 
+  mrange <- IRanges::IRanges(start = seq(refSeqStart * scaleFactor,
+                                         refSeqEnd * scaleFactor, 1),
+                             end = seq((refSeqStart * scaleFactor) + 1,
+                                       (refSeqEnd * scaleFactor) + 1, 1))
+  
+  ranges <- lapply(vectorList, 
+                   function(massVector){
+                     # get ppm across mass vector
+                     pp <- ppm / 10e5 * massVector
+                     massVector <- massVector * scaleFactor
+                     ir1 <- IRanges::IRanges(start = massVector - pp,
+                                             end = massVector + pp)
+                   }
+  )
+  lapply(ranges, function(x){
+    IRanges::findOverlaps(x, mrange)
+    #S4Vectors::unique(S4Vectors::subjectHits(z1))
     
   })
 }
