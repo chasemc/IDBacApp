@@ -3,13 +3,13 @@ proteinDistanceMatrix <- function(binnedData, method){
   if(method == "cosineD"){
 
     nam <- names(binnedData)
-    binnedData <- do.call(rbind,binnedData)
+    zz1 <- do.call(rbind, binnedData)
     
-    binnedData %>%
-      coop::tcosine(.) -> p
+    zz1[!is.na(zz1)] <- 1
+    zz1[is.na(zz1)] <- 0
+    as.dist(1-coop::tcosine(zz1))
+    
 
-      rownames(p) <- nam
-      1- as.dist(p)
 
 
   }else{

@@ -16,11 +16,17 @@ binnR <- function(vectorList,
                              end = seq((refSeqStart * scaleFactor) + 1,
                                        (refSeqEnd * scaleFactor) + 1, 1))
   
+  
+  mrange <- IRanges::IRanges(seq(refSeqStart, refSeqEnd, scaleFactor),
+                             rep(NA, length(seq(refSeqStart, refSeqEnd, scaleFactor))), scaleFactor)
+  
+  
+  
   ranges <- lapply(vectorList, 
                    function(massVector){
                      # get ppm across mass vector
                      pp <- ppm / 10e5 * massVector
-                     massVector <- massVector * scaleFactor
+                     massVector <- massVector
                      ir1 <- IRanges::IRanges(start = massVector - pp,
                                              end = massVector + pp)
                    }
