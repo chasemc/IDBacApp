@@ -9,3 +9,4 @@ License: GPL v3 except included packages or sources license otherwise
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat
+RoxygenNote: 6.1.1

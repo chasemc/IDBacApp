@@ -108,18 +108,24 @@ function(input,output,session){
                p("Location of experiment file:"),
                verbatimTextOutput("selectedSQLText",
                                   placeholder = TRUE)),
+               
                tabPanel("Create Experiment from Other Experiments",
                         column(12,
                                style = "background-color: #7777770d",
+                               
                                radioButtons("selectMixNmatchExperiment",
                                             label = p("Select samples from previous experiment to transfer to a new experiment."),
                                             choices = availableExperiments(),
                                             selected = 0),
                                uiOutput("chosenp"),
+                               p("Move strains between boxes by clicking the strain's name
+                                          and then an arrow. Strains in the right box will be used for analysis."),
+                               uiOutput("chooseNewDBSamples"),
                                verbatimTextOutput("selection"),
                                br(),
                                textInput("nameformixNmatch",
                                          label = "Enter name for new experiment"))),
+               
                tabPanel("Add/Modify Strain Attributes",
                         p("s"),
                         actionButton("searchNCBI",
@@ -1278,7 +1284,8 @@ dataForInversePeakComparisonPlot <- reactive({
 
   # connect to sql
   db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
-
+  conn <- pool::poolCheckout(userDBCon())
+  
   # get protein peak data for the 1st mirror plot selection
   db %>%
     filter(Strain_ID %in% input$Spectra1) %>%
@@ -1289,7 +1296,8 @@ dataForInversePeakComparisonPlot <- reactive({
                        db = userDBCon(),
                        proteinPercentPresence = input$percentPresenceP,
                        lowerMassCutoff = input$lowerMass,
-                       upperMassCutoff = input$upperMass) %>%
+                       upperMassCutoff = input$upperMass,
+                       dbConnection = conn) %>%
     return(.) -> mirrorPlotEnv$peaksSampleOne
 
   # get protein peak data for the 2nd mirror plot selection
@@ -1302,9 +1310,11 @@ dataForInversePeakComparisonPlot <- reactive({
                        db = userDBCon(),
                        proteinPercentPresence = input$percentPresenceP,
                        lowerMassCutoff = input$lowerMass,
-                       upperMassCutoff = input$upperMass) %>%
+                       upperMassCutoff = input$upperMass,
+                       dbConnection = conn) %>%
     return(.) -> mirrorPlotEnv$peaksSampleTwo
-
+  pool::poolReturn(conn)
+  
 
   # pSNR= the User-Selected Signal to Noise Ratio for protein
   
@@ -1565,15 +1575,20 @@ collapsedPeaksP <- reactive({
     split(spectrumSHA,Strain_ID) -> temp
   
   #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
-
-    lapply(temp, 
-           function(x){
+  conn <- pool::poolCheckout(userDBCon())
+  
+   return( lapply(temp,
+                 function(x){
              IDBacApp::collapseProteinReplicates(fileshas = x,
                                                  db = userDBCon(),
                                                  proteinPercentPresence = input$percentPresenceP,
                                                  lowerMassCutoff = input$lowerMass,
-                                                 upperMassCutoff = input$upperMass)
-           })
+                                                 upperMassCutoff = input$upperMass,
+                                                 dbConnection = conn)
+           }))
+    
+    pool::poolReturn(conn)
+    
 })
 
 
@@ -1612,8 +1627,8 @@ dendro <- reactive({
 #----
 
 binnedProtein <- reactive({
-
-      binvec <<- lapply(collapsedPeaksP(), function(x) x@mass)
+awss<<-collapsedPeaksP()
+      binvec <- lapply(collapsedPeaksP(), function(x) x@mass)
     zq <-  binnR(vectorList = binvec,
                         ppm = 2000, 
                         refSeqStart = 3000,
@@ -2330,11 +2345,12 @@ output$chooseProteinSamples <- renderUI({
 
 
 
+
 # Check which samples can be used for protein analysis, return Sample Names
 #----
 availableProtein <- reactive({
 
-  combinedSmallMolPeaksAll <- glue::glue_sql("
+  combinedProteinPeaksAll <- glue::glue_sql("
                                               SELECT DISTINCT `Strain_ID`
                                               FROM `IndividualSpectra`
                                               WHERE (`proteinPeaks` IS NOT NULL)",
@@ -2342,11 +2358,58 @@ availableProtein <- reactive({
   )
 
   conn <- pool::poolCheckout(userDBCon())
-  combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
-  combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
+  combinedProteinPeaksAll <- DBI::dbSendQuery(conn, combinedProteinPeaksAll)
+  
+  return(DBI::dbFetch(combinedProteinPeaksAll)[ , 1])
 
-  combinedSmallMolPeaksAll
 })
+
+
+
+# Select samples for input into new databe
+#----
+output$chooseNewDBSamples <- renderUI({
+  
+  IDBacApp::chooserInput("addSampleChooser",
+                         "Available samples", 
+                         "Selected samples",
+                         availableNewSamples(),
+                         c(),
+                         size = 10, 
+                         multiple = TRUE
+  )
+})
+
+# Check which samples are available in the databse to be moved into other databse
+#----
+availableNewSamples <- reactive({
+  
+  samples <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
+                            FROM `IndividualSpectra`",
+                            .con = userDBCon()
+                            )
+  
+  conn <- pool::poolCheckout(userDBCon())
+  samples <- DBI::dbSendQuery(conn, samples)
+  
+  return(DBI::dbFetch(samples)[ , 1])
+  
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
