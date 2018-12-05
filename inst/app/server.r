@@ -1565,8 +1565,8 @@ collapsedPeaksP <- reactive({
     split(spectrumSHA,Strain_ID) -> temp
   
   #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
-  temp %>%
-    lapply(., 
+
+    lapply(temp, 
            function(x){
              IDBacApp::collapseProteinReplicates(fileshas = x,
                                                  db = userDBCon(),
