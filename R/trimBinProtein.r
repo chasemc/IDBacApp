@@ -24,8 +24,6 @@ if(length(injectLibrary) == 0){      # If library injection is not selected:
 
   all <- lapply(ids, function(x) IDBacApp::collapseProteinReplicates2(db = db,
                                                                                spectrumSHA = x))
-
-alw<<-all
     # Trim masses to user-specified lower and upper bounds and return as the result of the function
   MALDIquant::trim(all,
                    c(lowerMassCutoff, upperMassCutoff))
