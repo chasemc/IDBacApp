@@ -1030,8 +1030,8 @@ isolate({
                                   "proteowizardinstallation", 
                                   "pwiz")
   
-  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-  #msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+  #msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
   
   
   mzFileInput <- list.files(mzmlRawFilesLocation(),
@@ -1119,9 +1119,9 @@ observeEvent({
 
       # Split into chunks. Each chunk will be consecutively loaded into RAM and processed
        rawDataFilePath <- conversions()$tempNames
-       rawDataFilePath <- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
+       rawDataFilePath <<- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
        sampleNames <- conversions()$sampleNames
-       sampleNames <- split(sampleNames, ceiling(seq_along(rawDataFilePath) / 25))
+       sampleNames <<- split(sampleNames, ceiling(seq_along(rawDataFilePath) / 25))
             lengthProgress <- length(rawDataFilePath)
 
 
@@ -1129,7 +1129,7 @@ observeEvent({
                    detail = 'This may take a while...',
                    value = 0, {
 
-                     for(i in base::seq_along(lengthProgress)){
+                     for(i in base::seq_along(rawDataFilePath)){
                        incProgress(1/lengthProgress)
                        IDBacApp::spectraProcessingFunction(rawDataFilePath = rawDataFilePath[[i]],
                                                            sample_ID = sampleNames[[i]],
@@ -1613,16 +1613,22 @@ dendro <- reactive({
 
 binnedProtein <- reactive({
 
-      binvec <- lapply(collapsedPeaksP(), function(x) x@mass)
+      binvec <<- lapply(collapsedPeaksP(), function(x) x@mass)
+    zq <-  binnR(vectorList = binvec,
+                        ppm = 2000, 
+                        refSeqStart = 3000,
+                        refSeqEnd = 15000)
+      
+    #  collected <- lapply(zq, function(x) S4Vectors::unique(S4Vectors::subjectHits(x)))
+    collected <- lapply(zq, function(x) S4Vectors::unique(S4Vectors::subjectHits(x)))
+    
+    cvec <- sort(unique(unlist(collected)))
+    
+     lapply(collected, function(x) match(cvec, x))
+
+      
         
-        
-      IDBacApp::binnR(vectorlist = binvec,
-                                                 ppm = 2000,
-                                                 low = input$lowerMass,
-                                                 high = input$upperMass,
-                                                 increment = 1)
-        
-      })
+})
   
   
   
