@@ -5,7 +5,7 @@
 \title{Collapse a sample's MALDIquant peak objects into a single peak object}
 \usage{
 collapseProteinReplicates(db, fileshas, proteinPercentPresence,
-  lowerMassCutoff, upperMassCutoff)
+  lowerMassCutoff, upperMassCutoff, dbConnection)
 }
 \arguments{
 \item{db}{ool::() connection to the IDBac sqlite dataabse}

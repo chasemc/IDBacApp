@@ -4,7 +4,7 @@
 \alias{getProteinPeakData}
 \title{Retrieve MALDIquant peak objects from an IDBac sqlite database}
 \usage{
-getProteinPeakData(db, fileshas)
+getProteinPeakData(db, dbConnection, fileshas)
 }
 \arguments{
 \item{db}{pool::() connection to the IDBac sqlite dataabse}
@@ -12,7 +12,7 @@ getProteinPeakData(db, fileshas)
 \item{fileshas}{the shas for the individual MALDIquant peak objects}
 }
 \value{
-MALDIquant peak objects correspoding to the provided fileshas
+unlisted MALDIquant peak objects correspoding to the provided fileshas
 }
 \description{
 Retrieve MALDIquant peak objects from an IDBac sqlite database
