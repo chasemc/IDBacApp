@@ -115,8 +115,8 @@ function(input,output,session){
                                
                                radioButtons("selectMixNmatchExperiment",
                                             label = p("Select samples from previous experiment to transfer to a new experiment."),
-                                            choices = availableExperiments(),
-                                            selected = 0),
+                                            choices = availableExperiments2(),
+                                            selected = availableExperiments2()[[1]]),
                                uiOutput("chosenp"),
                                p("Move strains between boxes by clicking the strain's name
                                           and then an arrow. Strains in the right box will be used for analysis."),
@@ -124,7 +124,18 @@ function(input,output,session){
                                verbatimTextOutput("selection"),
                                br(),
                                textInput("nameformixNmatch",
-                                         label = "Enter name for new experiment"))),
+                                         label = "Enter name for new experiment"),
+                               
+                               actionButton("addtoNewDB", "Add to new Experiment")
+                               
+                               
+                               
+                               
+                               
+                               )
+                        
+                        
+                        ),
                
                tabPanel("Add/Modify Strain Attributes",
                         p("s"),
@@ -148,7 +159,17 @@ availableExperiments <- reactive({
   
 })
   
+
+
+availableExperiments2 <- reactive({
+  tools::file_path_sans_ext(list.files(workingDirectory,
+                                       pattern = ".sqlite",
+                                       full.names = FALSE))
   
+  
+  
+})
+
   
   
 #----
@@ -182,46 +203,7 @@ newExperimentSqlite <- reactive({
 })
 
 
-#----
-mixNmatchOldDatabase <- reactive({
-  # This pool is used when mix an matching "experiment" .sqlite db
-   pool::dbPool(drv = RSQLite::SQLite(),
-               dbname = input$selectMixNmatchExperiment)
-})
 
-
-#----
-output$chosenp <- renderUI({
-  IDBacApp::chooserInput("mychooser",
-                         "Available frobs",
-                         "Selected frobs",
-                         oldnames(),
-                         c(),
-                         size = 10,
-                         multiple = TRUE)
-})
-
-
-#----
-output$selection <- renderPrint(
-    input$mychooser
-)
-
-
-#----
-oldnames <- reactive({
-  getAllStrain_IDsfromSQL(databaseConnection = mixNmatchOldDatabase(),
-                          table = "IndividualSpectra")
-})
-
-
-#Create mix N match sqlite
-#----
-newmixNmatchExperimentSqlite <- reactive({
-  # This pool is used when creating an entirely new mix N match "experiment" .sqlite db
-  pool::dbPool(drv = RSQLite::SQLite(),
-               dbname = input$nameformixNmatch)
-})
 
 
 #----
@@ -411,16 +393,7 @@ observe({
                      selected = 0,
                      inline = FALSE,
                      width = "100%")
-      }else if(input$startingWith == 3){
-        radioButtons("mzmlInputFormat",label = h3("Begin by selecting an option below:"),
-                     choices = list("Select here if each individual mzXML/mzML file contains both protein and small molecule data." = 1,
-                                    "Select here if you have a folder containing mzXML/mzML protein data and/or a folder 
-                                    containing small molecule data." = 2),
-                     selected = 0,
-                     inline = FALSE,
-                     width = "100%")
-      }  
-      
+      }
 
     })
   }
@@ -445,29 +418,17 @@ observe({
     output$ui1 <- renderUI({
       fluidRow(
                  column(12, align = "center",
-                        h3("Starting with mzML or mzXML Data"),
+                        h3("Starting with mzML or mzXML Data:"),
            
                column(2),
                column(8, style = "background-color:#7777770d", align = "center",
-                      fluidRow(
-                        h3("Workflow Pane",
-                           align="center")),
+      
                       br(),
-                      column(12,
-                      column(6,
-                             p(strong("1: Enter a Name for this New Experiment")),
+                      column(12,align = "center",
+                             p(strong("1: Enter a filename for this new experiment")),
                              textInput("newExperimentName",
                                        label = ""),
                              tags$hr(size=20)),
-                      column(6,
-                             p(strong("1: Or select a previous experiment to add data to"))
-                             
-                             # selectInput("newExperimentName",
-                             #              label = "",
-                             #              choices = availableExperiments(),
-                             #              selected = 0,
-                             #              width= "100%")
-                             )),
                       
                       br(),
                       p(strong("2: Click to select the location of your mzML files"), align= "center"),
@@ -498,7 +459,7 @@ observe({
 #----
 mzmlRawFilesLocation <- reactive({
   if (input$mzmlRawFileDirectory > 0) {
-    choose.dir()
+    IDBacApp::choose_dir()
   }
 })
 
@@ -510,11 +471,28 @@ output$mzmlRawFileDirectory <- renderText({
     return("No Folder Selected")
   } else {
     folders <- NULL
+    
+    findmz <- function(){
+     # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
+      return(list.files(mzmlRawFilesLocation(),
+                                  recursive = TRUE,
+                                  full.names = FALSE,
+                                  pattern = "\\.mz"))
+     # setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+      
+      }
+
+    
     # Get the folders contained within the chosen folder.
-    foldersInFolder <- list.files(mzmlRawFilesLocation(),
-                                 recursive = TRUE,
-                                 full.names = FALSE,
-                                 pattern = ".mz") 
+    foldersInFolder <- tryCatch(findmz(),
+                                error = function(x) paste("Timed out"),
+                                finally = function(x) x)
+    
+if (foldersInFolder == "Timed out"){
+  return("Timed out looking for mzML/mzXML files. This can happen if the folder you 
+          selected has lots of folders within it... because IDBac looks through all 
+          of them for mzML/mzXML files.")}else{
+    
     for (i in 1:length(foldersInFolder)) {
       # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
       folders <- paste0(folders, 
@@ -522,7 +500,9 @@ output$mzmlRawFileDirectory <- renderText({
                         basename(foldersInFolder[[i]]))
     }
     return(folders)
-  }
+          }}
+  
+  
 })
 
 
@@ -618,7 +598,7 @@ observe({
 #----
 delimitedLocationP <- reactive({
   if (input$delimitedDirectoryP > 0) {
-    choose.dir()
+    IDBacApp::choose_dir()
   }
 })
 
@@ -627,7 +607,7 @@ delimitedLocationP <- reactive({
 #----
 delimitedLocationSM <- reactive({
   if (input$delimitedDirectorySM > 0) {
-    choose.dir()
+    IDBacApp::choose_dir()
   }
 })
 
@@ -937,7 +917,7 @@ pressedidbacDirectoryButton <- reactive({
   if(is.null(input$idbacDirectoryButton)){
     return("No Folder Selected")
   } else if (input$idbacDirectoryButton > 0){
-    choose.dir()
+    IDBacApp::choose_dir()
   }
 })
 
@@ -946,7 +926,7 @@ pressedidbacDirectoryButton <- reactive({
 #----
 rawFilesLocation <- reactive({
   if (input$rawFileDirectory > 0) {
-    choose.dir()
+    IDBacApp::choose_dir()
   }
 })
 
@@ -977,7 +957,7 @@ output$rawFileDirectory <- renderText({
 #----
 multipleMaldiRawFileLocation <- reactive({
   if (input$multipleMaldiRawFileDirectory > 0) {
-    choose.dir()
+    IDBacApp::choose_dir()
   }
 })
 
@@ -1036,8 +1016,8 @@ isolate({
                                   "proteowizardinstallation", 
                                   "pwiz")
   
-  #msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+  #msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
   
   
   mzFileInput <- list.files(mzmlRawFilesLocation(),
@@ -1629,7 +1609,7 @@ dendro <- reactive({
 binnedProtein <- reactive({
 awss<<-collapsedPeaksP()
       binvec <- lapply(collapsedPeaksP(), function(x) x@mass)
-    zq <-  binnR(vectorList = binvec,
+    zq <- IDBacApp::binnR(vectorList = binvec,
                         ppm = 2000, 
                         refSeqStart = 3000,
                         refSeqEnd = 15000)
@@ -2380,16 +2360,33 @@ output$chooseNewDBSamples <- renderUI({
   )
 })
 
+#----
+existingDB <- reactive({
+  # This pool is used when selecting to analyze a previous experiment
+  #  isolate( input$percentPresenceP )
+  
+  fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
+                                                    pattern = ".sqlite",
+                                                    full.names = FALSE))
+  filePaths <- list.files(workingDirectory,
+                          pattern = ".sqlite",
+                          full.names = TRUE)
+  filePaths <- filePaths[which(fileNames == input$selectMixNmatchExperiment)]
+  
+  pool::dbPool(drv = RSQLite::SQLite(),
+               dbname = filePaths
+  )
+})
 # Check which samples are available in the databse to be moved into other databse
 #----
 availableNewSamples <- reactive({
   
   samples <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
                             FROM `IndividualSpectra`",
-                            .con = userDBCon()
+                            .con = existingDB()
                             )
   
-  conn <- pool::poolCheckout(userDBCon())
+  conn <- pool::poolCheckout(existingDB())
   samples <- DBI::dbSendQuery(conn, samples)
   
   return(DBI::dbFetch(samples)[ , 1])
@@ -2399,6 +2396,29 @@ availableNewSamples <- reactive({
 
 
 
+
+observeEvent(input$addtoNewDB, {
+  
+  fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
+                                                    pattern = ".sqlite",
+                                                    full.names = FALSE))
+  filePaths <- list.files(workingDirectory,
+                          pattern = ".sqlite",
+                          full.names = TRUE)
+
+
+  existingDBpath <- filePaths[which(fileNames == input$selectMixNmatchExperiment)]
+  newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
+
+  copyToNewDatabase(existingDBpath=existingDBpath,
+                    newdbPath = newdbPath, 
+                    sampleIDs = input$addSampleChooser$right)
+    
+
+
+
+
+})
 
 
 
