@@ -43,9 +43,6 @@ parseDelimitedMS <- function(proteinDirectory = NULL,
                               detail = 'This may take a while...', value = 0, {
 
 
-
-
-
                                 for(i in keys){
                                   incProgress(1/lengthProgress)
 
