@@ -2,6 +2,16 @@ copyToNewDatabase <- function(existingDBpath,
                               newdbPath, 
                               sampleIDs){
 
+  
+
+  
+  withProgress(message = 'Copying data to new database',
+               detail = 'Connecting experiments...',
+               value = 0, {
+         
+                 
+                 Sys.sleep(1) 
+  
   # Connect to both databases (create pool and checkout)
   
 existingDBPool <- pool::dbPool(drv = RSQLite::SQLite(),
@@ -22,6 +32,12 @@ sqlQ <- glue::glue_sql("attach database ({dbPath*}) as newDB;",
   
 DBI::dbSendStatement(existingDBconnection, sqlQ)
 
+
+Sys.sleep(1) 
+setProgress(value = 0.2, 
+            message = 'Copying data to new database',
+            detail = 'Setting the floxer...',
+            session = getDefaultReactiveDomain())
 
 # Create sqlite tables in new database
 #-----
@@ -51,49 +67,122 @@ DBI::dbWriteTable(conn = newDBconnection,
 # Copy over the data corresponding to the samples selected
 #-----
 
-sqlQ <- glue::glue_sql("INSERT INTO newDB.metaData
-                        SELECT * 
-                        FROM `metaData`
-                        WHERE (`Strain_ID` IN ({strainIds*}))",
-                       strainIds = sampleIDs,
-                       .con = existingDBPool
+
+Sys.sleep(1) 
+setProgress(value = 0.4, 
+            message = 'Copying data to new database',
+            detail = 'Copying the fluxes...',
+            session = getDefaultReactiveDomain())
+
+
+
+checkStrainIds <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
+                                  FROM `metaData`",
+                                          .con = newDBPool
 )
-DBI::dbSendStatement(existingDBconnection, sqlQ)
+
+checkStrainIds <- DBI::dbSendStatement(newDBconnection, checkStrainIds)
+checkStrainIds <- DBI::dbFetch(checkStrainIds)[ , 1]
+sampleIDsneeded <- sampleIDs[!sampleIDs %in% checkStrainIds]
+
+   if(length(sampleIDsneeded) > 0){
+       sqlQ <- glue::glue_sql("INSERT INTO newDB.metaData
+                               SELECT * 
+                               FROM `metaData`
+                               WHERE (`Strain_ID` IN ({strainIds*}))",
+                               strainIds = sampleIDsneeded,
+                               .con = existingDBPool
+                              )
+       DBI::dbSendStatement(existingDBconnection, sqlQ)
+       
+       }
 
 
 
+# Get fileshas from old db so we don't  add duplicates to new database
+sqlQ <- glue::glue_sql("SELECT DISTINCT `spectrumSHA`
+                        FROM `IndividualSpectra`
+                        WHERE (`Strain_ID` IN ({strainIds*}))",
+                        strainIds = sampleIDs,
+                        .con = existingDBPool
+)
+olddbshas <- DBI::dbSendStatement(existingDBconnection, sqlQ)
+olddbshas <- DBI::dbFetch(olddbshas)[ , 1]
+
+
+sqlQ <- glue::glue_sql("SELECT DISTINCT `spectrumSHA`
+                        FROM `IndividualSpectra`",
+                       .con = newDBPool
+)
+
+newdbshas <- DBI::dbSendStatement(newDBconnection, sqlQ)
+newdbshas <- DBI::dbFetch(newdbshas)[ , 1]
+
+
+newdbshas <- olddbshas[!olddbshas %in% newdbshas]
+
+if(length(newdbshas) > 0){
+  
 sqlQ <- glue::glue_sql("INSERT INTO newDB.IndividualSpectra
                         SELECT * 
+                       FROM `IndividualSpectra`
+                       WHERE (`spectrumSHA` IN ({spectrumSHAs*}))",
+                       spectrumSHAs = newdbshas,
+                       .con = existingDBPool
+)
+
+DBI::dbSendStatement(existingDBconnection, sqlQ)
+
+}
+
+
+
+
+
+
+
+
+
+
+# Get fileshas from old db so we don't  add duplicates to new database
+sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLSHA`
                        FROM `IndividualSpectra`
                        WHERE (`Strain_ID` IN ({strainIds*}))",
                        strainIds = sampleIDs,
                        .con = existingDBPool
 )
-
-DBI::dbSendStatement(existingDBconnection, sqlQ)
-
-
+olddbshas <- DBI::dbSendStatement(existingDBconnection, sqlQ)
+olddbshas <- DBI::dbFetch(olddbshas)[ , 1]
 
 
-samples <- glue::glue_sql("SELECT DISTINCT `mzMLSHA`
-                          FROM `IndividualSpectra`",
-                          .con = newDBPool
+sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLSHA`
+                       FROM `IndividualSpectra`",
+                       .con = newDBPool
 )
 
-samples <- DBI::dbSendQuery(newDBconnection, samples)
+newdbshas <- DBI::dbSendStatement(newDBconnection, sqlQ)
+newdbshas <- DBI::dbFetch(newdbshas)[ , 1]
 
-sampleIDs <- (DBI::dbFetch(samples)[ , 1])
+
+newdbshas <- olddbshas[!olddbshas %in% newdbshas]
+
+if(length(newdbshas) > 0){
+
 
 
 sqlQ <- glue::glue_sql("INSERT INTO newDB.XML
                         SELECT * 
                        FROM `XML`
                        WHERE (`mzMLSHA` IN ({mzMLSHA*}))",
-                       mzMLSHA = sampleIDs[!is.na(sampleIDs)],
+                       mzMLSHA = newdbshas,
                        .con = existingDBPool
 )
 
 DBI::dbSendStatement(existingDBconnection, sqlQ)
+
+
+}
+
 
 # Clean up
 #-----
@@ -127,5 +216,16 @@ DBI::dbSendStatement(newDBconnection, sqlQ)
 poolReturn(existingDBconnection)
 poolReturn(newDBconnection)
 
+
+
+setProgress(value = 0.8, 
+            message = 'Copying data to new database',
+            detail = 'Finishing up...',
+            session = getDefaultReactiveDomain())
+
+Sys.sleep(1)
+
+
+})
 
 }
