@@ -98,7 +98,7 @@ spectraProcessingFunction <- function(rawDataFilePath, sample_ID, userDBCon){
 
 
 
-  sqlDataFrame$XML <-NULL # Free up memory
+  sqlDataFrame$XML <- NULL # Free up memory
 
 
   check <- length(acquisitonInfo$Instrument_MetaFile) == length(acquisitonInfo$AcquisitionDate) &&
@@ -112,19 +112,6 @@ spectraProcessingFunction <- function(rawDataFilePath, sample_ID, userDBCon){
 
   
   #------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # If there's only one mzml file then we need to turn into a list for lapply
 if(typeof(mzML_con) == "S4"){
@@ -142,14 +129,14 @@ if(typeof(mzML_con) == "S4"){
     # Reset
     sqlDataFrame <- IDBacApp::sqlTableArchitecture(nrow = 1)
 
-        sqlDataFrame$IndividualSpectra$mzMLSHA <- mzMLSHA1[[yeah]]
+    sqlDataFrame$IndividualSpectra$mzMLSHA <- mzMLSHA1[[yeah]]
     sqlDataFrame$IndividualSpectra$Strain_ID <- ids[[yeah]]
     sqlDataFrame$IndividualSpectra$spectrumSHA <- individualRawSpecSHA[[yeah]]$spectrumSHA[[individualSpectrum]]
     sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
     sqlDataFrame$IndividualSpectra$AcquisitionDate <- acquisitonInfo$AcquisitionDate[[individualSpectrum]]
 
 
-
+    
 
     spectraImport <- mzR::peaks(mzML_con[[yeah]], scans = individualSpectrum)
 
@@ -202,7 +189,8 @@ if(typeof(mzML_con) == "S4"){
         MALDIquant::transformIntensity(., method = "sqrt") %>%
         MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
         MALDIquant::removeBaseline(., method = "TopHat") %>%
-        MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 4) %>%
+        MALDIquant::calibrateIntensity(.,  method="TIC") %>% 
+        MALDIquant::detectPeaks(., method = "MAD", halfWindowSize = 20, SNR = 3) %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
         memCompress(., type = "gzip") %>% 
         list(.)  -> sqlDataFrame$IndividualSpectra$proteinPeaks
@@ -221,6 +209,7 @@ if(typeof(mzML_con) == "S4"){
       spectraImport %>%
         MALDIquant::smoothIntensity(., method = "SavitzkyGolay", halfWindowSize = 20) %>%
         MALDIquant::removeBaseline(., method = "TopHat") %>%
+        MALDIquant::calibrateIntensity(.,  method="TIC") %>% 
         #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
         MALDIquant::detectPeaks(., method = "SuperSmoother", halfWindowSize = 20, SNR = 1) %>%
         serialize(object = ., connection = NULL, ascii = FALSE, xdr = FALSE, version = 3) %>%
@@ -233,9 +222,17 @@ if(typeof(mzML_con) == "S4"){
 
       
     }
+    a<-colnames(IDBacApp::sqlTableArchitecture(nrow = 1)$IndividualSpectra)
+    b <- colnames(sqlDataFrame$IndividualSpectra)
+    
+    for(i in a[!a %in% b]){
+      sqlDataFrame$IndividualSpectra[,i] <- NA
+    }
 
     
-   sqlDataFrame$IndividualSpectra[1, ]
+   return(sqlDataFrame$IndividualSpectra[1, a])
+    
+   
     
 })
 
