@@ -1016,8 +1016,8 @@ isolate({
                                   "proteowizardinstallation", 
                                   "pwiz")
   
-  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-  #msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+ # msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
   
   
   mzFileInput <- list.files(mzmlRawFilesLocation(),
@@ -2022,7 +2022,7 @@ output$downloadReport <- downloadHandler(
     file.copy(src, 'report.Rmd', overwrite = TRUE)
     
     library(rmarkdown)
-    out <- render('C:/Users/CMC/Documents/GitHub/IDBac_App/ResultsReport.Rmd', switch(
+    out <- render('C:/Users/chase/Documents/GitHub/IDBac_App/ResultsReport.Rmd', switch(
       input$format,
       HTML = html_document()
     ))
@@ -2530,13 +2530,13 @@ selectedSmallMolPeakList <- reactive({
   sqlQ <- DBI::dbFetch(sqlQ)
 
   split(sqlQ$spectrumSHA, sqlQ$Strain_ID) %>%
-  lapply(., function(x){
+  sqlQ <- lapply(., function(x){
     IDBacApp::collapseSmallMolReplicates(fileshas = x,
                                          db = userDBCon(),
                                          smallMolPercentPresence = input$percentPresenceSM,
                                          lowerMassCutoff = input$lowerMassSM,
                                          upperMassCutoff = input$upperMassSM) %>% unname
-  }) -> sqlQ
+  })
 
   for(i in 1:length(sqlQ)){
 
@@ -2558,55 +2558,22 @@ selectedSmallMolPeakList <- reactive({
 
 
 #----
-subtractMatrixBlank <- reactive({
-   
-      labs <- labels(selectedSmallMolPeakList())
+subtractedMatrixBlank <- reactive({
 
-      binned <- binPeaks(selectedSmallMolPeakList(), 
-                         method = "strict", 
-                         tolerance = 0.0002)
-
-      #Next, find which ID contains "matrix", in any capitalization
-      matrixIndex <- grep("^matrix",
-                          labs,
-                          ignore.case=TRUE)
-     peaksa <- binned
-
-      if(input$matrixSamplePresent == 1){
-
-        validate(
-          need(length(matrixIndex) > 0, 
-               "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to the left." )
-        )
-      # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
-
-      #----------------------------------------------------------------------------
-      #peaksa = all samples but remove the matrix sample from the list
-      peaksa <- binned[-matrixIndex]
-      #peaksb = matrix blank sample
-      peaksb <- binned[[matrixIndex]]
-
-      for (i in 1:length(peaksa)){
-      commonIons <- which(!is.element(peaksa[[i]]@mass, peaksb@mass))
-      if(length(commonIons) != 0){   # Without this if statement, peaksa values will be set to 0 if no matrix matches are found == BAD
-        peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]
-        peaksa[[i]]@intensity <- peaksa[[i]]@intensity[-commonIons]
-        peaksa[[i]]@snr <- peaksa[[i]]@snr[-commonIons]
-      }
-}
-    }
-    peaksa
+  IDBacApp::subtractMatrixBlank(sampleIds = labels(selectedSmallMolPeakList()), 
+                              peakList = selectedSmallMolPeakList(),
+                              binTolerance = 0.002)
 })
 
 
 #----
 smallMolNetworkDataFrame <- reactive({
 
-    smallNetwork <- intensityMatrix(subtractMatrixBlank())
+    smallNetwork <- intensityMatrix(subtractedMatrixBlank())
     temp <- NULL
     
-    for (i in 1:length(subtractMatrixBlank())){
-      temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
+    for (i in 1:length(subtractedMatrixBlank())){
+      temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
     }
 
     peaksaNames <- factor(temp)
@@ -2642,11 +2609,11 @@ smallMolNetworkDataFrame <- reactive({
 
 ppp <- reactive({
   
-  if(length(subtractMatrixBlank()) > 9){
-  aq6 <<- subtractMatrixBlank()
+  if(length(subtractedMatrixBlank()) > 9){
+  aq6 <<- subtractedMatrixBlank()
   aq2 <<-calcNetwork()
   
-  zz <<- intensityMatrix(subtractMatrixBlank())
+  zz <<- intensityMatrix(subtractedMatrixBlank())
   zz[is.na(zz)] <- 0
   zz[is.infinite(zz)] <-0
   
@@ -2657,7 +2624,7 @@ ppp <- reactive({
                         scale.unit = T)
   pc <- pc$ind$coord
   pc <- as.data.frame(pc)
-  nam <- unlist(lapply(subtractMatrixBlank(), function(x) x@metaData$Strain))
+  nam <- unlist(lapply(subtractedMatrixBlank(), function(x) x@metaData$Strain))
   pc <- cbind(pc,nam)
 
 azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
@@ -2720,8 +2687,8 @@ calcNetwork <- reactive({
   temp <- NULL
   
   
-  for (i in 1:length(subtractMatrixBlank())){
-    temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
+  for (i in 1:length(subtractedMatrixBlank())){
+    temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
   }
   aqww<<-smallMolNetworkDataFrame()
   
@@ -2933,7 +2900,7 @@ mainPanel(
 # Output a paragraph about which paramters were used to create the currently-displayed MAN
 #----
 output$manReport <- renderUI({
-  p("This MAN was created by analyzing ", tags$code(length(subtractMatrixBlank())), " samples,", if(input$matrixSamplePresent==1){("subtracting a matrix blank,")} else {},
+  p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,", if(input$matrixSamplePresent==1){("subtracting a matrix blank,")} else {},
     "and retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), " and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
     Peaks occuring below ", tags$code(input$lowerMassSM), " m/z or above ", tags$code(input$upperMassSM), " m/z were removed from the analysis. ")
 })

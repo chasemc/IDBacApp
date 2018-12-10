@@ -1,59 +1,218 @@
 
+### Clustering Isolates by Protein Spectra
 
 
 ```{r echo=FALSE}
-    paste0("This dendrogram was created by analyzing ", length(labels(dendro())), " samples, and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analyses.", "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
+    glue::glue("This dendrogram was created by analyzing ", length(labels(dendro())), " samples, and retaining peaks with a signal to noise ratio above ",input$pSNR," and occurring in greater than ",input$percentPresenceP,"% of replicate spectra. Peaks occuring below ",input$lowerMass," m/z or above ",input$upperMass," m/z were removed from the analyses.", "For clustering spectra, ",input$distance, " distance and ",input$clustering, " algorithms were used.")
   
+pheight <-  plotHeight() / 90
+
+```
+
+```{r, echo = FALSE, fig.align="center", fig.height=pheight}
+
+
+
+  if (input$kORheight == "1"){
+    
+    coloredDend()$dend %>%
+      hang.dendrogram %>% 
+      plot(horiz = TRUE, lwd = 8) 
+      rect.dendrogram(coloredDend()$dend, 
+                k=input$kClusters,
+                border = 8, 
+                lty = 5, 
+                lwd = 2,
+                horiz = TRUE)
+    
+}else if (input$kORheight == "2"){
+    
+    coloredDend()$dend  %>%  
+      hang.dendrogram %>% 
+      plot(horiz = TRUE, lwd = 8) 
+     rect.dendrogram(coloredDend()$dend, 
+                h=input$height,
+                border = 8, 
+                lty = 5, 
+                lwd = 2, 
+                horiz = TRUE)
+    abline(v = input$height, lty = 2)
+    
+  }else if (input$kORheight == "3"){
+
+    if(is.null(input$sampleMap$datapath)){
+      # No sample mapping selected
+      dendro()$dend %>%
+        hang.dendrogram %>% 
+        plot(horiz = TRUE, lwd = 8)
+      } else {
+        if(input$colDotsOrColDend == "1"){
+        
+          coloredDend()$dend %>%  
+            hang.dendrogram %>% 
+            plot(.,horiz=T)
+          
+          IDBacApp::colored_dots(coloredDend()$bigMatrix, 
+                                 coloredDend()$shortenedNames,
+                                 rowLabels = names(coloredDend()$bigMatrix),
+                                 horiz = T,
+                                 sort_by_labels_order = FALSE)
+        } else {
+          coloredDend()$dend  %>%
+            hang.dendrogram %>% 
+            plot(., horiz = T)
+        }
+      }
+  }
+
 ```
 
 Principle Components Analysis Results (First Three Components)
-```{r echo=FALSE}
+```{r, echo=FALSE}
 
-    pcaDat <- pcaCalculation()
-    colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
-    if(any(is.na(as.vector(colorsToUse)))){
-      colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
-    }
+    
+  colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+  
+  if(any(is.na(as.vector(colorsToUse)))){
+    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+  }
 
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), nam = (names(colorsToUse)))
-    pcaDat <- merge(pcaDat, colorsToUse, by="nam")
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
+                                  nam = (names(colorsToUse)))
+  
+  pcaDat <<- merge(pcaCalculation(),
+                  colorsToUse, 
+                  by = "nam")
+  
+
+  plot_ly(data = pcaDat,
+          x = ~Dim.1,
+          y = ~Dim.2,
+          z = ~Dim.3,
+          type = "scatter3d",
+          mode = "markers",
+          marker = list(color = ~fac),
+          hoverinfo = 'text',
+          bgcolor = ~fac,
+          text = ~nam)
+  
+  
+  
+  
+```
+
+Principle Coordinates Analysis Results (First Three Components)
+```{r, echo=FALSE}
+
+   colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+
+  if(any(is.na(as.vector(colorsToUse)))){
+    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+  }
+
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
+                                  nam = (names(colorsToUse)))
+  pcaDat <- merge(pcoaCalculation(),
+                  colorsToUse,
+                  by = "nam")
+
+  plot_ly(data = pcaDat,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
+          type = "scatter3d",
+          mode = "markers",
+          marker = list(color = ~fac),
+          hoverinfo = 'text',
+          text = ~nam) %>%
+          layout(
+          xaxis = list(
+            title = ""
+          ),
+          yaxis = list(
+            title = " "
+          ),
+          zaxis = list(
+            title = ""
+          ))
+  
+```
+
+t-SNE Results (First Three Components)
+```{r, echo=FALSE}
+
+  colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+
+  if(any(is.na(as.vector(colorsToUse)))){
+    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+  }
+
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
+                                  nam = (names(colorsToUse)))
+  pcaDat <- merge(tsneCalculation(), 
+                  colorsToUse,
+                  by="nam")
+
+  plot_ly(data = pcaDat,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
+          type = "scatter3d",
+          mode = "markers",
+          marker = list(color = ~fac),
+          hoverinfo = 'text',
+          text = ~nam)
+```
+
+___
+
+
+### Small Molecule Analysis
 
 
 
-plot_ly(data = pcaDat,
-        x = ~Dim.1,
-        y = ~Dim.2,
-        z = ~Dim.3,
-        type = "scatter3d",
-        mode = "markers",
-        marker = list(color = ~fac),
-        #hoverinfo = 'text',
-        text = ~nam)
+```{r, echo=FALSE}
+# Create groups
+cutK <- input$kClusters
+cutHeight <- input$height
+dendrogram <- dendro()
+
+if(input$kORheight == "1"){
+   dendCut <- dendrogram %>% dendextend::cutree(k = cutK)
+}else if(input$kORheight == "2"){
+   dendCut <- dendrogram %>% dendextend::cutree(h = cutHeight)
+  }
+             
+
+```
+
+```{r}
+
+for(i in unique(dendCut)){
+
+ pruned <- prune(dendro(), labels(dendCut)[which(dendCut != i)])
+
+plot(hang.dendrogram(pruned, hang = 0.1))
+
+}
+
+
+awq<<-subtractMatrixBlank()
+
+
+
+
+
+
+
+
+
 ```
 
 
 
 
-```{r echo=FALSE}
-  temp <- NULL
 
 
-    for (i in 1:length(subtractMatrixBlank())){
-      temp <- c(temp,subtractMatrixBlank()[[i]]@metaData$Strain)
-    }
 
-    a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
-    a<-igraph::simplify(a)
-    wc <- fastgreedy.community(a)
-    b <- igraph_to_networkD3(a, group = (wc$membership + 1))
-    z <- b$links
-    zz <- b$nodes
-
-    biggerSampleNodes<-rep(1,times=length(zz[,1]))
-    zz<-cbind(zz,biggerSampleNodes)
-    zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
-    forceNetwork(Links = z, Nodes = zz, Source = "source",Nodesize = "biggerSampleNodes",
-                 Target = "target", NodeID = "name",
-                 Group = "group", opacity = 1,opacityNoHover=.8, zoom = TRUE)
-```
 
