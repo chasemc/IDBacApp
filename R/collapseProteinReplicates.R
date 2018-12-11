@@ -1,6 +1,6 @@
 #' Collapse a sample's MALDIquant peak objects into a single peak object
 #' 
-#' @param db ool::() connection to the IDBac sqlite dataabse
+#' @param db pool::() connection to the IDBac sqlite dataabse
 #' @param fileshas the shas for the individual MALDIquant peak objects
 #' @param proteinPercentPresence value between 0 and 1 (percent presence translated to 0-100%)
 #' @param lowerMassCutoff masses below this will be removed from analyses

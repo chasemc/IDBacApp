@@ -1,3 +1,11 @@
+#' Subtract "matrix" sample masses from sample peak lists
+#' 
+#' @param sampleIds sample IDs corresponding to the peak list
+#' @param peakList MALDIquant peak objects
+#' @param binTolerance MALDIquant binPeaks tolerance value (ppm / 10^5)
+
+#' @return the peak list modifed by binning then subtractng the matrix sample, or just the binned peak list if no matrix wsa provided
+
 subtractMatrixBlank <- function(sampleIds, 
                                 peakList,
                                 binTolerance){
@@ -8,15 +16,11 @@ binned <- binPeaks(peakList,
                    tolerance = binTolerance)
 
 #Next, find which ID contains "matrix", in any capitalization
-matrixIndex <- grep("^matrix",
+matrixIndex <<- grep("^matrix",
                     sampleIds,
                     ignore.case=TRUE)
 
-  validate(
-    need(length(matrixIndex) > 0, 
-         "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to the left." )
-  )
-if(!length(matrixIndex) > 0){
+if(length(matrixIndex) > 0){
   #peaksa = all samples but remove the matrix sample from the list
   peaksa <- binned[-matrixIndex]
   #peaksb = matrix blank sample

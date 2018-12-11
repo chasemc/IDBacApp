@@ -197,8 +197,6 @@ plot(hang.dendrogram(pruned, hang = 0.1))
 }
 
 
-awq<<-subtractMatrixBlank()
-
 
 
 

@@ -8,7 +8,7 @@ collapseProteinReplicates(db, fileshas, proteinPercentPresence,
   lowerMassCutoff, upperMassCutoff, dbConnection)
 }
 \arguments{
-\item{db}{ool::() connection to the IDBac sqlite dataabse}
+\item{db}{pool::() connection to the IDBac sqlite dataabse}
 
 \item{fileshas}{the shas for the individual MALDIquant peak objects}
 

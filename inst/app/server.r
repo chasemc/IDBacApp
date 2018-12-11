@@ -1607,7 +1607,6 @@ dendro <- reactive({
 #----
 
 binnedProtein <- reactive({
-awss<<-collapsedPeaksP()
       binvec <- lapply(collapsedPeaksP(), function(x) x@mass)
     zq <- IDBacApp::binnR(vectorList = binvec,
                         ppm = 2000, 
@@ -2439,8 +2438,9 @@ observeEvent(input$addtoNewDB, {
 
 # -----------------
 selectedSmallMolPeakList <- reactive({
-
-  combinedSmallMolPeaks <- NULL
+ 
+  
+   combinedSmallMolPeaks <- NULL
   combinedSmallMolPeaksAll <- NULL
   matrixID <- NULL
 
@@ -2528,7 +2528,6 @@ selectedSmallMolPeakList <- reactive({
   sqlQ <- DBI::dbSendQuery(conn, sqlQ)
 
   sqlQ <- DBI::dbFetch(sqlQ)
-
   split(sqlQ$spectrumSHA, sqlQ$Strain_ID) %>%
   sqlQ <- lapply(., function(x){
     IDBacApp::collapseSmallMolReplicates(fileshas = x,
@@ -2549,7 +2548,6 @@ selectedSmallMolPeakList <- reactive({
   }
 
 
-
   sqlQ
 
 
@@ -2559,7 +2557,6 @@ selectedSmallMolPeakList <- reactive({
 
 #----
 subtractedMatrixBlank <- reactive({
-
   IDBacApp::subtractMatrixBlank(sampleIds = labels(selectedSmallMolPeakList()), 
                               peakList = selectedSmallMolPeakList(),
                               binTolerance = 0.002)
@@ -2569,40 +2566,9 @@ subtractedMatrixBlank <- reactive({
 #----
 smallMolNetworkDataFrame <- reactive({
 
-    smallNetwork <- intensityMatrix(subtractedMatrixBlank())
-    temp <- NULL
-    
-    for (i in 1:length(subtractedMatrixBlank())){
-      temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
-    }
-
-    peaksaNames <- factor(temp)
-
-    rownames(smallNetwork) <- paste(peaksaNames)
-
-    bool <- smallNetwork
-    bool[is.na(bool)] <- 0
-    bool <- as.data.frame(bool)
-    bool <-  ifelse(bool > 0,1,0)
-    bool <- bool
-    bool <- as.data.frame(bool)
-    #The network is weighted by the inverse of percentage of presence of the peak, this de-emphasizes commonly occuring peaks and "pulls" rarer peaks closer to their associated sample
-    bool[,colnames(bool)] <- sapply(bool[,colnames(bool)],function(x) ifelse(x==1,1/sum(x),x))
-    #Create a matrix readable by Gephi as an edges file
-    bool <- cbind(rownames(bool),bool)
-    bool <- melt(bool)
-    # Removeself
-    bool <- subset(bool, value!=0)
-    colnames(bool) <- c("Source","Target","Weight")
-    # Round m/z values to two decimals, use sprintf to preserve trailing zeros
-    bool$Target <- sprintf(as.numeric(as.matrix(bool$Target)),fmt='%#.2f')
-
-    bool$Source <- as.character(bool$Source)
-    bool$Target <- as.numeric(bool$Target)
-    bool$Weight <- as.numeric(bool$Weight)
-
-    bool
-
+  IDBacApp::smallMolDFtoNetwork(peakList = subtractedMatrixBlank())
+                                
+  
 })
 
 
