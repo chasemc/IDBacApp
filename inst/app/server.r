@@ -2529,13 +2529,13 @@ selectedSmallMolPeakList <- reactive({
 
   sqlQ <- DBI::dbFetch(sqlQ)
   split(sqlQ$spectrumSHA, sqlQ$Strain_ID) %>%
-  sqlQ <- lapply(., function(x){
-    IDBacApp::collapseSmallMolReplicates(fileshas = x,
-                                         db = userDBCon(),
-                                         smallMolPercentPresence = input$percentPresenceSM,
-                                         lowerMassCutoff = input$lowerMassSM,
-                                         upperMassCutoff = input$upperMassSM) %>% unname
-  })
+    lapply(., function(x){
+      IDBacApp::collapseSmallMolReplicates(fileshas = x,
+                                           db = userDBCon(),
+                                           smallMolPercentPresence = input$percentPresenceSM,
+                                           lowerMassCutoff = input$lowerMassSM,
+                                           upperMassCutoff = input$upperMassSM) %>% unname
+    }) -> sqlQ
 
   for(i in 1:length(sqlQ)){
 
