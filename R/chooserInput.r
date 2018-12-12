@@ -26,12 +26,10 @@ chooserInput <- function(inputId, leftLabel, rightLabel, leftChoices, rightChoic
             tags$select(class="left", size=size, multiple=multiple, leftChoices, width = "100%")
             
         ),
-        tags$br(),
         div(class="chooser-container chooser-center-container",
-            icon("arrow-circle-o-down", "right-arrow fa-3x"),
-            icon("arrow-circle-o-up", "left-arrow fa-3x")
+            icon("arrow-circle-o-right", "right-arrow fa-3x"), br(),
+            icon("arrow-circle-o-left", "left-arrow fa-3x")
         ),
-        tags$br(),
         div(class="chooser-container chooser-right-container",
             tags$label("Selected Samples"),
             tags$br(),
