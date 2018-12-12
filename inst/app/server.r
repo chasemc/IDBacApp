@@ -96,61 +96,64 @@ function(input,output,session){
         "Introduction to Experiments:",
         tabPanel(tags$ul(tags$li("Introduction to Experiments")),
                  value = "experiment_info_tab",
+      column(width = 12, 
+             offset = 1,
+             style = "background-color:#7777770d",
+#             align = "center",          
                  
-                 
-       h3("What is an \"experiment\?"),
-       p("In IDBac an \"Experiment\" refers to a collection of samples.", align="center"),
-       h3("What does this mean for me?"),
+       h3("What is an \"experiment\" in IDBac?", align = "center"),
+       tags$ul(
+         tags$li("In IDBac an \"experiment\" refers to a collection of samples."),
+         tags$li("Physically, each experiment is a separate \"SQLite\" database that can be shared between colleagues
+          or submitted alongside a manuscript."),
+         tags$li("Experiments contain the converted mzML file, instrument and data collection info (if found), 
+         processed spectra, as well as any user-input sample information.")),
+       
+       
+       h3("What does this mean for me?", align = "center"),
        
        tags$ul(
-         tags$li("")
+         tags$li("Experiments are how you organize your data."),
+         tags$li("Experiments should only contain the samples you want to analyze."),
+         tags$li("It is possible to \"mix and match\" samples from different experiments to create new experiments.")
        
        ),
-       
-       
-       
-       
-       
-                        fluidRow( 
-                          column(width = 2),
-                          column(width = 8, align = "center",
-                                 p("While you have the option to subset your data during analyses, 
-                                   working at the level of \"Experiment\" allows easier analyses and 
-                                   is the easiest method to share and store your data."),
-                        p("After processing your raw data, your named experiment will appear."),
-                        actionButton("moveToSelectExperiment",
-                                     "Click to select an experiment to analyze")
-                        
-                        ),
-                        column(width = 2))
-                 ),
+       h3("Begin analysis by selecting an available experiment:", align = "center"),
+                              column(12,align="center",actionButton("moveToSelectExperiment",
+                                     "Click to select an experiment to analyze"))
+
+                
+                 )),
         "Select/Create Experiments",
-        tabPanel(tags$ul(tags$li("Select Experiment to Analyze")), 
+        tabPanel(tags$ul(tags$li("Select an experiment to analyze")), 
                  value = "experiment_select_tab",
                  
                  
-                 column(width = 12, style = "background-color:#7777770d",  
-                 column(width = 1), 
-                        column(width = 8,
-                        
-                        radioButtons("selectExperiment",
-                                     label = h3("Select an Experiment to Analyze:"),
+                 column(width = 12, 
+                        offset = 1,
+                        style = "background-color:#7777770d",
+                        align = "center",
+                               selectInput("selectExperiment",
+                                     label = h3("Select an experiment to analyze:"),
                                      choices = availableExperiments(),
                                      selected = 0,
-                                     width= "100%"))),
+                                     width= "100%"
+                                     ),
                  actionButton("moveToAnalysis",
-                              "moveToAnalysis"),
+                              "Click to start analysis"),
                  
-                 p("Location of experiment file:"),
+                 p("Location of experiment file:", align = "center"),
                  verbatimTextOutput("selectedSQLText",
-                                    placeholder = TRUE)
+                                    placeholder = TRUE))
                  ),
         tabPanel(tags$ul(tags$li("Create an experiment, pulling samples from previous experiments")), 
                  value = "experiment_mixMatch_tab",
-                 column(12,
+                 column(12, align = "center",
                         style = "background-color: #7777770d",
-                        p("Select samples from a previous experiment to transfer to a new experiment.", align="center"),
-                        radioButtons("selectMixNmatchExperiment",
+                        offset = 1,
+                        h3("Transfer samples from previous experiments to new/other experiments.", align="center"),
+                        p("Note: For data integrity, samples cannot be removed from experiments.", align= "center"),
+                        selectInput("selectMixNmatchExperiment",
                                      label = "Available Experiments:",
                                      choices = availableExperiments2(),
                                      selected = availableExperiments2()[[1]]),
