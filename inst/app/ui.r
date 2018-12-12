@@ -132,7 +132,7 @@ navbarPage(collapsible = T,
                  )
                )
              ),
-           tabPanel("SQL",
+           tabPanel("Select/Manipulate Experiments",
                     value = "sqlUiTab",
                     uiOutput("sqlUI")
                     ),

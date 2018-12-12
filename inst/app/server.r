@@ -90,62 +90,103 @@ function(input,output,session){
   #This "observe" event creates the SQL tab UI.
   observe({
     output$sqlUI <- renderUI({
-    fluidPage(
-      p("After processing your raw data, your named experiment will appear here."),
-      p("IDBac analyses work at the unit of \"Experiments\", which is simply a collection
-        of samples."),
-      p("Use this ..... to select which experiment to analyze, or to \"mix and match\" experiments,
-         by transferring samples from one experiment to another"),
-      tabsetPanel(
-                  tabPanel("Analyze a Previous Experiment",
-               column(12,
-                      style = "background-color:#7777770d",
-                      radioButtons("selectExperiment",
-                                   label = h3("Select a Previous Experiment"),
-                                   choices = availableExperiments(),
-                                   selected = 0,
-                                   width= "100%")),
-               p("Location of experiment file:"),
-               verbatimTextOutput("selectedSQLText",
-                                  placeholder = TRUE)),
-               
-               tabPanel("Create Experiment from Other Experiments",
-                        column(12,
-                               style = "background-color: #7777770d",
-                               
-                               radioButtons("selectMixNmatchExperiment",
-                                            label = p("Select samples from previous experiment to transfer to a new experiment."),
-                                            choices = availableExperiments2(),
-                                            selected = availableExperiments2()[[1]]),
-                               uiOutput("chosenp"),
-                               p("Move strains between boxes by clicking the strain's name
-                                          and then an arrow. Strains in the right box will be used for analysis."),
-                               uiOutput("chooseNewDBSamples"),
-                               verbatimTextOutput("selection"),
-                               br(),
-                               textInput("nameformixNmatch",
-                                         label = "Enter name for new experiment"),
-                               
-                               actionButton("addtoNewDB", "Add to new Experiment")
-                               
-                               
-                               
-                               
-                               
-                               )
+      fluidPage(
+      navlistPanel(widths = c(3, 7),
+        
+        "Introduction to Experiments:",
+        tabPanel("Introduction to Experiments",
+                 id = "experiment_info_tab",
+                 
+                 
+                 column(width = 6,  
+                        p("In IDBac an \"Experiment\" refers to a collection of samples.", align="center"),
+                        fluidRow( 
+                          column(width = 2),
+                          column(width = 8, align = "center",
+                                 p("While you have the option to subset your data during analyses, 
+                                   working at the level of \"Experiment\" allows easier analyses and 
+                                   is the easiest method to share and store your data.")
+                                 ), column(width = 2)
+                          )),
+                 column(width = 6,
+                        p("After processing your raw data, your named experiment will appear here."),
+                        p("Use the tabs below to: ",
+                          tags$li("Select which experiment to analyze"), 
+                          tags$li("Creat new experiments by pulling samples from other experiments"),
+                          tags$li("Input/Modify information about samples"))
+                 )
+                 ),
+        "Select/Create Experiments",
+        tabPanel("Select Experiment to Analyze", 
+                 id = "experiment_select_tab",
+                 
+                 column(12,
+                        style = "background-color:#7777770d",
+                        radioButtons("selectExperiment",
+                                     label = h3("Select a Previous Experiment"),
+                                     choices = availableExperiments(),
+                                     selected = 0,
+                                     width= "100%")),
+                 p("Location of experiment file:"),
+                 verbatimTextOutput("selectedSQLText",
+                                    placeholder = TRUE)
+                 
+                 
+                 
+                 
+                 
+                 
+                 ),
+        tabPanel("Create an experiment, pulling samples from previous experiments", 
+                 id = "experiment_mixMatch_tab",
+                 
+                 
+                 
+                 column(12,
+                        style = "background-color: #7777770d",
+                        p("Select samples from a previous experiment to transfer to a new experiment.", align="center"),
+                        radioButtons("selectMixNmatchExperiment",
+                                     label = "Available Experiments:",
+                                     choices = availableExperiments2(),
+                                     selected = availableExperiments2()[[1]]),
+                        uiOutput("chosenp"),
+                        p("Move strains between boxes by clicking the strain's name
+                          and then an arrow. Strains in the right box will be used for analysis."),
+                        uiOutput("chooseNewDBSamples"),
+                        verbatimTextOutput("selection"),
+                        br(),
+                        textInput("nameformixNmatch",
+                                  label = "Enter name for new experiment"),
+                        
+                        actionButton("addtoNewDB", "Add to new Experiment")
                         
                         
-                        ),
-               
-               tabPanel("Add/Modify Strain Attributes",
-                        p("s"),
-                        actionButton("searchNCBI",
-                                     "Search NCBI"),
-                        actionButton("saven",
-                                     "save"),
-                        actionButton("pop22",
-                                     "pop"),
-                        rHandsontableOutput("metaTable", height=800))))
+                        
+                        
+                        
+                        )
+                 
+                 
+                 ),
+        "Modify Sample Info",
+        tabPanel("Add/modify information about samples", 
+                 id = "experiment_metaData_tab",
+        
+        p("s"),
+        actionButton("searchNCBI",
+                     "Search NCBI"),
+        actionButton("saven",
+                     "save"),
+        actionButton("pop22",
+                     "pop"),
+        rHandsontableOutput("metaTable", height=800)
+        )
+        
+        
+        
+      
+
+      ))
     })
 })
 
