@@ -91,57 +91,62 @@ function(input,output,session){
   observe({
     output$sqlUI <- renderUI({
       fluidPage(
-      navlistPanel(widths = c(3, 7),
+      navlistPanel(widths = c(3, 7), id = "ExperimentNav",
         
         "Introduction to Experiments:",
-        tabPanel("Introduction to Experiments",
-                 id = "experiment_info_tab",
+        tabPanel(tags$ul(tags$li("Introduction to Experiments")),
+                 value = "experiment_info_tab",
                  
                  
-                 column(width = 6,  
-                        p("In IDBac an \"Experiment\" refers to a collection of samples.", align="center"),
+       h3("What is an \"experiment\?"),
+       p("In IDBac an \"Experiment\" refers to a collection of samples.", align="center"),
+       h3("What does this mean for me?"),
+       
+       tags$ul(
+         tags$li("")
+       
+       ),
+       
+       
+       
+       
+       
                         fluidRow( 
                           column(width = 2),
                           column(width = 8, align = "center",
                                  p("While you have the option to subset your data during analyses, 
                                    working at the level of \"Experiment\" allows easier analyses and 
-                                   is the easiest method to share and store your data.")
-                                 ), column(width = 2)
-                          )),
-                 column(width = 6,
-                        p("After processing your raw data, your named experiment will appear here."),
-                        p("Use the tabs below to: ",
-                          tags$li("Select which experiment to analyze"), 
-                          tags$li("Creat new experiments by pulling samples from other experiments"),
-                          tags$li("Input/Modify information about samples"))
-                 )
+                                   is the easiest method to share and store your data."),
+                        p("After processing your raw data, your named experiment will appear."),
+                        actionButton("moveToSelectExperiment",
+                                     "Click to select an experiment to analyze")
+                        
+                        ),
+                        column(width = 2))
                  ),
         "Select/Create Experiments",
-        tabPanel("Select Experiment to Analyze", 
-                 id = "experiment_select_tab",
+        tabPanel(tags$ul(tags$li("Select Experiment to Analyze")), 
+                 value = "experiment_select_tab",
                  
-                 column(12,
-                        style = "background-color:#7777770d",
+                 
+                 column(width = 12, style = "background-color:#7777770d",  
+                 column(width = 1), 
+                        column(width = 8,
+                        
                         radioButtons("selectExperiment",
-                                     label = h3("Select a Previous Experiment"),
+                                     label = h3("Select an Experiment to Analyze:"),
                                      choices = availableExperiments(),
                                      selected = 0,
-                                     width= "100%")),
+                                     width= "100%"))),
+                 actionButton("moveToAnalysis",
+                              "moveToAnalysis"),
+                 
                  p("Location of experiment file:"),
                  verbatimTextOutput("selectedSQLText",
                                     placeholder = TRUE)
-                 
-                 
-                 
-                 
-                 
-                 
                  ),
-        tabPanel("Create an experiment, pulling samples from previous experiments", 
-                 id = "experiment_mixMatch_tab",
-                 
-                 
-                 
+        tabPanel(tags$ul(tags$li("Create an experiment, pulling samples from previous experiments")), 
+                 value = "experiment_mixMatch_tab",
                  column(12,
                         style = "background-color: #7777770d",
                         p("Select samples from a previous experiment to transfer to a new experiment.", align="center"),
@@ -159,17 +164,12 @@ function(input,output,session){
                                   label = "Enter name for new experiment"),
                         
                         actionButton("addtoNewDB", "Add to new Experiment")
-                        
-                        
-                        
-                        
-                        
                         )
                  
                  
                  ),
         "Modify Sample Info",
-        tabPanel("Add/modify information about samples", 
+        tabPanel(tags$ul(tags$li("Add/modify information about samples")), 
                  id = "experiment_metaData_tab",
         
         p("s"),
@@ -181,11 +181,6 @@ function(input,output,session){
                      "pop"),
         rHandsontableOutput("metaTable", height=800)
         )
-        
-        
-        
-      
-
       ))
     })
 })
@@ -195,9 +190,6 @@ availableExperiments <- reactive({
   tools::file_path_sans_ext(list.files(workingDirectory,
                                        pattern = ".sqlite",
                                        full.names = FALSE))
-  
-
-  
 })
   
 
@@ -206,15 +198,36 @@ availableExperiments2 <- reactive({
   tools::file_path_sans_ext(list.files(workingDirectory,
                                        pattern = ".sqlite",
                                        full.names = FALSE))
-  
-  
-  
 })
 
   
+#---
+
+observeEvent(input$moveToAnalysis, {
+  updateTabsetPanel(session, "mainIDBacNav",
+                    selected = "inversePeaks")
+})
+
+observeEvent(input$moveToSelectExperiment, {
+  updateNavlistPanel(session, "ExperimentNav",
+                    selected = "experiment_select_tab")
+})
+
+
+
   
+
 #----
-output$selectedSQLText <- renderPrint(input$selectExperiment)
+output$selectedSQLText <- renderPrint({
+  fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
+                                                    pattern = ".sqlite",
+                                                    full.names = FALSE))
+  filePaths <- list.files(workingDirectory,
+                          pattern = ".sqlite",
+                          full.names = TRUE)
+ filePaths[which(fileNames == input$selectExperiment)]
+  
+})
 
 
 #----
