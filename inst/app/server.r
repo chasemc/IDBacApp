@@ -103,7 +103,7 @@ function(input,output,session){
                  
        h3("What is an \"experiment\" in IDBac?", align = "center"),
        tags$ul(
-         tags$li("In IDBac an \"experiment\" refers to a collection of samples."),
+         tags$li("A user-defined group of samples that were analyzed by MALDI MS..."),
          tags$li("Physically, each experiment is a separate \"SQLite\" database that can be shared between colleagues
           or submitted alongside a manuscript."),
          tags$li("Experiments contain the converted mzML file, instrument and data collection info (if found), 
@@ -155,8 +155,8 @@ function(input,output,session){
                         p("Note: For data integrity, samples cannot be removed from experiments.", align= "center"),
                         selectInput("selectMixNmatchExperiment",
                                      label = "Available Experiments:",
-                                     choices = availableExperiments2(),
-                                     selected = availableExperiments2()[[1]]),
+                                     choices = availableExperiments(),
+                                     selected = availableExperiments()[[1]]),
                         uiOutput("chosenp"),
                         p("Move strains between boxes by clicking the strain's name
                           and then an arrow. Strains in the right box will be used for analysis."),
@@ -190,6 +190,8 @@ function(input,output,session){
 
 
 availableExperiments <- reactive({
+  
+  
   tools::file_path_sans_ext(list.files(workingDirectory,
                                        pattern = ".sqlite",
                                        full.names = FALSE))
@@ -197,11 +199,6 @@ availableExperiments <- reactive({
   
 
 
-availableExperiments2 <- reactive({
-  tools::file_path_sans_ext(list.files(workingDirectory,
-                                       pattern = ".sqlite",
-                                       full.names = FALSE))
-})
 
   
 #---
@@ -216,9 +213,6 @@ observeEvent(input$moveToSelectExperiment, {
                     selected = "experiment_select_tab")
 })
 
-
-
-  
 
 #----
 output$selectedSQLText <- renderPrint({
@@ -273,9 +267,9 @@ observeEvent(input$searchNCBI, {
   for(i in 1:ncol(aqw)){
     aqw[ ,i] <- as.character(aqw[ ,i])
   }
-
+  
   ind <- is.na(aqw[-1,]$Genbank_Accession)
-
+  
   providedAccessions <- as.character(aqw[-1,]$Genbank_Accession[!ind])
   
   ncbiResults <- lapply(as.list(providedAccessions), function(x){
@@ -285,9 +279,9 @@ observeEvent(input$searchNCBI, {
   
   
   zerror <- unlist(lapply(ncbiResults, function(x) inherits(x, 'try-error')))
- 
+  
   ind[!ind] <- zerror
-   
+  
   
   ncbiResults <- ncbiResults[!zerror]
   
@@ -295,30 +289,30 @@ observeEvent(input$searchNCBI, {
   genus <- sapply(ncbiResults, function(x) strsplit(x$taxon, " ")[[1]][[1]])
   species <- sapply(ncbiResults, function(x) strsplit(x$taxon, " ")[[1]][[2]])
   dna_16s <- lapply(ncbiResults, function(x){
-                                   if(as.numeric(x$length) < 2000){
-                                      x$sequence
-                                   } else {NA}
-                    })
-
+    if(as.numeric(x$length) < 2000){
+      x$sequence
+    } else {NA}
+  })
+  
   taxo <- lapply(ncbiResults, function(x){
-                                q <- taxize::classification(x$taxon,
+    q <- taxize::classification(x$taxon,
                                 db="ncbi",
                                 return_id = FALSE)[[1]]
-                                
-                                if(!is.na(q)){
-                                q2 <- as.list(q$name)
-                                names(q2) <- q$rank
-                                q2
-                                } else {
-                                  NA
-                                }
-                })
-
-
     
+    if(!is.na(q)){
+      q2 <- as.list(q$name)
+      names(q2) <- q$rank
+      q2
+    } else {
+      NA
+    }
+  })
+  
+  
+  
   keys <- unique(unlist(lapply(taxo, names)))
   taxo <-  setNames(do.call(mapply, c(FUN=c, lapply(taxo, `[`, keys))), keys)
-
+  
   # get rhandsontable minus the example row
   awe <-  aqw[-1, ]
   # ind is a logical vector of rows with input accessions
@@ -330,10 +324,10 @@ observeEvent(input$searchNCBI, {
   awe$Genus[!ind] <- taxo$genus
   awe$Species[!ind] <- taxo$species
   awe$dna_16S[!ind] <- unlist(dna_16s)
-
-# Update reactive value
-qwerty$rtab <- rbind(rhandsontable::hot_to_r(input$metaTable)[1, ], awe)
-
+  
+  # Update reactive value
+  qwerty$rtab <- rbind(rhandsontable::hot_to_r(input$metaTable)[1, ], awe)
+  
 })
 
 
@@ -354,7 +348,7 @@ observeEvent(input$saven,{
 
 #----
 output$metaTable <- rhandsontable::renderRHandsontable({
-
+  
   rhandsontable::rhandsontable(qwerty$rtab,
                                useTypes = FALSE,
                                contextMenu = TRUE ) %>%
@@ -369,52 +363,52 @@ output$metaTable <- rhandsontable::renderRHandsontable({
     hot_cols(fixedColumnsLeft = 1)
   
   
-
+  
 })
 
 
 
 #----
 observeEvent(input$pop22,{
-
+  
   if (is.null(input$metaTable)){
     qwerty$rtab <-  rhandsontable::hot_to_r(input$metaTable)
-    } else {
-
-        dbQuery <- glue::glue_sql("SELECT *
+  } else {
+    
+    dbQuery <- glue::glue_sql("SELECT *
                                   FROM ({tab*})",
-                                  tab = "metaData",
-                                  .con = userDBCon())
-
-        conn <- pool::poolCheckout(userDBCon())
-        dbQuery <- DBI::dbSendQuery(conn, dbQuery)
-        dbQuery <- DBI::dbFetch(dbQuery)
-
-        exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
-                                            "Genbank_Accession"            = "KY858228",
-                                            "NCBI_TaxID"                   = "446370",
-                                            "Kingdom"                      = "Bacteria",
-                                            "Phylum"                       = "Firmicutes",
-                                            "Class"                        = "Bacilli",
-                                            "Order"                        = "Bacillales",
-                                            "Family"                       = "Paenibacillaceae",
-                                            "Genus"                        = "Paenibacillus",
-                                            "Species"                      = "telluris",
-                                            "MALDI_Matrix"                 = "CHCA",
-                                            "DSM_Agar_Media"               = "1054_Fresh",
-                                            "Cultivation_Temp_Celsius"     = "27",
-                                            "Cultivation_Time_Days"        = "10",
-                                            "Cultivation_Other"            = "",
-                                            "User"                         = "Chase Clark",
-                                            "User_ORCID"                   = "0000-0001-6439-9397",
-                                            "PI_FirstName_LastName"        = "Brian Murphy",
-                                            "PI_ORCID"                     = "0000-0002-1372-3887",
-                                            "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
-        )
-
-        qwerty$rtab <- rbind(exampleMetaData, dbQuery)
-      }
-  })
+                              tab = "metaData",
+                              .con = userDBCon())
+    
+    conn <- pool::poolCheckout(userDBCon())
+    dbQuery <- DBI::dbSendQuery(conn, dbQuery)
+    dbQuery <- DBI::dbFetch(dbQuery)
+    
+    exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
+                                        "Genbank_Accession"            = "KY858228",
+                                        "NCBI_TaxID"                   = "446370",
+                                        "Kingdom"                      = "Bacteria",
+                                        "Phylum"                       = "Firmicutes",
+                                        "Class"                        = "Bacilli",
+                                        "Order"                        = "Bacillales",
+                                        "Family"                       = "Paenibacillaceae",
+                                        "Genus"                        = "Paenibacillus",
+                                        "Species"                      = "telluris",
+                                        "MALDI_Matrix"                 = "CHCA",
+                                        "DSM_Agar_Media"               = "1054_Fresh",
+                                        "Cultivation_Temp_Celsius"     = "27",
+                                        "Cultivation_Time_Days"        = "10",
+                                        "Cultivation_Other"            = "",
+                                        "User"                         = "Chase Clark",
+                                        "User_ORCID"                   = "0000-0001-6439-9397",
+                                        "PI_FirstName_LastName"        = "Brian Murphy",
+                                        "PI_ORCID"                     = "0000-0002-1372-3887",
+                                        "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
+    )
+    
+    qwerty$rtab <- rbind(exampleMetaData, dbQuery)
+  }
+})
 
 
 #----
@@ -424,7 +418,7 @@ observe({
   } else { 
     output$arrowPNG<-renderUI({
       img(src="arrowRight.png")
-  })
+    })
   }
 })
 
@@ -455,17 +449,6 @@ observe({
     })
   }
 })
-
-
-
-
-
-
-
-
-
-
-
 
 
 #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
@@ -530,98 +513,37 @@ output$mzmlRawFileDirectory <- renderText({
     folders <- NULL
     
     findmz <- function(){
-     # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
+      # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
       return(list.files(mzmlRawFilesLocation(),
-                                  recursive = TRUE,
-                                  full.names = FALSE,
-                                  pattern = "\\.mz"))
-     # setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+                        recursive = TRUE,
+                        full.names = FALSE,
+                        pattern = "\\.mz"))
+      # setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
       
-      }
-
+    }
+    
     
     # Get the folders contained within the chosen folder.
     foldersInFolder <- tryCatch(findmz(),
                                 error = function(x) paste("Timed out"),
                                 finally = function(x) x)
     
-if (foldersInFolder == "Timed out"){
-  return("Timed out looking for mzML/mzXML files. This can happen if the folder you 
+    if (foldersInFolder == "Timed out"){
+      return("Timed out looking for mzML/mzXML files. This can happen if the folder you 
           selected has lots of folders within it... because IDBac looks through all 
           of them for mzML/mzXML files.")}else{
-    
-    for (i in 1:length(foldersInFolder)) {
-      # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-      folders <- paste0(folders, 
-                        "\n",
-                        basename(foldersInFolder[[i]]))
-    }
-    return(folders)
+            
+            for (i in 1:length(foldersInFolder)) {
+              # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+              folders <- paste0(folders, 
+                                "\n",
+                                basename(foldersInFolder[[i]]))
+            }
+            return(folders)
           }}
   
   
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -731,7 +653,7 @@ observe({
                       p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       img(src = "window.png",
                           width = "100%")
-                      ),
+               ),
                column(1),
                column(5, style = "background-color:#7777770d",
                       fluidRow(
@@ -746,11 +668,11 @@ observe({
                       br(),
                       p(strong("2: Click to select the location of your RAW data"), align= "center"),
                       column(12, align="center",
-                      actionButton("rawFileDirectory",
-                                   label = "Raw Data Folder"),
-                      verbatimTextOutput("rawFileDirectory",
-                                         placeholder = TRUE),
-                      tags$hr(size = 20)),
+                             actionButton("rawFileDirectory",
+                                          label = "Raw Data Folder"),
+                             verbatimTextOutput("rawFileDirectory",
+                                                placeholder = TRUE),
+                             tags$hr(size = 20)),
                       br(),
                       column(12, align = "center",
                              p(strong("3:", "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files.")),
@@ -810,7 +732,7 @@ observe({
                       p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                       img(src = "window.png",
                           width = "100%")
-                      ),
+               ),
                column(1),
                column(5,
                       style = "background-color:#7777770d",
@@ -841,11 +763,11 @@ observe({
                              actionButton("run",
                                           label = "Process Data"),
                              tags$hr(size = 20))
-                      )
                )
         )
+      )
     })
-    }
+  }
 })
 
 
@@ -994,19 +916,19 @@ output$rawFileDirectory <- renderText({
   if (is.null(rawFilesLocation())) {
     return("No Folder Selected")
   } else {
-      folders <- NULL
-      # Get the folders contained within the chosen folder.
-      foldersInFolder <- list.dirs(rawFilesLocation(),
-                                   recursive = FALSE,
-                                   full.names = FALSE) 
-      for (i in 1:length(foldersInFolder)) {
-        # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-        folders <- paste0(folders, 
-                          "\n",
-                          foldersInFolder[[i]])
-      }
-      return(folders)
+    folders <- NULL
+    # Get the folders contained within the chosen folder.
+    foldersInFolder <- list.dirs(rawFilesLocation(),
+                                 recursive = FALSE,
+                                 full.names = FALSE) 
+    for (i in 1:length(foldersInFolder)) {
+      # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+      folders <- paste0(folders, 
+                        "\n",
+                        foldersInFolder[[i]])
     }
+    return(folders)
+  }
 })
 
 
@@ -1035,7 +957,7 @@ output$multipleMaldiRawFileDirectory <- renderText({
       # Individual folders displayed on a new line "\n"
       folders <- paste0(folders, "\n", foldersInFolder[[i]]) 
     }
-
+    
     return(folders)
   }
 })
@@ -1046,64 +968,62 @@ output$multipleMaldiRawFileDirectory <- renderText({
 #----
 spectraConversion <- reactive({
   
-  
   IDBacApp::excelMaptoPlateLocation(rawORreanalyze = input$rawORreanalyze,
                                     excelFileLocation = input$excelFile$datapath,
                                     rawFilesLocation = rawFilesLocation(),
                                     multipleMaldiRawFileLocation = multipleMaldiRawFileLocation())
-  
   
 })
 
 
 #----
 conversions <- reactive({
-isolate({
+  isolate({
     # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
     # contents of each element are file paths to the raw data for that sample
-   
-  # Find the location of the proteowizard libraries
-  # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
-  applibpath <- file.path(workingDirectory,
-                          "library")
-  msconvertLocation <- installed.packages(c(.libPaths(),
-                                             applibpath))
-  msconvertLocation <- as.list(msconvertLocation[grep("proteowizardinstallation", msconvertLocation), ])
-  msconvertLocation <- file.path(msconvertLocation$LibPath, 
-                                  "proteowizardinstallation", 
-                                  "pwiz")
-  
- # msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
-  
-  
-  mzFileInput <- list.files(mzmlRawFilesLocation(),
-                            recursive = TRUE,
-                            full.names = TRUE,
-                            pattern = ".mz") 
-  
-  popup1()
-  
-  mzmlRawFileDirectory1 <<-input$mzmlRawFileDirectory
-  mzmlRawFilesLocation<<-mzFileInput
-  msconvertLocation<<-msconvertLocation
-  outDir<-tempMZ
-  
-  conversions <- IDBacApp::convertToMzml(mzmlRawFileDirectory = input$mzmlRawFileDirectory,
-                                         mzmlRawFilesLocation = mzFileInput,
-                                         # spectraConversion = spectraConversion(),
-                                         msconvertLocation = file.path(msconvertLocation,"msconvert.exe"),
-                                         outDir = tempMZ)
-
-     return(conversions)
-  
-})
+    
+    # Find the location of the proteowizard libraries
+    # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
+    applibpath <- file.path(workingDirectory,
+                            "library")
+    msconvertLocation <- installed.packages(c(.libPaths(),
+                                              applibpath))
+    msconvertLocation <- as.list(msconvertLocation[grep("proteowizardinstallation",
+                                                        msconvertLocation), ])
+    msconvertLocation <- file.path(msconvertLocation$LibPath, 
+                                   "proteowizardinstallation", 
+                                   "pwiz")
+    
+    # msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+    msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+    
+    mzFileInput <- list.files(mzmlRawFilesLocation(),
+                              recursive = TRUE,
+                              full.names = TRUE,
+                              pattern = ".mz") 
+    
+    popup1()
+    
+    mzmlRawFileDirectory1 <-input$mzmlRawFileDirectory
+    mzmlRawFilesLocation <- mzFileInput
+    msconvertLocation <- msconvertLocation
+    outDir <- tempMZ
+    
+    conversions <- IDBacApp::convertToMzml(mzmlRawFileDirectory = input$mzmlRawFileDirectory,
+                                           mzmlRawFilesLocation = mzFileInput,
+                                           # spectraConversion = spectraConversion(),
+                                           msconvertLocation = file.path(msconvertLocation,"msconvert.exe"),
+                                           outDir = tempMZ)
+    
+    return(conversions)
+    
+  })
 })
 
 
 
 observeEvent(input$run,{
- warning(conversions())
+  warning(conversions())
   popup2()
   
 })
@@ -1111,9 +1031,9 @@ observeEvent(input$run,{
 # Run raw data processing on delimited-type input files
 #----
 observeEvent(input$runDelim,{
- 
+  
   popup1()
-
+  
   IDBacApp::parseDelimitedMS(proteinDirectory = delimitedLocationP(),
                              smallMolDirectory = delimitedLocationSM(),
                              exportDirectory =  tempdir())
@@ -1156,34 +1076,34 @@ observeEvent({
   c(input$beginPeakProcessing,
     input$beginPeakProcessingModal,
     input$beginPeakProcessingAgain)},{
-
+      
       
       popup3()
-
+      
       # Split into chunks. Each chunk will be consecutively loaded into RAM and processed
-       rawDataFilePath <- conversions()$tempNames
-       rawDataFilePath <<- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
-       sampleNames <- conversions()$sampleNames
-       sampleNames <<- split(sampleNames, ceiling(seq_along(rawDataFilePath) / 25))
-            lengthProgress <- length(rawDataFilePath)
-
-
+      rawDataFilePath <- conversions()$tempNames
+      rawDataFilePath <<- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
+      sampleNames <- conversions()$sampleNames
+      sampleNames <<- split(sampleNames, ceiling(seq_along(rawDataFilePath) / 25))
+      lengthProgress <- length(rawDataFilePath)
+      
+      
       withProgress(message = 'Processing in progress',
                    detail = 'This may take a while...',
                    value = 0, {
-
+                     
                      for(i in base::seq_along(rawDataFilePath)){
                        incProgress(1/lengthProgress)
                        IDBacApp::spectraProcessingFunction(rawDataFilePath = rawDataFilePath[[i]],
                                                            sample_ID = sampleNames[[i]],
                                                            userDBCon = newExperimentSqlite()) # pool connection
-                       }
-
+                     }
+                     
                    })
       
       
       
- 
+      
       
       
       # aa2z <-newExperimentSqlite()
@@ -1196,11 +1116,11 @@ observeEvent({
       # 
       # 
       
-    #  parallel::stopCluster(cl)
+      #  parallel::stopCluster(cl)
       
       
-
-   
+      
+      
       popup4()
 })
 
@@ -1229,8 +1149,6 @@ popup4 <- reactive({
     tagList(actionButton("processToAnalysis", 
                        "Click to continue"))
   ))
-  
-  
   
 })
 
