@@ -1,0 +1,108 @@
+<method name="RP_PepMix.par" date="2002-12-04T12:04:46" creator="FlexControl-1.x" version="1.0" last_modified="2017-06-02T12:42:05-05:00" flexControlVersion="3.4.135.0" InstrumentSerialNo="8264320.00621" crc32="f8e86c19">
+   <!--Mode can be LINEAR, REFLECTOR, NEUTRAL, FAST, LIFT or EXPERIMENTAL-->
+   <Mode>REFLECTOR</Mode>
+   <HighVoltageSupplies>
+      <!--These are all voltages of the instrument-->
+      <IonSource1>19000</IonSource1>
+      <IonSource2>16600</IonSource2>
+      <Lens>8300</Lens>
+      <Reflector>21000</Reflector>
+      <Reflector2>9700</Reflector2>
+      <Polarity>positive</Polarity>
+      <ReflectorDetector>3.00015</ReflectorDetector>
+      <HighMassDetector>0</HighMassDetector>
+      <PieDelay>200</PieDelay>
+   <RelativeMode>0</RelativeMode>
+<PanOn>1</PanOn>
+</HighVoltageSupplies>
+   <Digitizer>
+      <Timebase>0.2</Timebase>
+      <BandWidthLimit>0</BandWidthLimit>
+      <ElectronicGainLevel>2</ElectronicGainLevel>
+   <BaselineOffsetRel>0</BaselineOffsetRel>
+</Digitizer>
+   <Calibration type="MS">
+      <!--Mode means 1 = linear; 2 = quadratic-->
+      <AccessoryCalibrationInformation>
+<StdDevBeforeReCalibration>4.775466695348863</StdDevBeforeReCalibration>
+<StdDevAfterReCalibration>0.5041447242723314</StdDevAfterReCalibration>
+</AccessoryCalibrationInformation>
+<CalibrationGUIParametersMS>
+<SelectedCalibrationStrategy>Interactive</SelectedCalibrationStrategy>
+<UserDefinedPeakAssignmentTolerance>500</UserDefinedPeakAssignmentTolerance>
+<UserDefinedPeakAssignmentToleranceStatisticalPeptide>500</UserDefinedPeakAssignmentToleranceStatisticalPeptide>
+<NearNeighbourPeakAssignmentTolerance>50</NearNeighbourPeakAssignmentTolerance>
+<SelectedMassControlListNameManual>IDBac small molecule calibration</SelectedMassControlListNameManual>
+<ZoomRange>0.5</ZoomRange>
+<ZoomRangeUnitPercent>1</ZoomRangeUnitPercent>
+<PeakAssignmentToleranceSourceManual>ToleranceUserDefined</PeakAssignmentToleranceSourceManual>
+<SelectedMassControlListNameSmart></SelectedMassControlListNameSmart>
+<PeakAssignmentToleranceSourceIsNearNeighbourStatisticalPeptide>0</PeakAssignmentToleranceSourceIsNearNeighbourStatisticalPeptide>
+<CalibrationMode>CalibModeTof2CubicC1Enh</CalibrationMode>
+</CalibrationGUIParametersMS>
+<HPCPolynomial></HPCPolynomial>
+<HPCValid>0</HPCValid>
+<NTBCal>V3.0CCalibrator 12 1 0 0 -2147483648 2147483647  V1.0CHPCData  Order 0 vCoeff V1.0VectorDouble 0  c2 0 c0 0 minMass 0 maxMass 0 bUse 0 endCHPCData V1.0CTOF2CalibrationConstants 9316.7999999999993 0.19999999999999998 254.59665975445751 745960.96890935162 -0.17486581165903881 0.00086134245999392833 1.4111417645712865 2 V1.0CTOF2CalibrationConstants 0 0 0 0 0 0 0 -1  </NTBCal>
+<CalibrationValid>1</CalibrationValid>
+<CalibrationState>
+<CalibrationDate>2017-05-12T23:49:18-07:00</CalibrationDate>
+<Algorithm>ReferenceMassAssignement</Algorithm>
+<Mode>Cubic Enhanced</Mode>
+<Result>OK</Result>
+<ProgramName>flexControl</ProgramName>
+<ProgramVersion>3.4.135.0</ProgramVersion>
+<UserName>BDAL@DE</UserName>
+<Comment></Comment>
+<RootSpectrumID>B8170C86-C47E-4674-BE02-6A6FCD97627F</RootSpectrumID>
+<SourceSpectrumID></SourceSpectrumID>
+<SourceSpectrumDesc></SourceSpectrumDesc>
+<RefMassListName>PeptideCalibStandard mono</RefMassListName>
+<QualityBeforeCalib>4.7754667</QualityBeforeCalib>
+<QualityAfterCalib>0.50414472</QualityAfterCalib>
+<Calibrant time="37581.711" massb="1046.5499" massa="1046.5418" intens="0" mass="1046.5418" name="Angiotensin_II_[M+H]+_mono" prob="1" eppm="0.028956095" tol="0"></Calibrant>
+<Calibrant time="41783.17" massb="1296.6798" massa="1296.6838" intens="0" mass="1296.6848" name="Angiotensin_I_[M+H]+_mono" prob="1" eppm="0.76721396" tol="0"></Calibrant>
+<Calibrant time="42589.043" massb="1347.7317" massa="1347.7366" intens="0" mass="1347.7354" name="Substance_P_[M+H]+_mono" prob="1" eppm="0.92553849" tol="0"></Calibrant>
+<Calibrant time="46646.509" massb="1619.8156" massa="1619.8219" intens="0" mass="1619.8223" name="Bombesin[M+H]+_mono" prob="1" eppm="0.25601602" tol="0"></Calibrant>
+<Calibrant time="52959.436" massb="2093.0794" massa="2093.0864" intens="0" mass="2093.0862" name="ACTH_clip(1-17)[M+H]+_mono" prob="1" eppm="0.10747951" tol="0"></Calibrant>
+<Calibrant time="57432.005" massb="2465.1881" massa="2465.1982" intens="0" mass="2465.1983" name="ACTH_clip(18-39)[M+H]+_mono" prob="1" eppm="0.042258681" tol="0"></Calibrant>
+<Calibrant time="64827.253" massb="3147.4609" massa="3147.471" intens="0" mass="3147.471" name="Somatostatin(28)[M+H]+_mono" prob="1" eppm="0.0035149056" tol="0"></Calibrant>
+</CalibrationState>
+</Calibration>
+   <MassRange>
+      <MassStart>60</MassStart>
+      <MassEnd>2700</MassEnd>
+      <Mode>0</Mode>
+   </MassRange>
+   <MatrixSuppression>
+      <Mode>1</Mode>
+      <DeflectionConstant>0.241806</DeflectionConstant>
+      <CutOffMass>50</CutOffMass>
+      <GateStrength>0</GateStrength>
+   </MatrixSuppression>
+   <Laser>
+      <Shots>1000</Shots>
+      <PowerUV>34.0</PowerUV>
+      <Frequency>2000.0</Frequency>
+<ParmSet>3_medium</ParmSet>
+<RasterMode>1</RasterMode>
+<ShotsAtRasterPos>50</ShotsAtRasterPos>
+</Laser>
+   <CID>0</CID>
+   <ProcessingParameterFile>sc_peptide_cent</ProcessingParameterFile>
+<AutoMSCalibration>
+<AutoXMethod>LaserTuning_Peptides</AutoXMethod>
+<MaxStdDev>300</MaxStdDev>
+<SmoothSpectrum>0</SmoothSpectrum>
+<SaveMethod>0</SaveMethod>
+<MinPeakNum>0</MinPeakNum>
+<MaxPeakErr>100</MaxPeakErr>
+<DisplayMsg>0</DisplayMsg>
+<OnePointMCL></OnePointMCL>
+<MinCoverage>0</MinCoverage>
+<MinIntensThresh>0</MinIntensThresh>
+<SmoothWidth>1</SmoothWidth>
+<UseMinIntensThresh>0</UseMinIntensThresh>
+<UseSmoothWidth>0</UseSmoothWidth>
+<DoOnePointCal>0</DoOnePointCal>
+</AutoMSCalibration>
+</method>

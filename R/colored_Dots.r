@@ -145,7 +145,6 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
 
 
     #C<-as_tibble(C)
-    ccc<<-C
    points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]))
 
 
@@ -179,7 +178,6 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
       xr <<-xr/max(xr)
 
       #C<-as_tibble(C)
-      ccc<<-C
       points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]))
 
 
