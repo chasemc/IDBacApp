@@ -16,7 +16,7 @@ namesNpaths <- base::list.files(filePath,
                         pattern = ".sqlite",
                         full.names = TRUE)
 # Return single file, including path
-filePaths <- filePaths[which(names == fileName)]
+filePaths <- namesNpaths[which(names == fileName)]
 
 con <- pool::dbPool(drv = RSQLite::SQLite(),
              dbname = filePaths)

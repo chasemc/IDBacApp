@@ -240,8 +240,13 @@ userDBCon <- reactive({
 #----
 newExperimentSqlite <- reactive({
   # This pool is used when creating an entirely new "experiment" .sqlite db
+  name <- base::make.names(input$newExperimentName)
+  
   pool::dbPool(drv = RSQLite::SQLite(),
-               dbname = paste0(input$newExperimentName, ".sqlite"))
+               dbname = paste0(name, ".sqlite"))
+  
+  
+  
 })
 
 
@@ -473,6 +478,7 @@ observe({
                       br(),
                       column(12,align = "center",
                              p(strong("1: Enter a filename for this new experiment")),
+                             p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
                              textInput("newExperimentName",
                                        label = ""),
                              tags$hr(size=20)),
@@ -669,6 +675,7 @@ observe({
                       br(),
                       column(12, align="center",
                              p(strong("1: Enter a Name for this New Experiment")),
+                             p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
                              textInput("newExperimentName",
                                        label = ""),
                              tags$hr(size=20)),
@@ -748,6 +755,7 @@ observe({
                       br(),
                       column(12, align = "center",
                              p(strong("1: Enter a Name for this New Experiment")),
+                             p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
                              textInput("newExperimentName",
                                        label = ""),
                              tags$hr(size = 20)),
@@ -2003,7 +2011,7 @@ output$downloadReport <- downloadHandler(
     file.copy(src, 'report.Rmd', overwrite = TRUE)
     
     library(rmarkdown)
-    out <- render('C:/Users/chase/Documents/GitHub/IDBac_App/ResultsReport.Rmd', switch(
+    out <- render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
       input$format,
       HTML = html_document()
     ))
