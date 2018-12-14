@@ -1295,7 +1295,7 @@ output$pcoaPlot <- renderPlotly({
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
                                   nam = (names(colorsToUse)))
-  pcaDat <- merge(pcoaCalculation(),
+  pcaDat <<- merge(pcoaCalculation(),
                   colorsToUse,
                   by = "nam")
 
@@ -1325,9 +1325,10 @@ output$pcoaPlot <- renderPlotly({
 #----
 pcaCalculation <- reactive({
   
-    pc <- log10(proteinMatrix())
+    pc <<- log10(proteinMatrix())
     # Replace infinites
     pc[is.infinite(pc)] <- .000001
+    pc[is.na(pc)] <- .000001
     pc <- FactoMineR::PCA(pc,
                           graph = FALSE,
                           ncp = 3,
@@ -1335,34 +1336,12 @@ pcaCalculation <- reactive({
     pc <- pc$ind$coord
     pc <- as.data.frame(pc)
     nam <- row.names(pc)
-    cbind(pc,nam)
+    d <- cbind(pc,nam)
+    colnames(d) <- c( "Dim1", "Dim2", "Dim3", "nam")
+    as.data.frame(d)
   })
 
-# Match colors by sample across all protein-data graphs
-#----
-  colorMatch <- reactive({
-    pc <- pcaCalculation()
 
-    # Based on user selection, color PCA based on dendrogram groupings
-    if(!is.null(isolate(input$kORheight))){
-      if(input$kORheight == "2"){
-        # Colors chosen by cutting dendrogram at user-chosen height
-        fac <- stats::cutree(dendro(),
-                      h = input$height)
-      } else if (input$kORheight == "1"){
-        # Colors chosen by user-selected "k" of k-means
-        fac <- stats::cutree(dendro(),
-                             k = input$kClusters)
-      } else {
-        # No factors, everthing colored black
-        fac <- rep(1, length(labels(dendro())))
-        names(fac) <- labels(dendro())
-      }
-      fac
-    }
-})
-
-  
 # Output Plotly plot of PCA results
 #----
 output$pcaPlot <- renderPlotly({
@@ -1375,22 +1354,29 @@ output$pcaPlot <- renderPlotly({
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
                                   nam = (names(colorsToUse)))
-  
-  pcaDat <<- merge(pcaCalculation(),
+  pcaDat <- pcaCalculation()  
+  pcaDat <- merge(pcaCalculation(),
                   colorsToUse, 
                   by = "nam")
-  
-
-  plot_ly(data = pcaDat,
-          x = ~Dim.1,
-          y = ~Dim.2,
-          z = ~Dim.3,
+    plot_ly(data = pcaDat,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
           type = "scatter3d",
           mode = "markers",
           marker = list(color = ~fac),
           hoverinfo = 'text',
-          bgcolor = ~fac,
-          text = ~nam)
+          text = ~nam) %>%
+    layout(
+      xaxis = list(
+        title = ""
+      ),
+      yaxis = list(
+        title = " "
+      ),
+      zaxis = list(
+        title = ""
+      ))
   
   
   
@@ -2869,281 +2855,7 @@ observeEvent(input$updateIDBac,{
   })
 
 
-  #------------------------------------
-  #------------------------------------ append an Existing Library
-
-
-  output$appendLibPanelRadios  <- renderUI({
-    if(input$libraryTabs == "addToExistingLibPanel"){
-      radioButtons(inputId = "appendLibPanelRadiosSelected",
-                   label= "Existing Libraries",
-                   choiceNames = basename(libraries()),
-                   choiceValues = as.list(libraries())
-      )
-    }
-
-  })
-
-
-  appendLibraryEnvironmentTracking <- new.env()  # This allows modifyLibraryTable() below to update correctly
-
-  appendToLibraryTable <- reactive({
-    # Open connection to chosen existing database
-    appendDatabaseConnect <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$appendLibPanelRadiosSelected))
-    # Create lazy-eval tbl
-    db <- dplyr::tbl(appendDatabaseConnect, "IDBacDatabase")
-    # Select only columns to be displayed in IDBac
-    db <- db %>%
-      dplyr::select(-c("manufacturer",
-                       "model",
-                       "ionisation",
-                       "analyzer",
-                       "detector",
-                       "Protein_Replicates",
-                       "Small_Molecule_Replicates",
-                       "mzML",
-                       "proteinPeaksRDS")) %>%
-      dplyr::collect()
-
-
-    if ((!is.null(input$hot2)) && appendLibraryEnvironmentTracking$value == input$appendLibPanelRadiosSelected) {
-      rhandsontable::hot_to_r(input$hot3)
-    } else {
-      appendLibraryEnvironmentTracking$value <-input$appendLibPanelRadiosSelected
-      db
-    }
-
-  })
-
-  # Display the new Library as an editable table
-  output$hot3 <- rhandsontable::renderRHandsontable({
-    DF <- appendToLibraryTable()
-    DF %>% select(c("Strain_ID",
-                    "Genbank_Accession",
-                    "Kingdom",
-                    "Phylum",
-                    "Class",
-                    "Order",
-                    "Family",
-                    "Genus",
-                    "Species",
-                    "Strain")) %>%
-      return(.) -> DF
-    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
-      hot_col("Strain_ID", readOnly = TRUE)
-  })
-
-
-
-
-
-  # ----------------- Append data to selected database
-
-  observeEvent(input$saveAppendDatabase1, {
-
-    showModal(popupDBappend())
-
-  })
-
-
-  # Popup summarizing the final status of the conversion
-  popupDBappend <- function(failed = FALSE){
-    modalDialog(
-      title = "Are you sure?",
-      p("There is already a database with this name."),
-      p(paste0("Pressing save below will append to the existing database: \"", isolate(input$appendLibPanelRadiosSelected),"\"")),
-      footer = tagList(actionButton("saveAppendDatabase2", paste0("Append to: \"", isolate(basename(input$appendLibPanelRadiosSelected)),"\"")), modalButton("Close"))
-    )}
-
-  observeEvent(input$saveAppendDatabase2, {
-    # After initiating the database
-    newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$appendLibPanelRadiosSelected))
-    IDBacApp::addNewLibrary(samplesToAdd = createNewLibraryTable2(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
-  })
-
-
-
-
-
-  createNewLibraryTable2 <- reactive({
-
-    # "Get the sample names from the protein peak files
-    currentlyLoadedSamples <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
-    # Character vector of protein peak sample names
-    currentlyLoadedSamples <- as.character(strsplit(currentlyLoadedSamples,"_ProteinPeaks.rds"))
-    # Check for mzML files
-    mzMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzML"), full.names = FALSE)
-    mzMLfiles <- unlist(strsplit(mzMLfiles, ".mzML"))
-    nonMissingmzML <- which(currentlyLoadedSamples %in% mzMLfiles)
-    missingmzML <- which(! currentlyLoadedSamples %in% mzMLfiles)
-    currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzML]
-    # Create the data frame structure for the "database"
-    currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
-                                         "Genbank_Accession" = "",
-                                         "Kingdom" = "",
-                                         "Phylum"= "",
-                                         "Class" = "",
-                                         "Order" = "",
-                                         "Family" = "",
-                                         "Genus" = "",
-                                         "Species" = "",
-                                         "Strain" = "")
-    # If interactive table exists, show it, otherwise use "currentlyLoadedSamples" created above
-    if (!is.null(input$hott)) {
-      rhandsontable::hot_to_r(input$hott)
-    } else {
-      currentlyLoadedSamples
-    }
-
-  })
-
-  # Display the new Library as an editable table
-  output$hott <- rhandsontable::renderRHandsontable({
-    DF <- createNewLibraryTable2()
-    DF %>% select(c("Strain_ID",
-                    "Genbank_Accession",
-                    "Kingdom",
-                    "Phylum",
-                    "Class",
-                    "Order",
-                    "Family",
-                    "Genus",
-                    "Species",
-                    "Strain")) %>%
-      return(.) -> DF
-    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
-      hot_col("Strain_ID", readOnly = TRUE)
-  })
-
-
-
-
-
-
-  #------------------------------------------------------------------------------------------------------------
-
-  #-------------------------------------- Library Search
-
-
-  # Load library search function:
-  #source("librarySearch.r")
-
-
-
-
-  librarySearchResults <- reactive({
-    input$libraryInjection
-    input$initateInjection
-    IDBacApp::databaseSearch(idbacPath = idbacDirectory$filePath,
-                   databasePath = input$libraryInjection,
-                   wantReport = FALSE)
-
-
-  })
-
-
-
-
-
-  libSearchResultIDsForDendro <-  reactive({
-    a <- input$librarySearch
-
-
-   ffw <<- do.call(rbind.data.frame,unlist(librarySearchResults(), recursive = FALSE))
-
-
-
-       # only keep top hits and no duplicate library IDs
-       librarySearchResults <- ffw %>%
-         filter(Score < 30) %>%
-         distinct(Lib_ID, Unknown, .keep_all = TRUE)
-
-
-      # only keep top hits and no duplicate library IDs
-#      librarySearchResults <- librarySearchResults()
-
-            # return vector of Library IDs to Injecct
-      as.vector(unlist(librarySearchResults[,1]))
-
-  })
-
-
-
-
-
-
-  #---------------------------------------
-  # Library Injection
-
-
-
-  output$libraryInjectionLibrarySelect  <- renderUI({
-    if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
-      checkboxGroupInput(inputId = "libraryInjection",
-                         label= "Select Library to Inject",
-                         choiceNames = basename(libraries()),
-                         choiceValues = as.list(libraries())
-      )
-    }
-
-  })
-
-
-
-
-
-
-  output$libraryMetadataColumnsSelection  <- renderUI({
-    if(input$HierarchicalSidebarTabs == "hierLibrarySearch"){
-
-
-      checkboxGroupInput(inputId = "libraryMetadataColumns",
-                         label= "Select Library Columns",
-                         choiceNames =  DBI::dbConnect(RSQLite::SQLite(), input$libraryInjection) %>%
-                           dplyr::tbl(., "IDBacDatabase") %>%
-                           select(-c("Strain_ID",
-                                     "manufacturer",
-                                     "model",
-                                     "ionisation",
-                                     "analyzer",
-                                     "detector",
-                                     "Protein_Replicates",
-                                     "Small_Molecule_Replicates",
-                                     "mzML",
-                                     "proteinPeaksRDS",
-                                     "proteinSummedSpectrumRDS",
-                                     "smallMoleculePeaksRDS",
-                                     "mzMLhash",
-                                     "proteinPeaksRDShash",
-                                     "proteinSummedSpectrumRDShash",
-                                     "smallMoleculePeaksRDShash")) %>%  colnames(),
-                         choiceValues = as.list( DBI::dbConnect(RSQLite::SQLite(), input$libraryInjection) %>%
-                                                   dplyr::tbl(., "IDBacDatabase") %>%
-                                                   select(-c("Strain_ID",
-                                                             "manufacturer",
-                                                             "model",
-                                                             "ionisation",
-                                                             "analyzer",
-                                                             "detector",
-                                                             "Protein_Replicates",
-                                                             "Small_Molecule_Replicates",
-                                                             "mzML",
-                                                             "proteinPeaksRDS",
-                                                             "smallMoleculePeaksRDS",
-                                                             "proteinSummedSpectrumRDS",
-                                                             "mzMLhash",
-                                                             "proteinPeaksRDShash",
-                                                             "proteinSummedSpectrumRDShash",
-                                                             "smallMoleculePeaksRDShash")) %>%  colnames())
-      )
-    }
-
-  })
-
-
-
-
-
+  
 
 
 
