@@ -27,6 +27,8 @@ navbarPage(collapsible = T,
                  column(7,
                         h1("Welcome to IDBac",
                            align = "center"),
+                   
+                        
                         br(),
                         h4("General Information:",
                            align = "center"),
