@@ -8,5 +8,35 @@ Description: This app allows users to take raw dat MALDI-TOF MS files (Tested on
 License: GPL v3 except included packages or sources license otherwise
 Encoding: UTF-8
 LazyData: true
+Imports: 
+  shiny,
+  Rcpp,
+  MALDIquant,
+  MALDIquantForeign,
+  pool,
+  RSQLite,
+  DBI,
+  dbplyr,
+  dplyr,
+  magrittr,
+  reshape2,
+  FactoMineR,
+  Rtsne,
+  dendextend,
+  igraph,
+  plyr,
+  networkD3,
+  rhandsontable,
+  readxl,
+  devtools,
+  shinyjs,
+  plotly,
+  colourpicker,
+  ape,
+  svglite
+
+Remotes:   bioc::mzR
+
+
 Suggests: testthat
 RoxygenNote: 6.1.1

@@ -153,7 +153,7 @@ function(input,output,session){
                         offset = 1,
                         h3("Transfer samples from previous experiments to new/other experiments.", align="center"),
                         p("Note: For data integrity, samples cannot be removed from experiments.", align= "center"),
-                        selectInput("selectMixNmatchExperiment",
+                        selectInput("selectExperiment",
                                      label = "Available Experiments:",
                                      choices = availableExperiments(),
                                      selected = availableExperiments()[[1]]),
@@ -175,7 +175,10 @@ function(input,output,session){
         tabPanel(tags$ul(tags$li("Add/modify information about samples")), 
                  id = "experiment_metaData_tab",
         
-        p("s"),
+                 selectInput("selectExperimentforMeta",
+                             label = "Available Experiments:",
+                             choices = availableExperiments(),
+                             selected = availableExperiments()[[1]]),
         actionButton("searchNCBI",
                      "Search NCBI"),
         actionButton("saven",
@@ -229,20 +232,8 @@ output$selectedSQLText <- renderPrint({
 
 #----
 userDBCon <- reactive({
-  # This pool is used when selecting to analyze a previous experiment
-  #  isolate( input$percentPresenceP )
-  
-  fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
-                                       pattern = ".sqlite",
-                                       full.names = FALSE))
-  filePaths <- list.files(workingDirectory,
-                                       pattern = ".sqlite",
-                                       full.names = TRUE)
-  filePaths <- filePaths[which(fileNames == input$selectExperiment)]
-  
-  pool::dbPool(drv = RSQLite::SQLite(),
-               dbname = filePaths
-               )
+  IDBacApp::createPool(fileName = input$selectExperiment ,
+                       filePath = workingDirectory)
 })
 
 
@@ -375,10 +366,24 @@ observeEvent(input$pop22,{
     qwerty$rtab <-  rhandsontable::hot_to_r(input$metaTable)
   } else {
     
+    fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
+                                                      pattern = ".sqlite",
+                                                      full.names = FALSE))
+    filePaths <- list.files(workingDirectory,
+                            pattern = ".sqlite",
+                            full.names = TRUE)
+    filePaths <- filePaths[which(fileNames == input$selectExperimentforMeta)]
+    
+    metadb <- pool::dbPool(drv = RSQLite::SQLite(),
+                           dbname = filePaths)
+    
+    
+    
+    
     dbQuery <- glue::glue_sql("SELECT *
                                   FROM ({tab*})",
                               tab = "metaData",
-                              .con = userDBCon())
+                              .con = metadb)
     
     conn <- pool::poolCheckout(userDBCon())
     dbQuery <- DBI::dbSendQuery(conn, dbQuery)
@@ -407,6 +412,8 @@ observeEvent(input$pop22,{
     )
     
     qwerty$rtab <- rbind(exampleMetaData, dbQuery)
+    pool::poolReturn(conn)
+    pool::poolClose(metadb)
   }
 })
 
