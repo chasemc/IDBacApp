@@ -1270,16 +1270,11 @@ proteinDistance <- reactive({
 
 # PCoA Calculation
 #----
-pcoaCalculation <- reactive({
-
+pcoaResults <- reactive({
   # number of samples should be greater than k
   shiny::req(nrow(as.matrix(proteinDistance())) > 10)
-  
-  pc <- as.data.frame(stats::cmdscale((proteinDistance()), k=10))
-  pc <- pc[,1:3]
-  colnames(pc) <- c("Dim1", "Dim2", "Dim3")
-  pc["nam"] <- row.names(pc)
-  pc
+  bbb<<-proteinDistance()
+  IDBacApp::pcoaCalculation(proteinDistance())
 })
 
 
@@ -1295,7 +1290,7 @@ output$pcoaPlot <- renderPlotly({
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
                                   nam = (names(colorsToUse)))
-  pcaDat <<- merge(pcoaCalculation(),
+  pcaDat <<- merge(pcoaResults(),
                   colorsToUse,
                   by = "nam")
 
@@ -1323,22 +1318,15 @@ output$pcoaPlot <- renderPlotly({
 
 # PCA Calculation
 #----
-pcaCalculation <- reactive({
+pcaResults <- reactive({
+  # number of samples should be greater than k
+#  shiny::req(nrow(as.matrix(proteinMatrix())) > 4)
   
-    pc <<- log10(proteinMatrix())
-    # Replace infinites
-    pc[is.infinite(pc)] <- .000001
-    pc[is.na(pc)] <- .000001
-    pc <- FactoMineR::PCA(pc,
-                          graph = FALSE,
-                          ncp = 3,
-                          scale.unit = T)
-    pc <- pc$ind$coord
-    pc <- as.data.frame(pc)
-    nam <- row.names(pc)
-    d <- cbind(pc,nam)
-    colnames(d) <- c( "Dim1", "Dim2", "Dim3", "nam")
-    as.data.frame(d)
+  aaa<<-proteinMatrix()
+  IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
+                 logged = TRUE,
+                 scaled = TRUE, 
+                 missing = .00001)
   })
 
 
@@ -1354,8 +1342,8 @@ output$pcaPlot <- renderPlotly({
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
                                   nam = (names(colorsToUse)))
-  pcaDat <- pcaCalculation()  
-  pcaDat <- merge(pcaCalculation(),
+  pcaDat <- pcaResults()  
+  pcaDat <- merge(pcaResults(),
                   colorsToUse, 
                   by = "nam")
     plot_ly(data = pcaDat,
@@ -1392,19 +1380,14 @@ output$pcaPlot <- renderPlotly({
 
 # Calculate tSNE based on PCA calculation already performed
 #----
-tsneCalculation <- reactive({
-  d <- Rtsne::Rtsne(pcaCalculation(),
-                    pca = FALSE,
-                    dims = 3,
-                    perplexity = input$tsnePerplexity,
-                    theta = input$tsneTheta, 
-                    max_iter = input$tsneIterations)
-  d <- as.data.frame(d$Y)
-  d <- cbind.data.frame(as.vector(pcaCalculation()$nam),
-                        d)
-  colnames(d) <- c("nam", "Dim1", "Dim2", "Dim3")
-
-  as.data.frame(d)
+tsneResults <- reactive({
+  shiny::req(nrow(as.matrix(proteinMatrix())) > 15)
+  
+  IDBacApp::tsneCalculation(dataMatrix = proteinMatrix(),
+                   perplexity = input$tsnePerplexity,
+                   theta = input$tsneTheta,
+                   iterations = input$tsneIterations)
+ 
 })
 
 
@@ -1420,7 +1403,7 @@ output$tsnePlot <- renderPlotly({
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
                                   nam = (names(colorsToUse)))
-  pcaDat <- merge(tsneCalculation(), 
+  pcaDat <- merge(tsneResults(), 
                   colorsToUse,
                   by="nam")
 
