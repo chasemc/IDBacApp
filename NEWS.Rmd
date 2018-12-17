@@ -16,14 +16,18 @@ This release is more or less an entire re-write of IDBac, so... many, many chang
 ### Structural Changes
 This is likely the largest change and the most significant for anyone wanting to add-on or contribute to the codebase. 
 
-While the first version of IDBac followed an OK paradigm for small Shiny apps (two files: server.r and ui.r), it became quickly apparent that it was an unsustainable and unscalable model.
+While the first version of IDBac followed an valid paradigm for small Shiny apps (two files: server.r and ui.r), it became quickly apparent that it was an unsustainable and unscalable model for future development.
 
  New paradigms:
  - IDBac is an R package
-   - Now IDBac is structured as a regular R-package. This means that significant computation and code chunks have been pulled out of server.r and are now located in the packages `R` directory. 
+   - Now IDBac is structured as a regular R-package. This means that significant computation and code chunks have been pulled out of server.r and are now located in the package's `R` directory. 
  - IDBac is testable
-   - While testing the interactivity of Shiny apps is still a little shaky, ~~all~~ most functions within the `R` directory should have a `testthat` test.
+   - While methods for testing the interactivity of Shiny apps is still a little shaky, over the coming months ~~all~~  functions within the `R` directory should have a `testthat` test.
  
+### Structural Changes (continued)
+
+Prior to this release IDBac relied on the filesystem for storing and retrieving mzXML files, processed data, etc
+
  
  
 ### Algorithm changes (AKA Breaking results changes)
