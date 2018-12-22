@@ -39,7 +39,7 @@ ui_sqlUI <- function(id, availableExperiments) {
                                  selectInput("selectExperiment",
                                              label = h3("Select an experiment to analyze:"),
                                              choices = availableExperiments,
-                                             selected = 0,
+                                             selected = availableExperiments[[1]],
                                              width= "100%"
                                  ),
                                  actionButton("moveToAnalysis",

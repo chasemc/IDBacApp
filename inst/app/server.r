@@ -267,9 +267,11 @@ output$metaTable <- rhandsontable::renderRHandsontable({
 
 
 #----
-observeEvent(input$pop22,{
+observeEvent(input$selectExperimentforMeta,{
+
+  # if(is.null(input$selectExperimentforMeta)){}else{
   
-  if (is.null(input$metaTable)){
+     if (!is.null(input$metaTable)){
     qwerty$rtab <-  rhandsontable::hot_to_r(input$metaTable)
   } else {
     
@@ -292,7 +294,7 @@ observeEvent(input$pop22,{
                               tab = "metaData",
                               .con = metadb)
     
-    conn <- pool::poolCheckout(userDBCon())
+    conn <- pool::poolCheckout(metadb)
     dbQuery <- DBI::dbSendQuery(conn, dbQuery)
     dbQuery <- DBI::dbFetch(dbQuery)
     
@@ -323,7 +325,7 @@ observeEvent(input$pop22,{
     pool::poolClose(metadb)
   }
 
-
+#}
 })
 
 
@@ -637,8 +639,8 @@ conversions <- reactive({
                                    "proteowizardinstallation", 
                                    "pwiz")
     
-    # msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-    msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
+     msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
+  #  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
     
     mzFileInput <- list.files(mzmlRawFilesLocation(),
                               recursive = TRUE,
