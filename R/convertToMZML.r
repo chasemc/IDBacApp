@@ -12,15 +12,20 @@ convertToMzml <- function(mzmlRawFileDirectory,
 if(!is.null(mzmlRawFileDirectory)){
   
   # vector of filepaths
-  mzfilePaths <- normalizePath(mzmlRawFilesLocation, winslash = "/" )
+  tempNames <- normalizePath(mzmlRawFilesLocation, winslash = "/" )
   
   # vector of file names, no extensions
-  filenames <- basename(tools::file_path_sans_ext(mzfilePaths))
+  filenames <- basename(tools::file_path_sans_ext(tempNames))
 
+  
+  
+  
+  
+  
 }else{
   # Get names from excel
   fullZ <- spectraConversion
-}
+
 
   
   
@@ -73,6 +78,8 @@ numCores <- parallel::detectCores()
 cl <- parallel::makeCluster(numCores)
 parallel::parLapply(cl,msconvertCmdLineCommands,functionTOrunMSCONVERTonCMDline)
 parallel::stopCluster(cl)
+
+}
 
 
 return(list(tempNames = tempNames,

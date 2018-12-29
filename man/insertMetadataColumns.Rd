@@ -2,18 +2,20 @@
 % Please edit documentation in R/manipulateMetadata.R
 \name{insertMetadataColumns}
 \alias{insertMetadataColumns}
-\title{Principle Coordinates Analysis 
-Given a data frame whose columns are variables and rows are samples, run Principle Coordinates Analysis (PCoA)}
+\title{Insert columns into IDBac SQLite metadata table}
 \usage{
-insertMetadataColumns(databaseName, databasePath, columnNames)
+insertMetadataColumns(pool, columnNames)
 }
 \arguments{
-\item{input}{data frame whose columns are variables and rows are samples}
+\item{columnNames}{character vector of column names to be added}
+
+\item{databaseName}{}
+
+\item{databasePath}{}
 }
 \value{
 a single trimmed and binned MALDIquant peak object
 }
 \description{
-Principle Coordinates Analysis 
-Given a data frame whose columns are variables and rows are samples, run Principle Coordinates Analysis (PCoA)
+Insert columns into IDBac SQLite metadata table
 }

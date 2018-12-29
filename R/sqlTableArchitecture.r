@@ -1,4 +1,4 @@
-sqlTableArchitecture <- function(nrow){
+sqlTableArchitecture <- function(numberScans){
 
   sqlDataFrame <- new.env(parent = parent.frame())
 
@@ -24,7 +24,7 @@ sqlTableArchitecture <- function(nrow){
                              "dna_16S")
   
   
-  sqlDataFrame$metaData <- as.data.frame(matrix(nrow = nrow,
+  sqlDataFrame$metaData <- as.data.frame(matrix(nrow = numberScans,
                                                 ncol = length(sqlDataFrame$metaData), 
                                                 dimnames = list(NULL,sqlDataFrame$metaData)))
 
@@ -40,7 +40,7 @@ sqlTableArchitecture <- function(nrow){
                         "Instrument_MetaFile")
 
 
-  sqlDataFrame$XML <- as.data.frame(matrix(nrow = nrow,
+  sqlDataFrame$XML <- as.data.frame(matrix(nrow = numberScans,
                                                 ncol = length(sqlDataFrame$XML), 
                                                 dimnames = list(NULL,sqlDataFrame$XML)))
 

@@ -10,8 +10,13 @@ file.remove(list.files(tempMZ,
                        full.names = TRUE))
 
 
+wq <-pool::dbPool(drv = RSQLite::SQLite(),
+             dbname = paste0("wds", ".sqlite"))
 
-
+onStop(function() {
+  pool::poolClose(wq)
+  print(wq)
+}) # important!
 
 
 shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
@@ -659,7 +664,7 @@ conversions <- reactive({
                                            # spectraConversion = spectraConversion(),
                                            msconvertLocation = file.path(msconvertLocation,"msconvert.exe"),
                                            outDir = tempMZ)
-    
+    aw<<-conversions
     return(conversions)
     
   })
@@ -732,7 +737,7 @@ observeEvent({
       sampleNames <<- split(sampleNames, ceiling(seq_along(rawDataFilePath) / 25))
       lengthProgress <- length(rawDataFilePath)
       
-      
+      yobo<-pool::poolCheckout(newExperimentSqlite())
       withProgress(message = 'Processing in progress',
                    detail = 'This may take a while...',
                    value = 0, {
@@ -740,8 +745,8 @@ observeEvent({
                      for(i in base::seq_along(rawDataFilePath)){
                        incProgress(1/lengthProgress)
                        IDBacApp::spectraProcessingFunction(rawDataFilePath = rawDataFilePath[[i]],
-                                                           sample_ID = sampleNames[[i]],
-                                                           userDBCon = newExperimentSqlite()) # pool connection
+                                                           sampleID = sampleNames[[i]],
+                                                           userDBCon = yobo) # pool connection
                      }
                      
                    })
@@ -1917,10 +1922,10 @@ observeEvent(input$addtoNewDB, {
 selectedSmallMolPeakList <- reactive({
  
   
-   combinedSmallMolPeaks <- NULL
+  combinedSmallMolPeaks <- NULL
   combinedSmallMolPeaksAll <- NULL
   matrixID <- NULL
-
+  
   if(!is.null(dendro())){  # Check if there are protein spectra if TRUE, display protein dendrogram and use to subset strains
 
     if(is.null(input$plot_brush$ymin)){ # If there is a protein dendrogram and user hasn't brushed:
