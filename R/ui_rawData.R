@@ -191,3 +191,55 @@ beginWithTXT <- function(id){
                        placeholder = TRUE)
   )
 }
+
+
+
+conversionsUI <- function(id){
+  
+  fluidPage(
+    navlistPanel(widths = c(3, 7), id = "ConversionsNav",
+                 "Create an IDBac experiment",
+                 tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
+                          value = "convert_bruker_nav",
+
+                          
+                            radioButtons("rawORreanalyze",
+                                         label = h3("Begin by selecting an option below:"),
+                                         choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
+                                                        "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
+                                         selected = 1,
+                                         inline = FALSE,
+                                         width = "100%"),
+                   
+                            uiOutput("conversionMainUI")
+                          
+                          
+                      
+                            
+                          
+                          
+                 ),
+                 tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
+                          value = "convert_mzml_nav",
+                          fluidRow(
+                            uiOutput("conversionMainUI3")
+                          )
+                          
+                 ),
+                 tabPanel(tags$ul(tags$li("Click here to convert txt files")),
+                          value = "convert_txt_nav",
+                          radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
+                                       choices = list("Select here if you want to use .txt peak list files" = 3,
+                                                      "Select here if you want to use .csv peak list files" = 4),
+                                       selected = 0,
+                                       inline = FALSE,
+                                       width = "100%"),
+                          fluidRow(
+                            uiOutput("conversionMainUI2")
+                          )
+                          
+                 )
+    ))}
+                 
+                          
+                           

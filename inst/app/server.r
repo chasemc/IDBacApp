@@ -93,11 +93,24 @@ colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00",
 function(input,output,session){
   
   
+  
+  
+  #This "observe" event creates the SQL tab UI.
+  observe({
+    output$rawDataUI <- renderUI({
+      conversionsUI("Sd")
+    })
+    
+    
+  }) 
+  
   #This "observe" event creates the SQL tab UI.
   observe({
     output$sqlUI <- renderUI({
-      ui_sqlUI("ssds", availableExperiments = availableExperiments())
+    IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
     })
+    
+    
   })
   
 
@@ -334,51 +347,17 @@ observeEvent(input$selectExperimentforMeta,{
 })
 
 
-#----
-observe({
-  if (is.null(input$startingWith)){
-    # Intentionally Blank
-  } else { 
-    output$arrowPNG<-renderUI({
-      img(src="arrowRight.png")
-    })
-  }
-})
 
 
-#----
-observe({
-  if (is.null(input$startingWith)){
-    # Intentionally Blank
-  } else {
-    output$startingWithUI<-renderUI({
-      if(input$startingWith == 1){
-        radioButtons("rawORreanalyze",
-                     label = h3("Begin by selecting an option below:"),
-                     choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
-                                    "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 3),
-                     selected = 0,
-                     inline = FALSE,
-                     width = "100%")
-      } else if(input$startingWith == 2){
-        radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
-                     choices = list("Select here if you want to use .txt peak list files" = 5,
-                                    "Select here if you want to use .csv peak list files" = 6),
-                     selected = 0,
-                     inline = FALSE,
-                     width = "100%")
-      }
 
-    })
-  }
-})
+
 
 
 #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
 #----
 observe({
     if (is.null(input$startingWith)){} else if (input$startingWith == 3){
-    output$ui1 <- renderUI({
+    output$mzConversionUI <- renderUI({
       IDBacApp::beginWithMZ("beginWithMZ")
     })
   }
@@ -437,19 +416,6 @@ output$mzmlRawFileDirectory <- renderText({
 
 
 
-#----
-#This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
-observe({
-  if (is.null(input$startingWith)){
-    # Intentionally Blank
-    } else if (input$startingWith == 2){
-    output$ui1<-renderUI({
-      IDBacApp::beginWithTXT("beginWithTXT")
-    })
-
-  }
-})
-
 
 # Reactive variable returning the user-chosen location of the raw delim files as string
 #----
@@ -501,26 +467,28 @@ output$delimitedLocationPo <- renderText({
 
 #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
 #----
-observe({
-  if (is.null(input$rawORreanalyze)){} else if (input$rawORreanalyze == 1){
-    output$ui1 <- renderUI({
+observeEvent(input$rawORreanalyze, {
+req(input$rawORreanalyze)
+  if(is.null(input$rawORreanalyze)){
+    
+  }else{
+   if (input$rawORreanalyze == 1){
+    output$conversionMainUI <- renderUI({
      IDBacApp::oneMaldiPlate("oneMaldiPlate")
     })
-  }
-})
-
-
-#This "observe" event creates the UI element for analyzing multiple MALDI plates, based on user-input.
-#----
-observe({
-  if (is.null(input$rawORreanalyze)){
-    # Intentionally Blank
-  } else if (input$rawORreanalyze == 3){
-    output$ui1<-renderUI({
+  } else if (input$rawORreanalyze == 2){
+    output$conversionMainUI <- renderUI({
       IDBacApp::multipleMaldiPlates("multipleMaldiPlates")
     })
+  } else if (input$rawORreanalyze == 3){
+    output$conversionMainUI3 <- renderUI({
+      IDBacApp::beginWithTXT("beginWithTXT")
+    })
+  } 
   }
 })
+
+
 
 
 
@@ -625,49 +593,31 @@ spectraConversion <- reactive({
   
 })
 
-
+# Returns a named character list 
+  # character vector = filepaths of mzml files 
+  # `names` = sample names  
 #----
 conversions <- reactive({
-  isolate({
-    # spectraConversion() is a named list, where each element represents a sample and the element name is the sample name;
-    # contents of each element are file paths to the raw data for that sample
+  
+  if(isolate(input$startingWith == 3)){
     
-    # Find the location of the proteowizard libraries
-    # TODO: to make an R package without using RInno, this won't work, need to look for installed pwiz like in MZeasy
-    applibpath <- file.path(workingDirectory,
-                            "library")
-    msconvertLocation <- installed.packages(c(.libPaths(),
-                                              applibpath))
-    msconvertLocation <- as.list(msconvertLocation[grep("proteowizardinstallation",
-                                                        msconvertLocation), ])
-    msconvertLocation <- file.path(msconvertLocation$LibPath, 
-                                   "proteowizardinstallation", 
-                                   "pwiz")
-    
-     msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18160.626e4d2d8" #delete
-  #  msconvertLocation <- "C:/Program Files/ProteoWizard/ProteoWizard 3.0.18247.49b14bb3d"
-    
-    mzFileInput <- list.files(mzmlRawFilesLocation(),
-                              recursive = TRUE,
-                              full.names = TRUE,
-                              pattern = ".mz") 
-    
-    popup1()
-    
-    mzmlRawFileDirectory1 <-input$mzmlRawFileDirectory
-    mzmlRawFilesLocation <- mzFileInput
-    msconvertLocation <- msconvertLocation
-    outDir <- tempMZ
-    
-    conversions <- IDBacApp::convertToMzml(mzmlRawFileDirectory = input$mzmlRawFileDirectory,
-                                           mzmlRawFilesLocation = mzFileInput,
-                                           # spectraConversion = spectraConversion(),
-                                           msconvertLocation = file.path(msconvertLocation,"msconvert.exe"),
-                                           outDir = tempMZ)
-    aw<<-conversions
-    return(conversions)
-    
-  })
+    paths <- list.files(mzmlRawFilesLocation(),
+                            recursive = TRUE,
+                            full.names = TRUE,
+                            pattern = ".mz") 
+   
+    names(paths) <- tools::file_path_sans_ext(base::basename(paths))
+   
+  }
+  
+  
+  
+  
+  
+  popup1()
+  
+  return(paths)
+  
 })
 
 
@@ -731,29 +681,28 @@ observeEvent({
       popup3()
       
       # Split into chunks. Each chunk will be consecutively loaded into RAM and processed
-      rawDataFilePath <- conversions()$tempNames
-      rawDataFilePath <<- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
-      sampleNames <- conversions()$sampleNames
-      sampleNames <<- split(sampleNames, ceiling(seq_along(rawDataFilePath) / 25))
+      rawDataFilePath <- conversions()
+     # rawDataFilePath <- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
       lengthProgress <- length(rawDataFilePath)
       
-      yobo<-pool::poolCheckout(newExperimentSqlite())
+      userDBCon <- pool::poolCheckout(newExperimentSqlite())
       withProgress(message = 'Processing in progress',
                    detail = 'This may take a while...',
                    value = 0, {
                      
                      for(i in base::seq_along(rawDataFilePath)){
                        incProgress(1/lengthProgress)
-                       IDBacApp::spectraProcessingFunction(rawDataFilePath = rawDataFilePath[[i]],
-                                                           sampleID = sampleNames[[i]],
-                                                           userDBCon = yobo) # pool connection
+                       IDBacApp::spectraProcessingFunction(rawDataFilePath = as.vector(rawDataFilePath)[[i]],
+                                                           sampleID = names(rawDataFilePath)[[i]],
+                                                           userDBCon = userDBCon) # pool connection
                      }
                      
                    })
       
       
+      pool::poolReturn(userDBCon)
       
-      
+
       
       
       # aa2z <-newExperimentSqlite()
@@ -795,7 +744,7 @@ popup4 <- reactive({
   showModal(modalDialog(
     title = "Spectra Processing is Now Complete",
     br(),
-    easyClose = TRUE,
+    easyClose = FALSE,
     tagList(actionButton("processToAnalysis", 
                        "Click to continue"))
   ))
