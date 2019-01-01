@@ -467,25 +467,38 @@ output$delimitedLocationPo <- renderText({
 
 #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
 #----
-observeEvent(input$rawORreanalyze, {
-req(input$rawORreanalyze)
-  if(is.null(input$rawORreanalyze)){
+observeEvent(c(input$ConversionsNav,
+             input$rawORreanalyze),
+             {
+  
+  if (input$ConversionsNav == "convert_bruker_nav"){
     
-  }else{
-   if (input$rawORreanalyze == 1){
-    output$conversionMainUI <- renderUI({
-     IDBacApp::oneMaldiPlate("oneMaldiPlate")
-    })
-  } else if (input$rawORreanalyze == 2){
-    output$conversionMainUI <- renderUI({
+    if(is.null(input$rawORreanalyze)) {
+    } else if(input$rawORreanalyze == 1){
+    
+    output$conversionMainUI1 <- renderUI({
+      IDBacApp::oneMaldiPlate("oneMaldiPlate")
+    }) 
+    } else if (input$rawORreanalyze == 2) {
+    output$conversionMainUI1 <- renderUI({
       IDBacApp::multipleMaldiPlates("multipleMaldiPlates")
     })
-  } else if (input$rawORreanalyze == 3){
+    }
+  }
+  
+  
+  if (input$ConversionsNav == "convert_mzml_nav"){
+    output$conversionMainUI2 <- renderUI({
+      IDBacApp::beginWithMZ("beginWithMZ")
+    })
+  } 
+  
+  if (input$ConversionsNav == "convert_txt_nav"){
     output$conversionMainUI3 <- renderUI({
       IDBacApp::beginWithTXT("beginWithTXT")
     })
   } 
-  }
+  
 })
 
 
@@ -599,34 +612,23 @@ spectraConversion <- reactive({
 #----
 conversions <- reactive({
   
-  if(isolate(input$startingWith == 3)){
+  if(isolate(input$ConversionsNav == "convert_mzml_nav")){
     
     paths <- list.files(mzmlRawFilesLocation(),
-                            recursive = TRUE,
-                            full.names = TRUE,
-                            pattern = ".mz") 
-   
+                        recursive = TRUE,
+                        full.names = TRUE,
+                        pattern = ".mz") 
+    
     names(paths) <- tools::file_path_sans_ext(base::basename(paths))
-   
   }
-  
-  
-  
-  
-  
+
   popup1()
-  
   return(paths)
   
 })
 
 
 
-observeEvent(input$run,{
-  warning(conversions())
-  popup2()
-  
-})
 
 # Run raw data processing on delimited-type input files
 #----
@@ -672,17 +674,12 @@ popup2 <- reactive({
 
 # Call the Spectra processing function when the spectra processing button is pressed
 #----
-observeEvent({
-  c(input$beginPeakProcessing,
-    input$beginPeakProcessingModal,
-    input$beginPeakProcessingAgain)},{
+observeEvent(input$run, {
       
       
       popup3()
       
-      # Split into chunks. Each chunk will be consecutively loaded into RAM and processed
       rawDataFilePath <- conversions()
-     # rawDataFilePath <- split(rawDataFilePath, ceiling(seq_along(rawDataFilePath) / 25))
       lengthProgress <- length(rawDataFilePath)
       
       userDBCon <- pool::poolCheckout(newExperimentSqlite())
@@ -1009,56 +1006,56 @@ output$inversePeakComparisonPlotZoom <- renderPlot({
 
 # Download svg of top mirror plot
 #----
-output$downloadInverse <- downloadHandler(
-  filename = function(){
-    paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,".svg")
-    
+  output$downloadInverse <- downloadHandler(
+    filename = function(){
+      paste0("top-", input$Spectra1,"_", "bottom-", input$Spectra2, ".svg")
+      
     }, 
-  content = function(file1){
-
-    svglite::svglite(file1,
-                     width = 10,
-                     height = 8, 
-                     bg = "white",
-                     pointsize = 12,
-                     standalone = TRUE)
-
-    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-    
-    #Create peak plots and color each peak according to whether it occurs in the other spectrum
-    plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-         y = mirrorPlotEnv$spectrumSampleOne@intensity,
-         ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                  max(mirrorPlotEnv$spectrumSampleOne@intensity)),
-         type = "l",
-         col = adjustcolor("Black", alpha=0.3),
-         xlab = "m/z",
-         ylab = "Intensity")
-    lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-          y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-    rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-         ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-         border = mirrorPlotEnv$SampleOneColors)
-    rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-         ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-         border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
-     legend(max(mirrorPlotEnv$spectrumSampleOne@mass) * .6,
-            max(max(mirrorPlotEnv$spectrumSampleOne@intensity)) * .7,
-            legend = c(paste0("Top: ", input$Spectra1), 
-                       paste0("Bottom: ", input$Spectra2)),
-           col = c("black", "black"),
-           lty = 1:1,
-           cex = 1)
-
-    dev.off()
-    if (file.exists(paste0(file1, ".svg")))
-      file.rename(paste0(file1, ".svg"), file1)
-})
-
+    content = function(file1){
+      
+      svglite::svglite(file1,
+                       width = 10,
+                       height = 8, 
+                       bg = "white",
+                       pointsize = 12,
+                       standalone = TRUE)
+      
+      mirrorPlotEnv <- dataForInversePeakComparisonPlot()
+      
+      #Create peak plots and color each peak according to whether it occurs in the other spectrum
+      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
+           y = mirrorPlotEnv$spectrumSampleOne@intensity,
+           ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
+                    max(mirrorPlotEnv$spectrumSampleOne@intensity)),
+           type = "l",
+           col = adjustcolor("Black", alpha=0.3),
+           xlab = "m/z",
+           ylab = "Intensity")
+      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
+            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
+      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
+           ybottom = 0,
+           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
+           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
+           border = mirrorPlotEnv$SampleOneColors)
+      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
+           ybottom = 0,
+           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
+           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
+           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+      legend(max(mirrorPlotEnv$spectrumSampleOne@mass) * .6,
+             max(max(mirrorPlotEnv$spectrumSampleOne@intensity)) * .7,
+             legend = c(paste0("Top: ", input$Spectra1), 
+                        paste0("Bottom: ", input$Spectra2)),
+             col = c("black", "black"),
+             lty = 1:1,
+             cex = 1)
+      
+      dev.off()
+      if (file.exists(paste0(file1, ".svg")))
+        file.rename(paste0(file1, ".svg"), file1)
+    })
+  
 
 # Download svg of zoomed mirror plot
 #----

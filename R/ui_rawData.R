@@ -207,12 +207,12 @@ conversionsUI <- function(id){
                                          label = h3("Begin by selecting an option below:"),
                                          choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
                                                         "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
-                                         selected = 1,
+                                         selected = 0,
                                          inline = FALSE,
                                          width = "100%"),
-                   
-                            uiOutput("conversionMainUI")
-                          
+                   mainPanel(
+                            uiOutput("conversionMainUI1")
+                   )
                           
                       
                             
@@ -222,20 +222,20 @@ conversionsUI <- function(id){
                  tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
                           value = "convert_mzml_nav",
                           fluidRow(
-                            uiOutput("conversionMainUI3")
+                            uiOutput("conversionMainUI2")
                           )
                           
                  ),
                  tabPanel(tags$ul(tags$li("Click here to convert txt files")),
                           value = "convert_txt_nav",
-                          radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
-                                       choices = list("Select here if you want to use .txt peak list files" = 3,
-                                                      "Select here if you want to use .csv peak list files" = 4),
-                                       selected = 0,
-                                       inline = FALSE,
-                                       width = "100%"),
-                          fluidRow(
-                            uiOutput("conversionMainUI2")
+                          # radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
+                          #              choices = list("Select here if you want to use .txt peak list files" = 3,
+                          #                             "Select here if you want to use .csv peak list files" = 4),
+                          #              selected = 3,
+                          #              inline = FALSE,
+                          #              width = "100%"),
+                          mainPanel(
+                            uiOutput("conversionMainUI3")
                           )
                           
                  )
