@@ -18,6 +18,20 @@ spectraProcessingFunction <- function(rawDataFilePath,
   aa2<<-sampleID
   aa3<<-userDBCon
   
+  
+  #Doesn't do anything currently, but put here to help future-proof
+  
+  if(!"version" %in%  DBI::dbListTables(userDBCon)){
+  
+  # Write to SQL DB
+  DBI::dbWriteTable(conn = userDBCon,
+                    name = "version", # SQLite table to insert into
+                    IDBacApp::sqlTableArchitecture(numberScans = 1)$version, # Insert single row into DB
+                    append = TRUE, # Append to existing table
+                    overwrite = FALSE) # Do not overwrite
+  }
+  #----
+  
   # If sample ID doesn't exist, create it in table
   # TODO: userprompt with option to change ID
   IDBacApp::createMetaSQL(sampleID = sampleID,
