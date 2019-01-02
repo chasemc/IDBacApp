@@ -42,7 +42,8 @@ spectraProcessingFunction <- function(rawDataFilePath,
                              scanNumber = scanNumber,
                              userDBCon = userDBCon,
                              sampleID = sampleID,
-                             XMLinfo = XMLinfo)
+                             XMLinfo = XMLinfo, 
+                             rawDataFilePath = rawDataFilePath)
 }
 
 
@@ -50,7 +51,8 @@ createSpectraSQL <- function(mzML_con,
                              scanNumber,
                              userDBCon,
                              sampleID,
-                             XMLinfo){
+                             XMLinfo,
+                             rawDataFilePath){
   
   for (individualSpectrum in 1:scanNumber){
     
