@@ -80,12 +80,11 @@ ui_sqlUI <- function(id, availableExperiments) {
                                       label = "Available Experiments:",
                                       choices = availableExperiments,
                                       selected = availableExperiments[[1]]),
-                          actionButton("searchNCBI",
-                                       "Search NCBI"),
+                          # actionButton("searchNCBI",
+                          #              "Search NCBI"),
                           actionButton("saven",
                                        "save"),
-                          actionButton("pop22",
-                                       "pop"),
+                          
                           rHandsontableOutput("metaTable", height=800)
                  )
     ))
