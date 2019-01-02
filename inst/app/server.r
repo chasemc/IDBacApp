@@ -221,26 +221,25 @@ output$metaTable <- rhandsontable::renderRHandsontable({
 
 
 #----
-observeEvent(input$selectExperimentforMeta,{
-
-  # if(is.null(input$selectExperimentforMeta)){}else{
+observeEvent(c(input$ExperimentNav, input$selectExperimentforMeta),{
   
-     if (!is.null(input$metaTable)){
-    qwerty$rtab <-  rhandsontable::hot_to_r(input$metaTable)
-  } else {
+  fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
+                                                    pattern = ".sqlite",
+                                                    full.names = FALSE))
+  filePaths <- list.files(workingDirectory,
+                          pattern = ".sqlite",
+                          full.names = TRUE)
+  filePaths <- filePaths[which(fileNames == input$selectExperimentforMeta)]
+  
+  metadb <- pool::dbPool(drv = RSQLite::SQLite(),
+                         dbname = filePaths)
+  
+  if (!"metaData" %in% DBI::dbListTables(metadb)) {
+   
+    warning("It appears the experiment file may be corrupt, please create again.")
+    qwerty$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
     
-    fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
-                                                      pattern = ".sqlite",
-                                                      full.names = FALSE))
-    filePaths <- list.files(workingDirectory,
-                            pattern = ".sqlite",
-                            full.names = TRUE)
-    filePaths <- filePaths[which(fileNames == input$selectExperimentforMeta)]
-    
-    metadb <- pool::dbPool(drv = RSQLite::SQLite(),
-                           dbname = filePaths)
-    
-    
+  } else{
     
     
     dbQuery <- glue::glue_sql("SELECT *
@@ -278,8 +277,8 @@ observeEvent(input$selectExperimentforMeta,{
     pool::poolReturn(conn)
     pool::poolClose(metadb)
   }
-
-#}
+  
+  
 })
 
 
