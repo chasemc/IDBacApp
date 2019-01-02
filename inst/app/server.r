@@ -1837,9 +1837,9 @@ observeEvent(input$addtoNewDB, {
   existingDBpath <- filePaths[which(fileNames == input$selectMixNmatchExperiment)]
   newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
 
-  copyToNewDatabase(existingDBpath=existingDBpath,
-                    newdbPath = newdbPath, 
-                    sampleIDs = input$addSampleChooser$right)
+  IDBacApp::copyToNewDatabase(existingDBpath=existingDBpath,
+                              newdbPath = newdbPath, 
+                              sampleIDs = input$addSampleChooser$right)
     
 
 
