@@ -23,11 +23,14 @@ compress <- function(input){
 }
 
 #----
-createMZsha <- function(mzRobject){
+createMZsha <- function(peaklist){
   
-  peaklist <- mzR::peaks(mzRobject)
   
-  if(base::class(peaklist) =="double"){
+  if(base::class(peaklist) == "double"){
+    peaklist <- list(peaklist)
+  }
+  
+  if(base::class(peaklist) == "matrix"){
     peaklist <- list(peaklist)
   }
   
@@ -37,9 +40,31 @@ createMZsha <- function(mzRobject){
     warning("No data found in mzML. If you think this is an error, please submit an issue to GitHub
           with an example file.")
   } else if (numScans == 1){
-    peaklist <-  list(IDBacApp::hash(IDBacApp::serial(peaklist)))
+    peaklist <-  list(IDBacApp::hashR(IDBacApp::serial(peaklist)))
   } else {
-    peaklist <- lapply(peaklist, function(x) IDBacApp::hash(IDBacApp::serial(x)))
+    peaklist <- lapply(peaklist, function(x) IDBacApp::hashR(IDBacApp::serial(x)))
   }
-  return(IDBacApp::hash(IDBacApp::serial(peaklist)))
+  return(IDBacApp::hashR(IDBacApp::serial(peaklist)))
 }
+
+
+
+
+
+# "From"getOS" code written by Will Lowe and copied from: http://conjugateprior.org/2015/06/identifying-the-os-from-r/
+
+getOS <- function(){
+  sysinf <- Sys.info()
+  if (!is.null(sysinf)){
+    os <- sysinf['sysname']
+    if (os == 'Darwin')
+      os <- "osx"
+  } else { ## mystery machine
+    os <- .Platform$OS.type
+    if (grepl("^darwin", R.version$os))
+      os <- "osx"
+    if (grepl("linux-gnu", R.version$os))
+      os <- "linux"
+  }
+  return(as.character(tolower(os)))
+  }

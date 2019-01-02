@@ -5,10 +5,6 @@ convertToMzml <- function(mzmlRawFileDirectory,
                           outDir,
                           spectraConversion){
 
-  
- 
-    
-    
 if(!is.null(mzmlRawFileDirectory)){
   
   # vector of filepaths
@@ -17,18 +13,10 @@ if(!is.null(mzmlRawFileDirectory)){
   # vector of file names, no extensions
   filenames <- basename(tools::file_path_sans_ext(tempNames))
 
-  
-  
-  
-  
-  
 }else{
   # Get names from excel
   fullZ <- spectraConversion
 
-
-  
-  
 
   tempNames <- tempfile(pattern = rep("", length(filenames)), 
                                tmpdir = outDir,
@@ -82,8 +70,8 @@ parallel::stopCluster(cl)
 }
 
 
-return(list(tempNames = tempNames,
-            sampleNames = filenames)
+return(list(paths = tempNames,
+            names = filenames)
        )
 
 
