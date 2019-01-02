@@ -1351,6 +1351,8 @@ output$Heirarchicalui <-  renderUI({
 })
 
 
+
+
 # UI of paragraph explaining which variables were used
 #----
 output$proteinReport<-renderUI(
