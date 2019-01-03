@@ -10,13 +10,13 @@ file.remove(list.files(tempMZ,
                        full.names = TRUE))
 
 
-wq <-pool::dbPool(drv = RSQLite::SQLite(),
-             dbname = paste0("wds", ".sqlite"))
-
-onStop(function() {
-  pool::poolClose(wq)
-  print(wq)
-}) # important!
+# wq <-pool::dbPool(drv = RSQLite::SQLite(),
+#              dbname = paste0("wds", ".sqlite"))
+# 
+# onStop(function() {
+#   pool::poolClose(wq)
+#   print(wq)
+# }) # important!
 
 
 shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
@@ -169,6 +169,15 @@ newExperimentSqlite <- reactive({
   
 })
 
+#---- POOLS
+
+
+
+
+userDBCon <- reactive({
+  IDBacApp::createPool(fileName = input$selectExperiment,
+                                         filePath = workingDirectory)
+})
 
 
 
@@ -189,7 +198,7 @@ observeEvent(input$saven,{
   dbWriteTable(userDBCon(),
                "metaData",
                rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove exmple row 
-               overwrite= TRUE)  
+               overwrite = TRUE)  
   
 })
 
@@ -221,18 +230,10 @@ output$metaTable <- rhandsontable::renderRHandsontable({
 
 
 #----
-observeEvent(c(input$ExperimentNav, input$selectExperimentforMeta),{
+observeEvent(c(input$selectExperiment),{
   
-  fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
-                                                    pattern = ".sqlite",
-                                                    full.names = FALSE))
-  filePaths <- list.files(workingDirectory,
-                          pattern = ".sqlite",
-                          full.names = TRUE)
-  filePaths <- filePaths[which(fileNames == input$selectExperimentforMeta)]
-  
-  metadb <- pool::dbPool(drv = RSQLite::SQLite(),
-                         dbname = filePaths)
+if (!is.null(userDBCon())){
+  metadb <- userDBCon()
   
   if (!"metaData" %in% DBI::dbListTables(metadb)) {
    
@@ -275,10 +276,9 @@ observeEvent(c(input$ExperimentNav, input$selectExperimentforMeta),{
     
     qwerty$rtab <- rbind(exampleMetaData, dbQuery)
     pool::poolReturn(conn)
-    pool::poolClose(metadb)
   }
-  
-  
+
+}
 })
 
 
@@ -617,7 +617,7 @@ observeEvent(input$run, {
       rawDataFilePath <- conversions()
       lengthProgress <- length(rawDataFilePath)
       
-      userDBCon <- pool::poolCheckout(newExperimentSqlite())
+      userDB <- pool::poolCheckout(newExperimentSqlite())
       withProgress(message = 'Processing in progress',
                    detail = 'This may take a while...',
                    value = 0, {
@@ -626,14 +626,14 @@ observeEvent(input$run, {
                        incProgress(1/lengthProgress)
                        IDBacApp::spectraProcessingFunction(rawDataFilePath = as.vector(rawDataFilePath)[[i]],
                                                            sampleID = names(rawDataFilePath)[[i]],
-                                                           userDBCon = userDBCon) # pool connection
+                                                           userDBCon = userDB) # pool connection
                      }
                      
                    })
       
       
-      pool::poolReturn(userDBCon)
-      
+      pool::poolReturn(userDB)
+      pool::poolReturn(userDB)
 
       
       
@@ -752,6 +752,8 @@ output$inversepeakui <-  renderUI({
 # Used to display inputs for user to select for mirror plots
 #----
 inverseComparisonNames <- reactive({
+  
+  aws <<- userDBCon()
   db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
   db %>%
     filter(proteinPeaks != "NA") %>%
@@ -759,6 +761,7 @@ inverseComparisonNames <- reactive({
     distinct() %>%
     collect() %>%
     pull()
+  
 })
 
 
@@ -1718,21 +1721,6 @@ output$chooseNewDBSamples <- renderUI({
   )
 })
 
-#---- POOLS
-existingDB <- reactive({
-  # This pool is used when selecting to analyze a previous experiment
-  #  isolate( input$percentPresenceP )
-  IDBacApp::createPool(fileName = input$selectMixNmatchExperiment ,
-                       filePath = workingDirectory)
-    
-    
-})
-
-
-userDBCon <- reactive({
-  IDBacApp::createPool(fileName = input$selectExperiment ,
-                       filePath = workingDirectory)
-})
 
 
 
@@ -1747,12 +1735,12 @@ availableNewSamples <- reactive({
   
   samples <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
                             FROM `IndividualSpectra`",
-                            .con = existingDB()
+                            .con = userDBCon()
                             )
   
-  conn <- pool::poolCheckout(existingDB())
+  conn <- pool::poolCheckout(userDBCon())
   samples <- DBI::dbSendQuery(conn, samples)
-  
+  pool::poolReturn(conn)
   return(DBI::dbFetch(samples)[ , 1])
   
 })
@@ -1763,24 +1751,13 @@ availableNewSamples <- reactive({
 
 observeEvent(input$addtoNewDB, {
   
-  fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
-                                                    pattern = ".sqlite",
-                                                    full.names = FALSE))
-  filePaths <- list.files(workingDirectory,
-                          pattern = ".sqlite",
-                          full.names = TRUE)
-
-
-  existingDBpath <- filePaths[which(fileNames == input$selectMixNmatchExperiment)]
-  newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
-
-  IDBacApp::copyToNewDatabase(existingDBpath=existingDBpath,
+  newdbPath <- IDBacApp::createPool(fileName = input$nameformixNmatch,
+                       filePath = workingDirectory)
+  
+  IDBacApp::copyToNewDatabase(existingDBpath = userDBCon(),
                               newdbPath = newdbPath, 
                               sampleIDs = input$addSampleChooser$right)
     
-
-
-
 
 })
 

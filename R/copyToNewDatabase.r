@@ -1,5 +1,5 @@
-copyToNewDatabase <- function(existingDBpath,
-                              newdbPath, 
+copyToNewDatabase <- function(existingDBPool,
+                              newDBPool, 
                               sampleIDs){
   
   
@@ -11,12 +11,7 @@ copyToNewDatabase <- function(existingDBpath,
                         Sys.sleep(1) 
                         
                         # Connect to both databases (create pool and checkout)
-                        
-                        existingDBPool <- pool::dbPool(drv = RSQLite::SQLite(),
-                                                       dbname = existingDBpath)
-                        
-                        newDBPool <- pool::dbPool(drv = RSQLite::SQLite(),
-                                                  dbname = newdbPath)
+                      
                         
                         existingDBconnection <- pool::poolCheckout(existingDBPool)
                         newDBconnection <- pool::poolCheckout(newDBPool)
@@ -212,8 +207,8 @@ copyToNewDatabase <- function(existingDBpath,
                         
                         poolReturn(existingDBconnection)
                         poolReturn(newDBconnection)
-                        poolClose(existingDBPool)
-                        poolClose(newDBPool)
+                   
+                        
                         
                         
                         setProgress(value = 0.9, 
