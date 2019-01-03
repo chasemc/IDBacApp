@@ -1113,7 +1113,7 @@ dendro <- reactive({
     )
   )
      
-     })
+})
 
 
 
@@ -1180,10 +1180,10 @@ pcoaResults <- reactive({
 #----
 output$pcoaPlot <- renderPlotly({
 
-  colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+  colorsToUse <- dendextend::leaf_colors(coloredDend())
 
   if(any(is.na(as.vector(colorsToUse)))){
-    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+    colorsToUse <-  dendextend::labels_colors(coloredDend())
   }
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
@@ -1232,10 +1232,10 @@ pcaResults <- reactive({
 #----
 output$pcaPlot <- renderPlotly({
 
-  colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+  colorsToUse <- dendextend::leaf_colors(coloredDend())
   
   if(any(is.na(as.vector(colorsToUse)))){
-    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+    colorsToUse <-  dendextend::labels_colors(coloredDend())
   }
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
@@ -1293,10 +1293,10 @@ tsneResults <- reactive({
 #----
 output$tsnePlot <- renderPlotly({
 
-  colorsToUse <- dendextend::leaf_colors(coloredDend()$dend)
+  colorsToUse <- dendextend::leaf_colors(coloredDend())
 
   if(any(is.na(as.vector(colorsToUse)))){
-    colorsToUse <-  dendextend::labels_colors(coloredDend()$dend)
+    colorsToUse <-  dendextend::labels_colors(coloredDend())
   }
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
@@ -1353,8 +1353,11 @@ output$Heirarchicalui <-  renderUI({
       )
     } else {
     
-   ui_proteinClustering("protein")
-      }
+
+      fluidPage(
+        ui_proteinClustering("protein"),
+        ui_coloringDendLines()    
+      )}
 })
 
 
@@ -1548,7 +1551,9 @@ coloredDend <- reactive({
     cutHeight        = input$height,
     cutK             = input$kClusters,
     chosenColorsMeta = levs(),
-    colorsChosen     = colorsChosen
+    colorsChosen     = colorsChosen,
+    colorBy = input$colorBy,
+    colorBlindPalette = colorBlindPalette
   )
 
 
@@ -1564,13 +1569,13 @@ output$hclustPlot <- renderPlot({
 
   if (input$kORheight == "1"){
     
-    coloredDend()$dend %>%
+    coloredDend() %>%
       hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
   } else if (input$kORheight == "2"){
     
-    coloredDend()$dend  %>%  
+    coloredDend()  %>%  
       hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
@@ -1586,7 +1591,7 @@ output$hclustPlot <- renderPlot({
       } else {
         if(input$colDotsOrColDend == "1"){
         
-          coloredDend()$dend %>%  
+          coloredDend() %>%  
             hang.dendrogram %>% 
             plot(.,horiz=T)
           
@@ -1596,7 +1601,7 @@ output$hclustPlot <- renderPlot({
                                  horiz = T,
                                  sort_by_labels_order = FALSE)
         } else {
-          coloredDend()$dend  %>%
+          coloredDend()  %>%
             hang.dendrogram %>% 
             plot(., horiz = T)
         }
@@ -1640,7 +1645,7 @@ output$downloadHeirSVG <- downloadHandler(
       par(mar = c(5, 5, 5, input$dendparmar))
       if(input$colDotsOrColDend == "1"){
 
-        coloredDend()$dend  %>%
+        coloredDend()  %>%
           hang.dendrogram %>% 
           plot(., horiz = T)
         IDBacApp::colored_dots(coloredDend()$bigMatrix,
@@ -1649,7 +1654,7 @@ output$downloadHeirSVG <- downloadHandler(
                                horiz = T,
                                sort_by_labels_order = FALSE)
       } else {
-        coloredDend()$dend  %>%  
+        coloredDend()  %>%  
           hang.dendrogram %>% 
           plot(., horiz = T)
       }
@@ -2074,13 +2079,13 @@ output$netheir <- renderPlot({
   
   if (input$kORheight == "1"){
     
-    coloredDend()$dend %>%
+    coloredDend() %>%
       hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
   } else if (input$kORheight == "2"){
     
-    coloredDend()$dend  %>%  
+    coloredDend()  %>%  
       hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
@@ -2095,7 +2100,7 @@ output$netheir <- renderPlot({
     } else {
       if(input$colDotsOrColDend == "1"){
         
-        coloredDend()$dend %>%  
+        coloredDend() %>%  
           hang.dendrogram %>% 
           plot(.,horiz=T)
         
@@ -2105,7 +2110,7 @@ output$netheir <- renderPlot({
                                horiz = T,
                                sort_by_labels_order = FALSE)
       } else {
-        coloredDend()$dend  %>%
+        coloredDend()  %>%
           hang.dendrogram %>% 
           plot(., horiz = T)
       }

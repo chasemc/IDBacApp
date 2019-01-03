@@ -3,7 +3,6 @@ ui_proteinClustering <- function(id) {
   
   sidebarLayout(
     sidebarPanel(style = "background-color:#7777770d",
-                 
                  shiny::selectInput("proteinUIselector",
                                     label = "Available options:",
                                     choices = list("Hierarchical Clustering Settings" = 1,
@@ -48,6 +47,16 @@ ui_proteinClustering <- function(id) {
                                 value = 750,
                                 step = 50,
                                 min = 100),
+                   selectInput("colorBy", 
+                                      "Color By:", 
+                                      c("None" = "none",
+                                        "Choose Number of Groups" = "groups",
+                                        "Color by cutting at height" = "height",
+                                        "Color by sample info" = "metadata"
+                                      ),
+                                      selected = "none"
+                   ),
+                   
                    numericInput("dendparmar",
                                 label = h5(strong("Adjust right margin of dendrogram")),
                                 value = 20),
@@ -147,3 +156,21 @@ ui_proteinClustering <- function(id) {
 
 
 
+
+
+
+
+
+
+
+ui_coloringDendLines <- function(){
+  
+
+  absolutePanel(
+    bottom = "50%", right = "40%",width=30,
+    fixed = TRUE, draggable = TRUE,
+    wellPanel( p("sdsdsdsdssdkjnskjjksdfvjksdfjkvsjkvjksdns")),    style = "opacity: 0.92"
+
+  )
+    
+}
