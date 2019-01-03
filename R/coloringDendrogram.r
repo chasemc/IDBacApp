@@ -5,7 +5,7 @@
 #' @param useDots If TRUE then draw dend and dots
 #' @param cutByHeight
 #' @param useKMeans
-#' @param userColor
+#' @param useMetadata
 #' @param excelFilePath
 #' @param chosenIdColumn
 #' @param chosenMetaColumn
@@ -20,10 +20,10 @@
 
 coloringDendrogram <- function(dendrogram,
                                useDots,
-                               cutByHeight,
+                               useHeight,
                                drawAbline,
                                useKMeans,
-                               userColor,
+                               useMetadata,
                                excelFilePath,
                                chosenIdColumn,
                                chosenMetaColumn,
@@ -34,28 +34,28 @@ coloringDendrogram <- function(dendrogram,
                                colorsChosen,
                                colorBlindPalette){
   
+  # Dendrogram in IDBac is basically three parts (don't include expansion as that is done at render level, so not here)
+  # Lines
+  # Labels
+  # Dots to side of dendgrogram (optional)
   
   toReturn <- new.env(parent = new.env())
   
-
-  
-  
-  
-  # Dendrogram in IDBac is basically three parts (don't include expansion as that is done at render level, so not here)
-    # Lines
-    # Labels
-    # Dots to side of dendgrogram (optional)
+  toReturn$dend <- dendrogram
   
   
   
   
   
   
+  if(useKMeans == TRUE){
+    toReturn$dend <- dendrogram %>% color_branches(k = cutK, col = as.vector(colorBlindPalette$col[1:cutK]))
+  }
   
   
-  
-  
-  
+  if(useHeight == TRUE){
+    toReturn$dend <- dendrogram %>% color_branches(h = cutHeight, col = as.vector(colorBlindPalette$col[1:length(unique(cutree(dendrogram, h = cutHeight)))]))
+  }
   
   
   
@@ -65,7 +65,13 @@ coloringDendrogram <- function(dendrogram,
   
   
   
-  if(userColor == TRUE){
+  
+  
+  
+  
+  
+  
+  if(useMetadata == TRUE){
     
     if(useDots == TRUE){
       
@@ -182,14 +188,7 @@ coloringDendrogram <- function(dendrogram,
     
   }
   
-  if(useKMeans == TRUE){
-    toReturn$dend <- dendrogram %>% color_branches(k = cutK, col = as.vector(colorBlindPalette$col[1:cutK]))
-  }
   
-  
-  if(cutByHeight == TRUE){
-    toReturn$dend <- dendrogram %>% color_branches(h = cutHeight, col = as.vector(colorBlindPalette$col[1:length(unique(cutree(dendrogram, h = cutHeight)))]))
-  }
   
   
   toReturn
@@ -197,7 +196,7 @@ coloringDendrogram <- function(dendrogram,
   
   
   
-  #If no sample map is selected, run this:
+  
 }
 
 
@@ -208,13 +207,51 @@ coloringDendrogram <- function(dendrogram,
 # dendextend::set.... branches_lwd - set the line width of branches (using assign_values_to_branches_edgePar)
 
 
-adjustDendrogramLines <- function(dendrogram,
-                                  )
-
-
-
-
-
+colorDendLinesBy <- function(dendrogram,
+                             colorBy,
+                             colorBlindPalette){
+  
+  if(class(dendrogram) != "dendrogram"){
+    warning("Dendrogram input wasn't of class \"dendrogram\"")
+   } else if (class(colorBy) != "character") {
+      warning(paste0("colorBy was type ", class(colorBy), ", expected character vector."))
+    }
+  else if (class(colorBlindPalette) != "character") {
+    warning(paste0("colorBlindPalette was type ", class(colorBlindPalette), ", expected character vector."))
+  }
+    
+    
+    
+    
+    
+  # set(object, what, value)
+  # dendextend::set.... branches_col - set the color of branches (using assign_values_to_branches_edgePar)
+  # dendextend::set.... branches_lwd - set the line width of branches (using assign_values_to_branches_edgePar)
+  
+  if(input$colorBy == "none") {
+    
+    
+  } else if(colorBy == "height") {
+    
+    return( 
+      color_branches(dendrogram, 
+                     k = cutK,
+                     col = colorBlindPalette[1:cutK])
+    )
+    
+  } else if(input$colorBy == "groups") {
+    
+    return(
+      dendrogram %>% color_branches(h = cutHeight, col = as.vector(colorBlindPalette$col[1:length(unique(cutree(dendrogram, h = cutHeight)))]))
+    )
+    
+  } else if(input$colorBy == "metadata") {
+    return(
+      toReturn$dend <- dendrogram %>% color_branches(h = cutHeight, col = as.vector(colorBlindPalette$col[1:length(unique(cutree(dendrogram, h = cutHeight)))]))
+    )
+  }
+  return(dendrogram)
+}
 
 
 

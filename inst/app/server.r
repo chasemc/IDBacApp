@@ -86,7 +86,7 @@ Required_Packages = c("Rcpp",
 Install_And_Load(Required_Packages)
 
 #----
-colorBlindPalette <- cbind.data.frame(fac = 1:1008,col = c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", rainbow(1000)))
+colorBlindPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", rainbow(1000))
 
 
 # Reactive variable returning the user-chosen working directory as string
@@ -1105,10 +1105,15 @@ dendro <- reactive({
   #     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
   #                       "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
   
-  proteinDistance() %>%
-    hclust(method=input$clustering) %>%
-    as.dendrogram
-})
+  
+  return(
+    as.dendrogram(
+      hclust(proteinDistance(), 
+             method=input$clustering)
+    )
+  )
+     
+     })
 
 
 
@@ -1532,18 +1537,18 @@ coloredDend <- reactive({
   }
 
   IDBacApp::coloringDendrogram(
-      useDots          = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
-      useKMeans        = if(input$kORheight == "1"){TRUE} else {FALSE},
-      cutByHeight      = if(input$kORheight == "2"){TRUE} else {FALSE},
-      userColor        = if(input$kORheight == "3"){TRUE} else {FALSE},
-      excelFilePath    = input$sampleMap$datapath,
-      chosenIdColumn   = input$sampleFactorMapChosenIDColumn,
-      chosenMetaColumn = input$sampleFactorMapChosenAttribute,
-      dendrogram       = dendro(),
-      cutHeight        = input$height,
-      cutK             = input$kClusters,
-      chosenColorsMeta = levs(),
-      colorsChosen     = colorsChosen
+    dendrogram       = dendro(),
+    useDots          = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
+    useKMeans        = if(input$kORheight == "1"){TRUE} else {FALSE},
+    useHeight      = if(input$kORheight == "2"){TRUE} else {FALSE},
+    useMetadata        = if(input$kORheight == "3"){TRUE} else {FALSE},
+    excelFilePath    = input$sampleMap$datapath,
+    chosenIdColumn   = input$sampleFactorMapChosenIDColumn,
+    chosenMetaColumn = input$sampleFactorMapChosenAttribute,
+    cutHeight        = input$height,
+    cutK             = input$kClusters,
+    chosenColorsMeta = levs(),
+    colorsChosen     = colorsChosen
   )
 
 
