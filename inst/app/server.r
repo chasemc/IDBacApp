@@ -633,7 +633,7 @@ observeEvent(input$run, {
       
       
       pool::poolReturn(userDB)
-      pool::poolReturn(userDB)
+
 
       
       
