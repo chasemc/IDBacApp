@@ -752,7 +752,6 @@ output$inversepeakui <-  renderUI({
 #----
 inverseComparisonNames <- reactive({
   
-  aws <<- userDBCon()
   db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
   db %>%
     filter(proteinPeaks != "NA") %>%
@@ -1516,64 +1515,41 @@ output$sampleFactorMapColors <- renderUI({
 })
 
 
-# Color the Protein Dendrogram
+# List, 
+  # $dend is the dendrogram
+  # $names are the sample names in order of the dendrogram (necessary if user changes names)
 #----
-coloredDend <- reactive({
+# coloredDend <- reactive({
+# 
+#  shiny::callModule(proteinDendrogramDrawer, "proteinDendrogram", dendrogram = dendro())
+# 
+#   
+# })
 
- aw<<- shiny::callModule(proteinDendrogramDrawer, "proteinDendrogram", dendrogram = dendro())
 
-  aw
+# output$hclustPlot <- renderPlot({
+#   
+#   par(mar = c(5, 5, 5, dendparmar))
+#   
+#   
+# }, height = plotHeight)
+
+observe({
+  
+  validate(req(dendro()))
+  
+    callModule(proteinDendrogramDrawer, "sdfasd", dendrogram = dendro())
 })
 
 
 
-# Output the dendrogram
-#----
-output$hclustPlot <- renderPlot({
 
-  par(mar = c(5, 5, 5, input$dendparmar))
 
-  if (input$kORheight == "1"){
-    
-    coloredDend() %>%
-      hang.dendrogram %>% 
-      plot(horiz = TRUE, lwd = 8)
-    
-  } else if (input$kORheight == "2"){
-    
-    coloredDend()  %>%  
-      hang.dendrogram %>% 
-      plot(horiz = TRUE, lwd = 8)
-    
-    abline(v = input$cutHeight, lty = 2)
-    
-  } else if (input$kORheight == "3"){
 
-    if(is.null(input$sampleMap$datapath)){
-      # No sample mapping selected
-      dendro()$dend %>%
-        hang.dendrogram %>% 
-        plot(horiz = TRUE, lwd = 8)
-      } else {
-        if(input$colDotsOrColDend == "1"){
-        
-          coloredDend() %>%  
-            hang.dendrogram %>% 
-            plot(.,horiz=T)
-          
-          IDBacApp::colored_dots(coloredDend()$bigMatrix, 
-                                 coloredDend()$shortenedNames,
-                                 rowLabels = names(coloredDend()$bigMatrix),
-                                 horiz = T,
-                                 sort_by_labels_order = FALSE)
-        } else {
-          coloredDend()  %>%
-            hang.dendrogram %>% 
-            plot(., horiz = T)
-        }
-      }
-  }
-}, height = plotHeight)
+
+
+
+
 
 
 # Download svg of dendrogram

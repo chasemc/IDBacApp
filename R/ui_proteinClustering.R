@@ -16,33 +16,23 @@ ui_proteinClustering <- function(x) {
                    p("Move strains between boxes by clicking the strain's name
                      and then an arrow. Strains in the right box will be used for analysis."),
                    uiOutput("chooseProteinSamples"),
-                   selectInput("distance", 
-                               label = h5(strong("Distance Algorithm")),
-                               choices = list("cosine" = "cosineD",
-                                              "euclidean" = "euclidean",
-                                              "maximum" = "maximum",
-                                              "manhattan" = "manhattan",
-                                              "canberra" = "canberra",
-                                              "binary" = "binary",
-                                              "minkowski"= "minkowski"),
-                               selected = "cosine"),
-                   selectInput("clustering", 
-                               label = h5(strong("Clustering Algorithm")),
-                               choices = list("ward.D" = "ward.D",
-                                              "ward.D2" = "ward.D2",
-                                              "single" = "single", 
-                                              "complete" = "complete",
-                                              "average (UPGMA)" = "average",
-                                              "mcquitty (WPGMA)" = "mcquitty",
-                                              "median (WPGMC)" = "median",
-                                              "centroid (UPGMC)" = "centroid"),
-                               selected = "ward.D2"),
-                   radioButtons("booled", 
-                                label = h5(strong("Include peak intensities, or use presence/absence?")),
-                                choices = list("Presence/Absence" = 1, 
-                                               "Intensities" = 2),
-                                selected = 2),
+             
+                   
+                   
+                   
+                   
+                   
+                   
+                   
+                   
+                   
+                   
+                   
                    actionButton("showmeit", "showme"),
+                   
+                   
+                   cutHeightUI("proteinDendrogram"),                   
+                   
                    
                    
                    
@@ -136,9 +126,9 @@ ui_proteinClustering <- function(x) {
               
               
     )
-  ),
-  cutHeightUI("proteinDendrogram")
- 
+  )
+  
+
   ) 
 }
 

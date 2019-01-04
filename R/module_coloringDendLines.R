@@ -1,13 +1,13 @@
 
 
-
-
-cutHeightUI <- function(id) {
+colordendLinesUI <- function(id) {
   ns <- NS(id)
   
   absolutePanel(
     bottom = "50%", right = "40%", width="25%",
     fixed = TRUE, draggable = TRUE,
+    #Adjust Dendrogram Lines
+    #----
     wellPanel(
       h4("Adjust Dendrogram Lines"),
       selectInput(ns("colorBy"), 
@@ -17,7 +17,7 @@ cutHeightUI <- function(id) {
                     "Color by cutting at height" = "height",
                     "Color by sample info" = "metadata"
                   ),
-                  selected = "none"
+                  selected = "height"
       ),
       conditionalPanel(
         condition = "input.colorBy == 'height'", ns = ns,
@@ -36,12 +36,7 @@ cutHeightUI <- function(id) {
                      value = 1,
                      step = 1,
                      min = 1)
-        
-        
-        
-        
       ),     
-#      uiOutput(ns("todisp")),
       
       shiny::numericInput(ns("dendLineWidth"),
                           "Line Width", 
@@ -54,34 +49,143 @@ cutHeightUI <- function(id) {
       actionButton(ns("closeLineModification"),
                    "Close")
       
-    ),    style = "opacity: 0.92"
+    ),
+    #Adjust Dendrogram Lines
+    #----    
+    
+    style = "opacity: 0.92"
   )
 }
 
 
 
 
-proteinDendrogramDrawer <- function(input,
-                                    output,
-                                    session,
-                                    dendrogram){
-  
+colordendLines <- function(input,
+                           output,
+                           session,
+                           dendrogram){
   
   dendrogram <- IDBacApp::changeDendLinesColor(dendrogram = dendrogram,
-                                      colorBy = input$colorBy,
-                                      colorBlindPalette = IDBacApp::colorBlindPalette(),
-                                      cutHeight = input$cutHeight,
-                                      chosenK = input$chosenK)
+                                               colorBy = input$colorBy,
+                                               colorBlindPalette = IDBacApp::colorBlindPalette(),
+                                               cutHeight = input$cutHeight,
+                                               chosenK = input$chosenK)
   
   dendrogram <- IDBacApp::changeDendLinesWidth(dendrogram = dendrogram,
-                                     width = input$dendLineWidth)
+                                               width = input$dendLineWidth)
   
-  
-  
-  return(dendrogram)
-  
-  
+  return(dendrogram) 
+
 }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  output$hclustPlot <- renderPlot({
+    
+    par(mar = c(5, 5, 5, dendparmar))
+    
+    if (input$colorBy == "groups"){
+      
+      coloredDend() %>%
+        hang.dendrogram %>% 
+        plot(horiz = TRUE, lwd = 8)
+      
+    } else if (input$colorBy == "height"){
+      
+      coloredDend()  %>%  
+        hang.dendrogram %>% 
+        plot(horiz = TRUE, lwd = 8)
+      
+      abline(v = input$cutHeight, lty = 2)
+      
+    } else if (input$colorBy == "metadata"){
+      
+      if(is.null(input$sampleMap$datapath)){
+        # No sample mapping selected
+        dendro()$dend %>%
+          hang.dendrogram %>% 
+          plot(horiz = TRUE, lwd = 8)
+      }
+    }
+    
+    
+  }, height = plotHeight)
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # dendextend::set.... branches_col - set the color of branches (using assign_values_to_branches_edgePar)
