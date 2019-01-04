@@ -1,5 +1,5 @@
-copyToNewDatabase <- function(existingDBPool,
-                              newDBPool, 
+copyToNewDatabase <- function(existingDBpool,
+                              newdbPath, 
                               sampleIDs){
   
   
@@ -11,7 +11,11 @@ copyToNewDatabase <- function(existingDBPool,
                         Sys.sleep(1) 
                         
                         # Connect to both databases (create pool and checkout)
-                      
+                        
+                   
+                        
+                        newDBPool <- pool::dbPool(drv = RSQLite::SQLite(),
+                                                  dbname = newdbPath)
                         
                         existingDBconnection <- pool::poolCheckout(existingDBPool)
                         newDBconnection <- pool::poolCheckout(newDBPool)
@@ -36,7 +40,7 @@ copyToNewDatabase <- function(existingDBPool,
                         #-----
                         # Get IDBac database table structures
                         a <- IDBacApp::sqlTableArchitecture(1)
-
+                        
                         #Write table structures to database
                         DBI::dbWriteTable(conn = newDBconnection,
                                           name = "metaData", # SQLite table to insert into
@@ -68,7 +72,7 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         
                         checkStrainIds <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
-                                  FROM `metaData`",
+                                                         FROM `metaData`",
                                                          .con = newDBPool
                         )
                         
@@ -78,9 +82,9 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         if(length(sampleIDsneeded) > 0){
                           sqlQ <- glue::glue_sql("INSERT INTO newDB.metaData
-                               SELECT * 
-                               FROM `metaData`
-                               WHERE (`Strain_ID` IN ({strainIds*}))",
+                                                 SELECT * 
+                                                 FROM `metaData`
+                                                 WHERE (`Strain_ID` IN ({strainIds*}))",
                                                  strainIds = sampleIDsneeded,
                                                  .con = existingDBPool
                           )
@@ -96,8 +100,8 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         # Get fileshas from old db so we don't  add duplicates to new database
                         sqlQ <- glue::glue_sql("SELECT DISTINCT `spectrumSHA`
-                        FROM `IndividualSpectra`
-                        WHERE (`Strain_ID` IN ({strainIds*}))",
+                                               FROM `IndividualSpectra`
+                                               WHERE (`Strain_ID` IN ({strainIds*}))",
                                                strainIds = sampleIDs,
                                                .con = existingDBPool
                         )
@@ -106,7 +110,7 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         
                         sqlQ <- glue::glue_sql("SELECT DISTINCT `spectrumSHA`
-                        FROM `IndividualSpectra`",
+                                               FROM `IndividualSpectra`",
                                                .con = newDBPool
                         )
                         
@@ -118,9 +122,9 @@ copyToNewDatabase <- function(existingDBPool,
                         if(length(newdbshas) > 0){
                           
                           sqlQ <- glue::glue_sql("INSERT INTO newDB.IndividualSpectra
-                        SELECT * 
-                       FROM `IndividualSpectra`
-                       WHERE (`spectrumSHA` IN ({spectrumSHAs*}))",
+                                                 SELECT * 
+                                                 FROM `IndividualSpectra`
+                                                 WHERE (`spectrumSHA` IN ({spectrumSHAs*}))",
                                                  spectrumSHAs = newdbshas,
                                                  .con = existingDBPool
                           )
@@ -139,8 +143,8 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         # Get fileshas from old db so we don't  add duplicates to new database
                         sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLSHA`
-                       FROM `IndividualSpectra`
-                       WHERE (`Strain_ID` IN ({strainIds*}))",
+                                               FROM `IndividualSpectra`
+                                               WHERE (`Strain_ID` IN ({strainIds*}))",
                                                strainIds = sampleIDs,
                                                .con = existingDBPool
                         )
@@ -149,7 +153,7 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         
                         sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLSHA`
-                       FROM `IndividualSpectra`",
+                                               FROM `IndividualSpectra`",
                                                .con = newDBPool
                         )
                         
@@ -164,9 +168,9 @@ copyToNewDatabase <- function(existingDBPool,
                           
                           
                           sqlQ <- glue::glue_sql("INSERT INTO newDB.XML
-                        SELECT * 
-                       FROM `XML`
-                       WHERE (`mzMLSHA` IN ({mzMLSHA*}))",
+                                                 SELECT * 
+                                                 FROM `XML`
+                                                 WHERE (`mzMLSHA` IN ({mzMLSHA*}))",
                                                  mzMLSHA = newdbshas,
                                                  .con = existingDBPool
                           )
@@ -175,7 +179,7 @@ copyToNewDatabase <- function(existingDBPool,
                           
                           
                         }
-                  
+                        
                         # Clean up
                         #-----
                         
@@ -183,21 +187,21 @@ copyToNewDatabase <- function(existingDBPool,
                         # but the ways it is now, a row of NA's are input so need to be removed 
                         
                         sqlQ <- glue::glue_sql("DELETE FROM `XML`
-                        WHERE `mzMLSHA` IS NULL",
+                                               WHERE `mzMLSHA` IS NULL",
                                                .con = newDBPool
                         )
                         
                         DBI::dbSendStatement(newDBconnection, sqlQ)
                         
                         sqlQ <- glue::glue_sql("DELETE FROM `IndividualSpectra`
-                        WHERE `Strain_ID` IS NULL",
+                                               WHERE `Strain_ID` IS NULL",
                                                .con = newDBPool
                         )
                         
                         DBI::dbSendStatement(newDBconnection, sqlQ)
                         
                         sqlQ <- glue::glue_sql("DELETE FROM `metaData`
-                        WHERE `Strain_ID` IS NULL",
+                                               WHERE `Strain_ID` IS NULL",
                                                .con = newDBPool
                         )
                         
@@ -207,8 +211,8 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         poolReturn(existingDBconnection)
                         poolReturn(newDBconnection)
-                   
-                        
+                        poolClose(existingDBPool)
+                        poolClose(newDBPool)
                         
                         
                         setProgress(value = 0.9, 

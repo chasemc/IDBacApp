@@ -1442,7 +1442,8 @@ observeEvent(input$tester, {
 #User input changes the height/length of the main dendrogram
 #----
 plotHeight <- reactive({
-  return(as.numeric(input$hclustHeight))
+  #return(as.numeric(input$hclustHeight))
+  100
 })
 # 
 # 
@@ -1533,18 +1534,6 @@ output$sampleFactorMapColors <- renderUI({
 #   
 #   
 # }, height = plotHeight)
-
-observe({
-  
-  validate(req(dendro()))
-  
-    callModule(proteinDendrogramDrawer, "sdfasd", dendrogram = dendro())
-})
-
-
-
-
-
 
 
 
@@ -1703,18 +1692,18 @@ availableNewSamples <- reactive({
 
 observeEvent(input$addtoNewDB, {
   
-  newdbPath <- IDBacApp::createPool(fileName = input$nameformixNmatch,
-                       filePath = workingDirectory)
-  
-  IDBacApp::copyToNewDatabase(existingDBpath = userDBCon(),
-                              newdbPath = newdbPath, 
-                              sampleIDs = input$addSampleChooser$right)
     
 
+
+newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
+
+copyToNewDatabase(existingDBpool = existingDBpool,
+                  newdbPath = newdbPath, 
+                  sampleIDs = input$addSampleChooser$right)
+
+
+
 })
-
-
-
 
 
 
