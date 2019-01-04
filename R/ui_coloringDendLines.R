@@ -25,7 +25,7 @@ cutHeightUI <- function(id) {
     fixed = TRUE, draggable = TRUE,
     wellPanel(
       h4("Adjust Dendrogram Lines"),
-      selectInput(ns("colorBy"), 
+      selectInput("colorBy", 
                   "Color By:", 
                   c("None" = "none",
                     "Choose Number of Groups" = "groups",
@@ -34,9 +34,17 @@ cutHeightUI <- function(id) {
                   ),
                   selected = "none"
       ),
-      
-      uiOutput(ns("todisp")),
-      
+      conditionalPanel(
+        condition = "input.colorBy == 'height'",
+        numericInput(ns("cutHeight"), 
+                     label = h5(strong("Cut Tree at Height")),
+                     value = .5,
+                     step = 0.1,
+                     min = 0)
+        
+        
+      ),     
+#      uiOutput(ns("todisp")),
       
       shiny::numericInput(ns("dendLineWidth"),
                           "Line Width", 
@@ -49,20 +57,9 @@ cutHeightUI <- function(id) {
       actionButton(ns("closeLineModification"),
                    "Close")
       
-      
-      
     ),    style = "opacity: 0.92"
-    
   )
-  
-  
 }
-
-
-
-
-
-
 
 
 
@@ -71,18 +68,7 @@ cutHeightServer <- function(input,
                             output,
                             session){
   
-  
-    ns <- session$ns
-    output$todisp <- renderUI({
-      ns <- session$ns
-      numericInput(ns("cutHeight"), 
-                   label = h5(strong("Cut Tree at Height")),
-                   value = .5,
-                   step = 0.1,
-                   min = 0)
-    })
-  
-  
+print("hellop")
   
  # return(input$colorBy)
   
