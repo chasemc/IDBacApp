@@ -11,7 +11,7 @@
 #' @param chosenMetaColumn
 #' @param dendrogram
 #' @param cutHeight
-#' @param cutK
+#' @param cutHeight
 #' @param chosenColorsMeta
 #' @param colorsChosen
 
@@ -26,21 +26,26 @@ coloringDendrogram <- function(dendrogram,
                                excelFilePath,
                                chosenIdColumn,
                                chosenMetaColumn,
+                               
                                cutHeight,
-                               cutK,
                                chosenColorsMeta,
                                drawAbline,
                                colorsChosen,
                                colorBlindPalette,
-                               colorBy){
+                               colorBy,
+                               dendLineWidth){
 
   
   
   
-  changeDendLinesColor(dendrogram = dendrogram,
-                       colorBy = colorBy,
-                       colorBlindPalette = colorBlindPalette)
+  dendrogram <-  changeDendLinesColor(dendrogram = dendrogram,
+                                      colorBy = colorBy,
+                                      colorBlindPalette = colorBlindPalette,
+                                      cutHeight = cutHeight)
+  dendrogram <- changeDendLinesWidth(dendrogram = dendrogram,
+                              width = dendLineWidth)
   
+  return(dendrogram)
 }
 
 
@@ -53,7 +58,13 @@ coloringDendrogram <- function(dendrogram,
 
 changeDendLinesColor <- function(dendrogram,
                                  colorBy,
-                                 colorBlindPalette){
+                                 colorBlindPalette,
+                                 cutHeight = 0){
+  
+ 
+  
+  
+  
   
   if(class(dendrogram) != "dendrogram"){
     warning("Dendrogram input wasn't of class \"dendrogram\"")
@@ -66,33 +77,31 @@ changeDendLinesColor <- function(dendrogram,
     
     if(colorBy == "none") {
       #Intentionally Blank
+      return(dendrogram)
       
     } else if(colorBy == "height") {
       
-      return( 
-        color_branches(dend = dendrogram, 
-                       k = cutK,
-                       col = colorBlindPalette[1:cutK]
-        )
+      dendrogram <- color_branches(dend = dendrogram, 
+                       h = cutHeight,
+                       col = as.vector(colorBlindPalette[1:length(unique(cutree(dendrogram, h = cutHeight)))])
+  
       )
       
     } else if(colorBy == "groups") {
       
-      return(
-        color_branches(dend = dendrogram,
-                       h = cutHeight, 
-                       col = as.vector(colorBlindPalette$col[1:length(unique(cutree(dendrogram, h = cutHeight)))])
-        )
+        dendrogram <- color_branches(dend = dendrogram,
+                       k = cutHeight, 
+                       col = as.vector(colorBlindPalette[1:length(unique(cutree(dendrogram, k = cutHeight)))])
+        
       )
       
     } else if(colorBy == "metadata") {
       return(
-        
+       dendrogram 
       )
     }
-    return(dendrogram)
   }
-  
+return(dendrogram)  
   
   
   
@@ -105,11 +114,13 @@ changeDendLinesWidth <- function(dendrogram,
   
   if(class(dendrogram) != "dendrogram"){
     warning("Dendrogram input wasn't of class \"dendrogram\"")
-  } else if (class(width) != "numeric") {
+    return(dendrogram)
+  } else if (!is.numeric(width)) {
     warning(paste0("width was type ", class(width), ", expected numeric"))
+    return(dendrogram)
   } else {
     return(
-      set(dendrogram, "branches_lwd", 4)
+      set(dendrogram, "branches_lwd", width)
     )
   }
   

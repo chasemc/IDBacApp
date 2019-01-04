@@ -1,6 +1,6 @@
-ui_proteinClustering <- function(id) {
+ui_proteinClustering <- function(x) {
   
-  
+  fluidPage(
   sidebarLayout(
     sidebarPanel(style = "background-color:#7777770d",
                  shiny::selectInput("proteinUIselector",
@@ -8,8 +8,8 @@ ui_proteinClustering <- function(id) {
                                     choices = list("Hierarchical Clustering Settings" = 1,
                                                    "Show PCA, PCoA, t-SNE" = 2,
                                                    "Insert samples from another experiment" = 3)),
-              # Hierarchical Clustering Settings
-                    #----
+                 # Hierarchical Clustering Settings
+                 #----
                  conditionalPanel(
                    condition = "input.proteinUIselector == '1'",
                    h5(strong("Select Samples")),
@@ -42,20 +42,15 @@ ui_proteinClustering <- function(id) {
                                 choices = list("Presence/Absence" = 1, 
                                                "Intensities" = 2),
                                 selected = 2),
+                   actionButton("showmeit", "showme"),
+                   
+                   
+                   
                    numericInput("hclustHeight", 
                                 label = h5(strong("Expand Tree")),
                                 value = 750,
                                 step = 50,
                                 min = 100),
-                   selectInput("colorBy", 
-                                      "Color By:", 
-                                      c("None" = "none",
-                                        "Choose Number of Groups" = "groups",
-                                        "Color by cutting at height" = "height",
-                                        "Color by sample info" = "metadata"
-                                      ),
-                                      selected = "none"
-                   ),
                    
                    numericInput("dendparmar",
                                 label = h5(strong("Adjust right margin of dendrogram")),
@@ -67,7 +62,6 @@ ui_proteinClustering <- function(id) {
                                                "User-Defined Categories in Excel Sheet" = 3),
                                 selected = 1),
                    uiOutput("groupui"),
-                   uiOutput("hclustui"),
                    uiOutput("sampleGroupColoringui"),
                    br(),
                    h4("Suggestions for Reporting Protein Analysis:"),
@@ -88,8 +82,8 @@ ui_proteinClustering <- function(id) {
                    downloadButton('downloadReport')
                  ),    
                  
-              # Show PCA, PCoA, t-SNE
-              #----    
+                 # Show PCA, PCoA, t-SNE
+                 #----    
                  conditionalPanel(
                    condition = "input.proteinUIselector == '2'",
                    wellPanel(
@@ -127,19 +121,15 @@ ui_proteinClustering <- function(id) {
                      
                    )
                  ),
-              # Insert samples from another experiment     
-              #----  
+                 # Insert samples from another experiment     
+                 #----  
                  conditionalPanel(
                    condition = "input.proteinUIselector == '3'",
                    p("sds")
                    
                  )
-                   #----    
-                   #----    
-                   #----    
-                   #----    
-                   #----    
-                   
+              
+                 
                  
                  
                  
@@ -150,7 +140,10 @@ ui_proteinClustering <- function(id) {
               
               
     )
-  )
+  ),
+  cutHeightUI("proteindendyUI")
+ 
+  ) 
 }
 
 
@@ -160,17 +153,3 @@ ui_proteinClustering <- function(id) {
 
 
 
-
-
-
-ui_coloringDendLines <- function(){
-  
-
-  absolutePanel(
-    bottom = "50%", right = "40%",width=30,
-    fixed = TRUE, draggable = TRUE,
-    wellPanel( p("sdsdsdsdssdkjnskjjksdfvjksdfjkvsjkvjksdns")),    style = "opacity: 0.92"
-
-  )
-    
-}

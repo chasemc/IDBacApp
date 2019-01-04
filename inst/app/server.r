@@ -1354,13 +1354,16 @@ output$Heirarchicalui <-  renderUI({
     } else {
     
 
-      fluidPage(
-        ui_proteinClustering("protein"),
-        ui_coloringDendLines()    
-      )}
+
+        ui_proteinClustering("proteinyo")
+      }
 })
 
 
+
+df <- callModule(cutHeightServer, "proteindendyUI")
+  
+  
 
 
 # UI of paragraph explaining which variables were used
@@ -1447,28 +1450,18 @@ observeEvent(input$tester, {
 plotHeight <- reactive({
   return(as.numeric(input$hclustHeight))
 })
+# 
+# 
+# #----
+# output$groupui <- renderUI({
+#   if(input$kORheight=="1"){
+#     numericInput("kClusters", 
+#                  label = h5(strong("Number of Groups")),
+#                  value = 1,
+#                  step=1,
+#                  min=1)}
+# })
 
-
-#----
-output$hclustui <- renderUI({
-  if(input$kORheight!="2"){return(NULL)} else {
-    numericInput("height", 
-                 label = h5(strong("Cut Tree at Height")),
-                 value = .5,
-                 step=.1,
-                 min=0)}
-})
-
-
-#----
-output$groupui <- renderUI({
-  if(input$kORheight=="1"){
-    numericInput("kClusters", 
-                 label = h5(strong("Number of Groups")),
-                 value = 1,
-                 step=1,
-                 min=1)}
-})
 
 
 #----
@@ -1540,20 +1533,20 @@ coloredDend <- reactive({
   }
 
   IDBacApp::coloringDendrogram(
-    dendrogram       = dendro(),
-    useDots          = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
-    useKMeans        = if(input$kORheight == "1"){TRUE} else {FALSE},
-    useHeight      = if(input$kORheight == "2"){TRUE} else {FALSE},
-    useMetadata        = if(input$kORheight == "3"){TRUE} else {FALSE},
-    excelFilePath    = input$sampleMap$datapath,
-    chosenIdColumn   = input$sampleFactorMapChosenIDColumn,
-    chosenMetaColumn = input$sampleFactorMapChosenAttribute,
-    cutHeight        = input$height,
-    cutK             = input$kClusters,
-    chosenColorsMeta = levs(),
-    colorsChosen     = colorsChosen,
-    colorBy = input$colorBy,
-    colorBlindPalette = colorBlindPalette
+    dendrogram        = dendro(),
+    useDots           = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
+    useKMeans         = if(input$kORheight == "1"){TRUE} else {FALSE},
+    useHeight         = if(input$kORheight == "2"){TRUE} else {FALSE},
+    useMetadata       = if(input$kORheight == "3"){TRUE} else {FALSE},
+    excelFilePath     = input$sampleMap$datapath,
+    chosenIdColumn    = input$sampleFactorMapChosenIDColumn,
+    chosenMetaColumn  = input$sampleFactorMapChosenAttribute,
+    cutHeight         = input$cutHeight,
+    chosenColorsMeta  = levs(),
+    colorsChosen      = colorsChosen,
+    colorBy           = input$colorBy,
+    colorBlindPalette = colorBlindPalette,
+    dendLineWidth = input$dendLineWidth
   )
 
 
@@ -1579,7 +1572,7 @@ output$hclustPlot <- renderPlot({
       hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
-    abline(v = input$height, lty = 2)
+    abline(v = input$cutHeight, lty = 2)
     
   } else if (input$kORheight == "3"){
 
@@ -1635,9 +1628,9 @@ output$downloadHeirSVG <- downloadHandler(
     } else if (input$kORheight == "2"){
 
       dendro() %>% 
-        color_branches(h = input$height) %>%
+        color_branches(h = input$cutHeight) %>%
         plot(horiz = TRUE, lwd = 8)
-      abline(v = input$height,
+      abline(v = input$cutHeight,
              lty = 2)
 
     } else if (input$kORheight == "3"){
@@ -2089,7 +2082,7 @@ output$netheir <- renderPlot({
       hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
-    abline(v = input$height, lty = 2)
+    abline(v = input$cutHeight, lty = 2)
     
   } else if (input$kORheight == "3"){
     
