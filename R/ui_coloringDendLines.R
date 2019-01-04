@@ -84,20 +84,6 @@ proteinDendrogramDrawer <- function(input,
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # dendextend::set.... branches_col - set the color of branches (using assign_values_to_branches_edgePar)
 # dendextend::set.... branches_lwd - set the line width of branches (using assign_values_to_branches_edgePar)
 

@@ -1520,38 +1520,9 @@ output$sampleFactorMapColors <- renderUI({
 #----
 coloredDend <- reactive({
 
-  if (input$kORheight =="3"){
-    colorsChosen <- sapply(1:length(levs()),
-                           function(x){
-                               input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]]
-                             })
-  }
+ aw<<- shiny::callModule(proteinDendrogramDrawer, "proteinDendrogram", dendrogram = dendro())
 
-
-  
-  
-  shiny::callModule(proteinDendrogramDrawer, "proteinDendrogram", dendrogram = dendro())
-  
-  
-  
-    # IDBacApp::coloringDendrogram(
-  #   dendrogram        = dendro(),
-  #   useDots           = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
-  #   useKMeans         = if(input$kORheight == "1"){TRUE} else {FALSE},
-  #   useHeight         = if(input$kORheight == "2"){TRUE} else {FALSE},
-  #   useMetadata       = if(input$kORheight == "3"){TRUE} else {FALSE},
-  #   excelFilePath     = input$sampleMap$datapath,
-  #   chosenIdColumn    = input$sampleFactorMapChosenIDColumn,
-  #   chosenMetaColumn  = input$sampleFactorMapChosenAttribute,
-  #   cutHeight         = input$cutHeight,
-  #   chosenColorsMeta  = levs(),
-  #   colorsChosen      = colorsChosen,
-  #   colorBy           = input$colorBy,
-  #   IDBacApp::colorBlindPalette() = IDBacApp::colorBlindPalette()(),
-  #   dendLineWidth = input$dendLineWidth
-  # )
-
-
+  aw
 })
 
 

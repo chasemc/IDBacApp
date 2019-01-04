@@ -55,12 +55,8 @@ ui_proteinClustering <- function(x) {
                    numericInput("dendparmar",
                                 label = h5(strong("Adjust right margin of dendrogram")),
                                 value = 20),
-                   radioButtons("kORheight", 
-                                label = h5(strong("Color clusters based on:")),
-                                choices = list("Specified Number of Groups" = 1, 
-                                               "Height (x-axis value)" = 2,
-                                               "User-Defined Categories in Excel Sheet" = 3),
-                                selected = 1),
+
+                   
                    uiOutput("groupui"),
                    uiOutput("sampleGroupColoringui"),
                    br(),
