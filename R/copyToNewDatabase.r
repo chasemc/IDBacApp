@@ -1,4 +1,4 @@
-copyToNewDatabase <- function(existingDBpool,
+copyToNewDatabase <- function(existingDBPool,
                               newdbPath, 
                               sampleIDs){
   
@@ -12,7 +12,6 @@ copyToNewDatabase <- function(existingDBpool,
                         
                         # Connect to both databases (create pool and checkout)
                         
-                   
                         
                         newDBPool <- pool::dbPool(drv = RSQLite::SQLite(),
                                                   dbname = newdbPath)
@@ -25,7 +24,7 @@ copyToNewDatabase <- function(existingDBpool,
                         
                         sqlQ <- glue::glue_sql("attach database ({dbPath*}) as newDB;",
                                                dbPath = newdbPath,
-                                               .con = existingDBPool) 
+                                               .con = existingDBconnection) 
                         
                         DBI::dbSendStatement(existingDBconnection, sqlQ)
                         
@@ -86,7 +85,7 @@ copyToNewDatabase <- function(existingDBpool,
                                                  FROM `metaData`
                                                  WHERE (`Strain_ID` IN ({strainIds*}))",
                                                  strainIds = sampleIDsneeded,
-                                                 .con = existingDBPool
+                                                 .con = existingDBconnection
                           )
                           DBI::dbSendStatement(existingDBconnection, sqlQ)
                           
@@ -103,7 +102,7 @@ copyToNewDatabase <- function(existingDBpool,
                                                FROM `IndividualSpectra`
                                                WHERE (`Strain_ID` IN ({strainIds*}))",
                                                strainIds = sampleIDs,
-                                               .con = existingDBPool
+                                               .con = existingDBconnection
                         )
                         olddbshas <- DBI::dbSendStatement(existingDBconnection, sqlQ)
                         olddbshas <- DBI::dbFetch(olddbshas)[ , 1]
@@ -126,7 +125,7 @@ copyToNewDatabase <- function(existingDBpool,
                                                  FROM `IndividualSpectra`
                                                  WHERE (`spectrumSHA` IN ({spectrumSHAs*}))",
                                                  spectrumSHAs = newdbshas,
-                                                 .con = existingDBPool
+                                                 .con = existingDBconnection
                           )
                           
                           DBI::dbSendStatement(existingDBconnection, sqlQ)
@@ -146,7 +145,7 @@ copyToNewDatabase <- function(existingDBpool,
                                                FROM `IndividualSpectra`
                                                WHERE (`Strain_ID` IN ({strainIds*}))",
                                                strainIds = sampleIDs,
-                                               .con = existingDBPool
+                                               .con = existingDBconnection
                         )
                         olddbshas <- DBI::dbSendStatement(existingDBconnection, sqlQ)
                         olddbshas <- DBI::dbFetch(olddbshas)[ , 1]
@@ -172,7 +171,7 @@ copyToNewDatabase <- function(existingDBpool,
                                                  FROM `XML`
                                                  WHERE (`mzMLSHA` IN ({mzMLSHA*}))",
                                                  mzMLSHA = newdbshas,
-                                                 .con = existingDBPool
+                                                 .con = existingDBconnection
                           )
                           
                           DBI::dbSendStatement(existingDBconnection, sqlQ)
@@ -211,7 +210,6 @@ copyToNewDatabase <- function(existingDBpool,
                         
                         poolReturn(existingDBconnection)
                         poolReturn(newDBconnection)
-                        poolClose(existingDBPool)
                         poolClose(newDBPool)
                         
                         

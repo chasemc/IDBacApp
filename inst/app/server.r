@@ -79,7 +79,8 @@ Required_Packages = c("Rcpp",
                       "rhandsontable",
                       "Rtsne",
                       "pool",
-                      "magrittr")
+                      "magrittr",
+                      "shinyBS")
 
 
 # Install and Load Packages
@@ -120,12 +121,71 @@ availableExperiments <- reactive({
                                        pattern = ".sqlite",
                                        full.names = FALSE))
 })
-  
+
+# Collapsers
+#----  
+
+observeEvent(input$styleSelect, {
+  updateCollapse(session, "collapseSQLInstructions")
+})
+
+observeEvent(input$styleSelect, {
+  updateCollapse(session, "modifySqlCollapse")
+})
+
+observeEvent(input$styleSelect, {
+  isolate(
+    updateCollapse(session, "collapseSQLSelector")
+  )
+})
 
 
 
   
-#---
+
+
+
+observeEvent(input$selectExperiment, {
+  
+  appendTab(inputId = "mainIDBacNav",
+            tabPanel("Compare Two Samples (Protein)",
+                     value = "inversePeaks",
+                     uiOutput("inversepeakui")
+            )
+  )
+})
+
+
+
+
+
+observeEvent(input$pSNR, {
+  
+  appendTab(inputId = "mainIDBacNav",
+            tabPanel("Hierarchical Clustering (Protein)",
+                     uiOutput("Heirarchicalui")
+            )
+  )
+})
+
+
+
+observeEvent(input$selectExperiment, {
+  
+  appendTab(inputId = "mainIDBacNav",
+            tabPanel("Metabolite Association Network (Small-Molecule)",
+                     uiOutput("MANui")
+            )
+  )
+})
+
+
+
+
+
+
+
+#----
 
 observeEvent(input$moveToAnalysis, {
   updateTabsetPanel(session, "mainIDBacNav",
@@ -1697,7 +1757,7 @@ observeEvent(input$addtoNewDB, {
 
 newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
 
-copyToNewDatabase(existingDBpool = existingDBpool,
+copyToNewDatabase(existingDBPool = userDBCon(),
                   newdbPath = newdbPath, 
                   sampleIDs = input$addSampleChooser$right)
 

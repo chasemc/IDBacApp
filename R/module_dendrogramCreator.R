@@ -42,7 +42,7 @@ dendrogramCreationUI <- function(id) {
 
 
 
-proteinDendrogramDrawer2 <- function(input,
+dendrogramCreationServer <- function(input,
                                     output,
                                     session,
                                     dendrogram

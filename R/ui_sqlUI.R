@@ -1,55 +1,65 @@
 ui_sqlUI <- function(id, availableExperiments) {
   
   fluidPage(
-    sidebarLayout(
-      sidebarPanel(
-        h3("Instructions:", align="center"),
-        tags$b("What is an \"experiment\" in IDBac?"),
-        tags$ul(
-          tags$li("A user-defined group of samples that were analyzed by MALDI MS."),
-          tags$li("Physically, each experiment is a separate \"SQLite\" database that can be shared between colleagues
+    fluidRow(
+      bsCollapse(id = "collapseSQLInstructions", open = "Panel 1",
+                 bsCollapsePanel(h4("Click here for instructions", align = "center"),
+                                 tags$b("What is an \"experiment\" in IDBac?"),
+                                 tags$ul(
+                                   tags$li("A user-defined group of samples that were analyzed by MALDI MS."),
+                                   tags$li("Physically, each experiment is a separate \"SQLite\" database that can be shared between colleagues
                                          or submitted alongside a manuscript."),
-          tags$li("Experiments contain the converted mzML file, instrument and data collection info (if found), 
-                                         processed spectra, as well as any user-input sample information.")),
-        tags$b("What does this mean for me?"),
+                                   tags$li("Experiments contain the converted mzML file, instrument and data collection info (if found), 
+                                         processed spectra, as well as any sample information input into IDBac by you.")),
+                                 tags$b("What does this mean for me?"),
+                                 
+                                 tags$ul(
+                                   tags$li("Experiments are how you organize your data."),
+                                   tags$li("Experiments should only contain the samples you want to analyze."),
+                                   tags$li("It is possible to \"mix and match\" samples from different experiments to create new experiments.")
+                                 ),
+                                 tags$b("Begin analysis by selecting an available experiment to the right."), 
+                                 br(),
+                                 br(),
+                                 tags$b("You also have the option, below, to:"),
+                                 tags$ul(
+                                   tags$li("Create new experiments using data frfom previous experiments"),
+                                   tags$li("Add information about strains (for coloring plots later, or just as a record)")
+                                   
+                                 )
+                 ))),
+
+    bsCollapse(id = "collapseSQLSelector", open = "Panel 1",
+               bsCollapsePanel(h4("Click here to select an experiment", align = "center"),  
+    fluidRow(
+      column(width = 12,
+             align = "center",
+             selectInput("selectExperiment",
+                         label = h3("First, select an experiment:"),
+                         choices = availableExperiments,
+                         selected = availableExperiments[[1]],
+                         width= "50%"
+             ),
+             actionButton("moveToAnalysis",
+                          "Click here to begin analysis"),
+             
+             p("Location of experiment file:", align = "center"),
+             verbatimTextOutput("selectedSQLText",
+                                placeholder = TRUE)
+      )
+    ))),
+    
         
-        tags$ul(
-          tags$li("Experiments are how you organize your data."),
-          tags$li("Experiments should only contain the samples you want to analyze."),
-          tags$li("It is possible to \"mix and match\" samples from different experiments to create new experiments.")
-          
-        ),
-        tags$b("Begin analysis by selecting an available experiment to the right.")
-      ),        
-      
-      mainPanel(
-        fluidRow(
-          #    h3("Select an experiment to analyze"),
-          column(width = 5,
-                 offset = 2,
-                 #style = "background-color:#7777770d",
-                 align = "center",
-                 selectInput("selectExperiment",
-                             label = h3("First, select an experiment:"),
-                             choices = availableExperiments,
-                             selected = availableExperiments[[1]],
-                             width= "100%"
-                 ),
-                 actionButton("moveToAnalysis",
-                              "Click to start analysis"),
+  
+    
+        column(width=12,
+        
                  
-                 p("Location of experiment file:", align = "center"),
-                 verbatimTextOutput("selectedSQLText",
-                                    placeholder = TRUE))
-        ),
-        br(),
-        p("You also have the option, below, to:"),
-        tags$ul(
-          tags$li("Create new experiments using data frfom previous experiments"),
-          tags$li("Add information about strains (for coloring plots later, or just as a record)")
-          
-        ),
-        tabsetPanel(id = "ExperimentNav",
+                 
+               bsCollapse(id = "modifySqlCollapse",
+                          bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
+               
+                tabsetPanel(id = "ExperimentNav", 
                     tabPanel("Create an experiment, pulling samples from previous experiments",
                              value = "experiment_mixMatch_tab",
                              column(12, align = "center",
@@ -82,14 +92,14 @@ ui_sqlUI <- function(id, availableExperiments) {
                     )
                     
     
-                    
+        ) 
         )
         
-
-      )
+)
+               )
       
       
       
-    ))
+    )
 }
 

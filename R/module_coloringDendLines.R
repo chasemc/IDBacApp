@@ -1,13 +1,15 @@
 
 
-colordendLinesUI <- function(id) {
+colordendLinesServercolordendLinesUI <- function(id) {
   ns <- NS(id)
   
   absolutePanel(
-    bottom = "50%", right = "40%", width="25%",
-    fixed = TRUE, draggable = TRUE,
-    #Adjust Dendrogram Lines
-    #----
+    bottom = "50%",
+    right = "40%",
+    width ="25%",
+    fixed = TRUE, 
+    draggable = TRUE,
+    
     wellPanel(
       h4("Adjust Dendrogram Lines"),
       selectInput(ns("colorBy"), 
@@ -60,10 +62,11 @@ colordendLinesUI <- function(id) {
 
 
 
-colordendLines <- function(input,
-                           output,
-                           session,
-                           dendrogram){
+colordendLinesServer <- function(input,
+                                 output,
+                                 session,
+                                 dendrogram, 
+                                 plotHeight=500){
   
   dendrogram <- IDBacApp::changeDendLinesColor(dendrogram = dendrogram,
                                                colorBy = input$colorBy,
@@ -75,66 +78,52 @@ colordendLines <- function(input,
                                                width = input$dendLineWidth)
   
   return(dendrogram) 
-
+  
 }
-  
+
+
+
+# 
+# 
+#   output$hclustPlot <- renderPlot({
+#     
+#     par(mar = c(5, 5, 5, dendparmar))
+#     
+#     if (input$colorBy == "groups"){
+#       
+#       coloredDend() %>%
+#         hang.dendrogram %>% 
+#         plot(horiz = TRUE, lwd = 8)
+#       
+#     } else if (input$colorBy == "height"){
+#       
+#       coloredDend()  %>%  
+#         hang.dendrogram %>% 
+#         plot(horiz = TRUE, lwd = 8)
+#       
+#       abline(v = input$cutHeight, lty = 2)
+#       
+#     } else if (input$colorBy == "metadata"){
+#       
+#       if(is.null(input$sampleMap$datapath)){
+#         # No sample mapping selected
+#         dendro()$dend %>%
+#           hang.dendrogram %>% 
+#           plot(horiz = TRUE, lwd = 8)
+#       }
+#     }
+#     
+#     
+#   }, height = plotHeight)
+#   
+#   
+#   
+#   
+#   
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  output$hclustPlot <- renderPlot({
-    
-    par(mar = c(5, 5, 5, dendparmar))
-    
-    if (input$colorBy == "groups"){
-      
-      coloredDend() %>%
-        hang.dendrogram %>% 
-        plot(horiz = TRUE, lwd = 8)
-      
-    } else if (input$colorBy == "height"){
-      
-      coloredDend()  %>%  
-        hang.dendrogram %>% 
-        plot(horiz = TRUE, lwd = 8)
-      
-      abline(v = input$cutHeight, lty = 2)
-      
-    } else if (input$colorBy == "metadata"){
-      
-      if(is.null(input$sampleMap$datapath)){
-        # No sample mapping selected
-        dendro()$dend %>%
-          hang.dendrogram %>% 
-          plot(horiz = TRUE, lwd = 8)
-      }
-    }
-    
-    
-  }, height = plotHeight)
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
 
 
