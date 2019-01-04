@@ -85,8 +85,7 @@ Required_Packages = c("Rcpp",
 # Install and Load Packages
 Install_And_Load(Required_Packages)
 
-#----
-colorBlindPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", rainbow(1000))
+
 
 
 # Reactive variable returning the user-chosen working directory as string
@@ -1361,10 +1360,6 @@ output$Heirarchicalui <-  renderUI({
 
 
 
-df <- callModule(cutHeightServer, "proteindendyUI")
-  
-  
-
 
 # UI of paragraph explaining which variables were used
 #----
@@ -1532,22 +1527,29 @@ coloredDend <- reactive({
                              })
   }
 
-  IDBacApp::coloringDendrogram(
-    dendrogram        = dendro(),
-    useDots           = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
-    useKMeans         = if(input$kORheight == "1"){TRUE} else {FALSE},
-    useHeight         = if(input$kORheight == "2"){TRUE} else {FALSE},
-    useMetadata       = if(input$kORheight == "3"){TRUE} else {FALSE},
-    excelFilePath     = input$sampleMap$datapath,
-    chosenIdColumn    = input$sampleFactorMapChosenIDColumn,
-    chosenMetaColumn  = input$sampleFactorMapChosenAttribute,
-    cutHeight         = input$cutHeight,
-    chosenColorsMeta  = levs(),
-    colorsChosen      = colorsChosen,
-    colorBy           = input$colorBy,
-    colorBlindPalette = colorBlindPalette,
-    dendLineWidth = input$dendLineWidth
-  )
+
+  
+  
+  shiny::callModule(proteinDendrogramDrawer, "proteinDendrogram", dendrogram = dendro())
+  
+  
+  
+    # IDBacApp::coloringDendrogram(
+  #   dendrogram        = dendro(),
+  #   useDots           = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
+  #   useKMeans         = if(input$kORheight == "1"){TRUE} else {FALSE},
+  #   useHeight         = if(input$kORheight == "2"){TRUE} else {FALSE},
+  #   useMetadata       = if(input$kORheight == "3"){TRUE} else {FALSE},
+  #   excelFilePath     = input$sampleMap$datapath,
+  #   chosenIdColumn    = input$sampleFactorMapChosenIDColumn,
+  #   chosenMetaColumn  = input$sampleFactorMapChosenAttribute,
+  #   cutHeight         = input$cutHeight,
+  #   chosenColorsMeta  = levs(),
+  #   colorsChosen      = colorsChosen,
+  #   colorBy           = input$colorBy,
+  #   IDBacApp::colorBlindPalette() = IDBacApp::colorBlindPalette()(),
+  #   dendLineWidth = input$dendLineWidth
+  # )
 
 
 })
@@ -1941,7 +1943,7 @@ ppp <- reactive({
 azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
   azz <- match(nam, azz)
   
-  pc<- cbind(pc, as.vector(colorBlindPalette[calcNetwork()$wc$membership[azz], 2] ))
+  pc<- cbind(pc, as.vector(IDBacApp::colorBlindPalette()()[calcNetwork()$wc$membership[azz], 2] ))
   colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
   lp3<<-pc
   pc
@@ -2029,7 +2031,7 @@ output$metaboliteAssociationNetwork <- renderSimpleNetwork({
     awq2<<-calcNetwork()
     
     
-    cbp <- as.vector(colorBlindPalette[1:100,2])
+    cbp <- as.vector(IDBacApp::colorBlindPalette()()[1:100,2])
     
     
     YourColors <- paste0('d3.scaleOrdinal()

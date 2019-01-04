@@ -28,6 +28,8 @@ coloringDendrogram <- function(dendrogram,
                                chosenMetaColumn,
                                
                                cutHeight,
+                               chosenK,
+                               
                                chosenColorsMeta,
                                drawAbline,
                                colorsChosen,

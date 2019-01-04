@@ -141,7 +141,7 @@ ui_proteinClustering <- function(x) {
               
     )
   ),
-  cutHeightUI("proteindendyUI")
+  cutHeightUI("proteinDendrogram")
  
   ) 
 }

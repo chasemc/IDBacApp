@@ -2,21 +2,6 @@
 
 
 
-ui_coloringDendLines <- function(){
-  
-  
-  
-}
-
-
-
-
-
-
-
-
-
-
 cutHeightUI <- function(id) {
   ns <- NS(id)
   
@@ -25,7 +10,7 @@ cutHeightUI <- function(id) {
     fixed = TRUE, draggable = TRUE,
     wellPanel(
       h4("Adjust Dendrogram Lines"),
-      selectInput("colorBy", 
+      selectInput(ns("colorBy"), 
                   "Color By:", 
                   c("None" = "none",
                     "Choose Number of Groups" = "groups",
@@ -35,12 +20,24 @@ cutHeightUI <- function(id) {
                   selected = "none"
       ),
       conditionalPanel(
-        condition = "input.colorBy == 'height'",
+        condition = "input.colorBy == 'height'", ns = ns,
         numericInput(ns("cutHeight"), 
                      label = h5(strong("Cut Tree at Height")),
                      value = .5,
                      step = 0.1,
                      min = 0)
+        
+        
+      ),     
+      conditionalPanel(
+        condition = "input.colorBy == 'groups'", ns = ns,
+        numericInput(ns("chosenK"), 
+                     label = h5(strong("Choose the number of groups")),
+                     value = 1,
+                     step = 1,
+                     min = 1)
+        
+        
         
         
       ),     
@@ -64,13 +61,25 @@ cutHeightUI <- function(id) {
 
 
 
-cutHeightServer <- function(input,
-                            output,
-                            session){
+proteinDendrogramDrawer <- function(input,
+                                    output,
+                                    session,
+                                    dendrogram){
   
-print("hellop")
   
- # return(input$colorBy)
+  dendrogram <- IDBacApp::changeDendLinesColor(dendrogram = dendrogram,
+                                      colorBy = input$colorBy,
+                                      colorBlindPalette = IDBacApp::colorBlindPalette(),
+                                      cutHeight = input$cutHeight,
+                                      chosenK = input$chosenK)
+  
+  dendrogram <- IDBacApp::changeDendLinesWidth(dendrogram = dendrogram,
+                                     width = input$dendLineWidth)
+  
+  
+  
+  return(dendrogram)
+  
   
 }
 
@@ -96,7 +105,8 @@ print("hellop")
 changeDendLinesColor <- function(dendrogram,
                                  colorBy,
                                  colorBlindPalette,
-                                 cutHeight = 0){
+                                 cutHeight = 0,
+                                 chosenK = 1){
   
   if(class(dendrogram) != "dendrogram"){
     warning("Dendrogram input wasn't of class \"dendrogram\"")
@@ -121,8 +131,8 @@ changeDendLinesColor <- function(dendrogram,
     } else if(colorBy == "groups") {
       
       dendrogram <- color_branches(dend = dendrogram,
-                                   k = cutHeight, 
-                                   col = as.vector(colorBlindPalette[1:length(unique(cutree(dendrogram, k = cutHeight)))])
+                                   k = chosenK, 
+                                   col = as.vector(colorBlindPalette[1:length(unique(cutree(dendrogram, k = chosenK)))])
                                    
       )
       
