@@ -145,7 +145,8 @@ observeEvent(input$styleSelect, {
 
 
 
-observeEvent(input$selectExperiment, {
+observeEvent(input$selectExperiment,
+             once = TRUE, {
   
   appendTab(inputId = "mainIDBacNav",
             tabPanel("Compare Two Samples (Protein)",
@@ -156,10 +157,8 @@ observeEvent(input$selectExperiment, {
 })
 
 
-
-
-
-observeEvent(input$pSNR, {
+observeEvent(input$selectExperiment,
+             once = TRUE, {
   
   appendTab(inputId = "mainIDBacNav",
             tabPanel("Hierarchical Clustering (Protein)",
@@ -170,7 +169,8 @@ observeEvent(input$pSNR, {
 
 
 
-observeEvent(input$selectExperiment, {
+observeEvent(input$selectExperiment,
+             once = TRUE, {
   
   appendTab(inputId = "mainIDBacNav",
             tabPanel("Metabolite Association Network (Small-Molecule)",
