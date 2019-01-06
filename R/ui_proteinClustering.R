@@ -3,17 +3,7 @@ ui_proteinClustering <- function(x) {
   fluidPage(
     sidebarLayout(
       sidebarPanel(style = "background-color:#7777770d",
-                   
-                   selectInput("proteinUIselector",
-                               label = "Available options:",
-                               choices = list("Hierarchical Clustering Settings" = 1,
-                                              "Show PCA, PCoA, t-SNE" = 2,
-                                              "Insert samples from another experiment" = 3)),
-                   
-                   
-                   
-                   
-                   
+                  
                    
                    # Hierarchical Clustering Settings
                    #----
