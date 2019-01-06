@@ -1751,21 +1751,26 @@ availableNewSamples <- reactive({
 
 
 observeEvent(input$addtoNewDB, {
+  copyingDbPopup()
+  newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
+  copyToNewDatabase(existingDBPool = userDBCon(),
+                    newdbPath = newdbPath, 
+                    sampleIDs = input$addSampleChooser$right)
+
   
-    
+  removeModal()
+  })
 
 
-newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
-
-copyToNewDatabase(existingDBPool = userDBCon(),
-                  newdbPath = newdbPath, 
-                  sampleIDs = input$addSampleChooser$right)
-
-
-
+copyingDbPopup <- reactive({
+  showModal(modalDialog(
+    title = "Important message",
+    "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
+    br(),
+    "To check what has been converted, you can navigate to:",
+    easyClose = FALSE, size="l",
+    footer = ""))
 })
-
-
 
 
 
