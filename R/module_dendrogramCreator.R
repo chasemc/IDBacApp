@@ -1,94 +1,74 @@
 
-dendrogramCreationUI <- function(id) {
-  ns <- NS(id)
-  
-  absolutePanel(
-    bottom = "70%", right = "40%", width="25%",
-    fixed = TRUE, draggable = TRUE,
-    wellPanel(
-      selectInput(ns("distance"), 
-                  label = h5(strong("Distance Algorithm")),
-                  choices = list("cosine" = "cosineD",
-                                 "euclidean" = "euclidean",
-                                 "maximum" = "maximum",
-                                 "manhattan" = "manhattan",
-                                 "canberra" = "canberra",
-                                 "binary" = "binary",
-                                 "minkowski"= "minkowski"),
-                  selected = "cosine"),
-      selectInput(ns("clustering"), 
-                  label = h5(strong("Clustering Algorithm")),
-                  choices = list("ward.D" = "ward.D",
-                                 "ward.D2" = "ward.D2",
-                                 "single" = "single", 
-                                 "complete" = "complete",
-                                 "average (UPGMA)" = "average",
-                                 "mcquitty (WPGMA)" = "mcquitty",
-                                 "median (WPGMC)" = "median",
-                                 "centroid (UPGMC)" = "centroid"),
-                  selected = "average"),
-      radioButtons(ns("booled"), 
-                   label = h5(strong("Include peak intensities, or use presence/absence?")),
-                   choices = list("Presence/Absence" = 1, 
-                                  "Intensities" = 2)),
-      actionButton(ns("closeLineModification"),
-                   "Close")
-    ),
-    style = "opacity: 0.92"
+#' dendrogramCreatorUI
+#'
+#' @param id namespace id
+#'
+#' @return ui to choose the algorithm for creating the dendrogram
+#' @export
+#'
+
+dendrogramCreatorUI <- function(id) {
+  ns <- shiny::NS(id)
+
+  shiny::tagList(
+    shiny::selectInput(ns("distanceMethod"),
+                label = shiny::h5(shiny::strong("Distance Algorithm")),
+                choices = list("cosine" = "cosine",
+                               "euclidean" = "euclidean",
+                               "maximum" = "maximum",
+                               "manhattan" = "manhattan",
+                               "canberra" = "canberra",
+                               "binary" = "binary",
+                               "minkowski"= "minkowski"),
+                selected = "cosine"),
+
+    shiny::selectInput(ns("clustering"),
+                label = shiny::h5(shiny::strong("Clustering Algorithm")),
+                choices = list("ward.D" = "ward.D",
+                               "ward.D2" = "ward.D2",
+                               "single" = "single",
+                               "complete" = "complete",
+                               "average (UPGMA)" = "average",
+                               "mcquitty (WPGMA)" = "mcquitty",
+                               "median (WPGMC)" = "median",
+                               "centroid (UPGMC)" = "centroid"),
+                selected = "average"),
+
+    shiny::radioButtons(ns("booled"),
+                 label = shiny::h5(shiny::strong("Include peak intensities, or use presence/absence?")),
+                 choices = list("Presence/Absence" = TRUE,
+                                "Intensities" = FALSE))
   )
+
 }
 
 
 
+#' dendrogramCreator
+#'
+#' @param input shiny modules default
+#' @param output shiny modules default
+#' @param session shiny modules default
+#' @param data matrix or dataframe, where columns are variables and rows are samples
+#'
+#' @return dendrogram
+#' @export
+#'
+
+dendrogramCreator <- function(input,
+                              output,
+                              session,
+                              data){
 
 
-dendrogramCreationServer <- function(input,
-                                    output,
-                                    session,
-                                    dendrogram
-                                    
-                                    ){
-  if (input$kORheight == "1"){
-    
-    coloredDend() %>%
-      hang.dendrogram %>% 
-      plot(horiz = TRUE, lwd = 8)
-    
-  } else if (input$kORheight == "2"){
-    
-    coloredDend()  %>%  
-      hang.dendrogram %>% 
-      plot(horiz = TRUE, lwd = 8)
-    
-    abline(v = input$cutHeight, lty = 2)
-    
-  } else if (input$kORheight == "3"){
-    
-    if(is.null(input$sampleMap$datapath)){
-      # No sample mapping selected
-      dendro()$dend %>%
-        hang.dendrogram %>% 
-        plot(horiz = TRUE, lwd = 8)
-    } else {
-      if(input$colDotsOrColDend == "1"){
-        
-        coloredDend() %>%  
-          hang.dendrogram %>% 
-          plot(.,horiz=T)
-        
-        IDBacApp::colored_dots(coloredDend()$bigMatrix, 
-                               coloredDend()$shortenedNames,
-                               rowLabels = names(coloredDend()$bigMatrix),
-                               horiz = T,
-                               sort_by_labels_order = FALSE)
-      } else {
-        coloredDend()  %>%
-          hang.dendrogram %>% 
-          plot(., horiz = T)
-      }
-    }
-  }  
+  data <- IDBacApp::distMatrix(data = data,
+                              method = input$distanceMethod,
+                              booled = input$booled)
 
+  data <- stats::hclust(data,
+                        method = input$clustering)
+
+  return(stats::as.dendrogram(data))
 
 }
 

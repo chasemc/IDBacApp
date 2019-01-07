@@ -1106,7 +1106,7 @@ output$downloadInverseZoom <- downloadHandler(
 # Merge and trim protein replicates
 #----
 collapsedPeaksP <- reactive({
-  
+  req(input$myProteinchooser)
   # For each sample:
   # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
   # merge into a single peak list per sample
@@ -1151,25 +1151,10 @@ proteinMatrix <- reactive({
 #Create the hierarchical clustering based upon the user input for distance method and clustering technique
 #----
 dendro <- reactive({
-  
-  if (input$booled == "1") {
-    booled<-"_UsedIntenstites"
-  }
-  else {
-    booled<-"_UsedPresenceAbsence"
-  }
-  #TODO: add cache back with SQL system
-  #
-  #     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
-  #                       "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
-  
-  
-  return(
-    as.dendrogram(
-      hclust(proteinDistance(), 
-             method=input$clustering)
-    )
-  )
+
+  shiny::callModule(IDBacApp::dendrogramCreator,
+                    "prot",
+                    proteinMatrix())
      
 })
 
@@ -1208,7 +1193,7 @@ proteinDistance <- reactive({
   )
   
   
-  IDBacApp::proteinDistanceMatrix(binnedData = binnedProtein(),
+  IDBacApp::distMatrix(binnedData = binnedProtein(),
                                   method = input$distance)
   
   
@@ -1502,21 +1487,9 @@ observeEvent(input$tester, {
 #User input changes the height/length of the main dendrogram
 #----
 plotHeight <- reactive({
-  #return(as.numeric(input$hclustHeight))
+  return(as.numeric(input$hclustHeight))
   100
 })
-# 
-# 
-# #----
-# output$groupui <- renderUI({
-#   if(input$kORheight=="1"){
-#     numericInput("kClusters", 
-#                  label = h5(strong("Number of Groups")),
-#                  value = 1,
-#                  step=1,
-#                  min=1)}
-# })
-
 
 
 #----
@@ -1576,25 +1549,19 @@ output$sampleFactorMapColors <- renderUI({
 })
 
 
-# List, 
-  # $dend is the dendrogram
-  # $names are the sample names in order of the dendrogram (necessary if user changes names)
-#----
-# coloredDend <- reactive({
-# 
-#  shiny::callModule(proteinDendrogramDrawer, "proteinDendrogram", dendrogram = dendro())
-# 
-#   
-# })
-
-
-# output$hclustPlot <- renderPlot({
-#   
-#   par(mar = c(5, 5, 5, dendparmar))
-#   
-#   
-# }, height = plotHeight)
-
+output$hclustPlot <- shiny::renderPlot({
+  
+  req(dendro())
+  a <- shiny::callModule(IDBacApp::colordendLines,
+                         "prot2",
+                         dendrogram = dendro())
+  a <- shiny::callModule(IDBacApp::colordendLabels,
+                         "prot3",
+                         dendrogram = a)
+  par(mar = c(5, 5, 5, input$dendparmar))
+  plot(a, horiz = TRUE)
+  
+}, height = plotHeight)
 
 
 
