@@ -308,9 +308,8 @@ if (!is.null(userDBCon())){
                               .con = metadb)
     
     conn <- pool::poolCheckout(metadb)
-    dbQuery <- DBI::dbSendQuery(conn, dbQuery)
-    dbQuery <- DBI::dbFetch(dbQuery)
-    
+    dbQuery <- DBI::dbGetQuery(conn, dbQuery)
+
     exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
                                         "Genbank_Accession"            = "KY858228",
                                         "NCBI_TaxID"                   = "446370",
@@ -1553,10 +1552,10 @@ output$hclustPlot <- shiny::renderPlot({
   
   req(dendro())
   a <- shiny::callModule(IDBacApp::colordendLines,
-                         "prot2",
+                         "proteinDendLines",
                          dendrogram = dendro())
   a <- shiny::callModule(IDBacApp::colordendLabels,
-                         "prot3",
+                         "proteinDendLabels",
                          dendrogram = a)
   par(mar = c(5, 5, 5, input$dendparmar))
   plot(a, horiz = TRUE)
@@ -1652,6 +1651,39 @@ output$chooseProteinSamples <- renderUI({
 })
 
 
+observeEvent(input$colorLines, {
+  output$protLineMod <- renderUI({
+    IDBacApp::colordendLinesUI("proteinDendLines")
+  })
+})
+
+observeEvent(input$closeLineModification, {
+  output$protLineMod <- renderUI({
+    # Intentionally Blank
+  })
+})
+
+observeEvent(input$colorLabels, {
+  output$protLabelMod <- renderUI({
+    IDBacApp::colordendLabelsUI("proteinDendLabels")
+  })
+})
+
+observeEvent(input$closeLabelsModification, {
+  output$protLabelMod <- renderUI({
+    # Intentionally Blank
+  })
+})
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1667,9 +1699,9 @@ availableProtein <- reactive({
   )
 
   conn <- pool::poolCheckout(userDBCon())
-  combinedProteinPeaksAll <- DBI::dbSendQuery(conn, combinedProteinPeaksAll)
-  
-  return(DBI::dbFetch(combinedProteinPeaksAll)[ , 1])
+  combinedProteinPeaksAll <- DBI::dbGetQuery(conn, combinedProteinPeaksAll)
+  pool::poolReturn(conn)
+  return(combinedProteinPeaksAll[ , 1])
 
 })
 
@@ -1707,9 +1739,9 @@ availableNewSamples <- reactive({
                             )
   
   conn <- pool::poolCheckout(userDBCon())
-  samples <- DBI::dbSendQuery(conn, samples)
+  samples <- DBI::dbGetQuery(conn, samples)
   pool::poolReturn(conn)
-  return(DBI::dbFetch(samples)[ , 1])
+  return(samples[ , 1])
   
 })
 
@@ -1787,9 +1819,9 @@ selectedSmallMolPeakList <- reactive({
     )
 
     conn <- pool::poolCheckout(userDBCon())
-    combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
-    combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
-  }
+    combinedSmallMolPeaksAll <- DBI::dbGetQuery(conn, combinedSmallMolPeaksAll)[ , 1]
+    pool::poolReturn(con)
+      }
 
   # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
   if(input$matrixSamplePresent == 1){
@@ -1804,8 +1836,8 @@ selectedSmallMolPeakList <- reactive({
       )
 
     conn <- pool::poolCheckout(userDBCon())
-    combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
-    combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
+    combinedSmallMolPeaksAll <- DBI::dbGetQuery(conn, combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
+    pool::poolReturn(conn)
     }
 
 # Get sample IDs that begin with "matrix" (need this to search sql db)
@@ -1837,34 +1869,30 @@ selectedSmallMolPeakList <- reactive({
                          .con = userDBCon()
   )
 
-
+  
   conn <- pool::poolCheckout(userDBCon())
-
-  sqlQ <- DBI::dbSendQuery(conn, sqlQ)
-
-  sqlQ <- DBI::dbFetch(sqlQ)
-  split(sqlQ$spectrumSHA, sqlQ$Strain_ID) %>%
-    lapply(., function(x){
-      IDBacApp::collapseSmallMolReplicates(fileshas = x,
-                                           db = userDBCon(),
-                                           smallMolPercentPresence = input$percentPresenceSM,
-                                           lowerMassCutoff = input$lowerMassSM,
-                                           upperMassCutoff = input$upperMassSM) %>% unname
-    }) -> sqlQ
-
+  
+  sqlQ <- DBI::dbGetQuery(conn, sqlQ)
+  pool::poolReturn(conn)
+  sqlQ <- split(sqlQ$spectrumSHA, sqlQ$Strain_ID)
+  sqlQ <- lapply(sqlQ, function(x){
+    IDBacApp::collapseSmallMolReplicates(fileshas = x,
+                                         db = userDBCon(),
+                                         smallMolPercentPresence = input$percentPresenceSM,
+                                         lowerMassCutoff = input$lowerMassSM,
+                                         upperMassCutoff = input$upperMassSM) %>% unname
+  }) 
+  
   for(i in 1:length(sqlQ)){
-
-  snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)
-
-
-  sqlQ[[i]]@mass <- sqlQ[[i]]@mass[snr1]
-  sqlQ[[i]]@snr <- sqlQ[[i]]@snr[snr1]
-  sqlQ[[i]]@intensity <- sqlQ[[i]]@intensity[snr1]
+    snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)
+    sqlQ[[i]]@mass <- sqlQ[[i]]@mass[snr1]
+    sqlQ[[i]]@snr <- sqlQ[[i]]@snr[snr1]
+    sqlQ[[i]]@intensity <- sqlQ[[i]]@intensity[snr1]
   }
-
-
-  sqlQ
-
+  
+  
+ return(sqlQ)
+  
 
 
 })

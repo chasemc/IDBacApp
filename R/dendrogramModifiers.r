@@ -48,6 +48,12 @@ changeDendPartColor <- function(dendrogram,
       if(is.na(chosenK)){
         chosenK <- 1
       }
+      
+      if (chosenK > stats::nobs(dendrogram)) {
+        chosenK <- stats::nobs(dendrogram)
+      } 
+      
+      
       dendrogram <- dendFunc(dend = dendrogram,
                              k = chosenK,
                              col = as.vector(colorBlindPalette[1:length(unique(dendextend::cutree(dendrogram, k = chosenK)))])

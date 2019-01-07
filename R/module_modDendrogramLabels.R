@@ -79,19 +79,20 @@ colordendLabels <- function(input,
                             output,
                             session,
                             dendrogram){
+  
 
   dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram,
-                                     colorBy = input$colorBy,
-                                     colorBlindPalette = colorBlindPalette(),
-                                     cutHeight = input$cutHeight,
-                                     chosenK = input$chosenK,
-                                     part = "labels")
-
+                                              colorBy = input$colorBy,
+                                              colorBlindPalette = colorBlindPalette(),
+                                              cutHeight = input$cutHeight,
+                                              chosenK = input$chosenK,
+                                              part = "labels")
+  
   dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram,
-                                   dendPartSize = input$dendLabelSize,
-                                   part = "labels")
-
-
+                                             dendPartSize = input$dendLabelSize,
+                                             part = "labels")
+  
+  
   return(dendrogram)
-
+  
 }

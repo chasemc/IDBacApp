@@ -24,7 +24,7 @@ ui_proteinClustering <- function(x) {
                    IDBacApp::dendrogramCreatorUI("prot"),
                    numericInput("hclustHeight",
                                        label = h5(strong("Expand Tree")),
-                                       value = 500,
+                                       value = 750,
                                        step = 50,
                                        min = 100),
                    numericInput("dendparmar",
@@ -32,12 +32,11 @@ ui_proteinClustering <- function(x) {
                                        value = 20),
                    actionButton("colorLines", "Click to color lines"),
                    actionButton("colorLabels", "Click to color labels"),
-                   conditionalPanel("input.colorLines > input.closeLineModification ",
-                                           IDBacApp::colordendLinesUI("prot2")
-                   ),
-                   conditionalPanel("input.colorLabels > input.closeLabelsModification ",
-                                           IDBacApp::colordendLabelsUI("prot3")
-                   )
+                   uiOutput("protLineMod"),
+                   uiOutput("protLabelMod")
+                   
+                   
+                 
                    
       ),
       
