@@ -7,8 +7,7 @@ ui_proteinClustering <- function(x) {
                    
                    # Hierarchical Clustering Settings
                    #----
-                   conditionalPanel(
-                     condition = "input.proteinUIselector == '1'",
+                  
                      h5(strong("Select Samples")),
                      p("Move strains between boxes by clicking the strain's name
                      and then an arrow. Strains in the right box will be used for analysis."),
@@ -51,9 +50,8 @@ ui_proteinClustering <- function(x) {
                                   'Document format', 
                                   c('HTML'),
                                   inline = TRUE),
-                     downloadButton('downloadReport')
-                   ),    
-                   
+                     downloadButton('downloadReport'),
+            
                    # Show PCA, PCoA, t-SNE
                    #----    
                    conditionalPanel(
