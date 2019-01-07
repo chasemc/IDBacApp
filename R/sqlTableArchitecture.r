@@ -1,8 +1,9 @@
 sqlTableArchitecture <- function(numberScans){
 
+  sqlDataFrame$version <- data.frame(version = "1")
+
   sqlDataFrame <- new.env(parent = parent.frame())
 
-  sqlDataFrame$version <- data.frame(version = "1")
   
   sqlDataFrame$metaData <- c("Strain_ID",
                              "Genbank_Accession",
