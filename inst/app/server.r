@@ -1536,7 +1536,12 @@ output$sampleFactorMapColors <- renderUI({
   )
 })
 
-
+rew <- reactive({
+  shiny::callModule(IDBacApp::hierMeta,
+                       "proteDendDotsui",
+                       pool = userDBCon(),
+                       dendrogram = dendro())()
+})
 output$hclustPlot <- shiny::renderPlot({
   
   req(dendro())
@@ -1547,15 +1552,14 @@ output$hclustPlot <- shiny::renderPlot({
                          "proteinDendLabels",
                          dendrogram = a)
   
-  
-  par(mar = c(5, 5, 5, input$dendparmar))
-  plot(a, horiz = TRUE)
-  
-  if (TRUE) {
-    shiny::callModule(IDBacApp::hierMeta,
-                           "proteDendDotsui",
-                           pool = userDBCon())
-  }
+    
+IDBacApp::colored_dots(rew(),
+                           dendro(),
+                           #  rowLabels = names(coloredDend()$bigMatrix),
+                           horiz = T,
+                           sort_by_labels_order = TRUE)
+par(mar = c(5, 5, 5, input$dendparmar))
+plot(a, horiz = TRUE)
   
 }, height = plotHeight)
 

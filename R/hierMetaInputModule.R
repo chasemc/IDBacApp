@@ -6,8 +6,8 @@ hierMetaUI <- function(id, label = "Sample Metadata Input") {
   ns <- NS(id)
   
   uiOutput(ns("selectMetaColumnUI"))
- 
-
+  
+  
   
   
 }
@@ -15,37 +15,41 @@ hierMetaUI <- function(id, label = "Sample Metadata Input") {
 
 
 hierMeta <- function(input, output, session, dendrogram, pool) {
+
   
-  conn <- pool::poolCheckout(pool)
-  a <- dbListFields(conn, "metaData")
-  a <- [-which(a == "Strain_ID")]
   
   output$selectMetaColumnUI <- renderUI({
+    conn <- pool::poolCheckout(pool)
+    a <- dbListFields(conn, "metaData")
+    a <- a[-which(a == "Strain_ID")]
     ns <- session$ns  
     selectInput(ns("selectMetaColumn"),
                 "Select Category",
                 as.vector(a)
-                )
+    )
   })
   
-  if(!is.null(input$selectMetaColumn)) {
+  return(reactive({
+    
+    dendLabs <- labels(dendrogram)
+    conn <- pool::poolCheckout(pool)
    
+    if(!is.null(input$selectMetaColumn)) {
+    
     columnID <- input$selectMetaColumn
     
-    query <- glue::glue_sql("SELECT {`columnID`} FROM metaData",
-                            .con=conn)
-    chosenMeta <- DBI::dbGetQuery(conn, query)
     
-    query <- glue::glue_sql("SELECT Strain_ID FROM metaData",
-                            .con=conn)
-    sampleIds <- DBI::dbGetQuery(conn, query)
-    
-    pool::poolReturn(conn)
-    
-    selectedMeta <- base::cbind.data.frame(sampleIds, chosenMeta)
+    query <- DBI::dbSendStatement("SELECT *
+                                  FROM metaData
+                                  WHERE `Strain_ID` = ?",
+                                  con=conn)
+    DBI::dbBind(query, list(dendLabs))
+    selectedMeta <- DBI::dbFetch(query)
+    dbClearResult(query)
     
     
-    selectedMeta <- selectedMeta[sampleIds %in% base::labels(dendrogram), ]
+    selectedMeta <- base::cbind.data.frame(ids = selectedMeta$Strain_ID,
+                                           meta = selectedMeta[,colnames(selectedMeta) %in% columnID])
     
     
     cols <- IDBacApp::colorBlindPalette()
@@ -61,7 +65,8 @@ hierMeta <- function(input, output, session, dendrogram, pool) {
                            horiz = T,
                            sort_by_labels_order = TRUE)
     
-  } 
+    } 
+  }))
   
   
 }
