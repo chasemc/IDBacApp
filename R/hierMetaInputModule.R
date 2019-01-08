@@ -30,6 +30,7 @@ hierMeta <- function(input, output, session, pool) {
     columnID <- input$selectMetaColumn
     
     query <- glue::glue_sql("SELECT {`columnID`} FROM metaData",
+                            .con=conn)
     chosenMeta <- DBI::dbGetQuery(conn, query)
     
     query <- glue::glue_sql("SELECT Strain_ID FROM metaData",
