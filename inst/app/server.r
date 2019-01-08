@@ -1536,12 +1536,8 @@ output$sampleFactorMapColors <- renderUI({
   )
 })
 
-rew <- reactive({
-  shiny::callModule(IDBacApp::hierMeta,
-                       "proteDendDotsui",
-                       pool = userDBCon(),
-                       dendrogram = dendro())()
-})
+
+
 output$hclustPlot <- shiny::renderPlot({
   
   req(dendro())
@@ -1552,14 +1548,15 @@ output$hclustPlot <- shiny::renderPlot({
                          "proteinDendLabels",
                          dendrogram = a)
   
-    
-IDBacApp::colored_dots(rew(),
-                           dendro(),
-                           #  rowLabels = names(coloredDend()$bigMatrix),
-                           horiz = T,
-                           sort_by_labels_order = TRUE)
-par(mar = c(5, 5, 5, input$dendparmar))
-plot(a, horiz = TRUE)
+  par(mar = c(5, 5, 5, input$dendparmar))
+  plot(a, horiz = TRUE)
+  
+  if(isTruthy(input$selectMetaColumn)){
+  runDendDots(dendrogram = a,
+              pool = userDBCon(), 
+              columnID = input$selectMetaColumn) 
+  }
+  
   
 }, height = plotHeight)
 
@@ -1680,8 +1677,15 @@ observeEvent(input$closeLabelsModification, {
 #----
 observeEvent(input$protDendDots, {
   output$proteDendDots <- renderUI({
-    IDBacApp::hierMetaUI("proteDendDotsui")
-  })
+      conn <- pool::poolCheckout(userDBCon())
+      a <- dbListFields(conn, "metaData")
+      a <- a[-which(a == "Strain_ID")]
+      ns <- session$ns  
+      selectInput("selectMetaColumn",
+                  "Select Category",
+                  as.vector(a)
+      )
+    })
 })
 
 

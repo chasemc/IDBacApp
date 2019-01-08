@@ -1,42 +1,14 @@
 
 
-# Module UI function
-hierMetaUI <- function(id, label = "Sample Metadata Input") {
-  # Create a namespace function using the provided id
-  ns <- NS(id)
+runDendDots <- function(dendrogram, pool, columnID) {
   
-  uiOutput(ns("selectMetaColumnUI"))
+  conn <- pool::poolCheckout(pool)
+  dendLabs <- labels(dendrogram)
   
   
-  
-  
-}
-
-
-
-hierMeta <- function(input, output, session, dendrogram, pool) {
-
-  
-  
-  output$selectMetaColumnUI <- renderUI({
-    conn <- pool::poolCheckout(pool)
-    a <- dbListFields(conn, "metaData")
-    a <- a[-which(a == "Strain_ID")]
-    ns <- session$ns  
-    selectInput(ns("selectMetaColumn"),
-                "Select Category",
-                as.vector(a)
-    )
-  })
-  
-  return(reactive({
+  if(!is.null(columnID)) {
     
-    dendLabs <- labels(dendrogram)
-    conn <- pool::poolCheckout(pool)
-   
-    if(!is.null(input$selectMetaColumn)) {
-    
-    columnID <- input$selectMetaColumn
+    columnID <- columnID
     
     
     query <- DBI::dbSendStatement("SELECT *
@@ -61,17 +33,11 @@ hierMeta <- function(input, output, session, dendrogram, pool) {
     
     IDBacApp::colored_dots(colsd,
                            dendrogram,
-                           #  rowLabels = names(coloredDend()$bigMatrix),
                            horiz = T,
-                           sort_by_labels_order = TRUE)
+                           sort_by_labels_order = FALSE)
     
-    } 
-  }))
-  
-  
+  } 
 }
-
-
 
 
 
