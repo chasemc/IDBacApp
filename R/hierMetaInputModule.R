@@ -1,52 +1,51 @@
 
 
 # Module UI function
-hierMetaOutput <- function(id, label = "Sample Metadata Input") {
+hierMetaUI <- function(id, label = "Sample Metadata Input") {
   # Create a namespace function using the provided id
   ns <- NS(id)
+  
+  uiOutput(ns("selectMetaColumnUI"))
+ 
+
+  
+  
+}
 
 
-  tagList(tags$style(HTML(".htMenu { z-index: 1051; }")),
-    rHandsontableOutput(ns("metaTable"))
+
+hierMeta <- function(input, output, session, pool) {
+  
+  conn <- pool::poolCheckout(pool)
+  output$selectMetaColumnUI <- renderUI({
+    ns <- session$ns  
+    selectInput(ns("selectMetaColumn"),
+                "Select Category",
+                dbListFields(conn, "metaData"))
+  })
+  
+  return(reactive({
+    validate(need(input$selectMetaColumn, FALSE))
+    
+    columnID <- input$selectMetaColumn
+    
+    query <- glue::glue_sql("SELECT {`columnID`} FROM metaData",
+    chosenMeta <- DBI::dbGetQuery(conn, query)
+    
+    query <- glue::glue_sql("SELECT Strain_ID FROM metaData",
+                            .con=conn)
+    sampleIds <- DBI::dbGetQuery(conn, query)
+    
+    pool::poolReturn(conn)
+    
+    cbind.data.frame(sampleIds, chosenMeta)
+  })
   )
-
-
 }
 
 
 
-hierMeta <- function(input, output, session, sampleIDs) {
 
 
-  createNewLibraryTable <- reactive({
-
-    })
-
-
-
-  # Display the new Library as an editable table
-  output$metaTable <- rhandsontable::renderRHandsontable({
-
-
-        currentlyLoadedSamples <-  data.frame(Strain_ID = sampleIDs, `Property 1` = rep("",length(sampleIDs)))
-            rhandsontable::rhandsontable(currentlyLoadedSamples,
-                                          useTypes = FALSE,
-                                          contextMenu = TRUE ) %>%
-              hot_col("Strain_ID", readOnly = TRUE) %>%
-              hot_context_menu(allowRowEdit = FALSE,
-                               allowColEdit = TRUE)
-
-
-
-
-
-
-    })
-
-
-
-
-
-}
 
 

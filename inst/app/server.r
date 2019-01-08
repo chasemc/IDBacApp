@@ -1475,12 +1475,7 @@ output$sampleGroupColoringui <- renderUI(
 datafile <- callModule(IDBacApp::hierMeta, "datafile", labels(dendro()))
 
 
-# Invoke metadata modal
-#----
-observeEvent(input$tester, {
-  showModal(modalDialog(IDBacApp::hierMetaOutput("datafile", "User data (.csv format)"),
-                        size="l"))
-})
+
 
 
 #User input changes the height/length of the main dendrogram
