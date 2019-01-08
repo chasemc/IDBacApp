@@ -1470,12 +1470,6 @@ output$sampleGroupColoringui <- renderUI(
 })
 
 
-# MODAL for metadata input re: dendrogram 
-#----
-datafile <- callModule(IDBacApp::hierMeta, "datafile", labels(dendro()))
-
-
-
 
 
 #User input changes the height/length of the main dendrogram
@@ -1552,8 +1546,16 @@ output$hclustPlot <- shiny::renderPlot({
   a <- shiny::callModule(IDBacApp::colordendLabels,
                          "proteinDendLabels",
                          dendrogram = a)
+  
+  
   par(mar = c(5, 5, 5, input$dendparmar))
   plot(a, horiz = TRUE)
+  
+  if (TRUE) {
+    shiny::callModule(IDBacApp::hierMeta,
+                           "proteDendDotsui",
+                           pool = userDBCon())
+  }
   
 }, height = plotHeight)
 
@@ -1645,7 +1647,7 @@ output$chooseProteinSamples <- renderUI({
   )
 })
 
-
+#----
 observeEvent(input$colorLines, {
   output$protLineMod <- renderUI({
     IDBacApp::colordendLinesUI("proteinDendLines")
@@ -1658,6 +1660,7 @@ observeEvent(input$closeLineModification, {
   })
 })
 
+#----
 observeEvent(input$colorLabels, {
   output$protLabelMod <- renderUI({
     IDBacApp::colordendLabelsUI("proteinDendLabels")
@@ -1670,8 +1673,12 @@ observeEvent(input$closeLabelsModification, {
   })
 })
 
-
-
+#----
+observeEvent(input$protDendDots, {
+  output$proteDendDots <- renderUI({
+    IDBacApp::hierMetaUI("proteDendDotsui")
+  })
+})
 
 
 

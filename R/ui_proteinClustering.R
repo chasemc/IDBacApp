@@ -32,8 +32,10 @@ ui_proteinClustering <- function(x) {
                                        value = 20),
                    actionButton("colorLines", "Click to color lines"),
                    actionButton("colorLabels", "Click to color labels"),
+                   actionButton("protDendDots", "Click to add Dots"),
                    uiOutput("protLineMod"),
-                   uiOutput("protLabelMod")
+                   uiOutput("protLabelMod"),
+                   uiOutput("proteDendDots")
                    
                    
                  

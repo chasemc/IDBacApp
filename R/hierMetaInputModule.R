@@ -14,19 +14,22 @@ hierMetaUI <- function(id, label = "Sample Metadata Input") {
 
 
 
-hierMeta <- function(input, output, session, pool) {
+hierMeta <- function(input, output, session, dendrogram, pool) {
   
   conn <- pool::poolCheckout(pool)
+  a <- dbListFields(conn, "metaData")
+  a <- [-which(a == "Strain_ID")]
+  
   output$selectMetaColumnUI <- renderUI({
     ns <- session$ns  
     selectInput(ns("selectMetaColumn"),
                 "Select Category",
-                dbListFields(conn, "metaData"))
+                as.vector(a)
+                )
   })
   
-  return(reactive({
-    validate(need(input$selectMetaColumn, FALSE))
-    
+  if(!is.null(input$selectMetaColumn)) {
+   
     columnID <- input$selectMetaColumn
     
     query <- glue::glue_sql("SELECT {`columnID`} FROM metaData",
@@ -39,9 +42,28 @@ hierMeta <- function(input, output, session, pool) {
     
     pool::poolReturn(conn)
     
-    cbind.data.frame(sampleIds, chosenMeta)
-  })
-  )
+    selectedMeta <- base::cbind.data.frame(sampleIds, chosenMeta)
+    
+    
+    selectedMeta <- selectedMeta[sampleIds %in% base::labels(dendrogram), ]
+    
+    
+    cols <- IDBacApp::colorBlindPalette()
+    
+    
+    colsd <- cols[factor(selectedMeta[,2])]
+    
+    
+    
+    IDBacApp::colored_dots(colsd,
+                           dendrogram,
+                           #  rowLabels = names(coloredDend()$bigMatrix),
+                           horiz = T,
+                           sort_by_labels_order = TRUE)
+    
+  } 
+  
+  
 }
 
 
