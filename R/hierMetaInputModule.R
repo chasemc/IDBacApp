@@ -1,9 +1,9 @@
 
 
-runDendDots <- function(dendrogram, pool, columnID) {
+runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID) {
   
   conn <- pool::poolCheckout(pool)
-  dendLabs <- labels(dendrogram)
+  dendLabs <- labels(rawDendrogram)
   
   
   if(!is.null(columnID)) {
@@ -32,7 +32,7 @@ runDendDots <- function(dendrogram, pool, columnID) {
     
     
     IDBacApp::colored_dots(colsd,
-                           dendrogram,
+                           trimdLabsDend,
                            horiz = T,
                            sort_by_labels_order = FALSE)
     
@@ -42,4 +42,4 @@ runDendDots <- function(dendrogram, pool, columnID) {
 
 
 
-
+  

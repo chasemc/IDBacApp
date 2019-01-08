@@ -1,9 +1,8 @@
 sqlTableArchitecture <- function(numberScans){
-
-  sqlDataFrame$version <- data.frame(version = "1")
-
+  
   sqlDataFrame <- new.env(parent = parent.frame())
 
+  sqlDataFrame$version <- data.frame(version = "1")
   
   sqlDataFrame$metaData <- c("Strain_ID",
                              "Genbank_Accession",
@@ -30,9 +29,9 @@ sqlTableArchitecture <- function(numberScans){
   sqlDataFrame$metaData <- as.data.frame(matrix(nrow = numberScans,
                                                 ncol = length(sqlDataFrame$metaData), 
                                                 dimnames = list(NULL,sqlDataFrame$metaData)))
-
-
-
+  
+  
+  
   sqlDataFrame$XML <- c("mzMLSHA",
                         "XML", 
                         "manufacturer",
@@ -41,14 +40,14 @@ sqlTableArchitecture <- function(numberScans){
                         "analyzer",
                         "detector",
                         "Instrument_MetaFile")
-
-
+  
+  
   sqlDataFrame$XML <- as.data.frame(matrix(nrow = numberScans,
-                                                ncol = length(sqlDataFrame$XML), 
-                                                dimnames = list(NULL,sqlDataFrame$XML)))
-
-
-
+                                           ncol = length(sqlDataFrame$XML), 
+                                           dimnames = list(NULL,sqlDataFrame$XML)))
+  
+  
+  
   sqlDataFrame$IndividualSpectra <- c("spectrumSHA",
                                       "mzMLSHA",
                                       "Strain_ID",
@@ -60,10 +59,10 @@ sqlTableArchitecture <- function(numberScans){
                                       "smallMoleculeSpectrum")
   
   sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = 1,
-                                           ncol = length(sqlDataFrame$IndividualSpectra), 
-                                           dimnames = list(NULL,sqlDataFrame$IndividualSpectra)))
-
-
+                                                         ncol = length(sqlDataFrame$IndividualSpectra), 
+                                                         dimnames = list(NULL,sqlDataFrame$IndividualSpectra)))
+  
+  
   sqlDataFrame
-
+  
 }

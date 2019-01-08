@@ -1548,11 +1548,17 @@ output$hclustPlot <- shiny::renderPlot({
                          "proteinDendLabels",
                          dendrogram = a)
   
+  labs <- base::strtrim(labels(a),10)
+  
+  labels(a) <- labs
+  
+  
   par(mar = c(5, 5, 5, input$dendparmar))
   plot(a, horiz = TRUE)
   
-  if(isTruthy(input$selectMetaColumn)){
-  runDendDots(dendrogram = a,
+  if(!is.null(input$selectMetaColumn)){
+  runDendDots(rawDendrogram = dendro(),
+              trimdLabsDend = a,
               pool = userDBCon(), 
               columnID = input$selectMetaColumn) 
   }
