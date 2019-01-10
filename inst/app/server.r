@@ -1695,11 +1695,26 @@ observeEvent(input$protDendDots, {
 })
 
 
+observeEvent(input$selectMetaColumn, {
+output$sampleFactorMapColors <- renderUI({
+  column(3,
+         lapply(1:length(levs()),
+                function(x){
+                  do.call(colourInput,
+                          list(paste0("factor-",
+                                      gsub(" ",
+                                           "",
+                                           levs()[[x]])),
+                               levs()[[x]],
+                               value="blue",
+                               allowTransparent=T))
+                })
+  )
+})
 
 
 
-
-
+})
 
 
 
