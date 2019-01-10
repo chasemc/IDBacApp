@@ -1113,7 +1113,7 @@ output$downloadInverseZoom <- downloadHandler(
 # Merge and trim protein replicates
 #----
 collapsedPeaksP <- reactive({
-  req(input$myProteinchooser)
+  req(input$myProteinchooser$right)
   # For each sample:
   # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
   # merge into a single peak list per sample
