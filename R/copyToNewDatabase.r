@@ -41,12 +41,12 @@ copyToNewDatabase <- function(existingDBPool,
                         a <- IDBacApp::sqlTableArchitecture(1)
                         
                         #Write table structures to database
-                        DBI::dbWriteTable(conn = newDBconnection,
-                                          name = "metaData", # SQLite table to insert into
-                                          a$metaData, # Insert single row into DB
-                                          append = TRUE, # Append to existing table
-                                          overwrite = FALSE) # Do not overwrite
-                        
+                        # DBI::dbWriteTable(conn = newDBconnection,
+                        #                   name = "metaData", # SQLite table to insert into
+                        #                   a$metaData, # Insert single row into DB
+                        #                   append = TRUE, # Append to existing table
+                        #                   overwrite = FALSE) # Do not overwrite
+                        # 
                         DBI::dbWriteTable(conn = newDBconnection,
                                           name = "XML", # SQLite table to insert into
                                           a$XML, # Insert single row into DB

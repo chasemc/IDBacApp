@@ -235,7 +235,7 @@ newExperimentSqlite <- reactive({
 
 userDBCon <- reactive({
   IDBacApp::createPool(fileName = input$selectExperiment,
-                                         filePath = workingDirectory)
+                       filePath = workingDirectory)
 })
 
 
@@ -252,6 +252,15 @@ observeEvent(input$searchNCBI, {
 
 
 
+
+
+observeEvent(input$insertNewMetaColumn,{
+  IDBacApp::insertMetadataColumns(pool = userDBCon(),
+                                  columnNames = input$addMetaColumnName)
+  
+  
+})
+
 observeEvent(input$saven,{
   
   dbWriteTable(userDBCon(),
@@ -265,10 +274,8 @@ observeEvent(input$saven,{
 
 
 
-
 #----
 output$metaTable <- rhandsontable::renderRHandsontable({
-  
   rhandsontable::rhandsontable(qwerty$rtab,
                                useTypes = FALSE,
                                contextMenu = TRUE ) %>%
@@ -289,7 +296,7 @@ output$metaTable <- rhandsontable::renderRHandsontable({
 
 
 #----
-observeEvent(c(input$selectExperiment),{
+observeEvent(c(input$selectExperiment, input$insertNewMetaColumn),{
   
 if (!is.null(userDBCon())){
   metadb <- userDBCon()
@@ -331,8 +338,9 @@ if (!is.null(userDBCon())){
                                         "PI_ORCID"                     = "0000-0002-1372-3887",
                                         "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
     )
+
+    qwerty$rtab <- merge(exampleMetaData, dbQuery, all =TRUE)
     
-    qwerty$rtab <- rbind(exampleMetaData, dbQuery)
     pool::poolReturn(conn)
   }
 
@@ -1105,7 +1113,7 @@ output$downloadInverseZoom <- downloadHandler(
 # Merge and trim protein replicates
 #----
 collapsedPeaksP <- reactive({
-  req(input$myProteinchooser)
+  req(input$myProteinchooser$right)
   # For each sample:
   # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
   # merge into a single peak list per sample
@@ -1557,10 +1565,10 @@ output$hclustPlot <- shiny::renderPlot({
   plot(a, horiz = TRUE)
   
   if(!is.null(input$selectMetaColumn)){
-  runDendDots(rawDendrogram = dendro(),
-              trimdLabsDend = a,
-              pool = userDBCon(), 
-              columnID = input$selectMetaColumn) 
+    IDBacApp::runDendDots(rawDendrogram = dendro(),
+                          trimdLabsDend = a,
+                          pool = userDBCon(), 
+                          columnID = input$selectMetaColumn) 
   }
   
   
