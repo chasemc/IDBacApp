@@ -88,13 +88,20 @@ ui_sqlUI <- function(id, availableExperiments) {
                                                     
                                                     tabPanel("Add/modify information about samples",
                                                              value = "experiment_metaData_tab",
-                                                             
-                                                             
-                                                             # actionButton("searchNCBI",
-                                                             #              "Search NCBI"),
+                                                            column(width = 6, 
+                                                             p("Here is where you can add information about your sample. There are always standard
+                                                               columns like \"Genus\", but you can add your own columns as well."),
+                                                             p("After you are finished inputting your information, press \"save\" to write the information 
+                                                               to the database."),
+                                                                   
                                                              actionButton("saven",
-                                                                          "save"),
+                                                                          "save")
+                                                             ),column(width = 6,
                                                              
+                                                             textInput("addMetaColumnName", "New Column Name", width =3),
+                                                             actionButton("insertNewMetaColumn",
+                                                                          "Insert Column")),
+                                                            
                                                              rHandsontableOutput("metaTable", height=800)
                                                     )
                                                     
