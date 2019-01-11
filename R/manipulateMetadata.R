@@ -10,28 +10,44 @@
 
 insertMetadataColumns <- function(pool,
                                   columnNames){
-  
   conn <- pool::poolCheckout(pool)
-  
+    warning("Trying to insert column: ", columnNames, " into: ", conn@dbname)
+
   # Generate a string that is suitable for use in a query as a column or table name,
   # to generate valid SQL and protect against SQL injection attacks
-  columnNames <- dbQuoteIdentifier(conn = conn,
+  quotedColumnNames <- dbQuoteIdentifier(conn = conn,
                                    columnNames)
   
    samples <- glue::glue_sql("ALTER TABLE `metaData`
                               ADD {vars*} TEXT",
-                            vars = columnNames, 
+                            vars = quotedColumnNames, 
                            .con = conn)
  
    tryCatch(DBI::dbSendStatement(conn, samples),
                                error = function(x) warning(paste("Tried, but didn't add ",
-                                                                 columnNames,
+                                                                 quotedColumnNames,
                                                                  " column to ",
                                                                  strsplit(basename(conn@dbname),
                                                                           ".sqlite")[[1]],
-                                                                 " metaData")),
+                                                                 " metaData, it might already be present.")),
                                finally = function(x) warning(as.character(x@sql)))
 
+   checkMetaColumns <- base::colnames(DBI::dbGetQuery(conn = conn,
+                                                          "SELECT * FROM metaData", 
+                                                          n = 1))
+   checker <- columnNames %in% checkMetaColumns
+   aa1<<-columnNames
+   aa2<<-checkMetaColumns
    pool::poolReturn(conn)
+   
+   if(checker){
+   
+   warning(columnNames, " was inserted or was already present in ", conn@dbname)
+     
+   } else {
+     warning(columnNames, " was unable to be inserted in", conn@dbname)
+     
+   }
+     
 }
 

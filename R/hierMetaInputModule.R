@@ -31,8 +31,7 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, te
 
    
     colnames(selectedMeta) <- uniq
-    selectedMeta23<<-selectedMeta
-    trimdLabsDend<<-trimdLabsDend
+
     IDBacApp::colored_dots(selectedMeta,
                            trimdLabsDend,
                            horiz = T,

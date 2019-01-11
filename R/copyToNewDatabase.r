@@ -2,7 +2,6 @@ copyToNewDatabase <- function(existingDBPool,
                               newdbPath, 
                               sampleIDs){
   
-  
   # Run everything with a Shiny progress bar  
   shiny::withProgress(message = 'Copying data to new database',
                       detail = 'Connecting experiments...',
@@ -18,16 +17,28 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         existingDBconnection <- pool::poolCheckout(existingDBPool)
                         newDBconnection <- pool::poolCheckout(newDBPool)
+              warning(paste0("Begin migration of \n",
+                             existingDBconnection@dbname,
+                             " to \n", newDBconnection@dbname))
+            
+                        
+                        metaColumns <- base::colnames(DBI::dbGetQuery(conn = existingDBconnection,
+                                                                      "SELECT * FROM metaData", 
+                                                                      n = 1))
+                        df <- data.frame(matrix(ncol = length(metaColumns), nrow = 0))
+                        colnames(df) <- metaColumns
+                        metaColumns <- df
+                        remove(df)
                         
                         # Attach new database to existing database
                         #----
-                        
                         sqlQ <- glue::glue_sql("attach database ({dbPath*}) as newDB;",
                                                dbPath = newdbPath,
                                                .con = existingDBconnection) 
                         
-                        DBI::dbSendStatement(existingDBconnection, sqlQ)
-                        
+                        temp <- DBI::dbSendStatement(existingDBconnection, sqlQ)
+                        warning(temp@sql)
+                        DBI::dbClearResult(temp)
                         
                         Sys.sleep(1) 
                         setProgress(value = 0.2, 
@@ -41,12 +52,12 @@ copyToNewDatabase <- function(existingDBPool,
                         a <- IDBacApp::sqlTableArchitecture(1)
                         
                         #Write table structures to database
-                        # DBI::dbWriteTable(conn = newDBconnection,
-                        #                   name = "metaData", # SQLite table to insert into
-                        #                   a$metaData, # Insert single row into DB
-                        #                   append = TRUE, # Append to existing table
-                        #                   overwrite = FALSE) # Do not overwrite
-                        # 
+                        DBI::dbWriteTable(conn = newDBconnection,
+                                          name = "metaData", # SQLite table to insert into
+                                          metaColumns, # Insert single row into DB
+                                          append = TRUE, # Append to existing table
+                                          overwrite = FALSE) # Do not overwrite
+                        
                         DBI::dbWriteTable(conn = newDBconnection,
                                           name = "XML", # SQLite table to insert into
                                           a$XML, # Insert single row into DB
@@ -75,8 +86,10 @@ copyToNewDatabase <- function(existingDBPool,
                                                          .con = newDBPool
                         )
                         
-                        checkStrainIds <- DBI::dbSendStatement(newDBconnection, checkStrainIds)
-                        checkStrainIds <- DBI::dbFetch(checkStrainIds)[ , 1]
+                        checkStrainIds1 <- DBI::dbSendStatement(newDBconnection, checkStrainIds)
+                        warning(checkStrainIds1@sql)
+                        checkStrainIds <- DBI::dbFetch(checkStrainIds1)[ , 1]
+                        DBI::dbClearResult(checkStrainIds1) 
                         sampleIDsneeded <- sampleIDs[!sampleIDs %in% checkStrainIds]
                         
                         if(length(sampleIDsneeded) > 0){
@@ -87,8 +100,9 @@ copyToNewDatabase <- function(existingDBPool,
                                                  strainIds = sampleIDsneeded,
                                                  .con = existingDBconnection
                           )
-                          DBI::dbSendStatement(existingDBconnection, sqlQ)
-                          
+                          temp <- DBI::dbSendStatement(existingDBconnection, sqlQ)
+                          warning(temp@sql)
+                          DBI::dbClearResult(temp) 
                         }
                         
                         setProgress(value = 0.7, 
@@ -104,18 +118,20 @@ copyToNewDatabase <- function(existingDBPool,
                                                strainIds = sampleIDs,
                                                .con = existingDBconnection
                         )
-                        olddbshas <- DBI::dbSendStatement(existingDBconnection, sqlQ)
-                        olddbshas <- DBI::dbFetch(olddbshas)[ , 1]
-                        
+                        olddbshas1 <- DBI::dbSendStatement(existingDBconnection, sqlQ)
+                        warning(olddbshas1@sql)
+                        olddbshas <- DBI::dbFetch(olddbshas1)[ , 1]
+                        DBI::dbClearResult(olddbshas1) 
                         
                         sqlQ <- glue::glue_sql("SELECT DISTINCT `spectrumSHA`
                                                FROM `IndividualSpectra`",
                                                .con = newDBPool
                         )
                         
-                        newdbshas <- DBI::dbSendStatement(newDBconnection, sqlQ)
-                        newdbshas <- DBI::dbFetch(newdbshas)[ , 1]
-                        
+                        newdbshas1 <- DBI::dbSendStatement(newDBconnection, sqlQ)
+                        warning(newdbshas1@sql)
+                        newdbshas <- DBI::dbFetch(newdbshas1)[ , 1]
+                        DBI::dbClearResult(newdbshas1) 
                         newdbshas <- olddbshas[!olddbshas %in% newdbshas]
                         
                         if(length(newdbshas) > 0){
@@ -128,8 +144,9 @@ copyToNewDatabase <- function(existingDBPool,
                                                  .con = existingDBconnection
                           )
                           
-                          DBI::dbSendStatement(existingDBconnection, sqlQ)
-                          
+                          temp <- DBI::dbSendStatement(existingDBconnection, sqlQ)
+                          warning(temp@sql)
+                          DBI::dbClearResult(temp)
                         }
                         
                         
@@ -147,18 +164,20 @@ copyToNewDatabase <- function(existingDBPool,
                                                strainIds = sampleIDs,
                                                .con = existingDBconnection
                         )
-                        olddbshas <- DBI::dbSendStatement(existingDBconnection, sqlQ)
-                        olddbshas <- DBI::dbFetch(olddbshas)[ , 1]
-                        
+                        olddbshas1 <- DBI::dbSendStatement(existingDBconnection, sqlQ)
+                        warning(olddbshas1@sql)
+                        olddbshas <- DBI::dbFetch(olddbshas1)[ , 1]
+                        DBI::dbClearResult(olddbshas1)
                         
                         sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLSHA`
                                                FROM `IndividualSpectra`",
                                                .con = newDBPool
                         )
                         
-                        newdbshas <- DBI::dbSendStatement(newDBconnection, sqlQ)
-                        newdbshas <- DBI::dbFetch(newdbshas)[ , 1]
-                        
+                        newdbshas1 <- DBI::dbSendStatement(newDBconnection, sqlQ)
+                        warning(newdbshas1@sql)
+                        newdbshas <- DBI::dbFetch(newdbshas1)[ , 1]
+                        DBI::dbClearResult(newdbshas1)
                         
                         newdbshas <- olddbshas[!olddbshas %in% newdbshas]
                         
@@ -174,8 +193,9 @@ copyToNewDatabase <- function(existingDBPool,
                                                  .con = existingDBconnection
                           )
                           
-                          DBI::dbSendStatement(existingDBconnection, sqlQ)
-                          
+                          temp <- DBI::dbSendStatement(existingDBconnection, sqlQ)
+                          warning(temp@sql)
+                          DBI::dbClearResult(temp)
                           
                         }
                         
@@ -190,22 +210,25 @@ copyToNewDatabase <- function(existingDBPool,
                                                .con = newDBPool
                         )
                         
-                        DBI::dbSendStatement(newDBconnection, sqlQ)
-                        
+                        temp <- DBI::dbSendStatement(newDBconnection, sqlQ)
+                        warning(temp@sql)
+                        DBI::dbClearResult(temp)
                         sqlQ <- glue::glue_sql("DELETE FROM `IndividualSpectra`
                                                WHERE `Strain_ID` IS NULL",
                                                .con = newDBPool
                         )
                         
-                        DBI::dbSendStatement(newDBconnection, sqlQ)
-                        
+                        temp <- DBI::dbSendStatement(newDBconnection, sqlQ)
+                        warning(temp@sql)
+                        DBI::dbClearResult(temp)
                         sqlQ <- glue::glue_sql("DELETE FROM `metaData`
                                                WHERE `Strain_ID` IS NULL",
                                                .con = newDBPool
                         )
                         
-                        DBI::dbSendStatement(newDBconnection, sqlQ)
-                        
+                        temp <- DBI::dbSendStatement(newDBconnection, sqlQ)
+                        warning(temp@sql)
+                        DBI::dbClearResult(temp)
                         
                         
                         poolReturn(existingDBconnection)
@@ -219,7 +242,9 @@ copyToNewDatabase <- function(existingDBPool,
                                     session = getDefaultReactiveDomain())
                         
                         Sys.sleep(1)
-                        
+                        warning(paste0("End migration of \n",
+                                       existingDBconnection@dbname,
+                                       " to \n", newDBconnection@dbname))
                         
                       })
   
