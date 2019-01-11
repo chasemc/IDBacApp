@@ -100,24 +100,7 @@ navbarPage(collapsible = T,
            tabPanel(
              "Starting With Raw Data",
              value = "rawDataUiTab",
-             uiOutput("rawDataUI")),
+             uiOutput("rawDataUI"))
              
-             
-           tabPanel("Select/Manipulate Experiments",
-                    value = "sqlUiTab",
-                    uiOutput("sqlUI")
-           ),
-           tabPanel("Compare Two Samples (Protein)",
-                    value = "inversePeaks",
-                    uiOutput("inversepeakui")
-           ),
-           tabPanel("Hierarchical Clustering (Protein)",
-                    uiOutput("Heirarchicalui")
-           ),
-           tabPanel("Metabolite Association Network (Small-Molecule)",
-                    uiOutput("MANui")
-           ),
-           tabPanel("In-House Spectra Libraries",
-                    uiOutput("libraryTab")
-           )
+           
 )

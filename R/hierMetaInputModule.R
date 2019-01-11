@@ -1,52 +1,49 @@
 
 
-# Module UI function
-hierMetaOutput <- function(id, label = "Sample Metadata Input") {
-  # Create a namespace function using the provided id
-  ns <- NS(id)
+runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, text_shift) {
+  
+  conn <- pool::poolCheckout(pool)
+  dendLabs <- labels(rawDendrogram)
+  
+  
+    query <- DBI::dbSendStatement("SELECT *
+                                  FROM metaData
+                                  WHERE `Strain_ID` = ?",
+                                  con=conn)
+    
+    DBI::dbBind(query, list(dendLabs))
+    selectedMeta <- DBI::dbFetch(query)
+    
+    dbClearResult(query)
+    
+    
+    selectedMeta <- selectedMeta[ ,colnames(selectedMeta) %in% columnID]
+    uniq <- unique(selectedMeta)
+    selectedMeta <- sapply(uniq, function(x) selectedMeta %in% x)
+    
+    
+    for(i in seq_along(colors)){
+      
+      selectedMeta[,i][which(selectedMeta[, i] == TRUE)] <- colors[[i]]
+    }
+    
+        selectedMeta[selectedMeta == FALSE] <- "#00000000" 
 
-
-  tagList(tags$style(HTML(".htMenu { z-index: 1051; }")),
-    rHandsontableOutput(ns("metaTable"))
-  )
-
-
+   
+    colnames(selectedMeta) <- uniq
+    selectedMeta23<<-selectedMeta
+    trimdLabsDend<<-trimdLabsDend
+    IDBacApp::colored_dots(selectedMeta,
+                           trimdLabsDend,
+                           horiz = T,
+                           #rowLabels = uniq,
+                           sort_by_labels_order = FALSE,
+                           text_shift = text_shift)
+    
+  
 }
 
 
 
-hierMeta <- function(input, output, session, sampleIDs) {
 
-
-  createNewLibraryTable <- reactive({
-
-    })
-
-
-
-  # Display the new Library as an editable table
-  output$metaTable <- rhandsontable::renderRHandsontable({
-
-
-        currentlyLoadedSamples <-  data.frame(Strain_ID = sampleIDs, `Property 1` = rep("",length(sampleIDs)))
-            rhandsontable::rhandsontable(currentlyLoadedSamples,
-                                          useTypes = FALSE,
-                                          contextMenu = TRUE ) %>%
-              hot_col("Strain_ID", readOnly = TRUE) %>%
-              hot_context_menu(allowRowEdit = FALSE,
-                               allowColEdit = TRUE)
-
-
-
-
-
-
-    })
-
-
-
-
-
-}
-
-
+  

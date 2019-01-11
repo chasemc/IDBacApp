@@ -1,33 +1,29 @@
+#' Create Distance Matrix
+#'
+#' @param data matrix or dataframe, where columns are variables and rows are samples
+#' @param method distance metric to use
+#' @param booled whether all values >0 should be set to one
+#'
+#' @return distance matrix
+#' @export
 
-proteinDistanceMatrix <- function(binnedData, method){
-  if(method == "cosineD"){
-
-    nam <- names(binnedData)
-    zz1 <- do.call(rbind, binnedData)
-    
-    zz1[!is.na(zz1)] <- 1
-    zz1[is.na(zz1)] <- 0
-    as.dist(1-coop::tcosine(zz1))
-    
-
-
-
+distMatrix <- function(data,
+                       method,
+                       booled){
+  
+  data <- base::as.matrix(data)
+  # Change empty to 0
+  data[base::is.na(data)] <- 0
+  data[base::is.null(data)] <- 0
+  
+  if(booled == "TRUE"){
+    data[data > 1] <- 1
+  }
+  
+  if(method == "cosine"){
+    return(stats::as.dist(1 - coop::tcosine(data)))
   }else{
-
-    peakList %>%
-      MALDIquant::binPeaks(., method = "relaxed", tolerance = .02) %>%
-      MALDIquant::intensityMatrix() %>%
-      replace(., is.na(.), 0) %>%
-     dist(., method = method) %>%
-      as.matrix -> p
-
-
-    rownames(p) <- labels(peakList)
-
-    as.dist(p)
-
-
-
+    return(stats::dist(data, method = method))
   }
-  }
+}
 

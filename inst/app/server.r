@@ -79,14 +79,14 @@ Required_Packages = c("Rcpp",
                       "rhandsontable",
                       "Rtsne",
                       "pool",
-                      "magrittr")
+                      "magrittr",
+                      "shinyBS")
 
 
 # Install and Load Packages
 Install_And_Load(Required_Packages)
 
-#----
-colorBlindPalette <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7", rainbow(1000))
+
 
 
 # Reactive variable returning the user-chosen working directory as string
@@ -104,12 +104,23 @@ function(input,output,session){
     
   }) 
   
+  
+  
   #This "observe" event creates the SQL tab UI.
   observe({
-    output$sqlUI <- renderUI({
-    IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
-    })
     
+    if(length(availableExperiments()) > 0){
+      
+      appendTab(inputId = "mainIDBacNav",
+                tabPanel("Select/Manipulate Experiments",
+                         value = "sqlUiTab",
+                         IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
+                )
+      )
+      # output$sqlUI <- renderUI({
+      #   IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
+      # })
+    }
     
   })
   
@@ -121,12 +132,71 @@ availableExperiments <- reactive({
                                        pattern = ".sqlite",
                                        full.names = FALSE))
 })
-  
+
+# Collapsers
+#----  
+
+observeEvent(input$styleSelect, {
+  updateCollapse(session, "collapseSQLInstructions")
+})
+
+observeEvent(input$styleSelect, {
+  updateCollapse(session, "modifySqlCollapse")
+})
+
+observeEvent(input$styleSelect, {
+  isolate(
+    updateCollapse(session, "collapseSQLSelector")
+  )
+})
 
 
 
   
-#---
+
+
+
+observeEvent(input$moveToAnalysis,
+             once = TRUE, ignoreInit =T, {
+  
+  appendTab(inputId = "mainIDBacNav",
+            tabPanel("Compare Two Samples (Protein)",
+                     value = "inversePeaks",
+                     uiOutput("inversepeakui")
+            )
+  )
+})
+
+
+observeEvent(input$moveToAnalysis,
+             once = TRUE, ignoreInit =T, {
+  
+  appendTab(inputId = "mainIDBacNav",
+            tabPanel("Hierarchical Clustering (Protein)",
+                     uiOutput("Heirarchicalui")
+            )
+  )
+})
+
+
+
+observeEvent(input$moveToAnalysis,
+             once = TRUE, ignoreInit =T, {
+  
+  appendTab(inputId = "mainIDBacNav",
+            tabPanel("Metabolite Association Network (Small-Molecule)",
+                     uiOutput("MANui")
+            )
+  )
+})
+
+
+
+
+
+
+
+#----
 
 observeEvent(input$moveToAnalysis, {
   updateTabsetPanel(session, "mainIDBacNav",
@@ -176,7 +246,7 @@ newExperimentSqlite <- reactive({
 
 userDBCon <- reactive({
   IDBacApp::createPool(fileName = input$selectExperiment,
-                                         filePath = workingDirectory)
+                       filePath = workingDirectory)
 })
 
 
@@ -193,12 +263,21 @@ observeEvent(input$searchNCBI, {
 
 
 
-observeEvent(input$saven,{
+
+
+observeEvent(input$insertNewMetaColumn,{
+  IDBacApp::insertMetadataColumns(pool = userDBCon(),
+                                  columnNames = input$addMetaColumnName)
   
-  dbWriteTable(userDBCon(),
-               "metaData",
-               rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove exmple row 
-               overwrite = TRUE)  
+  
+})
+
+observeEvent(input$saven,{
+
+  DBI::dbWriteTable(conn = userDBCon(),
+                    name = "metaData",
+                    value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
+                    overwrite = TRUE)  
   
 })
 
@@ -206,10 +285,8 @@ observeEvent(input$saven,{
 
 
 
-
 #----
 output$metaTable <- rhandsontable::renderRHandsontable({
-  
   rhandsontable::rhandsontable(qwerty$rtab,
                                useTypes = FALSE,
                                contextMenu = TRUE ) %>%
@@ -230,12 +307,12 @@ output$metaTable <- rhandsontable::renderRHandsontable({
 
 
 #----
-observeEvent(c(input$selectExperiment),{
+observeEvent(c(input$selectExperiment, input$insertNewMetaColumn),{
   
 if (!is.null(userDBCon())){
-  metadb <- userDBCon()
+  conn <- pool::poolCheckout(userDBCon())
   
-  if (!"metaData" %in% DBI::dbListTables(metadb)) {
+  if (!"metaData" %in% DBI::dbListTables(conn)) {
    
     warning("It appears the experiment file may be corrupt, please create again.")
     qwerty$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
@@ -246,12 +323,10 @@ if (!is.null(userDBCon())){
     dbQuery <- glue::glue_sql("SELECT *
                                   FROM ({tab*})",
                               tab = "metaData",
-                              .con = metadb)
+                              .con = conn)
     
-    conn <- pool::poolCheckout(metadb)
-    dbQuery <- DBI::dbSendQuery(conn, dbQuery)
-    dbQuery <- DBI::dbFetch(dbQuery)
-    
+    dbQuery <- DBI::dbGetQuery(conn, dbQuery)
+
     exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
                                         "Genbank_Accession"            = "KY858228",
                                         "NCBI_TaxID"                   = "446370",
@@ -273,8 +348,12 @@ if (!is.null(userDBCon())){
                                         "PI_ORCID"                     = "0000-0002-1372-3887",
                                         "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
     )
+
+    qwerty$rtab <- merge(exampleMetaData,
+                         dbQuery,
+                         all = TRUE,
+                         sort = FALSE)
     
-    qwerty$rtab <- rbind(exampleMetaData, dbQuery)
     pool::poolReturn(conn)
   }
 
@@ -753,7 +832,6 @@ output$inversepeakui <-  renderUI({
 #----
 inverseComparisonNames <- reactive({
   
-  aws <<- userDBCon()
   db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
   db %>%
     filter(proteinPeaks != "NA") %>%
@@ -1048,7 +1126,7 @@ output$downloadInverseZoom <- downloadHandler(
 # Merge and trim protein replicates
 #----
 collapsedPeaksP <- reactive({
-  
+  req(input$myProteinchooser$right)
   # For each sample:
   # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
   # merge into a single peak list per sample
@@ -1093,25 +1171,10 @@ proteinMatrix <- reactive({
 #Create the hierarchical clustering based upon the user input for distance method and clustering technique
 #----
 dendro <- reactive({
-  
-  if (input$booled == "1") {
-    booled<-"_UsedIntenstites"
-  }
-  else {
-    booled<-"_UsedPresenceAbsence"
-  }
-  #TODO: add cache back with SQL system
-  #
-  #     cacheFile<-paste0(idbacDirectory$filePath,"\\Dendrogram_Cache\\","Distance-",input$distance,"_Clustering-",input$clustering, booled,
-  #                       "_SNR-",input$pSNR,"_PercentPresence-",input$percentPresenceP,"_LowCut-",input$lowerMass,"_HighCut-",input$upperMass,".rds")
-  
-  
-  return(
-    as.dendrogram(
-      hclust(proteinDistance(), 
-             method=input$clustering)
-    )
-  )
+
+  shiny::callModule(IDBacApp::dendrogramCreator,
+                    "prot",
+                    proteinMatrix())
      
 })
 
@@ -1150,7 +1213,7 @@ proteinDistance <- reactive({
   )
   
   
-  IDBacApp::proteinDistanceMatrix(binnedData = binnedProtein(),
+  IDBacApp::distMatrix(binnedData = binnedProtein(),
                                   method = input$distance)
   
   
@@ -1171,7 +1234,6 @@ proteinDistance <- reactive({
 pcoaResults <- reactive({
   # number of samples should be greater than k
   shiny::req(nrow(as.matrix(proteinDistance())) > 10)
-  bbb<<-proteinDistance()
   IDBacApp::pcoaCalculation(proteinDistance())
 })
 
@@ -1188,7 +1250,7 @@ output$pcoaPlot <- renderPlotly({
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
                                   nam = (names(colorsToUse)))
-  pcaDat <<- merge(pcoaResults(),
+  pcaDat <- merge(pcoaResults(),
                   colorsToUse,
                   by = "nam")
 
@@ -1220,8 +1282,8 @@ pcaResults <- reactive({
   # number of samples should be greater than k
 #  shiny::req(nrow(as.matrix(proteinMatrix())) > 4)
   
-  aaa<<-proteinMatrix()
-  IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
+
+    IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
                  logged = TRUE,
                  scaled = TRUE, 
                  missing = .00001)
@@ -1354,10 +1416,9 @@ output$Heirarchicalui <-  renderUI({
     } else {
     
 
-      fluidPage(
-        ui_proteinClustering("protein"),
-        ui_coloringDendLines()    
-      )}
+
+        ui_proteinClustering("proteinyo")
+      }
 })
 
 
@@ -1429,45 +1490,13 @@ output$sampleGroupColoringui <- renderUI(
 })
 
 
-# MODAL for metadata input re: dendrogram 
-#----
-datafile <- callModule(IDBacApp::hierMeta, "datafile", labels(dendro()))
-
-
-# Invoke metadata modal
-#----
-observeEvent(input$tester, {
-  showModal(modalDialog(IDBacApp::hierMetaOutput("datafile", "User data (.csv format)"),
-                        size="l"))
-})
 
 
 #User input changes the height/length of the main dendrogram
 #----
 plotHeight <- reactive({
   return(as.numeric(input$hclustHeight))
-})
-
-
-#----
-output$hclustui <- renderUI({
-  if(input$kORheight!="2"){return(NULL)} else {
-    numericInput("height", 
-                 label = h5(strong("Cut Tree at Height")),
-                 value = .5,
-                 step=.1,
-                 min=0)}
-})
-
-
-#----
-output$groupui <- renderUI({
-  if(input$kORheight=="1"){
-    numericInput("kClusters", 
-                 label = h5(strong("Number of Groups")),
-                 value = 1,
-                 step=1,
-                 min=1)}
+  100
 })
 
 
@@ -1499,14 +1528,21 @@ output$sampleMapColumns2 <- renderUI({
 
 #----
 levs <- reactive({
-  sampleMappings <- read_excel(input$sampleMap$datapath, 1)
-  #selected column
-
-  sampleMappings[input$sampleFactorMapChosenAttribute] %>% 
-    unique %>%
-    unlist %>% 
-    as.vector %>% 
-    c(.,"Missing_in_Excel")
+  
+  conn <- pool::poolCheckout(userDBCon())
+  dendLabs <- labels(dendro())
+  query <- DBI::dbSendStatement("SELECT *
+                                FROM metaData
+                                WHERE `Strain_ID` = ?",
+                                con=conn)
+  DBI::dbBind(query, list(dendLabs))
+  selectedMeta <- DBI::dbFetch(query)
+  
+  dbClearResult(query)
+  
+  selectedMeta <- selectedMeta[ , colnames(selectedMeta) %in% input$selectMetaColumn]
+  pool::poolReturn(conn)
+  return(unique(selectedMeta))
 })
 
 
@@ -1528,86 +1564,49 @@ output$sampleFactorMapColors <- renderUI({
 })
 
 
-# Color the Protein Dendrogram
-#----
-coloredDend <- reactive({
-
-  if (input$kORheight =="3"){
-    colorsChosen <- sapply(1:length(levs()),
-                           function(x){
-                               input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]]
-                             })
-  }
-
-  IDBacApp::coloringDendrogram(
-    dendrogram       = dendro(),
-    useDots          = if(input$colDotsOrColDend == "1"){TRUE} else {FALSE},
-    useKMeans        = if(input$kORheight == "1"){TRUE} else {FALSE},
-    useHeight      = if(input$kORheight == "2"){TRUE} else {FALSE},
-    useMetadata        = if(input$kORheight == "3"){TRUE} else {FALSE},
-    excelFilePath    = input$sampleMap$datapath,
-    chosenIdColumn   = input$sampleFactorMapChosenIDColumn,
-    chosenMetaColumn = input$sampleFactorMapChosenAttribute,
-    cutHeight        = input$height,
-    cutK             = input$kClusters,
-    chosenColorsMeta = levs(),
-    colorsChosen     = colorsChosen,
-    colorBy = input$colorBy,
-    colorBlindPalette = colorBlindPalette
-  )
-
-
+colorsChosen <- reactive({
+  sapply(1:length(levs()),
+         function(x){
+           input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]]
+         })
 })
 
 
-
-# Output the dendrogram
-#----
-output$hclustPlot <- renderPlot({
-
+output$hclustPlot <- shiny::renderPlot({
+  
+  req(dendro())
+  a <- shiny::callModule(IDBacApp::colordendLines,
+                         "proteinDendLines",
+                         dendrogram = dendro())
+  a <- shiny::callModule(IDBacApp::colordendLabels,
+                         "proteinDendLabels",
+                         dendrogram = a)
+  
+  labs <- base::strtrim(labels(a),10)
+  
+  labels(a) <- labs
+  
+  
   par(mar = c(5, 5, 5, input$dendparmar))
-
-  if (input$kORheight == "1"){
-    
-    coloredDend() %>%
-      hang.dendrogram %>% 
-      plot(horiz = TRUE, lwd = 8)
-    
-  } else if (input$kORheight == "2"){
-    
-    coloredDend()  %>%  
-      hang.dendrogram %>% 
-      plot(horiz = TRUE, lwd = 8)
-    
-    abline(v = input$height, lty = 2)
-    
-  } else if (input$kORheight == "3"){
-
-    if(is.null(input$sampleMap$datapath)){
-      # No sample mapping selected
-      dendro()$dend %>%
-        hang.dendrogram %>% 
-        plot(horiz = TRUE, lwd = 8)
-      } else {
-        if(input$colDotsOrColDend == "1"){
-        
-          coloredDend() %>%  
-            hang.dendrogram %>% 
-            plot(.,horiz=T)
-          
-          IDBacApp::colored_dots(coloredDend()$bigMatrix, 
-                                 coloredDend()$shortenedNames,
-                                 rowLabels = names(coloredDend()$bigMatrix),
-                                 horiz = T,
-                                 sort_by_labels_order = FALSE)
-        } else {
-          coloredDend()  %>%
-            hang.dendrogram %>% 
-            plot(., horiz = T)
-        }
-      }
+  plot(a, horiz = TRUE)
+  
+  a1 <-dendro()
+  
+  if(!is.null(input$selectMetaColumn)){
+    IDBacApp::runDendDots(rawDendrogram = dendro(),
+                          trimdLabsDend = a,
+                          pool = userDBCon(), 
+                          columnID = input$selectMetaColumn,
+                          colors = colorsChosen(),
+                          text_shift = 1) 
   }
+  
+  
 }, height = plotHeight)
+
+
+
+
 
 
 # Download svg of dendrogram
@@ -1635,9 +1634,9 @@ output$downloadHeirSVG <- downloadHandler(
     } else if (input$kORheight == "2"){
 
       dendro() %>% 
-        color_branches(h = input$height) %>%
+        color_branches(h = input$cutHeight) %>%
         plot(horiz = TRUE, lwd = 8)
-      abline(v = input$height,
+      abline(v = input$cutHeight,
              lty = 2)
 
     } else if (input$kORheight == "3"){
@@ -1693,7 +1692,67 @@ output$chooseProteinSamples <- renderUI({
   )
 })
 
+#----
+observeEvent(input$colorLines, {
+  output$protLineMod <- renderUI({
+    IDBacApp::colordendLinesUI("proteinDendLines")
+  })
+})
 
+observeEvent(input$closeLineModification, {
+  output$protLineMod <- renderUI({
+    # Intentionally Blank
+  })
+})
+
+#----
+observeEvent(input$colorLabels, {
+  output$protLabelMod <- renderUI({
+    IDBacApp::colordendLabelsUI("proteinDendLabels")
+  })
+})
+
+observeEvent(input$closeLabelsModification, {
+  output$protLabelMod <- renderUI({
+    # Intentionally Blank
+  })
+})
+
+#----
+observeEvent(input$protDendDots, {
+  output$proteDendDots <- renderUI({
+      conn <- pool::poolCheckout(userDBCon())
+      a <- dbListFields(conn, "metaData")
+      a <- a[-which(a == "Strain_ID")]
+      ns <- session$ns  
+      selectInput("selectMetaColumn",
+                  "Select Category",
+                  as.vector(a)
+      )
+    })
+})
+
+
+observeEvent(input$selectMetaColumn, {
+output$sampleFactorMapColors <- renderUI({
+  column(3,
+         lapply(1:length(levs()),
+                function(x){
+                  do.call(colourInput,
+                          list(paste0("factor-",
+                                      gsub(" ",
+                                           "",
+                                           levs()[[x]])),
+                               levs()[[x]],
+                               value="blue",
+                               allowTransparent=T))
+                })
+  )
+})
+
+
+
+})
 
 
 
@@ -1709,9 +1768,9 @@ availableProtein <- reactive({
   )
 
   conn <- pool::poolCheckout(userDBCon())
-  combinedProteinPeaksAll <- DBI::dbSendQuery(conn, combinedProteinPeaksAll)
-  
-  return(DBI::dbFetch(combinedProteinPeaksAll)[ , 1])
+  combinedProteinPeaksAll <- DBI::dbGetQuery(conn, combinedProteinPeaksAll)
+  pool::poolReturn(conn)
+  return(combinedProteinPeaksAll[ , 1])
 
 })
 
@@ -1749,9 +1808,9 @@ availableNewSamples <- reactive({
                             )
   
   conn <- pool::poolCheckout(userDBCon())
-  samples <- DBI::dbSendQuery(conn, samples)
+  samples <- DBI::dbGetQuery(conn, samples)
   pool::poolReturn(conn)
-  return(DBI::dbFetch(samples)[ , 1])
+  return(samples[ , 1])
   
 })
 
@@ -1760,21 +1819,26 @@ availableNewSamples <- reactive({
 
 
 observeEvent(input$addtoNewDB, {
-  
-  newdbPath <- IDBacApp::createPool(fileName = input$nameformixNmatch,
-                       filePath = workingDirectory)
-  
-  IDBacApp::copyToNewDatabase(existingDBpath = userDBCon(),
-                              newdbPath = newdbPath, 
-                              sampleIDs = input$addSampleChooser$right)
-    
+  copyingDbPopup()
+  newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
+  copyToNewDatabase(existingDBPool = userDBCon(),
+                    newdbPath = newdbPath, 
+                    sampleIDs = input$addSampleChooser$right)
 
+  
+  removeModal()
+  })
+
+
+copyingDbPopup <- reactive({
+  showModal(modalDialog(
+    title = "Important message",
+    "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
+    br(),
+    "To check what has been converted, you can navigate to:",
+    easyClose = FALSE, size="l",
+    footer = ""))
 })
-
-
-
-
-
 
 
 
@@ -1824,9 +1888,9 @@ selectedSmallMolPeakList <- reactive({
     )
 
     conn <- pool::poolCheckout(userDBCon())
-    combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
-    combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1]
-  }
+    combinedSmallMolPeaksAll <- DBI::dbGetQuery(conn, combinedSmallMolPeaksAll)[ , 1]
+    pool::poolReturn(con)
+      }
 
   # input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
   if(input$matrixSamplePresent == 1){
@@ -1841,8 +1905,8 @@ selectedSmallMolPeakList <- reactive({
       )
 
     conn <- pool::poolCheckout(userDBCon())
-    combinedSmallMolPeaksAll <- DBI::dbSendQuery(conn, combinedSmallMolPeaksAll)
-    combinedSmallMolPeaksAll <- DBI::dbFetch(combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
+    combinedSmallMolPeaksAll <- DBI::dbGetQuery(conn, combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
+    pool::poolReturn(conn)
     }
 
 # Get sample IDs that begin with "matrix" (need this to search sql db)
@@ -1874,34 +1938,30 @@ selectedSmallMolPeakList <- reactive({
                          .con = userDBCon()
   )
 
-
+  
   conn <- pool::poolCheckout(userDBCon())
-
-  sqlQ <- DBI::dbSendQuery(conn, sqlQ)
-
-  sqlQ <- DBI::dbFetch(sqlQ)
-  split(sqlQ$spectrumSHA, sqlQ$Strain_ID) %>%
-    lapply(., function(x){
-      IDBacApp::collapseSmallMolReplicates(fileshas = x,
-                                           db = userDBCon(),
-                                           smallMolPercentPresence = input$percentPresenceSM,
-                                           lowerMassCutoff = input$lowerMassSM,
-                                           upperMassCutoff = input$upperMassSM) %>% unname
-    }) -> sqlQ
-
+  
+  sqlQ <- DBI::dbGetQuery(conn, sqlQ)
+  pool::poolReturn(conn)
+  sqlQ <- split(sqlQ$spectrumSHA, sqlQ$Strain_ID)
+  sqlQ <- lapply(sqlQ, function(x){
+    IDBacApp::collapseSmallMolReplicates(fileshas = x,
+                                         db = userDBCon(),
+                                         smallMolPercentPresence = input$percentPresenceSM,
+                                         lowerMassCutoff = input$lowerMassSM,
+                                         upperMassCutoff = input$upperMassSM) %>% unname
+  }) 
+  
   for(i in 1:length(sqlQ)){
-
-  snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)
-
-
-  sqlQ[[i]]@mass <- sqlQ[[i]]@mass[snr1]
-  sqlQ[[i]]@snr <- sqlQ[[i]]@snr[snr1]
-  sqlQ[[i]]@intensity <- sqlQ[[i]]@intensity[snr1]
+    snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)
+    sqlQ[[i]]@mass <- sqlQ[[i]]@mass[snr1]
+    sqlQ[[i]]@snr <- sqlQ[[i]]@snr[snr1]
+    sqlQ[[i]]@intensity <- sqlQ[[i]]@intensity[snr1]
   }
-
-
-  sqlQ
-
+  
+  
+ return(sqlQ)
+  
 
 
 })
@@ -1928,8 +1988,8 @@ smallMolNetworkDataFrame <- reactive({
 ppp <- reactive({
   
   if(length(subtractedMatrixBlank()) > 9){
-  aq6 <<- subtractedMatrixBlank()
-  aq2 <<-calcNetwork()
+
+    
   
   zz <<- intensityMatrix(subtractedMatrixBlank())
   zz[is.na(zz)] <- 0
@@ -1948,7 +2008,7 @@ ppp <- reactive({
 azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
   azz <- match(nam, azz)
   
-  pc<- cbind(pc, as.vector(colorBlindPalette[calcNetwork()$wc$membership[azz], 2] ))
+  pc<- cbind(pc, as.vector(IDBacApp::colorBlindPalette()()[calcNetwork()$wc$membership[azz], 2] ))
   colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
   lp3<<-pc
   pc
@@ -2036,7 +2096,7 @@ output$metaboliteAssociationNetwork <- renderSimpleNetwork({
     awq2<<-calcNetwork()
     
     
-    cbp <- as.vector(colorBlindPalette[1:100,2])
+    cbp <- as.vector(IDBacApp::colorBlindPalette()()[1:100,2])
     
     
     YourColors <- paste0('d3.scaleOrdinal()
@@ -2089,7 +2149,7 @@ output$netheir <- renderPlot({
       hang.dendrogram %>% 
       plot(horiz = TRUE, lwd = 8)
     
-    abline(v = input$height, lty = 2)
+    abline(v = input$cutHeight, lty = 2)
     
   } else if (input$kORheight == "3"){
     

@@ -1,4 +1,22 @@
-#----
+#' colorBlindPalette
+#'
+#' @return colorblind palette and then rainbow x1000
+#' @export
+
+colorBlindPalette <- function(){
+  c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",
+    grDevices::rainbow(1000))
+}
+
+
+
+#' hashR
+#'    Settings for hashing in IDBac
+#' @param input object to hash 
+#'
+#' @return sha1 hash
+#' @export
+
 hashR <- function(input){
   digest::sha1(input, 
                digits = 14,
@@ -7,7 +25,14 @@ hashR <- function(input){
                serialize = FALSE)
 }
 
-#----
+
+#' serial
+#'    Settings for serializing in IDBac
+#' @param input object to serialize
+#'
+#' @return serialized object in binary
+#' @export
+
 serial <- function(input){
   base::serialize(object = input ,
                   connection = NULL,
@@ -16,16 +41,46 @@ serial <- function(input){
                   version = 3)
 }
 
-#----
+
+#' compress
+#'   Settings for compressing in IDBac
+#' @param input character or raw vector to compressed (char will be converted to raw)
+#'
+#' @return Raw vector
+#' @export
+
+
 compress <- function(input){
-  memCompress(input, 
+  base::memCompress(input, 
               type = "gzip")
 }
 
+
+#' decompress
+#'    Settings for decompressing in IDBac, serialized called first
+#' @param input compressed raw vector 
+#'
+#' @return raw vector 
+#' @export
+
+decompress <- function(input){
+  base::memDecompress(input, 
+              type = "gzip",
+              asChar = FALSE)
+}
+
+
 #----
+#' createMZsha
+#'    Given a mzR 
+#' @param  peaklist matrix
+#'
+#' @return sha
+#' @export
+
+
 createMZsha <- function(peaklist){
-  
-  
+
   if(base::class(peaklist) == "double"){
     peaklist <- list(peaklist)
   }

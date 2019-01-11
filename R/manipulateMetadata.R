@@ -8,7 +8,6 @@
 
 
 
-
 insertMetadataColumns <- function(pool,
                                   columnNames){
   
@@ -20,13 +19,19 @@ insertMetadataColumns <- function(pool,
                                    columnNames)
   
    samples <- glue::glue_sql("ALTER TABLE `metaData`
-                              ADD {vars*}",
+                              ADD {vars*} TEXT",
                             vars = columnNames, 
                            .con = conn)
  
- 
-  a <- DBI::dbSendStatement(conn, samples)
- message(a)
- 
+   tryCatch(DBI::dbSendStatement(conn, samples),
+                               error = function(x) warning(paste("Tried, but didn't add ",
+                                                                 columnNames,
+                                                                 " column to ",
+                                                                 strsplit(basename(conn@dbname),
+                                                                          ".sqlite")[[1]],
+                                                                 " metaData")),
+                               finally = function(x) warning(as.character(x@sql)))
+
+   pool::poolReturn(conn)
 }
 
