@@ -106,10 +106,17 @@ function(input,output,session){
   
   #This "observe" event creates the SQL tab UI.
   observe({
+    a3<<-availableExperiments()
+    if(length(availableExperiments()) == 0){
+      output$sqlUI <- renderUI({
+        p("No experiments have been created. Please create an experiment by navigating to the \"Starting with Raw Data\" tab.")
+      })
+    } else {
+       
     output$sqlUI <- renderUI({
     IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
     })
-    
+    }
     
   })
   

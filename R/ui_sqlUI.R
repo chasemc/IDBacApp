@@ -1,5 +1,4 @@
 ui_sqlUI <- function(id, availableExperiments) {
-  
   fluidPage(
       column(width=4,
                fluidRow(
