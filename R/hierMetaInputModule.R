@@ -1,6 +1,6 @@
 
 
-runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID) {
+runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, text_shift) {
   
   conn <- pool::poolCheckout(pool)
   dendLabs <- labels(rawDendrogram)
@@ -21,15 +21,24 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID) {
     uniq <- unique(selectedMeta)
     selectedMeta <- sapply(uniq, function(x) selectedMeta %in% x)
     
-    selectedMeta[selectedMeta == TRUE] <- "#000000" 
-    selectedMeta[selectedMeta == FALSE] <- "#00000000" 
-    colnames(selectedMeta) <- uniq
     
+    for(i in seq_along(colors)){
+      
+      selectedMeta[,i][which(selectedMeta[, i] == TRUE)] <- colors[[i]]
+    }
+    
+        selectedMeta[selectedMeta == FALSE] <- "#00000000" 
+
+   
+    colnames(selectedMeta) <- uniq
+    selectedMeta23<<-selectedMeta
+    trimdLabsDend<<-trimdLabsDend
     IDBacApp::colored_dots(selectedMeta,
                            trimdLabsDend,
                            horiz = T,
                            #rowLabels = uniq,
-                           sort_by_labels_order = FALSE)
+                           sort_by_labels_order = FALSE,
+                           text_shift = text_shift)
     
   
 }

@@ -273,11 +273,11 @@ observeEvent(input$insertNewMetaColumn,{
 })
 
 observeEvent(input$saven,{
-  
-  dbWriteTable(userDBCon(),
-               "metaData",
-               rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove exmple row 
-               overwrite = TRUE)  
+
+  DBI::dbWriteTable(conn = userDBCon(),
+                    name = "metaData",
+                    value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
+                    overwrite = TRUE)  
   
 })
 
@@ -310,9 +310,9 @@ output$metaTable <- rhandsontable::renderRHandsontable({
 observeEvent(c(input$selectExperiment, input$insertNewMetaColumn),{
   
 if (!is.null(userDBCon())){
-  metadb <- userDBCon()
+  conn <- pool::poolCheckout(userDBCon())
   
-  if (!"metaData" %in% DBI::dbListTables(metadb)) {
+  if (!"metaData" %in% DBI::dbListTables(conn)) {
    
     warning("It appears the experiment file may be corrupt, please create again.")
     qwerty$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
@@ -323,9 +323,8 @@ if (!is.null(userDBCon())){
     dbQuery <- glue::glue_sql("SELECT *
                                   FROM ({tab*})",
                               tab = "metaData",
-                              .con = metadb)
+                              .con = conn)
     
-    conn <- pool::poolCheckout(metadb)
     dbQuery <- DBI::dbGetQuery(conn, dbQuery)
 
     exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
@@ -350,7 +349,10 @@ if (!is.null(userDBCon())){
                                         "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
     )
 
-    qwerty$rtab <- merge(exampleMetaData, dbQuery, all =TRUE)
+    qwerty$rtab <- merge(exampleMetaData,
+                         dbQuery,
+                         all = TRUE,
+                         sort = FALSE)
     
     pool::poolReturn(conn)
   }
@@ -1232,7 +1234,6 @@ proteinDistance <- reactive({
 pcoaResults <- reactive({
   # number of samples should be greater than k
   shiny::req(nrow(as.matrix(proteinDistance())) > 10)
-  bbb<<-proteinDistance()
   IDBacApp::pcoaCalculation(proteinDistance())
 })
 
@@ -1249,7 +1250,7 @@ output$pcoaPlot <- renderPlotly({
 
   colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
                                   nam = (names(colorsToUse)))
-  pcaDat <<- merge(pcoaResults(),
+  pcaDat <- merge(pcoaResults(),
                   colorsToUse,
                   by = "nam")
 
@@ -1281,8 +1282,8 @@ pcaResults <- reactive({
   # number of samples should be greater than k
 #  shiny::req(nrow(as.matrix(proteinMatrix())) > 4)
   
-  aaa<<-proteinMatrix()
-  IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
+
+    IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
                  logged = TRUE,
                  scaled = TRUE, 
                  missing = .00001)
@@ -1527,14 +1528,21 @@ output$sampleMapColumns2 <- renderUI({
 
 #----
 levs <- reactive({
-  sampleMappings <- read_excel(input$sampleMap$datapath, 1)
-  #selected column
-
-  sampleMappings[input$sampleFactorMapChosenAttribute] %>% 
-    unique %>%
-    unlist %>% 
-    as.vector %>% 
-    c(.,"Missing_in_Excel")
+  
+  conn <- pool::poolCheckout(userDBCon())
+  dendLabs <- labels(dendro())
+  query <- DBI::dbSendStatement("SELECT *
+                                FROM metaData
+                                WHERE `Strain_ID` = ?",
+                                con=conn)
+  DBI::dbBind(query, list(dendLabs))
+  selectedMeta <- DBI::dbFetch(query)
+  
+  dbClearResult(query)
+  
+  selectedMeta <- selectedMeta[ , colnames(selectedMeta) %in% input$selectMetaColumn]
+  pool::poolReturn(conn)
+  return(unique(selectedMeta))
 })
 
 
@@ -1556,6 +1564,13 @@ output$sampleFactorMapColors <- renderUI({
 })
 
 
+colorsChosen <- reactive({
+  sapply(1:length(levs()),
+         function(x){
+           input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]]
+         })
+})
+
 
 output$hclustPlot <- shiny::renderPlot({
   
@@ -1575,11 +1590,15 @@ output$hclustPlot <- shiny::renderPlot({
   par(mar = c(5, 5, 5, input$dendparmar))
   plot(a, horiz = TRUE)
   
+  a1 <-dendro()
+  
   if(!is.null(input$selectMetaColumn)){
     IDBacApp::runDendDots(rawDendrogram = dendro(),
                           trimdLabsDend = a,
                           pool = userDBCon(), 
-                          columnID = input$selectMetaColumn) 
+                          columnID = input$selectMetaColumn,
+                          colors = colorsChosen(),
+                          text_shift = 1) 
   }
   
   
@@ -1969,8 +1988,8 @@ smallMolNetworkDataFrame <- reactive({
 ppp <- reactive({
   
   if(length(subtractedMatrixBlank()) > 9){
-  aq6 <<- subtractedMatrixBlank()
-  aq2 <<-calcNetwork()
+
+    
   
   zz <<- intensityMatrix(subtractedMatrixBlank())
   zz[is.na(zz)] <- 0
