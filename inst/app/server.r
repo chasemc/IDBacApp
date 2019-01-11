@@ -104,18 +104,22 @@ function(input,output,session){
     
   }) 
   
+  
+  
   #This "observe" event creates the SQL tab UI.
   observe({
-    a3<<-availableExperiments()
-    if(length(availableExperiments()) == 0){
-      output$sqlUI <- renderUI({
-        p("No experiments have been created. Please create an experiment by navigating to the \"Starting with Raw Data\" tab.")
-      })
-    } else {
-       
-    output$sqlUI <- renderUI({
-    IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
-    })
+    
+    if(length(availableExperiments()) > 0){
+      
+      appendTab(inputId = "mainIDBacNav",
+                tabPanel("Select/Manipulate Experiments",
+                         value = "sqlUiTab",
+                         IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
+                )
+      )
+      # output$sqlUI <- renderUI({
+      #   IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
+      # })
     }
     
   })
@@ -152,8 +156,8 @@ observeEvent(input$styleSelect, {
 
 
 
-observeEvent(input$selectExperiment,
-             once = TRUE, {
+observeEvent(input$moveToAnalysis,
+             once = TRUE, ignoreInit =T, {
   
   appendTab(inputId = "mainIDBacNav",
             tabPanel("Compare Two Samples (Protein)",
@@ -164,8 +168,8 @@ observeEvent(input$selectExperiment,
 })
 
 
-observeEvent(input$selectExperiment,
-             once = TRUE, {
+observeEvent(input$moveToAnalysis,
+             once = TRUE, ignoreInit =T, {
   
   appendTab(inputId = "mainIDBacNav",
             tabPanel("Hierarchical Clustering (Protein)",
@@ -176,8 +180,8 @@ observeEvent(input$selectExperiment,
 
 
 
-observeEvent(input$selectExperiment,
-             once = TRUE, {
+observeEvent(input$moveToAnalysis,
+             once = TRUE, ignoreInit =T, {
   
   appendTab(inputId = "mainIDBacNav",
             tabPanel("Metabolite Association Network (Small-Molecule)",

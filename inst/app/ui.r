@@ -100,10 +100,7 @@ navbarPage(collapsible = T,
            tabPanel(
              "Starting With Raw Data",
              value = "rawDataUiTab",
-             uiOutput("rawDataUI")),
+             uiOutput("rawDataUI"))
              
-           tabPanel("Select/Manipulate Experiments",
-                    value = "sqlUiTab",
-                    uiOutput("sqlUI")
-           )
+           
 )
