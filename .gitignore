@@ -8,3 +8,5 @@ IDBacApp.Rproj
 /inst/app/*.sqlite
 .Rproj.user
 IDBac_App.Rproj
+Getting Started.Rmd
+Getting Started.pdf
