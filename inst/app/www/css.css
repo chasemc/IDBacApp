@@ -1,4 +1,12 @@
-.modal-lg {
-width: 95%;
-height: 95%;
+h1
+#mainIDBacNav, 
+.container, 
+.navbar-inner {
+    background-color: yellow !important;
+} 
+
+.navbar-static-top {
+  position: static;
+  margin-bottom: 0px;
+  background-color: #cfcfcf !important;
 }

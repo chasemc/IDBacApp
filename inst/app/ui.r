@@ -10,21 +10,28 @@ zenodoId <- "1203781"
 # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
 #tags$body(background = "rotatingPCA.gif",
 navbarPage(collapsible = T,
-           theme = "css.css",
+          # theme = "css.css",
            title = "IDBac",
            id = "mainIDBacNav",
            tabPanel(
              "Introduction",
+             div(class="introPage"      ,   
+             
+includeCSS("www/styles.css"),
+             
+             
              
              shinyjs::useShinyjs(),
              fluidRow(
-               column(3,
-                      br(),
-                      div(img(src = "IDBac_Computer_SVG_300DPI.png",
-                              style = "width:75%;height:75%")
-                      )
-               ),
-               column(7,
+               wellPanel(
+                         # tags$style("IDBac_Computer_SVG_300DPI {
+                         #    margin-left:-80px;
+                         #    margin-right:-30px;
+                         #    margin-top:-15px;
+                         #  }"),
+                         # div(class="IDBac_Computer_SVG_300DPI",img(src="IDBac_Computer_SVG_300DPI.png",
+                         #                                           height="10%", 
+                         #                                           width="10%")),
                       h1("Welcome to IDBac",
                          align = "center"),
                       
@@ -92,15 +99,16 @@ navbarPage(collapsible = T,
                       ),
                       br(),
                       h4("Select \"PreProcessing\" above to begin", 
-                         align="center")
+                         align="center"),
+                      style = "opacity: 0.92"
                )
              )
-             
+             ) 
            ),
            tabPanel(
              "Starting With Raw Data",
              value = "rawDataUiTab",
              uiOutput("rawDataUI"))
              
-           
 )
+

@@ -1528,7 +1528,7 @@ output$sampleMapColumns2 <- renderUI({
 
 #----
 levs <- reactive({
-  
+  req(input$selectMetaColumn)
   conn <- pool::poolCheckout(userDBCon())
   dendLabs <- labels(dendro())
   query <- DBI::dbSendStatement("SELECT *
@@ -1548,6 +1548,7 @@ levs <- reactive({
 
 #----
 output$sampleFactorMapColors <- renderUI({
+  
   column(3,
          lapply(1:length(levs()),
                 function(x){
