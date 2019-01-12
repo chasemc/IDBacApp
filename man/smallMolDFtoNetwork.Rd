@@ -7,7 +7,7 @@
 smallMolDFtoNetwork(peakList)
 }
 \arguments{
-\item{peakList}{}
+\item{peakList}{NA}
 }
 \value{
 a single trimmed and binned MALDIquant peak object

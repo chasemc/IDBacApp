@@ -11,8 +11,6 @@ createPool(fileName, filePath)
 \item{fileName}{filename of sqlite database}
 
 \item{filePath}{path of the location of sqlite database, sans filename}
-
-\item{userDBCon}{database connection (checked out pool)}
 }
 \value{
 a pool connection to the sqlite database

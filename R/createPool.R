@@ -3,13 +3,9 @@
 #' 
 #' @param fileName filename of sqlite database
 #' @param filePath path of the location of sqlite database, sans filename
-#' @param userDBCon database connection (checked out pool)
-
+#'
 #' @return a pool connection to the sqlite database
 #' @export
-
-
-
 createPool <- function(fileName,
                        filePath){
   # Filenames within directory

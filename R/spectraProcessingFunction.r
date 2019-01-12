@@ -362,48 +362,40 @@ createXMLSQL <- function(rawDataFilePath,
 }
 
 
-#' findAcquisitionInfo
-#'
-#' @param rawFilepaths NA
-#' @param manufacturer NA
-#'
-#' @return NA
-#' @export
-#'
-#' @examples NA
-findAcquisitionInfo <- function(rawFilepaths,
-                                manufacturer){
-  
-  if(!exists("sha")){
-    sha <- new.env(parent = parent.frame())
-  }
-  
-  files <-  gsub("file://", "", rawFilepaths)
-  files <- dirname(files)
-  
-  #gat Bruker flex series metadata:
-  
-  try({
-    
-    if(manufacturer == "Bruker Daltonics flex series"){
-      files <- files[which(file.exists(files))]
-      if(length(files) > 0){
-        
-        files <- list.files(files, pattern="acqus", recursive = TRUE, full.names = TRUE)
-        sha$Instrument_MetaFile  <- lapply(files, function(x)  read.delim(x, sep="\n")) # Find Acqu file
-        sha$MassError <- unlist(lapply(sha$Instrument_MetaFile , function(x) as.character(x[grep("Masserr", x[,1]),]))) #Parse the Acqu file for the mass error row
-        sha$MassError <- unlist(lapply(sha$MassError, function(x) as.numeric(strsplit(x, "##\\$Masserr= " )[[1]][[2]])))
-        sha$AcquisitionDate <- unlist(lapply(sha$Instrument_MetaFile , function(x) as.character(x[grep("##\\$AQ_DATE", x[,1]),]))) #Parse the Acqu file for the mass error row
-        sha$AcquisitionDate <- unlist(lapply(sha$AcquisitionDate, function(x) gsub('^.*<\\s*|\\s*.>.*$', '', x)))
-      }
-    } else {
-      sha$AcquisitionDate <-  base::Sys.Date() 
-      
-    }
-    
-  })
-  
-  return(sha)
-}
-
+# 
+# findAcquisitionInfo <- function(rawFilepaths,
+#                                 manufacturer){
+#   
+#   if(!exists("sha")){
+#     sha <- new.env(parent = parent.frame())
+#   }
+#   
+#   files <-  gsub("file://", "", rawFilepaths)
+#   files <- dirname(files)
+#   
+#   #gat Bruker flex series metadata:
+#   
+#   try({
+#     
+#     if(manufacturer == "Bruker Daltonics flex series"){
+#       files <- files[which(file.exists(files))]
+#       if(length(files) > 0){
+#         
+#         files <- list.files(files, pattern="acqus", recursive = TRUE, full.names = TRUE)
+#         sha$Instrument_MetaFile  <- lapply(files, function(x)  read.delim(x, sep="\n")) # Find Acqu file
+#         sha$MassError <- unlist(lapply(sha$Instrument_MetaFile , function(x) as.character(x[grep("Masserr", x[,1]),]))) #Parse the Acqu file for the mass error row
+#         sha$MassError <- unlist(lapply(sha$MassError, function(x) as.numeric(strsplit(x, "##\\$Masserr= " )[[1]][[2]])))
+#         sha$AcquisitionDate <- unlist(lapply(sha$Instrument_MetaFile , function(x) as.character(x[grep("##\\$AQ_DATE", x[,1]),]))) #Parse the Acqu file for the mass error row
+#         sha$AcquisitionDate <- unlist(lapply(sha$AcquisitionDate, function(x) gsub('^.*<\\s*|\\s*.>.*$', '', x)))
+#       }
+#     } else {
+#       sha$AcquisitionDate <-  base::Sys.Date() 
+#       
+#     }
+#     
+#   })
+#   
+#   return(sha)
+# }
+# 
 

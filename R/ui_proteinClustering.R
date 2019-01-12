@@ -1,3 +1,11 @@
+#' ui_proteinClustering
+#'
+#' @param x NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 ui_proteinClustering <- function(x) {
   
   fluidPage(

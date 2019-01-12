@@ -1,3 +1,12 @@
+#' ui_sqlUI
+#'
+#' @param id NA
+#' @param availableExperiments NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 ui_sqlUI <- function(id, availableExperiments) {
   fluidPage(
       column(width=4,
@@ -27,8 +36,8 @@ ui_sqlUI <- function(id, availableExperiments) {
              column(width = 8,
                     
                     fluidRow(
-                      bsCollapse(id = "collapseSQLInstructions", open = "Panel 1",
-                                 bsCollapsePanel(h4("Open/Close Instructions", align = "center"),
+                      shinyBS::bsCollapse(id = "collapseSQLInstructions", open = "Panel 1",
+                                          shinyBS::bsCollapsePanel(h4("Open/Close Instructions", align = "center"),
                                                  tags$b("What is an \"experiment\" in IDBac?"),
                                                  tags$ul(
                                                    tags$li("A user-defined group of samples that were analyzed by MALDI MS."),
@@ -58,8 +67,8 @@ ui_sqlUI <- function(id, availableExperiments) {
              ),
              fluidRow(
                
-                    bsCollapse(id = "modifySqlCollapse",
-                               bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
+               shinyBS::bsCollapse(id = "modifySqlCollapse",
+                                   shinyBS::bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
                                                
                                                tabsetPanel(id = "ExperimentNav", 
                                                            tabPanel("Create an experiment, pulling samples from the selected experiment",

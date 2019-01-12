@@ -1,3 +1,11 @@
+#' sqlTableArchitecture
+#'
+#' @param numberScans NA 
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame <- new.env(parent = parent.frame())

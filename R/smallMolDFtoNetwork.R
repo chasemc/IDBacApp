@@ -1,6 +1,6 @@
 #' Collapse a sample's MALDIquant peak objects into a single peak object
 #' 
-#' @param peakList 
+#' @param peakList NA
 #' @export
 #' @return a single trimmed and binned MALDIquant peak object
 

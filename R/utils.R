@@ -73,6 +73,7 @@ decompress <- function(input){
 #----
 #' createMZsha
 #'    Given a mzR 
+#'
 #' @param  peaklist matrix
 #'
 #' @return sha
@@ -108,6 +109,12 @@ createMZsha <- function(peaklist){
 
 # "From"getOS" code written by Will Lowe and copied from: http://conjugateprior.org/2015/06/identifying-the-os-from-r/
 
+#' Get OS
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 getOS <- function(){
   sysinf <- Sys.info()
   if (!is.null(sysinf)){
