@@ -6,6 +6,7 @@ os:
   - linux
   - osx
 
-  
+r: bioc-release
+
 repos:
   CRAN: https://cran.microsoft.com/snapshot/2019-01-12
