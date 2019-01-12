@@ -16,7 +16,6 @@ spectraProcessingFunction(rawDataFilePath, sampleID, userDBCon)
 }
 \value{
 the peak list modifed by binning then subtractng the matrix sample,
-or just the binned peak list if no matrix wsa provided
 }
 \description{
 Create IDBac SQLite database 

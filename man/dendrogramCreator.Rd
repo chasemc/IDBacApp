@@ -7,16 +7,16 @@
 dendrogramCreator(input, output, session, data)
 }
 \arguments{
-\item{input}{a}
+\item{input}{shiny modules default}
 
-\item{output}{a}
+\item{output}{shiny modules default}
 
-\item{session}{a}
+\item{session}{shiny modules default}
 
-\item{data}{a}
+\item{data}{matrix or dataframe, where columns are variables and rows are samples}
 }
 \value{
-a
+dendrogram
 }
 \description{
 dendrogramCreator

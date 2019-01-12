@@ -7,15 +7,7 @@
 smallMolDFtoNetwork(peakList)
 }
 \arguments{
-\item{db}{ool::() connection to the IDBac sqlite dataabse}
-
-\item{fileshas}{the shas for the individual MALDIquant peak objects}
-
-\item{proteinPercentPresence}{value between 0 and 1 (percent presence translated to 0-100%)}
-
-\item{lowerMassCutoff}{masses below this will be removed from analyses}
-
-\item{upperMassCutoff}{masses above this will be removed from analyses}
+\item{peakList}{}
 }
 \value{
 a single trimmed and binned MALDIquant peak object

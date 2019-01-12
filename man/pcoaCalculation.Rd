@@ -8,7 +8,7 @@ Given a data frame whose columns are variables and rows are samples, run Princip
 pcoaCalculation(distanceMatrix)
 }
 \arguments{
-\item{input}{data frame whose columns are variables and rows are samples}
+\item{distanceMatrix}{NA}
 }
 \value{
 a single trimmed and binned MALDIquant peak object

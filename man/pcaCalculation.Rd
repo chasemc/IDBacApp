@@ -9,7 +9,15 @@ pcaCalculation(dataMatrix, logged = TRUE, scaled = TRUE,
   centered = TRUE, missing = 1e-05)
 }
 \arguments{
-\item{input}{data frame whose columns are variables and rows are samples}
+\item{dataMatrix}{NA}
+
+\item{logged}{NA}
+
+\item{scaled}{NA}
+
+\item{centered}{NA}
+
+\item{missing}{NA}
 }
 \value{
 a single trimmed and binned MALDIquant peak object

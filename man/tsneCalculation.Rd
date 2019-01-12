@@ -8,7 +8,13 @@ Given a data frame whose columns are variables and rows are samples, run t-SNE}
 tsneCalculation(dataMatrix, perplexity, theta, iterations)
 }
 \arguments{
-\item{input}{data frame whose columns are variables and rows are samples}
+\item{dataMatrix}{NA}
+
+\item{perplexity}{NA}
+
+\item{theta}{NA}
+
+\item{iterations}{NA}
 }
 \value{
 a single trimmed and binned MALDIquant peak object

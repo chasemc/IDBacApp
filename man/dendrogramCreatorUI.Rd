@@ -7,10 +7,10 @@
 dendrogramCreatorUI(id)
 }
 \arguments{
-\item{id}{a}
+\item{id}{namespace id}
 }
 \value{
-a
+ui to choose the algorithm for creating the dendrogram
 }
 \description{
 dendrogramCreatorUI

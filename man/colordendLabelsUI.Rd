@@ -7,10 +7,10 @@
 colordendLabelsUI(id)
 }
 \arguments{
-\item{id}{a}
+\item{id}{namespace id}
 }
 \value{
-a
+ui for coloring dendrogram labels
 }
 \description{
 colordendLabelsUI

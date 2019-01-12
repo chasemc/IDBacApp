@@ -7,13 +7,13 @@
 colordendLabels(input, output, session, dendrogram)
 }
 \arguments{
-\item{input}{a}
+\item{input}{shiny modules default}
 
-\item{output}{a}
+\item{output}{shiny modules default}
 
-\item{session}{a}
+\item{session}{shiny modules default}
 
-\item{dendrogram}{a}
+\item{dendrogram}{dendrogram whose labels are to be modified}
 }
 \value{
 a

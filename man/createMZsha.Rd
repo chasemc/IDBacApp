@@ -8,7 +8,10 @@
 createMZsha(peaklist)
 }
 \arguments{
-\item{peaklist}{}
+\item{peaklist}{matrix}
+}
+\value{
+sha
 }
 \description{
 createMZsha

@@ -7,11 +7,9 @@
 insertMetadataColumns(pool, columnNames)
 }
 \arguments{
+\item{pool}{pool}
+
 \item{columnNames}{character vector of column names to be added}
-
-\item{databaseName}{}
-
-\item{databasePath}{}
 }
 \value{
 a single trimmed and binned MALDIquant peak object
