@@ -140,40 +140,34 @@ multipleMaldiPlates <- function(id){
 
 beginWithMZ <- function(id){
   fluidRow(
-    column(12, align = "center",
-           h3("Starting with mzML or mzXML Data:"),
+     column(width=10, offset =2,     wellPanel(class= "intro_WellPanel", align= "center",
+            h3("Starting with mzML or mzXML Data:"),
            
-           column(2),
-           column(8, style = "background-color:#7777770d", align = "center",
-                  
-                  br(),
-                  column(12,align = "center",
+
                          p(strong("1: Enter a filename for this new experiment")),
                          p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
                          textInput("newExperimentName",
                                    label = ""),
-                         tags$hr(size=20)),
+                         tags$hr(size=20),
                   
                   br(),
                   p(strong("2: Click to select the location of your mzML files"), align= "center"),
-                  column(12, align="center",
                          actionButton("mzmlRawFileDirectory",
                                       label = "Raw Data Folder"),
                          verbatimTextOutput("mzmlRawFileDirectory",
                                             placeholder = TRUE),
-                         tags$hr(size = 20)),
+                         tags$hr(size = 20),
                   br(),
                   p("Samples will be named according to the file name of the provided files"),
                   br(),
-                  column(12, align = "center",
                          p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
                          actionButton("run",
                                       label = "Process Data"),
-                         tags$hr(size = 20))
+                         tags$hr(size = 20)
                   
            )
-    )
-  )
+    ))
+  
 }
 
 beginWithTXT <- function(id){

@@ -1,23 +1,31 @@
 @import url("//fonts.googleapis.com/css?family=Lobster|Cabin:400,700");
 
 h1 {
-  font-family: 'Lobster', cursive;
+  font-family: 'Charcoal';
+  font-size: 30pt;
   font-weight: 500;
   line-height: 1.1;
-  color: #ad1d28;
+  color: black;
+  
 }
 .introPage {
   background-image: url("big_bacPlate.jpg");
-  background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover ;
+  
+  
 }
 
 
 
 .navbar-static-top {
-    font-family: 'Lobster', cursive;
+    font-family: 'Arial', cursive;
     background-color: #e7e7e7;
+    font-weight: 800;
 
+}
+
+.intro_WellPanel{
+  margin:50px;
 }
