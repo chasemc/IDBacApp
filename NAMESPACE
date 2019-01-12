@@ -1,2 +1,5 @@
 exportPattern("^[[:alpha:]]+")
 import("shiny")
+importFrom(magrittr,"%>%")
+import("graphics")
+import("dendextend")
