@@ -5,3 +5,12 @@ cache: packages
 os:
   - linux
   - osx
+install:
+  ## For installing all CRAN dependencies using rpack's DESCRIPTION
+  - ./travis-tool.sh install_deps
+  
+  ## For installing all Bioconductor dependencies using rpack's DESCRIPTION
+  - ./travis-tool.sh install_bioc_deps
+  
+  repos:
+  CRAN: https://cran.microsoft.com/snapshot/2019-01-12
