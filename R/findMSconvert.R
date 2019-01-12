@@ -1,8 +1,11 @@
 #' @title Find msconvert.exe
 #' @export
-#' @rdname findMSconvert
+#' @rdname findMSconvert NA
+#'
 #' @param proteoWizardLocation optional filepath of msconvert.exe to be checked for validity
+#'
 #' @return filepath of the folder containing msconvert.exe
+#' @export
 
 findMSconvert <- function(proteoWizardLocation = character()){
   

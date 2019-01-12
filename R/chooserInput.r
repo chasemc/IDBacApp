@@ -1,7 +1,21 @@
-# From: https://github.com/rstudio/shiny-examples/blob/master/036-custom-input-control/chooser.R
 
+#' chooserInput
+#'
+#' @param inputId  NA
+#' @param leftLabel  NA
+#' @param rightLabel  NA
+#' @param leftChoices  NA
+#' @param rightChoices  NA
+#' @param size  NA
+#' @param multiple NA 
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 chooserInput <- function(inputId, leftLabel, rightLabel, leftChoices, rightChoices,
                          size = 5, multiple = FALSE) {
+# From: https://github.com/rstudio/shiny-examples/blob/master/036-custom-input-control/chooser.R
 
   leftChoices <- lapply(leftChoices, tags$option)
   rightChoices <- lapply(rightChoices, tags$option)

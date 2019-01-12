@@ -1,8 +1,14 @@
 #' Principle Components Analysis 
 #' Given a data frame whose columns are variables and rows are samples, run Principle Components Analysis (PCA)
 #' 
-#' @param input data frame whose columns are variables and rows are samples
+#' @param dataMatrix NA
+#' @param logged  NA
+#' @param scaled  NA
+#' @param centered  NA
+#' @param missing  NA
+#'
 #' @return a single trimmed and binned MALDIquant peak object
+#' @export
 
 
 
@@ -45,9 +51,13 @@ pcaCalculation <- function(dataMatrix,
 #' t-SNE Analysis 
 #' Given a data frame whose columns are variables and rows are samples, run t-SNE
 #' 
-#' @param input data frame whose columns are variables and rows are samples
+#' @param dataMatrix NA
+#' @param perplexity NA
+#' @param theta NA
+#' @param iterations NA
+#'
 #' @return a single trimmed and binned MALDIquant peak object
-
+#' @export
 
 
 tsneCalculation <- function(dataMatrix,
@@ -82,8 +92,10 @@ tsneCalculation <- function(dataMatrix,
 #' Principle Coordinates Analysis 
 #' Given a data frame whose columns are variables and rows are samples, run Principle Coordinates Analysis (PCoA)
 #' 
-#' @param input data frame whose columns are variables and rows are samples
+#' @param distanceMatrix NA
+#'
 #' @return a single trimmed and binned MALDIquant peak object
+#' @export
 
 
 

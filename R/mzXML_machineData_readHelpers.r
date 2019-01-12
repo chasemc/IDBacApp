@@ -10,6 +10,14 @@
 
 
 
+#' findRawSHAandFile
+#'
+#' @param singlemzMLpath NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 findRawSHAandFile <- function(singlemzMLpath){
   if(!exists("sha")){
     sha <- list()
@@ -48,6 +56,15 @@ findRawSHAandFile <- function(singlemzMLpath){
 }
 
 
+#' findAcquisitionInfo
+#'
+#' @param rawFilepaths NA
+#' @param manufacturer NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 findAcquisitionInfo <- function(rawFilepaths,
                                 manufacturer){
 

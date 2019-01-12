@@ -1,4 +1,16 @@
 
+#' Convert to mzML
+#'
+#' @param mzmlRawFileDirectory NA
+#' @param mzmlRawFilesLocation NA 
+#' @param msconvertLocation  NA
+#' @param outDir  NA
+#' @param spectraConversion  NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 convertToMzml <- function(mzmlRawFileDirectory,
                           mzmlRawFilesLocation,
                           msconvertLocation,

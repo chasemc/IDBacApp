@@ -1,4 +1,14 @@
 
+#' parseDelimitedMS
+#'
+#' @param proteinDirectory NA
+#' @param smallMolDirectory NA
+#' @param exportDirectory NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 parseDelimitedMS <- function(proteinDirectory = NULL,
                              smallMolDirectory = NULL,
                              exportDirectory){

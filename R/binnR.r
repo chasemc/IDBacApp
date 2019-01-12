@@ -1,5 +1,16 @@
-# require("IRanges")
 
+
+#' binnR
+#'
+#' @param vectorList  NA
+#' @param ppm  NA
+#' @param refSeqStart  NA
+#' @param refSeqEnd  NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 binnR <- function(vectorList,
                   ppm, 
                   refSeqStart,

@@ -1,10 +1,18 @@
 
 
-# Functions below from: https://github.com/sgibb/readBrukerFlexData
+# Functions taken from MALDIquant source code : https://github.com/sgibb/readBrukerFlexData
 # function that should be called is readAcquFile
 # input is fid file path
 
 
+#' readAcquFile
+#'
+#' @param fidFile NA
+#' @param verbose NA
+#'
+#' @return NA
+#'
+#' @examples NA
 readAcquFile <- function(fidFile, verbose=FALSE) {
   acquFile <- sub(pattern="fid$", x=fidFile, replacement="acqu")
 
@@ -218,6 +226,14 @@ readAcquFile <- function(fidFile, verbose=FALSE) {
 
 
 
+#' .grepAcquValue
+#'
+#' @param patternStr NA
+#' @param srcStr NA
+#'
+#' @return NA
+#'
+#' @examples NA
 .grepAcquValue <- function(patternStr, srcStr) {
   tmpLine <- grep(pattern=patternStr, x=srcStr, value=TRUE)
   gsub(pattern="(^.*= *<?)|(>? *$)", replacement="", x=tmpLine)
@@ -225,6 +241,14 @@ readAcquFile <- function(fidFile, verbose=FALSE) {
 
 
 
+#' .grepAcquDoubleValue
+#'
+#' @param patternStr NA
+#' @param srcStr NA
+#'
+#' @return NA
+#'
+#' @examples NA
 .grepAcquDoubleValue <- function(patternStr, srcStr) {
   strValue <- .grepAcquValue(patternStr, srcStr)
 
@@ -234,6 +258,13 @@ readAcquFile <- function(fidFile, verbose=FALSE) {
 
 
 
+#' .sampleName
+#'
+#' @param fidFile NA
+#'
+#' @return NA
+#'
+#' @examples NA
 .sampleName <- function(fidFile) {
   # regular expression for directory separator (on unix: /+, on windows \+)
   # sadly .Platform$file.sep == "/" on both

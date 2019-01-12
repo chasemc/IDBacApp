@@ -1,3 +1,13 @@
+#' networkViaBrushedDendrogram
+#'
+#' @param dendrogram NA
+#' @param brushYmin NA
+#' @param brushYmax NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 networkViaBrushedDendrogram <- function(dendrogram,
                                         brushYmin,
                                         brushYmax){

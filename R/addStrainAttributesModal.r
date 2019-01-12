@@ -1,6 +1,15 @@
 
 
-# Module UI function
+
+#' sampMetaOutput
+#'
+#' @param id NA
+#' @param label NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 sampMetaOutput <- function(id, label = "Sample Metadata Input") {
   # Create a namespace function using the provided id
   ns <- NS(id)
@@ -12,6 +21,17 @@ sampMetaOutput <- function(id, label = "Sample Metadata Input") {
 
 
 
+#' sampMeta
+#'
+#' @param input NA
+#' @param output NA
+#' @param session NA
+#' @param databaseConnection NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 sampMeta <- function(input, output, session, databaseConnection) {
 
 

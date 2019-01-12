@@ -1,13 +1,10 @@
 #' Insert columns into IDBac SQLite metadata table
 #' 
-#' 
-#' @param databaseName 
-#' @param databasePath 
+#' @param pool pool
 #' @param columnNames character vector of column names to be added 
+#'
 #' @return a single trimmed and binned MALDIquant peak object
-
-
-
+#' @export
 insertMetadataColumns <- function(pool,
                                   columnNames){
   conn <- pool::poolCheckout(pool)

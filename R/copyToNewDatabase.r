@@ -1,3 +1,13 @@
+#' Copy from one database to another, selecting by Sample ID
+#'
+#' @param existingDBPool NA 
+#' @param newdbPath  NA
+#' @param sampleIDs  NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 copyToNewDatabase <- function(existingDBPool,
                               newdbPath, 
                               sampleIDs){

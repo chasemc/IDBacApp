@@ -1,13 +1,13 @@
 #' dendAndDotsUI
 #'
-#' @param id
+#' @param id NA
 #'
-#' @return
+#' @return NA
 #' @export
 
 dendAndDotsUI <- function(id) {
   ns <- NS(id)
-
+  
   absolutePanel(
     bottom = "50%",
     right = "50%",
@@ -16,10 +16,10 @@ dendAndDotsUI <- function(id) {
     draggable = TRUE,
     style="z-index:1002;",
     wellPanel(
-     
       
       
-
+      
+      
     )
   )
 }
@@ -33,28 +33,28 @@ dendAndDotsUI <- function(id) {
 #' @param session default shiny
 #' @param dendrogram dendrogram input (eg stats::as.dendrogram)
 #'
-#' @return
+#' @return NA
 
 
 dendAndDots <- function(input,
-                            output,
-                            session,
-                            dendrogram){
-
+                        output,
+                        session,
+                        dendrogram){
+  
   dendrogram <- dendVis::changeDendPartColor(dendrogram = dendrogram,
                                              colorBy = input$colorBy,
                                              colorBlindPalette = colorBlindPalette(),
                                              cutHeight = input$cutHeight,
                                              chosenK = input$chosenK,
                                              part = "labels")
-
+  
   dendrogram <- dendVis::changeDendPartSize(dendrogram = dendrogram,
                                             dendPartSize = input$dendLabelSize,
                                             part = "labels")
-
-
+  
+  
   return(dendrogram)
-
+  
 }
 
 

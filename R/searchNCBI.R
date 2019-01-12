@@ -1,3 +1,9 @@
+#' searchNCBI
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 searchNCBI <- function(){
   
   aqw <-  rhandsontable::hot_to_r(input$metaTable)

@@ -1,5 +1,13 @@
 
 
+#' colordendLinesServercolordendLinesUI
+#'
+#' @param id NA
+#'
+#' @return NA
+#' @export 
+#'
+#' @examples NA
 colordendLinesServercolordendLinesUI <- function(id) {
   ns <- NS(id)
   
@@ -62,6 +70,18 @@ colordendLinesServercolordendLinesUI <- function(id) {
 
 
 
+#' colordendLinesServer
+#'
+#' @param input NA
+#' @param output  NA
+#' @param session  NA
+#' @param dendrogram  NA
+#' @param plotHeight  NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 colordendLinesServer <- function(input,
                                  output,
                                  session,
@@ -83,104 +103,20 @@ colordendLinesServer <- function(input,
 
 
 
-# 
-# 
-#   output$hclustPlot <- renderPlot({
-#     
-#     par(mar = c(5, 5, 5, dendparmar))
-#     
-#     if (input$colorBy == "groups"){
-#       
-#       coloredDend() %>%
-#         hang.dendrogram %>% 
-#         plot(horiz = TRUE, lwd = 8)
-#       
-#     } else if (input$colorBy == "height"){
-#       
-#       coloredDend()  %>%  
-#         hang.dendrogram %>% 
-#         plot(horiz = TRUE, lwd = 8)
-#       
-#       abline(v = input$cutHeight, lty = 2)
-#       
-#     } else if (input$colorBy == "metadata"){
-#       
-#       if(is.null(input$sampleMap$datapath)){
-#         # No sample mapping selected
-#         dendro()$dend %>%
-#           hang.dendrogram %>% 
-#           plot(horiz = TRUE, lwd = 8)
-#       }
-#     }
-#     
-#     
-#   }, height = plotHeight)
-#   
-#   
-#   
-#   
-#   
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# dendextend::set.... branches_col - set the color of branches (using assign_values_to_branches_edgePar)
-# dendextend::set.... branches_lwd - set the line width of branches (using assign_values_to_branches_edgePar)
-
-
+#' changeDendLinesColor
+#'
+#' @param dendrogram NA
+#' @param colorBy  NA
+#' @param colorBlindPalette  NA
+#' @param cutHeight  NA
+#' @param chosenK  NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 changeDendLinesColor <- function(dendrogram,
                                  colorBy,
                                  colorBlindPalette,
@@ -229,6 +165,15 @@ changeDendLinesColor <- function(dendrogram,
 
 
 
+#' changeDendLinesWidth
+#'
+#' @param dendrogram NA
+#' @param width NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 changeDendLinesWidth <- function(dendrogram,
                                  width){
   

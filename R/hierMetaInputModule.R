@@ -1,5 +1,18 @@
 
 
+#' Run Dend and dots
+#'
+#' @param rawDendrogram NA
+#' @param trimdLabsDend NA 
+#' @param pool  NA
+#' @param columnID NA 
+#' @param colors  NA
+#' @param text_shift NA 
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, text_shift) {
   
   conn <- pool::poolCheckout(pool)

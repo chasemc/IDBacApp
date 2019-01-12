@@ -1,15 +1,30 @@
-
-
-
-
-
+#' colored_dots
+#' I submitted this and it was pulled into dendextend but is left here for less dependency/more control
+#' @param colors NA
+#' @param dend NA
+#' @param rowLabels NA
+#' @param cex.rowLabels NA
+#' @param add NA
+#' @param y_scale NA
+#' @param y_shift  NA
+#' @param text_shift  NA
+#' @param sort_by_labels_order  NA
+#' @param horiz  NA
+#' @param alf  NA
+#' @param circ  NA
+#' @param ...  NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
-                  add = TRUE, y_scale, y_shift, text_shift = 1, sort_by_labels_order = TRUE,
-                  horiz = FALSE, alf=1,circ=FALSE,...)
+                        add = TRUE, y_scale, y_shift, text_shift = 1, sort_by_labels_order = TRUE,
+                        horiz = FALSE, alf=1,circ=FALSE,...)
 {
-
+  
   # Same as colored_bars.R, except with circle representation for each point
-
+  
   zero_range <- function (x, tol = .Machine$double.eps * 100)
   {
     if (length(x) == 1)
@@ -27,24 +42,24 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
       return(FALSE)
     abs((x[1] - x[2])/m) < tol
   }
-
+  
   rescale <- function (x, to = c(0, 1), from = range(x, na.rm = TRUE))
   {
     if (zero_range(from) || zero_range(to))
       return(rep(mean(to), length(x)))
     (x - from[1])/diff(from) * diff(to) + to[1]
   }
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
   #    if(T) 2 else 1
   #    if(F) 2 else 1
-
-
-
+  
+  
+  
   # This function is require in order to know the height of the rotated labels in the dendrogram!
   # Thanks to Prof. Brian Ripley
   # # http://r.789695.n4.nabble.com/strwidth-and-strheight-for-rotated-text-td839105.html
@@ -66,8 +81,8 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
     a <- V_rotated_str_dim(s)
     max(a["yh",])
   }
-
-
+  
+  
   n_colors <- if (is.null(dim(colors)))
     length(colors)
   else nrow(colors)
@@ -136,18 +151,18 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
       yb <- yb * y_scale + y_shift
       yt <- yt * y_scale + y_shift
     }
-
-
+    
+    
     if (horiz) {
       #rect(-yb, xl, -yt, xr, col = as.character(C[, j]),
       #     border = as.character(C[, j]))
-
-
-
-    #C<-as_tibble(C)
-   points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]))
-
-
+      
+      
+      
+      #C<-as_tibble(C)
+      points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]))
+      
+      
       par(srt = 90)
       if (is.null(rowLabels)) {
         s <- as.character(j)
@@ -162,25 +177,25 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
                                                              (j) * y_scale + y_shift), cex = cex.rowLabels)
       }
     }
-
-
-
-
-
+    
+    
+    
+    
+    
     else if (circ) {
       #rect(-yb, xl, -yt, xr, col = as.character(C[, j]),
       #     border = as.character(C[, j]))
-
-
+      
+      
       yb <<-yb/max(yb)
       yt  <<-yt/max(yt)
       xl  <<-xl/max(xl)
       xr <<-xr/max(xr)
-
+      
       #C<-as_tibble(C)
       points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]))
-
-
+      
+      
       par(srt = 90)
       if (is.null(rowLabels)) {
         s <- as.character(j)
@@ -195,33 +210,33 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
                                                              (j) * y_scale + y_shift), cex = cex.rowLabels)
       }
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     else {
       #rect(xl, yb, xr, yt, col = as.character(C[, j]),
       #    border = as.character(C[, j]))
-
-
-
-        points((xl+xr)/2,(yb+yt)/2,pch=19,col = as.character(C[, j]))
-
-
-
+      
+      
+      
+      points((xl+xr)/2,(yb+yt)/2,pch=19,col = as.character(C[, j]))
+      
+      
+      
       if (is.null(rowLabels)) {
         text(as.character(j), pos = 2, x = charWidth *
                text_shift, y = ystep * (j - 0.5) * y_scale +

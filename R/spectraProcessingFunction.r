@@ -5,18 +5,13 @@
 #' @param rawDataFilePath filepath of the data
 #' @param sampleID the sample ID to be read and added to the database
 #' @param userDBCon database connection (checked out pool)
-
+#'
 #' @return the peak list modifed by binning then subtractng the matrix sample,
-#' or just the binned peak list if no matrix wsa provided
-
-
-# -----------------
+#' @export
 spectraProcessingFunction <- function(rawDataFilePath,
                                       sampleID,
                                       userDBCon){
-  aa1<<-rawDataFilePath
-  aa2<<-sampleID
-  aa3<<-userDBCon
+ 
   
   
   #Doesn't do anything currently, but put here to help future-proof
@@ -61,6 +56,19 @@ spectraProcessingFunction <- function(rawDataFilePath,
 }
 
 
+#' createSpectraSQL
+#'
+#' @param mzML_con NA
+#' @param scanNumber NA
+#' @param userDBCon NA
+#' @param sampleID NA
+#' @param XMLinfo NA
+#' @param rawDataFilePath NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 createSpectraSQL <- function(mzML_con, 
                              scanNumber,
                              userDBCon,
@@ -213,6 +221,15 @@ createSpectraSQL <- function(mzML_con,
 
 
 
+#' createMetaSQL
+#'
+#' @param sampleID NA
+#' @param userDBCon NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 createMetaSQL <- function(sampleID,
                           userDBCon){
   
@@ -263,6 +280,17 @@ createMetaSQL <- function(sampleID,
 }
 
 
+#' createXMLSQL
+#'
+#' @param rawDataFilePath NA
+#' @param sampleID NA
+#' @param userDBCon NA
+#' @param mzML_con NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 createXMLSQL <- function(rawDataFilePath,
                          sampleID,
                          userDBCon,
@@ -334,6 +362,15 @@ createXMLSQL <- function(rawDataFilePath,
 }
 
 
+#' findAcquisitionInfo
+#'
+#' @param rawFilepaths NA
+#' @param manufacturer NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 findAcquisitionInfo <- function(rawFilepaths,
                                 manufacturer){
   

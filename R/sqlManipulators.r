@@ -1,19 +1,14 @@
 
 
-#library(dplyr)
-
-
-#a <- "C:/Users/CMC/Desktop/hi2.sqlite"
-
-
-# where rds was before
-
-
-
-
-#---------------------------
-#---------------------------
-
+#' getSmallMolPeakData
+#'
+#' @param db NA
+#' @param fileshas NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 getSmallMolPeakData <-   function(db, fileshas){
 
   sqlQ <- glue::glue_sql("
@@ -43,6 +38,18 @@ getSmallMolPeakData <-   function(db, fileshas){
 }
 
 
+#' collapseSmallMolReplicates
+#'
+#' @param db NA
+#' @param fileshas NA
+#' @param smallMolPercentPresence NA
+#' @param lowerMassCutoff NA
+#' @param upperMassCutoff NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 collapseSmallMolReplicates <- function(db,
                                        fileshas,
                                        smallMolPercentPresence,
@@ -68,6 +75,15 @@ collapseSmallMolReplicates <- function(db,
 
 
 
+#' getAllStrain_IDsfromSQL
+#'
+#' @param databaseConnection NA
+#' @param table NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 getAllStrain_IDsfromSQL <- function(databaseConnection, table){
 # Gets unique Strain_IDs given a RSQLite database connecction and table name
 

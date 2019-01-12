@@ -1,12 +1,12 @@
 #' Create a pool connecton, given file names and a path
 #' If there is no existing database by that name, create one.
 #' 
-#'  
 #' @param fileName filename of sqlite database
 #' @param filePath path of the location of sqlite database, sans filename
 #' @param userDBCon database connection (checked out pool)
 
 #' @return a pool connection to the sqlite database
+#' @export
 
 
 
