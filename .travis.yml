@@ -5,9 +5,7 @@ cache: packages
 os:
   - linux
   - osx
-install:
-  - ./travis-tool.sh install_deps
-  - ./travis-tool.sh install_bioc_deps
+
   
 repos:
   CRAN: https://cran.microsoft.com/snapshot/2019-01-12
