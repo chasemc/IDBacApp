@@ -137,7 +137,7 @@ changeDendLinesColor <- function(dendrogram,
       
     } else if(colorBy == "height") {
       
-      dendrogram <- color_branches(dend = dendrogram, 
+      dendrogram <- IDBacApp::color_branches(dend = dendrogram, 
                                    h = cutHeight,
                                    col = as.vector(colorBlindPalette[1:length(unique(cutree(dendrogram, h = cutHeight)))])
                                    
@@ -145,7 +145,7 @@ changeDendLinesColor <- function(dendrogram,
       
     } else if(colorBy == "groups") {
       
-      dendrogram <- color_branches(dend = dendrogram,
+      dendrogram <- dendexted::color_branches(dend = dendrogram,
                                    k = chosenK, 
                                    col = as.vector(colorBlindPalette[1:length(unique(cutree(dendrogram, k = chosenK)))])
                                    

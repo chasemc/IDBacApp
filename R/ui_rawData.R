@@ -1,3 +1,11 @@
+#' oneMaldiPlate
+#'
+#' @param id NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 oneMaldiPlate <- function(id){
   fluidRow(
     column(12,
@@ -70,6 +78,14 @@ oneMaldiPlate <- function(id){
 }
 
 
+#' multipleMaldiPlates
+#'
+#' @param id NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 multipleMaldiPlates <- function(id){
   
   
@@ -138,6 +154,14 @@ multipleMaldiPlates <- function(id){
 }
 
 
+#' beginWithMZ
+#'
+#' @param id NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 beginWithMZ <- function(id){
   fluidRow(
      column(width=10, offset =2,     wellPanel(class= "intro_WellPanel", align= "center",
@@ -170,6 +194,14 @@ beginWithMZ <- function(id){
   
 }
 
+#' beginWithTXT
+#'
+#' @param id NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 beginWithTXT <- function(id){
   fluidRow(
     p(".txt and .csv support coming soon!"),
@@ -188,6 +220,14 @@ beginWithTXT <- function(id){
 
 
 
+#' conversionsUI
+#'
+#' @param id NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
 conversionsUI <- function(id){
   
   fluidPage(

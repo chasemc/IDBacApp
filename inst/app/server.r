@@ -1629,13 +1629,13 @@ output$downloadHeirSVG <- downloadHandler(
     if (input$kORheight == "1"){
       
       dendro() %>% 
-        color_branches(k = input$kClusters) %>% 
+        dendexted::color_branches(k = input$kClusters) %>% 
         plot(horiz = TRUE, lwd = 8)
 
     } else if (input$kORheight == "2"){
 
       dendro() %>% 
-        color_branches(h = input$cutHeight) %>%
+        dendexted::color_branches(h = input$cutHeight) %>%
         plot(horiz = TRUE, lwd = 8)
       abline(v = input$cutHeight,
              lty = 2)
