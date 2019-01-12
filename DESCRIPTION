@@ -8,6 +8,7 @@ Description: This app allows users to take raw dat MALDI-TOF MS files (Tested on
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+biocViews:
 Imports: 
     Rcpp,
     MALDIquant,
@@ -35,7 +36,6 @@ Imports:
     svglite,
     IRanges,
     coop,
-    dendVis,
     digest,
     glue,
     taxize,
