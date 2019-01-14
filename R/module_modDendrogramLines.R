@@ -9,62 +9,15 @@
 
 colordendLinesUI <- function(id) {
   ns <- shiny::NS(id)
-
-  shiny::absolutePanel(
-    bottom = "50%",
-    right =  "0%",
-    width = "20%",
-    fixed = TRUE,
-    draggable = TRUE,
-    style = "z-index:1002;",
-
-
-    shiny::wellPanel(
-      shiny::h4("Adjust Dendrogram Lines"),
-      shiny::selectInput(ns("colorBy"),
-                         "Color By:",
-                         c("None" = "none",
-                           "Choose Number of Groups" = "groups",
-                           "Color by cutting at height" = "height",
-                           "Color by sample info" = "metadata"
-                         ),
-                         selected = "groups"
-      ),
-      shiny::conditionalPanel(
-        condition = "input.colorBy == 'height'", ns = ns,
-        shiny::numericInput(ns("cutHeight"),
-                            label = shiny::h5(shiny::strong("Cut Tree at Height")),
-                            value = 0,
-                            step = 0.1,
-                            min = 0)
-
-
-      ),
-      shiny::conditionalPanel(
-        condition = "input.colorBy == 'groups'", ns = ns,
-        shiny::numericInput(ns("chosenK"),
-                            label = shiny::h5(shiny::strong("Choose the number of groups")),
-                            value = 1,
-                            step = 1,
-                            min = 1)
-      ),
-
-      shiny::numericInput(ns("dendLineWidth"),
-                          "Line Width",
-                          value = 1,
-                          min = 1,
-                          max = 10,
-                          step = 1
-      ),
-
-      shiny::actionButton("closeLineModification",
-                          "Close")
-
-    )
-  )
+  uiOutput(ns("colordendLinesPaneller"))
+  
 }
 
-
+colordendLinesActionButtonUI <- function(id) {
+  ns <- shiny::NS(id)
+  actionButton(ns("colorLines"), "Click to color lines")
+  
+}
 
 
 #' colordendLines
@@ -84,20 +37,99 @@ colordendLines <- function(input,
                            session,
                            dendrogram,
                            plotHeight=500){
+  
+  
+  
+  
+  
+  observeEvent(input$closeLineModification, {
+    output$colordendLinesPaneller <- renderUI({
+      # Intentionally Blank
+    })
+  })  
+  
+  
+  
+  observeEvent(input$colorLines, {
+  
+  print("lop")
+  ns <- session$ns
 
+  output$colordendLinesPaneller <- renderUI(
+    shiny::absolutePanel(
+      bottom = "50%",
+      right =  "0%",
+      width = "20%",
+      fixed = TRUE,
+      draggable = TRUE,
+      style = "z-index:1002;",
+      shiny::wellPanel(
+        shiny::h4("Adjust Dendrogram Lines"),
+        shiny::selectInput(ns("colorBy"),
+                           "Color By:",
+                           c("None" = "none",
+                             "Choose Number of Groups" = "groups",
+                             "Color by cutting at height" = "height",
+                             "Color by sample info" = "metadata"
+                           ),
+                           selected = "groups"
+        ),
+        shiny::conditionalPanel(
+          condition = "input.colorBy == 'height'", ns = ns,
+          shiny::numericInput(ns("cutHeight"),
+                              label = shiny::h5(shiny::strong("Cut Tree at Height")),
+                              value = 0,
+                              step = 0.1,
+                              min = 0)
+          
+          
+        ),
+        shiny::conditionalPanel(
+          condition = "input.colorBy == 'groups'", ns = ns,
+          shiny::numericInput(ns("chosenK"),
+                              label = shiny::h5(shiny::strong("Choose the number of groups")),
+                              value = 1,
+                              step = 1,
+                              min = 1)
+        ),
+        
+        shiny::numericInput(ns("dendLineWidth"),
+                            "Line Width",
+                            value = 1,
+                            min = 1,
+                            max = 10,
+                            step = 1
+        ),
+        
+        shiny::actionButton(ns("closeLineModification"),
+                            "Close")
+        
+      )
+    )
+    
+  )
+  
+
+  })
+  
+  
+  
+  
+  
+  
   dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram,
-                                          colorBy = input$colorBy,
-                                          colorBlindPalette = colorBlindPalette(),
-                                          cutHeight = input$cutHeight,
-                                          chosenK = input$chosenK,
-                                          part = "branches")
-
+                                              colorBy = input$colorBy,
+                                              colorBlindPalette = colorBlindPalette(),
+                                              cutHeight = input$cutHeight,
+                                              chosenK = input$chosenK,
+                                              part = "branches")
+  
   dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram,
-                                   dendPartSize = input$dendLineWidth,
-                                   part = "branches")
-
+                                             dendPartSize = input$dendLineWidth,
+                                             part = "branches")
+  
   return(dendrogram)
-
+  
 }
 
 

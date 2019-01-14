@@ -38,12 +38,19 @@ ui_proteinClustering <- function(x) {
                    numericInput("dendparmar",
                                        label = h5(strong("Adjust right margin of dendrogram")),
                                        value = 20),
-                   actionButton("colorLines", "Click to color lines"),
+
+                   IDBacApp::colordendLinesUI("colordendLinesProtein"),
+                   IDBacApp::colordendLinesActionButtonUI("colordendLinesProtein"),
+                   
                    actionButton("colorLabels", "Click to color labels"),
                    actionButton("protDendDots", "Click to add Dots"),
                    uiOutput("protLineMod"),
                    uiOutput("protLabelMod"),
-                   uiOutput("proteoDendDots"),
+                   IDBacApp::dendDotsUI1("sdvdwv"),
+                   
+
+                   
+                   uiOutput("proteoDendDots2"),
                    uiOutput("sampleFactorMapColors")
                    
                    
@@ -55,7 +62,7 @@ ui_proteinClustering <- function(x) {
       
       
       mainPanel(
-        plotOutput("hclustPlot")
+        IDBacApp::dendDotsUI2("sdvdwv")
       )
     )
   )

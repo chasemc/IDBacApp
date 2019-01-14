@@ -55,7 +55,7 @@ colordendLabelsUI <- function(id) {
                           step = .1
       ),
 
-      shiny::actionButton("closeLabelsModification",
+      shiny::actionButton(ns("closeLabelsModification"),
                    "Close")
 
     )

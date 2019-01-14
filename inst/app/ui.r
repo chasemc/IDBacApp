@@ -15,24 +15,14 @@ navbarPage(collapsible = T,
            id = "mainIDBacNav",
            tabPanel(
              "Introduction",
-             div(class="introPage"      ,   
-                 
+             div(class="introPage",
                  includeCSS("www/styles.css"),
-                 
-                 
-                 
                  shinyjs::useShinyjs(),
                  fluidRow(
                    column(width=8,offset=2,
                           wellPanel(class="intro_WellPanel",
-                                    # tags$style("IDBac_Computer_SVG_300DPI {
-                                    #    margin-left:-80px;
-                                    #    margin-right:-30px;
-                                    #    margin-top:-15px;
-                                    #  }"),
-                                    # div(class="IDBac_Computer_SVG_300DPI",img(src="IDBac_Computer_SVG_300DPI.png",
-                                    #                                           height="10%", 
-                                    #                                           width="10%")),
+                                    
+                                    
                                     h1("Welcome to IDBac",
                                        align = "center"),
                                     

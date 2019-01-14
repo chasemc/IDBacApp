@@ -1,5 +1,5 @@
 
-dendDotsUI <- function(id) {
+dendDotsUI1 <- function(id) {
   ns <- shiny::NS(id)
   
   shiny::absolutePanel(
@@ -13,17 +13,28 @@ dendDotsUI <- function(id) {
     shiny::wellPanel(
       uiOutput(ns("proteDendDots")),
       uiOutput(ns("sampleFactorMapColors")),
-
-      p("hello")
+      shiny::actionButton("closeLineModification",
+                          "Close")
+      
     ))
 }
+
+
+
+
+dendDotsUI2 <- function(id) {
+  ns <- NS(id)
+  uiOutput(ns("hclustPlotter"))
+}
+
 
 dendDotsServer <- function(input,
                            output,
                            session,
                            dendrogram,
                            dendTrimmedLabels,
-                           pool){
+                           pool,
+                           plotWidth){
   
   
   
@@ -42,13 +53,13 @@ dendDotsServer <- function(input,
                                  label = levs()[[x]],
                                  value = "blue",
                                  allowTransparent = T))})
-                  
+           
     )
   })
-
+  
   
   levs <- reactive({
-        req(input$selectMetaColumn)
+    req(input$selectMetaColumn)
     conn <- pool::poolCheckout(pool)
     dendLabs <- labels(dendrogram)
     query <- DBI::dbSendStatement("SELECT *
@@ -74,8 +85,8 @@ dendDotsServer <- function(input,
     
     selectInput(ns("selectMetaColumn"),
                 "Select Category",
-                as.vector(a)
-    )
+                as.vector(a))
+    
   })
   
   
@@ -90,37 +101,43 @@ dendDotsServer <- function(input,
     
   })
   
- 
-  
-  observe({
-    qww<<-colorsChosen()
-req(!is.null(colorsChosen()[[1]]))
-      dendTrimmedLabels <- shiny::callModule(IDBacApp::colordendLines,
-                           "proteinDendLines",
-                           dendrogram = dendrogram)
-    dendTrimmedLabels <- shiny::callModule(IDBacApp::colordendLabels,
-                           "proteinDendLabels",
-                           dendrogram = dendTrimmedLabels)
+  observe({    req(!is.null(colorsChosen()[[1]]))
+    ns <- session$ns
     
-    labs <- base::strtrim(labels(dendTrimmedLabels),10)
-    
-    labels(dendTrimmedLabels) <- labs
+    output$hclustPlotter <- renderUI(   plotOutput(ns("hclustPlot"))   )
     
     
     
-    
-    
-    par(mar = c(5, 5, 5, 20))
-    plot(dendTrimmedLabels, horiz = TRUE)
-    
-    IDBacApp::runDendDots(rawDendrogram = dendrogram,
-                          trimdLabsDend = dendTrimmedLabels,
-                          pool = pool, 
-                          columnID = input$selectMetaColumn,
-                          colors = colorsChosen(),
-                          text_shift = 1) 
+    output$hclustPlot <- shiny::renderPlot({
+      
+      
+      # dendTrimmedLabels <- shiny::callModule(IDBacApp::colordendLines,
+      #                                        "proteinDendLines",
+      #                                        dendrogram = dendrogram)
+      dendTrimmedLabels <- shiny::callModule(IDBacApp::colordendLabels,
+                                             "proteinDendLabels",
+                                             dendrogram = dendTrimmedLabels)
+      
+      labs <- base::strtrim(labels(dendTrimmedLabels),10)
+      
+      labels(dendTrimmedLabels) <- labs
+      par(mar = c(5, 5, 5, plotWidth))
+      plot(dendTrimmedLabels, horiz = TRUE)
+      
+      IDBacApp::runDendDots(rawDendrogram = dendrogram,
+                            trimdLabsDend = dendTrimmedLabels,
+                            pool = pool, 
+                            columnID = input$selectMetaColumn,
+                            colors = colorsChosen(),
+                            text_shift = 1) 
+      
+    })
   })
-    
-
+  
+  
+  
+  
+  
+  
   
 }
