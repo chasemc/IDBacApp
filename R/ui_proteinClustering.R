@@ -39,20 +39,19 @@ ui_proteinClustering <- function(x) {
                                        label = h5(strong("Adjust right margin of dendrogram")),
                                        value = 20),
 
-                   IDBacApp::colordendLinesUI("colordendLinesProtein"),
-                   IDBacApp::openColorDendLinesUI("colordendLinesProtein"),
-                   IDBacApp::colordendLabelsUI("colordendLabelsProtein"),
-                   IDBacApp::openColorDendLabelsUI("colordendLabelsProtein"),
+                
+                   IDBacApp::addDotsActionUI("proth"),
+                   IDBacApp::dendDotsUI("proth"),
+                   IDBacApp::colordendLabelsUI("proth"),
+                   IDBacApp::colordendLinesUI("proth")
                    
-                   actionButton("protDendDots", "Click to add Dots"),
-                   uiOutput("protLineMod"),
-                   uiOutput("protLabelMod"),
-                   IDBacApp::dendDotsUI1("sdvdwv"),
                    
-
                    
-                   uiOutput("proteoDendDots2"),
-                   uiOutput("sampleFactorMapColors")
+                   # 
+                   # uiOutput("protLineMod"),
+                   # uiOutput("protLabelMod"),
+                   # IDBacApp::dendDotsUI("sdvdwv"),
+ 
                    
                    
                    
@@ -63,7 +62,7 @@ ui_proteinClustering <- function(x) {
       
       
       mainPanel(
-        plotOutput("hclustPlot")
+        IDBacApp::plotHier("proth")
       )
     )
   )

@@ -1539,38 +1539,14 @@ output$sampleMapColumns2 <- renderUI({
 #                             dendrogram = dendro())()
 # })
 
-wed <- reactive({shiny::callModule(IDBacApp::colordendLines,
-                            "colordendLinesProtein",
-                            dendrogram = dendro())()})
-
-wed2 <- reactive({shiny::callModule(IDBacApp::colordendLabels,
-                               "colordendLabelsProtein",
-                               dendrogram = wed())()})
-
-output$hclustPlot <- shiny::renderPlot({
-  
-  a <-input$myProteinchooser
- 
-
-  
- 
-
-
-  # shiny::callModule(IDBacApp::dendDotsServer,
-  #                   "sdvdwv",
-  #                   dendrogram = dendy,
-  #                   dendTrimmedLabels = dendy,
-  #                   pool = userDBCon() )
-
-
-plot(wed2(), horiz=T)
-
-}, height = plotHeight)
-
-
-
-
-
+observeEvent(input$myProteinchooser, {
+  shiny::callModule(IDBacApp::dendDotsServer,
+                    "proth",
+                    dendrogram = dendro(),
+                    pool = userDBCon(),
+                    plotWidth=20,
+                    plotHeight = input$hclustHeight)
+})
 
 # Download svg of dendrogram
 #----
