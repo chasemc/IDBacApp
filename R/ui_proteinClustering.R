@@ -40,9 +40,10 @@ ui_proteinClustering <- function(x) {
                                        value = 20),
 
                    IDBacApp::colordendLinesUI("colordendLinesProtein"),
-                   IDBacApp::colordendLinesActionButtonUI("colordendLinesProtein"),
+                   IDBacApp::openColorDendLinesUI("colordendLinesProtein"),
+                   IDBacApp::colordendLabelsUI("colordendLabelsProtein"),
+                   IDBacApp::openColorDendLabelsUI("colordendLabelsProtein"),
                    
-                   actionButton("colorLabels", "Click to color labels"),
                    actionButton("protDendDots", "Click to add Dots"),
                    uiOutput("protLineMod"),
                    uiOutput("protLabelMod"),
@@ -62,7 +63,7 @@ ui_proteinClustering <- function(x) {
       
       
       mainPanel(
-        IDBacApp::dendDotsUI2("sdvdwv")
+        plotOutput("hclustPlot")
       )
     )
   )

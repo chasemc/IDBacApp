@@ -9,13 +9,20 @@
 
 colordendLinesUI <- function(id) {
   ns <- shiny::NS(id)
-  uiOutput(ns("colordendLinesPaneller"))
+  uiOutput(ns("absPanel"))
   
 }
 
-colordendLinesActionButtonUI <- function(id) {
+#' colordendLinesActionButtonUI
+#'
+#' @param id namespace id
+#'
+#' @return shiny UImodule
+#' @export
+#'
+openColorDendLinesUI <- function(id) {
   ns <- shiny::NS(id)
-  actionButton(ns("colorLines"), "Click to color lines")
+  actionButton(ns("openLinesUI"), "Click to color lines")
   
 }
 
@@ -42,20 +49,18 @@ colordendLines <- function(input,
   
   
   
-  observeEvent(input$closeLineModification, {
-    output$colordendLinesPaneller <- renderUI({
+  observeEvent(input$close, {
+    output$absPanel <- renderUI({
       # Intentionally Blank
     })
   })  
   
   
   
-  observeEvent(input$colorLines, {
-  
-  print("lop")
-  ns <- session$ns
+  observeEvent(input$openLinesUI, ignoreInit = T ,ignoreNULL = F, {
+      ns <- session$ns
 
-  output$colordendLinesPaneller <- renderUI(
+  output$absPanel <- renderUI(
     shiny::absolutePanel(
       bottom = "50%",
       right =  "0%",
@@ -63,6 +68,7 @@ colordendLines <- function(input,
       fixed = TRUE,
       draggable = TRUE,
       style = "z-index:1002;",
+      style = "opacity: 0.80",
       shiny::wellPanel(
         shiny::h4("Adjust Dendrogram Lines"),
         shiny::selectInput(ns("colorBy"),
@@ -101,7 +107,7 @@ colordendLines <- function(input,
                             step = 1
         ),
         
-        shiny::actionButton(ns("closeLineModification"),
+        shiny::actionButton(ns("close"),
                             "Close")
         
       )
@@ -115,7 +121,7 @@ colordendLines <- function(input,
   
   
   
-  
+  dendro <- reactive({
   
   dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram,
                                               colorBy = input$colorBy,
@@ -124,11 +130,11 @@ colordendLines <- function(input,
                                               chosenK = input$chosenK,
                                               part = "branches")
   
-  dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram,
+  IDBacApp::changeDendPartSize(dendrogram = dendrogram,
                                              dendPartSize = input$dendLineWidth,
                                              part = "branches")
-  
-  return(dendrogram)
+  })
+  return(dendro)
   
 }
 

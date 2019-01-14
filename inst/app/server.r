@@ -1527,24 +1527,45 @@ output$sampleMapColumns2 <- renderUI({
 
 
 
+# 
+# observe({
+#   dendy <<- dendro()
+#   
+#   dendy <<- shiny::callModule(IDBacApp::colordendLines,
+#                               "colordendLinesProtein",
+#                               dendrogram = dendy)
+#   dendy2 <<- shiny::callModule(IDBacApp::colordendLabels,
+#                             "colordendLabelsProtein",
+#                             dendrogram = dendro())()
+# })
 
-# 
-# 
-# 
-# output$hclustPlot <- shiny::renderPlot({
-#   
-#  
-#   shiny::callModule(IDBacApp::dendDotsServer,
-#                     "sdvdwv",
-#                     dendrogram = dendro(),
-#                     dendTrimmedLabels = dendro(),
-#                     pool = userDBCon() )
-#  
-#  
-#   
-#   
-#   
-# }, height = plotHeight)
+wed <- reactive({shiny::callModule(IDBacApp::colordendLines,
+                            "colordendLinesProtein",
+                            dendrogram = dendro())()})
+
+wed2 <- reactive({shiny::callModule(IDBacApp::colordendLabels,
+                               "colordendLabelsProtein",
+                               dendrogram = wed())()})
+
+output$hclustPlot <- shiny::renderPlot({
+  
+  a <-input$myProteinchooser
+ 
+
+  
+ 
+
+
+  # shiny::callModule(IDBacApp::dendDotsServer,
+  #                   "sdvdwv",
+  #                   dendrogram = dendy,
+  #                   dendTrimmedLabels = dendy,
+  #                   pool = userDBCon() )
+
+
+plot(wed2(), horiz=T)
+
+}, height = plotHeight)
 
 
 
@@ -1634,37 +1655,9 @@ output$chooseProteinSamples <- renderUI({
   )
 })
 
-protDendModLines <- observe(shiny::callModule(IDBacApp::colordendLines,
-                                       "colordendLinesProtein",
-                                       dendrogram = dendro())
-)
-
-#----
-observeEvent(input$colorLabels, {
-  output$protLabelMod <- renderUI({
-    IDBacApp::colordendLabelsUI("proteinDendLabels")
-  })
-})
-
-observeEvent(input$closeLabelsModification, {
-  output$protLabelMod <- renderUI({
-    # Intentionally Blank
-  })
-})
 
 
 
-#----
-observeEvent(input$protDendDots, {
-  # shiny::callModule(IDBacApp::dendDotsServer,
-  #                                       "sdvdwv",
-  #                                       dendrogram = dendro(),
-  #                                       dendTrimmedLabels = dendro(),
-  #                                       pool = userDBCon(),
-  #                   plotWidth = input$dendparmar)
-  
-  })
-  
 
 
 
