@@ -17,7 +17,7 @@ colordendLinesServercolordendLinesUI <- function(id) {
     width ="25%",
     fixed = TRUE, 
     draggable = TRUE,
-    
+    style = "opacity: 0.80",
     wellPanel(
       h4("Adjust Dendrogram Lines"),
       selectInput(ns("colorBy"), 

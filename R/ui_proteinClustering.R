@@ -43,7 +43,7 @@ ui_proteinClustering <- function(x) {
                    actionButton("protDendDots", "Click to add Dots"),
                    uiOutput("protLineMod"),
                    uiOutput("protLabelMod"),
-                   uiOutput("proteDendDots"),
+                   uiOutput("proteoDendDots"),
                    uiOutput("sampleFactorMapColors")
                    
                    

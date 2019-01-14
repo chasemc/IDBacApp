@@ -1485,7 +1485,7 @@ output$sampleGroupColoringui <- renderUI(
       uiOutput("sampleMapColumns1"),
       uiOutput("sampleMapColumns2"),
       fluidRow(
-        uiOutput("sampleFactorMapColors"))
+        uiOutput("sampleFactorMssssssssapColors"))
       )
 })
 
@@ -1526,81 +1526,22 @@ output$sampleMapColumns2 <- renderUI({
 })
 
 
-#----
-levs <- reactive({
-  req(input$selectMetaColumn)
-  conn <- pool::poolCheckout(userDBCon())
-  dendLabs <- labels(dendro())
-  query <- DBI::dbSendStatement("SELECT *
-                                FROM metaData
-                                WHERE `Strain_ID` = ?",
-                                con=conn)
-  DBI::dbBind(query, list(dendLabs))
-  selectedMeta <- DBI::dbFetch(query)
-  
-  dbClearResult(query)
-  
-  selectedMeta <- selectedMeta[ , colnames(selectedMeta) %in% input$selectMetaColumn]
-  pool::poolReturn(conn)
-  return(unique(selectedMeta))
-})
 
 
-#----
-output$sampleFactorMapColors <- renderUI({
-  
-  column(3,
-         lapply(1:length(levs()),
-                function(x){
-                  do.call(colourInput,
-                          list(paste0("factor-",
-                                      gsub(" ",
-                                           "",
-                                           levs()[[x]])),
-                               levs()[[x]],
-                               value="blue",
-                               allowTransparent=T))
-         })
-  )
-})
 
-
-colorsChosen <- reactive({
-  sapply(1:length(levs()),
-         function(x){
-           input[[paste0("factor-", gsub(" ", "", levs()[[x]]))]]
-         })
-})
 
 
 output$hclustPlot <- shiny::renderPlot({
   
-  req(dendro())
-  a <- shiny::callModule(IDBacApp::colordendLines,
-                         "proteinDendLines",
-                         dendrogram = dendro())
-  a <- shiny::callModule(IDBacApp::colordendLabels,
-                         "proteinDendLabels",
-                         dendrogram = a)
+ 
+  shiny::callModule(IDBacApp::dendDotsServer,
+                    "sdvdwv",
+                    dendrogram = dendro(),
+                    dendTrimmedLabels = dendro(),
+                    pool = userDBCon() )
+ 
+ 
   
-  labs <- base::strtrim(labels(a),10)
-  
-  labels(a) <- labs
-  
-  
-  par(mar = c(5, 5, 5, input$dendparmar))
-  plot(a, horiz = TRUE)
-  
-  a1 <-dendro()
-  
-  if(!is.null(input$selectMetaColumn)){
-    IDBacApp::runDendDots(rawDendrogram = dendro(),
-                          trimdLabsDend = a,
-                          pool = userDBCon(), 
-                          columnID = input$selectMetaColumn,
-                          colors = colorsChosen(),
-                          text_shift = 1) 
-  }
   
   
 }, height = plotHeight)
@@ -1719,41 +1660,15 @@ observeEvent(input$closeLabelsModification, {
   })
 })
 
+
+
 #----
 observeEvent(input$protDendDots, {
-  output$proteDendDots <- renderUI({
-      conn <- pool::poolCheckout(userDBCon())
-      a <- dbListFields(conn, "metaData")
-      a <- a[-which(a == "Strain_ID")]
-      ns <- session$ns  
-      selectInput("selectMetaColumn",
-                  "Select Category",
-                  as.vector(a)
-      )
-    })
+  output$proteoDendDots <- renderUI({
+    IDBacApp::dendDotsUI("sdvdwv")
+  })
 })
 
-
-observeEvent(input$selectMetaColumn, {
-output$sampleFactorMapColors <- renderUI({
-  column(3,
-         lapply(1:length(levs()),
-                function(x){
-                  do.call(colourInput,
-                          list(paste0("factor-",
-                                      gsub(" ",
-                                           "",
-                                           levs()[[x]])),
-                               levs()[[x]],
-                               value="blue",
-                               allowTransparent=T))
-                })
-  )
-})
-
-
-
-})
 
 
 

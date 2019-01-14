@@ -16,6 +16,7 @@ colordendLabelsUI <- function(id) {
     fixed = TRUE,
     draggable = TRUE,
     style = "z-index:1002;",
+    style = "opacity: 0.80",
     shiny::wellPanel(
       shiny::h4("Adjust Dendrogram Labels"),
       shiny::selectInput(ns("colorBy"),
