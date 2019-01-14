@@ -355,88 +355,78 @@ dendDotsServer <- function(input,
   
   dendro <- reactive({
     
-
-      if(!is.null(input$colorByLabels)){
-        
-        dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram,
-                                                    colorBy = input$colorByLabels,
-                                                    colorBlindPalette = colorBlindPalette(),
-                                                    cutHeight = input$cutHeightLabels,
-                                                    chosenK = input$chosenKLabels,
-                                                    part = "labels")
-      }
+    
+    if(!is.null(input$colorByLabels)){
       
-      if(!is.null(input$dendLabelSize)){
-        dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram,
-                                                   dendPartSize = input$dendLabelSize,
-                                                   part = "labels")
-      }
+      dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram,
+                                                  colorBy = input$colorByLabels,
+                                                  colorBlindPalette = colorBlindPalette(),
+                                                  cutHeight = input$cutHeightLabels,
+                                                  chosenK = input$chosenKLabels,
+                                                  part = "labels")
+    }
+    
+    if(!is.null(input$dendLabelSize)){
+      dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram,
+                                                 dendPartSize = input$dendLabelSize,
+                                                 part = "labels")
+    }
+    
+    
+    if(!is.null(input$colorByLines)){
+      dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram,
+                                                  colorBy = input$colorByLines,
+                                                  colorBlindPalette = colorBlindPalette(),
+                                                  cutHeight = input$cutHeightLines,
+                                                  chosenK = input$chosenKLines,
+                                                  part = "branches")
+    }
+    if(!is.null(input$dendLineWidth)){
+      dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram,
+                                                 dendPartSize = input$dendLineWidth,
+                                                 part = "branches")
       
-      
-      if(!is.null(input$colorByLines)){
-        dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram,
-                                                    colorBy = input$colorByLines,
-                                                    colorBlindPalette = colorBlindPalette(),
-                                                    cutHeight = input$cutHeightLines,
-                                                    chosenK = input$chosenKLines,
-                                                    part = "branches")
-      }
-      if(!is.null(input$dendLineWidth)){
-        dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram,
-                                                   dendPartSize = input$dendLineWidth,
-                                                   part = "branches")
-        
-      }
+    }
     
     return(dendrogram)
   })
   
   
-
-    
+  
+  
   
   
   output$hierOut <- renderPlot({
-print(input$selectMetaColumn[[1]])
     
     
-
     if (!is.null(input$selectMetaColumn[[1]])){
-
+      
       
       dendTrimmedLabels <- dendro()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
       labels(dendTrimmedLabels) <- labs
-      
-      
-      
       par(mar = c(5, 5, 5, plotWidth))
       plot(dendro(), horiz = TRUE)
+      IDBacApp::runDendDots(rawDendrogram = dendro(),
+                            trimdLabsDend = dendTrimmedLabels,
+                            pool = pool,
+                            columnID = input$selectMetaColumn,
+                            colors = colorsChosen(),
+                            text_shift = 1)
       
-      
-        IDBacApp::runDendDots(rawDendrogram = dendro(),
-                              trimdLabsDend = dendTrimmedLabels,
-                              pool = pool,
-                              columnID = input$selectMetaColumn,
-                              colors = colorsChosen(),
-                              text_shift = 1)
-        
-      
-
     }else{
       par(mar = c(5, 5, 5, plotWidth))
       plot(dendro(), horiz = TRUE)
     }
-      
-      
- 
-            
-    })
+    
+    
+    
+    
+  })
   
   
   
-  }
-  
-  
-  
-  
+}
+
+
+
