@@ -28,7 +28,8 @@ mirrorPlotUI <- function(id) {
 mirrorPlotServer <- function(input,
                            output,
                            session,
-                           dbPool
+                           dbPool,
+                           protORsmall = "protein"
 ){
   
   
@@ -96,8 +97,8 @@ mirrorPlotServer <- function(input,
   
   
   
-  
-  
+    #Could use tidy eval, but changing too much and want to remove dplyr/magrittr anyways
+
   
   
   
@@ -106,14 +107,29 @@ mirrorPlotServer <- function(input,
   # Used to display inputs for user to select for mirror plots
   #----
   inverseComparisonNames <- reactive({
+qq<<-dbPool
+        if(protORsmall == "small"){
     
     db <- dplyr::tbl(dbPool, "IndividualSpectra")
     db %>%
-      filter(proteinPeaks != "NA") %>%
+      filter(smallMoleculePeaks != "NA") %>%
       select(Strain_ID) %>%
       distinct() %>%
       collect() %>%
-      pull()
+      pull() 
+    
+    } else {
+      db <- dplyr::tbl(dbPool, "IndividualSpectra")
+      db %>%
+        filter(proteinPeaks != "NA") %>%
+        select(Strain_ID) %>%
+        distinct() %>%
+        collect() %>%
+        pull()
+    }
+    
+    
+    
     
   })
   
@@ -127,13 +143,17 @@ mirrorPlotServer <- function(input,
     db <- dplyr::tbl(dbPool, "IndividualSpectra")
     conn <- pool::poolCheckout(dbPool)
     
+    
+    if(protORsmall == "small"){
+      
+    
     # get protein peak data for the 1st mirror plot selection
     db %>%
       filter(Strain_ID %in% input$Spectra1) %>%
-      filter(proteinPeaks != "NA") %>%
+      filter(smallMoleculePeaks != "NA") %>%
       select(spectrumSHA) %>%
       pull %>%
-      IDBacApp::collapseProteinReplicates(fileshas = .,
+      IDBacApp::getSmallMolPeakData(fileshas = .,
                                           db = dbPool,
                                           proteinPercentPresence = input$percentPresenceP,
                                           lowerMassCutoff = input$lowerMass,
@@ -144,16 +164,54 @@ mirrorPlotServer <- function(input,
     # get protein peak data for the 2nd mirror plot selection
     db %>%
       filter(Strain_ID %in% input$Spectra2) %>%
-      filter(proteinPeaks != "NA") %>%
+      filter(smallMoleculePeaks != "NA") %>%
       select(spectrumSHA) %>%
       pull %>%
-      IDBacApp::collapseProteinReplicates(fileshas = .,
+      IDBacApp::getSmallMolPeakData(fileshas = .,
                                           db = dbPool,
                                           proteinPercentPresence = input$percentPresenceP,
                                           lowerMassCutoff = input$lowerMass,
                                           upperMassCutoff = input$upperMass,
                                           dbConnection = conn) %>%
       return(.) -> mirrorPlotEnv$peaksSampleTwo
+    
+    } else {
+    
+      
+      # get protein peak data for the 1st mirror plot selection
+      db %>%
+        filter(Strain_ID %in% input$Spectra1) %>%
+        filter(proteinPeaks != "NA") %>%
+        select(spectrumSHA) %>%
+        pull %>%
+        IDBacApp::collapseProteinReplicates(fileshas = .,
+                                            db = dbPool,
+                                            proteinPercentPresence = input$percentPresenceP,
+                                            lowerMassCutoff = input$lowerMass,
+                                            upperMassCutoff = input$upperMass,
+                                            dbConnection = conn) %>%
+        return(.) -> mirrorPlotEnv$peaksSampleOne
+      
+      # get protein peak data for the 2nd mirror plot selection
+      db %>%
+        filter(Strain_ID %in% input$Spectra2) %>%
+        filter(proteinPeaks != "NA") %>%
+        select(spectrumSHA) %>%
+        pull %>%
+        IDBacApp::collapseProteinReplicates(fileshas = .,
+                                            db = dbPool,
+                                            proteinPercentPresence = input$percentPresenceP,
+                                            lowerMassCutoff = input$lowerMass,
+                                            upperMassCutoff = input$upperMass,
+                                            dbConnection = conn) %>%
+        return(.) -> mirrorPlotEnv$peaksSampleTwo
+    
+    
+    
+    
+    
+    }
+    
     pool::poolReturn(conn)
     
     
@@ -195,6 +253,34 @@ mirrorPlotServer <- function(input,
     mirrorPlotEnv$SampleOneColors[temp] <- "blue"
     remove(temp)
     
+    
+    if(protORsmall == "small"){
+    
+   
+    # Retrieve the full spectra for each of the samples and average them
+    db %>%
+      filter(Strain_ID %in% input$Spectra2) %>%
+      filter(smallMoleculeSpectrum != "NA") %>%
+      select(smallMoleculeSpectrum) %>%
+      pull %>%
+      lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
+      unlist(., recursive = TRUE) %>%
+      MALDIquant::averageMassSpectra(., method = "mean") %>%
+      return(.) -> mirrorPlotEnv$spectrumSampleTwo
+    
+    
+    db %>%
+      filter(Strain_ID %in% input$Spectra1) %>%
+      filter(smallMoleculeSpectrum != "NA") %>%
+      select(smallMoleculeSpectrum) %>%
+      pull %>%
+      lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
+      unlist(., recursive = TRUE) %>%
+      MALDIquant::averageMassSpectra(., method = "mean") %>%
+      return(.) -> mirrorPlotEnv$spectrumSampleOne
+    
+ } else {
+    
     # Retrieve the full spectra for each of the samples and average them
     db %>%
       filter(Strain_ID %in% input$Spectra2) %>%
@@ -216,6 +302,11 @@ mirrorPlotServer <- function(input,
       unlist(., recursive = TRUE) %>%
       MALDIquant::averageMassSpectra(., method = "mean") %>%
       return(.) -> mirrorPlotEnv$spectrumSampleOne
+    
+    
+    
+  }  
+    
     
     
     # Return the entire saved environment

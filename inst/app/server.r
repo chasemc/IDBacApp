@@ -785,7 +785,8 @@ output$inversepeakui <-  renderUI({
   observe({
     shiny::callModule(IDBacApp::mirrorPlotServer,
                       "kkl",
-                      dbPool = userDBCon())
+                      dbPool = userDBCon(),
+                      protORsmall = "protein")
     
   })
   
