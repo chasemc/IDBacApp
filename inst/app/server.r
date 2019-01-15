@@ -1546,7 +1546,7 @@ observe({
                     "proth",
                     dendrogram = dendro(),
                     pool = userDBCon(),
-                    plotWidth=20,
+                    plotWidth=input$dendparmar,
                     plotHeight = input$hclustHeight)
 
 })

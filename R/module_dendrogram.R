@@ -101,8 +101,7 @@ dendDotsServer <- function(input,
                            dendrogram,
                            pool,
                            plotWidth,
-                           plotHeight,
-                           mp){
+                           plotHeight){
   
   
   observeEvent(input$closeDendDots, {
@@ -397,14 +396,10 @@ dendDotsServer <- function(input,
   
   
   
-  
-  
+
   
   output$hierOut <- renderPlot({
-    
-    
-   
-    
+
     if (!is.null(input$selectMetaColumn[[1]])){
       dendTrimmedLabels <- dendro()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
@@ -430,21 +425,17 @@ dendDotsServer <- function(input,
     }
     
     if(!is.null(input$colorByLines)){
-    if(input$colorByLines == "height"){
-      abline(v= input$cutHeightLines, lty = 2)
-      
-    }
+      if(input$colorByLines == "height"){
+        abline(v= input$cutHeightLines, lty = 2)
+        
+      }
     }
     
     if(!is.null(input$colorByLabels)){
-    if(input$colorByLabels == "height"){
-      abline(v= input$cutHeightLabels, lty = 2)
+      if(input$colorByLabels == "height"){
+        abline(v= input$cutHeightLabels, lty = 2)
+      }
     }
-    }
-    
-    
-    
-    
     
   }, height=plotHeight)
   
