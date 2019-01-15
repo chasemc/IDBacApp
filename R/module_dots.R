@@ -109,11 +109,13 @@ dendDotsServer <- function(input,
     output$absPaneldendDots <- renderUI({
       # Intentionally Blank
     })
+    
+
   })  
   
   
   
-  observeEvent(input$openDendots, ignoreInit = T ,ignoreNULL = F, {
+  observeEvent(input$openDendots, ignoreInit = T ,ignoreNULL = T, {
     ns <- session$ns
     
     output$absPaneldendDots <- renderUI(
@@ -121,17 +123,19 @@ dendDotsServer <- function(input,
       shiny::absolutePanel(
         bottom = "0%",
         right = "0%",
-        width = "20%",
-        fixed = TRUE,
+     ##   width = "20%",
+        fixed = F,
         draggable = TRUE,
         style = "z-index:1002;",
         style = "opacity: 0.80",
-        shiny::wellPanel(
+        shiny::wellPanel(class = "dendDots_WellPanel",
+          fluidRow(
+          fluidRow(
           uiOutput(ns("proteDendDots")),
-          uiOutput(ns("sampleFactorMapColors")),
+          uiOutput(ns("sampleFactorMapColors"))),
           shiny::actionButton(ns("closeDendDots"),
                               "Close")
-          
+          )
         ))
       
     )
@@ -209,7 +213,7 @@ dendDotsServer <- function(input,
   
   
   
-  observeEvent(input$openLabelMod, ignoreInit = T ,ignoreNULL = F, {
+  observeEvent(input$openLabelMod, ignoreInit = T ,ignoreNULL = T, {
     
     ns <- session$ns
     
@@ -282,7 +286,7 @@ dendDotsServer <- function(input,
   })  
   
   
-  observeEvent(input$openLineMod, ignoreInit = T ,ignoreNULL = F, {
+  observeEvent(input$openLineMod, ignoreInit = T ,ignoreNULL = T, {
     ns <- session$ns
     
     output$absPanelDendLines <- renderUI(
@@ -422,7 +426,7 @@ dendDotsServer <- function(input,
     
     
     
-  })
+  }, height=plotHeight)
   
   
   

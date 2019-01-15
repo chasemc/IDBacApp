@@ -1170,7 +1170,8 @@ proteinMatrix <- reactive({
 
 #Create the hierarchical clustering based upon the user input for distance method and clustering technique
 #----
-dendro <- reactive({
+
+dendro <- eventReactive(input$myProteinchooser,{
 
   shiny::callModule(IDBacApp::dendrogramCreator,
                     "prot",
@@ -1539,15 +1540,16 @@ output$sampleMapColumns2 <- renderUI({
 #                             dendrogram = dendro())()
 # })
 
-observeEvent(input$myProteinchooser, {
+observe({
+  
   shiny::callModule(IDBacApp::dendDotsServer,
                     "proth",
                     dendrogram = dendro(),
                     pool = userDBCon(),
                     plotWidth=20,
                     plotHeight = input$hclustHeight)
-})
 
+})
 # Download svg of dendrogram
 #----
 output$downloadHeirSVG <- downloadHandler(
