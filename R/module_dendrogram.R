@@ -110,7 +110,7 @@ dendDotsServer <- function(input,
       # Intentionally Blank
     })
     
-
+    
   })  
   
   
@@ -123,19 +123,19 @@ dendDotsServer <- function(input,
       shiny::absolutePanel(
         bottom = "0%",
         right = "0%",
-     ##   width = "20%",
+        ##   width = "20%",
         fixed = F,
         draggable = TRUE,
         style = "z-index:1002;",
         style = "opacity: 0.80",
         shiny::wellPanel(class = "dendDots_WellPanel",
-          fluidRow(
-          fluidRow(
-          uiOutput(ns("proteDendDots")),
-          uiOutput(ns("sampleFactorMapColors"))),
-          shiny::actionButton(ns("closeDendDots"),
-                              "Close")
-          )
+                         fluidRow(
+                           fluidRow(
+                             uiOutput(ns("proteDendDots")),
+                             uiOutput(ns("sampleFactorMapColors"))),
+                           shiny::actionButton(ns("closeDendDots"),
+                                               "Close")
+                         )
         ))
       
     )
@@ -403,25 +403,45 @@ dendDotsServer <- function(input,
   output$hierOut <- renderPlot({
     
     
+   
+    
     if (!is.null(input$selectMetaColumn[[1]])){
-      
-      
       dendTrimmedLabels <- dendro()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
       labels(dendTrimmedLabels) <- labs
+      
+      
       par(mar = c(5, 5, 5, plotWidth))
-      plot(dendro(), horiz = TRUE)
+      plot(dendTrimmedLabels, horiz = TRUE)
       IDBacApp::runDendDots(rawDendrogram = dendro(),
                             trimdLabsDend = dendTrimmedLabels,
                             pool = pool,
                             columnID = input$selectMetaColumn,
                             colors = colorsChosen(),
                             text_shift = 1)
-      
     }else{
+      dendTrimmedLabels <- dendro()
+      labs <- base::strtrim(labels(dendTrimmedLabels), 10)
+      labels(dendTrimmedLabels) <- labs
+      
+      
       par(mar = c(5, 5, 5, plotWidth))
-      plot(dendro(), horiz = TRUE)
+      plot(dendTrimmedLabels, horiz = TRUE)
     }
+    
+    if(!is.null(input$colorByLines)){
+    if(input$colorByLines == "height"){
+      abline(v= input$cutHeightLines, lty = 2)
+      
+    }
+    }
+    
+    if(!is.null(input$colorByLabels)){
+    if(input$colorByLabels == "height"){
+      abline(v= input$cutHeightLabels, lty = 2)
+    }
+    }
+    
     
     
     
