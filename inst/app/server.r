@@ -897,9 +897,15 @@ dataForInversePeakComparisonPlot <- reactive({
   mirrorPlotEnv$peaksSampleTwo@mass <- mirrorPlotEnv$peaksSampleTwo@mass[mirrorPlotEnv$SampleTwoSNR]
   mirrorPlotEnv$peaksSampleTwo@snr <- mirrorPlotEnv$peaksSampleTwo@snr[mirrorPlotEnv$SampleTwoSNR]
   mirrorPlotEnv$peaksSampleTwo@intensity <- mirrorPlotEnv$peaksSampleTwo@intensity[mirrorPlotEnv$SampleTwoSNR]
-
+aa<<-mirrorPlotEnv$peaksSampleOne
   # Binpeaks for the two samples so we can color code similar peaks within the plot
- temp <- binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .02)
+ 
+validate(
+  need(sum(length(mirrorPlotEnv$peaksSampleOne@mass),
+           length(mirrorPlotEnv$peaksSampleTwo@mass)) > 0,
+       "No peaks found in either sample, double-check the settings or your raw data.")
+)
+temp <- binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .02)
 
 
  
