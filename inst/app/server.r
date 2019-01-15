@@ -1,6 +1,8 @@
 
 # Setup working directories
 workingDirectory <- getwd()
+
+
 tempMZ <- file.path(workingDirectory, "temp_mzML")
 dir.create(tempMZ)
 # Cleanup mzML temp folder 
@@ -620,21 +622,21 @@ function(input,output,session){
     
   })
   
-  # Returns a named character list 
-  # character vector = filepaths of mzml files 
-  # `names` = sample names  
-  #----
+ # This should take mzml/mxml and return the file paths,
+ # otherwise convert to mzML and return file paths.
+# the return is a named vector -> names will become Sample IDs!  
   conversions <- reactive({
     
-    if(isolate(input$ConversionsNav == "convert_mzml_nav")){
-      
-      paths <- list.files(mzmlRawFilesLocation(),
-                          recursive = TRUE,
-                          full.names = TRUE,
-                          pattern = ".mz") 
-      
-      names(paths) <- tools::file_path_sans_ext(base::basename(paths))
-    }
+    
+    
+    function(chosenDir, 
+             filetype = input$ConversionsNav ){
+    
+    
+    
+    
+    
+    
     
     popup1()
     return(paths)

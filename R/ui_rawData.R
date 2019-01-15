@@ -262,12 +262,6 @@ conversionsUI <- function(id){
                  ),
                  tabPanel(tags$ul(tags$li("Click here to convert txt files")),
                           value = "convert_txt_nav",
-                          # radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
-                          #              choices = list("Select here if you want to use .txt peak list files" = 3,
-                          #                             "Select here if you want to use .csv peak list files" = 4),
-                          #              selected = 3,
-                          #              inline = FALSE,
-                          #              width = "100%"),
                           mainPanel(
                             uiOutput("conversionMainUI3")
                           )

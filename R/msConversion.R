@@ -1,67 +1,74 @@
 
-#' findMSconvert
+
+
+
+
+
+#' 
+#'  Using an excel spreadsheet, get the filepath for msconvert and the user-supplied name
 #'
-#' @param proteoWizardLocation NA
+#' @param brukerDataPath path to directory containg bruker files
+#' @param excel path to excel file
 #'
-#' @return NA
+#' @return named list, names are sample IDs, values are paths
 #' @export
 #'
-#' @examples NA
- findMSconvert <- function(proteoWizardLocation = character()){
-   
-   # Msconvert only works on Windows so abort function if not on Windows
-   os <- IDBacApp::getOS()
-   if (os == "windows") {
-     
-     # Look for msconvert if a path wasn't provided
-     if(length(proteoWizardLocation) == 0) {
-       
-       # Check 64
-       proteoWizardLocation <- base::shell(cmd = "ECHO %ProgramFiles%\\ProteoWizard", 
-                                           translate = TRUE, 
-                                           intern = T)
-       
-       proteoWizardLocation <- base::list.files(proteoWizardLocation,
-                                                recursive = TRUE, 
-                                                pattern = "msconvert.exe",
-                                                full.names = TRUE)
-       
-       if(length(proteoWizardLocation) == 0) {
-         # Check 32
-         proteoWizardLocation2 <- base::shell(cmd = "ECHO %programfiles(x86)%\\ProteoWizard", 
-                                              translate = TRUE, 
-                                              intern = T)
-         
-         proteoWizardLocation <- base::list.files(proteoWizardLocation,
-                                                  recursive = TRUE, 
-                                                  pattern = "msconvert.exe",
-                                                  full.names = TRUE)
-       }
-     }
-     
-     foundMSconvert <- tryCatch(base::file.exists(proteoWizardLocation),
-                                error = function(e) return(FALSE))[[1]]
-     
-     if(foundMSconvert){
-       
-       proteoWizardLocation <- base::normalizePath(proteoWizardLocation[[1]])
-       
-     } else {
-       proteoWizardLocation <- "error"
-       warning("Unable to find msconvert.exe")
-       
-     }
-   }
-   
-   return(proteoWizardLocation)
-   
- }
- 
- 
- 
- 
- 
- 
+#' @examples
+brukerDataNamesPaths <- function(brukerDataPath,
+                                 excel){
+  
+  files <- list.files(brukerDataPath, pattern="acqus", recursive = TRUE, full.names = TRUE)
+
+  instrument_MetaFile  <- lapply(files, function(x)  read.delim(x, sep="\n"))
+  
+  
+  # Find Acqu file
+  spots <- try(lapply(instrument_MetaFile , function(x) as.character(x[grep("SPOTNO=", x[,1]),])),
+               silent = TRUE)
+  
+  validate(need(length(spots) > 0, "Something happened when trying to get the spot position from the acqus file."))
+  names(spots) <- dirname(files)
+  
+  #Parse the Acqu file for the mass error row
+  spots <- sapply(spots, function(x) strsplit(x, "##$SPOTNO= ", fixed = TRUE)[[1]][[2]])
+  spots <- base::gsub(">", "" ,spots)
+  spots <- base::gsub("<", "" ,spots)
+  spots <- base::trimws(spots)
+  
+  
+  userExcel <- readxl::read_excel(excel, col_names = FALSE, range ="B2:Y17")
+  userExcel <- as.matrix(userExcel)
+  lets <- LETTERS[1:16]
+  nums <- 1:24
+  
+  aa <- sapply(nums, function(x) paste0(lets, x))
+  aa <- matrix(aa, nrow = 16, ncol = 24)
+  
+  aa <- sapply(spots, function(x) userExcel[which(aa %in% x)])
+  
+  
+split(names(aa), aa)
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
  
  # 
  # 

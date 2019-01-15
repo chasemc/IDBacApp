@@ -7,14 +7,16 @@
 #' @return filepath of the folder containing msconvert.exe
 #' @export
 
-findMSconvert <- function(proteoWizardLocation = character()){
+findMSconvert <- function(proteoWizardLocation = ""){
   
   # Msconvert only works on Windows so abort function if not on Windows
   os <- IDBacApp::getOS()
   if (os == "windows") {
     
     # Look for msconvert if a path wasn't provided
-    if(length(proteoWizardLocation) == 0) {
+    if(!file.exists(file.path(dirname(proteoWizardLocation), "msconvert.exe"))) {
+      
+      warning("Given path to msconvert didn't work, trying to auto-find in Programs")
       
       # Check 64
       proteoWizardLocation <- base::shell(cmd = "ECHO %ProgramFiles%\\ProteoWizard", 
@@ -37,23 +39,27 @@ findMSconvert <- function(proteoWizardLocation = character()){
                                                  pattern = "msconvert.exe",
                                                  full.names = TRUE)
       }
-    }
+    } else {
+    
+    validate("Unfortunately msconvert is not currently available on this operating system, try again on Windows or start with 
+             mzML or mzXML files instead of raw-data.")
+  }
     
     foundMSconvert <- tryCatch(base::file.exists(proteoWizardLocation),
                                error = function(e) return(FALSE))[[1]]
     
-  if(foundMSconvert){
- 
-    proteoWizardLocation <- base::normalizePath(proteoWizardLocation[[1]])
-    
-  } else {
-    proteoWizardLocation <- "error"
-     warning("Unable to find msconvert.exe")
-    
-  }
-}
-
-
-return(proteoWizardLocation)
-
+    if(foundMSconvert){
+      
+      proteoWizardLocation <- base::normalizePath(proteoWizardLocation[[1]])
+      
+    } else {
+      proteoWizardLocation <- "error"
+      warning("Unable to find msconvert.exe")
+      
+    }
+  } 
+  
+  warning(paste0("msconvert location: ", proteoWizardLocation))
+  return(proteoWizardLocation)
+  
 }
