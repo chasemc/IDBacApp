@@ -61,7 +61,9 @@ oneMaldiPlate <- function(id){
                          fileInput('excelFile',
                                    label = NULL ,
                                    accept = c('.xlsx','.xls')),
-                         tags$hr(size = 20)),
+                         tags$hr(size = 20),
+                         actionButton("showSampleMap", "Click to name samples")
+                  ),
                   column(12, align = "center",
                          p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
                          actionButton("run",
@@ -164,32 +166,32 @@ multipleMaldiPlates <- function(id){
 #' @examples NA
 beginWithMZ <- function(id){
   fluidRow(
-     column(width=10, offset =2,     wellPanel(class= "intro_WellPanel", align= "center",
-            h3("Starting with mzML or mzXML Data:"),
-           
-
-                         p(strong("1: Enter a filename for this new experiment")),
-                         p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
-                         textInput("newExperimentName",
-                                   label = ""),
-                         tags$hr(size=20),
-                  
-                  br(),
-                  p(strong("2: Click to select the location of your mzML files"), align= "center"),
-                         actionButton("mzmlRawFileDirectory",
-                                      label = "Raw Data Folder"),
-                         verbatimTextOutput("mzmlRawFileDirectory",
-                                            placeholder = TRUE),
-                         tags$hr(size = 20),
-                  br(),
-                  p("Samples will be named according to the file name of the provided files"),
-                  br(),
-                         p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
-                         actionButton("run",
-                                      label = "Process Data"),
-                         tags$hr(size = 20)
-                  
-           )
+    column(width=10, offset =2,     wellPanel(class= "intro_WellPanel", align= "center",
+                                              h3("Starting with mzML or mzXML Data:"),
+                                              
+                                              
+                                              p(strong("1: Enter a filename for this new experiment")),
+                                              p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
+                                              textInput("newExperimentName",
+                                                        label = ""),
+                                              tags$hr(size=20),
+                                              
+                                              br(),
+                                              p(strong("2: Click to select the location of your mzML files"), align= "center"),
+                                              actionButton("mzmlRawFileDirectory",
+                                                           label = "Raw Data Folder"),
+                                              verbatimTextOutput("mzmlRawFileDirectory",
+                                                                 placeholder = TRUE),
+                                              tags$hr(size = 20),
+                                              br(),
+                                              p("Samples will be named according to the file name of the provided files"),
+                                              br(),
+                                              p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
+                                              actionButton("run",
+                                                           label = "Process Data"),
+                                              tags$hr(size = 20)
+                                              
+    )
     ))
   
 }
@@ -235,21 +237,21 @@ conversionsUI <- function(id){
                  "Create an IDBac experiment",
                  tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
                           value = "convert_bruker_nav",
-
                           
-                            radioButtons("rawORreanalyze",
-                                         label = h3("Begin by selecting an option below:"),
-                                         choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
-                                                        "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
-                                         selected = 0,
-                                         inline = FALSE,
-                                         width = "100%"),
-                   mainPanel(
+                          
+                          radioButtons("rawORreanalyze",
+                                       label = h3("Begin by selecting an option below:"),
+                                       choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
+                                                      "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
+                                       selected = 0,
+                                       inline = FALSE,
+                                       width = "100%"),
+                          mainPanel(
                             uiOutput("conversionMainUI1")
-                   )
+                          )
                           
-                      
-                            
+                          
+                          
                           
                           
                  ),
@@ -268,6 +270,5 @@ conversionsUI <- function(id){
                           
                  )
     ))}
-                 
-                          
-                           
+
+

@@ -35,3 +35,10 @@ h1 {
 .dendDots_WellPanel{
   padding-left:50px;
 }
+
+
+.modal-dialog{ 
+  width:100%; 
+  height:100%;
+  
+}

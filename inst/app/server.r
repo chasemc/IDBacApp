@@ -253,7 +253,6 @@ function(input,output,session){
   
   
   
-  
   #----
   qwerty <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
   
@@ -678,13 +677,12 @@ function(input,output,session){
     if (input$ConversionsNav == "convert_bruker_nav"){
       ww<<-input$excelFile
       if(input$rawORreanalyze == 1) {
-        chosenDir <<- rawFilesLocation()
-        excel <<- input$excelFile$datapath
-        tempDir <<- tempMZDir
+  validate(need(any(!is.na(sampleMapReactive$rt)), 
+                "No samples entered into sample map, please try entering them again"))
         
         forMScon <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
                                            msconvertPath = "",
-                                           excel = input$excelFile$datapath,
+                                           excel = sampleMapReactive$rt,
                                            tempDir = tempMZDir)
           
           
@@ -731,6 +729,67 @@ function(input,output,session){
     
     popup4()
   })
+  
+  
+
+  sampleMapReactive <- reactiveValues(rt = as.data.frame(base::matrix(NA,
+                                                                      nrow = 16,
+                                                                      ncol = 24,
+                                                                      dimnames = list(LETTERS[1:16],1:24))))
+  
+  observeEvent(input$showSampleMap,{  
+    
+    showModal(modalDialog({
+      tagList(
+        rHandsontableOutput("plateDefault"),
+        actionButton("saveSampleMap", "Save")
+      )
+    }))
+    
+    
+    
+  })
+  
+  
+  output$plateDefault <- rhandsontable::renderRHandsontable({
+    
+    rhandsontable::rhandsontable(sampleMapReactive$rt,
+                                 useTypes = FALSE,
+                                 contextMenu = TRUE ) %>%
+      hot_context_menu(allowRowEdit = FALSE,
+                       allowColEdit = TRUE) %>%
+      hot_cols(colWidths = 100) %>%
+      hot_rows(rowHeights = 25)
+  })
+  
+  
+  
+  
+  
+  
+  observeEvent(input$saveSampleMap, ignoreInit = TRUE, {
+
+      
+      z <- unlist(input$plateDefault$data, recursive = FALSE) 
+      zz <- as.character(z)
+      zz[zz == "NULL"] <-NA 
+      
+      
+    # for some reason rhandsontable hot_to_r not working, implementing own:
+    changed <- base::matrix(zz,
+                 nrow = nrow(sampleMapReactive$rt),
+                 ncol = ncol(sampleMapReactive$rt),
+                 dimnames = list(LETTERS[1:16],1:24),
+                 byrow = T)
+    
+    sampleMapReactive$rt <- as.data.frame(changed, stringsAsFactors = FALSE)
+    
+  
+  })
+  
+  
+  
+  
   
   
   # Modal displayed while speactra -> peak processing is ocurring
