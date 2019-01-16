@@ -3,10 +3,10 @@
 workingDirectory <- getwd()
 
 
-tempMZ <- file.path(workingDirectory, "temp_mzML")
-dir.create(tempMZ)
+tempMZDir <- file.path(workingDirectory, "temp_mzML")
+dir.create(tempMZDir)
 # Cleanup mzML temp folder 
-file.remove(list.files(tempMZ,
+file.remove(list.files(tempMZDir,
                        pattern = ".mzML",
                        recursive = FALSE,
                        full.names = TRUE))
@@ -622,27 +622,7 @@ function(input,output,session){
     
   })
   
- # This should take mzml/mxml and return the file paths,
- # otherwise convert to mzML and return file paths.
-# the return is a named vector -> names will become Sample IDs!  
-  conversions <- reactive({
-    
-    
-    
-    function(chosenDir, 
-             filetype = input$ConversionsNav ){
-    
-    
-    
-    
-    
-    
-    
-    popup1()
-    return(paths)
-    
-  })
-  
+
   
   
   
@@ -695,8 +675,24 @@ function(input,output,session){
     
     popup3()
     
-    rawDataFilePath <- conversions()
-    lengthProgress <- length(rawDataFilePath)
+    if (input$ConversionsNav == "convert_bruker_nav"){
+      ww<<-input$excelFile
+      if(input$rawORreanalyze == 1) {
+        chosenDir <<- rawFilesLocation()
+        excel <<- input$excelFile$datapath
+        tempDir <<- tempMZDir
+        
+        forMScon <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
+                                           msconvertPath = "",
+                                           excel = input$excelFile$datapath,
+                                           tempDir = tempMZDir)
+          
+          
+        
+      }
+    }
+    
+    lengthProgress <- length(forMScon)
     
     userDB <- pool::poolCheckout(newExperimentSqlite())
     withProgress(message = 'Processing in progress',
@@ -705,8 +701,8 @@ function(input,output,session){
                    
                    for(i in base::seq_along(rawDataFilePath)){
                      incProgress(1/lengthProgress)
-                     IDBacApp::spectraProcessingFunction(rawDataFilePath = as.vector(rawDataFilePath)[[i]],
-                                                         sampleID = names(rawDataFilePath)[[i]],
+                     IDBacApp::spectraProcessingFunction(rawDataFilePath = unname(forMScon)[[i]],
+                                                         sampleID = names(forMScon)[[i]],
                                                          userDBCon = userDB) # pool connection
                    }
                    
@@ -1470,33 +1466,6 @@ function(input,output,session){
   )
   
   
-  # UI for coloring samples by user input metadata
-  #----
-  output$sampleGroupColoringui <- renderUI(
-    
-    if(input$kORheight == "3"){
-      tags$div(
-        p("To color samples according to user-defined groupings..."),
-        p("To use this function, create a different excel file and list all of your sample names in
-          different rows of a single column. In other columns you may add additional characteristics
-          of your samples (eg. media type, genus, sample location), with one characteristic per column.
-          You will have the option to color code your hierarchical clustering plot
-          based on these characteristics, which will appear in the drop-down list below."),
-        radioButtons("colDotsOrColDend", 
-                     label = h5("Color dend or dots:"),
-                     choices = list("dots" = 1, 
-                                    "no dots" = 2),
-                     selected = 1),
-        p("Click the blue boxes under a factor (below) to change the color of the factor."),
-        fileInput('sampleMap',
-                  label = "Sample Mapping",
-                  accept = c('.xlsx', '.xls')),
-        uiOutput("sampleMapColumns1"),
-        uiOutput("sampleMapColumns2"),
-        fluidRow(
-          uiOutput("sampleFactorMssssssssapColors"))
-      )
-    })
   
   
   
@@ -1509,44 +1478,9 @@ function(input,output,session){
   })
   
   
-  #----
-  sampleFactorMapColumns <- reactive({
-    sampleMappings <- variable.names(read_excel(input$sampleMap$datapath,
-                                                sheet = 1,
-                                                range = cell_rows(1)))
-  })
-  
-  
-  #----
-  output$sampleMapColumns1 <- renderUI({
-    selectInput("sampleFactorMapChosenIDColumn",
-                label = h5("Select a Group Mapping"),
-                choices = as.list(sampleFactorMapColumns()))
-  })
-  
-  
-  #----
-  output$sampleMapColumns2 <- renderUI({
-    selectInput("sampleFactorMapChosenAttribute",
-                label = h5("Select a Group Mapping"),
-                choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,
-                                                                  sampleFactorMapColumns(),
-                                                                  ignore.case = TRUE)]))
-  })
   
   
   
-  # 
-  # observe({
-  #   dendy <<- dendro()
-  #   
-  #   dendy <<- shiny::callModule(IDBacApp::colordendLines,
-  #                               "colordendLinesProtein",
-  #                               dendrogram = dendy)
-  #   dendy2 <<- shiny::callModule(IDBacApp::colordendLabels,
-  #                             "colordendLabelsProtein",
-  #                             dendrogram = dendro())()
-  # })
   
   observe({
     w<-input$myProteinchooser$right
@@ -2692,6 +2626,10 @@ function(input,output,session){
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
   #   session$onSessionEnded(function() {
+  # file.remove(list.files(tempMZDir,
+  #                        pattern = ".mzML",
+  #                        recursive = FALSE,
+  #                        full.names = TRUE))
   #      stopApp()
   #      q("no")
   #    })
