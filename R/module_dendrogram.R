@@ -143,15 +143,13 @@ dendDotsServer <- function(input,
   
   output$sampleFactorMapColors <- renderUI({
     column(3,
-           lapply(1:length(levs()),
+           lapply(seq_along(levs()),
                   function(x){
                     ns <- session$ns 
                     
                     do.call((colourpicker::colourInput),
                             list(inputId = ns(paste0("factor-",
-                                                     gsub(" ",
-                                                          "",
-                                                          levs()[[x]]))),
+                                                     make.unique(rep("dendDotsColors", length(levs())))[[x]])),
                                  label = levs()[[x]],
                                  value = "blue",
                                  allowTransparent = T))})
@@ -194,10 +192,10 @@ dendDotsServer <- function(input,
   
   
   colorsChosen <- reactive({
-    sapply(levs(),
+    sapply(seq_along(levs()),
            function(x){ 
-             
-             input[[paste0("factor-", gsub(" ", "", x))]]
+             input[[paste0("factor-",
+                           make.unique(rep("dendDotsColors", length(levs())))[[x]])]]
              
            })
     
