@@ -680,6 +680,9 @@ function(input,output,session){
   validate(need(any(!is.na(sampleMapReactive$rt)), 
                 "No samples entered into sample map, please try entering them again"))
         
+        
+        #spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+        
         forMScon <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
                                            msconvertPath = "",
                                            excel = sampleMapReactive$rt,

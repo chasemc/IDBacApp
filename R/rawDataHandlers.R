@@ -42,7 +42,6 @@ startingFromBrukerFlex <- function(chosenDir,
   
   
 
-    col <- IDBacApp::brukerDataNamesPaths(chosenDir, excel)
     tempNames <- base::tempfile(pattern = rep("", length(col)), 
                           tmpdir = tempDir,
                           fileext = ".mzMl")
@@ -142,8 +141,7 @@ startingFromBrukerFlex <- function(chosenDir,
 #' @export
 #'
 #' @examples
-brukerDataNamesPaths <- function(brukerDataPath,
-                                 excel){
+brukerDataSpotsandPaths <- function(brukerDataPath){
   
   files <- list.files(brukerDataPath, pattern="acqus", recursive = TRUE, full.names = TRUE)
   
@@ -162,22 +160,25 @@ brukerDataNamesPaths <- function(brukerDataPath,
   spots <- base::gsub(">", "" ,spots)
   spots <- base::gsub("<", "" ,spots)
   spots <- base::trimws(spots)
-  
-  
-  userExcel <- readxl::read_excel(excel, col_names = FALSE, range ="B2:Y17")
-  userExcel <- as.matrix(userExcel)
-  lets <- LETTERS[1:16]
-  nums <- 1:24
-  
-  aa <- sapply(nums, function(x) paste0(lets, x))
-  aa <- matrix(aa, nrow = 16, ncol = 24)
-  
-  aa <- sapply(spots, function(x) userExcel[which(aa %in% x)])
-  
-  
-  split(names(aa), aa)
-  
+  return(spots)
 }
+  
+  
+  # 
+  # excel <- readxl::read_excel(excel, col_names = FALSE, range ="B2:Y17")
+  # userExcel <- as.matrix(userExcel)
+  # lets <- LETTERS[1:16]
+  # nums <- 1:24
+  # 
+  # aa <- sapply(nums, function(x) paste0(lets, x))
+  # aa <- matrix(aa, nrow = 16, ncol = 24)
+  # 
+  # aa <- sapply(spots, function(x) userExcel[which(aa %in% x)])
+  # 
+  # 
+  # split(names(aa), aa)
+  
+
 
 
 
