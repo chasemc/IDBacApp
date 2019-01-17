@@ -402,7 +402,7 @@ function(input,output,session){
                           recursive = TRUE,
                           full.names = FALSE,
                           pattern = "\\.mz"))
-        # setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+        setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
         
       }
       
@@ -681,7 +681,11 @@ function(input,output,session){
                 "No samples entered into sample map, please try entering them again"))
         
         
-        #spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+        spots <<-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+    
+        chosenDir <<- rawFilesLocation()
+        s1 <<- sampleMapReactive$rt
+        t1<<-tempMZDir
         
         forMScon <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
                                            msconvertPath = "",
@@ -734,7 +738,20 @@ function(input,output,session){
   })
   
   
-
+output$missingSampleNames <- shiny::renderText({
+  req(rawFilesLocation())
+  req(sampleMapReactive$rt)
+  spots <- brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+  s1 <- base::as.matrix(sampleMapReactive$rt)
+  b <- sapply(spots, function(x) s1[which(aa %in% x)])
+  b <- as.character(spots[which(is.na(b))])
+  if(length(b) == 0){
+    paste0("No missing IDs")
+  }else{
+  paste0(paste0(b, collapse=" \n ", sep=","))
+  }
+})
+  
   sampleMapReactive <- reactiveValues(rt = as.data.frame(base::matrix(NA,
                                                                       nrow = 16,
                                                                       ncol = 24,
@@ -742,16 +759,23 @@ function(input,output,session){
   
   observeEvent(input$showSampleMap,{  
     
-    showModal(modalDialog({
+    showModal(modalDialog(footer = actionButton("saveSampleMap", "Save"),{
       tagList(
-        rHandsontableOutput("plateDefault"),
-        actionButton("saveSampleMap", "Save")
+        rHandsontableOutput("plateDefault")
+        
       )
     }))
     
     
     
   })
+  observeEvent(input$saveSampleMap,{  
+    
+  
+  shiny::removeModal()
+    
+  })
+  
   
   
   output$plateDefault <- rhandsontable::renderRHandsontable({

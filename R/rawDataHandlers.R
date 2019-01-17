@@ -164,24 +164,24 @@ brukerDataSpotsandPaths <- function(brukerDataPath){
 }
   
   
-  # 
-  # excel <- readxl::read_excel(excel, col_names = FALSE, range ="B2:Y17")
-  # userExcel <- as.matrix(userExcel)
-  # lets <- LETTERS[1:16]
-  # nums <- 1:24
-  # 
-  # aa <- sapply(nums, function(x) paste0(lets, x))
-  # aa <- matrix(aa, nrow = 16, ncol = 24)
-  # 
-  # aa <- sapply(spots, function(x) userExcel[which(aa %in% x)])
-  # 
-  # 
-  # split(names(aa), aa)
-  
-
-
-
-
+# 
+#   excel <- readxl::read_excel(excel, col_names = FALSE, range ="B2:Y17")
+#   userExcel <- as.matrix(userExcel)
+#   lets <- LETTERS[1:16]
+#   nums <- 1:24
+# 
+#   aa <- sapply(nums, function(x) paste0(lets, x))
+#   aa <- matrix(aa, nrow = 16, ncol = 24)
+# 
+#   aa <- sapply(spots, function(x) userExcel[which(aa %in% x)])
+# 
+# 
+#   split(names(aa), aa)
+# 
+# 
+# 
+# 
+#   base::as.matrix(s1)
 
 
 
