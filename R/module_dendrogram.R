@@ -170,9 +170,10 @@ dendDotsServer <- function(input,
     selectedMeta <- DBI::dbFetch(query)
     
     DBI::dbClearResult(query)
-    
-    selectedMeta <- selectedMeta[ , colnames(selectedMeta) %in% input$selectMetaColumn]
     pool::poolReturn(conn)
+    selectedMeta <- selectedMeta[ , colnames(selectedMeta) %in% input$selectMetaColumn]
+    selectedMeta[is.na(selectedMeta)] <- "Missing MetaData"
+
     return(unique(selectedMeta))
   })
   
