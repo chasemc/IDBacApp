@@ -1,5 +1,5 @@
 
-#' dendDotsUI
+#' Modify (color/size) dendrogram lines
 #'
 #' @param id  namespace id
 #'
@@ -13,7 +13,7 @@ dendDotsUI <- function(id) {
   
 }
 
-#' colordendLabelsUI
+#' Modify (color/size) dendrogram Labels
 #'
 #' @param id namespace id
 #'
@@ -396,10 +396,10 @@ dendDotsServer <- function(input,
   
   
   
-
+  
   
   output$hierOut <- renderPlot({
-
+    
     if (!is.null(input$selectMetaColumn[[1]])){
       dendTrimmedLabels <- dendro()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
