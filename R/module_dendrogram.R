@@ -1,5 +1,5 @@
 
-#' dendDotsUI
+#' Modify (color/size) dendrogram lines
 #'
 #' @param id  namespace id
 #'
@@ -13,7 +13,7 @@ dendDotsUI <- function(id) {
   
 }
 
-#' colordendLabelsUI
+#' Modify (color/size) dendrogram Labels
 #'
 #' @param id namespace id
 #'
@@ -143,15 +143,13 @@ dendDotsServer <- function(input,
   
   output$sampleFactorMapColors <- renderUI({
     column(3,
-           lapply(1:length(levs()),
+           lapply(seq_along(levs()),
                   function(x){
                     ns <- session$ns 
                     
                     do.call((colourpicker::colourInput),
                             list(inputId = ns(paste0("factor-",
-                                                     gsub(" ",
-                                                          "",
-                                                          levs()[[x]]))),
+                                                     make.unique(rep("dendDotsColors", length(levs())))[[x]])),
                                  label = levs()[[x]],
                                  value = "blue",
                                  allowTransparent = T))})
@@ -172,9 +170,10 @@ dendDotsServer <- function(input,
     selectedMeta <- DBI::dbFetch(query)
     
     DBI::dbClearResult(query)
-    
-    selectedMeta <- selectedMeta[ , colnames(selectedMeta) %in% input$selectMetaColumn]
     pool::poolReturn(conn)
+    selectedMeta <- selectedMeta[ , colnames(selectedMeta) %in% input$selectMetaColumn]
+    selectedMeta[is.na(selectedMeta)] <- "Missing MetaData"
+
     return(unique(selectedMeta))
   })
   
@@ -194,10 +193,10 @@ dendDotsServer <- function(input,
   
   
   colorsChosen <- reactive({
-    sapply(levs(),
+    sapply(seq_along(levs()),
            function(x){ 
-             
-             input[[paste0("factor-", gsub(" ", "", x))]]
+             input[[paste0("factor-",
+                           make.unique(rep("dendDotsColors", length(levs())))[[x]])]]
              
            })
     
@@ -396,10 +395,10 @@ dendDotsServer <- function(input,
   
   
   
-
+  
   
   output$hierOut <- renderPlot({
-
+    
     if (!is.null(input$selectMetaColumn[[1]])){
       dendTrimmedLabels <- dendro()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)

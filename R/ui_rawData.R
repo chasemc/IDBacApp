@@ -7,39 +7,14 @@
 #'
 #' @examples NA
 oneMaldiPlate <- function(id){
-  fluidRow(
-    column(12,
-           br(),
-           br(),
-           fluidRow(
-             column(12, offset = 3,
-                    h3("Starting with a Single MALDI Plate of Raw Data"))),
-           br(),
-           br(),
-           column(5,
+  tagList( 
+    
+            
+           column(width = 12,
+                  style = "background-color:#7777770d",
                   fluidRow(
-                    column(5,offset = 3,
-                           h3("Instructions"))),
-                  br(),
-                  p(strong("1: Working Directory"), " This directs where on your computer you would like to create an IDBac working directory."),
-                  p("In the folder you select, IDBac will create sub-folders within a main directory named \"IDBac\":"),
-                  img(src = "WorkingDirectory.png",
-                      style = "width:60%;height:60%"),
-                  br(),
-                  p(strong("2: Raw Data"), "Your RAW data is a single folder that contains: one subfolder containing protein
-                    data and one subfolder containing small-molecule data"),
-                  img(src = "Single-MALDI-Plate.png",
-                      style = "width:60%;height:60%"),
-                  br(),
-                  p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-                  img(src = "window.png",
-                      width = "100%")
-           ),
-           column(1),
-           column(5, style = "background-color:#7777770d",
-                  fluidRow(
-                    h3("Workflow Pane",
-                       align="center")),
+                    h3("Starting with a Single MALDI Plate of Raw Data", align = "center"),
+                    
                   br(),
                   column(12, align="center",
                          p(strong("1: Enter a Name for this New Experiment")),
@@ -57,11 +32,13 @@ oneMaldiPlate <- function(id){
                          tags$hr(size = 20)),
                   br(),
                   column(12, align = "center",
-                         p(strong("3:", "Choose  your Sample Map file, the excel sheet that IDBac will use to rename your files.")),
-                         fileInput('excelFile',
-                                   label = NULL ,
-                                   accept = c('.xlsx','.xls')),
-                         tags$hr(size = 20)),
+                         p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
+                         
+                         actionButton("showSampleMap", "Click to name samples"),
+                         br(),
+                         p(strong("Missing sample IDs for the following spots:")),
+                         shiny::verbatimTextOutput("missingSampleNames", placeholder = TRUE)
+                  ),
                   column(12, align = "center",
                          p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
                          actionButton("run",
@@ -73,9 +50,41 @@ oneMaldiPlate <- function(id){
                   br(),
                   p(strong("Note:","If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."))
            )
-    )
-  )
+    ))
+  
 }
+
+
+#' oneMaldiPlateHelpUI
+#'
+#' @param id NA
+#'
+#' @return NA
+#' @export
+#'
+#' @examples NA
+oneMaldiPlateHelpUI <- function(id){
+  tagList(
+    h3("Instructions", align = "center"),
+    
+    br(),
+    p(strong("1: Working Directory"), " This directs where on your computer you would like to create an IDBac working directory."),
+    p("In the folder you select, IDBac will create sub-folders within a main directory named \"IDBac\":"),
+    img(src = "WorkingDirectory.png",
+        style = "width:60%;height:60%"),
+    br(),
+    p(strong("2: Raw Data"), "Your RAW data is a single folder that contains: one subfolder containing protein
+                    data and one subfolder containing small-molecule data"),
+    img(src = "Single-MALDI-Plate.png",
+        style = "width:60%;height:60%"),
+    br(),
+    p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
+    img(src = "window.png",
+        width = "100%")
+  )
+  
+}
+
 
 
 #' multipleMaldiPlates
@@ -164,32 +173,32 @@ multipleMaldiPlates <- function(id){
 #' @examples NA
 beginWithMZ <- function(id){
   fluidRow(
-     column(width=10, offset =2,     wellPanel(class= "intro_WellPanel", align= "center",
-            h3("Starting with mzML or mzXML Data:"),
-           
-
-                         p(strong("1: Enter a filename for this new experiment")),
-                         p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
-                         textInput("newExperimentName",
-                                   label = ""),
-                         tags$hr(size=20),
-                  
-                  br(),
-                  p(strong("2: Click to select the location of your mzML files"), align= "center"),
-                         actionButton("mzmlRawFileDirectory",
-                                      label = "Raw Data Folder"),
-                         verbatimTextOutput("mzmlRawFileDirectory",
-                                            placeholder = TRUE),
-                         tags$hr(size = 20),
-                  br(),
-                  p("Samples will be named according to the file name of the provided files"),
-                  br(),
-                         p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
-                         actionButton("run",
-                                      label = "Process Data"),
-                         tags$hr(size = 20)
-                  
-           )
+    column(width=10, offset =2,     wellPanel(class= "intro_WellPanel", align= "center",
+                                              h3("Starting with mzML or mzXML Data:"),
+                                              
+                                              
+                                              p(strong("1: Enter a filename for this new experiment")),
+                                              p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
+                                              textInput("newExperimentName",
+                                                        label = ""),
+                                              tags$hr(size=20),
+                                              
+                                              br(),
+                                              p(strong("2: Click to select the location of your mzML files"), align= "center"),
+                                              actionButton("mzmlRawFileDirectory",
+                                                           label = "Raw Data Folder"),
+                                              verbatimTextOutput("mzmlRawFileDirectory",
+                                                                 placeholder = TRUE),
+                                              tags$hr(size = 20),
+                                              br(),
+                                              p("Samples will be named according to the file name of the provided files"),
+                                              br(),
+                                              p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
+                                              actionButton("run",
+                                                           label = "Process Data"),
+                                              tags$hr(size = 20)
+                                              
+    )
     ))
   
 }
@@ -231,25 +240,26 @@ beginWithTXT <- function(id){
 conversionsUI <- function(id){
   
   fluidPage(
-    navlistPanel(widths = c(3, 7), id = "ConversionsNav",
+    navlistPanel(widths = c(3, 8), id = "ConversionsNav",
                  "Create an IDBac experiment",
                  tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
                           value = "convert_bruker_nav",
-
                           
-                            radioButtons("rawORreanalyze",
-                                         label = h3("Begin by selecting an option below:"),
-                                         choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1,
-                                                        "Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
-                                         selected = 0,
-                                         inline = FALSE,
-                                         width = "100%"),
-                   mainPanel(
-                            uiOutput("conversionMainUI1")
-                   )
                           
-                      
-                            
+                          
+                          mainPanel( offset = 3,
+                          radioButtons("rawORreanalyze",
+                                       label = h3("Begin by selecting an option below:"),
+                                       choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1),
+                                                      #"Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
+                                       selected = 0,
+                                       inline = FALSE,
+                                       width = "100%"),
+                          uiOutput("conversionMainUI1")
+                           )
+                          
+                          
+                          
                           
                           
                  ),
@@ -262,18 +272,11 @@ conversionsUI <- function(id){
                  ),
                  tabPanel(tags$ul(tags$li("Click here to convert txt files")),
                           value = "convert_txt_nav",
-                          # radioButtons("rawORreanalyze",label = h3("Begin by selecting an option below:"),
-                          #              choices = list("Select here if you want to use .txt peak list files" = 3,
-                          #                             "Select here if you want to use .csv peak list files" = 4),
-                          #              selected = 3,
-                          #              inline = FALSE,
-                          #              width = "100%"),
                           mainPanel(
                             uiOutput("conversionMainUI3")
                           )
                           
                  )
     ))}
-                 
-                          
-                           
+
+

@@ -1,10 +1,12 @@
 
 # Setup working directories
 workingDirectory <- getwd()
-tempMZ <- file.path(workingDirectory, "temp_mzML")
-dir.create(tempMZ)
+
+
+tempMZDir <- file.path(workingDirectory, "temp_mzML")
+dir.create(tempMZDir)
 # Cleanup mzML temp folder 
-file.remove(list.files(tempMZ,
+file.remove(list.files(tempMZDir,
                        pattern = ".mzML",
                        recursive = FALSE,
                        full.names = TRUE))
@@ -251,7 +253,6 @@ function(input,output,session){
   
   
   
-  
   #----
   qwerty <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
   
@@ -401,7 +402,7 @@ function(input,output,session){
                           recursive = TRUE,
                           full.names = FALSE,
                           pattern = "\\.mz"))
-        # setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+        setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
         
       }
       
@@ -620,27 +621,7 @@ function(input,output,session){
     
   })
   
-  # Returns a named character list 
-  # character vector = filepaths of mzml files 
-  # `names` = sample names  
-  #----
-  conversions <- reactive({
-    
-    if(isolate(input$ConversionsNav == "convert_mzml_nav")){
-      
-      paths <- list.files(mzmlRawFilesLocation(),
-                          recursive = TRUE,
-                          full.names = TRUE,
-                          pattern = ".mz") 
-      
-      names(paths) <- tools::file_path_sans_ext(base::basename(paths))
-    }
-    
-    popup1()
-    return(paths)
-    
-  })
-  
+
   
   
   
@@ -693,18 +674,48 @@ function(input,output,session){
     
     popup3()
     
-    rawDataFilePath <- conversions()
-    lengthProgress <- length(rawDataFilePath)
+    if (input$ConversionsNav == "convert_bruker_nav"){
+      ww<<-input$excelFile
+      if(input$rawORreanalyze == 1) {
+  validate(need(any(!is.na(sampleMapReactive$rt)), 
+                "No samples entered into sample map, please try entering them again"))
+        aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
+        aa <- matrix(aa, nrow = 16, ncol = 24)
+        
+        
+        spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+        s1 <- base::as.matrix(sampleMapReactive$rt)
+        sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
+        
+        
+       
+        
+        forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
+                                           msconvertPath = "",
+                                           sampleMap = sampleMap,
+                                           tempDir = tempMZDir)
+          
+          
+        
+      }
+    }
+    
+    validate(need(length(forProcessing$mzFile) == length(forProcessing$sampleID), 
+                  "Temp mzML files and sample ID lengths don't match."
+    ))
+    
+    lengthProgress <- length(forProcessing$mzFile)
     
     userDB <- pool::poolCheckout(newExperimentSqlite())
+    
     withProgress(message = 'Processing in progress',
                  detail = 'This may take a while...',
                  value = 0, {
                    
-                   for(i in base::seq_along(rawDataFilePath)){
+                   for(i in base::seq_along(forProcessing$mzFile)){
                      incProgress(1/lengthProgress)
-                     IDBacApp::spectraProcessingFunction(rawDataFilePath = as.vector(rawDataFilePath)[[i]],
-                                                         sampleID = names(rawDataFilePath)[[i]],
+                     IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
+                                                         sampleID = forProcessing$sampleID[[i]],
                                                          userDBCon = userDB) # pool connection
                    }
                    
@@ -733,6 +744,92 @@ function(input,output,session){
     
     popup4()
   })
+  
+  
+output$missingSampleNames <- shiny::renderText({
+  req(rawFilesLocation())
+  req(sampleMapReactive$rt)
+  aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
+     aa <- matrix(aa, nrow = 16, ncol = 24)
+   
+
+  spots <- brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+  s1 <- base::as.matrix(sampleMapReactive$rt)
+  b <- sapply(spots, function(x) s1[which(aa %in% x)])
+  b <- as.character(spots[which(is.na(b))])
+ 
+   if(length(b) == 0){
+    paste0("No missing IDs")
+  }else{
+  paste0(paste0(b, collapse=" \n ", sep=","))
+  }
+})
+  
+  sampleMapReactive <- reactiveValues(rt = as.data.frame(base::matrix(NA,
+                                                                      nrow = 16,
+                                                                      ncol = 24,
+                                                                      dimnames = list(LETTERS[1:16],1:24))))
+  
+  observeEvent(input$showSampleMap,{  
+    
+    showModal(modalDialog(footer = actionButton("saveSampleMap", "Save"),{
+      tagList(
+        rHandsontableOutput("plateDefault")
+        
+      )
+    }))
+    
+    
+    
+  })
+  observeEvent(input$saveSampleMap,{  
+    
+  
+  shiny::removeModal()
+    
+  })
+  
+  
+  
+  output$plateDefault <- rhandsontable::renderRHandsontable({
+    
+    rhandsontable::rhandsontable(sampleMapReactive$rt,
+                                 useTypes = FALSE,
+                                 contextMenu = TRUE ) %>%
+      hot_context_menu(allowRowEdit = FALSE,
+                       allowColEdit = TRUE) %>%
+      hot_cols(colWidths = 100) %>%
+      hot_rows(rowHeights = 25)
+  })
+  
+  
+  
+  
+  
+  
+  observeEvent(input$saveSampleMap, ignoreInit = TRUE, {
+
+      
+      z <- unlist(input$plateDefault$data, recursive = FALSE) 
+      zz <- as.character(z)
+      zz[zz == "NULL"] <-NA 
+      
+      
+    # for some reason rhandsontable hot_to_r not working, implementing own:
+    changed <- base::matrix(zz,
+                 nrow = nrow(sampleMapReactive$rt),
+                 ncol = ncol(sampleMapReactive$rt),
+                 dimnames = list(LETTERS[1:16],1:24),
+                 byrow = T)
+    
+    sampleMapReactive$rt <- as.data.frame(changed, stringsAsFactors = FALSE)
+    
+  
+  })
+  
+  
+  
+  
   
   
   # Modal displayed while speactra -> peak processing is ocurring
@@ -1468,33 +1565,6 @@ function(input,output,session){
   )
   
   
-  # UI for coloring samples by user input metadata
-  #----
-  output$sampleGroupColoringui <- renderUI(
-    
-    if(input$kORheight == "3"){
-      tags$div(
-        p("To color samples according to user-defined groupings..."),
-        p("To use this function, create a different excel file and list all of your sample names in
-          different rows of a single column. In other columns you may add additional characteristics
-          of your samples (eg. media type, genus, sample location), with one characteristic per column.
-          You will have the option to color code your hierarchical clustering plot
-          based on these characteristics, which will appear in the drop-down list below."),
-        radioButtons("colDotsOrColDend", 
-                     label = h5("Color dend or dots:"),
-                     choices = list("dots" = 1, 
-                                    "no dots" = 2),
-                     selected = 1),
-        p("Click the blue boxes under a factor (below) to change the color of the factor."),
-        fileInput('sampleMap',
-                  label = "Sample Mapping",
-                  accept = c('.xlsx', '.xls')),
-        uiOutput("sampleMapColumns1"),
-        uiOutput("sampleMapColumns2"),
-        fluidRow(
-          uiOutput("sampleFactorMssssssssapColors"))
-      )
-    })
   
   
   
@@ -1507,44 +1577,9 @@ function(input,output,session){
   })
   
   
-  #----
-  sampleFactorMapColumns <- reactive({
-    sampleMappings <- variable.names(read_excel(input$sampleMap$datapath,
-                                                sheet = 1,
-                                                range = cell_rows(1)))
-  })
-  
-  
-  #----
-  output$sampleMapColumns1 <- renderUI({
-    selectInput("sampleFactorMapChosenIDColumn",
-                label = h5("Select a Group Mapping"),
-                choices = as.list(sampleFactorMapColumns()))
-  })
-  
-  
-  #----
-  output$sampleMapColumns2 <- renderUI({
-    selectInput("sampleFactorMapChosenAttribute",
-                label = h5("Select a Group Mapping"),
-                choices = as.list(sampleFactorMapColumns()[!grepl(input$sampleFactorMapChosenIDColumn,
-                                                                  sampleFactorMapColumns(),
-                                                                  ignore.case = TRUE)]))
-  })
   
   
   
-  # 
-  # observe({
-  #   dendy <<- dendro()
-  #   
-  #   dendy <<- shiny::callModule(IDBacApp::colordendLines,
-  #                               "colordendLinesProtein",
-  #                               dendrogram = dendy)
-  #   dendy2 <<- shiny::callModule(IDBacApp::colordendLabels,
-  #                             "colordendLabelsProtein",
-  #                             dendrogram = dendro())()
-  # })
   
   observe({
     w<-input$myProteinchooser$right
@@ -1576,13 +1611,13 @@ function(input,output,session){
       if (input$kORheight == "1"){
         
         dendro() %>% 
-          dendexted::color_branches(k = input$kClusters) %>% 
+          dendextend::color_branches(k = input$kClusters) %>% 
           plot(horiz = TRUE, lwd = 8)
         
       } else if (input$kORheight == "2"){
         
         dendro() %>% 
-          dendexted::color_branches(h = input$cutHeight) %>%
+          dendextend::color_branches(h = input$cutHeight) %>%
           plot(horiz = TRUE, lwd = 8)
         abline(v = input$cutHeight,
                lty = 2)
@@ -2690,6 +2725,10 @@ function(input,output,session){
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
   #   session$onSessionEnded(function() {
+  # file.remove(list.files(tempMZDir,
+  #                        pattern = ".mzML",
+  #                        recursive = FALSE,
+  #                        full.names = TRUE))
   #      stopApp()
   #      q("no")
   #    })

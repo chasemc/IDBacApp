@@ -13,10 +13,8 @@
 sampMetaOutput <- function(id, label = "Sample Metadata Input") {
   # Create a namespace function using the provided id
   ns <- NS(id)
-
-
-          rHandsontableOutput(ns("metaTable"))
-
+  rHandsontableOutput(ns("metaTable"))
+  
 }
 
 
@@ -33,28 +31,28 @@ sampMetaOutput <- function(id, label = "Sample Metadata Input") {
 #'
 #' @examples NA
 sampMeta <- function(input, output, session, databaseConnection) {
-
-
+  
+  
   createNewLibraryTable <- reactive({
-
+    
   })
-
+  
   # Display the new Library as an editable table
   output$metaTable <- rhandsontable::renderRHandsontable({
     dbqueryReactive()
   })
-
-dbqueryReactive <- reactive({
-   dbQuery <- glue::glue_sql("SELECT *
+  
+  dbqueryReactive <- reactive({
+    dbQuery <- glue::glue_sql("SELECT *
                             FROM ({tab*})",
                               tab = "metaData",
                               .con = databaseConnection)
-
+    
     conn <- pool::poolCheckout(databaseConnection)
     dbQuery <- DBI::dbSendQuery(conn, dbQuery)
     dbQuery <- DBI::dbFetch(dbQuery)
-
-
+    
+    
     exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
                                         "Genbank_Accession"            = "KY858228",
                                         "NCBI_TaxID"                   = "446370",
@@ -76,30 +74,9 @@ dbqueryReactive <- reactive({
                                         "PI_ORCID"                     = "0000-0002-1372-3887",
                                         "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
     )
-
-
-
+    
     dbQuery <- rbind(exampleMetaData, dbQuery)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    
     rhandsontable::rhandsontable(dbQuery,
                                  useTypes = FALSE,
                                  contextMenu = TRUE ) %>%
@@ -110,19 +87,14 @@ dbqueryReactive <- reactive({
       hot_cols(colWidths = 100) %>%
       hot_rows(rowHeights = 25) %>%
       hot_cols(fixedColumnsLeft = 1)
-
-
-
-
-
-
+    
   })
-
-
+  
+  
   return(dbqueryReactive)
-
-
-
+  
+  
+  
 }
 
 
