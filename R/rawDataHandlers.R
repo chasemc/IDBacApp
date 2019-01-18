@@ -28,7 +28,7 @@ startingFromMZ <- function(chosenDir){
 #' When user is starting with Bruker Flex file(s)
 #'
 #' @param msconvertPath path to MSconvert, if none provided, it will search in Programs folder
-#' @param excel excel file used for re-naming samples
+#' @param sampleMap excel file used for re-naming samples
 #' @param tempDir directory to temp mzML files are written to
 #' @param chosenDir user-chosen directory containing bruker raw data files
 #'
@@ -37,89 +37,92 @@ startingFromMZ <- function(chosenDir){
 #' @examples
 startingFromBrukerFlex <- function(chosenDir, 
                                    msconvertPath = "",
-                                   excel,
+                                   sampleMap,
                                    tempDir){
   
-  
-
-    tempNames <- base::tempfile(pattern = rep("", length(col)), 
-                          tmpdir = tempDir,
-                          fileext = ".mzMl")
-    
-    mzfilePaths <- base::lapply(col, shQuote)
-    
-    tempNames <- base::normalizePath(tempNames, winslash = "\\", mustWork = FALSE)
-    
-    tempdirname <- base::dirname(tempNames)[[1]]
-    tempdirname <- base::shQuote(tempdirname)
-    
-    msconvertLocation <- IDBacApp::findMSconvert(msconvertPath)
-    msconvertLocation <- base::normalizePath(msconvertLocation,
-                                             winslash = "\\",
-                                             mustWork = FALSE)
-    
-    msconvertLocation <- base::shQuote(msconvertLocation)
-    
-    
-    #Command-line MSConvert, converts from proprietary vendor data to mzML
-    msconvertCmdLineCommands <- base::lapply(base::seq_along(mzfilePaths), 
-                                       function(x){
-                                         
-                                         (base::paste0(msconvertLocation,
-                                                 " ",
-                                                 base::paste0(mzfilePaths[[x]],
-                                                              collapse = "",
-                                                              sep = " "),
-                                                 " --mzML --merge -z  --32 -v",
-                                                 " --outdir ", tempdirname,
-                                                 " --outfile ", tempNames[[x]]))
-                                         
-                                       })
-    
-    
-    functionTOrunMSCONVERTonCMDline <- function(x){
-      system(command = x, 
-             invisible = FALSE,
-             wait = TRUE)
-    }
-    
-    
-    lengthProgress <- length(msconvertCmdLineCommands)
-    
-    # withProgress(message = 'Conversion in progress',
-    #              detail = 'This may take a while...', value = 0, {
-    #                for(i in 1:lengthProgress){
-    #                  incProgress(1/lengthProgress)
-    #                  functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
-    #                  }
-    #              })
-    
-    
-    numCores <- parallel::detectCores()
-    numCores <- ifelse(numCores > 2,
-                       numCores - 1,
-                       1)    
-    cl <- parallel::makeCluster(numCores)
-    parallel::parLapply(cl,
-                        msconvertCmdLineCommands,
-                        functionTOrunMSCONVERTonCMDline)
-    parallel::stopCluster(cl)
-    
-    paths <- normalizePath(tempNames)
-    
-    names(paths) <- names(col)
-    
-    
-  return(paths)
-  
-  
 
   
+  convertFrom <- base::split(labels(sampleMap),as.character(sampleMap))
+  
+  convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
+                              tmpdir = tempDir,
+                              fileext = ".mzMl")
+  convertTo <- base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE)
+  
+  convertWhere <- base::dirname(convertTo)[[1]]
+  convertWhere <- base::normalizePath(convertWhere, winslash = "\\", mustWork = FALSE)
+  convertWhere <- base::shQuote(convertWhere)
+  
+  msconvertLocation <- IDBacApp::findMSconvert(msconvertPath)
+  msconvertLocation <- base::normalizePath(msconvertLocation,
+                                           winslash = "\\",
+                                           mustWork = FALSE)
+  msconvertLocation <- base::shQuote(msconvertLocation)
+  
+
+    
+
+  #Command-line MSConvert, converts from proprietary vendor data to mzML
+  msconvertCmdLineCommands <- base::lapply(base::seq_along(convertFrom), 
+                                           function(x){
+                                             (base::paste0(msconvertLocation,
+                                                           " ",
+                                                           base::paste0(convertFrom[[x]],
+                                                                        collapse = "",
+                                                                        sep = " "),
+                                                           " --mzML --merge -z  --32 -v",
+                                                           " --outdir ", convertWhere,
+                                                           
+                                                           " --outfile ", convertTo[[x]]))
+                                             
+                                           })
+  
+  
+  functionTOrunMSCONVERTonCMDline <- function(x){
+    system(command = x, 
+           invisible = FALSE,
+           wait = TRUE)
+  }
+  
+  
+  lengthProgress <- length(msconvertCmdLineCommands)
+  
+  
+  
+  numCores <- parallel::detectCores()
+  numCores <- ifelse(numCores > 2,
+                     numCores - 1,
+                     1)    
+  cl <- parallel::makeCluster(numCores)
+  parallel::parLapply(cl,
+                      msconvertCmdLineCommands,
+                      functionTOrunMSCONVERTonCMDline)
+  parallel::stopCluster(cl)
+  
+
+  validate(need(all(file.exists(convertTo)), 
+                cbind(convertTo, exists(convertTo))
+  ))
+  
+  
+  
+  return(list(mzFile = convertTo,
+         sampleID = names(convertFrom)))
+  
+  
+   
   
 }
 
 
-
+# Single-core conversion with progress bar:
+# withProgress(message = 'Conversion in progress',
+#              detail = 'This may take a while...', value = 0, {
+#                for(i in 1:lengthProgress){
+#                  incProgress(1/lengthProgress)
+#                  functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
+#                  }
+#              })
 
 
 
@@ -135,7 +138,6 @@ startingFromBrukerFlex <- function(chosenDir,
 #'  Using an excel spreadsheet, get the filepath for msconvert and the user-supplied name
 #'
 #' @param brukerDataPath path to directory containg bruker files
-#' @param excel path to excel file
 #'
 #' @return named list, names are sample IDs, values are paths
 #' @export
@@ -162,8 +164,8 @@ brukerDataSpotsandPaths <- function(brukerDataPath){
   spots <- base::trimws(spots)
   return(spots)
 }
-  
-  
+
+
 # 
 #   excel <- readxl::read_excel(excel, col_names = FALSE, range ="B2:Y17")
 #   userExcel <- as.matrix(userExcel)
@@ -245,7 +247,7 @@ findMSconvert <- function(proteoWizardLocation = ""){
       warning("Unable to find msconvert.exe")
       
     }
-    } 
+  } 
   
   warning(paste0("msconvert location: ", proteoWizardLocation))
   return(proteoWizardLocation)

@@ -679,17 +679,20 @@ function(input,output,session){
       if(input$rawORreanalyze == 1) {
   validate(need(any(!is.na(sampleMapReactive$rt)), 
                 "No samples entered into sample map, please try entering them again"))
+        aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
+        aa <- matrix(aa, nrow = 16, ncol = 24)
         
         
-        spots <<-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
-    
-        chosenDir <<- rawFilesLocation()
-        s1 <<- sampleMapReactive$rt
-        t1<<-tempMZDir
+        spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+        s1 <- base::as.matrix(sampleMapReactive$rt)
+        sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
         
-        forMScon <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
+        
+       
+        
+        forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
                                            msconvertPath = "",
-                                           excel = sampleMapReactive$rt,
+                                           sampleMap = sampleMap,
                                            tempDir = tempMZDir)
           
           
@@ -697,17 +700,22 @@ function(input,output,session){
       }
     }
     
-    lengthProgress <- length(forMScon)
+    validate(need(length(forProcessing$mzFile) == length(forProcessing$sampleID), 
+                  "Temp mzML files and sample ID lengths don't match."
+    ))
+    
+    lengthProgress <- length(forProcessing$mzFile)
     
     userDB <- pool::poolCheckout(newExperimentSqlite())
+    
     withProgress(message = 'Processing in progress',
                  detail = 'This may take a while...',
                  value = 0, {
                    
-                   for(i in base::seq_along(rawDataFilePath)){
+                   for(i in base::seq_along(forProcessing$mzFile)){
                      incProgress(1/lengthProgress)
-                     IDBacApp::spectraProcessingFunction(rawDataFilePath = unname(forMScon)[[i]],
-                                                         sampleID = names(forMScon)[[i]],
+                     IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
+                                                         sampleID = forProcessing$sampleID[[i]],
                                                          userDBCon = userDB) # pool connection
                    }
                    
@@ -741,11 +749,16 @@ function(input,output,session){
 output$missingSampleNames <- shiny::renderText({
   req(rawFilesLocation())
   req(sampleMapReactive$rt)
+  aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
+     aa <- matrix(aa, nrow = 16, ncol = 24)
+   
+
   spots <- brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
   s1 <- base::as.matrix(sampleMapReactive$rt)
   b <- sapply(spots, function(x) s1[which(aa %in% x)])
   b <- as.character(spots[which(is.na(b))])
-  if(length(b) == 0){
+ 
+   if(length(b) == 0){
     paste0("No missing IDs")
   }else{
   paste0(paste0(b, collapse=" \n ", sep=","))
