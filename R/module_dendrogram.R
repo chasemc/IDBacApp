@@ -142,7 +142,7 @@ dendDotsServer <- function(input,
   
   
   output$sampleFactorMapColors <- renderUI({
-    column(3,
+    column(7,
            lapply(seq_along(levs()),
                   function(x){
                     ns <- session$ns 

@@ -28,35 +28,37 @@ ui_proteinClustering <- function(x) {
                      p("Move strains between boxes by clicking the strain's name
                        and then an arrow. Strains in the right box will be used for analysis."),
                      uiOutput("chooseProteinSamples")),
-                     
+                   
                    IDBacApp::dendrogramCreatorUI("prot"),
                    numericInput("hclustHeight",
-                                       label = h5(strong("Expand Tree")),
-                                       value = 750,
-                                       step = 50,
-                                       min = 100),
+                                label = h5(strong("Expand Tree")),
+                                value = 750,
+                                step = 50,
+                                min = 100),
                    numericInput("dendparmar",
-                                       label = h5(strong("Adjust right margin of dendrogram")),
-                                       value = 20),
-
-                
+                                label = h5(strong("Adjust right margin of dendrogram")),
+                                value = 20),
+                   
+                   
                    IDBacApp::addDotsActionUI("proth"),
                    IDBacApp::dendDotsUI("proth"),
                    IDBacApp::colordendLabelsUI("proth"),
-                   IDBacApp::colordendLinesUI("proth")
-                   
+                   IDBacApp::colordendLinesUI("proth"),
+                   br(),
+                   h4("Suggestions for Reporting Protein Analysis:"),
+                   uiOutput("proteinReport")
                    
                    
                    # 
                    # uiOutput("protLineMod"),
                    # uiOutput("protLabelMod"),
                    # IDBacApp::dendDotsUI("sdvdwv"),
- 
                    
                    
                    
                    
-                 
+                   
+                   
                    
       ),
       
@@ -73,7 +75,6 @@ ui_proteinClustering <- function(x) {
 
 
 
-                     
 
 # 
 # 
