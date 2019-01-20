@@ -159,8 +159,7 @@ brukerDataSpotsandPaths <- function(brukerDataPath){
   
   #Parse the Acqu file for the mass error row
   spots <- sapply(spots, function(x) strsplit(x, "##$SPOTNO= ", fixed = TRUE)[[1]][[2]])
-  spots <- base::gsub(">", "" ,spots)
-  spots <- base::gsub("<", "" ,spots)
+  spots <- base::gsub("[[:punct:]]|", "" ,spots)
   spots <- base::trimws(spots)
   return(spots)
 }
