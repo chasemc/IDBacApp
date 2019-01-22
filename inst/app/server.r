@@ -187,10 +187,11 @@ function(input,output,session){
                  
                  appendTab(inputId = "mainIDBacNav",
                            tabPanel("Metabolite Association Network (Small-Molecule)",
-                                    uiOutput("MANui")
+                                    IDBacApp::ui_smallMolMan()
                            )
                  )
                })
+  
   
   
   
@@ -957,11 +958,12 @@ output$missingSampleNames <- shiny::renderText({
       select(spectrumSHA) %>%
       pull %>%
       IDBacApp::collapseProteinReplicates(fileshas = .,
-                                          db = userDBCon(),
+                                         # db = userDBCon(),
                                           proteinPercentPresence = input$percentPresenceP,
                                           lowerMassCutoff = input$lowerMass,
                                           upperMassCutoff = input$upperMass,
-                                          dbConnection = conn) %>%
+                                         checkedOutPool = conn,
+                                         minSNR = 6) %>%
       return(.) -> mirrorPlotEnv$peaksSampleOne
     
     # get protein peak data for the 2nd mirror plot selection
@@ -971,11 +973,12 @@ output$missingSampleNames <- shiny::renderText({
       select(spectrumSHA) %>%
       pull %>%
       IDBacApp::collapseProteinReplicates(fileshas = .,
-                                          db = userDBCon(),
+                                          # db = userDBCon(),
                                           proteinPercentPresence = input$percentPresenceP,
                                           lowerMassCutoff = input$lowerMass,
                                           upperMassCutoff = input$upperMass,
-                                          dbConnection = conn) %>%
+                                          checkedOutPool = conn,
+                                          minSNR = 6) %>%
       return(.) -> mirrorPlotEnv$peaksSampleTwo
     pool::poolReturn(conn)
     
@@ -1249,12 +1252,13 @@ output$missingSampleNames <- shiny::renderText({
     
     return( lapply(temp,
                    function(x){
-                     IDBacApp::collapseProteinReplicates(fileshas = x,
-                                                         db = userDBCon(),
+                     IDBacApp::collapseProteinReplicates(fileshas = .,
+                                                         # db = userDBCon(),
                                                          proteinPercentPresence = input$percentPresenceP,
                                                          lowerMassCutoff = input$lowerMass,
                                                          upperMassCutoff = input$upperMass,
-                                                         dbConnection = conn)
+                                                         checkedOutPool = conn,
+                                                         minSNR = 6)
                    }))
     
     pool::poolReturn(conn)
@@ -1492,7 +1496,7 @@ output$missingSampleNames <- shiny::renderText({
   # Create Heir ui
   #----
   output$Heirarchicalui <-  renderUI({
-    
+
     if(is.null(input$Spectra1)){
       fluidPage(
         h1(" There is no data to display",
@@ -1510,7 +1514,7 @@ output$missingSampleNames <- shiny::renderText({
                   a(href = "https://github.com/chasemc/IDBacApp/issues",
                     target = "_blank",
                     "IDBac Issues Page at GitHub.",
-                    img(border = "0", 
+                    img(border = "0",
                         title = "https://github.com/chasemc/IDBacApp/issues",
                         src = "GitHub.png",
                         width = "25",
@@ -1518,10 +1522,9 @@ output$missingSampleNames <- shiny::renderText({
         )
       )
     } else {
+
+      IDBacApp::ui_proteinClustering()
       
-      
-      
-      ui_proteinClustering("proteinyo")
     }
   })
   
@@ -1784,9 +1787,33 @@ output$missingSampleNames <- shiny::renderText({
   #------------------------------------------------------------------------------
   
   # -----------------
+  
+  
+  
+  observe({
+    w<-input$myProteinchooser$right
+    w<-input$dendparmar
+ pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
+                      "proteinMANpage",
+                      dendrogram = dendro(),
+                      pool = userDBCon(),
+                      plotWidth=input$dendparmar,
+                      plotHeight = input$hclustHeight)
+ er<<-reactiveValuesToList(input)
+    
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   selectedSmallMolPeakList <- reactive({
-    
-    
+
     combinedSmallMolPeaks <- NULL
     combinedSmallMolPeaksAll <- NULL
     matrixID <- NULL
@@ -1869,10 +1896,10 @@ output$missingSampleNames <- shiny::renderText({
                            .con = userDBCon()
     )
     
+    uu<<-userDBCon()
+    conn <<- pool::poolCheckout(userDBCon())
     
-    conn <- pool::poolCheckout(userDBCon())
-    
-    sqlQ <- DBI::dbGetQuery(conn, sqlQ)
+    sqlQ <<- DBI::dbGetQuery(conn, sqlQ)
     pool::poolReturn(conn)
     sqlQ <- split(sqlQ$spectrumSHA, sqlQ$Strain_ID)
     sqlQ <- lapply(sqlQ, function(x){
@@ -2062,148 +2089,8 @@ output$missingSampleNames <- shiny::renderText({
     return(as.numeric(input$hclustHeightNetwork))
   })
   
-  # -----------------
-  # Plot MAN Dendrogram
+ 
   
-  output$netheir <- renderPlot({
-    par(mar = c(5, 5, 5, input$dendparmar))
-    
-    if (input$kORheight == "1"){
-      
-      coloredDend() %>%
-        hang.dendrogram %>% 
-        plot(horiz = TRUE, lwd = 8)
-      
-    } else if (input$kORheight == "2"){
-      
-      coloredDend()  %>%  
-        hang.dendrogram %>% 
-        plot(horiz = TRUE, lwd = 8)
-      
-      abline(v = input$cutHeight, lty = 2)
-      
-    } else if (input$kORheight == "3"){
-      
-      if(is.null(input$sampleMap$datapath)){
-        # No sample mapping selected
-        dendro()$dend %>%
-          plot(horiz = TRUE, lwd = 8)
-      } else {
-        if(input$colDotsOrColDend == "1"){
-          
-          coloredDend() %>%  
-            hang.dendrogram %>% 
-            plot(.,horiz=T)
-          
-          IDBacApp::colored_dots(coloredDend()$bigMatrix, 
-                                 coloredDend()$shortenedNames,
-                                 rowLabels = names(coloredDend()$bigMatrix),
-                                 horiz = T,
-                                 sort_by_labels_order = FALSE)
-        } else {
-          coloredDend()  %>%
-            hang.dendrogram %>% 
-            plot(., horiz = T)
-        }
-      }
-    }
-    
-  }, height = plotHeightHeirNetwork)
-  
-  
-  # Create MAN UI
-  #----
-  output$MANui <-  renderUI({
-    
-    fluidPage(sidebarLayout(
-      
-      
-      sidebarPanel(style = 'padding:30px',
-                   radioButtons("matrixSamplePresent",
-                                label = h5(strong("Do you have a matrix blank?")),
-                                choices = list("Yes" = 1, 
-                                               "No (Also Turns Off Matrix Subtraction)" = 2),
-                                selected = 1),
-                   numericInput("percentPresenceSM",
-                                label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
-                                value = 70,
-                                step = 10,
-                                min = 0,
-                                max = 100),
-                   numericInput("smSNR",
-                                label = h5(strong("Signal To Noise Cutoff")),
-                                value = 4,
-                                step = 0.5,
-                                min = 1.5,
-                                max = 100),
-                   numericInput("upperMassSM",
-                                label = h5(strong("Upper Mass Cutoff")),
-                                value = 2000,
-                                step = 20,
-                                max = 3000),
-                   numericInput("lowerMassSM",
-                                label = h5(strong("Lower Mass Cutoff")),
-                                value = 200,
-                                step = 20,
-                                min = 3000),
-                   numericInput("hclustHeightNetwork",
-                                label = h5(strong("Expand Tree")),
-                                value = 750,
-                                step = 50,
-                                min = 100),
-                   numericInput("dendparmar2",
-                                label = h5(strong("Adjust right margin of dendrogram")),
-                                value = 5),
-                   downloadButton("downloadSmallMolNetworkData",
-                                  label = "Download Current Network Data",
-                                  value = FALSE),
-                   br(),
-                   p(strong("Hint 1:"),
-                     "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
-                   p(strong("Hint 2:"),
-                     "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),
-                   br(),
-                   
-                   p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network.\"
-                     while selected- this saves a .csv file of the currently-displayed
-                     network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
-                     While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
-                     means this box is checked and the file is open in another program, either uncheck or close the file."),
-                   br(),
-                   h4("Suggestions for Reporting MAN Analysis:"),
-                   uiOutput("manReport"),
-                   br(),
-                   h4("Suggestions for Reporting Protein Analysis"),
-                   uiOutput("proteinReport2")
-      ),
-      mainPanel(
-        column(width = 5,
-               #   style ="padding: 14px 0px; margin:0%",
-               plotOutput("netheir",
-                          width = "100%",
-                          height = "100%",
-                          click = "plot_click",
-                          dblclick = "plot_dblclick",
-                          hover = "plot_hover",
-                          brush = "plot_brush")
-        ),
-        column(width=6, style ="padding: 14px 0px; margin:0%",
-               absolutePanel(fixed = TRUE, width = "50%",
-                             tabsetPanel(type="tabs",           
-                                         tabPanel(value = "smallMolMANUI","MAN",
-                                                  simpleNetworkOutput("metaboliteAssociationNetwork", width="100%")),
-                                         tabPanel(value = "smallMolPCAUi","PCA",
-                                                  plotlyOutput("smallMolPca",
-                                                               width = "100%"
-                                                  )
-                                         ))
-                             
-                             
-                             
-               ))
-      )
-    ))
-  })
   
   
   # Output a paragraph about which paramters were used to create the currently-displayed MAN

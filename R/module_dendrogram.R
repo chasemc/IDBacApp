@@ -439,7 +439,7 @@ dendDotsServer <- function(input,
   }, height=plotHeight)
   
   
-  
+  return(reactiveValuesToList(input))
 }
 
 

@@ -6,7 +6,7 @@
 #' @export
 #'
 #' @examples NA
-ui_proteinClustering <- function(x) {
+ui_proteinClustering <- function() {
   
   fluidPage(
     sidebarLayout(
