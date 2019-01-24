@@ -399,7 +399,9 @@ dendDotsServer <- function(input,
   
   output$hierOut <- renderPlot({
     
+    
     if (!is.null(input$selectMetaColumn[[1]])){
+      
       dendTrimmedLabels <- dendro()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
       labels(dendTrimmedLabels) <- labs
@@ -407,12 +409,14 @@ dendDotsServer <- function(input,
       
       par(mar = c(5, 5, 5, plotWidth))
       plot(dendTrimmedLabels, horiz = TRUE)
+      if(input$closeDendDots == 1){}else{
       IDBacApp::runDendDots(rawDendrogram = dendro(),
                             trimdLabsDend = dendTrimmedLabels,
                             pool = pool,
                             columnID = input$selectMetaColumn,
                             colors = colorsChosen(),
                             text_shift = 1)
+      }
     }else{
       dendTrimmedLabels <- dendro()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
@@ -439,7 +443,7 @@ dendDotsServer <- function(input,
   }, height=plotHeight)
   
   
-  return(reactiveValuesToList(input))
+ # return(reactiveValuesToList(input))
 }
 
 
