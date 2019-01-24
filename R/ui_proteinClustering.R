@@ -41,7 +41,7 @@ ui_proteinClustering <- function() {
                    
                    
                    IDBacApp::addDotsActionUI("proth"),
-                   IDBacApp::dendDotsUI("proth"),
+            #      IDBacApp::dendDotsUI("proth"),
                    IDBacApp::colordendLabelsUI("proth"),
                    IDBacApp::colordendLinesUI("proth"),
                    br(),
@@ -64,7 +64,9 @@ ui_proteinClustering <- function() {
       
       
       mainPanel(
-        IDBacApp::plotHier("proth")
+        IDBacApp::plotHier("proth"),
+       IDBacApp::dendDotsUI("proth")
+        
       )
     )
   )

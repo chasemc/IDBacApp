@@ -120,13 +120,14 @@ dendDotsServer <- function(input,
     output$absPaneldendDots <- renderUI(
       
       shiny::absolutePanel(
-        bottom = "0%",
-        right = "0%",
+        bottom = "50%",
+        right =  "0%",
+        width = "20%",
         ##   width = "20%",
-        fixed = F,
+        fixed = T,
         draggable = TRUE,
         style = "z-index:1002;",
-        style = "opacity: 0.80",
+        style = "opacity: 1",
         shiny::wellPanel(class = "dendDots_WellPanel",
                          fluidRow(
                            fluidRow(

@@ -1248,20 +1248,20 @@ output$missingSampleNames <- shiny::renderText({
       split(spectrumSHA,Strain_ID) -> temp
     
     #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
-    conn <- pool::poolCheckout(userDBCon())
-    
-    return( lapply(temp,
+    conn <<- pool::poolCheckout(userDBCon())
+    tt<<-temp
+    temp <- lapply(temp,
                    function(x){
-                     IDBacApp::collapseProteinReplicates(fileshas = .,
-                                                         # db = userDBCon(),
+                     IDBacApp::collapseProteinReplicates(checkedOutPool = conn,
+                                                         fileshas = x,
                                                          proteinPercentPresence = input$percentPresenceP,
                                                          lowerMassCutoff = input$lowerMass,
                                                          upperMassCutoff = input$upperMass,
-                                                         checkedOutPool = conn,
                                                          minSNR = 6)
-                   }))
+                   })
     
-    pool::poolReturn(conn)
+  pool::poolReturn(conn)
+  return(temp)
     
   })
   
@@ -1287,11 +1287,12 @@ output$missingSampleNames <- shiny::renderText({
   })
   
   
-  
   # Turn collapsed peak list into a distance matrix
   #----
   
   binnedProtein <- reactive({
+    
+  
     binvec <- lapply(collapsedPeaksP(), function(x) x@mass)
     zq <- IDBacApp::binnR(vectorList = binvec,
                           ppm = 2000, 
@@ -1787,23 +1788,23 @@ output$missingSampleNames <- shiny::renderText({
   #------------------------------------------------------------------------------
   
   # -----------------
-  
-  
-  
-  observe({
-    w<-input$myProteinchooser$right
-    w<-input$dendparmar
- pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
-                      "proteinMANpage",
-                      dendrogram = dendro(),
-                      pool = userDBCon(),
-                      plotWidth=input$dendparmar,
-                      plotHeight = input$hclustHeight)
- er<<-reactiveValuesToList(input)
-    
-  })
-  
-  
+ #  
+ #  
+ #  
+ #  observe({
+ #    w<-input$myProteinchooser$right
+ #    w<-input$dendparmar
+ # pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
+ #                      "proteinMANpage",
+ #                      dendrogram = dendro(),
+ #                      pool = userDBCon(),
+ #                      plotWidth=input$dendparmar,
+ #                      plotHeight = input$hclustHeight)
+ # er<<-reactiveValuesToList(input)
+ #    
+ #  })
+ #  
+ #  
   
   
   
