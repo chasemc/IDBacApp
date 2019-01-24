@@ -398,6 +398,23 @@ dendDotsServer <- function(input,
       
     }
     
+    if (!is.null(input$selectMetaColumn[[1]])){
+      
+      if(input$closeDendDots == 1){
+        
+      } else {
+        
+        trimdLabsDend <- dendrogram
+        trimdLabsDend <- strtrim(labels(trimdLabsDend), 20)
+        IDBacApp::runDendDots(rawDendrogram = dendrogram,
+                              trimdLabsDend = trimdLabsDend,
+                              pool = pool,
+                              columnID = input$selectMetaColumn,
+                              colors = colorsChosen(),
+                              text_shift = 1)
+      }
+    }
+    
     return(dendrogram)
   })
   
@@ -406,37 +423,11 @@ dendDotsServer <- function(input,
   
   
   output$hierOut <- renderPlot({
-    
+
     par(mar = c(5, 5, 5, plotWidth))
-    
-    if (!is.null(input$selectMetaColumn[[1]])){
-      
-      dendTrimmedLabels <- dendroReact()
-      labs <- base::strtrim(labels(dendTrimmedLabels), 10)
-      labels(dendTrimmedLabels) <- labs
-      
-      
-      plot(dendTrimmedLabels, horiz = TRUE)
-      
-      if(input$closeDendDots == 1){
-        
-      }else{
-      
-        IDBacApp::runDendDots(rawDendrogram = dendroReact(),
-                            trimdLabsDend = dendTrimmedLabels,
-                            pool = pool,
-                            columnID = input$selectMetaColumn,
-                            colors = colorsChosen(),
-                            text_shift = 1)
-      }
-    }else{
-      dendTrimmedLabels <- dendroReact()
-      labs <- base::strtrim(labels(dendTrimmedLabels), 10)
-      labels(dendTrimmedLabels) <- labs
-      
-      plot(dendTrimmedLabels, horiz = TRUE)
-    }
-    
+
+    plot(dendroReact(), horiz = TRUE)
+   
     if(!is.null(input$colorByLines)){
       if(input$colorByLines == "height"){
         abline(v= input$cutHeightLines, lty = 2)
@@ -446,14 +437,22 @@ dendDotsServer <- function(input,
     
     if(!is.null(input$colorByLabels)){
       if(input$colorByLabels == "height"){
-        abline(v= input$cutHeightLabels, lty = 2)
+        abline(v= input$cutHeightLines, lty = 2)
       }
     }
     
   }, height=plotHeight)
   
   
- # return(reactiveValuesToList(input))
+  return(list(dendroReact = reactive(dendroReact()),
+              colorByLines = reactive(input$colorByLines),
+              cutHeightLines = reactive(input$cutHeightLines),
+              colorByLabels = reactive(input$colorByLabels),
+              cutHeightLabels = reactive(input$cutHeightLabels)
+              )
+  )
+  
+  
 }
 
 

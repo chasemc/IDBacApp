@@ -248,7 +248,7 @@ function(input,output,session){
   
   
   userDBCon <- reactive({
-   qq<<- IDBacApp::createPool(fileName = input$selectExperiment,
+    IDBacApp::createPool(fileName = input$selectExperiment,
                          filePath = workingDirectory)[[1]]
   })
   
@@ -1588,14 +1588,43 @@ output$missingSampleNames <- shiny::renderText({
   
   observe({
     
-    shiny::callModule(IDBacApp::dendDotsServer,
+  proteinDend <<-  shiny::callModule(IDBacApp::dendDotsServer,
                       "proth",
                       dendrogram = reactive(dendro()),
                       pool = reactive(userDBCon()),
                       plotWidth=reactive(input$dendparmar),
                       plotHeight = reactive(input$hclustHeight))
     
+  
   })
+  
+  # This observe controls the generation and display of the
+  # protein hierarchical clustering page
+  
+  observe({
+    
+    smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
+                                      "manProtDend",
+                                      dendroReact = reactive(proteinDend$dendroReact()),
+                                      colorByLines = reactive(proteinDend$colorByLines()),
+                                      cutHeightLines = reactive(proteinDend$cutHeightLines()),
+                                      colorByLabels = reactive(proteinDend$colorByLabels()),
+                                      cutHeightLabels = reactive(proteinDend$cutHeightLabels()),
+                                      plotHeight = 500,
+                                      plotWidth =  )
+    
+    
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -1900,19 +1929,19 @@ output$missingSampleNames <- shiny::renderText({
                            .con = userDBCon()
     )
     
-    uu<<-userDBCon()
-    conn <<- pool::poolCheckout(userDBCon())
+    conn <- pool::poolCheckout(userDBCon())
     
-    sqlQ <<- DBI::dbGetQuery(conn, sqlQ)
+    sqlQ <- DBI::dbGetQuery(conn, sqlQ)
     pool::poolReturn(conn)
     sqlQ <- split(sqlQ$spectrumSHA, sqlQ$Strain_ID)
-    sqlQ <- lapply(sqlQ, function(x){
-      IDBacApp::collapseSmallMolReplicates(fileshas = x,
-                                           db = userDBCon(),
-                                           smallMolPercentPresence = input$percentPresenceSM,
-                                           lowerMassCutoff = input$lowerMassSM,
-                                           upperMassCutoff = input$upperMassSM) %>% unname
-    }) 
+    sqlQ <- lapply(sqlQ,
+                   function(x){
+                     IDBacApp::collapseSmallMolReplicates(fileshas = x,
+                                                          db = userDBCon(),
+                                                          smallMolPercentPresence = input$percentPresenceSM,
+                                                          lowerMassCutoff = input$lowerMassSM,
+                                                          upperMassCutoff = input$upperMassSM) %>% unname
+                   }) 
     
     for(i in 1:length(sqlQ)){
       snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)

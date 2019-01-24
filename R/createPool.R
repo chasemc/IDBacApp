@@ -30,7 +30,7 @@ createPool <- function(fileName,
                           dbname = base::file.path(filePath, fileName))
     } else {
       con <- lapply(filePaths, function(x) pool::dbPool(drv = RSQLite::SQLite(),
-                                                        dbname = x) )
+                                                        dbname = x))
     }
     
     return(con)

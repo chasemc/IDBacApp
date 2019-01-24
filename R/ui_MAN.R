@@ -76,7 +76,9 @@ ui_smallMolMan <-  function(){
              #            brush = "plot_brush")
              
              
-             IDBacApp::plotHier2("proteinMANpage")
+             manPageProtDendUI("manProtDend")
+
+            
              
              
              
@@ -103,19 +105,12 @@ ui_smallMolMan <-  function(){
 
 
 
-plotHier2 <- function(id) {
-  ns <- shiny::NS(id)
-  
-  plotOutput(ns("hierOut"),
-             width = "100%",
-             height = "100%",
-             click = "plot_click",
-             dblclick = "plot_dblclick",
-             hover = "plot_hover",
-             brush = "plot_brush")
-  
-  
-}
+
+
+
+
+
+
 
 
 
