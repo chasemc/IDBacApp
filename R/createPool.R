@@ -1,23 +1,24 @@
 #' Create a pool connecton, given file names and a path
 #' If there is no existing database by that name, create one.
 #' 
+#'   Note: Need both name and path due to how users select
 #' @param fileName filename of sqlite database
 #' @param filePath path of the location of sqlite database, sans filename
 #'
-#' @return a pool connection to the sqlite database
+#' @return a list of pool connections
 #' @export
+#' 
 createPool <- function(fileName,
                        filePath){
-  # Filenames within directory
-  names <- tools::file_path_sans_ext(base::list.files(filePath,
-                                                pattern = ".sqlite",
-                                                full.names = FALSE))
-  # Filenames within directory including path
-  namesNpaths <- base::list.files(filePath,
-                                  pattern = ".sqlite",
-                                  full.names = TRUE)
-  # Return single file, including path
-  filePaths <- namesNpaths[which(names == fileName)]
+  
+  
+  if(length(fileName) != length(filePath)){
+    warning("createPool: Length of fileName and filePath are different")
+    
+  } else { 
+  
+  filePaths <- file.path(filePath, fileName)
+  names(filePaths) <- tools::file_path_sans_ext(fileName)
   
   # If no current database by that name exists, create it, 
   # otherwise make a connection to the existing one.
@@ -25,11 +26,11 @@ createPool <- function(fileName,
     con <- pool::dbPool(drv = RSQLite::SQLite(),
                         dbname = base::file.path(filePath, fileName))
   } else {
-    con <- pool::dbPool(drv = RSQLite::SQLite(),
-                        dbname = filePaths)
+    con <- lapply(filePaths, function(x) pool::dbPool(drv = RSQLite::SQLite(),
+                                                      dbname = x) )
   }
   
   return(con)
-  
+  }
   
 }
