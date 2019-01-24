@@ -1279,7 +1279,7 @@ output$missingSampleNames <- shiny::renderText({
   #----
   
   dendro <- reactive({
-    w<-input$myProteinchooser$right
+  
     shiny::callModule(IDBacApp::dendrogramCreator,
                       "prot",
                       proteinMatrix())
@@ -1586,8 +1586,8 @@ output$missingSampleNames <- shiny::renderText({
   
   
   observe({
-    w<-input$myProteinchooser$right
-    w<-input$dendparmar
+z<-dendro()
+cat("hello /n")
     shiny::callModule(IDBacApp::dendDotsServer,
                       "proth",
                       dendrogram = dendro(),
@@ -1596,6 +1596,9 @@ output$missingSampleNames <- shiny::renderText({
                       plotHeight = input$hclustHeight)
     
   })
+  
+  
+  
   # Download svg of dendrogram
   #----
   output$downloadHeirSVG <- downloadHandler(

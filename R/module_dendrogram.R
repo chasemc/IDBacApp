@@ -356,7 +356,7 @@ dendDotsServer <- function(input,
   
   
   
-  dendro <- reactive({
+  dendroReact <- reactive({
     
     
     if(!is.null(input$colorByLabels)){
@@ -403,7 +403,7 @@ dendDotsServer <- function(input,
     
     if (!is.null(input$selectMetaColumn[[1]])){
       
-      dendTrimmedLabels <- dendro()
+      dendTrimmedLabels <- dendroReact()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
       labels(dendTrimmedLabels) <- labs
       
@@ -411,7 +411,7 @@ dendDotsServer <- function(input,
       par(mar = c(5, 5, 5, plotWidth))
       plot(dendTrimmedLabels, horiz = TRUE)
       if(input$closeDendDots == 1){}else{
-      IDBacApp::runDendDots(rawDendrogram = dendro(),
+      IDBacApp::runDendDots(rawDendrogram = dendroReact(),
                             trimdLabsDend = dendTrimmedLabels,
                             pool = pool,
                             columnID = input$selectMetaColumn,
@@ -419,7 +419,7 @@ dendDotsServer <- function(input,
                             text_shift = 1)
       }
     }else{
-      dendTrimmedLabels <- dendro()
+      dendTrimmedLabels <- dendroReact()
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
       labels(dendTrimmedLabels) <- labs
       

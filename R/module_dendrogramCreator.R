@@ -67,6 +67,7 @@ dendrogramCreator <- function(input,
 
   data <- stats::hclust(data,
                         method = input$clustering)
+  
 
   return(stats::as.dendrogram(data))
 
