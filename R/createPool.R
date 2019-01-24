@@ -16,21 +16,24 @@ createPool <- function(fileName,
     warning("createPool: Length of fileName and filePath are different")
     
   } else { 
-  
-  filePaths <- file.path(filePath, fileName)
-  names(filePaths) <- tools::file_path_sans_ext(fileName)
-  
-  # If no current database by that name exists, create it, 
-  # otherwise make a connection to the existing one.
-  if(length(filePaths) == 0){
-    con <- pool::dbPool(drv = RSQLite::SQLite(),
-                        dbname = base::file.path(filePath, fileName))
-  } else {
-    con <- lapply(filePaths, function(x) pool::dbPool(drv = RSQLite::SQLite(),
-                                                      dbname = x) )
-  }
-  
-  return(con)
+    
+    fileName <- tools::file_path_sans_ext(fileName)
+    fileName <- paste0(fileName, ".sqlite")
+    
+    filePaths <- file.path(filePath, fileName)
+    names(filePaths) <- tools::file_path_sans_ext(fileName)
+    
+    # If no current database by that name exists, create it, 
+    # otherwise make a connection to the existing one.
+    if(length(filePaths) == 0){
+      con <- pool::dbPool(drv = RSQLite::SQLite(),
+                          dbname = base::file.path(filePath, fileName))
+    } else {
+      con <- lapply(filePaths, function(x) pool::dbPool(drv = RSQLite::SQLite(),
+                                                        dbname = x) )
+    }
+    
+    return(con)
   }
   
 }

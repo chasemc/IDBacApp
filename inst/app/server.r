@@ -248,8 +248,8 @@ function(input,output,session){
   
   
   userDBCon <- reactive({
-    IDBacApp::createPool(fileName = input$selectExperiment,
-                         filePath = workingDirectory)
+   qq<<- IDBacApp::createPool(fileName = input$selectExperiment,
+                         filePath = workingDirectory)[[1]]
   })
   
   
