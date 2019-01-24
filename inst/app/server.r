@@ -1586,14 +1586,14 @@ output$missingSampleNames <- shiny::renderText({
   
   
   observe({
-z<-dendro()
-cat("hello /n")
+
+
     shiny::callModule(IDBacApp::dendDotsServer,
                       "proth",
-                      dendrogram = dendro(),
-                      pool = userDBCon(),
-                      plotWidth=input$dendparmar,
-                      plotHeight = input$hclustHeight)
+                      dendrogram = reactive(dendro()),
+                      pool = reactive(userDBCon()),
+                      plotWidth=reactive(input$dendparmar),
+                      plotHeight = reactive(input$hclustHeight))
     
   })
   

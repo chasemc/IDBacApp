@@ -104,6 +104,13 @@ dendDotsServer <- function(input,
                            plotHeight){
   
   
+  dendrogram <- dendrogram()
+  pool <- pool()
+  plotWidth <- plotWidth()
+  plotHeight <- plotHeight()
+  
+  
+  
   observeEvent(input$closeDendDots, {
     output$absPaneldendDots <- renderUI({
       # Intentionally Blank
@@ -400,6 +407,7 @@ dendDotsServer <- function(input,
   
   output$hierOut <- renderPlot({
     
+    par(mar = c(5, 5, 5, plotWidth))
     
     if (!is.null(input$selectMetaColumn[[1]])){
       
@@ -408,10 +416,13 @@ dendDotsServer <- function(input,
       labels(dendTrimmedLabels) <- labs
       
       
-      par(mar = c(5, 5, 5, plotWidth))
       plot(dendTrimmedLabels, horiz = TRUE)
-      if(input$closeDendDots == 1){}else{
-      IDBacApp::runDendDots(rawDendrogram = dendroReact(),
+      
+      if(input$closeDendDots == 1){
+        
+      }else{
+      
+        IDBacApp::runDendDots(rawDendrogram = dendroReact(),
                             trimdLabsDend = dendTrimmedLabels,
                             pool = pool,
                             columnID = input$selectMetaColumn,
@@ -423,8 +434,6 @@ dendDotsServer <- function(input,
       labs <- base::strtrim(labels(dendTrimmedLabels), 10)
       labels(dendTrimmedLabels) <- labs
       
-      
-      par(mar = c(5, 5, 5, plotWidth))
       plot(dendTrimmedLabels, horiz = TRUE)
     }
     

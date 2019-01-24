@@ -11,7 +11,7 @@ ui_proteinClustering <- function() {
   fluidPage(
     sidebarLayout(
       
-      sidebarPanel(style = "background-color:#7777770d",
+      sidebarPanel(style = "background-color:#7777770d", width=3,
                    
                    selectInput("proteinUIselector",
                                label = "Available options:",
