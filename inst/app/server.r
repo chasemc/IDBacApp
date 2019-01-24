@@ -1583,11 +1583,11 @@ output$missingSampleNames <- shiny::renderText({
   
   
   
-  
+  # This observe controls the generation and display of the
+  # protein hierarchical clustering page
   
   observe({
-
-
+    
     shiny::callModule(IDBacApp::dendDotsServer,
                       "proth",
                       dendrogram = reactive(dendro()),
