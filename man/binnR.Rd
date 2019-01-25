@@ -4,16 +4,16 @@
 \alias{binnR}
 \title{binnR}
 \usage{
-binnR(vectorList, ppm, refSeqStart, refSeqEnd)
+binnR(vectorList, ppm, massStart, massEnd)
 }
 \arguments{
 \item{vectorList}{NA}
 
 \item{ppm}{NA}
 
-\item{refSeqStart}{NA}
+\item{massStart}{NA}
 
-\item{refSeqEnd}{NA}
+\item{massEnd}{NA}
 }
 \value{
 NA

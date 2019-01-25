@@ -4,7 +4,7 @@
 \alias{ui_proteinClustering}
 \title{ui_proteinClustering}
 \usage{
-ui_proteinClustering(x)
+ui_proteinClustering()
 }
 \arguments{
 \item{x}{NA}

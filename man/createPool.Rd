@@ -13,9 +13,8 @@ createPool(fileName, filePath)
 \item{filePath}{path of the location of sqlite database, sans filename}
 }
 \value{
-a pool connection to the sqlite database
+a list of pool connections
 }
 \description{
-Create a pool connecton, given file names and a path
-If there is no existing database by that name, create one.
+Note: Need both name and path due to how users select
 }

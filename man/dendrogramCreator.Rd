@@ -4,7 +4,7 @@
 \alias{dendrogramCreator}
 \title{dendrogramCreator}
 \usage{
-dendrogramCreator(input, output, session, data)
+dendrogramCreator(input, output, session, proteinMatrix)
 }
 \arguments{
 \item{input}{shiny modules default}
