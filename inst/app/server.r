@@ -1310,14 +1310,14 @@ output$missingSampleNames <- shiny::renderText({
   })
   
 
-  proteinDendrogram <- reactiveValues()
-  observe({  
-
+  observe({
     
-    proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
+    proteinDendrogram2 <- shiny::callModule(IDBacApp::dendrogramCreator,
                                                       "proteinHierOptions",
-                                                      reactive(proteinMatrix()))
+                                                      proteinMatrix())
   
+ 
+    print(proteinDendrogram2) 
   })
   
   
@@ -1575,28 +1575,17 @@ output$missingSampleNames <- shiny::renderText({
   
   
   
-  
-  
-  
-  #User input changes the height/length of the main dendrogram
-  #----
-  plotHeight <- reactive({
-    return(as.numeric(input$hclustHeight))
-    100
-  })
-  
-  
-  
-  
 
 
   observe({
     print("yep")
     
+    req(exists("proteinDendrogram2"))
+
   proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
                                     "proth",
-                                    dendrogram = reactiveValues(dendrogram = proteinDendrogram$dendrogram),
-                                    pool = reactive(userDBCon()),
+                                    dendrogram = proteinDendrogram$dendrogram,
+                                    pool = userDBCon(),
                                     plotWidth= reactive(input$dendparmar),
                                     plotHeight = reactive(input$hclustHeight))
 })
@@ -1607,6 +1596,7 @@ output$missingSampleNames <- shiny::renderText({
   
   # This observe controls the generation and display of the
   # protein hierarchical clustering page
+  
   
   observe({  
     # req(!is.null(proteinDendrogram$dendrogram))

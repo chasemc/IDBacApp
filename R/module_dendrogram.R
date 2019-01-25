@@ -112,7 +112,7 @@ dendDotsServer <- function(input,
     
   })  
   
-  observe(tt <<- dendrogram$dendrogram
+  observe(tt <<- dendrogram
 )
   
   observeEvent(input$openDendots, ignoreInit = T ,ignoreNULL = T, {
