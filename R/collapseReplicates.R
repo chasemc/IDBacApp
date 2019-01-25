@@ -95,15 +95,15 @@ getProteinPeakData <-  function(checkedOutPool, fileshas){
 #' @return a single trimmed and binned MALDIquant peak object
 
 
-collapseSmallMolReplicates <- function(checkedOutPool,
-                                       fileshas,
-                                       proteinPercentPresence,
+collapseSmallMolReplicates <- function(checkedPool,
+                                       sampleIDs,
+                                       peakPercentPresence,
                                        lowerMassCutoff,
                                        upperMassCutoff, 
                                        minSNR){
   
-  temp <- IDBacApp::getSmallMolPeakData(checkedOutPool = checkedOutPool,
-                                        fileshas = fileshas) 
+  temp <- IDBacApp::getSmallMolPeakData(checkedPool = checkedPool,
+                                        sampleIDs = sampleIDs) 
   # Binning peaks lists belonging to a single sample so we can filter 
   # peaks outside the given threshold of presence 
   
@@ -119,7 +119,7 @@ collapseSmallMolReplicates <- function(checkedOutPool,
                                method = c("strict")) 
   
   temp <- MALDIquant::filterPeaks(temp,
-                                  minFrequency = proteinPercentPresence / 100) 
+                                  minFrequency = peakPercentPresence / 100) 
   
   temp <- MALDIquant::mergeMassPeaks(temp, 
                                      method = "mean") 
@@ -133,27 +133,34 @@ collapseSmallMolReplicates <- function(checkedOutPool,
 #' Retrieve MALDIquant peak objects from an IDBac sqlite database
 #' 
 #' @param checkedOutPool database pool connection
-#' @param fileshas the shas for the individual MALDIquant peak objects
+#' @param sampleIDs the shas for the individual MALDIquant peak objects
 #'
-#' @return unlisted MALDIquant peak objects correspoding to the provided fileshas
+#' @return unlisted MALDIquant peak objects correspoding to the provided sampleIDs
 #' @export
 
 
-getSmallMolPeakData <-  function(checkedOutPool, fileshas){
+getSmallMolPeakData <-  function(checkedPool, sampleIDs){
   
-  sqlQ <- glue::glue_sql("
-                         SELECT `smallMoleculePeaks`
-                         FROM (SELECT *
-                         FROM `IndividualSpectra`
-                         WHERE (`spectrumSHA` IN ({shas*})))
-                         WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                         shas = fileshas,
-                         .con = checkedOutPool
-  )
   
-  results <- DBI::dbGetQuery(checkedOutPool, sqlQ)
+  query <- DBI::dbSendStatement("SELECT `smallMoleculePeaks`
+                                FROM IndividualSpectra
+                                WHERE (`smallMoleculePeaks` IS NOT NULL)
+                                AND (`Strain_ID` = ?)",
+                                con=con)
+  
+
+  DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
+  results <- DBI::dbFetch(query)
+  DBI::dbClearResult(query)
+   
   results <- unname(unlist(results, recursive = FALSE))
-  unlist(lapply(results, function(x) unserialize(memDecompress(x, type = "gzip")))  )
+  unlist(lapply(results, 
+                function(x) 
+                  unserialize(memDecompress(x, 
+                                            type = "gzip")
+                              )
+                ) 
+         )
   
   
 }

@@ -1,136 +1,125 @@
+# IDBacApp::subtractMatrixBlank(sampleIds = labels(selectedSmallMolPeakList()), 
+#                               peakList = selectedSmallMolPeakList(),
+#                               binTolerance = 0.002)
 
-selectedSmallMolPeakList
 
 
 
 
-labelsFromBrushedDendrogram
-dendBrushToID <- function(dendrogram,
-                          ymin,
-                          ymax){
+
+
+
+
+
+#' Retrieve small molecule and matrix peak lists and make consensus peak lists
+#'
+#' @param pool pool
+#' @param sampleIDs character vector of IDs (currently not used)
+#' @param dendrogram protein dendrogram that was brushed 
+#' @param ymin brush y-min
+#' @param ymax brush y-max
+#' @param matrixIDs sampleID that will be used as a matrix
+#' @param peakPercentPresence peaks whose frequency of occurence in replicates below this are dropped
+#' @param lowerMassCutoff lower mass to retain
+#' @param upperMassCutoff upper mass to retain
+#' @param minSNR minimum SNR a peak must have to be retained
+#'
+#' @return a list containg two lists of MALDIquant peak objects "samplePeaks" and "matrixPeaks"
+#' @export
+#'
+getSmallMolSpectra <- function(pool,
+                               sampleIDs,
+                               dendrogram,
+                               ymin,
+                               ymax,
+                               matrixIDs = NULL,
+                               peakPercentPresence,
+                               lowerMassCutoff,
+                               upperMassCutoff, 
+                               minSNR){
   
+  checkedPool <- pool::poolCheckout(pool)
   
+
   
-  
-  
-}
-
-
-
-
-function(checkedPool,
-         sampleIDs,
-         dendrogram
-         
-         ){
-
-
-
-combinedSmallMolPeaks <- NULL
-combinedSmallMolPeaksAll <- NULL
-matrixID <- NULL
-
-# Check if there is a protein dendrogram, if TRUE: use to subset strains, if FALSE, show all MAN
-if(!is.null(dendrogram)){  
-  
-  if(is.null(input$plot_brush$ymin)){ # If there is a protein dendrogram and user hasn't brushed:
-    # Don't ovrwhelm the browser by displaying everthing when page loads
+  # Check if there is a protein dendrogram, if TRUE: use to subset strains, if FALSE, show all MAN
+  if(!is.null(dendrogram)){  
     
-    if(length(labels(dendro())) >= 25){
-      # If more than 25 strains present, only display 10 to start, otherwise display all
-      # Get random 10 strain IDs from dendrogram
-      combinedSmallMolPeaks <- labels(dendro())[1:sample.int(10, 1)]
+    # If there is a protein dendrogram but a user hasn't brushed:
+    if(is.null(ymin)){ 
+      
+      # Don't ovrwhelm the browser by displaying everthing when page loads
+      if(length(labels(dendrogram)) >= 25){
+        # If more than 25 strains present, only display 10 to start, otherwise display all
+        # Get random 10 strain IDs from dendrogram
+        sampleIDs <- labels(dendrogram)[1:sample.int(10, 1)]
+      } else {
+        sampleIDs <- labels(dendrogram)
+      }
     } else {
-      combinedSmallMolPeaks <- labels(dendro())
+      # Get the labels of the brushed dendrogram
+      sampleIDs <- IDBacApp::labelsFromBrushedDendrogram(dendrogram = dendrogram,
+                                                     #    dendrogramShortLabels = dendrogram,
+                                                         brushYmin = ymin,
+                                                         brushYmax = ymax)
     }
   } else {
-    combinedSmallMolPeaks <- IDBacApp::networkViaBrushedDendrogram(dendrogram = dendro(),
-                                                                   brushYmin = input$plot_brush$ymin,
-                                                                   brushYmax = input$plot_brush$ymax)
-  }
-} else {
-  
-  # retrieve all Strain_IDs in db, check for matrix.
-  combinedSmallMolPeaksAll <- glue::glue_sql("
-                                             SELECT DISTINCT `Strain_ID`
-                                             FROM `IndividualSpectra`
-                                             WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                                             .con = userDBCon()
-  )
-  
-  conn <- pool::poolCheckout(userDBCon())
-  combinedSmallMolPeaksAll <- DBI::dbGetQuery(conn, combinedSmallMolPeaksAll)[ , 1]
-  pool::poolReturn(con)
-}
-
-# input$matrixSamplePresent (User selection of whether to subtract matrix sample)  1 = Yes, 2 = No
-if(input$matrixSamplePresent == 1){
-  
-  if(!exists("combinedSmallMolPeaksAll")){
-    # retrieve all Strain_IDs in db, check for matrix.
-    combinedSmallMolPeaksAll <- glue::glue_sql("
-                                               SELECT DISTINCT `Strain_ID`
-                                               FROM `IndividualSpectra`
-                                               WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                                               .con = userDBCon()
+    
+    # retrieve all Strain_IDs in db that have small molecule spectra
+    sampleIDs <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
+                               FROM `IndividualSpectra`
+                               WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                                .con = checkedPool
     )
     
-    conn <- pool::poolCheckout(userDBCon())
-    combinedSmallMolPeaksAll <- DBI::dbGetQuery(conn, combinedSmallMolPeaksAll)[ , 1] # return as vector of strain IDs
-    pool::poolReturn(conn)
+    sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)
+    sampleIDs <- as.vector(sampleIDs)
   }
   
-  # Get sample IDs that begin with "matrix" (need this to search sql db)
-  # Also give opportunity to later add ability for letting user interactively select which sample is the blank
-  matrixID <- grep("^matrix",
-                   combinedSmallMolPeaksAll,
-                   ignore.case = TRUE,
-                   value = TRUE)
+  
+  s2 <<- checkedPool
+  s1<<-sampleIDs
+  
+  samples <- lapply(sampleIDs, 
+                    function(sampleIDs){ 
+                      IDBacApp::collapseSmallMolReplicates(checkedPool = checkedPool,
+                                                           sampleIDs = sampleIDs ,
+                                                           peakPercentPresence = peakPercentPresence,
+                                                           lowerMassCutoff =lowerMassCutoff,
+                                                           upperMassCutoff = upperMassCutoff, 
+                                                           minSNR = minSNR)
+                    })
   
   
-  # Check if there is a matrix sample
-  validate(
-    need(length(matrixID) == 0, "Matrix blank not found.  Try selecting \"No\" under \"Do you have a matrix blank\" to left." )
-  )
   
-} else {
-  # Don't add matrix blank to sample ID vector (leave as NULL)
-}
-
-# retrieve small mol peaks, spectrumSHA, and strain_id , given Strain_ID.
-sqlQ <- glue::glue_sql("
-                       SELECT `spectrumSHA`, `Strain_ID`
-                       FROM (SELECT *
-                       FROM `IndividualSpectra`
-                       WHERE (`Strain_ID` IN ({strainIds*})))
-                       WHERE (`smallMoleculePeaks` != 'NA')",
-                       strainIds = c(combinedSmallMolPeaks,combinedSmallMolPeaksAll, matrixID),
-                       .con = userDBCon()
-)
-
-conn <- pool::poolCheckout(userDBCon())
-
-sqlQ <- DBI::dbGetQuery(conn, sqlQ)
-pool::poolReturn(conn)
-sqlQ <- split(sqlQ$spectrumSHA, sqlQ$Strain_ID)
-sqlQ <- lapply(sqlQ,
-               function(x){
-                 IDBacApp::collapseSmallMolReplicates(fileshas = x,
-                                                      db = userDBCon(),
-                                                      smallMolPercentPresence = input$percentPresenceSM,
-                                                      lowerMassCutoff = input$lowerMassSM,
-                                                      upperMassCutoff = input$upperMassSM) %>% unname
-               }) 
-
-for(i in 1:length(sqlQ)){
-  snr1 <-  which(MALDIquant::snr(sqlQ[[i]]) >= input$smSNR)
-  sqlQ[[i]]@mass <- sqlQ[[i]]@mass[snr1]
-  sqlQ[[i]]@snr <- sqlQ[[i]]@snr[snr1]
-  sqlQ[[i]]@intensity <- sqlQ[[i]]@intensity[snr1]
-}
-
-
-return(sqlQ)
-
-
+  
+  
+  if (!is.null(matrixIDs)){
+    
+    # Not lapply because we are just going to merge anyways
+    
+    matrix <- IDBacApp::collapseSmallMolReplicates(checkedPool = checkedPool,
+                                                   sampleIDs = matrixIDs ,
+                                                   peakPercentPresence = peakPercentPresence,
+                                                   lowerMassCutoff =lowerMassCutoff,
+                                                   upperMassCutoff = upperMassCutoff, 
+                                                   minSNR = minSNR)
+    
+    
+  } else {
+    matrix <- NULL
+  }
+  
+  
+  
+  qwer <<-samples
+  
+  
+  # Return pool
+  pool::poolReturn(checkedPool)
+  
+  return(list(samplePeaks = reactive(samples),
+              matrixPeaks = matrix))
+  
+  
 }
