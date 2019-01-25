@@ -58,18 +58,18 @@ dendrogramCreatorUI <- function(id) {
 dendrogramCreator <- function(input,
                               output,
                               session,
-                              data){
+                              proteinMatrix){
 
-
-  data <- IDBacApp::distMatrix(data = data,
+observe(ttt<<-proteinMatrix$proteinMatrix)
+  proteinMatrix$proteinMatrix <- IDBacApp::distMatrix(data = proteinMatrix$proteinMatrix,
                               method = input$distanceMethod,
                               booled = input$booled)
 
-  data <- stats::hclust(data,
+  proteinMatrix$proteinMatrix <- stats::hclust(proteinMatrix$proteinMatrix,
                         method = input$clustering)
   
 
-  return(stats::as.dendrogram(data))
+  return(stats::as.dendrogram(proteinMatrix$proteinMatrix))
 
 }
 

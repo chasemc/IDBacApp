@@ -94,7 +94,7 @@ Install_And_Load(Required_Packages)
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
   
-  
+  proteinDendrogram <- reactiveValues(dendrogram = NULL)
   
   
   #This "observe" event creates the SQL tab UI.
@@ -1272,28 +1272,34 @@ output$missingSampleNames <- shiny::renderText({
   
   
   
-  
-  
-  proteinDendrogram <- reactiveValues()
-  
   # Bin peaks across all protein samples and turn into intensity matrix
   #----
-  proteinMatrix <- reactive({
-    
-    binnedProtein <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
-                         ppm = 2000,
-                         massStart = input$lowerMass,
-                         massEnd = input$upperMass)
-    
-     do.call(rbind, binnedProtein)
+  proteinMatrix <- reactiveValues()
+  
+  observe({
+
+    req(collapsedPeaksP())
+    proteinMatrix$proteinMatrix <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
+                                                        ppm = 2000,
+                                                        massStart = input$lowerMass,
+                                                        massEnd = input$upperMass)
+    print("yo")
+    proteinMatrix$proteinMatrix <- do.call(rbind, proteinMatrix$proteinMatrix)
 
   })
   
   observe({
-  proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
-                                                    "prot",
-                                                    proteinMatrix())
+    req(!is.null(proteinMatrix$proteinMatrix))
+    print("hi")
+  # proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
+  #                                                   "prot",
+  #                                                   reactive(proteinMatrix$proteinMatrix))
   })
+  
+  
+  
+  
+  
   # 
   # #Create the hierarchical clustering based upon the user input for distance method and clustering technique
   # #----
@@ -1551,26 +1557,14 @@ output$missingSampleNames <- shiny::renderText({
   
   
   
-  # This observe controls the generation and display of the
-  # protein hierarchical clustering page
-  
-  
-#     
-#   proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
-#                                     "proth",
-#                                     dendrogram = reactive(proteinDendrogram$dendrogram),
-#                                     pool = reactive(userDBCon()),
-#                                     plotWidth= 20,
-#                                     plotHeight = 300)
-#     
-# # 
 
 
-observe({
-  req(proteinDendrogram$dendrogram)
+  observe({
+    print("yep")
+    
   proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
                                     "proth",
-                                    dendrogram = proteinDendrogram$dendrogram,
+                                    dendrogram = reactiveValues(dendrogram = proteinDendrogram$dendrogram),
                                     pool = reactive(userDBCon()),
                                     plotWidth= reactive(input$dendparmar),
                                     plotHeight = reactive(input$hclustHeight))
@@ -1583,20 +1577,20 @@ observe({
   # This observe controls the generation and display of the
   # protein hierarchical clustering page
   
-  observe({
-    req(proteinDend)
-    pp<<-proteinDend
-    
-    smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
-                                      "manProtDend",
-                                      dendroReact = reactive(proteinDend$dendroReact()),
-                                      colorByLines = reactive(proteinDend$colorByLines()),
-                                      cutHeightLines = reactive(proteinDend$cutHeightLines()),
-                                      colorByLabels = reactive(proteinDend$colorByLabels()),
-                                      cutHeightLabels = reactive(proteinDend$cutHeightLabels()),
-                                      plotHeight = 500,
-                                      plotWidth =  )
-    
+  observe({  
+    # req(!is.null(proteinDendrogram$dendrogram))
+    # pp<<-proteinDend$dendrogram
+    # 
+    # smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
+    #                                   "manProtDend",
+    #                                   dendroReact = reactive(proteinDend$dendroReact()),
+    #                                   colorByLines = reactive(proteinDend$colorByLines()),
+    #                                   cutHeightLines = reactive(proteinDend$cutHeightLines()),
+    #                                   colorByLabels = reactive(proteinDend$colorByLabels()),
+    #                                   cutHeightLabels = reactive(proteinDend$cutHeightLabels()),
+    #                                   plotHeight = 500,
+    #                                   plotWidth =  )
+    # 
     
   })
   
@@ -1681,19 +1675,6 @@ observe({
   )
   
   
-  # Select samples for input into dendrogram
-  #----
-  output$chooseProteinSamples <- renderUI({
-    
-    IDBacApp::chooserInput("myProteinchooser",
-                           "Available frobs", 
-                           "Selected frobs",
-                           availableProtein(),
-                           c(),
-                           size = 10, 
-                           multiple = TRUE
-    )
-  })
   
   
   
@@ -1705,25 +1686,7 @@ observe({
   
   
   
-  
-  
-  # Check which samples can be used for protein analysis, return Sample Names
-  #----
-  availableProtein <- reactive({
-    
-    combinedProteinPeaksAll <- glue::glue_sql("
-                                              SELECT DISTINCT `Strain_ID`
-                                              FROM `IndividualSpectra`
-                                              WHERE (`proteinPeaks` IS NOT NULL)",
-                                              .con = userDBCon()
-    )
-    
-    conn <- pool::poolCheckout(userDBCon())
-    combinedProteinPeaksAll <- DBI::dbGetQuery(conn, combinedProteinPeaksAll)
-    pool::poolReturn(conn)
-    return(combinedProteinPeaksAll[ , 1])
-    
-  })
+ 
   
   
   
