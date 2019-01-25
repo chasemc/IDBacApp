@@ -103,13 +103,17 @@ dendDotsServer <- function(input,
                            plotWidth,
                            plotHeight){
   
+  observe({ 
   
-  dendrogram <- dendrogram()
-  pool <- pool()
-  plotWidth <- plotWidth()
-  plotHeight <- plotHeight()
-  
-  
+    ll<<-dendrogram()
+    print(dendrogram())
+    
+  #dendrogram <- dendrogram()
+  # pool <- pool()
+  # plotWidth <- plotWidth()
+  # plotHeight <- plotHeight()
+  # 
+  })
   
   observeEvent(input$closeDendDots, {
     output$absPaneldendDots <- renderUI({
@@ -364,7 +368,7 @@ dendDotsServer <- function(input,
   
   
   dendroReact <- reactive({
-    
+    hello <<- dendrogram
     
     if(!is.null(input$colorByLabels)){
       
@@ -425,7 +429,8 @@ dendDotsServer <- function(input,
   output$hierOut <- renderPlot({
 
     par(mar = c(5, 5, 5, plotWidth))
-
+    ww<<-dendrogram
+we<<-dendroReact()
     plot(dendroReact(), horiz = TRUE)
    
     if(!is.null(input$colorByLines)){

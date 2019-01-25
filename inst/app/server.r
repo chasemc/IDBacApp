@@ -997,7 +997,7 @@ output$missingSampleNames <- shiny::renderText({
     mirrorPlotEnv$peaksSampleTwo@mass <- mirrorPlotEnv$peaksSampleTwo@mass[mirrorPlotEnv$SampleTwoSNR]
     mirrorPlotEnv$peaksSampleTwo@snr <- mirrorPlotEnv$peaksSampleTwo@snr[mirrorPlotEnv$SampleTwoSNR]
     mirrorPlotEnv$peaksSampleTwo@intensity <- mirrorPlotEnv$peaksSampleTwo@intensity[mirrorPlotEnv$SampleTwoSNR]
-    aa<<-mirrorPlotEnv$peaksSampleOne
+    
     # Binpeaks for the two samples so we can color code similar peaks within the plot
     
     validate(
@@ -1248,8 +1248,8 @@ output$missingSampleNames <- shiny::renderText({
       split(spectrumSHA,Strain_ID) -> temp
     
     #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
-    conn <<- pool::poolCheckout(userDBCon())
-    tt<<-temp
+    conn <- pool::poolCheckout(userDBCon())
+    
     temp <- lapply(temp,
                    function(x){
                      IDBacApp::collapseProteinReplicates(checkedOutPool = conn,
@@ -1266,75 +1266,43 @@ output$missingSampleNames <- shiny::renderText({
   })
   
   
+ 
+  
+ 
+  
+  
+  
+  
+  
+  proteinDendrogram <- reactiveValues()
+  
   # Bin peaks across all protein samples and turn into intensity matrix
   #----
   proteinMatrix <- reactive({
     
-    do.call(rbind, binnedProtein())
+    binnedProtein <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
+                         ppm = 2000,
+                         massStart = input$lowerMass,
+                         massEnd = input$upperMass)
     
+     do.call(rbind, binnedProtein)
+
   })
   
-  
-  #Create the hierarchical clustering based upon the user input for distance method and clustering technique
-  #----
-  
-  dendro <- reactive({
-  
-    shiny::callModule(IDBacApp::dendrogramCreator,
-                      "prot",
-                      proteinMatrix())
-    
+  observe({
+  proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
+                                                    "prot",
+                                                    proteinMatrix())
   })
-  
-  
-  # Turn collapsed peak list into a distance matrix
-  #----
-  
-  binnedProtein <- reactive({
-    
-  
-    binvec <- lapply(collapsedPeaksP(), function(x) x@mass)
-    zq <- IDBacApp::binnR(vectorList = binvec,
-                          ppm = 2000, 
-                          refSeqStart = 3000,
-                          refSeqEnd = 15000)
-    
-    #  collected <- lapply(zq, function(x) S4Vectors::unique(S4Vectors::subjectHits(x)))
-    collected <- lapply(zq, function(x) S4Vectors::unique(S4Vectors::subjectHits(x)))
-    
-    cvec <- sort(unique(unlist(collected)))
-    
-    lapply(collected, function(x) match(cvec, x))
-    
-    
-    
-  })
-  
-  
-  
-  
-  
-  
-  proteinDistance <- reactive({
-    
-    validate(
-      need(length(collapsedPeaksP()) != 0, "Select samples to analyze on left" )
-    )
-    
-    
-    IDBacApp::distMatrix(binnedData = binnedProtein(),
-                         method = input$distance)
-    
-    
-    
-    
-    
-    
-    
-    
-  })
-  
-  
+  # 
+  # #Create the hierarchical clustering based upon the user input for distance method and clustering technique
+  # #----
+  # observe({
+  #   proteinDendrogram <- reactiveValues(dendrogram = shiny::callModule(IDBacApp::dendrogramCreator,
+  #                                                                      "prot",
+  #                                                                      proteinMatrix()))
+  # })
+  # 
   
   
   
@@ -1535,7 +1503,7 @@ output$missingSampleNames <- shiny::renderText({
   # UI of paragraph explaining which variables were used
   #----
   output$proteinReport<-renderUI(
-    p("This dendrogram was created by analyzing ",tags$code(length(labels(dendro()))), " samples,
+    p("This dendrogram was created by analyzing ",tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
       and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
       Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
       "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
@@ -1586,22 +1554,38 @@ output$missingSampleNames <- shiny::renderText({
   # This observe controls the generation and display of the
   # protein hierarchical clustering page
   
-  observe({
-    
-  proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
-                      "proth",
-                      dendrogram = reactive(dendro()),
-                      pool = reactive(userDBCon()),
-                      plotWidth=reactive(input$dendparmar),
-                      plotHeight = reactive(input$hclustHeight))
-    
   
-  })
+#     
+#   proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
+#                                     "proth",
+#                                     dendrogram = reactive(proteinDendrogram$dendrogram),
+#                                     pool = reactive(userDBCon()),
+#                                     plotWidth= 20,
+#                                     plotHeight = 300)
+#     
+# # 
+
+
+observe({
+  req(proteinDendrogram$dendrogram)
+  proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
+                                    "proth",
+                                    dendrogram = proteinDendrogram$dendrogram,
+                                    pool = reactive(userDBCon()),
+                                    plotWidth= reactive(input$dendparmar),
+                                    plotHeight = reactive(input$hclustHeight))
+})
+  
+  
+  
+  
   
   # This observe controls the generation and display of the
   # protein hierarchical clustering page
   
   observe({
+    req(proteinDend)
+    pp<<-proteinDend
     
     smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
                                       "manProtDend",
@@ -1646,13 +1630,13 @@ output$missingSampleNames <- shiny::renderText({
       
       if (input$kORheight == "1"){
         
-        dendro() %>% 
+        proteinDendrogram$dendrogram %>% 
           dendextend::color_branches(k = input$kClusters) %>% 
           plot(horiz = TRUE, lwd = 8)
         
       } else if (input$kORheight == "2"){
         
-        dendro() %>% 
+        proteinDendrogram$dendrogram %>% 
           dendextend::color_branches(h = input$cutHeight) %>%
           plot(horiz = TRUE, lwd = 8)
         abline(v = input$cutHeight,
@@ -1692,7 +1676,7 @@ output$missingSampleNames <- shiny::renderText({
       paste0(Sys.Date(), ".newick")
     },
     content = function(file) {
-      ape::write.tree(as.phylo(dendro()), file=file)
+      ape::write.tree(as.phylo(proteinDendrogram$dendrogram), file=file)
     }
   )
   
@@ -1828,7 +1812,7 @@ output$missingSampleNames <- shiny::renderText({
  #    w<-input$dendparmar
  # pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
  #                      "proteinMANpage",
- #                      dendrogram = dendro(),
+ #                      dendrogram = proteinDendrogram$dendrogram,
  #                      pool = userDBCon(),
  #                      plotWidth=input$dendparmar,
  #                      plotHeight = input$hclustHeight)
@@ -1863,8 +1847,7 @@ output$missingSampleNames <- shiny::renderText({
     
   })
   
- 
-  
+
   #----
   smallMolNetworkDataFrame <- reactive({
     
@@ -1900,7 +1883,6 @@ output$missingSampleNames <- shiny::renderText({
       
       pc<- cbind(pc, as.vector(IDBacApp::colorBlindPalette()()[calcNetwork()$wc$membership[azz], 2] ))
       colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
-      lp3<<-pc
       pc
     }else{FALSE}
   })
@@ -2038,10 +2020,10 @@ output$missingSampleNames <- shiny::renderText({
   #----
   output$proteinReport2 <- renderUI({
     
-    if(length(labels(dendro())) == 0){
+    if(length(labels(proteinDendrogram$dendrogram)) == 0){
       p("No Protein Data to Display")
     } else {
-      p("This dendrogram was created by analyzing ", tags$code(length(labels(dendro()))), " samples,
+      p("This dendrogram was created by analyzing ", tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
         and retaining peaks with a signal to noise ratio above ", tags$code(input$pSNR)," and occurring in greater than ", tags$code(input$percentPresenceP),"% of replicate spectra.
         Peaks occuring below ", tags$code(input$lowerMass), " m/z or above ", tags$code(input$upperMass), " m/z were removed from the analyses. ",
         "For clustering spectra, ", tags$code(input$distance), " distance and ", tags$code(input$clustering), " algorithms were used.")
