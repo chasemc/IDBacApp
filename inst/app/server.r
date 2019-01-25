@@ -94,8 +94,7 @@ Install_And_Load(Required_Packages)
 # Reactive variable returning the user-chosen working directory as string
 function(input,output,session){
   
-  proteinDendrogram <- reactiveValues(dendrogram = NULL)
-  
+ 
   
   #This "observe" event creates the SQL tab UI.
   observe({
@@ -1027,8 +1026,6 @@ output$missingSampleNames <- shiny::renderText({
     mirrorPlotEnv$spectrumSampleOne <- DBI::dbFetch(query)
     DBI::dbClearResult(query)
     
-    www <<- mirrorPlotEnv
-    co <<- conn
     mirrorPlotEnv$spectrumSampleOne <- lapply(mirrorPlotEnv$spectrumSampleOne[ , 1],
                                               function(x){
                                                 unserialize(memDecompress(x, 
@@ -1248,39 +1245,49 @@ output$missingSampleNames <- shiny::renderText({
   # Protein processing
   #------------------------------------------------------------------------------
   
+  
+ 
+  
+  
+  
+  
+  # User chooses which samples to include
+  chosenProteinSampleIDs <- reactiveValues()
+  
+  observe({
+    chosenProteinSampleIDs$ids <- shiny::callModule(IDBacApp::sampleChooser,
+                                                    "proteinSampleChooser",
+                                                    pool = userDBCon(),
+                                                    protein = TRUE)
+  })
+  
+  
   # Merge and trim protein replicates
   #----
   collapsedPeaksP <- reactive({
-    req(input$myProteinchooser$right)
+    req(chosenProteinSampleIDs$ids)
+    print("hi")
     # For each sample:
     # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
     # merge into a single peak list per sample
     # trim m/z based on user input
     # connect to sql
-    db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
-    
-    db %>%
-      filter(proteinPeaks != "NA") %>%
-      select(spectrumSHA,Strain_ID) %>%
-      filter(Strain_ID %in% input$myProteinchooser$right) %>%
-      collect %$%
-      split(spectrumSHA,Strain_ID) -> temp
-    
-    #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
     conn <- pool::poolCheckout(userDBCon())
     
-    temp <- lapply(temp,
-                   function(x){
-                     IDBacApp::collapseProteinReplicates(checkedOutPool = conn,
-                                                         fileshas = x,
-                                                         proteinPercentPresence = input$percentPresenceP,
-                                                         lowerMassCutoff = input$lowerMass,
-                                                         upperMassCutoff = input$upperMass,
-                                                         minSNR = 6)
+    temp <- lapply(chosenProteinSampleIDs$ids,
+                   function(ids){
+                     IDBacApp::collapseReplicates(checkedPool = conn,
+                                                  sampleIDs = ids,
+                                                  peakPercentPresence = input$percentPresenceP,
+                                                  lowerMassCutoff = input$lowerMass,
+                                                  upperMassCutoff = input$upperMass, 
+                                                  minSNR = 6, 
+                                                  tolerance = 0.002,
+                                                  protein = TRUE)
                    })
     
-  pool::poolReturn(conn)
-  return(temp)
+    pool::poolReturn(conn)
+    return(temp)
     
   })
   
@@ -1290,30 +1297,35 @@ output$missingSampleNames <- shiny::renderText({
  
   
   
-  
-  # Bin peaks across all protein samples and turn into intensity matrix
-  #----
-  proteinMatrix <- reactiveValues()
-  
-  observe({
+ 
+  proteinMatrix <- reactive({
 
-    req(collapsedPeaksP())
-    proteinMatrix$proteinMatrix <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
-                                                        ppm = 2000,
-                                                        massStart = input$lowerMass,
-                                                        massEnd = input$upperMass)
-    print("yo")
-    proteinMatrix$proteinMatrix <- do.call(rbind, proteinMatrix$proteinMatrix)
-
+    
+    pm <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
+                                            ppm = 2000,
+                                            massStart = input$lowerMass,
+                                            massEnd = input$upperMass)
+   do.call(rbind, pm)
+    
   })
   
-  observe({
-    req(!is.null(proteinMatrix$proteinMatrix))
-    print("hi")
-  # proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
-  #                                                   "prot",
-  #                                                   reactive(proteinMatrix$proteinMatrix))
+
+  proteinDendrogram <- reactiveValues()
+  observe({  
+
+    
+    proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
+                                                      "proteinHierOptions",
+                                                      reactive(proteinMatrix()))
+  
   })
+  
+  
+  
+  
+  
+  
+  
   
   
   
@@ -1699,29 +1711,13 @@ output$missingSampleNames <- shiny::renderText({
   
   
   
-  
-  
+ 
   
   
   
   
  
   
-  
-  
-  # Select samples for input into new databe
-  #----
-  output$chooseNewDBSamples <- renderUI({
-    
-    IDBacApp::chooserInput("addSampleChooser",
-                           "Available samples", 
-                           "Selected samples",
-                           availableNewSamples(),
-                           c(),
-                           size = 10, 
-                           multiple = TRUE
-    )
-  })
   
   
   
@@ -1781,6 +1777,7 @@ output$missingSampleNames <- shiny::renderText({
   
   
   
+  
   #------------------------------------------------------------------------------
   # Small molecule data processing
   #------------------------------------------------------------------------------
@@ -1790,7 +1787,7 @@ output$missingSampleNames <- shiny::renderText({
  #  
  #  
  #  observe({
- #    w<-input$myProteinchooser$right
+ #    w<-chosenProteinSampleIDs$ids
  #    w<-input$dendparmar
  # pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
  #                      "proteinMANpage",

@@ -9,37 +9,37 @@
 
 dendrogramCreatorUI <- function(id) {
   ns <- shiny::NS(id)
-
+  
   shiny::tagList(
     shiny::selectInput(ns("distanceMethod"),
-                label = shiny::h5(shiny::strong("Distance Algorithm")),
-                choices = list("cosine" = "cosine",
-                               "euclidean" = "euclidean",
-                               "maximum" = "maximum",
-                               "manhattan" = "manhattan",
-                               "canberra" = "canberra",
-                               "binary" = "binary",
-                               "minkowski"= "minkowski"),
-                selected = "cosine"),
-
+                       label = shiny::h5(shiny::strong("Distance Algorithm")),
+                       choices = list("cosine" = "cosine",
+                                      "euclidean" = "euclidean",
+                                      "maximum" = "maximum",
+                                      "manhattan" = "manhattan",
+                                      "canberra" = "canberra",
+                                      "binary" = "binary",
+                                      "minkowski"= "minkowski"),
+                       selected = "cosine"),
+    
     shiny::selectInput(ns("clustering"),
-                label = shiny::h5(shiny::strong("Clustering Algorithm")),
-                choices = list("ward.D" = "ward.D",
-                               "ward.D2" = "ward.D2",
-                               "single" = "single",
-                               "complete" = "complete",
-                               "average (UPGMA)" = "average",
-                               "mcquitty (WPGMA)" = "mcquitty",
-                               "median (WPGMC)" = "median",
-                               "centroid (UPGMC)" = "centroid"),
-                selected = "average"),
-
+                       label = shiny::h5(shiny::strong("Clustering Algorithm")),
+                       choices = list("ward.D" = "ward.D",
+                                      "ward.D2" = "ward.D2",
+                                      "single" = "single",
+                                      "complete" = "complete",
+                                      "average (UPGMA)" = "average",
+                                      "mcquitty (WPGMA)" = "mcquitty",
+                                      "median (WPGMC)" = "median",
+                                      "centroid (UPGMC)" = "centroid"),
+                       selected = "average"),
+    
     shiny::radioButtons(ns("booled"),
-                 label = shiny::h5(shiny::strong("Include peak intensities, or use presence/absence?")),
-                 choices = list("Presence/Absence" = TRUE,
-                                "Intensities" = FALSE))
+                        label = shiny::h5(shiny::strong("Include peak intensities, or use presence/absence?")),
+                        choices = list("Presence/Absence" = TRUE,
+                                       "Intensities" = FALSE))
   )
-
+  
 }
 
 
@@ -59,17 +59,26 @@ dendrogramCreator <- function(input,
                               output,
                               session,
                               proteinMatrix){
-
-observe(ttt<<-proteinMatrix$proteinMatrix)
-  proteinMatrix$proteinMatrix <- IDBacApp::distMatrix(data = proteinMatrix$proteinMatrix,
-                              method = input$distanceMethod,
-                              booled = input$booled)
-
-  proteinMatrix$proteinMatrix <- stats::hclust(proteinMatrix$proteinMatrix,
-                        method = input$clustering)
   
-
-  return(stats::as.dendrogram(proteinMatrix$proteinMatrix))
+ 
+a <-   reactive({
+    prt<<-proteinMatrix
+      if(nrow(proteinMatrix) > 1){
+      
+        proteinMatrix <- IDBacApp::distMatrix(data = proteinMatrix,
+                                       method = input$distanceMethod,
+                                       booled = input$booled)
+    
+        proteinMatrix <- stats::hclust(proteinMatrix,
+                                method = input$clustering)
+    } else {
+      warning("More than two samples must be selected to cluster.")
+    }
+    
+  
+  return(stats::as.dendrogram(proteinMatrix))
+  })
+return(a)
 
 }
 

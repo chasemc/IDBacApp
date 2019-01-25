@@ -27,9 +27,9 @@ ui_proteinClustering <- function() {
                      h5(strong("Select Samples")),
                      p("Move strains between boxes by clicking the strain's name
                        and then an arrow. Strains in the right box will be used for analysis."),
-                     uiOutput("chooseProteinSamples")),
+                     IDBacApp::sampleChooserUI("proteinSampleChooser")),
                    
-                   IDBacApp::dendrogramCreatorUI("prot"),
+                   IDBacApp::dendrogramCreatorUI("proteinHierOptions"),
                    numericInput("hclustHeight",
                                 label = h5(strong("Expand Tree")),
                                 value = 750,
