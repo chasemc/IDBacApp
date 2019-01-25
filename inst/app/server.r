@@ -952,37 +952,31 @@ output$missingSampleNames <- shiny::renderText({
     conn <- pool::poolCheckout(userDBCon())
     
     # get protein peak data for the 1st mirror plot selection
-    db %>%
-      filter(Strain_ID %in% input$Spectra1) %>%
-      filter(proteinPeaks != "NA") %>%
-      select(spectrumSHA) %>%
-      pull %>%
-      IDBacApp::collapseProteinReplicates(fileshas = .,
-                                         # db = userDBCon(),
-                                          proteinPercentPresence = input$percentPresenceP,
-                                          lowerMassCutoff = input$lowerMass,
-                                          upperMassCutoff = input$upperMass,
-                                         checkedOutPool = conn,
-                                         minSNR = 6) %>%
-      return(.) -> mirrorPlotEnv$peaksSampleOne
     
-    # get protein peak data for the 2nd mirror plot selection
-    db %>%
-      filter(Strain_ID %in% input$Spectra2) %>%
-      filter(proteinPeaks != "NA") %>%
-      select(spectrumSHA) %>%
-      pull %>%
-      IDBacApp::collapseProteinReplicates(fileshas = .,
-                                          # db = userDBCon(),
-                                          proteinPercentPresence = input$percentPresenceP,
-                                          lowerMassCutoff = input$lowerMass,
-                                          upperMassCutoff = input$upperMass,
-                                          checkedOutPool = conn,
-                                          minSNR = 6) %>%
-      return(.) -> mirrorPlotEnv$peaksSampleTwo
-    pool::poolReturn(conn)
+    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
+                                                                 sampleIDs = input$Spectra1,
+                                                                 peakPercentPresence = input$percentPresenceP,
+                                                                 lowerMassCutoff = input$lowerMass,
+                                                                 upperMassCutoff = input$upperMass,
+                                                                 minSNR = 6,
+                                                                 tolerance = 0.002,
+                                                                 protein = TRUE) 
     
     
+    
+    
+    mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
+                                                                 sampleIDs = input$Spectra2,
+                                                                 peakPercentPresence = input$percentPresenceP,
+                                                                 lowerMassCutoff = input$lowerMass,
+                                                                 upperMassCutoff = input$upperMass,
+                                                                 minSNR = 6,
+                                                                 tolerance = 0.002,
+                                                                 protein = TRUE)
+    
+    
+   
+
     # pSNR= the User-Selected Signal to Noise Ratio for protein
     
     # Remove peaks from the two peak lists that are less than the chosen SNR cutoff
@@ -1005,7 +999,7 @@ output$missingSampleNames <- shiny::renderText({
                length(mirrorPlotEnv$peaksSampleTwo@mass)) > 0,
            "No peaks found in either sample, double-check the settings or your raw data.")
     )
-    temp <- binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .02)
+    temp <- binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .002)
     
     
     
@@ -1021,30 +1015,55 @@ output$missingSampleNames <- shiny::renderText({
     mirrorPlotEnv$SampleOneColors[temp] <- "blue"
     remove(temp)
     
-    # Retrieve the full spectra for each of the samples and average them
-    db %>%
-      filter(Strain_ID %in% input$Spectra2) %>%
-      filter(proteinSpectrum != "NA") %>%
-      select(proteinSpectrum) %>%
-      pull %>%
-      lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
-      unlist(., recursive = TRUE) %>%
-      MALDIquant::averageMassSpectra(., method = "mean") %>%
-      return(.) -> mirrorPlotEnv$spectrumSampleTwo
+    
+    query <- DBI::dbSendStatement("SELECT `proteinSpectrum`
+                                  FROM IndividualSpectra
+                                  WHERE (`proteinSpectrum` IS NOT NULL)
+                                  AND (`Strain_ID` = ?)",
+                                  con = conn)
     
     
-    db %>%
-      filter(Strain_ID %in% input$Spectra1) %>%
-      filter(proteinSpectrum != "NA") %>%
-      select(proteinSpectrum) %>%
-      pull %>%
-      lapply(., function(x) unserialize(memDecompress(x, type= "gzip"))) %>%
-      unlist(., recursive = TRUE) %>%
-      MALDIquant::averageMassSpectra(., method = "mean") %>%
-      return(.) -> mirrorPlotEnv$spectrumSampleOne
+    DBI::dbBind(query, list(as.character(as.vector(input$Spectra1))))
+    mirrorPlotEnv$spectrumSampleOne <- DBI::dbFetch(query)
+    DBI::dbClearResult(query)
+    
+    www <<- mirrorPlotEnv
+    co <<- conn
+    mirrorPlotEnv$spectrumSampleOne <- lapply(mirrorPlotEnv$spectrumSampleOne[ , 1],
+                                              function(x){
+                                                unserialize(memDecompress(x, 
+                                                                          type = "gzip"))
+                                                })
+    mirrorPlotEnv$spectrumSampleOne <- unlist(mirrorPlotEnv$spectrumSampleOne, recursive = TRUE)
+    mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(mirrorPlotEnv$spectrumSampleOne,
+                                                                      method = "mean") 
+      
     
     
-    # Return the entire saved environment
+    
+    query <- DBI::dbSendStatement("SELECT `proteinSpectrum`
+                                  FROM IndividualSpectra
+                                  WHERE (`proteinSpectrum` IS NOT NULL)
+                                  AND (`Strain_ID` = ?)",
+                                  con = conn)
+    
+    
+    DBI::dbBind(query, list(as.character(as.vector(input$Spectra2))))
+    mirrorPlotEnv$spectrumSampleTwo <- DBI::dbFetch(query)
+    DBI::dbClearResult(query)
+    
+    mirrorPlotEnv$spectrumSampleTwo <- lapply(mirrorPlotEnv$spectrumSampleTwo[ , 1],
+                                              function(x){
+                                                unserialize(memDecompress(x, 
+                                                                          type = "gzip"))
+                                              })
+    mirrorPlotEnv$spectrumSampleTwo <- unlist(mirrorPlotEnv$spectrumSampleTwo, recursive = TRUE)
+    mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(mirrorPlotEnv$spectrumSampleTwo,
+                                                                      method = "mean") 
+    
+    
+    pool::poolReturn(conn)
+        # Return the entire saved environment
     mirrorPlotEnv
     
   })

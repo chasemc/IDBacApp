@@ -1,8 +1,9 @@
 
 #' Retrieve MALDIquant peak objects from an IDBac sqlite database
 #' 
-#' @param checkedPool 
-#' @param sampleIDs 
+#' @param checkedPool checked out pool
+#' @param sampleIDs sample IDs of samples to process
+#' @param protein whether to search SQL for protein or small mol spectra
 #'
 #' @return unlisted MALDIquant peak objects correspoding to the provided fileshas
 #' @export
@@ -15,7 +16,7 @@ getPeakData <-  function(checkedPool, sampleIDs, protein){
                                 FROM IndividualSpectra
                                 WHERE (`proteinPeaks` IS NOT NULL)
                                 AND (`Strain_ID` = ?)",
-                                  con = con)
+                                  con = checkedPool)
     
     
     DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
@@ -36,7 +37,7 @@ getPeakData <-  function(checkedPool, sampleIDs, protein){
                                 FROM IndividualSpectra
                                   WHERE (`smallMoleculePeaks` IS NOT NULL)
                                   AND (`Strain_ID` = ?)",
-                                  con=con)
+                                  con = checkedPool)
     
     
     DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
@@ -74,6 +75,8 @@ getPeakData <-  function(checkedPool, sampleIDs, protein){
 #' @param sampleIDs sample IDs of samples to process
 #' @param peakPercentPresence peaks in replciates that occurr less frequently than this will be removed
 #' @param tolerance binning tolerance ppm / 10e6
+#' @param protein whether to search SQL for protein or small mol spectra
+
 #'
 #' @export
 #' @return a single trimmed and binned MALDIquant peak object
@@ -85,10 +88,12 @@ collapseReplicates <- function(checkedPool,
                                lowerMassCutoff,
                                upperMassCutoff, 
                                minSNR, 
-                               tolerance = 0.002){
+                               tolerance = 0.002,
+                               protein){
   
   temp <- IDBacApp::getPeakData(checkedPool = checkedPool,
-                                sampleIDs = sampleIDs) 
+                                sampleIDs = sampleIDs,
+                                protein = protein) 
   # Binning peaks lists belonging to a single sample so we can filter 
   # peaks outside the given threshold of presence 
   
