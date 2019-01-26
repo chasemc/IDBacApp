@@ -7,31 +7,29 @@
 #' @return IDBac server
 #' @export
 #'
-app_server <- function(input, output,session) {
+app_server <- function(input, output, session) {
+
+#######
+# For during Dev
   options(shiny.reactlog = TRUE)
+  workingDirectory <- getwd()
+#######
+  
   
 # Setup working directories
-workingDirectory <- getwd()
 
-
+# Create a directory for temporary mzml files
 tempMZDir <- file.path(workingDirectory, "temp_mzML")
 dir.create(tempMZDir)
-# Cleanup mzML temp folder 
+
+# Cleanup mzML temp folder on initialization of app
 file.remove(list.files(tempMZDir,
                        pattern = ".mzML",
                        recursive = FALSE,
                        full.names = TRUE))
 
 
-# wq <-pool::dbPool(drv = RSQLite::SQLite(),
-#              dbname = paste0("wds", ".sqlite"))
-# 
-# onStop(function() {
-#   pool::poolClose(wq)
-#   print(wq)
-# }) # important!
-
-
+# Register sample-choosing JS
 shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
   if (is.null(data)) {
     NULL
@@ -39,72 +37,10 @@ shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
     list(left = as.character(data$left), right = as.character(data$right))
   }}, force = TRUE)
 
-
-#delete
-#chase change to id
-
-# The server portion of the Shiny app serves as the backend, 
-# performing data processing and creating the visualizations 
-# to be displayed as specified in the UI function(input, output,session){}
-
-# Function to Install and Load R Packages
-Install_And_Load <- function(Required_Packages)
-{
-  Remaining_Packages <-
-    Required_Packages[!(Required_Packages %in% installed.packages()[, "Package"])]
-  if (length(Remaining_Packages))
-  {
-    install.packages(Remaining_Packages)
-  }
-  for (package_name in Required_Packages)
-  {
-    library(package_name,
-            character.only = TRUE,
-            quietly = TRUE)
-  }
-}
-
-# Required packages to install and load
-#----
-Required_Packages = c("Rcpp",
-                      "devtools",
-                      "svglite",
-                      "shinyjs",
-                      "mzR",
-                      "plotly",
-                      "colourpicker",
-                      "shiny",
-                      "MALDIquant",
-                      "MALDIquantForeign",
-                      "readxl",
-                      "networkD3",
-                      "ape",
-                      "FactoMineR",
-                      "dendextend",
-                      "networkD3",
-                      "reshape2",
-                      "plyr",
-                      "igraph",
-                      "RSQLite",
-                      "DBI",
-                      "dbplyr",
-                      "dplyr",
-                      "rhandsontable",
-                      "Rtsne",
-                      "pool",
-                      "magrittr",
-                      "shinyBS")
-
-
-# Install and Load Packages
-Install_And_Load(Required_Packages)
+ 
 
 
 
-
-# Reactive variable returning the user-chosen working directory as string
-function(input,output,session){
-  
  
   
   #This "observe" event creates the SQL tab UI.
@@ -2199,8 +2135,15 @@ output$missingSampleNames <- shiny::renderText({
   #      q("no")
   #    })
   
-
+  
+  # wq <-pool::dbPool(drv = RSQLite::SQLite(),
+  #              dbname = paste0("wds", ".sqlite"))
+  # 
+  # onStop(function() {
+  #   pool::poolClose(wq)
+  #   print(wq)
+  # }) # important!
+  
   
 }
 
-}

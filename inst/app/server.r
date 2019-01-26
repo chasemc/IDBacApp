@@ -1,1 +1,1 @@
-IDBacApp::app_server()
+IDBacApp::app_server
