@@ -33,10 +33,10 @@ file.remove(list.files(tempMZDir,
 
 
 shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
-  if (is.null(data)){
+  if (is.null(data)) {
     NULL
   } else {
-    list(left=as.character(data$left), right=as.character(data$right))
+    list(left = as.character(data$left), right = as.character(data$right))
   }}, force = TRUE)
 
 
@@ -113,7 +113,6 @@ function(input,output,session){
       conversionsUI("Sd")
     })
     
-    
   }) 
   
   
@@ -123,7 +122,7 @@ function(input,output,session){
   #This "observe" event creates the SQL tab UI.
   observeEvent(availableDatabases$db, {
     
-    if(length(availableDatabases$db) > 0){
+    if (length(availableDatabases$db) > 0) {
       
      
       appendTab(inputId = "mainIDBacNav",
@@ -291,7 +290,7 @@ function(input,output,session){
   observeEvent(c(input$selectExperiment, input$insertNewMetaColumn), 
                ignoreInit = TRUE, {
     
-    if (!is.null(userDBCon())){
+    if (!is.null(userDBCon())) {
       conn <- pool::poolCheckout(userDBCon())
       
       if (!"metaData" %in% DBI::dbListTables(conn)) {
@@ -352,7 +351,7 @@ function(input,output,session){
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   #----
   observe({
-    if (is.null(input$startingWith)){} else if (input$startingWith == 3){
+    if (is.null(input$startingWith)){} else if (input$startingWith == 3) {
       output$mzConversionUI <- renderUI({
         IDBacApp::beginWithMZ("beginWithMZ")
       })
@@ -393,7 +392,7 @@ function(input,output,session){
                                   error = function(x) paste("Timed out"),
                                   finally = function(x) x)
       
-      if (foldersInFolder == "Timed out"){
+      if (foldersInFolder == "Timed out") {
         return("Timed out looking for mzML/mzXML files. This can happen if the folder you 
                selected has lots of folders within it... because IDBac looks through all 
                of them for mzML/mzXML files.")}else{
@@ -468,10 +467,10 @@ function(input,output,session){
                ignoreInit = TRUE, 
                {
                  
-                 if (input$ConversionsNav == "convert_bruker_nav"){
+                 if (input$ConversionsNav == "convert_bruker_nav") {
                    
-                   if(is.null(input$rawORreanalyze)) {
-                   } else if(input$rawORreanalyze == 1){
+                   if (is.null(input$rawORreanalyze)) {
+                   } else if (input$rawORreanalyze == 1) {
                      
                      output$conversionMainUI1 <- renderUI({
                        IDBacApp::oneMaldiPlate("oneMaldiPlate")
@@ -484,13 +483,13 @@ function(input,output,session){
                  }
                  
                  
-                 if (input$ConversionsNav == "convert_mzml_nav"){
+                 if (input$ConversionsNav == "convert_mzml_nav") {
                    output$conversionMainUI2 <- renderUI({
                      IDBacApp::beginWithMZ("beginWithMZ")
                    })
                  } 
                  
-                 if (input$ConversionsNav == "convert_txt_nav"){
+                 if (input$ConversionsNav == "convert_txt_nav") {
                    output$conversionMainUI3 <- renderUI({
                      IDBacApp::beginWithTXT("beginWithTXT")
                    })
@@ -521,9 +520,9 @@ function(input,output,session){
   # When ReAnalyzing data, and need to select the "IDBac" folder directly
   #----
   pressedidbacDirectoryButton <- reactive({
-    if(is.null(input$idbacDirectoryButton)){
+    if (is.null(input$idbacDirectoryButton)) {
       return("No Folder Selected")
-    } else if (input$idbacDirectoryButton > 0){
+    } else if (input$idbacDirectoryButton > 0) {
       IDBacApp::choose_dir()
     }
   })
@@ -572,7 +571,7 @@ function(input,output,session){
   # Creates text showing the user which directory they chose for raw files
   #----
   output$multipleMaldiRawFileDirectory <- renderText({
-    if (is.null(multipleMaldiRawFileLocation())){
+    if (is.null(multipleMaldiRawFileLocation())) {
       return("No Folder Selected")
     } else {
       folders <- NULL
@@ -629,7 +628,7 @@ function(input,output,session){
       "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
       br(),
       "To check what has been converted, you can navigate to:",
-      easyClose = FALSE, size="l",
+      easyClose = FALSE, size = "l",
       footer = ""))
   })
   
@@ -658,9 +657,9 @@ function(input,output,session){
     
     popup3()
     
-    if (input$ConversionsNav == "convert_bruker_nav"){
-      ww<<-input$excelFile
-      if(input$rawORreanalyze == 1) {
+    if (input$ConversionsNav == "convert_bruker_nav") {
+      ww <<- input$excelFile
+      if (input$rawORreanalyze == 1) {
   validate(need(any(!is.na(sampleMapReactive$rt)), 
                 "No samples entered into sample map, please try entering them again"))
         aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
@@ -696,7 +695,7 @@ function(input,output,session){
                  detail = 'This may take a while...',
                  value = 0, {
                    
-                   for(i in base::seq_along(forProcessing$mzFile)){
+                   for (i in base::seq_along(forProcessing$mzFile)) {
                      incProgress(1/lengthProgress)
                      IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
                                                          sampleID = forProcessing$sampleID[[i]],
@@ -742,10 +741,10 @@ output$missingSampleNames <- shiny::renderText({
   b <- sapply(spots, function(x) s1[which(aa %in% x)])
   b <- as.character(spots[which(is.na(b))])
  
-   if(length(b) == 0){
+   if (length(b) == 0) {
     paste0("No missing IDs")
-  }else{
-  paste0(paste0(b, collapse=" \n ", sep=","))
+  } else {
+  paste0(paste0(b, collapse = " \n ", sep = ","))
   }
 })
   
@@ -799,7 +798,7 @@ output$missingSampleNames <- shiny::renderText({
       
       z <- unlist(input$plateDefault$data, recursive = FALSE) 
       zz <- as.character(z)
-      zz[zz == "NULL"] <-NA 
+      zz[zz == "NULL"] <- NA 
       
       
     # for some reason rhandsontable hot_to_r not working, implementing own:
@@ -880,11 +879,15 @@ output$missingSampleNames <- shiny::renderText({
                    downloadButton("downloadInverseZoom", 
                                   label = "Download Zoomed Plot"),
                    numericInput("percentPresenceP", 
-                                label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),value = 70,step=10,min=0,max=100),
+                                label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
+                                value = 70,
+                                step = 10,
+                                min = 0,
+                                max = 100),
                    numericInput("pSNR",
                                 label = h5(strong("Signal To Noise Cutoff")),
                                 value = 4,
-                                step= 0.5,
+                                step = 0.5,
                                 min = 1.5,
                                 max = 100),
                    numericInput("lowerMass", 
@@ -1071,7 +1074,7 @@ output$missingSampleNames <- shiny::renderText({
          ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
                   max(mirrorPlotEnv$spectrumSampleOne@intensity)),
          type = "l",
-         col = adjustcolor("Black", alpha=0.3),
+         col = adjustcolor("Black", alpha = 0.3),
          xlab = "m/z",
          ylab = "Intensity")
     lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
@@ -1112,7 +1115,7 @@ output$missingSampleNames <- shiny::renderText({
          y = mirrorPlotEnv$spectrumSampleOne@intensity,
          xlim = ranges2$x, ylim = ranges2$y,
          type = "l",
-         col = adjustcolor("Black", alpha=0.3),
+         col = adjustcolor("Black", alpha = 0.3),
          xlab = "m/z",
          ylab = "Intensity")
     lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
@@ -1154,7 +1157,7 @@ output$missingSampleNames <- shiny::renderText({
            ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
                     max(mirrorPlotEnv$spectrumSampleOne@intensity)),
            type = "l",
-           col = adjustcolor("Black", alpha=0.3),
+           col = adjustcolor("Black", alpha = 0.3),
            xlab = "m/z",
            ylab = "Intensity")
       lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
@@ -1199,7 +1202,7 @@ output$missingSampleNames <- shiny::renderText({
            y = mirrorPlotEnv$spectrumSampleOne@intensity,
            xlim = ranges2$x, ylim = ranges2$y,
            type = "l",
-           col = adjustcolor("Black", alpha=0.3),
+           col = adjustcolor("Black", alpha = 0.3),
            xlab = "m/z",
            ylab = "Intensity")
       lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
@@ -1299,11 +1302,11 @@ output$missingSampleNames <- shiny::renderText({
   
 
   observe({
-    if(!is.null(proteinMatrix()))
+    if (!is.null(proteinMatrix())) {
     proteinDendrogram2 <- shiny::callModule(IDBacApp::dendrogramCreator,
                                                       "proteinHierOptions",
                                                       proteinMatrix())
-  
+    }
  
   })
   
@@ -1345,7 +1348,7 @@ output$missingSampleNames <- shiny::renderText({
     
     colorsToUse <- dendextend::leaf_colors(coloredDend())
     
-    if(any(is.na(as.vector(colorsToUse)))){
+    if(any(is.na(as.vector(colorsToUse)))) {
       colorsToUse <-  dendextend::labels_colors(coloredDend())
     }
     
@@ -1397,7 +1400,7 @@ output$missingSampleNames <- shiny::renderText({
     
     colorsToUse <- dendextend::leaf_colors(coloredDend())
     
-    if(any(is.na(as.vector(colorsToUse)))){
+    if (any(is.na(as.vector(colorsToUse)))) {
       colorsToUse <-  dendextend::labels_colors(coloredDend())
     }
     
@@ -1427,15 +1430,6 @@ output$missingSampleNames <- shiny::renderText({
           title = ""
         ))
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
   })
   
   
@@ -1458,7 +1452,7 @@ output$missingSampleNames <- shiny::renderText({
     
     colorsToUse <- dendextend::leaf_colors(coloredDend())
     
-    if(any(is.na(as.vector(colorsToUse)))){
+    if (any(is.na(as.vector(colorsToUse)))) {
       colorsToUse <-  dendextend::labels_colors(coloredDend())
     }
     
@@ -1466,7 +1460,7 @@ output$missingSampleNames <- shiny::renderText({
                                     nam = (names(colorsToUse)))
     pcaDat <- merge(tsneResults(), 
                     colorsToUse,
-                    by="nam")
+                    by = "nam")
     
     plot_ly(data = pcaDat,
             x = ~Dim1,
@@ -1490,7 +1484,7 @@ output$missingSampleNames <- shiny::renderText({
   #----
   output$Heirarchicalui <-  renderUI({
 
-    if(is.null(input$Spectra1)){
+    if (is.null(input$Spectra1)) {
       fluidPage(
         h1(" There is no data to display",
            img(src = "errors/hit3.gif",
@@ -1526,7 +1520,7 @@ output$missingSampleNames <- shiny::renderText({
   
   # UI of paragraph explaining which variables were used
   #----
-  output$proteinReport<-renderUI(
+  output$proteinReport <- renderUI(
     p("This dendrogram was created by analyzing ",tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
       and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
       Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
@@ -1573,7 +1567,7 @@ output$missingSampleNames <- shiny::renderText({
                                     "proth",
                                     dendrogram = proteinDendrogram$dendrogram,
                                     pool = userDBCon(),
-                                    plotWidth= reactive(input$dendparmar),
+                                    plotWidth = reactive(input$dendparmar),
                                     plotHeight = reactive(input$hclustHeight))
 })
   
@@ -1630,13 +1624,13 @@ output$missingSampleNames <- shiny::renderText({
       
       par(mar = c(5, 5, 5, input$dendparmar))
       
-      if (input$kORheight == "1"){
+      if (input$kORheight == "1") {
         
         proteinDendrogram$dendrogram %>% 
           dendextend::color_branches(k = input$kClusters) %>% 
           plot(horiz = TRUE, lwd = 8)
         
-      } else if (input$kORheight == "2"){
+      } else if (input$kORheight == "2") {
         
         proteinDendrogram$dendrogram %>% 
           dendextend::color_branches(h = input$cutHeight) %>%
@@ -1644,10 +1638,10 @@ output$missingSampleNames <- shiny::renderText({
         abline(v = input$cutHeight,
                lty = 2)
         
-      } else if (input$kORheight == "3"){
+      } else if (input$kORheight == "3") {
         
         par(mar = c(5, 5, 5, input$dendparmar))
-        if(input$colDotsOrColDend == "1"){
+        if(input$colDotsOrColDend == "1") {
           
           coloredDend()  %>%
             hang.dendrogram %>% 
@@ -1678,30 +1672,12 @@ output$missingSampleNames <- shiny::renderText({
       paste0(Sys.Date(), ".newick")
     },
     content = function(file) {
-      ape::write.tree(as.phylo(proteinDendrogram$dendrogram), file=file)
+      ape::write.tree(as.phylo(proteinDendrogram$dendrogram), file = file)
     }
   )
   
   
-  
-  
-  
-  
-  
  
-  
-  
-  
-  
- 
-  
-  
-  
-  
-  
-  
-  
-  
   
   
   # Check which samples are available in the databse to be moved into other databse
@@ -1743,7 +1719,7 @@ output$missingSampleNames <- shiny::renderText({
       "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
       br(),
       "To check what has been converted, you can navigate to:",
-      easyClose = FALSE, size="l",
+      easyClose = FALSE, size = "l",
       footer = ""))
   })
   
@@ -1789,7 +1765,7 @@ output$missingSampleNames <- shiny::renderText({
   subtractedMatrixBlank <- reactive({
 
 
-  aw<<-  getSmallMolSpectra(pool = userDBCon(),
+  aw <<-  getSmallMolSpectra(pool = userDBCon(),
                        sampleIDs,
                        dendrogram = proteinDend$dendroReact(),
                        ymin = 0,
@@ -1817,13 +1793,13 @@ output$missingSampleNames <- shiny::renderText({
   
   ppp <- reactive({
     
-    if(length(subtractedMatrixBlank()) > 9){
+    if (length(subtractedMatrixBlank()) > 9) {
       
       
       
       zz <<- intensityMatrix(subtractedMatrixBlank())
       zz[is.na(zz)] <- 0
-      zz[is.infinite(zz)] <-0
+      zz[is.infinite(zz)] <- 0
       
       
       pc <- FactoMineR::PCA(zz,
@@ -1838,7 +1814,7 @@ output$missingSampleNames <- shiny::renderText({
       azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
       azz <- match(nam, azz)
       
-      pc<- cbind(pc, as.vector(IDBacApp::colorBlindPalette()()[calcNetwork()$wc$membership[azz], 2] ))
+      pc <- cbind(pc, as.vector(IDBacApp::colorBlindPalette()()[calcNetwork()$wc$membership[azz], 2] ))
       colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
       pc
     }else{FALSE}
@@ -1894,23 +1870,23 @@ output$missingSampleNames <- shiny::renderText({
     temp <- NULL
     
     
-    for (i in 1:length(subtractedMatrixBlank())){
+    for (i in 1:length(subtractedMatrixBlank())) {
       temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
     }
-    aqww<<-smallMolNetworkDataFrame()
+    aqww <- smallMolNetworkDataFrame()
     
     a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
-    a<-igraph::simplify(a)
-    wc <<- fastgreedy.community(a)
+    a <- igraph::simplify(a)
+    wc <- fastgreedy.community(a)
     
     b <- igraph_to_networkD3(a, group = (wc$membership)) # zero indexed
     
     z <- b$links
     zz <- b$nodes
     
-    biggerSampleNodes<-rep(1,times=length(zz[,1]))
-    zz<-cbind(zz,biggerSampleNodes)
-    zz$biggerSampleNodes[which(zz[,1] %in% temp)]<-50
+    biggerSampleNodes <- rep(1,times=length(zz[,1]))
+    zz <- cbind(zz,biggerSampleNodes)
+    zz$biggerSampleNodes[which(zz[,1] %in% temp)] <- 50
     
     net$z <- z
     net$zz <- zz
@@ -1922,7 +1898,7 @@ output$missingSampleNames <- shiny::renderText({
   
   
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
-    awq2<<-calcNetwork()
+    awq2 <<- calcNetwork()
     
     
     cbp <- as.vector(IDBacApp::colorBlindPalette()()[1:100,2])
@@ -1945,7 +1921,7 @@ output$missingSampleNames <- shiny::renderText({
                  NodeID = "name",
                  Group = "group",
                  opacity = 1,
-                 opacityNoHover=.8, 
+                 opacityNoHover = 0.8, 
                  zoom = TRUE,
                  colourScale = JS(YourColors))
     
@@ -1961,13 +1937,13 @@ output$missingSampleNames <- shiny::renderText({
   })
   
  
-  
-  
-  
+
+# Suggested Reporting Paragraphs ------------------------------------------
+
   # Output a paragraph about which paramters were used to create the currently-displayed MAN
   #----
   output$manReport <- renderUI({
-    p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,", if(input$matrixSamplePresent==1){("subtracting a matrix blank,")} else {},
+    p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,", if (input$matrixSamplePresent == 1) {("subtracting a matrix blank,") } else {},
       "and retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), " and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
       Peaks occuring below ", tags$code(input$lowerMassSM), " m/z or above ", tags$code(input$upperMassSM), " m/z were removed from the analysis. ")
   })
@@ -1977,7 +1953,7 @@ output$missingSampleNames <- shiny::renderText({
   #----
   output$proteinReport2 <- renderUI({
     
-    if(length(labels(proteinDendrogram$dendrogram)) == 0){
+    if (length(labels(proteinDendrogram$dendrogram)) == 0) {
       p("No Protein Data to Display")
     } else {
       p("This dendrogram was created by analyzing ", tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
@@ -1988,12 +1964,9 @@ output$missingSampleNames <- shiny::renderText({
   })
   
   
-  
-  #------------------------------------------------------------------------------
-  # Updating IDBac
-  #------------------------------------------------------------------------------
-  
-  
+
+# Updating IDBac ----------------------------------------------------------
+
   # Updating IDBac Functions
   #----
   observeEvent(input$updateIDBac, 
@@ -2022,7 +1995,7 @@ output$missingSampleNames <- shiny::renderText({
     
     internetPing <- !suppressWarnings(system(paste("ping -n 1", "www.google.com")))
     
-    if (internetPing == TRUE){
+    if (internetPing == TRUE) {
       internetPingResponse <- "Successful"
       showModal(modalDialog(
         title = "IDBac Update",
@@ -2091,7 +2064,7 @@ output$missingSampleNames <- shiny::renderText({
         fade = FALSE
       ))
       
-      if (class(latestStableVersion) == "try-error"){
+      if (class(latestStableVersion) == "try-error") {
         
         showModal(modalDialog(
           title = "IDBac Update",
@@ -2119,7 +2092,7 @@ output$missingSampleNames <- shiny::renderText({
               style = "color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
         }
         
-        if(as.character(local_version) == "Installed version is latest version"){
+        if (as.character(local_version) == "Installed version is latest version") {
           
           showModal(modalDialog(
             title = "IDBac Update",
@@ -2143,7 +2116,7 @@ output$missingSampleNames <- shiny::renderText({
             }
           )
           
-        } else if(compareVersion(as.character(local_version), 
+        } else if (compareVersion(as.character(local_version), 
                                  as.character(latestStableVersion)) == -1) {
           
           showModal(modalDialog(
@@ -2202,130 +2175,9 @@ output$missingSampleNames <- shiny::renderText({
     }
   })
   
-  
-  
-  
-  #------------------------------------------------------------------------------
-  # In-house library generation code:
-  #------------------------------------------------------------------------------
-  
-  
-  # The UI for the library editing/creation tab
-  output$libraryTab <-  renderUI({
-    
-    fluidPage(
-      tabsetPanel(id= "libraryTabs", type="tabs",
-                  tabPanel("Create a New Library", value="newLibPanel",
-                           textInput("newDatabaseName", "Input Library Name:", value="Default Library"),
-                           actionButton("saveBtn", "Save"),
-                           rHandsontableOutput("hot")
-                  ),
-                  tabPanel("Add Isolates to an Existing Library", value="addToExistingLibPanel",
-                           uiOutput("appendLibPanelRadios"),
-                           actionButton("saveAppendDatabase1", "Append"),
-                           rHandsontableOutput("hott"),
-                           rHandsontableOutput("hot3")),
-                  
-                  tabPanel("Modify an Existing Library",
-                           value="modifyLibPanel",
-                           uiOutput("modifyLibPanelRadios"),
-                           actionButton("saveModifyDatabase1", "Update"),
-                           rHandsontableOutput("hot2"))
-      )
-    )
-  })
-  
-  
-  
-  
-  
-  
-  
-  #-----------  Creating a new library
-  
-  createNewLibraryTable <- reactive({
-    
-    # "Get the sample names from the protein peak files
-    currentlyLoadedSamples <- list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists"),full.names = FALSE)[grep(".ProteinPeaks.", list.files(paste0(idbacDirectory$filePath, "\\Peak_Lists")))]
-    # Character vector of protein peak sample names
-    currentlyLoadedSamples <- as.character(strsplit(currentlyLoadedSamples,"_ProteinPeaks.rds"))
-    # Check for mzML files
-    mzMLfiles <- list.files(paste0(idbacDirectory$filePath, "\\Converted_To_mzML"), full.names = FALSE)
-    mzMLfiles <- unlist(strsplit(mzMLfiles, ".mzML"))
-    nonMissingmzML <- which(currentlyLoadedSamples %in% mzMLfiles)
-    missingmzML <- which(! currentlyLoadedSamples %in% mzMLfiles)
-    currentlyLoadedSamples <- currentlyLoadedSamples[nonMissingmzML]
-    # Create the data frame structure for the "database"
-    currentlyLoadedSamples <- data.frame("Strain_ID" = currentlyLoadedSamples,
-                                         "Genbank_Accession" = "",
-                                         "NCBI_TaxID" = "",
-                                         "Kingdom" = "",
-                                         "Phylum"= "",
-                                         "Class" = "",
-                                         "Order" = "",
-                                         "Family" = "",
-                                         "Genus" = "",
-                                         "Species" = "",
-                                         "Strain" = "")
-    # If interactive table exists, show it, otherwise use "currentlyLoadedSamples" created above
-    if (!is.null(input$hot)) {
-      rhandsontable::hot_to_r(input$hot)
-    } else {
-      currentlyLoadedSamples
-    }
-    
-  })
-  
-  # Display the new Library as an editable table
-  output$hot <- rhandsontable::renderRHandsontable({
-    DF <- createNewLibraryTable()
-    
-    DF %>% select(c("Strain_ID",
-                    "Genbank_Accession",
-                    "Kingdom",
-                    "Phylum",
-                    "Class",
-                    "Order",
-                    "Family",
-                    "Genus",
-                    "Species",
-                    "Strain")) %>%
-      return(.) -> DF
-    
-    
-    
-    
-    rhandsontable::rhandsontable(DF,
-                                 useTypes = FALSE,
-                                 selectCallback = TRUE,
-                                 contextMenu = FALSE) %>%
-      hot_col("Strain_ID",
-              readOnly = TRUE)
-  })
-  
-  observeEvent(input$saveBtn,  
-               ignoreInit = TRUE, {
-    appDirectory <- workingDirectory # Get the location of where IDBac is installed
-    if (!dir.exists(file.path(appDirectory, "SpectraLibrary"))){  # If spectra library folder doesn't exist, create it
-      dir.create(file.path(appDirectory, "SpectraLibrary"))
-    }
-    if(!file.exists(paste0("SpectraLibrary/", isolate(input$newDatabaseName), ".sqlite"))){ # If SQL file does not exist
-      isolate(
-        newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", input$newDatabaseName, ".sqlite"))
-      )
-      isolate(
-        IDBacApp::addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
-      )
-      DBI::dbDisconnect(newDatabase)
-    } else {
-      print("2")
-      showModal(popupDBCreation())
-    }
-  })
-  
-  
-  
-  # -----------------
+
+# Old Database Stuff ------------------------------------------------------
+
   # Popup summarizing the final status of the conversion
   popupDBCreation <- function(failed = FALSE){
     modalDialog(
@@ -2335,151 +2187,7 @@ output$missingSampleNames <- shiny::renderText({
       footer = tagList(actionButton("saveNewDatabase", paste0("Append to: \"", isolate(input$newDatabaseName),"\"")), modalButton("Close"))
     )}
   
-  observeEvent(input$saveNewDatabase,  
-               ignoreInit = TRUE, {
-    removeModal()
-    # After initiating the database
-    newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", isolate(input$newDatabaseName),".sqlite"))
-    DBI::dbRemoveTable(newDatabase, "IDBacDatabase")
-    IDBacApp::addNewLibrary(samplesToAdd = createNewLibraryTable(), newDatabase = newDatabase,  selectedIDBacDataFolder = idbacDirectory$filePath)
-    DBI::dbDisconnect(newDatabase)
-  })
-  
-  #------------------------------------
-  #------------------------------------ Modify an Existing Library
-  libraries <- function(){list.files(file.path(workingDirectory, "SpectraLibrary"), pattern=".sqlite", full.names = TRUE)}
-  
-  output$modifyLibPanelRadios  <- renderUI({
-    if(input$libraryTabs == "modifyLibPanel"){
-      radioButtons(inputId = "modifyLibPanelRadiosSelected",
-                   label= "Existing Libraries",
-                   choiceNames = basename(libraries()),
-                   choiceValues = as.list(libraries())
-      )
-    }
-    
-  })
-  
-  
-  modifiedLibraryEnvironmentTracking <- new.env()  # This allows modifyLibraryTable() below to update correctly
-  
-  modifyLibraryTable <- reactive({
-    # Open connection to chosen existing database
-    modifyDatabaseConnect <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$modifyLibPanelRadiosSelected))
-    # Create lazy-eval tbl
-    db <- dplyr::tbl(modifyDatabaseConnect, "IDBacDatabase")
-    # Select only columns to be displayed in IDBac
-    db <- db %>%
-      dplyr::select(-c("manufacturer",
-                       "model",
-                       "ionisation",
-                       "analyzer",
-                       "detector",
-                       "Protein_Replicates",
-                       "Small_Molecule_Replicates",
-                       "mzML",
-                       "proteinPeaksRDS")) %>%
-      dplyr::collect()
-    
-    if ((!is.null(input$hot2)) && modifiedLibraryEnvironmentTracking$value == input$modifyLibPanelRadiosSelected) {
-      rhandsontable::hot_to_r(input$hot2)
-    } else {
-      modifiedLibraryEnvironmentTracking$value <-input$modifyLibPanelRadiosSelected
-      db
-    }
-    
-  })
-  
-  # Display the new Library as an editable table
-  output$hot2 <- rhandsontable::renderRHandsontable({
-    DF <- modifyLibraryTable()
-    DF %>% select(c("Strain_ID",
-                    "Genbank_Accession",
-                    "Kingdom",
-                    "Phylum",
-                    "Class",
-                    "Order",
-                    "Family",
-                    "Genus",
-                    "Species",
-                    "Strain")) %>%
-      return(.) -> DF
-    rhandsontable::rhandsontable(DF, useTypes = FALSE, selectCallback = TRUE, contextMenu = FALSE) %>%
-      hot_col("Strain_ID", readOnly = TRUE)
-  })
-  
-  #------------------------------------ Modify existing databse
-  
-  
-  observeEvent(input$saveModifyDatabase1, 
-               ignoreInit = TRUE,  {
-    
-    showModal(popupDBmodify())
-    
-  })
-  
-  
-  # Popup summarizing the final status of the conversion
-  popupDBmodify <- function(failed = FALSE){
-    modalDialog(
-      title = "Are you sure?",
-      p("There is already a database with this name."),
-      p(paste0("Pressing save below will append to the existing database: \"", isolate(input$modifyLibPanelRadiosSelected),"\"")),
-      footer = tagList(actionButton("saveModifyDatabase2", paste0("Append to: \"", isolate(basename(input$modifyLibPanelRadiosSelected)),"\"")), modalButton("Close"))
-    )}
-  
-  observeEvent(input$saveModifyDatabase2, 
-               ignoreInit = TRUE,  {
-    # After initiating the database
-    
-    newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$modifyLibPanelRadiosSelected))
-    db          <- dplyr::tbl(newDatabase, "IDBacDatabase")
-    
-    dbIds <- db %>% select(Strain_ID) %>% collect %>% unlist() %>% as.vector()
-    colsToUpdate <-  db %>%
-      dplyr::select(-c("Strain_ID",
-                       "manufacturer",
-                       "model",
-                       "ionisation",
-                       "analyzer",
-                       "detector",
-                       "Protein_Replicates",
-                       "Small_Molecule_Replicates",
-                       "mzML",
-                       "proteinPeaksRDS")) %>%
-      colnames()
-    
-    
-    
-    for (i in dbIds){
-      # Allows editing dynamic columns (user-added metadata column) ie- prevents overwriting instrument data or
-      # MS data but can edit all other columns
-      # modded is a tbl with the user-updated values from rhandsontable
-      updateValues <-   modifyLibraryTable() %>% filter(Strain_ID == i) %>% select(colsToUpdate)
-      a <- as.vector(unlist(updateValues))
-      b <- colnames(updateValues)
-      # Format for SQL multiple "SET" query
-      a1 <- sapply(a, function(x) paste0("'",x,"'"))
-      b1 <- sapply(b, function(x) paste0("'",x,"'"))
-      all <- paste(b1, a1, sep = "=", collapse = ",")
-      # Run SQL update
-      DBI::dbSendQuery(newDatabase, paste("UPDATE IDBacDatabase SET ", all, " WHERE Strain_ID=",shQuote(i))) # works
-      
-    }
-    removeModal()
-    
-  })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   
   
   #--------------------------------------
