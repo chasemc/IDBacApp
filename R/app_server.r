@@ -8,6 +8,7 @@
 #' @export
 #'
 app_server <- function(input, output,session) {
+  options(shiny.reactlog = TRUE)
   
 # Setup working directories
 workingDirectory <- getwd()
@@ -116,46 +117,36 @@ function(input,output,session){
   }) 
   
   
-  
+  availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(workingDirectory,
+                                                                                 pattern = ".sqlite",
+                                                                                 full.names = FALSE)))
   #This "observe" event creates the SQL tab UI.
-  observe({
+  observeEvent(availableDatabases$db, {
     
-    if(length(availableExperiments()) > 0){
+    if(length(availableDatabases$db) > 0){
       
+     
       appendTab(inputId = "mainIDBacNav",
                 tabPanel("Select/Manipulate Experiments",
                          value = "sqlUiTab",
-                         IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
+                         IDBacApp::ui_sqlUI("ssds", availableExperiments = availableDatabases$db)
                 )
       )
-      # output$sqlUI <- renderUI({
-      #   IDBacApp::ui_sqlUI("ssds", availableExperiments = availableExperiments())
-      # })
+   
     }
     
   })
   
-  
-  availableExperiments <- reactive({
-    
-    
-    tools::file_path_sans_ext(list.files(workingDirectory,
-                                         pattern = ".sqlite",
-                                         full.names = FALSE))
-  })
+
   
   # Collapsers
   #----  
   
-  observeEvent(input$styleSelect, {
-    updateCollapse(session, "collapseSQLInstructions")
-  })
-  
-  observeEvent(input$styleSelect, {
-    updateCollapse(session, "modifySqlCollapse")
-  })
-  
-  observeEvent(input$styleSelect, {
+  observeEvent(input$styleSelect, 
+               ignoreInit = TRUE, {
+                 updateCollapse(session, "collapseSQLInstructions")
+                 updateCollapse(session, "modifySqlCollapse")
+                 
     isolate(
       updateCollapse(session, "collapseSQLSelector")
     )
@@ -168,7 +159,8 @@ function(input,output,session){
   
   
   observeEvent(input$moveToAnalysis,
-               once = TRUE, ignoreInit =T, {
+               once = TRUE, 
+               ignoreInit = TRUE, {
                  
                  appendTab(inputId = "mainIDBacNav",
                            tabPanel("Compare Two Samples (Protein)",
@@ -176,49 +168,23 @@ function(input,output,session){
                                     uiOutput("inversepeakui")
                            )
                  )
-               })
-  
-  
-  observeEvent(input$moveToAnalysis,
-               once = TRUE, ignoreInit =T, {
-                 
                  appendTab(inputId = "mainIDBacNav",
                            tabPanel("Hierarchical Clustering (Protein)",
                                     uiOutput("Heirarchicalui")
                            )
                  )
-               })
-  
-  
-  
-  observeEvent(input$moveToAnalysis,
-               once = TRUE, ignoreInit =T, {
-                 
                  appendTab(inputId = "mainIDBacNav",
                            tabPanel("Metabolite Association Network (Small-Molecule)",
                                     IDBacApp::ui_smallMolMan()
                            )
                  )
+                 
+                 updateTabsetPanel(session, "mainIDBacNav",
+                                   selected = "inversePeaks")
+                 
+                 updateNavlistPanel(session, "ExperimentNav",
+                                    selected = "experiment_select_tab")
                })
-  
-  
-  
-  
-  
-  
-  
-  
-  #----
-  
-  observeEvent(input$moveToAnalysis, {
-    updateTabsetPanel(session, "mainIDBacNav",
-                      selected = "inversePeaks")
-  })
-  
-  observeEvent(input$moveToSelectExperiment, {
-    updateNavlistPanel(session, "ExperimentNav",
-                       selected = "experiment_select_tab")
-  })
   
   
   #----
@@ -256,7 +222,8 @@ function(input,output,session){
   
   
   
-  userDBCon <- reactive({
+  userDBCon <- eventReactive(input$selectExperiment, {
+    print("d")
     IDBacApp::createPool(fileName = input$selectExperiment,
                          filePath = workingDirectory)[[1]]
   })
@@ -268,7 +235,8 @@ function(input,output,session){
   
   
   #----
-  observeEvent(input$searchNCBI, {
+  observeEvent(input$searchNCBI, 
+               ignoreInit = TRUE,  {
     # IDBacApp::searchNCBI()
   })
   
@@ -276,14 +244,16 @@ function(input,output,session){
   
   
   
-  observeEvent(input$insertNewMetaColumn,{
+  observeEvent(input$insertNewMetaColumn, 
+               ignoreInit = TRUE, {
     IDBacApp::insertMetadataColumns(pool = userDBCon(),
                                     columnNames = input$addMetaColumnName)
     
     
   })
   
-  observeEvent(input$saven,{
+  observeEvent(input$saven, 
+               ignoreInit = TRUE, {
     
     DBI::dbWriteTable(conn = userDBCon(),
                       name = "metaData",
@@ -318,7 +288,8 @@ function(input,output,session){
   
   
   #----
-  observeEvent(c(input$selectExperiment, input$insertNewMetaColumn),{
+  observeEvent(c(input$selectExperiment, input$insertNewMetaColumn), 
+               ignoreInit = TRUE, {
     
     if (!is.null(userDBCon())){
       conn <- pool::poolCheckout(userDBCon())
@@ -493,7 +464,8 @@ function(input,output,session){
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   #----
   observeEvent(c(input$ConversionsNav,
-                 input$rawORreanalyze),
+                 input$rawORreanalyze), 
+               ignoreInit = TRUE, 
                {
                  
                  if (input$ConversionsNav == "convert_bruker_nav"){
@@ -637,7 +609,8 @@ function(input,output,session){
   
   # Run raw data processing on delimited-type input files
   #----
-  observeEvent(input$runDelim,{
+  observeEvent(input$runDelim, 
+               ignoreInit = TRUE, {
     
     popup1()
     
@@ -679,7 +652,8 @@ function(input,output,session){
   
   # Call the Spectra processing function when the spectra processing button is pressed
   #----
-  observeEvent(input$run, {
+  observeEvent(input$run, 
+               ignoreInit = TRUE,  {
     
     
     popup3()
@@ -780,7 +754,8 @@ output$missingSampleNames <- shiny::renderText({
                                                                       ncol = 24,
                                                                       dimnames = list(LETTERS[1:16],1:24))))
   
-  observeEvent(input$showSampleMap,{  
+  observeEvent(input$showSampleMap, 
+               ignoreInit = TRUE, {  
     
     showModal(modalDialog(footer = actionButton("saveSampleMap", "Save"),{
       tagList(
@@ -792,7 +767,8 @@ output$missingSampleNames <- shiny::renderText({
     
     
   })
-  observeEvent(input$saveSampleMap,{  
+  observeEvent(input$saveSampleMap, 
+               ignoreInit = TRUE, {  
     
   
   shiny::removeModal()
@@ -817,7 +793,8 @@ output$missingSampleNames <- shiny::renderText({
   
   
   
-  observeEvent(input$saveSampleMap, ignoreInit = TRUE, {
+  observeEvent(input$saveSampleMap, 
+               ignoreInit = TRUE, {
 
       
       z <- unlist(input$plateDefault$data, recursive = FALSE) 
@@ -870,7 +847,8 @@ output$missingSampleNames <- shiny::renderText({
   })
   
   
-  observeEvent(input$processToAnalysis, {
+  observeEvent(input$processToAnalysis,  
+               ignoreInit = TRUE, {
     updateTabsetPanel(session, "mainIDBacNav",
                       selected = "sqlUiTab")
     removeModal()
@@ -1321,13 +1299,13 @@ output$missingSampleNames <- shiny::renderText({
   
 
   observe({
-    
+    if(!is.null(proteinMatrix()))
     proteinDendrogram2 <- shiny::callModule(IDBacApp::dendrogramCreator,
                                                       "proteinHierOptions",
                                                       proteinMatrix())
   
- 
-    print(proteinDendrogram2) 
+    reactlog::listDependencies()
+    
   })
   
   
@@ -1747,7 +1725,8 @@ output$missingSampleNames <- shiny::renderText({
   
   
   
-  observeEvent(input$addtoNewDB, {
+  observeEvent(input$addtoNewDB,  
+               ignoreInit = TRUE, {
     copyingDbPopup()
     newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
     copyToNewDatabase(existingDBPool = userDBCon(),
@@ -2018,7 +1997,8 @@ output$missingSampleNames <- shiny::renderText({
   
   # Updating IDBac Functions
   #----
-  observeEvent(input$updateIDBac,{
+  observeEvent(input$updateIDBac, 
+               ignoreInit = TRUE, {
     withConsoleRedirect <- function(containerId, expr) {
       # Change type="output" to type="message" to catch stderr
       # (messages, warnings, and errors) instead of stdout.
@@ -2324,7 +2304,8 @@ output$missingSampleNames <- shiny::renderText({
               readOnly = TRUE)
   })
   
-  observeEvent(input$saveBtn, {
+  observeEvent(input$saveBtn,  
+               ignoreInit = TRUE, {
     appDirectory <- workingDirectory # Get the location of where IDBac is installed
     if (!dir.exists(file.path(appDirectory, "SpectraLibrary"))){  # If spectra library folder doesn't exist, create it
       dir.create(file.path(appDirectory, "SpectraLibrary"))
@@ -2355,7 +2336,8 @@ output$missingSampleNames <- shiny::renderText({
       footer = tagList(actionButton("saveNewDatabase", paste0("Append to: \"", isolate(input$newDatabaseName),"\"")), modalButton("Close"))
     )}
   
-  observeEvent(input$saveNewDatabase, {
+  observeEvent(input$saveNewDatabase,  
+               ignoreInit = TRUE, {
     removeModal()
     # After initiating the database
     newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0("SpectraLibrary/", isolate(input$newDatabaseName),".sqlite"))
@@ -2430,7 +2412,8 @@ output$missingSampleNames <- shiny::renderText({
   #------------------------------------ Modify existing databse
   
   
-  observeEvent(input$saveModifyDatabase1, {
+  observeEvent(input$saveModifyDatabase1, 
+               ignoreInit = TRUE,  {
     
     showModal(popupDBmodify())
     
@@ -2446,7 +2429,8 @@ output$missingSampleNames <- shiny::renderText({
       footer = tagList(actionButton("saveModifyDatabase2", paste0("Append to: \"", isolate(basename(input$modifyLibPanelRadiosSelected)),"\"")), modalButton("Close"))
     )}
   
-  observeEvent(input$saveModifyDatabase2, {
+  observeEvent(input$saveModifyDatabase2, 
+               ignoreInit = TRUE,  {
     # After initiating the database
     
     newDatabase <- DBI::dbConnect(RSQLite::SQLite(), paste0(input$modifyLibPanelRadiosSelected))
@@ -2513,6 +2497,9 @@ output$missingSampleNames <- shiny::renderText({
   #      q("no")
   #    })
   
+  observe({
+  loeg <<- shiny:::.graphStack$as_list()
+  })
   
   
 }
