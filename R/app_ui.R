@@ -21,7 +21,8 @@ navbarPage(collapsible = T,
            tabPanel(
              "Introduction",
              div(class="introPage",
-                 tags$head(tags$link(href = "www/style.css", rel = "stylesheet")),
+                 #includeCSS(file.path(system.file('www', package = 'IDBacApp'), 'style.css')),
+                 tags$head(tags$link(href = "www/styles.css", rel = "stylesheet")),
                  shinyjs::useShinyjs(),
                  fluidRow(
                    column(width=8,offset=2,

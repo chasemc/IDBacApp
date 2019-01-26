@@ -1,4 +1,4 @@
-
+/*
 h1 {
   font-family: 'Arial';
   font-size: 30pt;
@@ -7,14 +7,46 @@ h1 {
   color: black;
   
 }
+*/
+
+
 .introPage {
-  background-image: url("big_bacPlate.jpg");
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover ;
-  
-  
+    position: relative;
+    background: #ffffff;
+    overflow: hidden;
 }
+/* You could use :after - it doesn't really matter */
+.introPage:before {
+    content: ' ';
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    opacity: 0.6;
+    background-image: url("big_bacPlate.jpg");
+    background-repeat: no-repeat;
+    background-position: 50% 0;
+    -ms-background-size: cover;
+    -o-background-size: cover;
+    -moz-background-size: cover;
+    -webkit-background-size: cover;
+    background-size: cover;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

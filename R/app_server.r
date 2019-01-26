@@ -1304,8 +1304,7 @@ output$missingSampleNames <- shiny::renderText({
                                                       "proteinHierOptions",
                                                       proteinMatrix())
   
-    reactlog::listDependencies()
-    
+ 
   })
   
   
@@ -2497,10 +2496,7 @@ output$missingSampleNames <- shiny::renderText({
   #      q("no")
   #    })
   
-  observe({
-  loeg <<- shiny:::.graphStack$as_list()
-  })
-  
+
   
 }
 
