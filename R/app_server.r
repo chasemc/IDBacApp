@@ -37,34 +37,32 @@ file.remove(list.files(tempMZDir,
                        full.names = TRUE))
 
 
-  
+
 # This "observe" event creates the onversions UI tab where users select which experiments to analyze
 observe({
   output$rawDataUI <- renderUI({
     conversionsUI()
   })
 }) 
+
+# Find the available databases, and make reactive so can be updated if more are created
+availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(workingDirectory,
+                                                                               pattern = ".sqlite",
+                                                                               full.names = FALSE)))
+#This "observe" event creates the SQL tab UI.
+observeEvent(availableDatabases$db, {
   
+  if (length(availableDatabases$db) > 0) {
+        appendTab(inputId = "mainIDBacNav",
+              tabPanel("Select/Manipulate Experiments",
+                       value = "sqlUiTab",
+                       IDBacApp::ui_sqlUI(availableExperiments = availableDatabases$db)
+              )
+    )
+    
+  }
   
-  availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(workingDirectory,
-                                                                                 pattern = ".sqlite",
-                                                                                 full.names = FALSE)))
-  #This "observe" event creates the SQL tab UI.
-  observeEvent(availableDatabases$db, {
-    
-    if (length(availableDatabases$db) > 0) {
-      
-     
-      appendTab(inputId = "mainIDBacNav",
-                tabPanel("Select/Manipulate Experiments",
-                         value = "sqlUiTab",
-                         IDBacApp::ui_sqlUI("ssds", availableExperiments = availableDatabases$db)
-                )
-      )
-   
-    }
-    
-  })
+})
   
 
   

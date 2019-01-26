@@ -1,13 +1,12 @@
 #' ui_sqlUI
 #'
-#' @param id NA
 #' @param availableExperiments NA
 #'
 #' @return NA
 #' @export
 #'
 #' @examples NA
-ui_sqlUI <- function(id, availableExperiments) {
+ui_sqlUI <- function(availableExperiments) {
   fluidPage(
       column(width=4,
                fluidRow(
