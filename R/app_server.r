@@ -1348,7 +1348,7 @@ output$missingSampleNames <- shiny::renderText({
     
     colorsToUse <- dendextend::leaf_colors(coloredDend())
     
-    if(any(is.na(as.vector(colorsToUse)))) {
+    if (any(is.na(as.vector(colorsToUse)))) {
       colorsToUse <-  dendextend::labels_colors(coloredDend())
     }
     
@@ -1765,7 +1765,7 @@ output$missingSampleNames <- shiny::renderText({
   subtractedMatrixBlank <- reactive({
 
 
-  aw <<-  getSmallMolSpectra(pool = userDBCon(),
+  aw <-  getSmallMolSpectra(pool = userDBCon(),
                        sampleIDs,
                        dendrogram = proteinDend$dendroReact(),
                        ymin = 0,
@@ -1884,7 +1884,7 @@ output$missingSampleNames <- shiny::renderText({
     z <- b$links
     zz <- b$nodes
     
-    biggerSampleNodes <- rep(1,times=length(zz[,1]))
+    biggerSampleNodes <- rep(1,times =length(zz[,1]))
     zz <- cbind(zz,biggerSampleNodes)
     zz$biggerSampleNodes[which(zz[,1] %in% temp)] <- 50
     
@@ -1898,7 +1898,6 @@ output$missingSampleNames <- shiny::renderText({
   
   
   output$metaboliteAssociationNetwork <- renderSimpleNetwork({
-    awq2 <<- calcNetwork()
     
     
     cbp <- as.vector(IDBacApp::colorBlindPalette()()[1:100,2])
@@ -1908,11 +1907,7 @@ output$missingSampleNames <- shiny::renderText({
                          .domain([',paste0(shQuote(1:100), collapse = ", "),'])
                          .range([', paste0(shQuote(cbp), collapse = ", "),' ])')
     
-    
-    
-    
-    #awq2$zz$group <- rep(c(1,1,1,1,2,2,2,3,3,3),88)[1:length(awq2$zz$group)]
-    
+
     forceNetwork(Links = awq2$z, 
                  Nodes = awq2$zz, 
                  Source = "source",
