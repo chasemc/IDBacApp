@@ -15,7 +15,15 @@ app_server <- function(input, output, session) {
   workingDirectory <- getwd()
 #######
   
+  # Register sample-choosing JS
+  shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
+    if (is.null(data)) {
+      NULL
+    } else {
+      list(left = as.character(data$left), right = as.character(data$right))
+    }}, force = TRUE)
   
+    
 # Setup working directories
 
 # Create a directory for temporary mzml files
@@ -29,27 +37,13 @@ file.remove(list.files(tempMZDir,
                        full.names = TRUE))
 
 
-# Register sample-choosing JS
-shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
-  if (is.null(data)) {
-    NULL
-  } else {
-    list(left = as.character(data$left), right = as.character(data$right))
-  }}, force = TRUE)
-
- 
-
-
-
- 
   
-  #This "observe" event creates the SQL tab UI.
-  observe({
-    output$rawDataUI <- renderUI({
-      conversionsUI("Sd")
-    })
-    
-  }) 
+# This "observe" event creates the onversions UI tab where users select which experiments to analyze
+observe({
+  output$rawDataUI <- renderUI({
+    conversionsUI()
+  })
+}) 
   
   
   availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(workingDirectory,
