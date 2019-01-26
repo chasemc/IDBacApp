@@ -64,7 +64,8 @@ sqlTableArchitecture <- function(numberScans){
                                       "proteinPeaks",
                                       "proteinSpectrum",
                                       "smallMoleculePeaks",
-                                      "smallMoleculeSpectrum")
+                                      "smallMoleculeSpectrum",
+                                      "ignore")
   
   sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = 1,
                                                          ncol = length(sqlDataFrame$IndividualSpectra), 
