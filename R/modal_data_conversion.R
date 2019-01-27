@@ -205,9 +205,11 @@ convertDataTabServer <- databaseTabServer <- function(input,
     
     rhandsontable::rhandsontable(sampleMapReactive$rt,
                                  useTypes = FALSE,
-                                 contextMenu = TRUE ) %>%
+                                 contextMenu = TRUE,
+                                 maxRows = 16,
+                                 maxRows = 24) %>%
       rhandsontable::hot_context_menu(allowRowEdit = FALSE,
-                       allowColEdit = TRUE) %>%
+                       allowColEdit = FALSE) %>%
       rhandsontable::hot_cols(colWidths = 100) %>%
       rhandsontable::hot_rows(rowHeights = 25)
   })
@@ -280,24 +282,11 @@ convertDataTabServer <- databaseTabServer <- function(input,
                  popup2()
                })
   
-  
-  # Modal to display while converting to mzML
-  #----
-  popup1 <- reactive({
-    showModal(modalDialog(
-      title = "Important message",
-      "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
-      br(),
-      "To check what has been converted, you can navigate to:",
-      easyClose = FALSE, size = "l",
-      footer = ""))
-  })
-  
-  
   # Popup summarizing the final status of the conversion
   #----
   popup2 <- reactive({
     showModal(modalDialog(
+      size = "m",
       title = "Conversion Complete",
       paste0(" files were converted into open data format files."),
       br(),
@@ -308,6 +297,20 @@ convertDataTabServer <- databaseTabServer <- function(input,
                        modalButton("Close"))
     ))
   })
+  # Modal to display while converting to mzML
+  #----
+  popup1 <- reactive({
+    showModal(modalDialog(
+      size = "m",
+      title = "Important message",
+      "To track the",
+      "To check what has been converted, you can navigate to:",
+      easyClose = FALSE, size = "l",
+      footer = ""))
+  })
+  
+  
+ 
   
 
   
@@ -351,13 +354,19 @@ convertDataTabServer <- databaseTabServer <- function(input,
                    
                    userDB <- createNewSQLITEdb(input$newExperimentName)
                    
-                 
+                
+                 progLength <- base::length(forProcessing$mzFile)
                  withProgress(message = 'Processing in progress',
-                              detail = 'This may take a while...',
-                              value = 0, {
+                              value = 0,
+                              max = progLength, {
                                 
                                 for (i in base::seq_along(forProcessing$mzFile)) {
-                                  incProgress(1/lengthProgress)
+                                  setProgress(value = i,
+                                              message = 'Processing in progress',
+                                              detail = glue(" \n Sample: {forProcessing$sampleID[[i]]},
+                                                            {i} of {progLength}"),
+                                              session = getDefaultReactiveDomain())
+                                  
                                   IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
                                                                       sampleID = forProcessing$sampleID[[i]],
                                                                       userDBCon = userDB) # pool connection
@@ -395,12 +404,12 @@ convertDataTabServer <- databaseTabServer <- function(input,
   #----
   popup3 <- reactive({
     showModal(modalDialog(
+      size = "m",
       title = "Important message",
       "When spectra processing is complete you will be able to begin with the data analysis",
       br(),
-      "To check the progress, observe the progress bar at bottom right or navigate to the following directory, where four files will be created per sample ",
+      "To check the progress, observe the progress bar at bottom right.",
       easyClose = FALSE, 
-      size = "l",
       footer = ""))
   })
   
@@ -409,6 +418,7 @@ convertDataTabServer <- databaseTabServer <- function(input,
   #----
   popup4 <- reactive({
     showModal(modalDialog(
+      size = "m",
       title = "Spectra Processing is Now Complete",
       br(),
       easyClose = FALSE,

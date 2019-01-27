@@ -49,12 +49,6 @@ callModule(IDBacApp::convertDataTabServer,
 
 
 
-
-
-
-
-
-
 # SQL Tab -----------------------------------------------------------------
 
 #-----
