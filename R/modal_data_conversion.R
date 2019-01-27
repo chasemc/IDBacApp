@@ -5,9 +5,9 @@ convertDataTabUI <- function(id) {
 navlistPanel(widths = c(3, 8), id = ns("ConversionsNav"),
              "Create an IDBac experiment",
              tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
-                      value = "convert_bruker_nav",
+                      value = ns("convert_bruker_nav"),
                       mainPanel(offset = 3,
-                                radioButtons(ns("rawORreanalyze"),
+                                radioButtons(ns("typeOfRawData"),
                                              label = h3("Begin by selecting an option below:"),
                                              choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1),
                                              #"Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
@@ -37,8 +37,218 @@ navlistPanel(widths = c(3, 8), id = ns("ConversionsNav"),
 
 convertDataTabServer <- databaseTabServer <- function(input,
                                                       output,
-                                                      session){
+                                                      session,
+                                                      tempMZDir){
   
+
+# Single MALDI plate ------------------------------------------------------
+
+  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
+  #----
+  observeEvent(c(input$ConversionsNav,
+                 input$typeOfRawData), 
+               ignoreInit = TRUE, 
+               {
+                 ns <- session$ns
+                 print(input$typeOfRawData)
+                 
+                 if (input$ConversionsNav == ns("convert_bruker_nav")) {
+                   
+                   if (is.null(input$typeOfRawData)) {
+                     
+                   } else if (input$typeOfRawData == "1") {
+                     output$conversionMainUI1 <- renderUI({
+                       IDBacApp::oneMaldiPlate(ns)
+                     }) 
+                   } else if (input$typeOfRawData == 2) {
+                     output$conversionMainUI1 <- renderUI({
+                       IDBacApp::multipleMaldiPlates(ns("multipleMaldiPlates"))
+                     })
+                   }
+                 }
+                 
+                 
+                 if (input$ConversionsNav == ns("convert_mzml_nav")) {
+                   output$conversionMainUI2 <- renderUI({
+                     IDBacApp::beginWithMZ(ns("beginWithMZ"))
+                   })
+                 } 
+                 
+                 if (input$ConversionsNav == ns("convert_txt_nav")) {
+                   output$conversionMainUI3 <- renderUI({
+                     IDBacApp::beginWithTXT(ns("beginWithTXT"))
+                   })
+                 } 
+                 
+               })
+  
+  
+  
+  
+  
+  
+  
+  
+  # Reactive variable returning the user-chosen location of the raw MALDI files as string
+  #----
+  rawFilesLocation <- reactive({
+    if (input$rawFileDirectory > 0) {
+      IDBacApp::choose_dir()
+    }
+  })
+  
+  
+  # Creates text showing the user which directory they chose for raw files
+  #----
+  output$rawFileDirectoryText <- renderText({
+    if (is.null(rawFilesLocation())) {
+      return("No Folder Selected")
+    } else {
+      folders <- NULL
+      # Get the folders contained within the chosen folder.
+      foldersInFolder <- list.dirs(rawFilesLocation(),
+                                   recursive = FALSE,
+                                   full.names = FALSE) 
+      for (i in 1:length(foldersInFolder)) {
+        # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
+        folders <- paste0(folders, 
+                          "\n",
+                          foldersInFolder[[i]])
+      }
+      return(folders)
+    }
+  })
+  
+  
+  # Reactive variable returning the user-chosen location of the raw MALDI files as string
+  #----
+  multipleMaldiRawFileLocation <- reactive({
+    if (input$multipleMaldiRawFileDirectory > 0) {
+      IDBacApp::choose_dir()
+    }
+  })
+  
+  
+  # Creates text showing the user which directory they chose for raw files
+  #----
+  output$multipleMaldiRawFileDirectory <- renderText({
+    if (is.null(multipleMaldiRawFileLocation())) {
+      return("No Folder Selected")
+    } else {
+      folders <- NULL
+      # Get the folders contained within the chosen folder.
+      foldersInFolder <- list.dirs(multipleMaldiRawFileLocation(),
+                                   recursive = FALSE, 
+                                   full.names = FALSE) 
+      for (i in 1:length(foldersInFolder)) {
+        # Creates user feedback about which raw data folders were chosen. 
+        # Individual folders displayed on a new line "\n"
+        folders <- paste0(folders, "\n", foldersInFolder[[i]]) 
+      }
+      
+      return(folders)
+    }
+  })
+  
+
+# Sample Map --------------------------------------------------------------
+
+  
+  output$missingSampleNames <- shiny::renderText({
+    req(rawFilesLocation())
+    req(sampleMapReactive$rt)
+    
+    aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
+    aa <- matrix(aa, nrow = 16, ncol = 24)
+    
+    
+    spots <- IDBacApp::brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+    s1 <- base::as.matrix(sampleMapReactive$rt)
+    b <- sapply(spots, function(x) s1[which(aa %in% x)])
+    b <- as.character(spots[which(is.na(b))])
+    
+    if (length(b) == 0) {
+      paste0("No missing IDs")
+    } else {
+      paste0(paste0(b, collapse = " \n ", sep = ","))
+    }
+  })
+  
+  sampleMapReactive <- reactiveValues(rt = as.data.frame(base::matrix(NA,
+                                                                      nrow = 16,
+                                                                      ncol = 24,
+                                                                      dimnames = list(LETTERS[1:16],1:24))))
+  
+  observeEvent(input$showSampleMap, 
+               ignoreInit = TRUE, {  
+                 ns <- session$ns
+                 showModal(modalDialog(footer = actionButton(ns("saveSampleMap"), "Save"),{
+                   tagList(
+                     rhandsontable::rHandsontableOutput(ns("plateDefault"))
+                     
+                   )
+                 }))
+                 
+                 
+                 
+               })
+  observeEvent(input$saveSampleMap, 
+               ignoreInit = TRUE, {  
+
+                 shiny::removeModal()
+                 
+               })
+  
+  
+  
+  output$plateDefault <- rhandsontable::renderRHandsontable({
+    
+    rhandsontable::rhandsontable(sampleMapReactive$rt,
+                                 useTypes = FALSE,
+                                 contextMenu = TRUE ) %>%
+      rhandsontable::hot_context_menu(allowRowEdit = FALSE,
+                       allowColEdit = TRUE) %>%
+      rhandsontable::hot_cols(colWidths = 100) %>%
+      rhandsontable::hot_rows(rowHeights = 25)
+  })
+  
+  
+  
+  
+  
+  
+  observeEvent(input$saveSampleMap, 
+               ignoreInit = TRUE, {
+                 z <- unlist(input$plateDefault$data, recursive = FALSE) 
+                 zz <- as.character(z)
+                 zz[zz == "NULL"] <- NA 
+                 
+                 # for some reason rhandsontable hot_to_r not working, implementing own:
+                 changed <- base::matrix(zz,
+                                         nrow = nrow(sampleMapReactive$rt),
+                                         ncol = ncol(sampleMapReactive$rt),
+                                         dimnames = list(LETTERS[1:16],1:24),
+                                         byrow = T)
+                 
+                 sampleMapReactive$rt <- as.data.frame(changed, stringsAsFactors = FALSE)
+                 
+                 
+               })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+# Spectra Conversion ------------------------------------------------------
+
   
   
   # Spectra conversion
@@ -46,7 +256,7 @@ convertDataTabServer <- databaseTabServer <- function(input,
   #----
   spectraConversion <- reactive({
     
-    IDBacApp::excelMaptoPlateLocation(rawORreanalyze = input$rawORreanalyze,
+    IDBacApp::excelMaptoPlateLocation(typeOfRawData = input$typeOfRawData,
                                       excelFileLocation = input$excelFile$datapath,
                                       rawFilesLocation = rawFilesLocation(),
                                       multipleMaldiRawFileLocation = multipleMaldiRawFileLocation())
@@ -99,29 +309,28 @@ convertDataTabServer <- databaseTabServer <- function(input,
     ))
   })
   
+
+  
   
   # Call the Spectra processing function when the spectra processing button is pressed
   #----
   observeEvent(input$run, 
                ignoreInit = TRUE,  {
                 
+                 ns <- session$ns
                  popup3()
                  
-                 if (input$ConversionsNav == "convert_bruker_nav") {
-                   if (input$rawORreanalyze == 1) {
+                 if (input$ConversionsNav == ns("convert_bruker_nav")) {
+                   if (input$typeOfRawData == 1) {
                      validate(need(any(!is.na(sampleMapReactive$rt)), 
                                    "No samples entered into sample map, please try entering them again"))
                      aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
                      aa <- matrix(aa, nrow = 16, ncol = 24)
                      
-                     
                      spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
                      s1 <- base::as.matrix(sampleMapReactive$rt)
                      sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
-                     
-                     
-                     
-                     
+                    
                      forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
                                                              msconvertPath = "",
                                                              sampleMap = sampleMap,
@@ -138,7 +347,10 @@ convertDataTabServer <- databaseTabServer <- function(input,
                  
                  lengthProgress <- length(forProcessing$mzFile)
                  
-                 userDB <- pool::poolCheckout(newExperimentSqlite())
+                 # Create DB
+                   
+                   userDB <- createNewSQLITEdb(input$newExperimentName)
+                   
                  
                  withProgress(message = 'Processing in progress',
                               detail = 'This may take a while...',
@@ -252,8 +464,7 @@ convertDataTabServer <- databaseTabServer <- function(input,
 #' @export
 #'
 #' @examples NA
-oneMaldiPlate <- function(id){
-  ns <- shiny::NS(id)
+oneMaldiPlate <- function(ns){
   tagList( 
     column(width = 12,
            style = "background-color:#7777770d",
@@ -272,14 +483,14 @@ oneMaldiPlate <- function(id){
              column(12, align = "center",
                     actionButton(ns("rawFileDirectory"),
                                  label = "Raw Data Folder"),
-                    verbatimTextOutput(ns("rawFileDirectory"),
+                    verbatimTextOutput(ns("rawFileDirectoryText"),
                                        placeholder = TRUE),
                     tags$hr(size = 20)),
              br(),
              column(12, align = "center",
                     p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
                     
-                    actionButton(ns("showSampleMap", "Click to name samples")),
+                    actionButton(ns("showSampleMap"), "Click to name samples"),
                     br(),
                     p(strong("Missing sample IDs for the following spots:")),
                     shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE)

@@ -44,7 +44,8 @@ file.remove(list.files(tempMZDir,
 
 
 callModule(IDBacApp::convertDataTabServer,
-           "convertDataTab")
+           "convertDataTab",
+           tempMZDir)
 
 
 
@@ -599,7 +600,7 @@ observe({
       
       # output Plotly plot of PCoA results
       #----
-      output$pcoaPlot <- renderPlotly({
+      output$pcoaPlot <- plotly::renderPlotly({
         
         colorsToUse <- dendextend::leaf_colors(coloredDend())
         
@@ -651,7 +652,7 @@ observe({
       
       # Output Plotly plot of PCA results
       #----
-      output$pcaPlot <- renderPlotly({
+      output$pcaPlot <- plotly::renderPlotly({
         
         colorsToUse <- dendextend::leaf_colors(coloredDend())
         
@@ -703,7 +704,7 @@ observe({
       
       # Output Plotly plot of tSNE results
       #----
-      output$tsnePlot <- renderPlotly({
+      output$tsnePlot <- plotly::renderPlotly({
         
         colorsToUse <- dendextend::leaf_colors(coloredDend())
         
@@ -1078,7 +1079,7 @@ observe({
       
       
       
-      output$smallMolPca <- renderPlotly({
+      output$smallMolPca <- plotly::renderPlotly({
         
         yep <- as.data.frame(ppp(), stringsAsFactors = FALSE)
         plot_ly(data = yep,
@@ -1152,7 +1153,7 @@ observe({
       })
       
       
-      output$metaboliteAssociationNetwork <- renderSimpleNetwork({
+      output$metaboliteAssociationNetwork <- networkD3::renderSimpleNetwork({
         
         
         cbp <- as.vector(IDBacApp::colorBlindPalette()()[1:100,2])

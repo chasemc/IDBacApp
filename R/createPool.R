@@ -37,3 +37,31 @@ createPool <- function(fileName,
   }
   
 }
+
+
+
+
+
+
+#----
+#' Create New, Empty SQLite Database
+#'
+#' @param newExperimentName 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+createNewSQLITEdb <- function(newExperimentName){
+  # This pool is used when creating an entirely new "experiment" .sqlite db
+  name <- base::make.names(newExperimentName)
+  
+  # max 50 character file length
+  name <-  base::substr(name, 1, 50)
+  
+  conn <- pool::dbPool(drv = RSQLite::SQLite(),
+               dbname = paste0(name, ".sqlite"))
+  
+  pool::poolCheckout(conn)
+  
+}
