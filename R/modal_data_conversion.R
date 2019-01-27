@@ -35,12 +35,12 @@ navlistPanel(widths = c(3, 8), id = ns("ConversionsNav"),
 
 
 
-convertDataTabServer <- databaseTabServer <- function(input,
-                                                      output,
-                                                      session,
-                                                      tempMZDir){
+convertDataTabServer <- function(input,
+                                output,
+                                session,
+                                tempMZDir){
   
-
+  
 # Single MALDI plate ------------------------------------------------------
 
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.

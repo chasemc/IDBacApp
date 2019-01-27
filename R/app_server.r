@@ -62,38 +62,112 @@ availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(w
 
 databasePools <- reactiveValues(userDBcon = NULL)
 
+
+
 #This "observe" event creates the SQL tab UI.
-observe({
- 
+observeEvent(availableDatabases$db,{
+  print("ehy")
+  
   if (length(availableDatabases$db) > 0) {
-    print("1")
-    p <- callModule(IDBacApp::databaseTabServer,
-                    "sqlUIcreator",
-                    workingDirectory = workingDirectory,
-                    availableExperiments = reactive(availableDatabases$db))
-  print("2")
-    
     appendTab(inputId = "mainIDBacNav",
               tabPanel("Select/Manipulate Experiments",
                        value = "sqlUiTab",
+                       p("Sdv"),
                        IDBacApp::databaseTabUI("sqlUIcreator")
                        
               )
     )
+  
   }
 })
 
 
+pw <- reactive({callModule(IDBacApp::databaseTabServer,
+                "sqlUIcreator",
+                workingDirectory = workingDirectory,
+                availableExperiments = reactive(availableDatabases$db))})
 
-      
 
+observeEvent(pw()$move,{
+  databasePools$userDBcon <- pw()$userDBCon
+  
+  rrt<<-pw()$userDBCon
+  print("go")
+  
+  })
+
+
+
+# Trigger add tabs --------------------------------------------------------
+
+observeEvent(pw()$move,
+             once = T, 
+             ignoreInit = TRUE, {
+
+               print("go2")
+               
+               
+               appendTab(inputId = "mainIDBacNav",
+                         tabPanel("Compare Two Samples (Protein)",
+                                  value = "inversePeaks",
+                                  uiOutput("inversepeakui")
+                         )
+               )
+               appendTab(inputId = "mainIDBacNav",
+                         tabPanel("Hierarchical Clustering (Protein)",
+                                  uiOutput("Heirarchicalui")
+                         )
+               )
+               appendTab(inputId = "mainIDBacNav",
+                         tabPanel("Metabolite Association Network (Small-Molecule)",
+                                  IDBacApp::ui_smallMolMan()
+                         )
+               )
+               
+             
+               })
+# 
+# observeEvent((pw()$move),ignoreInit = TRUE,{
+#   print(isolate(pw()$move))
+# updateTabsetPanel(session, "mainIDBacNav",
+#                   selected = "inversePeaks")
+# })     
+#       
       
       
       
-      
-      
-      
-      
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
      
       
       observeEvent(input$processToAnalysis,  
@@ -499,7 +573,7 @@ observe({
         chosenProteinSampleIDs$ids <- shiny::callModule(IDBacApp::sampleChooser,
                                                         "proteinSampleChooser",
                                                         pool = databasePools$userDBcon,
-                                                        protein = TRUE)
+                                                        whetherProtein = TRUE)
       })
       
       
@@ -507,7 +581,6 @@ observe({
       #----
       collapsedPeaksP <- reactive({
         req(chosenProteinSampleIDs$ids)
-        print("hi")
         # For each sample:
         # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
         # merge into a single peak list per sample
@@ -809,8 +882,6 @@ observe({
     
     
       observe({
-        print("yep")
-        
         req(exists("proteinDendrogram2"))
     
       proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,

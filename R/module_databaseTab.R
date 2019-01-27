@@ -5,7 +5,8 @@
 databaseTabUI <- function(id) {
   ns <- shiny::NS(id)
   
-  fluidPage(
+  tagList(
+  
     column(width = 4,
            fluidRow(
              column(width = 12,
@@ -22,8 +23,10 @@ databaseTabUI <- function(id) {
     ),
     column(width = 8,
            fluidRow(
-             shinyBS::bsCollapse(id = ns("collapseSQLInstructions"), open = "Panel 1",
-                                 shinyBS::bsCollapsePanel(h4("Open\\Close Instructions", align = "center"),
+           #  shinyBS::bsCollapse(id = ns("collapseSQLInstructions"),
+                               #  open = "Panel 1",
+                              #   shinyBS::bsCollapsePanel(h4("Open\\Close Instructions", 
+                                           #                  align = "center"),
                                                           tags$b("What is an \"experiment\" in IDBac?"),
                                                           tags$ul(
                                                             tags$li("A user-defined group of samples that were analyzed by MALDI MS."),
@@ -47,14 +50,13 @@ databaseTabUI <- function(id) {
                                                             tags$li("Add information about strains (for coloring plots later, or just as a record)")
                                                             
                                                           )
-                                 )
+                               ##  )
                                  
-             )
+            # )
            ),
            fluidRow(
-             
-             shinyBS::bsCollapse(id = ns("modifySqlCollapse"),
-                                 shinyBS::bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
+            # shinyBS::bsCollapse(id = ns("modifySqlCollapse"),
+                          #       shinyBS::bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
                                                           
                                                           tabsetPanel(id = ns("ExperimentNav"), 
                                                                       tabPanel("Create an experiment, pulling samples from the selected experiment",
@@ -66,7 +68,7 @@ databaseTabUI <- function(id) {
                                                                                       p("Note: For data integrity, samples cannot be removed from experiments.", align = "center"),
                                                                                       p("Move strains between boxes by clicking the strain's name
                                                                                and then an arrow. Strains in the right box will be used for analysis."),
-                                                                                      uiOutput(ns("chooseNewDBSamples")),
+                                                                                      IDBacApp::sampleChooserUI("chooseNewDBSamples"),
                                                                                       verbatimTextOutput(ns("selection")),
                                                                                       br(),
                                                                                       textInput(ns("nameformixNmatch"),
@@ -92,16 +94,16 @@ databaseTabUI <- function(id) {
                                                                                                 label = "New Column Name"),
                                                                                       actionButton(ns("insertNewMetaColumn"),
                                                                                                    label = "Insert Column")),
-                                                                               rHandsontableOutput(ns("metaTable"), height = 800)
+                                                                               rhandsontable::rHandsontableOutput(ns("metaTable"), height = 800)
                                                                       )
                                                           ) 
                                  )
-             )
-           )
+            # )
+          # )
            
     )
-  )
   
+  )
   
 }
 
@@ -115,18 +117,19 @@ databaseTabServer <- function(input,
                               workingDirectory,
                               availableExperiments,
                               pool){
+ 
   
-  availableExperimentsR <- reactive(availableExperiments)
-  
+
   output$availableDB <- renderUI({
     ns <- session$ns
     selectInput(ns("selectExperiment"),
                 label = h3("First, select an experiment:"),
-                choices = availableExperimentsR(),
+                choices = availableExperiments(),
                 selected = NULL,
                 width = "50%"
     )
   })
+  
   
   
   # Collapsable instruction panels
@@ -143,14 +146,18 @@ databaseTabServer <- function(input,
   
   
   
-  
   userDBCon <- eventReactive(input$selectExperiment, {
     IDBacApp::createPool(fileName = input$selectExperiment,
                          filePath = workingDirectory)[[1]]
   })
   
   
-  
+  shiny::callModule(IDBacApp::sampleChooser,
+                    "chooseNewDBSamples",
+                    pool = userDBCon(),
+                    allSamples = TRUE,
+                    whetherProtein = FALSE)
+                    
   
   
   
@@ -196,39 +203,9 @@ databaseTabServer <- function(input,
   
   
   
-  
-  
-  
   # Create analysis tabs and move the view to the mirror plots tab  
   
-  observeEvent(input$moveToAnalysis,
-               once = TRUE, 
-               ignoreInit = TRUE, {
-                 
-                 appendTab(inputId = "mainIDBacNav",
-                           tabPanel("Compare Two Samples (Protein)",
-                                    value = "inversePeaks",
-                                    uiOutput("inversepeakui")
-                           )
-                 )
-                 appendTab(inputId = "mainIDBacNav",
-                           tabPanel("Hierarchical Clustering (Protein)",
-                                    uiOutput("Heirarchicalui")
-                           )
-                 )
-                 appendTab(inputId = "mainIDBacNav",
-                           tabPanel("Metabolite Association Network (Small-Molecule)",
-                                    IDBacApp::ui_smallMolMan()
-                           )
-                 )
-                 
-                 updateTabsetPanel(session, "mainIDBacNav",
-                                   selected = "inversePeaks")
-                 
-                 updateNavlistPanel(session, "ExperimentNav",
-                                    selected = "experiment_select_tab")
-               }
-  )
+  
   
   
   
@@ -284,15 +261,15 @@ databaseTabServer <- function(input,
     rhandsontable::rhandsontable(qwerty$rtab,
                                  useTypes = FALSE,
                                  contextMenu = TRUE ) %>%
-      hot_col("Strain_ID",
+      rhandsontable::hot_col("Strain_ID",
               readOnly = TRUE) %>%
-      hot_row(1,
+      rhandsontable::hot_row(1,
               readOnly = TRUE) %>%
-      hot_context_menu(allowRowEdit = FALSE,
+      rhandsontable::hot_context_menu(allowRowEdit = FALSE,
                        allowColEdit = TRUE) %>%
-      hot_cols(colWidths = 100) %>%
-      hot_rows(rowHeights = 25) %>%
-      hot_cols(fixedColumnsLeft = 1)
+      rhandsontable::hot_cols(colWidths = 100) %>%
+      rhandsontable::hot_rows(rowHeights = 25) %>%
+      rhandsontable::hot_cols(fixedColumnsLeft = 1)
     
     
     
@@ -476,7 +453,9 @@ databaseTabServer <- function(input,
   
   
   
-  return(userDBCon())
+  return(list(pool = reactive(userDBCon()),
+              move = input$moveToAnalysis
+              ))
   
 }
 

@@ -87,9 +87,9 @@ ui_smallMolMan <-  function(){
              absolutePanel(fixed = TRUE, width = "50%",
                            tabsetPanel(type="tabs",           
                                        tabPanel(value = "smallMolMANUI","MAN",
-                                                simpleNetworkOutput("metaboliteAssociationNetwork", width="100%")),
+                                                networkD3::simpleNetworkOutput("metaboliteAssociationNetwork", width="100%")),
                                        tabPanel(value = "smallMolPCAUi","PCA",
-                                                plotlyOutput("smallMolPca",
+                                                plotly::plotlyOutput("smallMolPca",
                                                              width = "100%"
                                                 )
                                        ))

@@ -11,14 +11,16 @@ sampleChooser <- function(input,
                           output,
                           session,
                           pool,
-                          protein){
+                          whetherProtein = FALSE,
+                          allSamples = FALSE){
   
   
   
   
   availableNewSamples <- reactive({
     IDBacApp::availableSampleNames(pool = pool,
-                                   protein = protein)
+                                   whetherProtein = whetherProtein,
+                                   allSamples = allSamples)
   })
   
   
@@ -49,63 +51,6 @@ sampleChooser <- function(input,
 
 
 
-
-#   
-#   
-#   
-#   
-#   
-#   
-#   
-#   
-#   collapsedPeaks <- reactive({
-#     req(input$addSampleChooser$right)
-#     
-#     query <- DBI::dbSendStatemen("
-#                                  SELECT DISTINCT `spectrumSHA`, `Strain_ID`
-#                                  FROM `IndividualSpectra`
-#                                  WHERE (`proteinPeaks` IS NOT NULL) AND
-#                                  WHERE `Strain_ID` = ?",
-#                                  .con = conn)
-#     
-#     DBI::dbBind(query, list(as.vector(as.character(input$addSampleChooser$right))))
-#     selectedMeta <- DBI::dbFetch(query)
-#     
-#     dbClearResult(query)
-#     
-#     
-#     
-#   
-#     #TODO: Lapply might be looked at and consider replacinng with  parallel::parLapply() 
-#     conn <- pool::poolCheckout(pool)
-#     
-#     temp <- lapply(temp,
-#                    function(x){
-#                      IDBacApp::collapseProteinReplicates(checkedOutPool = conn,
-#                                                          fileshas = x,
-#                                                          proteinPercentPresence = input$percentPresenceP,
-#                                                          lowerMassCutoff = input$lowerMass,
-#                                                          upperMassCutoff = input$upperMass,
-#                                                          minSNR = 6)
-#                    })
-#     
-#     pool::poolReturn(conn)
-#     return(temp)
-#     
-#   })
-#   
-#   
-# 
-#   
-#   
-#   
-#   return(collapsedPeaks)
-#   
-# }
-# 
-
-
-
 #' Search an IDBac database to see which sample IDs have protein or small molecule data
 #'
 #' @param pool 
@@ -115,11 +60,19 @@ sampleChooser <- function(input,
 #' @export
 #'
 #' @examples
-availableSampleNames <- function(pool, protein){
+availableSampleNames <- function(pool, whetherProtein, allSamples){
   
   
   conn <- pool::poolCheckout(pool)
-  if(protein == TRUE){
+  
+  if (allSamples == TRUE) {
+  
+    query <- glue::glue_sql("
+                          SELECT DISTINCT `Strain_ID`
+                            FROM `IndividualSpectra`",
+                            .con = conn)
+  } else {
+  if (protein == TRUE) {
     query <- glue::glue_sql("
                           SELECT DISTINCT `Strain_ID`
                           FROM `IndividualSpectra`
@@ -135,7 +88,8 @@ availableSampleNames <- function(pool, protein){
                             .con = conn)
     
   }
-  
+    }
+    
   query <- DBI::dbGetQuery(conn, query)
   pool::poolReturn(conn)
   return(query[ , 1])
