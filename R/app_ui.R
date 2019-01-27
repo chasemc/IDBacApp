@@ -19,7 +19,7 @@ app_ui <- function(){
              title = "IDBac",
              id = "mainIDBacNav",
              tabPanel(
-               "Introduction",
+               title = "Introduction",
                div(class="introPage",
                    #includeCSS(file.path(system.file('www', package = 'IDBacApp'), 'style.css')),
                    tags$head(tags$link(href = "www/styles.css", rel = "stylesheet")),
@@ -52,8 +52,11 @@ app_ui <- function(){
                                             )
                                           )
                                         ),
-                                        column(width=12,align="center", actionButton("updateIDBac",
-                                                                                     label = "Check for Updates",align="center")
+                                        column(width = 12,
+                                               align = "center",
+                                               actionButton("updateIDBac",
+                                                            label = "Check for Updates",
+                                                            align = "center")
                                         )
                                       ),
                                       br(),
@@ -104,7 +107,7 @@ app_ui <- function(){
              tabPanel(
                "Starting With Raw Data",
                value = "rawDataUiTab",
-               uiOutput("rawDataUI"))
+               IDBacApp::convertDataTabUI("convertDataTab"))
              
   )
 }

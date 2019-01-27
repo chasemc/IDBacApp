@@ -43,12 +43,14 @@ file.remove(list.files(tempMZDir,
 # Conversions Tab ---------------------------------------------------------
 
 
-# This "observe" event creates the onversions UI tab where users select which experiments to analyze
-observe({
-  output$rawDataUI <- renderUI({
-    conversionsUI()
-  })
-}) 
+callModule(IDBacApp::convertDataTabServer,
+           "convertDataTab")
+
+
+
+
+
+
 
 
 
@@ -56,728 +58,48 @@ observe({
 
 #-----
 
-  #----
+#----
+
 # Find the available databases, and make reactive so can be updated if more are created
 availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(workingDirectory,
                                                                                pattern = ".sqlite",
                                                                                full.names = FALSE)))
+
+databasePools <- reactiveValues(userDBcon = NULL)
+
 #This "observe" event creates the SQL tab UI.
-observeEvent(availableDatabases$db, {
-  
+observe({
+ 
   if (length(availableDatabases$db) > 0) {
-        appendTab(inputId = "mainIDBacNav",
-                  tabPanel("Select/Manipulate Experiments",
-                           value = "sqlUiTab",
-                           IDBacApp::ui_sqlUI(availableExperiments = availableDatabases$db)
-                  )
-        )
+    print("1")
+    p <- callModule(IDBacApp::databaseTabServer,
+                    "sqlUIcreator",
+                    workingDirectory = workingDirectory,
+                    availableExperiments = reactive(availableDatabases$db))
+  print("2")
+    
+    appendTab(inputId = "mainIDBacNav",
+              tabPanel("Select/Manipulate Experiments",
+                       value = "sqlUiTab",
+                       IDBacApp::databaseTabUI("sqlUIcreator")
+                       
+              )
+    )
   }
 })
 
 
-# Collapsible instruction panels
-observeEvent(input$styleSelect, 
-             ignoreInit = TRUE, {
-               updateCollapse(session, "collapseSQLInstructions")
-               updateCollapse(session, "modifySqlCollapse")
-               isolate(
-                 updateCollapse(session, "collapseSQLSelector")
-               )
-             }
-)
 
+      
 
-# Create analysis tabs and move the view to the mirror plots tab  
-
-observeEvent(input$moveToAnalysis,
-             once = TRUE, 
-             ignoreInit = TRUE, {
-               
-               appendTab(inputId = "mainIDBacNav",
-                         tabPanel("Compare Two Samples (Protein)",
-                                  value = "inversePeaks",
-                                  uiOutput("inversepeakui")
-                         )
-               )
-               appendTab(inputId = "mainIDBacNav",
-                         tabPanel("Hierarchical Clustering (Protein)",
-                                  uiOutput("Heirarchicalui")
-                         )
-               )
-               appendTab(inputId = "mainIDBacNav",
-                         tabPanel("Metabolite Association Network (Small-Molecule)",
-                                  IDBacApp::ui_smallMolMan()
-                         )
-               )
-               
-               updateTabsetPanel(session, "mainIDBacNav",
-                                 selected = "inversePeaks")
-               
-               updateNavlistPanel(session, "ExperimentNav",
-                                  selected = "experiment_select_tab")
-             }
-)
-  
-  
-      #----
-      output$selectedSQLText <- renderPrint({
-        fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
-                                                          pattern = ".sqlite",
-                                                          full.names = FALSE))
-        filePaths <- list.files(workingDirectory,
-                                pattern = ".sqlite",
-                                full.names = TRUE)
-        filePaths[which(fileNames == input$selectExperiment)]
-        
-      })
       
       
       
       
-      #----
-      newExperimentSqlite <- reactive({
-        # This pool is used when creating an entirely new "experiment" .sqlite db
-        name <- base::make.names(input$newExperimentName)
-        
-        # maxx 100 characters with ".sqlite"
-        name <-  base::substr(name, 1, 93)
-        
-        pool::dbPool(drv = RSQLite::SQLite(),
-                     dbname = paste0(name, ".sqlite"))
-        
-        
-        
-      })
       
-      #---- POOLS
       
       
-      
-      
-      userDBCon <- eventReactive(input$selectExperiment, {
-        print("d")
-        IDBacApp::createPool(fileName = input$selectExperiment,
-                             filePath = workingDirectory)[[1]]
-      })
-      
-      
-      
-      #----
-      qwerty <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
-      
-      
-      #----
-      observeEvent(input$searchNCBI, 
-                   ignoreInit = TRUE,  {
-        # IDBacApp::searchNCBI()
-      })
-      
-      
-      
-      
-      
-      observeEvent(input$insertNewMetaColumn, 
-                   ignoreInit = TRUE, {
-        IDBacApp::insertMetadataColumns(pool = userDBCon(),
-                                        columnNames = input$addMetaColumnName)
-        
-        
-      })
-      
-      observeEvent(input$saven, 
-                   ignoreInit = TRUE, {
-        
-        DBI::dbWriteTable(conn = userDBCon(),
-                          name = "metaData",
-                          value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
-                          overwrite = TRUE)  
-        
-      })
-      
-      
-      
-      
-      
-      #----
-      output$metaTable <- rhandsontable::renderRHandsontable({
-        rhandsontable::rhandsontable(qwerty$rtab,
-                                     useTypes = FALSE,
-                                     contextMenu = TRUE ) %>%
-          hot_col("Strain_ID",
-                  readOnly = TRUE) %>%
-          hot_row(1,
-                  readOnly = TRUE) %>%
-          hot_context_menu(allowRowEdit = FALSE,
-                           allowColEdit = TRUE) %>%
-          hot_cols(colWidths = 100) %>%
-          hot_rows(rowHeights = 25) %>%
-          hot_cols(fixedColumnsLeft = 1)
-        
-        
-        
-      })
-      
-      
-      
-      #----
-      observeEvent(c(input$selectExperiment, input$insertNewMetaColumn), 
-                   ignoreInit = TRUE, {
-        
-        if (!is.null(userDBCon())) {
-          conn <- pool::poolCheckout(userDBCon())
-          
-          if (!"metaData" %in% DBI::dbListTables(conn)) {
-            
-            warning("It appears the experiment file may be corrupt, please create again.")
-            qwerty$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
-            
-          } else{
-            
-            
-            dbQuery <- glue::glue_sql("SELECT *
-                                      FROM ({tab*})",
-                                      tab = "metaData",
-                                      .con = conn)
-            
-            dbQuery <- DBI::dbGetQuery(conn, dbQuery)
-            
-            exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
-                                                "Genbank_Accession"            = "KY858228",
-                                                "NCBI_TaxID"                   = "446370",
-                                                "Kingdom"                      = "Bacteria",
-                                                "Phylum"                       = "Firmicutes",
-                                                "Class"                        = "Bacilli",
-                                                "Order"                        = "Bacillales",
-                                                "Family"                       = "Paenibacillaceae",
-                                                "Genus"                        = "Paenibacillus",
-                                                "Species"                      = "telluris",
-                                                "MALDI_Matrix"                 = "CHCA",
-                                                "DSM_Agar_Media"               = "1054_Fresh",
-                                                "Cultivation_Temp_Celsius"     = "27",
-                                                "Cultivation_Time_Days"        = "10",
-                                                "Cultivation_Other"            = "",
-                                                "User"                         = "Chase Clark",
-                                                "User_ORCID"                   = "0000-0001-6439-9397",
-                                                "PI_FirstName_LastName"        = "Brian Murphy",
-                                                "PI_ORCID"                     = "0000-0002-1372-3887",
-                                                "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
-            )
-            
-            qwerty$rtab <- merge(exampleMetaData,
-                                 dbQuery,
-                                 all = TRUE,
-                                 sort = FALSE)
-            
-            pool::poolReturn(conn)
-          }
-          
-        }
-      })
-      
-      
-      
-      
-      
-      
-      
-      
-      #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
-      #----
-      observe({
-        if (is.null(input$startingWith)){} else if (input$startingWith == 3) {
-          output$mzConversionUI <- renderUI({
-            IDBacApp::beginWithMZ("beginWithMZ")
-          })
-        }
-      })
-      
-      
-      # Reactive variable returning the user-chosen location of the raw MALDI files as string
-      #----
-      mzmlRawFilesLocation <- reactive({
-        if (input$mzmlRawFileDirectory > 0) {
-          IDBacApp::choose_dir()
-        }
-      })
-      
-      
-      # Creates text showing the user which directory they chose for raw files
-      #----
-      output$mzmlRawFileDirectory <- renderText({
-        if (is.null(mzmlRawFilesLocation())) {
-          return("No Folder Selected")
-        } else {
-          folders <- NULL
-          
-          findmz <- function(){
-            # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
-            return(list.files(mzmlRawFilesLocation(),
-                              recursive = TRUE,
-                              full.names = FALSE,
-                              pattern = "\\.mz"))
-            setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-            
-          }
-          
-          
-          # Get the folders contained within the chosen folder.
-          foldersInFolder <- tryCatch(findmz(),
-                                      error = function(x) paste("Timed out"),
-                                      finally = function(x) x)
-          
-          if (foldersInFolder == "Timed out") {
-            return("Timed out looking for mzML/mzXML files. This can happen if the folder you 
-                   selected has lots of folders within it... because IDBac looks through all 
-                   of them for mzML/mzXML files.")}else{
-                     
-                     for (i in 1:length(foldersInFolder)) {
-                       # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-                       folders <- paste0(folders, 
-                                         "\n",
-                                         basename(foldersInFolder[[i]]))
-                     }
-                     return(folders)
-                   }}
-        
-        
-      })
-      
-      
-      
-      
-      # Reactive variable returning the user-chosen location of the raw delim files as string
-      #----
-      delimitedLocationP <- reactive({
-        if (input$delimitedDirectoryP > 0) {
-          IDBacApp::choose_dir()
-        }
-      })
-      
-      
-      # Reactive variable returning the user-chosen location of the raw delim files as string
-      #----
-      delimitedLocationSM <- reactive({
-        if (input$delimitedDirectorySM > 0) {
-          IDBacApp::choose_dir()
-        }
-      })
-      
-      
-      # Creates text showing the user which directory they chose for raw files
-      #----
-      output$delimitedLocationSMo <- renderText({
-        if (is.null(delimitedLocationSM())) {
-          return("No Folder Selected")} else {
-            folders <- NULL
-            foldersInFolder <- list.files(delimitedLocationSM(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
-            for (i in 1:length(foldersInFolder)) {
-              folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-            }
-            folders
-          }
-      })
-      
-      
-      # Creates text showing the user which directory they chose for raw files
-      #----
-      output$delimitedLocationPo <- renderText({
-        if (is.null(delimitedLocationP())) {
-          return("No Folder Selected")} else {
-            folders <- NULL
-            foldersInFolder <- list.files(delimitedLocationP(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
-            for (i in 1:length(foldersInFolder)) {
-              folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-            }
-            folders
-          }
-      })
-      
-      
-      #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
-      #----
-      observeEvent(c(input$ConversionsNav,
-                     input$rawORreanalyze), 
-                   ignoreInit = TRUE, 
-                   {
-                     
-                     if (input$ConversionsNav == "convert_bruker_nav") {
-                       
-                       if (is.null(input$rawORreanalyze)) {
-                       } else if (input$rawORreanalyze == 1) {
-                         
-                         output$conversionMainUI1 <- renderUI({
-                           IDBacApp::oneMaldiPlate("oneMaldiPlate")
-                         }) 
-                       } else if (input$rawORreanalyze == 2) {
-                         output$conversionMainUI1 <- renderUI({
-                           IDBacApp::multipleMaldiPlates("multipleMaldiPlates")
-                         })
-                       }
-                     }
-                     
-                     
-                     if (input$ConversionsNav == "convert_mzml_nav") {
-                       output$conversionMainUI2 <- renderUI({
-                         IDBacApp::beginWithMZ("beginWithMZ")
-                       })
-                     } 
-                     
-                     if (input$ConversionsNav == "convert_txt_nav") {
-                       output$conversionMainUI3 <- renderUI({
-                         IDBacApp::beginWithTXT("beginWithTXT")
-                       })
-                     } 
-                     
-                   })
-      
-      
-      
-      
-      
-      
-      
-      
-      # Find if "IDBac" exists in selected folder and then uniquify if necessary
-      #----
-      uniquifiedIDBac <- reactive({
-        req(selectedDirectory())
-        uniquifiedIDBacs <- list.dirs(selectedDirectory(), 
-                                      recursive = F,
-                                      full.names = F)
-        uniquifiedIDBacs <- make.unique(c(uniquifiedIDBacs, "IDBac"), 
-                                        sep = "-")
-        tail(uniquifiedIDBacs, 1)
-      })
-      
-      
-      # When ReAnalyzing data, and need to select the "IDBac" folder directly
-      #----
-      pressedidbacDirectoryButton <- reactive({
-        if (is.null(input$idbacDirectoryButton)) {
-          return("No Folder Selected")
-        } else if (input$idbacDirectoryButton > 0) {
-          IDBacApp::choose_dir()
-        }
-      })
-      
-      
-      # Reactive variable returning the user-chosen location of the raw MALDI files as string
-      #----
-      rawFilesLocation <- reactive({
-        if (input$rawFileDirectory > 0) {
-          IDBacApp::choose_dir()
-        }
-      })
-      
-      
-      # Creates text showing the user which directory they chose for raw files
-      #----
-      output$rawFileDirectory <- renderText({
-        if (is.null(rawFilesLocation())) {
-          return("No Folder Selected")
-        } else {
-          folders <- NULL
-          # Get the folders contained within the chosen folder.
-          foldersInFolder <- list.dirs(rawFilesLocation(),
-                                       recursive = FALSE,
-                                       full.names = FALSE) 
-          for (i in 1:length(foldersInFolder)) {
-            # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-            folders <- paste0(folders, 
-                              "\n",
-                              foldersInFolder[[i]])
-          }
-          return(folders)
-        }
-      })
-      
-      
-      # Reactive variable returning the user-chosen location of the raw MALDI files as string
-      #----
-      multipleMaldiRawFileLocation <- reactive({
-        if (input$multipleMaldiRawFileDirectory > 0) {
-          IDBacApp::choose_dir()
-        }
-      })
-      
-      
-      # Creates text showing the user which directory they chose for raw files
-      #----
-      output$multipleMaldiRawFileDirectory <- renderText({
-        if (is.null(multipleMaldiRawFileLocation())) {
-          return("No Folder Selected")
-        } else {
-          folders <- NULL
-          # Get the folders contained within the chosen folder.
-          foldersInFolder <- list.dirs(multipleMaldiRawFileLocation(),
-                                       recursive = FALSE, 
-                                       full.names = FALSE) 
-          for (i in 1:length(foldersInFolder)) {
-            # Creates user feedback about which raw data folders were chosen. 
-            # Individual folders displayed on a new line "\n"
-            folders <- paste0(folders, "\n", foldersInFolder[[i]]) 
-          }
-          
-          return(folders)
-        }
-      })
-      
-      
-      # Spectra conversion
-      #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
-      #----
-      spectraConversion <- reactive({
-        
-        IDBacApp::excelMaptoPlateLocation(rawORreanalyze = input$rawORreanalyze,
-                                          excelFileLocation = input$excelFile$datapath,
-                                          rawFilesLocation = rawFilesLocation(),
-                                          multipleMaldiRawFileLocation = multipleMaldiRawFileLocation())
-        
-      })
-      
-    
-      
-      
-      
-      # Run raw data processing on delimited-type input files
-      #----
-      observeEvent(input$runDelim, 
-                   ignoreInit = TRUE, {
-        
-        popup1()
-        
-        IDBacApp::parseDelimitedMS(proteinDirectory = delimitedLocationP(),
-                                   smallMolDirectory = delimitedLocationSM(),
-                                   exportDirectory =  tempdir())
-        popup2()
-      })
-      
-      
-      # Modal to display while converting to mzML
-      #----
-      popup1 <- reactive({
-        showModal(modalDialog(
-          title = "Important message",
-          "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
-          br(),
-          "To check what has been converted, you can navigate to:",
-          easyClose = FALSE, size = "l",
-          footer = ""))
-      })
-      
-      
-      # Popup summarizing the final status of the conversion
-      #----
-      popup2 <- reactive({
-        showModal(modalDialog(
-          title = "Conversion Complete",
-          paste0(" files were converted into open data format files."),
-          br(),
-          "To check what has been converted you can navigate to:",
-          easyClose = TRUE,
-          footer = tagList(actionButton("beginPeakProcessingModal", 
-                                        "Click to continue with Peak Processing"),
-                           modalButton("Close"))
-        ))
-      })
-      
-      
-      # Call the Spectra processing function when the spectra processing button is pressed
-      #----
-      observeEvent(input$run, 
-                   ignoreInit = TRUE,  {
-        
-        
-        popup3()
-        
-        if (input$ConversionsNav == "convert_bruker_nav") {
-          ww <<- input$excelFile
-          if (input$rawORreanalyze == 1) {
-      validate(need(any(!is.na(sampleMapReactive$rt)), 
-                    "No samples entered into sample map, please try entering them again"))
-            aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
-            aa <- matrix(aa, nrow = 16, ncol = 24)
-            
-            
-            spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
-            s1 <- base::as.matrix(sampleMapReactive$rt)
-            sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
-            
-            
-           
-            
-            forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
-                                               msconvertPath = "",
-                                               sampleMap = sampleMap,
-                                               tempDir = tempMZDir)
-              
-              
-            
-          }
-        }
-        
-        validate(need(length(forProcessing$mzFile) == length(forProcessing$sampleID), 
-                      "Temp mzML files and sample ID lengths don't match."
-        ))
-        
-        lengthProgress <- length(forProcessing$mzFile)
-        
-        userDB <- pool::poolCheckout(newExperimentSqlite())
-        
-        withProgress(message = 'Processing in progress',
-                     detail = 'This may take a while...',
-                     value = 0, {
-                       
-                       for (i in base::seq_along(forProcessing$mzFile)) {
-                         incProgress(1/lengthProgress)
-                         IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
-                                                             sampleID = forProcessing$sampleID[[i]],
-                                                             userDBCon = userDB) # pool connection
-                       }
-                       
-                     })
-        
-        
-        pool::poolReturn(userDB)
-        
-        
-        
-        
-        # aa2z <-newExperimentSqlite()
-        # 
-        # numCores <- parallel::detectCores()
-        # cl <- parallel::makeCluster(numCores)
-        # parallel::parLapply(cl,fileList, function(x)
-        #                     IDBacApp::spectraProcessingFunction(rawDataFilePath = x,
-        #                                     userDBCon = aa2z))
-        # 
-        # 
-        
-        #  parallel::stopCluster(cl)
-        
-        
-        
-        
-        popup4()
-      })
-      
-      
-    output$missingSampleNames <- shiny::renderText({
-      req(rawFilesLocation())
-      req(sampleMapReactive$rt)
-      aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
-         aa <- matrix(aa, nrow = 16, ncol = 24)
-       
-    
-      spots <- brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
-      s1 <- base::as.matrix(sampleMapReactive$rt)
-      b <- sapply(spots, function(x) s1[which(aa %in% x)])
-      b <- as.character(spots[which(is.na(b))])
      
-       if (length(b) == 0) {
-        paste0("No missing IDs")
-      } else {
-      paste0(paste0(b, collapse = " \n ", sep = ","))
-      }
-    })
-      
-      sampleMapReactive <- reactiveValues(rt = as.data.frame(base::matrix(NA,
-                                                                          nrow = 16,
-                                                                          ncol = 24,
-                                                                          dimnames = list(LETTERS[1:16],1:24))))
-      
-      observeEvent(input$showSampleMap, 
-                   ignoreInit = TRUE, {  
-        
-        showModal(modalDialog(footer = actionButton("saveSampleMap", "Save"),{
-          tagList(
-            rHandsontableOutput("plateDefault")
-            
-          )
-        }))
-        
-        
-        
-      })
-      observeEvent(input$saveSampleMap, 
-                   ignoreInit = TRUE, {  
-        
-      
-      shiny::removeModal()
-        
-      })
-      
-      
-      
-      output$plateDefault <- rhandsontable::renderRHandsontable({
-        
-        rhandsontable::rhandsontable(sampleMapReactive$rt,
-                                     useTypes = FALSE,
-                                     contextMenu = TRUE ) %>%
-          hot_context_menu(allowRowEdit = FALSE,
-                           allowColEdit = TRUE) %>%
-          hot_cols(colWidths = 100) %>%
-          hot_rows(rowHeights = 25)
-      })
-      
-      
-      
-      
-      
-      
-      observeEvent(input$saveSampleMap, 
-                   ignoreInit = TRUE, {
-    
-          
-          z <- unlist(input$plateDefault$data, recursive = FALSE) 
-          zz <- as.character(z)
-          zz[zz == "NULL"] <- NA 
-          
-          
-        # for some reason rhandsontable hot_to_r not working, implementing own:
-        changed <- base::matrix(zz,
-                     nrow = nrow(sampleMapReactive$rt),
-                     ncol = ncol(sampleMapReactive$rt),
-                     dimnames = list(LETTERS[1:16],1:24),
-                     byrow = T)
-        
-        sampleMapReactive$rt <- as.data.frame(changed, stringsAsFactors = FALSE)
-        
-      
-      })
-      
-      
-      
-      
-      
-      
-      # Modal displayed while speactra -> peak processing is ocurring
-      #----
-      popup3 <- reactive({
-        showModal(modalDialog(
-          title = "Important message",
-          "When spectra processing is complete you will be able to begin with the data analysis",
-          br(),
-          "To check the progress, observe the progress bar at bottom right or navigate to the following directory, where four files will be created per sample ",
-          easyClose = FALSE, 
-          size = "l",
-          footer = ""))
-      })
-      
-      
-      # Popup notifying user when spectra processing is complete
-      #----
-      popup4 <- reactive({
-        showModal(modalDialog(
-          title = "Spectra Processing is Now Complete",
-          br(),
-          easyClose = FALSE,
-          tagList(actionButton("processToAnalysis", 
-                               "Click to continue"))
-        ))
-        
-      })
-      
       
       observeEvent(input$processToAnalysis,  
                    ignoreInit = TRUE, {
@@ -853,7 +175,7 @@ observeEvent(input$moveToAnalysis,
       #----
       inverseComparisonNames <- reactive({
         
-        db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
+        db <- dplyr::tbl(databasePools$userDBcon, "IndividualSpectra")
         db %>%
           filter(proteinPeaks != "NA") %>%
           select(Strain_ID) %>%
@@ -871,8 +193,8 @@ observeEvent(input$moveToAnalysis,
         mirrorPlotEnv <- new.env(parent = parent.frame())
         
         # connect to sql
-        db <- dplyr::tbl(userDBCon(), "IndividualSpectra")
-        conn <- pool::poolCheckout(userDBCon())
+        db <- dplyr::tbl(databasePools$userDBcon, "IndividualSpectra")
+        conn <- pool::poolCheckout(databasePools$userDBcon)
         
         # get protein peak data for the 1st mirror plot selection
         
@@ -1181,7 +503,7 @@ observeEvent(input$moveToAnalysis,
       observe({
         chosenProteinSampleIDs$ids <- shiny::callModule(IDBacApp::sampleChooser,
                                                         "proteinSampleChooser",
-                                                        pool = userDBCon(),
+                                                        pool = databasePools$userDBcon,
                                                         protein = TRUE)
       })
       
@@ -1196,7 +518,7 @@ observeEvent(input$moveToAnalysis,
         # merge into a single peak list per sample
         # trim m/z based on user input
         # connect to sql
-        conn <- pool::poolCheckout(userDBCon())
+        conn <- pool::poolCheckout(databasePools$userDBcon)
         
         temp <- lapply(chosenProteinSampleIDs$ids,
                        function(ids){
@@ -1499,7 +821,7 @@ observeEvent(input$moveToAnalysis,
       proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
                                         "proth",
                                         dendrogram = proteinDendrogram$dendrogram,
-                                        pool = userDBCon(),
+                                        pool = databasePools$userDBcon,
                                         plotWidth = reactive(input$dendparmar),
                                         plotHeight = reactive(input$hclustHeight))
     })
@@ -1619,10 +941,10 @@ observeEvent(input$moveToAnalysis,
         
         samples <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
                                   FROM `IndividualSpectra`",
-                                  .con = userDBCon()
+                                  .con = databasePools$userDBcon
         )
         
-        conn <- pool::poolCheckout(userDBCon())
+        conn <- pool::poolCheckout(databasePools$userDBcon)
         samples <- DBI::dbGetQuery(conn, samples)
         pool::poolReturn(conn)
         return(samples[ , 1])
@@ -1637,7 +959,7 @@ observeEvent(input$moveToAnalysis,
                    ignoreInit = TRUE, {
         copyingDbPopup()
         newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
-        copyToNewDatabase(existingDBPool = userDBCon(),
+        copyToNewDatabase(existingDBPool = databasePools$userDBcon,
                           newdbPath = newdbPath, 
                           sampleIDs = input$addSampleChooser$right)
         
@@ -1679,7 +1001,7 @@ observeEvent(input$moveToAnalysis,
      # pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
      #                      "proteinMANpage",
      #                      dendrogram = proteinDendrogram$dendrogram,
-     #                      pool = userDBCon(),
+     #                      pool = databasePools$userDBcon,
      #                      plotWidth=input$dendparmar,
      #                      plotHeight = input$hclustHeight)
      # er<<-reactiveValuesToList(input)
@@ -1698,7 +1020,7 @@ observeEvent(input$moveToAnalysis,
       subtractedMatrixBlank <- reactive({
     
     
-      aw <-  getSmallMolSpectra(pool = userDBCon(),
+      aw <-  getSmallMolSpectra(pool = databasePools$userDBcon,
                            sampleIDs,
                            dendrogram = proteinDend$dendroReact(),
                            ymin = 0,
