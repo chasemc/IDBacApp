@@ -509,12 +509,7 @@ oneMaldiPlate <- function(ns){
                     p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
                     actionButton(ns("run"),
                                  label = "Process Data"),
-                    tags$hr(size = 20)),
-             br(),
-             br(),
-             br(),
-             br(),
-             p(strong("Note:","If you canceled out of the popup after spectra conversion completed, you can process your converted spectra using the button below: (but only after all files have been converted) This step is not necessary otherwise."))
+                    tags$hr(size = 20))
            )
     ))
   
