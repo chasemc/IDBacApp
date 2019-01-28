@@ -41,7 +41,7 @@ databaseSelector_server <- function(input,
     ns <- session$ns
     selectInput(ns("selectExperiment"),
                 label = h3(h3Label),
-                choices = availableExperiments$db,
+                choices = availableExperiments,
                 selected = NULL,
                 width = "50%"
     )
@@ -59,5 +59,5 @@ databaseSelector_server <- function(input,
     
   })
   
- return(input$selectExperiment) 
+ return(input)
 }

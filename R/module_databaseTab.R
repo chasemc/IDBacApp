@@ -2,6 +2,13 @@
 
 
 
+#' Layout for the databaseTabUI
+#'
+#' @param id namespace
+#'
+#' @return ui for database UI
+#' @export
+#'
 databaseTabUI <- function(id) {
   ns <- shiny::NS(id)
   
@@ -51,44 +58,19 @@ databaseTabUI <- function(id) {
            fluidRow(
             # shinyBS::bsCollapse(id = ns("modifySqlCollapse"),
                           #       shinyBS::bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
-                                                          
                                                           tabsetPanel(id = ns("ExperimentNav"), 
                                                                       tabPanel("Create an experiment, pulling samples from the selected experiment",
                                                                                value = "experiment_mixMatch_tab",
                                                                                column(12, align = "center",
                                                                                       style = "background-color: #7777770d",
                                                                                       offset = 1,
-                                                                                      h3("Transfer samples from previous experiments to new/other experiments.", align = "center"),
-                                                                                      p("Note: For data integrity, samples cannot be removed from experiments.", align = "center"),
-                                                                                      p("Move strains between boxes by clicking the strain's name
-                                                                               and then an arrow. Strains in the right box will be used for analysis."),
-                                                                                      IDBacApp::sampleChooserUI("chooseNewDBSamples"),
-                                                                                      verbatimTextOutput(ns("selection")),
-                                                                                      br(),
-                                                                                      textInput(ns("nameformixNmatch"),
-                                                                                                label = "Enter name for new experiment"),
-                                                                                      
-                                                                                      actionButton(ns("addtoNewDB"),
-                                                                                                   label = "Add to new Experiment")
+                                                                                  IDBacApp::transferToNewDB_UI(ns("transferToNewDB"))
                                                                                )
                                                                       ),
                                                                       tabPanel("Add/modify information about samples",
                                                                                value = "experiment_metaData_tab",
-                                                                               column(width = 6, 
-                                                                                      p("Here is where you can add information about your sample. There are always standard
-                                                                               columns like \"Genus\", but you can add your own columns as well."),
-                                                                                      p("After you are finished inputting your information, press \"save\" to write the information 
-                                                                               to the database."),
-                                                                                      
-                                                                                      actionButton(ns("saven"),
-                                                                                                   label = "save")
-                                                                               ), 
-                                                                               column(width = 6,
-                                                                                      textInput(ns("addMetaColumnName"), 
-                                                                                                label = "New Column Name"),
-                                                                                      actionButton(ns("insertNewMetaColumn"),
-                                                                                                   label = "Insert Column")),
-                                                                               rhandsontable::rHandsontableOutput(ns("metaTable"), height = 800)
+                                                                       IDBacApp::updateMeta_UI("updateMeta")
+                                                                                  
                                                                       )
                                                           ) 
                                  )
@@ -109,20 +91,71 @@ databaseTabServer <- function(input,
                               output,
                               session,
                               workingDirectory,
-                              availableExperiments,
-                              pool){
- 
-  observe(aws<<-availableExperiments)
+                              availableExperiments){
+  
+  
+  
 
+  selectedDB <<- callModule(IDBacApp::databaseSelector_server,
+                           "databaseSelector",
+                           h3Label = "First, select an experiment:",
+                           availableExperiments = availableExperiments,
+                           workingDirectory = workingDirectory)
+  
+  
+  
+  
+  userDBCon <- reactive({
 
-  selectedDB <- reactive({
-    callModule(IDBacApp::databaseSelector_server,
-               "databaseSelector",
-               h3Label = "First, select an experiment:",
-               availableExperiments = availableExperiments,
-               workingDirectory = workingDirectory)
-  })
+    if(length(selectedDB > 0)){
     
+     
+    IDBacApp::createPool(fileName = selectedDB,
+                         filePath = workingDirectory)[[1]]
+    }
+  })  
+  
+  
+  
+# Update Metadata ---------------------------------------------------------
+
+  
+szdsds <<- reactive({ callModule(IDBacApp::updateMeta_server,
+             "updateMeta",
+             pool = userDBCon
+             )
+})
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+
+  
+
+    
+  
+  observe({
+    req(!is.null(selectedDB))
+    
+    callModule(IDBacApp::transferToNewDB_server,
+               "transferToNewDB",
+               pool = IDBacApp::createPool(fileName = selectedDB,
+                                           filePath = workingDirectory)[[1]],
+               workingDirectory = workingDirectory)
+    
+    
+  })
+ 
+  
+  
   
   
   # Collapsable instruction panels
@@ -139,189 +172,8 @@ databaseTabServer <- function(input,
   
   
   
-  userDBCon <- eventReactive(selectedDB(), {
-    IDBacApp::createPool(fileName = selectedDB(),
-                         filePath = workingDirectory)[[1]]
-  })
   
-  
-  shiny::callModule(IDBacApp::sampleChooser,
-                    "chooseNewDBSamples",
-                    pool = userDBCon(),
-                    allSamples = TRUE,
-                    whetherProtein = FALSE)
-                    
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  # Create analysis tabs and move the view to the mirror plots tab  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  #----
-  qwerty <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
-  
-  
-  #----
-  observeEvent(input$searchNCBI, 
-               ignoreInit = TRUE,  {
-                 # IDBacApp::searchNCBI()
-               })
-  
-  
-  
-  
-  
-  observeEvent(input$insertNewMetaColumn, 
-               ignoreInit = TRUE, {
-                 IDBacApp::insertMetadataColumns(pool = userDBCon(),
-                                                 columnNames = input$addMetaColumnName)
-                 
-                 
-               })
-  
-  observeEvent(input$saven, 
-               ignoreInit = TRUE, {
-                 
-                 DBI::dbWriteTable(conn = userDBCon(),
-                                   name = "metaData",
-                                   value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
-                                   overwrite = TRUE)  
-                 
-               })
-  
-  
-  
-  
-  
-  #----
-  output$metaTable <- rhandsontable::renderRHandsontable({
-    rhandsontable::rhandsontable(qwerty$rtab,
-                                 useTypes = FALSE,
-                                 contextMenu = TRUE ) %>%
-      rhandsontable::hot_col("Strain_ID",
-              readOnly = TRUE) %>%
-      rhandsontable::hot_row(1,
-              readOnly = TRUE) %>%
-      rhandsontable::hot_context_menu(allowRowEdit = FALSE,
-                       allowColEdit = TRUE) %>%
-      rhandsontable::hot_cols(colWidths = 100) %>%
-      rhandsontable::hot_rows(rowHeights = 25) %>%
-      rhandsontable::hot_cols(fixedColumnsLeft = 1)
-    
-    
-    
-  })
-  
-  
-  
-  #----
-  observeEvent(c(input$insertNewMetaColumn), 
-               ignoreInit = TRUE, {
-                 
-                 if (!is.null(userDBCon())) {
-                   conn <- pool::poolCheckout(userDBCon())
-                   
-                   if (!"metaData" %in% DBI::dbListTables(conn)) {
-                     
-                     warning("It appears the experiment file may be corrupt, please create again.")
-                     qwerty$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
-                     
-                   } else{
-                     
-                     
-                     dbQuery <- glue::glue_sql("SELECT *
-                                             FROM ({tab*})",
-                                               tab = "metaData",
-                                               .con = conn)
-                     
-                     dbQuery <- DBI::dbGetQuery(conn, dbQuery)
-                     
-                     exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
-                                                         "Genbank_Accession"            = "KY858228",
-                                                         "NCBI_TaxID"                   = "446370",
-                                                         "Kingdom"                      = "Bacteria",
-                                                         "Phylum"                       = "Firmicutes",
-                                                         "Class"                        = "Bacilli",
-                                                         "Order"                        = "Bacillales",
-                                                         "Family"                       = "Paenibacillaceae",
-                                                         "Genus"                        = "Paenibacillus",
-                                                         "Species"                      = "telluris",
-                                                         "MALDI_Matrix"                 = "CHCA",
-                                                         "DSM_Agar_Media"               = "1054_Fresh",
-                                                         "Cultivation_Temp_Celsius"     = "27",
-                                                         "Cultivation_Time_Days"        = "10",
-                                                         "Cultivation_Other"            = "",
-                                                         "User"                         = "Chase Clark",
-                                                         "User_ORCID"                   = "0000-0001-6439-9397",
-                                                         "PI_FirstName_LastName"        = "Brian Murphy",
-                                                         "PI_ORCID"                     = "0000-0002-1372-3887",
-                                                         "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
-                     )
-                     
-                     qwerty$rtab <- merge(exampleMetaData,
-                                          dbQuery,
-                                          all = TRUE,
-                                          sort = FALSE)
-                     
-                     pool::poolReturn(conn)
-                   }
-                   
-                 }
-               })
-  
-  
-  
-  
-  
-  
-  
-  
+
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   #----
   observe({
