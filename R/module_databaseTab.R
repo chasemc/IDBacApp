@@ -11,13 +11,7 @@ databaseTabUI <- function(id) {
            fluidRow(
              column(width = 12,
                     align = "center",
-                    uiOutput(ns("availableDB")),
-                    actionButton(ns("moveToAnalysis"),
-                                 "Click here to begin analysis"),
-                    
-                    p("Location of experiment file:", align = "center"),
-                    verbatimTextOutput(ns("selectedSQLText"),
-                                       placeholder = TRUE)
+                    IDBacApp::databaseSelector_UI(ns("databaseSelector"))
              )
            )
     ),
@@ -118,18 +112,17 @@ databaseTabServer <- function(input,
                               availableExperiments,
                               pool){
  
-  
+  observe(aws<<-availableExperiments)
 
-  output$availableDB <- renderUI({
-    ns <- session$ns
-    selectInput(ns("selectExperiment"),
-                label = h3("First, select an experiment:"),
-                choices = availableExperiments(),
-                selected = NULL,
-                width = "50%"
-    )
+
+  selectedDB <- reactive({
+    callModule(IDBacApp::databaseSelector_server,
+               "databaseSelector",
+               h3Label = "First, select an experiment:",
+               availableExperiments = availableExperiments,
+               workingDirectory = workingDirectory)
   })
-  
+    
   
   
   # Collapsable instruction panels
@@ -146,8 +139,8 @@ databaseTabServer <- function(input,
   
   
   
-  userDBCon <- eventReactive(input$selectExperiment, {
-    IDBacApp::createPool(fileName = input$selectExperiment,
+  userDBCon <- eventReactive(selectedDB(), {
+    IDBacApp::createPool(fileName = selectedDB(),
                          filePath = workingDirectory)[[1]]
   })
   
@@ -166,16 +159,6 @@ databaseTabServer <- function(input,
   
   
   
-  output$selectedSQLText <- renderPrint({
-    fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
-                                                      pattern = ".sqlite",
-                                                      full.names = FALSE))
-    filePaths <- list.files(workingDirectory,
-                            pattern = ".sqlite",
-                            full.names = TRUE)
-    filePaths[which(fileNames == input$selectExperiment)]
-    
-  })
   
   
   
@@ -278,7 +261,7 @@ databaseTabServer <- function(input,
   
   
   #----
-  observeEvent(c(input$selectExperiment, input$insertNewMetaColumn), 
+  observeEvent(c(input$insertNewMetaColumn), 
                ignoreInit = TRUE, {
                  
                  if (!is.null(userDBCon())) {
