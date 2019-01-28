@@ -66,13 +66,10 @@ databasePools <- reactiveValues(userDBcon = NULL)
 
 #This "observe" event creates the SQL tab UI.
 observeEvent(availableDatabases$db,{
-  print("ehy")
-  
   if (length(availableDatabases$db) > 0) {
     appendTab(inputId = "mainIDBacNav",
               tabPanel("Select/Manipulate Experiments",
                        value = "sqlUiTab",
-                       p("Sdv"),
                        IDBacApp::databaseTabUI("sqlUIcreator")
                        
               )
@@ -82,18 +79,23 @@ observeEvent(availableDatabases$db,{
 })
 
 
-pw <- reactive({callModule(IDBacApp::databaseTabServer,
-                "sqlUIcreator",
-                workingDirectory = workingDirectory,
-                availableExperiments = reactive(availableDatabases$db))})
+pw <- reactive({
+
+  callModule(IDBacApp::databaseTabServer,
+             "sqlUIcreator",
+             workingDirectory = workingDirectory,
+             availableExperiments = availableDatabases)
+})
 
 
 observeEvent(pw()$move,{
+  
   databasePools$userDBcon <- pw()$userDBCon
-  
-  rrt<<-pw()$userDBCon
-  print("go")
-  
+
+
+  updateTabsetPanel(session, "mainIDBacNav",
+                    selected = "inversePeaks")
+
   })
 
 
@@ -101,12 +103,12 @@ observeEvent(pw()$move,{
 # Trigger add tabs --------------------------------------------------------
 
 observeEvent(pw()$move,
-             once = T, 
+             once = T,
              ignoreInit = TRUE, {
 
                print("go2")
-               
-               
+
+
                appendTab(inputId = "mainIDBacNav",
                          tabPanel("Compare Two Samples (Protein)",
                                   value = "inversePeaks",
@@ -123,61 +125,27 @@ observeEvent(pw()$move,
                                   IDBacApp::ui_smallMolMan()
                          )
                )
-               
-             
+
+
                })
-# 
-# observeEvent((pw()$move),ignoreInit = TRUE,{
-#   print(isolate(pw()$move))
-# updateTabsetPanel(session, "mainIDBacNav",
-#                   selected = "inversePeaks")
-# })     
-#       
-      
-      
-      
+
+
+
+
+
+
+
+
      
 
+observeEvent(input$processToAnalysis,  
+             ignoreInit = TRUE, {
+               updateTabsetPanel(session, "mainIDBacNav",
+                                 selected = "sqlUiTab")
+               removeModal()
+             })
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
-     
-      
-      observeEvent(input$processToAnalysis,  
-                   ignoreInit = TRUE, {
-        updateTabsetPanel(session, "mainIDBacNav",
-                          selected = "sqlUiTab")
-        removeModal()
-      })
-      
-      
       
       #------------------------------------------------------------------------------
       # Mirror Plots
@@ -569,11 +537,11 @@ observeEvent(pw()$move,
       # User chooses which samples to include
       chosenProteinSampleIDs <- reactiveValues()
       
-      observe({
-        chosenProteinSampleIDs$ids <- shiny::callModule(IDBacApp::sampleChooser,
-                                                        "proteinSampleChooser",
-                                                        pool = databasePools$userDBcon,
-                                                        whetherProtein = TRUE)
+      observeEvent(FALSE, {
+        # chosenProteinSampleIDs$ids <- shiny::callModule(IDBacApp::sampleChooser,
+        #                                                 "proteinSampleChooser",
+        #                                                 pool = databasePools$userDBcon,
+        #                                                 whetherProtein = TRUE)
       })
       
       
@@ -1001,48 +969,12 @@ observeEvent(pw()$move,
      
       
       
-      # Check which samples are available in the databse to be moved into other databse
-      #----
-      availableNewSamples <- reactive({
-        
-        samples <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
-                                  FROM `IndividualSpectra`",
-                                  .con = databasePools$userDBcon
-        )
-        
-        conn <- pool::poolCheckout(databasePools$userDBcon)
-        samples <- DBI::dbGetQuery(conn, samples)
-        pool::poolReturn(conn)
-        return(samples[ , 1])
-        
-      })
+    
       
       
       
       
       
-      observeEvent(input$addtoNewDB,  
-                   ignoreInit = TRUE, {
-        copyingDbPopup()
-        newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
-        copyToNewDatabase(existingDBPool = databasePools$userDBcon,
-                          newdbPath = newdbPath, 
-                          sampleIDs = input$addSampleChooser$right)
-        
-        
-        removeModal()
-      })
-      
-      
-      copyingDbPopup <- reactive({
-        showModal(modalDialog(
-          title = "Important message",
-          "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
-          br(),
-          "To check what has been converted, you can navigate to:",
-          easyClose = FALSE, size = "l",
-          footer = ""))
-      })
       
       
       
