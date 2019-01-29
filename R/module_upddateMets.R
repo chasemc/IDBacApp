@@ -35,7 +35,6 @@ updateMeta_server <- function(input,
                               pool,
                               selectedDB){
        
-
   #----
   qwertyy <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
   
@@ -80,7 +79,7 @@ updateMeta_server <- function(input,
   observeEvent(c(selectedDB$selectExperiment, input$insertNewMetaColumn),{
                  
                  if (!is.null(pool())) {
-                   conn <<- pool::poolCheckout(pool())
+                   conn <- pool::poolCheckout(pool())
                    
                    if (!"metaData" %in% DBI::dbListTables(conn)) {
                      

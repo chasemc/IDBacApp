@@ -13,8 +13,13 @@
 #' @export
 #'
 #' @examples NA
-chooserInput <- function(inputId, leftLabel, rightLabel, leftChoices, rightChoices,
-                         size = 5, multiple = FALSE) {
+chooserInput <- function(inputId, 
+                         leftLabel,
+                         rightLabel,
+                         leftChoices,
+                         rightChoices,
+                         size = 5,
+                         multiple = FALSE) {
 # From: https://github.com/rstudio/shiny-examples/blob/master/036-custom-input-control/chooser.R
 
   leftChoices <- lapply(leftChoices, tags$option)
@@ -27,7 +32,7 @@ chooserInput <- function(inputId, leftLabel, rightLabel, leftChoices, rightChoic
 
   tagList(
     singleton(tags$head(
-      tags$script(src="chooser-binding.js"),
+      tags$script(src="www/chooser-binding.js"),
       tags$style(type="text/css",
                  HTML(".chooser-container { display: inline-block; }")
       )

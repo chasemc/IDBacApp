@@ -21,7 +21,11 @@ transferToNewDB_UI <- function(id) {
   br(),
   textInput(ns("nameformixNmatch"),
             label = "Enter name for new experiment"),
+  p("1"),
+  IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
+
   
+  p("2"),
   actionButton(ns("addtoNewDB"),
                label = "Add to new Experiment")
   )
@@ -38,23 +42,18 @@ transferToNewDB_server <- function(input,
                                    workingDirectory,
                                    selectedDB){
   
-wet <<- reactive({
-  
+  observeEvent(selectedDB$selectExperiment, {
+#wet <- reactive({
   ns <- session$ns
-  nj <<- shiny::callModule(IDBacApp::sampleChooser_server,
-                          ns("chooseNewDBSamples"),
+ # ns <- session$ns
+   shiny::callModule(IDBacApp::sampleChooser_server,
+                          "chooseNewDBSamples",
                           pool = pool,
                           allSamples = TRUE,
                           whetherProtein = FALSE,
-                          selectedDB)
-
-  
-})
-
-output$ploo <- renderUI({
-  IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples"))
-  
-})  
+                          selectedDB = selectedDB)
+print("5")
+  })
 
 
   copyingDbPopup <- reactive({

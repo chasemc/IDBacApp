@@ -109,24 +109,21 @@ databaseTabServer <- function(input,
 
 
 
-    callModule(IDBacApp::updateMeta_server,
-               "updateMeta",
-               pool = selectedDB$userDBCon,
-               selectedDB  = selectedDB$inputs
-    )
-
+  callModule(IDBacApp::updateMeta_server,
+             "updateMeta",
+             pool = selectedDB$userDBCon,
+             selectedDB  = selectedDB$inputs
+  )
   
   
-
-    
-
-
-    callModule(IDBacApp::transferToNewDB_server,
-               "transferToNewDB",
-               pool = selectedDB$userDBCon,
-               workingDirectory = workingDirectory,
-               selectedDB  = selectedDB$inputs)
-
+  
+  
+  callModule(IDBacApp::transferToNewDB_server,
+             "transferToNewDB",
+             pool = selectedDB$userDBCon,
+             workingDirectory = workingDirectory,
+             selectedDB  = selectedDB$inputs)
+  
 
   
   
