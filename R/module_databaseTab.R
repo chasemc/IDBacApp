@@ -117,31 +117,17 @@ databaseTabServer <- function(input,
 
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-
-
-  
 
     
-  # 
-  # observe({
-  #   req(!is.null(selectedDB))
-  #   
-  #   callModule(IDBacApp::transferToNewDB_server,
-  #              "transferToNewDB",
-  #              pool = userDBCon(),
-  #              workingDirectory = workingDirectory)
-  #   
-  #   
-  # })
- 
+
+
+    callModule(IDBacApp::transferToNewDB_server,
+               "transferToNewDB",
+               pool = selectedDB$userDBCon,
+               workingDirectory = workingDirectory,
+               selectedDB  = selectedDB$inputs)
+
+
   
   
   

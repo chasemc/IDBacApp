@@ -16,7 +16,7 @@ transferToNewDB_UI <- function(id) {
   p("Note: For data integrity, samples cannot be removed from experiments.", align = "center"),
   p("Move strains between boxes by clicking the strain's name
   and then an arrow. Strains in the right box will be used for analysis."),
-  IDBacApp::sampleChooserUI(ns("chooseNewDBSamples")),
+  uiOutput("ploo"),
   verbatimTextOutput(ns("selection")),
   br(),
   textInput(ns("nameformixNmatch"),
@@ -35,19 +35,28 @@ transferToNewDB_server <- function(input,
                                    output,
                                    session,
                                    pool,
-                                   workingDirectory){
+                                   workingDirectory,
+                                   selectedDB){
   
-
-  nj <- shiny::callModule(IDBacApp::sampleChooser,
-                          "chooseNewDBSamples",
+wet <<- reactive({
+  
+  ns <- session$ns
+  nj <<- shiny::callModule(IDBacApp::sampleChooser_server,
+                          ns("chooseNewDBSamples"),
                           pool = pool,
                           allSamples = TRUE,
-                          whetherProtein = FALSE)
-  
-  
-
+                          whetherProtein = FALSE,
+                          selectedDB)
 
   
+})
+
+output$ploo <- renderUI({
+  IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples"))
+  
+})  
+
+
   copyingDbPopup <- reactive({
     showModal(modalDialog(
       title = "Important message",
@@ -68,7 +77,7 @@ transferToNewDB_server <- function(input,
     copyingDbPopup()
     
     newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
-    copyToNewDatabase(existingDBPool = databasePools$userDBcon,
+    copyToNewDatabase(existingDBPool = pool(),
                       newdbPath = newdbPath, 
                       sampleIDs = input$addSampleChooser$right)
     

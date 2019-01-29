@@ -6,7 +6,7 @@
 #' @return UI
 #' @export
 #'
-sampleChooserUI <- function(id) {
+sampleChooser_UI <- function(id) {
   ns <- shiny::NS(id)
   tagList(
     shiny::uiOutput(ns("chooseSamples"))
@@ -28,23 +28,28 @@ sampleChooserUI <- function(id) {
 #' @return 
 #' @export
 #'
-sampleChooser <- function(input,
+sampleChooser_server <- function(input,
                           output,
                           session,
                           pool,
                           whetherProtein = FALSE,
-                          allSamples = FALSE){
+                          allSamples = FALSE,
+                          selectedDB){
   
   
-amcd <- reactive({
-  IDBacApp::availableSampleNames(pool = pool,
-                                 whetherProtein = whetherProtein,
-                                 allSamples = allSamples)
-})  
-
-    output$chooseSamples <- renderUI({
-      ns <- session$ns
- 
+  amcd <- reactive({
+    selectedDB$selectExperiment
+    conn <- pool::poolCheckout(pool())
+    print("poo")
+    IDBacApp::availableSampleNames(checkedPool = conn,
+                                   whetherProtein = whetherProtein,
+                                   allSamples = allSamples)
+    pool::poolReturn(conn)
+  })  
+  
+  output$chooseSamples <- renderUI({
+    ns <- session$ns
+    
     IDBacApp::chooserInput(ns("addSampleChooser"),
                            "Available samples",
                            "Selected samples",
@@ -53,9 +58,11 @@ amcd <- reactive({
                            size = 10,
                            multiple = TRUE
     )
+    
+    
   })
   
   
-
-  return(input$addSampleChooser)
+  
+  return(input)
 }
