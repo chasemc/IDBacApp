@@ -48,12 +48,15 @@ callModule(IDBacApp::convertDataTabServer,
            tempMZDir)
 
 
+observeEvent(input$processToAnalysis,  
+             ignoreInit = TRUE, {
+               updateTabsetPanel(session, "mainIDBacNav",
+                                 selected = "sqlUiTab")
+               removeModal()
+             })
 
 # SQL Tab -----------------------------------------------------------------
 
-#-----
-
-#----
 
 # Find the available databases, and make reactive so can be updated if more are created
 availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(workingDirectory,
@@ -79,16 +82,17 @@ observeEvent(availableDatabases$db,{
 })
 
 
-pw <- callModule(IDBacApp::databaseTabServer,
+workingDB <- callModule(IDBacApp::databaseTabServer,
              "sqlUIcreator",
              workingDirectory = workingDirectory,
              availableExperiments = availableDatabases)
+
 
 # 
 # 
 # observeEvent(pw()$move,{
 #   
-#   databasePools$userDBcon <- pw()$userDBCon
+#   workingDB$pool() <- workingDB$pool$userDBCon
 # 
 # 
 #   updateTabsetPanel(session, "mainIDBacNav",
@@ -99,8 +103,7 @@ pw <- callModule(IDBacApp::databaseTabServer,
 
 
 # Trigger add tabs --------------------------------------------------------
-observe(yt<<-pw)
-observeEvent(pw$move$selectExperiment,
+observeEvent(workingDB$move$selectExperiment,
              once = T,
              ignoreInit = TRUE, {
 
@@ -136,19 +139,11 @@ observeEvent(pw$move$selectExperiment,
 
      
 
-observeEvent(input$processToAnalysis,  
-             ignoreInit = TRUE, {
-               updateTabsetPanel(session, "mainIDBacNav",
-                                 selected = "sqlUiTab")
-               removeModal()
-             })
 
 
-      
-      #------------------------------------------------------------------------------
-      # Mirror Plots
-      #------------------------------------------------------------------------------
-      
+
+# Mirror Plots ------------------------------------------------------------
+
       # Mirror plot UI
       #----
       output$inversepeakui <-  renderUI({
@@ -205,20 +200,23 @@ observeEvent(input$processToAnalysis,
         )
       })
       
-      # Retrieve all available sample names that have protein peak data
-      # Used to display inputs for user to select for mirror plots
-      #----
-      inverseComparisonNames <- reactive({
-        
-        db <- dplyr::tbl(databasePools$userDBcon, "IndividualSpectra")
-        db %>%
-          filter(proteinPeaks != "NA") %>%
-          select(Strain_ID) %>%
-          distinct() %>%
-          collect() %>%
-          pull()
-        
-      })
+# Retrieve all available sample names that have protein peak data
+# Used to display inputs for user to select for mirror plots
+#----
+inverseComparisonNames <- reactive({
+  conn <- pool::poolCheckout(workingDB$pool())
+  
+  
+  
+  
+  a <-DBI::dbGetQuery(conn, "SELECT DISTINCT `Strain_ID`
+                              FROM IndividualSpectra
+                              WHERE (`proteinPeaks` IS NOT NULL)")
+  pool::poolReturn(conn)
+  
+  a[ ,1]
+  
+})
       
       
       #This retrieves data a processes/formats it for the mirror plots
@@ -228,8 +226,7 @@ observeEvent(input$processToAnalysis,
         mirrorPlotEnv <- new.env(parent = parent.frame())
         
         # connect to sql
-        db <- dplyr::tbl(databasePools$userDBcon, "IndividualSpectra")
-        conn <- pool::poolCheckout(databasePools$userDBcon)
+        conn <- pool::poolCheckout(workingDB$pool())
         
         # get protein peak data for the 1st mirror plot selection
         
@@ -279,7 +276,7 @@ observeEvent(input$processToAnalysis,
                    length(mirrorPlotEnv$peaksSampleTwo@mass)) > 0,
                "No peaks found in either sample, double-check the settings or your raw data.")
         )
-        temp <- binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .002)
+        temp <- MALDIquant::binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .002)
         
         
         
@@ -538,7 +535,7 @@ observeEvent(input$processToAnalysis,
       observeEvent(FALSE, {
         # chosenProteinSampleIDs$ids <- shiny::callModule(IDBacApp::sampleChooser,
         #                                                 "proteinSampleChooser",
-        #                                                 pool = databasePools$userDBcon,
+        #                                                 pool = workingDB$pool(),
         #                                                 whetherProtein = TRUE)
       })
       
@@ -552,7 +549,7 @@ observeEvent(input$processToAnalysis,
         # merge into a single peak list per sample
         # trim m/z based on user input
         # connect to sql
-        conn <- pool::poolCheckout(databasePools$userDBcon)
+        conn <- pool::poolCheckout(workingDB$pool())
         
         temp <- lapply(chosenProteinSampleIDs$ids,
                        function(ids){
@@ -853,7 +850,7 @@ observeEvent(input$processToAnalysis,
       proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
                                         "proth",
                                         dendrogram = proteinDendrogram$dendrogram,
-                                        pool = databasePools$userDBcon,
+                                        pool = workingDB$pool(),
                                         plotWidth = reactive(input$dendparmar),
                                         plotHeight = reactive(input$hclustHeight))
     })
@@ -997,7 +994,7 @@ observeEvent(input$processToAnalysis,
      # pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
      #                      "proteinMANpage",
      #                      dendrogram = proteinDendrogram$dendrogram,
-     #                      pool = databasePools$userDBcon,
+     #                      pool = workingDB$pool(),
      #                      plotWidth=input$dendparmar,
      #                      plotHeight = input$hclustHeight)
      # er<<-reactiveValuesToList(input)
@@ -1016,7 +1013,7 @@ observeEvent(input$processToAnalysis,
       subtractedMatrixBlank <- reactive({
     
     
-      aw <-  getSmallMolSpectra(pool = databasePools$userDBcon,
+      aw <-  getSmallMolSpectra(pool = workingDB$pool(),
                            sampleIDs,
                            dendrogram = proteinDend$dendroReact(),
                            ymin = 0,
