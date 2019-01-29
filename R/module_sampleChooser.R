@@ -37,11 +37,9 @@ sampleChooser_server <- function(input,
                                  allSamples = FALSE,
                                  selectedDB){
   nams <- reactiveValues()
-  
-  
+
   observeEvent(selectedDB$selectExperiment, {
     req(class(pool())[[1]] == "Pool")
-    print("ok")
     conn <- pool::poolCheckout(pool())
     
     nams$av <- IDBacApp::availableSampleNames(checkedPool = conn,

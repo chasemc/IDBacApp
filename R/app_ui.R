@@ -23,7 +23,8 @@ app_ui <- function(){
                div(class="introPage",
                    #includeCSS(file.path(system.file('www', package = 'IDBacApp'), 'style.css')),
                    tags$head(tags$link(href = "www/styles.css", rel = "stylesheet")),
-                   tags$head(tags$link(href = "www/chooser-binding.js")),
+                   tags$head(tags$link(href = "www/collapse/shinyBS.js")),
+                   tags$head(tags$link(href = "www/collapse/shinyBS.css")),
                    shinyjs::useShinyjs(),
                    fluidRow(
                      column(width = 8,

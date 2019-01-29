@@ -24,10 +24,10 @@ databaseTabUI <- function(id) {
     ),
     column(width = 8,
            fluidRow(
-           #  shinyBS::bsCollapse(id = ns("collapseSQLInstructions"),
-                               #  open = "Panel 1",
-                              #   shinyBS::bsCollapsePanel(h4("Open\\Close Instructions", 
-                                           #                  align = "center"),
+             IDBacApp::bsCollapse(id = ns("collapseSQLInstructions"),
+                                 open = "Panel 1",
+                                 IDBacApp::bsCollapsePanel(h4("Open\\Close Instructions", 
+                                                           align = "center"),
                                                           tags$b("What is an \"experiment\" in IDBac?"),
                                                           tags$ul(
                                                             tags$li("A user-defined group of samples that were analyzed by MALDI MS."),
@@ -51,13 +51,13 @@ databaseTabUI <- function(id) {
                                                             tags$li("Add information about strains (for coloring plots later, or just as a record)")
                                                             
                                                           )
-                               ##  )
+                                 )
                                  
-            # )
+             )
            ),
            fluidRow(
-            # shinyBS::bsCollapse(id = ns("modifySqlCollapse"),
-                          #       shinyBS::bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
+             IDBacApp::bsCollapse(id = ns("modifySqlCollapse"),
+                                  IDBacApp::bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
                                                           tabsetPanel(id = ns("ExperimentNav"), 
                                                                       tabPanel("Create an experiment, pulling samples from the selected experiment",
                                                                                value = "experiment_mixMatch_tab",
@@ -74,8 +74,8 @@ databaseTabUI <- function(id) {
                                                                       )
                                                           ) 
                                  )
-            # )
-          # )
+             )
+           )
            
     )
   
