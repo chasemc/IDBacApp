@@ -1,48 +1,48 @@
 convertDataTabUI <- function(id) {
   ns <- shiny::NS(id)
   
-
-navlistPanel(widths = c(3, 8), id = ns("ConversionsNav"),
-             "Create an IDBac experiment",
-             tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
-                      value = ns("convert_bruker_nav"),
-                      mainPanel(offset = 3,
-                                radioButtons(ns("typeOfRawData"),
-                                             label = h3("Begin by selecting an option below:"),
-                                             choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1),
-                                             #"Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
-                                             selected = 0,
-                                             inline = FALSE,
-                                             width = "100%"),
-                                uiOutput(ns("conversionMainUI1"))
-                      )
-             ),
-             tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
-                      value = ns("convert_mzml_nav"),
-                      fluidRow(
-                        uiOutput(ns("conversionMainUI2"))
-                      )
-             ),
-             tabPanel(tags$ul(tags$li("Click here to convert txt files")),
-                      value = ns("convert_txt_nav"),
-                      mainPanel(
-                        uiOutput(ns("conversionMainUI3"))
-                      )
-             )
-)
+  
+  navlistPanel(widths = c(3, 8), id = ns("ConversionsNav"),
+               "Create an IDBac experiment",
+               tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
+                        value = ns("convert_bruker_nav"),
+                        mainPanel(offset = 3,
+                                  radioButtons(ns("typeOfRawData"),
+                                               label = h3("Begin by selecting an option below:"),
+                                               choices = list("Select here to convert and analyze raw-data from a single MALDI-plate" = 1),
+                                               #"Select here to convert and analyze raw-data from multiple MALDI-plates at once" = 2),
+                                               selected = 0,
+                                               inline = FALSE,
+                                               width = "100%"),
+                                  uiOutput(ns("conversionMainUI1"))
+                        )
+               ),
+               tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
+                        value = ns("convert_mzml_nav"),
+                        fluidRow(
+                          uiOutput(ns("conversionMainUI2"))
+                        )
+               ),
+               tabPanel(tags$ul(tags$li("Click here to convert txt files")),
+                        value = ns("convert_txt_nav"),
+                        mainPanel(
+                          uiOutput(ns("conversionMainUI3"))
+                        )
+               )
+  )
 }
 
 
 
 
 convertDataTabServer <- function(input,
-                                output,
-                                session,
-                                tempMZDir){
+                                 output,
+                                 session,
+                                 tempMZDir){
   
   
-# Single MALDI plate ------------------------------------------------------
-
+  # Single MALDI plate ------------------------------------------------------
+  
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   #----
   observeEvent(c(input$ConversionsNav,
@@ -150,9 +150,9 @@ convertDataTabServer <- function(input,
     }
   })
   
-
-# Sample Map --------------------------------------------------------------
-
+  
+  # Sample Map --------------------------------------------------------------
+  
   
   output$missingSampleNames <- shiny::renderText({
     req(rawFilesLocation())
@@ -194,7 +194,7 @@ convertDataTabServer <- function(input,
                })
   observeEvent(input$saveSampleMap, 
                ignoreInit = TRUE, {  
-
+                 
                  shiny::removeModal()
                  
                })
@@ -209,7 +209,7 @@ convertDataTabServer <- function(input,
                                  maxRows = 16,
                                  maxRows = 24) %>%
       rhandsontable::hot_context_menu(allowRowEdit = FALSE,
-                       allowColEdit = FALSE) %>%
+                                      allowColEdit = FALSE) %>%
       rhandsontable::hot_cols(colWidths = 100) %>%
       rhandsontable::hot_rows(rowHeights = 25)
   })
@@ -248,9 +248,9 @@ convertDataTabServer <- function(input,
   
   
   
-
-# Spectra Conversion ------------------------------------------------------
-
+  
+  # Spectra Conversion ------------------------------------------------------
+  
   
   
   # Spectra conversion
@@ -310,16 +310,16 @@ convertDataTabServer <- function(input,
   })
   
   
- 
   
-
+  
+  
   
   
   # Call the Spectra processing function when the spectra processing button is pressed
   #----
   observeEvent(input$run, 
                ignoreInit = TRUE,  {
-                
+                 
                  ns <- session$ns
                  popup3()
                  
@@ -333,7 +333,7 @@ convertDataTabServer <- function(input,
                      spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
                      s1 <- base::as.matrix(sampleMapReactive$rt)
                      sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
-                    
+                     
                      forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
                                                              msconvertPath = "",
                                                              sampleMap = sampleMap,
@@ -351,10 +351,10 @@ convertDataTabServer <- function(input,
                  lengthProgress <- length(forProcessing$mzFile)
                  
                  # Create DB
-                   
-                   userDB <- createNewSQLITEdb(input$newExperimentName)
-                   
-                
+                 
+                 userDB <- createNewSQLITEdb(input$newExperimentName)
+                 
+                 
                  progLength <- base::length(forProcessing$mzFile)
                  withProgress(message = 'Processing in progress',
                               value = 0,
@@ -363,7 +363,7 @@ convertDataTabServer <- function(input,
                                 for (i in base::seq_along(forProcessing$mzFile)) {
                                   setProgress(value = i,
                                               message = 'Processing in progress',
-                                              detail = glue(" \n Sample: {forProcessing$sampleID[[i]]},
+                                              detail = glue::glue(" \n Sample: {forProcessing$sampleID[[i]]},
                                                             {i} of {progLength}"),
                                               session = getDefaultReactiveDomain())
                                   
@@ -543,7 +543,7 @@ oneMaldiPlateHelpUI <- function(id){
     p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
     img(src = "window.png",
         width = "100%")
-    )
+  )
   
 }
 
@@ -586,7 +586,7 @@ multipleMaldiPlates <- function(id){
                   p("Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
                   img(src = "window.png",
                       width = "100%")
-                  ),
+           ),
            column(1),
            column(5,
                   style = "background-color:#7777770d",
@@ -619,7 +619,7 @@ multipleMaldiPlates <- function(id){
                                       label = "Process Data"),
                          tags$hr(size = 20))
            )
-           )
+    )
   )
 }
 
