@@ -32,18 +32,17 @@ updateMeta_UI <- function(id) {
 updateMeta_server <- function(input,
                               output,
                               session,
-                              pool,
-                              qwertyy){
+                              pool){
        
-  
+
   #----
   qwertyy <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
   
   #----
-  
   output$metaTable <- rhandsontable::renderRHandsontable({
-print("ss")
-    pool()
+   print("imcool")
+aa<- pool()
+    
     rhandsontable::rhandsontable(qwertyy$rtab,
                                  useTypes = FALSE,
                                  contextMenu = TRUE ) %>%
@@ -71,13 +70,13 @@ print("ss")
   
   observeEvent(input$insertNewMetaColumn, 
                ignoreInit = TRUE, {
-                 IDBacApp::insertMetadataColumns(pool = pool(),
+                 IDBacApp::insertMetadataColumns(pool = pool,
                                                  columnNames = input$addMetaColumnName)
                })
   
   observeEvent(input$saven, 
                ignoreInit = TRUE, {
-                 DBI::dbWriteTable(conn = pool(),
+                 DBI::dbWriteTable(conn = pool,
                                    name = "metaData",
                                    value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
                                    overwrite = TRUE)  
@@ -87,8 +86,7 @@ print("ss")
   
   
   #----
-  observe({
-    print("whyyyy")
+  observeEvent(c(input$selectExperiment, input$insertNewMetaColumn),{
                  
                  if (!is.null(pool())) {
                    conn <- pool::poolCheckout(pool())

@@ -69,7 +69,7 @@ databaseTabUI <- function(id) {
                                                                       ),
                                                                       tabPanel("Add/modify information about samples",
                                                                                value = "experiment_metaData_tab",
-                                                                       IDBacApp::updateMeta_UI("updateMeta")
+                                                                       IDBacApp::updateMeta_UI(ns("updateMeta"))
                                                                                   
                                                                       )
                                                           ) 
@@ -93,38 +93,26 @@ databaseTabServer <- function(input,
                               workingDirectory,
                               availableExperiments){
   
-  
-  
+  #outputs reactive inputs, access via $
+  selectedDB <- callModule(IDBacApp::databaseSelector_server,
+                            "databaseSelector",
+                            h3Label = "First, select an experiment:",
+                            availableExperiments = availableExperiments,
+                            workingDirectory = workingDirectory)
 
-  selectedDB <<- callModule(IDBacApp::databaseSelector_server,
-                           "databaseSelector",
-                           h3Label = "First, select an experiment:",
-                           availableExperiments = availableExperiments,
-                           workingDirectory = workingDirectory)
   
   
-  
-  
-  userDBCon <- reactive({
-
-    if(length(selectedDB > 0)){
-    
-     
-    IDBacApp::createPool(fileName = selectedDB,
-                         filePath = workingDirectory)[[1]]
-    }
-  })  
   
   
   
 # Update Metadata ---------------------------------------------------------
 
-  
-szdsds <<- reactive({ callModule(IDBacApp::updateMeta_server,
-             "updateMeta",
-             pool = userDBCon
-             )
-})
+
+
+    callModule(IDBacApp::updateMeta_server,
+               "updateMeta",
+               pool = selectedDB
+    )
 
   
   
@@ -141,18 +129,17 @@ szdsds <<- reactive({ callModule(IDBacApp::updateMeta_server,
   
 
     
-  
-  observe({
-    req(!is.null(selectedDB))
-    
-    callModule(IDBacApp::transferToNewDB_server,
-               "transferToNewDB",
-               pool = IDBacApp::createPool(fileName = selectedDB,
-                                           filePath = workingDirectory)[[1]],
-               workingDirectory = workingDirectory)
-    
-    
-  })
+  # 
+  # observe({
+  #   req(!is.null(selectedDB))
+  #   
+  #   callModule(IDBacApp::transferToNewDB_server,
+  #              "transferToNewDB",
+  #              pool = userDBCon(),
+  #              workingDirectory = workingDirectory)
+  #   
+  #   
+  # })
  
   
   

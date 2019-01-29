@@ -41,7 +41,7 @@ databaseSelector_server <- function(input,
     ns <- session$ns
     selectInput(ns("selectExperiment"),
                 label = h3(h3Label),
-                choices = availableExperiments,
+                choices = availableExperiments$db,
                 selected = NULL,
                 width = "50%"
     )
@@ -55,9 +55,23 @@ databaseSelector_server <- function(input,
     filePaths <- list.files(workingDirectory,
                             pattern = ".sqlite",
                             full.names = TRUE)
+    
     filePaths[which(fileNames == input$selectExperiment)]
     
   })
+ 
+   userDBCon <- reactive({
+    
+    req(!is.null(input$selectExperiment))
+    print(input$selectExperiment)
+    validate(need(length(input$selectExperiment) == length(workingDirectory), 
+                  "databaseTabServer: userDBCon, createPool inputs are different lengths."))
+    print("hello")
+    IDBacApp::createPool(fileName = input$selectExperiment,
+                         filePath = workingDirectory)[[1]]
+    
+    
+  })  
   
- return(input)
+ return(userDBCon)
 }

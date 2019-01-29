@@ -1,25 +1,43 @@
 
+#' UI for choosing all samples fromm an IDBac DB
+#'
+#' @param id namespace
+#'
+#' @return UI
+#' @export
+#'
 sampleChooserUI <- function(id) {
   ns <- shiny::NS(id)
   tagList(
-    p("sdaa"),
     shiny::uiOutput(ns("chooseSamples"))
     
   )
 }
 
+
+
+#' Server for choosing all samples fromm an IDBac DB
+#'
+#' @param input  NA
+#' @param output NA
+#' @param session NA
+#' @param pool pool
+#' @param whetherProtein T/F 
+#' @param allSamples T/F
+#'
+#' @return 
+#' @export
+#'
 sampleChooser <- function(input,
                           output,
                           session,
                           pool,
                           whetherProtein = FALSE,
                           allSamples = FALSE){
-
   
   
 amcd <- reactive({
-  
-  IDBacApp::availableSampleNames(pool = pool,
+  IDBacApp::availableSampleNames(pool = pool(),
                                  whetherProtein = whetherProtein,
                                  allSamples = allSamples)
 })  

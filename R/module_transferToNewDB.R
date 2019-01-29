@@ -37,15 +37,14 @@ transferToNewDB_server <- function(input,
                                    pool,
                                    workingDirectory){
   
+
+  nj <- shiny::callModule(IDBacApp::sampleChooser,
+                          "chooseNewDBSamples",
+                          pool = pool,
+                          allSamples = TRUE,
+                          whetherProtein = FALSE)
   
-  observe({
-   nj<- shiny::callModule(IDBacApp::sampleChooser,
-                    "chooseNewDBSamples",
-                    pool = pool,
-                    allSamples = TRUE,
-                    whetherProtein = FALSE)
- 
-  })
+  
 
 
   

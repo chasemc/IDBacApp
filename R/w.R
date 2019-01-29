@@ -16,8 +16,7 @@
 #' @examples
 availableSampleNames <- function(pool, whetherProtein, allSamples){
   
-  
-  conn <<- pool::poolCheckout(pool)
+  conn <- pool::poolCheckout(pool)
   
   if (allSamples == TRUE) {
   
@@ -45,6 +44,7 @@ availableSampleNames <- function(pool, whetherProtein, allSamples){
     }
     
   query <- DBI::dbGetQuery(conn, query)
+  pool::poolReturn(conn)
   return(query[ , 1])
   
   
