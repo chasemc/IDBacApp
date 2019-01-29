@@ -79,30 +79,28 @@ observeEvent(availableDatabases$db,{
 })
 
 
-pw <- reactive({
-
-  callModule(IDBacApp::databaseTabServer,
+pw <- callModule(IDBacApp::databaseTabServer,
              "sqlUIcreator",
              workingDirectory = workingDirectory,
              availableExperiments = availableDatabases)
-})
 
-
-observeEvent(pw()$move,{
-  
-  databasePools$userDBcon <- pw()$userDBCon
-
-
-  updateTabsetPanel(session, "mainIDBacNav",
-                    selected = "inversePeaks")
-
-  })
+# 
+# 
+# observeEvent(pw()$move,{
+#   
+#   databasePools$userDBcon <- pw()$userDBCon
+# 
+# 
+#   updateTabsetPanel(session, "mainIDBacNav",
+#                     selected = "inversePeaks")
+# 
+#   })
 
 
 
 # Trigger add tabs --------------------------------------------------------
-
-observeEvent(pw()$move,
+observe(yt<<-pw)
+observeEvent(pw$move$selectExperiment,
              once = T,
              ignoreInit = TRUE, {
 
