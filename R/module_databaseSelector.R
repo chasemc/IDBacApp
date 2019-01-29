@@ -73,5 +73,6 @@ databaseSelector_server <- function(input,
     
   })  
   
- return(userDBCon)
+ return(list(userDBCon = userDBCon,
+             inputs = input))
 }

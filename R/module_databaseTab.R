@@ -111,7 +111,8 @@ databaseTabServer <- function(input,
 
     callModule(IDBacApp::updateMeta_server,
                "updateMeta",
-               pool = selectedDB
+               pool = selectedDB$userDBCon,
+               selectedDB  = selectedDB$inputs
     )
 
   

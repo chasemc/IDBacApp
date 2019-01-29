@@ -37,7 +37,7 @@ sampleChooser <- function(input,
   
   
 amcd <- reactive({
-  IDBacApp::availableSampleNames(pool = pool(),
+  IDBacApp::availableSampleNames(pool = pool,
                                  whetherProtein = whetherProtein,
                                  allSamples = allSamples)
 })  

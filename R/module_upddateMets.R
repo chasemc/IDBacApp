@@ -32,7 +32,8 @@ updateMeta_UI <- function(id) {
 updateMeta_server <- function(input,
                               output,
                               session,
-                              pool){
+                              pool,
+                              selectedDB){
        
 
   #----
@@ -40,9 +41,7 @@ updateMeta_server <- function(input,
   
   #----
   output$metaTable <- rhandsontable::renderRHandsontable({
-   print("imcool")
-aa<- pool()
-    
+
     rhandsontable::rhandsontable(qwertyy$rtab,
                                  useTypes = FALSE,
                                  contextMenu = TRUE ) %>%
@@ -60,23 +59,15 @@ aa<- pool()
     
   
   
-  
-  
-  # #----
-  # observeEvent(input$searchNCBI, 
-  #              ignoreInit = TRUE,  {
-  #                # IDBacApp::searchNCBI()
-  #              })
-  
   observeEvent(input$insertNewMetaColumn, 
                ignoreInit = TRUE, {
-                 IDBacApp::insertMetadataColumns(pool = pool,
+                 IDBacApp::insertMetadataColumns(pool = pool(),
                                                  columnNames = input$addMetaColumnName)
                })
   
   observeEvent(input$saven, 
                ignoreInit = TRUE, {
-                 DBI::dbWriteTable(conn = pool,
+                 DBI::dbWriteTable(conn = pool(),
                                    name = "metaData",
                                    value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
                                    overwrite = TRUE)  
@@ -86,10 +77,10 @@ aa<- pool()
   
   
   #----
-  observeEvent(c(input$selectExperiment, input$insertNewMetaColumn),{
+  observeEvent(c(selectedDB$selectExperiment, input$insertNewMetaColumn),{
                  
                  if (!is.null(pool())) {
-                   conn <- pool::poolCheckout(pool())
+                   conn <<- pool::poolCheckout(pool())
                    
                    if (!"metaData" %in% DBI::dbListTables(conn)) {
                      
@@ -98,7 +89,7 @@ aa<- pool()
                      
                    } else{
                      
-                     
+                     print(":dfldk")
                      dbQuery <- glue::glue_sql("SELECT *
                                              FROM ({tab*})",
                                                tab = "metaData",
