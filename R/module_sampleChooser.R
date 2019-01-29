@@ -69,14 +69,6 @@ sampleChooser_server <- function(input,
   
   
   
-  output$chooseSamples22 <- renderUI({
-
-    selectInput(session$ns("dfsd"), "sd", nams$av)
-    
-    
-  })
-  
-  
   
   
   
