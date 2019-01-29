@@ -112,8 +112,7 @@ databaseTabServer <- function(input,
   callModule(IDBacApp::updateMeta_server,
              "updateMeta",
              pool = selectedDB$userDBCon,
-             selectedDB  = selectedDB$inputs
-  )
+             selectedDB = selectedDB$inputs)
   
   
   
@@ -259,9 +258,9 @@ databaseTabServer <- function(input,
   
   
   
-  return(list(pool = reactive(userDBCon()),
-              move = input$moveToAnalysis
-              ))
+  return(list(pool = selectedDB$userDBCon,
+              move = selectedDB$inputs)
+              )
   
 }
 
