@@ -191,7 +191,7 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         newdbshas <- olddbshas[!olddbshas %in% newdbshas]
                         
-                        if(length(newdbshas) > 0){
+                        if (length(newdbshas) > 0) {
                           
                           
                           
@@ -241,12 +241,12 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(temp)
                         
                         
-                        poolReturn(existingDBconnection)
-                        poolReturn(newDBconnection)
-                        poolClose(newDBPool)
+                       pool::poolReturn(existingDBconnection)
+                       pool::poolReturn(newDBconnection)
+                       pool::poolClose(newDBPool)
                         
                         
-                        setProgress(value = 0.9, 
+                        shiny::setProgress(value = 0.9, 
                                     message = 'Copying data to new database',
                                     detail = 'Finishing...',
                                     session = getDefaultReactiveDomain())
