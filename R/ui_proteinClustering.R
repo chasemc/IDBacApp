@@ -26,8 +26,8 @@ ui_proteinClustering <- function() {
                      condition = "input.proteinUIselector == '1'",
                      h5(strong("Select Samples")),
                      p("Move strains between boxes by clicking the strain's name
-                       and then an arrow. Strains in the right box will be used for analysis.")
-                #     IDBacApp::sampleChooserUI("proteinSampleChooser")),
+                       and then an arrow. Strains in the right box will be used for analysis."),
+                     IDBacApp::sampleChooser_UI("proteinSampleChooser")
                    ),
                    IDBacApp::dendrogramCreatorUI("proteinHierOptions"),
                    numericInput("hclustHeight",
@@ -41,25 +41,12 @@ ui_proteinClustering <- function() {
                    
                    
                    IDBacApp::addDotsActionUI("proth"),
-            #      IDBacApp::dendDotsUI("proth"),
                    IDBacApp::colordendLabelsUI("proth"),
                    IDBacApp::colordendLinesUI("proth"),
                    br(),
                    h4("Suggestions for Reporting Protein Analysis:"),
                    uiOutput("proteinReport")
-                   
-                   
-                   # 
-                   # uiOutput("protLineMod"),
-                   # uiOutput("protLabelMod"),
-                   # IDBacApp::dendDotsUI("sdvdwv"),
-                   
-                   
-                   
-                   
-                   
-                   
-                   
+           
       ),
       
       

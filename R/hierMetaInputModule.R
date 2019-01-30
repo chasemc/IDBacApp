@@ -15,7 +15,7 @@
 #' @examples NA
 runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, text_shift) {
   
-  conn <- pool::poolCheckout(pool)
+  conn <- pool::poolCheckout(pool())
   dendLabs <- labels(rawDendrogram)
   
   
@@ -27,7 +27,7 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, te
     DBI::dbBind(query, list(dendLabs))
     selectedMeta <- DBI::dbFetch(query)
     
-    dbClearResult(query)
+    DBI::dbClearResult(query)
     
     
     selectedMeta <- selectedMeta[ ,colnames(selectedMeta) %in% columnID]
@@ -52,10 +52,10 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, te
                            sort_by_labels_order = FALSE,
                            text_shift = text_shift)
     
-  
+    
 }
 
 
 
 
-  
+

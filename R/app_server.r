@@ -202,7 +202,7 @@ observeEvent(workingDB$move$selectExperiment,
       
 # Retrieve all available sample names that have protein peak data
 # Used to display inputs for user to select for mirror plots
-#----
+      #----
 inverseComparisonNames <- reactive({
   conn <- pool::poolCheckout(workingDB$pool())
   
@@ -518,40 +518,33 @@ inverseComparisonNames <- reactive({
           
         })
       
-      
-      #------------------------------------------------------------------------------
-      # Protein processing
-      #------------------------------------------------------------------------------
-      
-      
-     
-      
-      
-      
-      
-      # User chooses which samples to include
-      chosenProteinSampleIDs <- reactiveValues()
-      
-      observeEvent(FALSE, {
-        # chosenProteinSampleIDs$ids <- shiny::callModule(IDBacApp::sampleChooser,
-        #                                                 "proteinSampleChooser",
-        #                                                 pool = workingDB$pool(),
-        #                                                 whetherProtein = TRUE)
-      })
-      
+
+
+# Protein processing ------------------------------------------------------
+
+# User chooses which samples to include
+      #-----
+
+
+chosenProteinSampleIDs <-  shiny::callModule(IDBacApp::sampleChooser_server,
+                                                 "proteinSampleChooser",
+                                                 pool = workingDB$pool,
+                                                 allSamples = FALSE,
+                                                 whetherProtein = TRUE,
+                                                 selectedDB = workingDB$move)
+
       
       # Merge and trim protein replicates
       #----
       collapsedPeaksP <- reactive({
-        req(chosenProteinSampleIDs$ids)
+        req(length(chosenProteinSampleIDs$addSampleChooser$right) > 1)
         # For each sample:
         # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
         # merge into a single peak list per sample
         # trim m/z based on user input
         # connect to sql
         conn <- pool::poolCheckout(workingDB$pool())
-        
-        temp <- lapply(chosenProteinSampleIDs$ids,
+        temp <- lapply(chosenProteinSampleIDs$addSampleChooser$right,
                        function(ids){
                          IDBacApp::collapseReplicates(checkedPool = conn,
                                                       sampleIDs = ids,
@@ -563,8 +556,12 @@ inverseComparisonNames <- reactive({
                                                       protein = TRUE)
                        })
         
+        
+        names(temp) <- chosenProteinSampleIDs$addSampleChooser$right
         pool::poolReturn(conn)
-        return(temp)
+        
+        
+                return(temp)
         
       })
       
@@ -573,41 +570,30 @@ inverseComparisonNames <- reactive({
       
      
       
-      
-     
-      proteinMatrix <- reactive({
-    
-        
-        pm <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
-                                                ppm = 2000,
-                                                massStart = input$lowerMass,
-                                                massEnd = input$upperMass)
-       do.call(rbind, pm)
-        
-      })
-      
-    
-      observe({
-        if (!is.null(proteinMatrix())) {
-        proteinDendrogram2 <- shiny::callModule(IDBacApp::dendrogramCreator,
-                                                          "proteinHierOptions",
-                                                          proteinMatrix())
-        }
-     
-      })
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      # 
+
+
+proteinMatrix <- reactive({
+  req(input$lowerMass, input$upperMass)
+  pm <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
+                             ppm = 2000,
+                             massStart = input$lowerMass,
+                             massEnd = input$upperMass)
+  
+  do.call(rbind, pm)
+})
+
+
+proteinDendrogram <- reactiveValues(dendrogram  = NULL)
+
+observe({
+proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
+                                                  "proteinHierOptions",
+                                                  proteinMatrix = proteinMatrix)
+})
+
+
+
+# 
       # #Create the hierarchical clustering based upon the user input for distance method and clustering technique
       # #----
       # observe({
@@ -803,10 +789,10 @@ inverseComparisonNames <- reactive({
       
       
       
-      
       # UI of paragraph explaining which variables were used
       #----
       output$proteinReport <- renderUI(
+
         p("This dendrogram was created by analyzing ",tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
           and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
           Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
@@ -843,17 +829,14 @@ inverseComparisonNames <- reactive({
       
       
     
-    
-      observe({
-        req(exists("proteinDendrogram2"))
-    
-      proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
+
+        shiny::callModule(IDBacApp::dendDotsServer,
                                         "proth",
-                                        dendrogram = proteinDendrogram$dendrogram,
-                                        pool = workingDB$pool(),
+                                        dendrogram = proteinDendrogram,
+                                        pool = workingDB$pool,
                                         plotWidth = reactive(input$dendparmar),
                                         plotHeight = reactive(input$hclustHeight))
-    })
+  
       
       
       
@@ -989,7 +972,7 @@ inverseComparisonNames <- reactive({
      #  
      #  
      #  observe({
-     #    w<-chosenProteinSampleIDs$ids
+     #    w<-chosenProteinSampleIDs$addSampleChooser$right
      #    w<-input$dendparmar
      # pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
      #                      "proteinMANpage",
@@ -1192,20 +1175,7 @@ inverseComparisonNames <- reactive({
       })
       
       
-      # Output a paragraph about which parameters were used to create the currently-displayed dendrogram
-      #----
-      output$proteinReport2 <- renderUI({
-        
-        if (length(labels(proteinDendrogram$dendrogram)) == 0) {
-          p("No Protein Data to Display")
-        } else {
-          p("This dendrogram was created by analyzing ", tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
-            and retaining peaks with a signal to noise ratio above ", tags$code(input$pSNR)," and occurring in greater than ", tags$code(input$percentPresenceP),"% of replicate spectra.
-            Peaks occuring below ", tags$code(input$lowerMass), " m/z or above ", tags$code(input$upperMass), " m/z were removed from the analyses. ",
-            "For clustering spectra, ", tags$code(input$distance), " distance and ", tags$code(input$clustering), " algorithms were used.")
-        }
-      })
-      
+   
       
     
     # Updating IDBac ----------------------------------------------------------

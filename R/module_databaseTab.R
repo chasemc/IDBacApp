@@ -121,7 +121,8 @@ databaseTabServer <- function(input,
              "transferToNewDB",
              pool = selectedDB$userDBCon,
              workingDirectory = workingDirectory,
-             selectedDB  = selectedDB$inputs)
+             selectedDB  = selectedDB$inputs,
+             availableExperiments = availableExperiments)
   
 
   

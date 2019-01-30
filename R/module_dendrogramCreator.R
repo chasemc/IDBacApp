@@ -60,26 +60,24 @@ dendrogramCreator <- function(input,
                               session,
                               proteinMatrix){
   
- 
-a <-   reactive({
-    prt<<-proteinMatrix
-      if(nrow(proteinMatrix) > 1){
-      
-        proteinMatrix <- IDBacApp::distMatrix(data = proteinMatrix,
-                                       method = input$distanceMethod,
-                                       booled = input$booled)
-    
-        proteinMatrix <- stats::hclust(proteinMatrix,
-                                method = input$clustering)
-    } else {
-      warning("More than two samples must be selected to cluster.")
-    }
-    
   
-  return(stats::as.dendrogram(proteinMatrix))
+  pMatrixReactive <- reactive({
+    
+    req(nrow(proteinMatrix() > 1))
+    
+    dend <- IDBacApp::distMatrix(data = proteinMatrix(),
+                                                 method = input$distanceMethod,
+                                                 booled = input$booled)
+    
+    dend <- stats::hclust(dend,
+                                          method = input$clustering)
+    dend <- stats::as.dendrogram(dend)
+    
+    
   })
-return(a)
-
+  
+  return(pMatrixReactive())
+  
 }
 
 
