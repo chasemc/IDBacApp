@@ -10,8 +10,8 @@ manPageProtDend <- function(input,
                             cutHeightLines,
                             colorByLabels,
                             cutHeightLabels,
-                            plotHeight = 500,
-                            plotWidth = 20){
+                            plotHeight,
+                            plotWidth){
   
   output$hierOut <- renderPlot({
     

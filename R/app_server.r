@@ -856,8 +856,8 @@ proteinDendColors <- shiny::callModule(IDBacApp::dendDotsServer,
                                           cutHeightLines = proteinDendColors$cutHeightLines,
                                           colorByLabels = proteinDendColors$colorByLabels,
                                           cutHeightLabels = proteinDendColors$cutHeightLabels,
-                                          plotHeight = 500,
-                                          plotWidth =  15)
+                                          plotHeight = reactive(input$hclustHeightNetwork),
+                                          plotWidth =  reactive(input$dendparmar2))
 
         
       })
