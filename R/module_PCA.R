@@ -44,19 +44,27 @@ pca_Server <- function(input,
   
   
   output$pcaPlot <- plotly::renderPlotly({
-    b1 <<- pcaCalc()
-    b2<<-namedColors()
+b1 <<- namedColors()
+pcaCalc1 <<- pcaCalc()
     req(nrow(pcaCalc()) > 2,
         ncol(pcaCalc()) > 2)
+    
+    if (is.null(namedColors())) {
+      colorsToUse <- cbind.data.frame(fac = rep("#000000", nrow(pcaCalc())), 
+                                      pcaCalc())
+    } else {
     
     colorsToUse <- cbind.data.frame(fac = as.vector(namedColors()), 
                                     nam = (names(namedColors())))
     
-    pcaDat <<- merge(pcaCalc(),
-                    colorsToUse, 
-                    by = "nam")
     
-  plotly::plot_ly(data = pcaDat,
+    
+    colorsToUse <- merge(pcaCalc(),
+                         colorsToUse, 
+                         by = "nam")
+    }
+    
+  plotly::plot_ly(data = colorsToUse,
             x = ~Dim1,
             y = ~Dim2,
             z = ~Dim3,

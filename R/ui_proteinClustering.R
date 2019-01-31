@@ -45,13 +45,32 @@ ui_proteinClustering <- function() {
                    IDBacApp::colordendLinesUI("proth"),
                    br(),
                    h4("Suggestions for Reporting Protein Analysis:"),
-                   uiOutput("proteinReport")
-           
-      ),
+                   uiOutput("proteinReport"),
+                   shiny::absolutePanel(
+                     bottom = "20%",
+                     right =  "0%",
+                     width = "40%",
+                     ##   width = "20%",
+                     fixed = T,
+                     draggable = F,
+                     style = "z-index:1002;",
+                     style = "opacity: 1",
+                     shiny::wellPanel( IDBacApp::bsCollapse(id = "collapsInstructions",
+                                                            open = "Panel 1",
+                                                            IDBacApp::bsCollapsePanel(h4("Open\\Close Instructions", 
+                                                                                         align = "center"),
+                                                                                      tabsetPanel(id = "ProteinScatterPlots", 
+                                                                                                  tabPanel("PCA",
+                                                                                                           value = "proteinPCA",                    
+                                                              IDBacApp::pca_UI("proteinPCA")))
+                                                            )
+                                       
+                     )))
+                     ),
       
       
       mainPanel(
-        IDBacApp::pca_UI("proteinPCA"),
+
         IDBacApp::plotHier("proth"),
        IDBacApp::dendDotsUI("proth")
        
