@@ -5,7 +5,7 @@
 manPageProtDend <- function(input,
                             output,
                             session,
-                            dendroReact,
+                            dendrogram,
                             colorByLines,
                             cutHeightLines,
                             colorByLabels,
@@ -17,7 +17,7 @@ manPageProtDend <- function(input,
     
     par(mar = c(5, 5, 5, plotWidth))
     
-    plot(dendroReact(), horiz = TRUE)
+    plot(dendrogram$dendrogram, horiz = TRUE)
     
     if(!is.null(colorByLines())){
       if(colorByLines() == "height"){

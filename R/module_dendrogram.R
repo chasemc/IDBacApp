@@ -430,8 +430,7 @@ dendDotsServer <- function(input,
   }, height = plotHeight)
   
   
-  return(list(dendroReact = reactive(dendroReact()),
-              colorByLines = reactive(input$colorByLines),
+  return(list(colorByLines = reactive(input$colorByLines),
               cutHeightLines = reactive(input$cutHeightLines),
               colorByLabels = reactive(input$colorByLabels),
               cutHeightLabels = reactive(input$cutHeightLabels)

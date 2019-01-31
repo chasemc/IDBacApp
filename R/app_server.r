@@ -830,13 +830,13 @@ proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
       
     
 
-        shiny::callModule(IDBacApp::dendDotsServer,
-                                        "proth",
-                                        dendrogram = proteinDendrogram,
-                                        pool = workingDB$pool,
-                                        plotWidth = reactive(input$dendparmar),
-                                        plotHeight = reactive(input$hclustHeight))
-  
+proteinDendColors <- shiny::callModule(IDBacApp::dendDotsServer,
+                                       "proth",
+                                       dendrogram = proteinDendrogram,
+                                       pool = workingDB$pool,
+                                       plotWidth = reactive(input$dendparmar),
+                                       plotHeight = reactive(input$hclustHeight))
+
       
       
       
@@ -847,19 +847,18 @@ proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
       
       
       observe({  
-        # req(!is.null(proteinDendrogram$dendrogram))
-        # pp<<-proteinDend$dendrogram
-        # 
-        # smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
-        #                                   "manProtDend",
-        #                                   dendroReact = reactive(proteinDend$dendroReact()),
-        #                                   colorByLines = reactive(proteinDend$colorByLines()),
-        #                                   cutHeightLines = reactive(proteinDend$cutHeightLines()),
-        #                                   colorByLabels = reactive(proteinDend$colorByLabels()),
-        #                                   cutHeightLabels = reactive(proteinDend$cutHeightLabels()),
-        #                                   plotHeight = 500,
-        #                                   plotWidth =  )
-        # 
+        req(!is.null(proteinDendrogram$dendrogram))
+
+        smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
+                                          "manProtDend",
+                                          dendrogram = proteinDendrogram,
+                                          colorByLines = proteinDendColors$colorByLines,
+                                          cutHeightLines = proteinDendColors$cutHeightLines,
+                                          colorByLabels = proteinDendColors$colorByLabels,
+                                          cutHeightLabels = proteinDendColors$cutHeightLabels,
+                                          plotHeight = 500,
+                                          plotWidth =  15)
+
         
       })
       
