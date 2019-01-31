@@ -181,6 +181,133 @@ manPageProtDend_UI <- function(id) {
 
 
 
+# MAN Creator -------------------------------------------------------------
+
+
+manPageProtDend_UI <- function(id) {
+  ns <- shiny::NS(id)
+  shiny::tagList(
+    networkD3::simpleNetworkOutput(ns("MAN"),
+                                   width = "100%")
+  )
+}
+
+downloadSmNet_UI <- function(id) {
+  ns <- shiny::NS(id)
+shiny::tagList(
+downloadButton("downloadSmallMolNetworkData",
+               label = "Download Current Network Data",
+               value = FALSE)
+)
+}
+
+
+MAN_Server <- function(input,
+                       output,
+                       session,
+                       subtractedMatrixBlank,
+
+                       cutHeightLines,
+                       colorByLabels,
+                       cutHeightLabels){
+
+
+  
+  
+  
+  #----
+  smallMolNetworkDataFrame <- reactive({
+
+    IDBacApp::smallMolDFtoNetwork(peakList = subtractedMatrixBlank())
+    
+  })
+
+  #----
+  
+  output$downloadSmallMolNetworkData <- downloadHandler(
+    filename = function(){"SmallMolecule_Network.csv"
+    },
+    content = function(file){
+      write.csv(as.matrix(smallMolNetworkDataFrame()),
+                file,
+                row.names = FALSE)
+    }
+  )
+  
+  
+  #This creates the network plot and calculations needed for such.
+  #----
+  calcNetwork <- reactive({
+    net <- new.env(parent = parent.frame())
+    
+    temp <- NULL
+    
+    
+    for (i in 1:length(subtractedMatrixBlank())) {
+      temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
+    }
+    aqww <- smallMolNetworkDataFrame()
+    
+    a <- igraph::as.undirected(igraph::graph_from_data_frame(smallMolNetworkDataFrame()))
+    a <- igraph::simplify(a)
+    wc <- igraph::fastgreedy.community(a)
+    
+    b <- networkD3::igraph_to_networkD3(a, group = (wc$membership)) # zero indexed
+    
+    z <- b$links
+    zz <- b$nodes
+    
+    biggerSampleNodes <- rep(1,times =length(zz[,1]))
+    zz <- cbind(zz,biggerSampleNodes)
+    zz$biggerSampleNodes[which(zz[,1] %in% temp)] <- 50
+    
+    net$z <- z
+    net$zz <- zz
+    net$wc <- wc
+    net$temp <- temp
+    net
+    
+  })
+  
+  
+  output$metaboliteAssociationNetwork <- networkD3::renderSimpleNetwork({
+    
+    
+    cbp <- as.vector(IDBacApp::colorBlindPalette()[1:100])
+    
+    
+    YourColors <- paste0('d3.scaleOrdinal()
+                         .domain([',paste0(shQuote(1:100), collapse = ", "),'])
+                         .range([', paste0(shQuote(cbp), collapse = ", "),' ])')
+    
+    
+    networkD3::forceNetwork(Links = calcNetwork()$z, 
+                            Nodes = calcNetwork()$zz, 
+                            Source = "source",
+                            Nodesize = "biggerSampleNodes",
+                            Target = "target",
+                            NodeID = "name",
+                            Group = "group",
+                            opacity = 1,
+                            opacityNoHover = 0.8, 
+                            zoom = TRUE,
+                            colourScale = networkD3::JS(YourColors))
+    
+  })
+  
+  
+
+
+}
+
+
+
+
+
+
+
+
+
 
 
 

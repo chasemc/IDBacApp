@@ -42,9 +42,8 @@ ui_smallMolMan <-  function(){
                  numericInput("dendparmar2",
                               label = h5(strong("Adjust right margin of dendrogram")),
                               value = 5),
-                 downloadButton("downloadSmallMolNetworkData",
-                                label = "Download Current Network Data",
-                                value = FALSE),
+                 
+                 IDBacApp::downloadSmNet_UI("smMAN"),
                  br(),
                  p(strong("Hint 1:"),
                    "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
@@ -66,28 +65,15 @@ ui_smallMolMan <-  function(){
                  ),
     mainPanel(
       column(width = 5,
-             #   style ="padding: 14px 0px; margin:0%",
-             # plotOutput("netheir",
-             #            width = "100%",
-             #            height = "100%",
-             #            click = "plot_click",
-             #            dblclick = "plot_dblclick",
-             #            hover = "plot_hover",
-             #            brush = "plot_brush")
-             
-             
              manPageProtDend_UI("manProtDend")
-
-            
-             
-             
-             
       ),
-      column(width=6, style ="padding: 14px 0px; margin:0%",
-             absolutePanel(fixed = TRUE, width = "50%",
-                           tabsetPanel(type="tabs",           
+      column(width = 6,
+             style = "padding: 14px 0px; margin:0%",
+             absolutePanel(fixed = TRUE,
+                           width = "50%",
+                           tabsetPanel(type = "tabs",           
                                        tabPanel(value = "smallMolMANUI","MAN",
-                                                networkD3::simpleNetworkOutput("metaboliteAssociationNetwork", width="100%")),
+                                                IDBacApp::smMANPlot_UI("smMAN")),
                                        tabPanel(value = "smallMolPCAUi","PCA",
                                                
                                                 IDBacApp::pca_UI("smallMolPcaPlot")
