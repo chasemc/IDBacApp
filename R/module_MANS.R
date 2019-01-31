@@ -184,10 +184,10 @@ manPageProtDend_UI <- function(id) {
 # MAN Creator -------------------------------------------------------------
 
 
-manPageProtDend_UI <- function(id) {
+smMANPlot_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    networkD3::simpleNetworkOutput(ns("MAN"),
+    networkD3::simpleNetworkOutput(ns("metaboliteAssociationNetwork"),
                                    width = "100%")
   )
 }
@@ -195,7 +195,7 @@ manPageProtDend_UI <- function(id) {
 downloadSmNet_UI <- function(id) {
   ns <- shiny::NS(id)
 shiny::tagList(
-downloadButton("downloadSmallMolNetworkData",
+downloadButton(ns("downloadSmallMolNetworkData"),
                label = "Download Current Network Data",
                value = FALSE)
 )
@@ -205,11 +205,7 @@ downloadButton("downloadSmallMolNetworkData",
 MAN_Server <- function(input,
                        output,
                        session,
-                       subtractedMatrixBlank,
-
-                       cutHeightLines,
-                       colorByLabels,
-                       cutHeightLabels){
+                       subtractedMatrixBlank){
 
 
   
@@ -238,34 +234,25 @@ MAN_Server <- function(input,
   #This creates the network plot and calculations needed for such.
   #----
   calcNetwork <- reactive({
-    net <- new.env(parent = parent.frame())
-    
-    temp <- NULL
-    
-    
-    for (i in 1:length(subtractedMatrixBlank())) {
-      temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
+    manEnvironment <- new.env(parent = parent.frame())
+    manEnvironment$sampleNodes <- character(length(subtractedMatrixBlank()))
+    for (i in seq_along(subtractedMatrixBlank())) {
+      manEnvironment$sampleNodes[i] <- subtractedMatrixBlank()[[i]]@metaData$Strain
     }
-    aqww <- smallMolNetworkDataFrame()
-    
+
     a <- igraph::as.undirected(igraph::graph_from_data_frame(smallMolNetworkDataFrame()))
     a <- igraph::simplify(a)
-    wc <- igraph::fastgreedy.community(a)
+    manEnvironment$wc <- igraph::fastgreedy.community(a)
     
-    b <- networkD3::igraph_to_networkD3(a, group = (wc$membership)) # zero indexed
+    b <- networkD3::igraph_to_networkD3(a, group = (manEnvironment$wc$membership)) # zero indexed
     
-    z <- b$links
-    zz <- b$nodes
     
-    biggerSampleNodes <- rep(1,times =length(zz[,1]))
-    zz <- cbind(zz,biggerSampleNodes)
-    zz$biggerSampleNodes[which(zz[,1] %in% temp)] <- 50
+    manEnvironment$z <- b$links
+    manEnvironment$zz <- b$nodes
+    manEnvironment$zz <- cbind(manEnvironment$zz, biggerSampleNodes = rep(1,times = length(manEnvironment$zz[,1])))
+    manEnvironment$zz$biggerSampleNodes[which(manEnvironment$zz[,1] %in% manEnvironment$sampleNodes)] <- 50
     
-    net$z <- z
-    net$zz <- zz
-    net$wc <- wc
-    net$temp <- temp
-    net
+   manEnvironment
     
   })
   
