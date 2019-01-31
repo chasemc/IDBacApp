@@ -14,7 +14,7 @@ pca_UI <- function(id){
 
 
 
-#' PCA Server
+#' Plotly PCA Server using irlba
 #'
 #' @param input shiny
 #' @param output shiny

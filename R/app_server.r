@@ -912,14 +912,14 @@ output$downloadHierarchical <- downloadHandler(
 callModule(IDBacApp::pca_Server,
            "smallMolPcaPlot",
            dataframe = smallMolDataFrame,
-           namedColors = NULL)
+           namedColors = function() NULL)
       
       
 
 subtractedMatrixBlank <- reactive({
   
   
-  IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
+ a <-  IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
                                sampleIDs,
                                dendrogram = proteinDendrogram$dendrogram,
                                brushInputs = smallProtDend,
@@ -928,6 +928,9 @@ subtractedMatrixBlank <- reactive({
                                lowerMassCutoff = input$lowerMassSM,
                                upperMassCutoff = input$upperMassSM,
                                minSNR = input$smSNR)
+  
+  MALDIquant::binPeaks(a, tolerance = .002)
+  
 })
 
 
@@ -951,8 +954,7 @@ smallMolDataFrame <- reactive({
   
   rownames(smallNetwork) <- temp
   smallNetwork[is.na(smallNetwork)] <- 0
-  smallNetwork <- ifelse(smallNetwork > 0,1,0)
-  as.data.frame(smallNetwork)
+  as.matrix(smallNetwork)
 })
 
 

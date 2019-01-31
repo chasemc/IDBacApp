@@ -41,7 +41,13 @@ The largest change here was that of how protein spectra are compared. The algori
     - It is fairly slow
     - See # 1
     
-    
+##### PCA
+
+Now performed via the irlba package which should make faster but will provide some differences to prcomp
+
+##### Cosine Similarity
+
+Now performed with the coop package which ia a fast and memory-efficient implementation.
     
 #### MANs
 
