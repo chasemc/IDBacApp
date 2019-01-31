@@ -11,8 +11,8 @@ pca_UI <- function(id){
   plotly::plotlyOutput(ns("pcaPlot"),
                        width = "100%")
 }
-  
- 
+
+
 
 #' PCA Server
 #'
@@ -21,48 +21,42 @@ pca_UI <- function(id){
 #' @param session shiny
 #' @param dataframe dataframe that PCA will be performed on
 #' @param namedColors named vector, names are sample labels, hex colors are the vector
-#'     172-10     172-7     172-1    172-11 
-#`    "#000000" "#000000" "#E69F00" "#E69F00" 
 #'
-#' @return
+#' @return returns PCA results as reactive data frame
 #'
-manPageProtDend <- function(input,
-                            output,
-                            session,
-                            dataframe,
-                            namedColors){ 
-
+pca_Server <- function(input,
+                       output,
+                       session,
+                       dataframe,
+                       namedColors){ 
+  
   
   
   pcaCalc <- reactive({
     
-  IDBacApp::pcaCalculation(dataMatrix = dataframe,
-                               logged = TRUE,
-                               scaled = TRUE,
-                               centered = TRUE,
-                               missing = 0.00001)
+    IDBacApp::pcaCalculation(dataMatrix = dataframe(),
+                             logged = TRUE,
+                             scaled = TRUE,
+                             centered = TRUE,
+                             missing = 0.00001)
   })
   
   
   
   output$pcaPlot <- plotly::renderPlotly({
+    b1 <<- pcaCalc()
+    b2<<-namedColors()
+    req(nrow(pcaCalc()) > 2,
+        ncol(pcaCalc()) > 2)
     
-  
+    colorsToUse <- cbind.data.frame(fac = as.vector(namedColors()), 
+                                    nam = (names(namedColors())))
     
-    colorsToUse <- dendextend::leaf_colors(coloredDend())
-    
-    if (any(is.na(as.vector(colorsToUse)))) {
-      colorsToUse <-  dendextend::labels_colors(coloredDend())
-    }
-    
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
-                                    nam = (names(colorsToUse)))
-
-    pcaDat <- merge(pcaCalc(),
+    pcaDat <<- merge(pcaCalc(),
                     colorsToUse, 
                     by = "nam")
     
-    plot_ly(data = pcaDat,
+  plotly::plot_ly(data = pcaDat,
             x = ~Dim1,
             y = ~Dim2,
             z = ~Dim3,
@@ -70,16 +64,21 @@ manPageProtDend <- function(input,
             mode = "markers",
             marker = list(color = ~fac),
             hoverinfo = 'text',
-            text = ~nam) %>%
-      layout(
-        xaxis = list(
-          title = ""
-        ),
-        yaxis = list(
-          title = " "
-        ),
-        zaxis = list(
-          title = ""
-        ))
-})
+            text = ~nam) 
+  
+  # %>%
+  #     layout(
+  #       xaxis = list(
+  #         title = ""
+  #       ),
+  #       yaxis = list(
+  #         title = " "
+  #       ),
+  #       zaxis = list(
+  #         title = ""
+  #       ))
+  })
+  
+  
+  return(pcaCalc)
 }

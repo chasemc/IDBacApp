@@ -29,8 +29,6 @@ pcaCalculation <- function(dataMatrix,
   # Check for NAs
   dataMatrix[is.na(dataMatrix)] <- missing
   
-  #
-  
   dataMatrix <- irlba::prcomp_irlba(dataMatrix,
                                     n = 3,
                                     retx = TRUE,

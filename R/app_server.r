@@ -603,11 +603,7 @@ proteinDendColored <- shiny::callModule(IDBacApp::dendDotsServer,
                                        plotHeight = reactive(input$hclustHeight))
 
 
-observe(dd<<-proteinDendrogram$dendrogram)
- #sample colors <- dendextend::leaf_colors(coloredDend())
-
-
-
+unifiedProteinColor <- reactive(dendextend::labels_colors(proteinDendrogram$dendrogram))
 
 
 # 
@@ -661,58 +657,14 @@ output$pcoaPlot <- plotly::renderPlotly({
 
 # PCA Calculation      
 #----
+callModule(IDBacApp::pca_Server,
+           "proteinPCA",
+           dataframe = proteinMatrix,
+           namedColors = unifiedProteinColor)
 
 
-pcaResults <- reactive({
-  # number of samples should be greater than k
-  #  shiny::req(nrow(as.matrix(proteinMatrix())) > 4)
-  
-  
-  IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
-                           logged = TRUE,
-                           scaled = TRUE, 
-                           missing = .00001)
-})
 
 
-# Output Plotly plot of PCA results
-#----
-output$pcaPlot <- plotly::renderPlotly({
-  
-  colorsToUse <- dendextend::leaf_colors(coloredDend())
-  
-  if (any(is.na(as.vector(colorsToUse)))) {
-    colorsToUse <-  dendextend::labels_colors(coloredDend())
-  }
-  
-  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
-                                  nam = (names(colorsToUse)))
-  pcaDat <- pcaResults()  
-  pcaDat <- merge(pcaResults(),
-                  colorsToUse, 
-                  by = "nam")
-  
-  plot_ly(data = pcaDat,
-          x = ~Dim1,
-          y = ~Dim2,
-          z = ~Dim3,
-          type = "scatter3d",
-          mode = "markers",
-          marker = list(color = ~fac),
-          hoverinfo = 'text',
-          text = ~nam) %>%
-    layout(
-      xaxis = list(
-        title = ""
-      ),
-      yaxis = list(
-        title = " "
-      ),
-      zaxis = list(
-        title = ""
-      ))
-  
-})
 
 
 # Calculate tSNE based on PCA calculation already performed

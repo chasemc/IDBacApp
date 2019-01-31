@@ -51,8 +51,10 @@ ui_proteinClustering <- function() {
       
       
       mainPanel(
+        IDBacApp::pca_UI("proteinPCA"),
         IDBacApp::plotHier("proth"),
        IDBacApp::dendDotsUI("proth")
+       
         
       )
     )
