@@ -595,12 +595,16 @@ proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
 
 
 
-proteinDendColors <- shiny::callModule(IDBacApp::dendDotsServer,
+proteinDendColored <- shiny::callModule(IDBacApp::dendDotsServer,
                                        "proth",
                                        dendrogram = proteinDendrogram,
                                        pool = workingDB$pool,
                                        plotWidth = reactive(input$dendparmar),
                                        plotHeight = reactive(input$hclustHeight))
+
+
+observe(dd<<-proteinDendrogram$dendrogram)
+ #sample colors <- dendextend::leaf_colors(coloredDend())
 
 
 
@@ -622,7 +626,7 @@ pcoaResults <- reactive({
 #----
 output$pcoaPlot <- plotly::renderPlotly({
   
-  colorsToUse <- dendextend::leaf_colors(coloredDend())
+  colorsToUse <- 
   
   if (any(is.na(as.vector(colorsToUse)))) {
     colorsToUse <-  dendextend::labels_colors(coloredDend())
@@ -656,7 +660,6 @@ output$pcoaPlot <- plotly::renderPlotly({
 })
 
 # PCA Calculation      
-PCA 
 #----
 
 
@@ -688,6 +691,7 @@ output$pcaPlot <- plotly::renderPlotly({
   pcaDat <- merge(pcaResults(),
                   colorsToUse, 
                   by = "nam")
+  
   plot_ly(data = pcaDat,
           x = ~Dim1,
           y = ~Dim2,
@@ -927,11 +931,9 @@ output$downloadHierarchical <- downloadHandler(
       
       
       
-      
-      
-      #------------------------------------------------------------------------------
-      # Small molecule data processing
-      #------------------------------------------------------------------------------
+
+# Small molecule data processing ------------------------------------------
+
 
 # This observe controls the generation and display of the
 # protein hierarchical clustering page
@@ -943,10 +945,10 @@ observe({
   smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
                                       "manProtDend",
                                       dendrogram = proteinDendrogram,
-                                      colorByLines = proteinDendColors$colorByLines,
-                                      cutHeightLines = proteinDendColors$cutHeightLines,
-                                      colorByLabels = proteinDendColors$colorByLabels,
-                                      cutHeightLabels = proteinDendColors$cutHeightLabels,
+                                      colorByLines = proteinDendColored$colorByLines,
+                                      cutHeightLines = proteinDendColored$cutHeightLines,
+                                      colorByLabels = proteinDendColored$colorByLabels,
+                                      cutHeightLabels = proteinDendColored$cutHeightLabels,
                                       plotHeight = reactive(input$hclustHeightNetwork),
                                       plotWidth =  reactive(input$dendparmar2))
   
