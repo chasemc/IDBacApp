@@ -911,28 +911,46 @@ output$downloadHierarchical <- downloadHandler(
 #----
 callModule(IDBacApp::pca_Server,
            "smallMolPcaPlot",
-           dataframe = proteinMatrix,
-           namedColors = unifiedProteinColor)
+           dataframe = smallMolRegDF,
+           namedColors = NULL)
       
       
 
 subtractedMatrixBlank <- reactive({
   
   
-  aw <-  getSmallMolSpectra(pool = workingDB$pool(),
+ getSmallMolSpectra(pool = workingDB$pool(),
                             sampleIDs,
                             dendrogram = proteinDendrogram$dendrogram,
-                            ymin = smallProtDend()$ymin,
-                            ymax = smallProtDend()$xmax,
+                            brushInputs = smallProtDend,
                             matrixIDs = NULL,
                             peakPercentPresence = input$percentPresenceSM,
                             lowerMassCutoff = input$lowerMassSM,
                             upperMassCutoff = input$upperMassSM,
                             minSNR = input$smSNR)
+ 
   
   
   
 })
+
+
+
+smallMolRegDF <- reactive({
+  
+  smallNetwork <- MALDIquant::intensityMatrix(subtractedMatrixBlank())
+  temp <- NULL
+  
+  for (i in 1:length(subtractedMatrixBlank())) {
+    temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
+  }
+  
+  rownames(smallNetwork) <- temp
+  smallNetwork[is.na(smallNetwork)] <- 0
+  smallNetwork <- ifelse(smallNetwork > 0,1,0)
+  as.data.frame(smallNetwork)
+})
+
 
 
       #----
@@ -976,11 +994,11 @@ subtractedMatrixBlank <- reactive({
         }
         aqww <- smallMolNetworkDataFrame()
         
-        a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
+        a <- igraph::as.undirected(igraph::graph_from_data_frame(smallMolNetworkDataFrame()))
         a <- igraph::simplify(a)
-        wc <- fastgreedy.community(a)
+        wc <- igraph::fastgreedy.community(a)
         
-        b <- igraph_to_networkD3(a, group = (wc$membership)) # zero indexed
+        b <- networkD3::igraph_to_networkD3(a, group = (wc$membership)) # zero indexed
         
         z <- b$links
         zz <- b$nodes
@@ -1001,7 +1019,7 @@ subtractedMatrixBlank <- reactive({
       output$metaboliteAssociationNetwork <- networkD3::renderSimpleNetwork({
         
         
-        cbp <- as.vector(IDBacApp::colorBlindPalette()()[1:100,2])
+        cbp <- as.vector(IDBacApp::colorBlindPalette()[1:100])
         
         
         YourColors <- paste0('d3.scaleOrdinal()
@@ -1009,8 +1027,8 @@ subtractedMatrixBlank <- reactive({
                              .range([', paste0(shQuote(cbp), collapse = ", "),' ])')
         
     
-        forceNetwork(Links = awq2$z, 
-                     Nodes = awq2$zz, 
+        networkD3::forceNetwork(Links = calcNetwork()$z, 
+                     Nodes = calcNetwork()$zz, 
                      Source = "source",
                      Nodesize = "biggerSampleNodes",
                      Target = "target",
@@ -1019,7 +1037,7 @@ subtractedMatrixBlank <- reactive({
                      opacity = 1,
                      opacityNoHover = 0.8, 
                      zoom = TRUE,
-                     colourScale = JS(YourColors))
+                     colourScale = networkD3::JS(YourColors))
         
       })
       

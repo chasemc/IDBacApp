@@ -10,13 +10,12 @@
 #' @param pool pool
 #' @param sampleIDs character vector of IDs (currently not used)
 #' @param dendrogram protein dendrogram that was brushed 
-#' @param ymin brush y-min
-#' @param ymax brush y-max
 #' @param matrixIDs sampleID that will be used as a matrix
 #' @param peakPercentPresence peaks whose frequency of occurence in replicates below this are dropped
 #' @param lowerMassCutoff lower mass to retain
 #' @param upperMassCutoff upper mass to retain
 #' @param minSNR minimum SNR a peak must have to be retained
+#' @param brushInputs brusked dendrogram outputs
 #'
 #' @return a list containg two lists of MALDIquant peak objects "samplePeaks" and "matrixPeaks"
 #' @export
@@ -24,24 +23,21 @@
 getSmallMolSpectra <- function(pool,
                                sampleIDs,
                                dendrogram,
-                               ymin,
-                               ymax,
+                               brushInputs,
                                matrixIDs = NULL,
                                peakPercentPresence,
                                lowerMassCutoff,
                                upperMassCutoff, 
                                minSNR){
   
-  pool <<-pool
-  dendrogram<<-dendrogram
-  print(ymin)
-  print(ymaX)
+  
+
   checkedPool <- pool::poolCheckout(pool)
   
   if (!is.null(dendrogram)) {  
     
     # If there is a protein dendrogram but a user hasn't brushed:
-    if(is.null(ymin)){ 
+    if(is.null(brushInputs()$ymin)){ 
       
       # Don't ovrwhelm the browser by displaying everthing when page loads
       if(length(labels(dendrogram)) >= 25){
@@ -55,8 +51,8 @@ getSmallMolSpectra <- function(pool,
       # Get the labels of the brushed dendrogram
       sampleIDs <- IDBacApp::labelsFromBrushedDendrogram(dendrogram = dendrogram,
                                                          #    dendrogramShortLabels = dendrogram,
-                                                         brushYmin = ymin,
-                                                         brushYmax = ymax)
+                                                         brushYmin = brushInputs()$ymin,
+                                                         brushYmax = brushInputs()$ymax)
     }
   } else {
     
@@ -67,7 +63,7 @@ getSmallMolSpectra <- function(pool,
                                 .con = checkedPool)
     
     sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)
-    sampleIDs <- as.vector(sampleIDs)
+    sampleIDs <- as.vector(sampleIDs)[,1]
   }
   
   
@@ -110,8 +106,6 @@ getSmallMolSpectra <- function(pool,
   # Return pool
   pool::poolReturn(checkedPool)
   
-  return(list(samplePeaks = reactive(samples),
-              matrixPeaks = matrix))
-  
+  return(samples)
   
 }

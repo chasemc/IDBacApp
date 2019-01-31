@@ -17,7 +17,7 @@ pcaCalculation <- function(dataMatrix,
                            scaled = TRUE,
                            centered = TRUE,
                            missing = .00001){
-  
+  DJHB<<-dataMatrix
   names <- rownames(dataMatrix)
   # log10 if chosen
   if(logged){

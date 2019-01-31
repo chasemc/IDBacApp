@@ -44,8 +44,6 @@ pca_Server <- function(input,
   
   
   output$pcaPlot <- plotly::renderPlotly({
-b1 <<- namedColors()
-pcaCalc1 <<- pcaCalc()
     req(nrow(pcaCalc()) > 2,
         ncol(pcaCalc()) > 2)
     
