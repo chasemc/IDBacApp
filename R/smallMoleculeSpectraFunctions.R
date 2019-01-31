@@ -5,12 +5,6 @@
 
 
 
-
-
-
-
-
-
 #' Retrieve small molecule and matrix peak lists and make consensus peak lists
 #'
 #' @param pool pool
@@ -38,12 +32,13 @@ getSmallMolSpectra <- function(pool,
                                upperMassCutoff, 
                                minSNR){
   
+  pool <<-pool
+  dendrogram<<-dendrogram
+  print(ymin)
+  print(ymaX)
   checkedPool <- pool::poolCheckout(pool)
   
-
-  
-  # Check if there is a protein dendrogram, if TRUE: use to subset strains, if FALSE, show all MAN
-  if(!is.null(dendrogram)){  
+  if (!is.null(dendrogram)) {  
     
     # If there is a protein dendrogram but a user hasn't brushed:
     if(is.null(ymin)){ 
@@ -59,7 +54,7 @@ getSmallMolSpectra <- function(pool,
     } else {
       # Get the labels of the brushed dendrogram
       sampleIDs <- IDBacApp::labelsFromBrushedDendrogram(dendrogram = dendrogram,
-                                                     #    dendrogramShortLabels = dendrogram,
+                                                         #    dendrogramShortLabels = dendrogram,
                                                          brushYmin = ymin,
                                                          brushYmax = ymax)
     }
@@ -69,25 +64,25 @@ getSmallMolSpectra <- function(pool,
     sampleIDs <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
                                FROM `IndividualSpectra`
                                WHERE (`smallMoleculePeaks` IS NOT NULL)",
-                                .con = checkedPool
-    )
+                                .con = checkedPool)
     
     sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)
     sampleIDs <- as.vector(sampleIDs)
   }
   
   
-  s2 <<- checkedPool
-  s1<<-sampleIDs
-  
+
   samples <- lapply(sampleIDs, 
                     function(sampleIDs){ 
-                      IDBacApp::collapseSmallMolReplicates(checkedPool = checkedPool,
-                                                           sampleIDs = sampleIDs ,
-                                                           peakPercentPresence = peakPercentPresence,
-                                                           lowerMassCutoff =lowerMassCutoff,
-                                                           upperMassCutoff = upperMassCutoff, 
-                                                           minSNR = minSNR)
+                      IDBacApp::collapseReplicates(checkedPool = checkedPool,
+                                                   sampleIDs = sampleIDs,
+                                                   peakPercentPresence = peakPercentPresence,
+                                                   lowerMassCutoff = lowerMassCutoff,
+                                                   upperMassCutoff = upperMassCutoff,  
+                                                   minSNR = minSNR, 
+                                                   tolerance = 0.002,
+                                                   protein = FALSE)
+                      
                     })
   
   
@@ -110,9 +105,6 @@ getSmallMolSpectra <- function(pool,
     matrix <- NULL
   }
   
-  
-  
-  qwer <<-samples
   
   
   # Return pool

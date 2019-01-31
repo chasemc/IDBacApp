@@ -76,7 +76,7 @@ ui_smallMolMan <-  function(){
              #            brush = "plot_brush")
              
              
-             manPageProtDendUI("manProtDend")
+             manPageProtDend_UI("manProtDend")
 
             
              
@@ -89,9 +89,8 @@ ui_smallMolMan <-  function(){
                                        tabPanel(value = "smallMolMANUI","MAN",
                                                 networkD3::simpleNetworkOutput("metaboliteAssociationNetwork", width="100%")),
                                        tabPanel(value = "smallMolPCAUi","PCA",
-                                                plotly::plotlyOutput("smallMolPca",
-                                                             width = "100%"
-                                                )
+                                               
+                                                IDBacApp::pca_UI("smallMolPcaPlot")
                                        ))
                            
                            

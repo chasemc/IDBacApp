@@ -1,3 +1,8 @@
+
+# Small molecule page -------------------------------------------------
+
+
+
 #' MAN UI modules
 #'
 #' @param id namespace
@@ -80,15 +85,102 @@ smallMolMAN_UI <- function(id){
 
 }
 
-smallMolPCA_UI <- function(id){
-  ns <- shiny::NS(id)
-           plotly::plotlyOutput("smallMolPca",
-                                width = "100%")
-
-}
 
 #nothing yet
 smallMolDendrogram_UI <- function(id){
   ns <- shiny::NS(id)
   #empty
 }
+
+
+
+
+
+
+
+# Brushable dend (protein) on small molecule page ---------------------------------------
+
+
+#' manPageProtDend_Server
+#'
+#' @param input input 
+#' @param output  output 
+#' @param session  session 
+#' @param dendrogram dendrogram 
+#' @param colorByLines colorByLines 
+#' @param cutHeightLines cutHeightLines 
+#' @param colorByLabels colorByLabels 
+#' @param cutHeightLabels cutHeightLabels 
+#' @param plotHeight plotHeight 
+#' @param plotWidth plotWidth 
+#'
+#' @return manPageProtDend_Server
+#' @export
+#'
+
+manPageProtDend_Server <- function(input,
+                                   output,
+                                   session,
+                                   dendrogram,
+                                   colorByLines,
+                                   cutHeightLines,
+                                   colorByLabels,
+                                   cutHeightLabels,
+                                   plotHeight,
+                                   plotWidth){
+  
+  output$hierOut <- renderPlot({
+    req(!is.null(dendrogram$dendrogram))
+    
+    par(mar = c(5, 5, 5, plotWidth))
+    
+    plot(dendrogram$dendrogram, horiz = TRUE)
+    
+    if (!is.null(colorByLines())) {
+      if (colorByLines() == "height") {
+        abline(v = cutHeightLines(), lty = 2)
+        
+      }
+    }
+    
+    if (!is.null(colorByLabels())) {
+      if (colorByLabels() == "height") {
+        abline(v = cutHeightLines(), lty = 2)
+      }
+    }
+    
+  }, height = plotHeight)
+  
+  
+  
+  
+  return(reactive(input$plot_brush))
+  
+}
+
+
+#' manPageProtDend_UI
+#'
+#' @param id namespace
+#'
+#' @return manPageProtDend_UI
+#' @export
+#'
+
+manPageProtDend_UI <- function(id) {
+  ns <- shiny::NS(id)
+  tagList(
+    plotOutput(ns("hierOut"),
+               brush = ns("plot_brush"))
+  )
+  
+  
+  
+}
+
+
+
+
+
+
+

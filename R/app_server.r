@@ -891,10 +891,8 @@ output$downloadHierarchical <- downloadHandler(
 # protein hierarchical clustering page
 
 
-observe({  
-  req(!is.null(proteinDendrogram$dendrogram))
   
-  smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
+  smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend_Server,
                                       "manProtDend",
                                       dendrogram = proteinDendrogram,
                                       colorByLines = proteinDendColored$colorByLines,
@@ -905,52 +903,38 @@ observe({
                                       plotWidth =  reactive(input$dendparmar2))
   
   
-})   
-      # -----------------
-     #  
-     #  
-     #  
-     #  observe({
-     #    w<-chosenProteinSampleIDs$addSampleChooser$right
-     #    w<-input$dendparmar
-     # pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
-     #                      "proteinMANpage",
-     #                      dendrogram = proteinDendrogram$dendrogram,
-     #                      pool = workingDB$pool(),
-     #                      plotWidth=input$dendparmar,
-     #                      plotHeight = input$hclustHeight)
-     # er<<-reactiveValuesToList(input)
-     #    
-     #  })
-     #  
-     #  
+
+
+
+
+# PCA Calculation      
+#----
+callModule(IDBacApp::pca_Server,
+           "smallMolPcaPlot",
+           dataframe = proteinMatrix,
+           namedColors = unifiedProteinColor)
       
       
-      
-      
-      
-      
-      
-      
-      subtractedMatrixBlank <- reactive({
-    
-    
-      aw <-  getSmallMolSpectra(pool = workingDB$pool(),
-                           sampleIDs,
-                           dendrogram = proteinDend$dendroReact(),
-                           ymin = 0,
-                           ymax = 20000,
-                           matrixIDs = NULL,
-                           peakPercentPresence = input$percentPresenceSM,
-                           lowerMassCutoff = input$lowerMassSM,
-                           upperMassCutoff = input$upperMassSM,
-                           minSNR = input$smSNR)
-          
-        
-        
-      })
-      
-    
+
+subtractedMatrixBlank <- reactive({
+  
+  
+  aw <-  getSmallMolSpectra(pool = workingDB$pool(),
+                            sampleIDs,
+                            dendrogram = proteinDendrogram$dendrogram,
+                            ymin = smallProtDend()$ymin,
+                            ymax = smallProtDend()$xmax,
+                            matrixIDs = NULL,
+                            peakPercentPresence = input$percentPresenceSM,
+                            lowerMassCutoff = input$lowerMassSM,
+                            upperMassCutoff = input$upperMassSM,
+                            minSNR = input$smSNR)
+  
+  
+  
+})
+
+
       #----
       smallMolNetworkDataFrame <- reactive({
         
@@ -958,59 +942,6 @@ observe({
         
         
       })
-      
-      
-      
-      ppp <- reactive({
-        
-        if (length(subtractedMatrixBlank()) > 9) {
-          
-          
-          
-          zz <<- intensityMatrix(subtractedMatrixBlank())
-          zz[is.na(zz)] <- 0
-          zz[is.infinite(zz)] <- 0
-          
-          
-          pc <- FactoMineR::PCA(zz,
-                                graph = FALSE,
-                                ncp = 3,
-                                scale.unit = T)
-          pc <- pc$ind$coord
-          pc <- as.data.frame(pc)
-          nam <- unlist(lapply(subtractedMatrixBlank(), function(x) x@metaData$Strain))
-          pc <- cbind(pc,nam)
-          
-          azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
-          azz <- match(nam, azz)
-          
-          pc <- cbind(pc, as.vector(IDBacApp::colorBlindPalette()()[calcNetwork()$wc$membership[azz], 2] ))
-          colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
-          pc
-        }else{FALSE}
-      })
-      
-      
-      
-      
-      output$smallMolPca <- plotly::renderPlotly({
-        
-        yep <- as.data.frame(ppp(), stringsAsFactors = FALSE)
-        plot_ly(data = yep,
-                x = ~Dim1,
-                y = ~Dim2,
-                z = ~Dim3,
-                type = "scatter3d",
-                mode = "markers",
-                #          marker = list(color = ~fac),
-                hoverinfo = 'text',
-                text = ~nam, 
-                color = ~ I(color)  )
-      })
-      
-      
-      
-      
       
       
       
