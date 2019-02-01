@@ -1,7 +1,3 @@
-
-
-
-
 #' Layout for the databaseTabUI
 #'
 #' @param id namespace
