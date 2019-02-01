@@ -40,7 +40,8 @@ transferToNewDB_server <- function(input,
                                    session,
                                    pool,
                                    workingDirectory,
-                                   selectedDB){
+                                   selectedDB,
+                                   availableExperiments){
   
   
   chosenSamples <-  shiny::callModule(IDBacApp::sampleChooser_server,
@@ -78,7 +79,9 @@ transferToNewDB_server <- function(input,
     
     
     removeModal()
-    
+    availableExperiments$db <- tools::file_path_sans_ext(list.files(workingDirectory,
+                                                                    pattern = ".sqlite",
+                                                                    full.names = FALSE))
   })
   
 }

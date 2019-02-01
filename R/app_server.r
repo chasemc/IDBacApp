@@ -104,29 +104,49 @@ workingDB <- callModule(IDBacApp::databaseTabServer,
 
 # Trigger add tabs --------------------------------------------------------
 observeEvent(workingDB$move$selectExperiment,
-             once = T,
              ignoreInit = TRUE, {
-
-               print("go2")
-
-
+               removeTab(inputId = "mainIDBacNav",
+                         target = "inversePeaks"
+                         
+                       
+               )
+               removeTab(inputId = "mainIDBacNav",
+                         target = "Hierarchical Clustering (Protein)"
+               )
+                         
+               
+               removeTab(inputId = "mainIDBacNav",
+                         target = "Metabolite Association Network (Small-Molecule)"
+                         
+               )
+               
+               pool <<- pool::poolCheckout(workingDB$pool())
+             p <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE proteinPeaks IS NOT NULL")[,1]
+             s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaks IS NOT NULL")[,1]
+             pool::poolReturn(pool)
+              if (p > 0) {
+               
                appendTab(inputId = "mainIDBacNav",
                          tabPanel("Compare Two Samples (Protein)",
                                   value = "inversePeaks",
                                   uiOutput("inversepeakui")
                          )
                )
+               
+               
                appendTab(inputId = "mainIDBacNav",
                          tabPanel("Hierarchical Clustering (Protein)",
                                   uiOutput("Heirarchicalui")
                          )
                )
+              }
+             if (s > 0){
                appendTab(inputId = "mainIDBacNav",
                          tabPanel("Metabolite Association Network (Small-Molecule)",
                                   IDBacApp::ui_smallMolMan()
                          )
                )
-
+             }
 
                })
 
@@ -202,7 +222,7 @@ observeEvent(workingDB$move$selectExperiment,
       
 # Retrieve all available sample names that have protein peak data
 # Used to display inputs for user to select for mirror plots
-#----
+      #----
 inverseComparisonNames <- reactive({
   conn <- pool::poolCheckout(workingDB$pool())
   
@@ -518,40 +538,34 @@ inverseComparisonNames <- reactive({
           
         })
       
-      
-      #------------------------------------------------------------------------------
-      # Protein processing
-      #------------------------------------------------------------------------------
-      
-      
-     
-      
-      
-      
-      
-      # User chooses which samples to include
-      chosenProteinSampleIDs <- reactiveValues()
-      
-      observeEvent(FALSE, {
-        # chosenProteinSampleIDs$ids <- shiny::callModule(IDBacApp::sampleChooser,
-        #                                                 "proteinSampleChooser",
-        #                                                 pool = workingDB$pool(),
-        #                                                 whetherProtein = TRUE)
-      })
-      
+
+
+# Protein processing ------------------------------------------------------
+
+# User chooses which samples to include
+      #-----
+
+
+chosenProteinSampleIDs <-  shiny::callModule(IDBacApp::sampleChooser_server,
+                                                 "proteinSampleChooser",
+                                                 pool = workingDB$pool,
+                                                 allSamples = FALSE,
+                                                 whetherProtein = TRUE,
+                                                 selectedDB = workingDB$move)
+
       
       # Merge and trim protein replicates
+# Collapse peaks
       #----
       collapsedPeaksP <- reactive({
-        req(chosenProteinSampleIDs$ids)
+        req(length(chosenProteinSampleIDs$addSampleChooser$right) > 1)
         # For each sample:
         # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
         # merge into a single peak list per sample
         # trim m/z based on user input
         # connect to sql
         conn <- pool::poolCheckout(workingDB$pool())
-        
-        temp <- lapply(chosenProteinSampleIDs$ids,
+        temp <- lapply(chosenProteinSampleIDs$addSampleChooser$right,
                        function(ids){
                          IDBacApp::collapseReplicates(checkedPool = conn,
                                                       sampleIDs = ids,
@@ -563,8 +577,12 @@ inverseComparisonNames <- reactive({
                                                       protein = TRUE)
                        })
         
+        
+        names(temp) <- chosenProteinSampleIDs$addSampleChooser$right
         pool::poolReturn(conn)
-        return(temp)
+        
+        
+                return(temp)
         
       })
       
@@ -573,397 +591,304 @@ inverseComparisonNames <- reactive({
       
      
       
-      
-     
-      proteinMatrix <- reactive({
-    
-        
-        pm <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
-                                                ppm = 2000,
-                                                massStart = input$lowerMass,
-                                                massEnd = input$upperMass)
-       do.call(rbind, pm)
-        
-      })
-      
-    
-      observe({
-        if (!is.null(proteinMatrix())) {
-        proteinDendrogram2 <- shiny::callModule(IDBacApp::dendrogramCreator,
-                                                          "proteinHierOptions",
-                                                          proteinMatrix())
-        }
-     
-      })
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      # 
-      # #Create the hierarchical clustering based upon the user input for distance method and clustering technique
-      # #----
-      # observe({
-      #   proteinDendrogram <- reactiveValues(dendrogram = shiny::callModule(IDBacApp::dendrogramCreator,
-      #                                                                      "prot",
-      #                                                                      proteinMatrix()))
-      # })
-      # 
-      
-      
-      
-      # PCoA Calculation
-      #----
-      pcoaResults <- reactive({
-        # number of samples should be greater than k
-        shiny::req(nrow(as.matrix(proteinDistance())) > 10)
-        IDBacApp::pcoaCalculation(proteinDistance())
-      })
-      
-      
-      # output Plotly plot of PCoA results
-      #----
-      output$pcoaPlot <- plotly::renderPlotly({
-        
-        colorsToUse <- dendextend::leaf_colors(coloredDend())
-        
-        if (any(is.na(as.vector(colorsToUse)))) {
-          colorsToUse <-  dendextend::labels_colors(coloredDend())
-        }
-        
-        colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
-                                        nam = (names(colorsToUse)))
-        pcaDat <- merge(pcoaResults(),
-                        colorsToUse,
-                        by = "nam")
-        
-        plot_ly(data = pcaDat,
-                x = ~Dim1,
-                y = ~Dim2,
-                z = ~Dim3,
-                type = "scatter3d",
-                mode = "markers",
-                marker = list(color = ~fac),
-                hoverinfo = 'text',
-                text = ~nam) %>%
-          layout(
-            xaxis = list(
-              title = ""
-            ),
-            yaxis = list(
-              title = " "
-            ),
-            zaxis = list(
-              title = ""
-            ))
-      })
-      
-      
-      # PCA Calculation
-      #----
-      pcaResults <- reactive({
-        # number of samples should be greater than k
-        #  shiny::req(nrow(as.matrix(proteinMatrix())) > 4)
-        
-        
-        IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
-                                 logged = TRUE,
-                                 scaled = TRUE, 
-                                 missing = .00001)
-      })
-      
-      
-      # Output Plotly plot of PCA results
-      #----
-      output$pcaPlot <- plotly::renderPlotly({
-        
-        colorsToUse <- dendextend::leaf_colors(coloredDend())
-        
-        if (any(is.na(as.vector(colorsToUse)))) {
-          colorsToUse <-  dendextend::labels_colors(coloredDend())
-        }
-        
-        colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
-                                        nam = (names(colorsToUse)))
-        pcaDat <- pcaResults()  
-        pcaDat <- merge(pcaResults(),
-                        colorsToUse, 
-                        by = "nam")
-        plot_ly(data = pcaDat,
-                x = ~Dim1,
-                y = ~Dim2,
-                z = ~Dim3,
-                type = "scatter3d",
-                mode = "markers",
-                marker = list(color = ~fac),
-                hoverinfo = 'text',
-                text = ~nam) %>%
-          layout(
-            xaxis = list(
-              title = ""
-            ),
-            yaxis = list(
-              title = " "
-            ),
-            zaxis = list(
-              title = ""
-            ))
-        
-      })
-      
-      
-      # Calculate tSNE based on PCA calculation already performed
-      #----
-      tsneResults <- reactive({
-        shiny::req(nrow(as.matrix(proteinMatrix())) > 15)
-        
-        IDBacApp::tsneCalculation(dataMatrix = proteinMatrix(),
-                                  perplexity = input$tsnePerplexity,
-                                  theta = input$tsneTheta,
-                                  iterations = input$tsneIterations)
-        
-      })
-      
-      
-      # Output Plotly plot of tSNE results
-      #----
-      output$tsnePlot <- plotly::renderPlotly({
-        
-        colorsToUse <- dendextend::leaf_colors(coloredDend())
-        
-        if (any(is.na(as.vector(colorsToUse)))) {
-          colorsToUse <-  dendextend::labels_colors(coloredDend())
-        }
-        
-        colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
-                                        nam = (names(colorsToUse)))
-        pcaDat <- merge(tsneResults(), 
-                        colorsToUse,
-                        by = "nam")
-        
-        plot_ly(data = pcaDat,
-                x = ~Dim1,
-                y = ~Dim2,
-                z = ~Dim3,
-                type = "scatter3d",
-                mode = "markers",
-                marker = list(color = ~fac),
-                hoverinfo = 'text',
-                text = ~nam)
-      })
-      
-      
-      
-      #------------------------------------------------------------------------------
-      # Protein Hierarchical clustering calculation and plotting
-      #------------------------------------------------------------------------------
-      
-      
-      # Create Heir ui
-      #----
-      output$Heirarchicalui <-  renderUI({
-    
-        if (is.null(input$Spectra1)) {
-          fluidPage(
-            h1(" There is no data to display",
-               img(src = "errors/hit3.gif",
-                   width = "200",
-                   height = "100")),
-            br(),
-            h4("Troubleshooting:"),
-            tags$ul(
-              tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the
+
+
+proteinMatrix <- reactive({
+  req(input$lowerMass, input$upperMass)
+  pm <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
+                             ppm = 2000,
+                             massStart = input$lowerMass,
+                             massEnd = input$upperMass)
+  
+  do.call(rbind, pm)
+})
+
+
+proteinDendrogram <- reactiveValues(dendrogram  = NULL)
+
+observe({
+proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
+                                                  "proteinHierOptions",
+                                                  proteinMatrix = proteinMatrix)
+})
+
+
+
+
+proteinDendColored <- shiny::callModule(IDBacApp::dendDotsServer,
+                                       "proth",
+                                       dendrogram = proteinDendrogram,
+                                       pool = workingDB$pool,
+                                       plotWidth = reactive(input$dendparmar),
+                                       plotHeight = reactive(input$hclustHeight))
+
+
+unifiedProteinColor <- reactive(dendextend::labels_colors(proteinDendrogram$dendrogram))
+
+
+# 
+# #Create the hierarchical clustering based upon the user input for distance method and clustering technique
+# PCoA Calculation
+#----
+pcoaResults <- reactive({
+  # number of samples should be greater than k
+  shiny::req(nrow(as.matrix(proteinDistance())) > 10)
+  IDBacApp::pcoaCalculation(proteinDistance())
+})
+
+
+# output Plotly plot of PCoA results
+# PCoA Plot
+#----
+output$pcoaPlot <- plotly::renderPlotly({
+  
+  colorsToUse <- 
+  
+  if (any(is.na(as.vector(colorsToUse)))) {
+    colorsToUse <-  dendextend::labels_colors(coloredDend())
+  }
+  
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
+                                  nam = (names(colorsToUse)))
+  pcaDat <- merge(pcoaResults(),
+                  colorsToUse,
+                  by = "nam")
+  
+  plot_ly(data = pcaDat,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
+          type = "scatter3d",
+          mode = "markers",
+          marker = list(color = ~fac),
+          hoverinfo = 'text',
+          text = ~nam) %>%
+    layout(
+      xaxis = list(
+        title = ""
+      ),
+      yaxis = list(
+        title = " "
+      ),
+      zaxis = list(
+        title = ""
+      ))
+})
+
+# PCA Calculation      
+#----
+callModule(IDBacApp::pca_Server,
+           "proteinPCA",
+           dataframe = proteinMatrix,
+           namedColors = unifiedProteinColor)
+
+
+
+
+
+
+# Calculate tSNE based on PCA calculation already performed
+#----
+tsneResults <- reactive({
+  shiny::req(nrow(as.matrix(proteinMatrix())) > 15)
+  
+  IDBacApp::tsneCalculation(dataMatrix = proteinMatrix(),
+                            perplexity = input$tsnePerplexity,
+                            theta = input$tsneTheta,
+                            iterations = input$tsneIterations)
+  
+})
+
+
+# Output Plotly plot of tSNE results
+#----
+output$tsnePlot <- plotly::renderPlotly({
+  
+  colorsToUse <- dendextend::leaf_colors(coloredDend())
+  
+  if (any(is.na(as.vector(colorsToUse)))) {
+    colorsToUse <-  dendextend::labels_colors(coloredDend())
+  }
+  
+  colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
+                                  nam = (names(colorsToUse)))
+  pcaDat <- merge(tsneResults(), 
+                  colorsToUse,
+                  by = "nam")
+  
+  plot_ly(data = pcaDat,
+          x = ~Dim1,
+          y = ~Dim2,
+          z = ~Dim3,
+          type = "scatter3d",
+          mode = "markers",
+          marker = list(color = ~fac),
+          hoverinfo = 'text',
+          text = ~nam)
+})
+
+
+
+
+
+
+# Protein Hierarchical clustering calculation and plotting ----------------
+
+
+# Create Heir ui
+#----
+output$Heirarchicalui <-  renderUI({
+  
+  if (is.null(input$Spectra1)) {
+    fluidPage(
+      h1(" There is no data to display",
+         img(src = "errors/hit3.gif",
+             width = "200",
+             height = "100")),
+      br(),
+      h4("Troubleshooting:"),
+      tags$ul(
+        tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the
                       \"Compare Two Samples\" tab."),
-              tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
+        tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
                       named \"Peak_Lists\""),
-              tags$li("If it seems there is a bug in the software, this can be reported on the",
-                      a(href = "https://github.com/chasemc/IDBacApp/issues",
-                        target = "_blank",
-                        "IDBac Issues Page at GitHub.",
-                        img(border = "0",
-                            title = "https://github.com/chasemc/IDBacApp/issues",
-                            src = "GitHub.png",
-                            width = "25",
-                            height = "25")))
-            )
-          )
-        } else {
+        tags$li("If it seems there is a bug in the software, this can be reported on the",
+                a(href = "https://github.com/chasemc/IDBacApp/issues",
+                  target = "_blank",
+                  "IDBac Issues Page at GitHub.",
+                  img(border = "0",
+                      title = "https://github.com/chasemc/IDBacApp/issues",
+                      src = "GitHub.png",
+                      width = "25",
+                      height = "25")))
+      )
+    )
+  } else {
     
-          IDBacApp::ui_proteinClustering()
-          
-        }
-      })
-      
-      
-      
-      
-      # UI of paragraph explaining which variables were used
-      #----
-      output$proteinReport <- renderUI(
-        p("This dendrogram was created by analyzing ",tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
+    IDBacApp::ui_proteinClustering()
+    
+  }
+})
+
+
+
+# UI of paragraph explaining which variables were used
+
+# Paragraph to relay info for reporting
+#----
+output$proteinReport <- renderUI(
+  
+  p("This dendrogram was created by analyzing ",tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
           and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
           Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
-          "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
-      )
-      
-      
-      # Markdown report generation and download
-      #----
-      output$downloadReport <- downloadHandler(
-        filename = function() {
-          paste('my-report', sep = '.', switch(
-            input$format,  HTML = 'html'
-          ))
-        },
-        content = function(file) {
-          src <- normalizePath('report.Rmd')
-          
-          # temporarily switch to the temp dir, in case you do not have write
-          # permission to the current working directory
-          owd <- setwd(tempdir())
-          on.exit(setwd(owd))
-          file.copy(src, 'report.Rmd', overwrite = TRUE)
-          
-          library(rmarkdown)
-          out <- render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
-            input$format,
-            HTML = html_document()
-          ))
-          file.rename(out, file)
-        }
-      )
-      
-      
-      
+    "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
+)
+
+
+# Generate Rmarkdown report -----------------------------------------------
+
+
+# Markdown report generation and download
+#----
+output$downloadReport <- downloadHandler(
+  filename = function() {
+    paste('my-report', sep = '.', switch(
+      input$format,  HTML = 'html'
+    ))
+  },
+  content = function(file) {
+    src <- normalizePath('report.Rmd')
     
+    # temporarily switch to the temp dir, in case you do not have write
+    # permission to the current working directory
+    owd <- setwd(tempdir())
+    on.exit(setwd(owd))
+    file.copy(src, 'report.Rmd', overwrite = TRUE)
     
-      observe({
-        req(exists("proteinDendrogram2"))
+    library(rmarkdown)
+    out <- render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
+      input$format,
+      HTML = html_document()
+    ))
+    file.rename(out, file)
+  }
+)
+
+
+
+
+# Download svg of dendrogram
+#----
+output$downloadHeirSVG <- downloadHandler(
+  filename = function(){paste0("Dendrogram.svg")
+  },
+  content = function(file1){
     
-      proteinDend <-  shiny::callModule(IDBacApp::dendDotsServer,
-                                        "proth",
-                                        dendrogram = proteinDendrogram$dendrogram,
-                                        pool = workingDB$pool(),
-                                        plotWidth = reactive(input$dendparmar),
-                                        plotHeight = reactive(input$hclustHeight))
-    })
+    svglite::svglite(file1, 
+                     width = 10,
+                     height = plotHeight() / 100,
+                     bg = "white",
+                     pointsize = 12, 
+                     standalone = TRUE)
+    
+    par(mar = c(5, 5, 5, input$dendparmar))
+    
+    if (input$kORheight == "1") {
       
+      proteinDendrogram$dendrogram %>% 
+        dendextend::color_branches(k = input$kClusters) %>% 
+        plot(horiz = TRUE, lwd = 8)
       
+    } else if (input$kORheight == "2") {
       
+      proteinDendrogram$dendrogram %>% 
+        dendextend::color_branches(h = input$cutHeight) %>%
+        plot(horiz = TRUE, lwd = 8)
+      abline(v = input$cutHeight,
+             lty = 2)
       
+    } else if (input$kORheight == "3") {
       
-      # This observe controls the generation and display of the
-      # protein hierarchical clustering page
-      
-      
-      observe({  
-        # req(!is.null(proteinDendrogram$dendrogram))
-        # pp<<-proteinDend$dendrogram
-        # 
-        # smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend,
-        #                                   "manProtDend",
-        #                                   dendroReact = reactive(proteinDend$dendroReact()),
-        #                                   colorByLines = reactive(proteinDend$colorByLines()),
-        #                                   cutHeightLines = reactive(proteinDend$cutHeightLines()),
-        #                                   colorByLabels = reactive(proteinDend$colorByLabels()),
-        #                                   cutHeightLabels = reactive(proteinDend$cutHeightLabels()),
-        #                                   plotHeight = 500,
-        #                                   plotWidth =  )
-        # 
+      par(mar = c(5, 5, 5, input$dendparmar))
+      if (input$colDotsOrColDend == "1") {
         
-      })
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      # Download svg of dendrogram
-      #----
-      output$downloadHeirSVG <- downloadHandler(
-        filename = function(){paste0("Dendrogram.svg")
-        },
-        content = function(file1){
-          
-          svglite::svglite(file1, 
-                           width = 10,
-                           height = plotHeight() / 100,
-                           bg = "white",
-                           pointsize = 12, 
-                           standalone = TRUE)
-          
-          par(mar = c(5, 5, 5, input$dendparmar))
-          
-          if (input$kORheight == "1") {
-            
-            proteinDendrogram$dendrogram %>% 
-              dendextend::color_branches(k = input$kClusters) %>% 
-              plot(horiz = TRUE, lwd = 8)
-            
-          } else if (input$kORheight == "2") {
-            
-            proteinDendrogram$dendrogram %>% 
-              dendextend::color_branches(h = input$cutHeight) %>%
-              plot(horiz = TRUE, lwd = 8)
-            abline(v = input$cutHeight,
-                   lty = 2)
-            
-          } else if (input$kORheight == "3") {
-            
-            par(mar = c(5, 5, 5, input$dendparmar))
-            if(input$colDotsOrColDend == "1") {
-              
-              coloredDend()  %>%
-                hang.dendrogram %>% 
-                plot(., horiz = T)
-              IDBacApp::colored_dots(coloredDend()$bigMatrix,
-                                     coloredDend()$shortenedNames,
-                                     rowLabels = names(coloredDend()$bigMatrix),
-                                     horiz = T,
-                                     sort_by_labels_order = FALSE)
-            } else {
-              coloredDend()  %>%  
-                hang.dendrogram %>% 
-                plot(., horiz = T)
-            }
-          }
-          dev.off()
-          if (file.exists(paste0(file1, ".svg")))
-            file.rename(paste0(file1, ".svg"), file1)
-        }
-      )
-      
-      
-      # Download dendrogram as Newick
-      #----
-      output$downloadHierarchical <- downloadHandler(
-        
-        filename = function() {
-          paste0(Sys.Date(), ".newick")
-        },
-        content = function(file) {
-          ape::write.tree(as.phylo(proteinDendrogram$dendrogram), file = file)
-        }
-      )
-      
-      
-     
-      
-      
+        coloredDend()  %>%
+          hang.dendrogram %>% 
+          plot(., horiz = T)
+        IDBacApp::colored_dots(coloredDend()$bigMatrix,
+                               coloredDend()$shortenedNames,
+                               rowLabels = names(coloredDend()$bigMatrix),
+                               horiz = T,
+                               sort_by_labels_order = FALSE)
+      } else {
+        coloredDend()  %>%  
+          hang.dendrogram %>% 
+          plot(., horiz = T)
+      }
+    }
+    dev.off()
+    if (file.exists(paste0(file1, ".svg")))
+      file.rename(paste0(file1, ".svg"), file1)
+  }
+)
+
+
+# Download dendrogram as Newick
+#----
+output$downloadHierarchical <- downloadHandler(
+  
+  filename = function() {
+    paste0(Sys.Date(), ".newick")
+  },
+  content = function(file) {
+    ape::write.tree(as.phylo(proteinDendrogram$dendrogram), file = file)
+  }
+)
+
+
+
+
+
     
       
       
@@ -978,199 +903,84 @@ inverseComparisonNames <- reactive({
       
       
       
+
+# Small molecule data processing ------------------------------------------
+
+
+# This observe controls the generation and display of the
+# protein hierarchical clustering page
+
+
+  
+  smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend_Server,
+                                      "manProtDend",
+                                      dendrogram = proteinDendrogram,
+                                      colorByLines = proteinDendColored$colorByLines,
+                                      cutHeightLines = proteinDendColored$cutHeightLines,
+                                      colorByLabels = proteinDendColored$colorByLabels,
+                                      cutHeightLabels = proteinDendColored$cutHeightLabels,
+                                      plotHeight = reactive(input$hclustHeightNetwork),
+                                      plotWidth =  reactive(input$dendparmar2))
+  
+  
+
+
+
+
+# PCA Calculation      
+#----
+callModule(IDBacApp::pca_Server,
+           "smallMolPcaPlot",
+           dataframe = smallMolDataFrame,
+           namedColors = function() NULL)
       
       
-      #------------------------------------------------------------------------------
-      # Small molecule data processing
-      #------------------------------------------------------------------------------
-      
-      # -----------------
-     #  
-     #  
-     #  
-     #  observe({
-     #    w<-chosenProteinSampleIDs$ids
-     #    w<-input$dendparmar
-     # pp <<-  shiny::callModule(IDBacApp::dendDotsServer,
-     #                      "proteinMANpage",
-     #                      dendrogram = proteinDendrogram$dendrogram,
-     #                      pool = workingDB$pool(),
-     #                      plotWidth=input$dendparmar,
-     #                      plotHeight = input$hclustHeight)
-     # er<<-reactiveValuesToList(input)
-     #    
-     #  })
-     #  
-     #  
-      
-      
-      
-      
-      
-      
-      
-      
-      subtractedMatrixBlank <- reactive({
-    
-    
-      aw <-  getSmallMolSpectra(pool = workingDB$pool(),
-                           sampleIDs,
-                           dendrogram = proteinDend$dendroReact(),
-                           ymin = 0,
-                           ymax = 20000,
-                           matrixIDs = NULL,
-                           peakPercentPresence = input$percentPresenceSM,
-                           lowerMassCutoff = input$lowerMassSM,
-                           upperMassCutoff = input$upperMassSM,
-                           minSNR = input$smSNR)
-          
-        
-        
-      })
-      
-    
-      #----
-      smallMolNetworkDataFrame <- reactive({
-        
-        IDBacApp::smallMolDFtoNetwork(peakList = subtractedMatrixBlank())
-        
-        
-      })
-      
-      
-      
-      ppp <- reactive({
-        
-        if (length(subtractedMatrixBlank()) > 9) {
-          
-          
-          
-          zz <<- intensityMatrix(subtractedMatrixBlank())
-          zz[is.na(zz)] <- 0
-          zz[is.infinite(zz)] <- 0
-          
-          
-          pc <- FactoMineR::PCA(zz,
-                                graph = FALSE,
-                                ncp = 3,
-                                scale.unit = T)
-          pc <- pc$ind$coord
-          pc <- as.data.frame(pc)
-          nam <- unlist(lapply(subtractedMatrixBlank(), function(x) x@metaData$Strain))
-          pc <- cbind(pc,nam)
-          
-          azz <-  calcNetwork()$wc$names[1:length(calcNetwork()$temp)]
-          azz <- match(nam, azz)
-          
-          pc <- cbind(pc, as.vector(IDBacApp::colorBlindPalette()()[calcNetwork()$wc$membership[azz], 2] ))
-          colnames(pc) <- c("Dim1", "Dim2", "Dim3", "nam", "color") 
-          pc
-        }else{FALSE}
-      })
-      
-      
-      
-      
-      output$smallMolPca <- plotly::renderPlotly({
-        
-        yep <- as.data.frame(ppp(), stringsAsFactors = FALSE)
-        plot_ly(data = yep,
-                x = ~Dim1,
-                y = ~Dim2,
-                z = ~Dim3,
-                type = "scatter3d",
-                mode = "markers",
-                #          marker = list(color = ~fac),
-                hoverinfo = 'text',
-                text = ~nam, 
-                color = ~ I(color)  )
-      })
-      
-      
-      
-      
-      
-      
-      
-      #----
-      
-      output$downloadSmallMolNetworkData <- downloadHandler(
-        filename = function(){"SmallMolecule_Network.csv"
-        },
-        content = function(file){
-          write.csv(as.matrix(smallMolNetworkDataFrame()),
-                    file,
-                    row.names = FALSE)
-        }
-      )
-      
-      
-      
-      
-      
-      
-      
-      #This creates the network plot and calculations needed for such.
-      #----
-      calcNetwork <- reactive({
-        net <- new.env(parent = parent.frame())
-        
-        temp <- NULL
-        
-        
-        for (i in 1:length(subtractedMatrixBlank())) {
-          temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
-        }
-        aqww <- smallMolNetworkDataFrame()
-        
-        a <- as.undirected(graph_from_data_frame(smallMolNetworkDataFrame()))
-        a <- igraph::simplify(a)
-        wc <- fastgreedy.community(a)
-        
-        b <- igraph_to_networkD3(a, group = (wc$membership)) # zero indexed
-        
-        z <- b$links
-        zz <- b$nodes
-        
-        biggerSampleNodes <- rep(1,times =length(zz[,1]))
-        zz <- cbind(zz,biggerSampleNodes)
-        zz$biggerSampleNodes[which(zz[,1] %in% temp)] <- 50
-        
-        net$z <- z
-        net$zz <- zz
-        net$wc <- wc
-        net$temp <- temp
-        net
-        
-      })
-      
-      
-      output$metaboliteAssociationNetwork <- networkD3::renderSimpleNetwork({
-        
-        
-        cbp <- as.vector(IDBacApp::colorBlindPalette()()[1:100,2])
-        
-        
-        YourColors <- paste0('d3.scaleOrdinal()
-                             .domain([',paste0(shQuote(1:100), collapse = ", "),'])
-                             .range([', paste0(shQuote(cbp), collapse = ", "),' ])')
-        
-    
-        forceNetwork(Links = awq2$z, 
-                     Nodes = awq2$zz, 
-                     Source = "source",
-                     Nodesize = "biggerSampleNodes",
-                     Target = "target",
-                     NodeID = "name",
-                     Group = "group",
-                     opacity = 1,
-                     opacityNoHover = 0.8, 
-                     zoom = TRUE,
-                     colourScale = JS(YourColors))
-        
-      })
-      
-      
+
+subtractedMatrixBlank <- reactive({
+  
+  
+ a <-  IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
+                               sampleIDs,
+                               dendrogram = proteinDendrogram$dendrogram,
+                               brushInputs = smallProtDend,
+                               matrixIDs = NULL,
+                               peakPercentPresence = input$percentPresenceSM,
+                               lowerMassCutoff = input$lowerMassSM,
+                               upperMassCutoff = input$upperMassSM,
+                               minSNR = input$smSNR)
+  
+  MALDIquant::binPeaks(a, tolerance = .002)
+  
+})
+
+
+
+callModule(IDBacApp::MAN_Server,
+          "smMAN",
+          subtractedMatrixBlank = subtractedMatrixBlank)
+
+
+
+
+
+smallMolDataFrame <- reactive({
+  
+  smallNetwork <- MALDIquant::intensityMatrix(subtractedMatrixBlank())
+  temp <- NULL
+  
+  for (i in 1:length(subtractedMatrixBlank())) {
+    temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
+  }
+  
+  rownames(smallNetwork) <- temp
+  smallNetwork[is.na(smallNetwork)] <- 0
+  as.matrix(smallNetwork)
+})
+
+
+
+
+
       
       
       # -----------------
@@ -1192,20 +1002,7 @@ inverseComparisonNames <- reactive({
       })
       
       
-      # Output a paragraph about which parameters were used to create the currently-displayed dendrogram
-      #----
-      output$proteinReport2 <- renderUI({
-        
-        if (length(labels(proteinDendrogram$dendrogram)) == 0) {
-          p("No Protein Data to Display")
-        } else {
-          p("This dendrogram was created by analyzing ", tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
-            and retaining peaks with a signal to noise ratio above ", tags$code(input$pSNR)," and occurring in greater than ", tags$code(input$percentPresenceP),"% of replicate spectra.
-            Peaks occuring below ", tags$code(input$lowerMass), " m/z or above ", tags$code(input$upperMass), " m/z were removed from the analyses. ",
-            "For clustering spectra, ", tags$code(input$distance), " distance and ", tags$code(input$clustering), " algorithms were used.")
-        }
-      })
-      
+   
       
     
     # Updating IDBac ----------------------------------------------------------

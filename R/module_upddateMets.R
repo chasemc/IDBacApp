@@ -88,7 +88,6 @@ updateMeta_server <- function(input,
                      
                    } else{
                      
-                     print(":dfldk")
                      dbQuery <- glue::glue_sql("SELECT *
                                              FROM ({tab*})",
                                                tab = "metaData",

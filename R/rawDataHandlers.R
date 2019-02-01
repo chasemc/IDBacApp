@@ -39,9 +39,10 @@ startingFromBrukerFlex <- function(chosenDir,
                                    msconvertPath = "",
                                    sampleMap,
                                    tempDir){
-  
-
-  
+  # 
+  # tempDir <<- tempDir
+  # sampleMap <<- sampleMap
+  # chosenDir <<- chosenDir
   convertFrom <- base::split(labels(sampleMap),as.character(sampleMap))
   
   convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
@@ -59,15 +60,15 @@ startingFromBrukerFlex <- function(chosenDir,
                                            mustWork = FALSE)
   msconvertLocation <- base::shQuote(msconvertLocation)
   
-
-    
-
+  
+  
+  
   #Command-line MSConvert, converts from proprietary vendor data to mzML
   msconvertCmdLineCommands <- base::lapply(base::seq_along(convertFrom), 
                                            function(x){
                                              (base::paste0(msconvertLocation,
                                                            " ",
-                                                           base::paste0(convertFrom[[x]],
+                                                           base::paste0(shQuote(convertFrom[[x]]),
                                                                         collapse = "",
                                                                         sep = " "),
                                                            " --mzML --merge -z  --32 -v",
@@ -99,7 +100,7 @@ startingFromBrukerFlex <- function(chosenDir,
                       functionTOrunMSCONVERTonCMDline)
   parallel::stopCluster(cl)
   
-
+  
   validate(need(all(file.exists(convertTo)), 
                 cbind(convertTo, exists(convertTo))
   ))
@@ -107,29 +108,12 @@ startingFromBrukerFlex <- function(chosenDir,
   
   
   return(list(mzFile = convertTo,
-         sampleID = names(convertFrom)))
+              sampleID = names(convertFrom)))
   
   
-   
+  
   
 }
-
-
-# Single-core conversion with progress bar:
-# withProgress(message = 'Conversion in progress',
-#              detail = 'This may take a while...', value = 0, {
-#                for(i in 1:lengthProgress){
-#                  incProgress(1/lengthProgress)
-#                  functionTOrunMSCONVERTonCMDline(msconvertCmdLineCommands[i])
-#                  }
-#              })
-
-
-
-
-
-
-
 
 
 
@@ -137,6 +121,12 @@ startingFromBrukerFlex <- function(chosenDir,
 #' 
 #'  Using an excel spreadsheet, get the filepath for msconvert and the user-supplied name
 #'
+#'   from: https://qa.nmrwiki.org/question/143/what-is-the-purpose-of-acqu-and-acqus-files-in-bruker-setup
+#'    The s at the end of a parameter file name specifies this file as a status parameterfile. Status parameters are written at the end of an acquisition or also when a FID in a multidimensional experiment is written.
+#'    The files without the s are the current parameters. If you change a parameter it will be changed in the files without the s.
+#'    Let's assume a dataset where an acquisition has already been done, acqus and acqu contain the same information. You now decide to restart the acquisition but with more scans. You enter a new number for NS. acqu will show this new value and acqus will still show the number that was used to collect the FID that is on disk. Once the new acquisition is finished acqus now also contains the new value. In multidimensional acquisition the value of TD will be updated when a new FID is written to disk. The contents of acqus are printed in parameter listings.
+#'    The acqu files with numbers contain the parameters for the indirect dimensions. "acqu2" and acqu2s are for the F1 dimension in a 2D. A 3D will have acqu, acqu2 and acqu3, in a 4D you will also find acqu4 etc.
+#' 
 #' @param brukerDataPath path to directory containg bruker files
 #'
 #' @return named list, names are sample IDs, values are paths
@@ -145,10 +135,9 @@ startingFromBrukerFlex <- function(chosenDir,
 #' @examples
 brukerDataSpotsandPaths <- function(brukerDataPath){
   
-  files <- list.files(brukerDataPath, pattern="acqus", recursive = TRUE, full.names = TRUE)
+  files <- list.files(brukerDataPath, pattern = "acqus", recursive = TRUE, full.names = TRUE)
   
-  instrument_MetaFile  <- lapply(files, function(x)  read.delim(x, sep="\n"))
-  
+  instrument_MetaFile  <- lapply(files, function(x)  read.delim(x, sep = "\n"))
   
   # Find Acqu file
   spots <- try(lapply(instrument_MetaFile , function(x) as.character(x[grep("SPOTNO=", x[,1]),])),
@@ -165,24 +154,6 @@ brukerDataSpotsandPaths <- function(brukerDataPath){
 }
 
 
-# 
-#   excel <- readxl::read_excel(excel, col_names = FALSE, range ="B2:Y17")
-#   userExcel <- as.matrix(userExcel)
-#   lets <- LETTERS[1:16]
-#   nums <- 1:24
-# 
-#   aa <- sapply(nums, function(x) paste0(lets, x))
-#   aa <- matrix(aa, nrow = 16, ncol = 24)
-# 
-#   aa <- sapply(spots, function(x) userExcel[which(aa %in% x)])
-# 
-# 
-#   split(names(aa), aa)
-# 
-# 
-# 
-# 
-#   base::as.matrix(s1)
 
 
 

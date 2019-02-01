@@ -112,8 +112,6 @@ dendDotsServer <- function(input,
     
   })  
   
-  observe(tt <<- dendrogram
-)
   
   observeEvent(input$openDendots, ignoreInit = T ,ignoreNULL = T, {
     ns <- session$ns
@@ -162,8 +160,8 @@ dendDotsServer <- function(input,
   
   levs <- reactive({
     req(input$selectMetaColumn)
-    conn <- pool::poolCheckout(pool)
-    dendLabs <- labels(dendrogram)
+    conn <- pool::poolCheckout(pool())
+    dendLabs <- labels(dendrogram$dendrogram)
     query <- DBI::dbSendStatement("SELECT *
                                   FROM metaData
                                   WHERE `Strain_ID` = ?",
@@ -182,8 +180,7 @@ dendDotsServer <- function(input,
   
   output$proteDendDots <- renderUI({
     ns <- session$ns 
-    conn <- pool::poolCheckout(pool)
-    a <- DBI::dbListFields(conn, "metaData")
+    a <- DBI::dbListFields(pool(), "metaData")
     a <- a[-which(a == "Strain_ID")]
     
     selectInput(ns("selectMetaColumn"),
@@ -396,19 +393,23 @@ dendDotsServer <- function(input,
   
   
   output$hierOut <- renderPlot({
+
+    shiny::validate(shiny::need(dendrogram$dendrogram, "Try selecting samples using the menu to the left."))
+    
+    
     par(mar = c(5, 5, 5, plotWidth))
-   
-     if (!is.null(input$selectMetaColumn[[1]])){
+   plot(dendrogram$dendrogram, horiz = T)
+     if (!is.null(input$selectMetaColumn[[1]])) {
       
-      if(input$closeDendDots == 1){
+      if (input$closeDendDots == 1) {
         
       } else {
         
-        trimdLabsDend <- dendrogram
-        trimdLabsDend <- strtrim(labels(trimdLabsDend), 20)
-        IDBacApp::runDendDots(rawDendrogram = dendrogram,
+        trimdLabsDend <- dendrogram$dendrogram
+        labels(trimdLabsDend) <- strtrim(labels(trimdLabsDend), 20)
+        IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
                               trimdLabsDend = trimdLabsDend,
-                              pool = pool,
+                              pool = pool(),
                               columnID = input$selectMetaColumn,
                               colors = colorsChosen(),
                               text_shift = 1)
@@ -416,24 +417,23 @@ dendDotsServer <- function(input,
     }
     
 
-    if(!is.null(input$colorByLines)){
-      if(input$colorByLines == "height"){
-        abline(v= input$cutHeightLines, lty = 2)
+    if (!is.null(input$colorByLines)) {
+      if (input$colorByLines == "height") {
+        abline(v = input$cutHeightLines, lty = 2)
         
       }
     }
     
-    if(!is.null(input$colorByLabels)){
-      if(input$colorByLabels == "height"){
-        abline(v= input$cutHeightLines, lty = 2)
+    if (!is.null(input$colorByLabels)) {
+      if (input$colorByLabels == "height") {
+        abline(v = input$cutHeightLines, lty = 2)
       }
     }
     
-  }, height=plotHeight)
+  }, height = plotHeight)
   
   
-  return(list(dendroReact = reactive(dendroReact()),
-              colorByLines = reactive(input$colorByLines),
+  return(list(colorByLines = reactive(input$colorByLines),
               cutHeightLines = reactive(input$cutHeightLines),
               colorByLabels = reactive(input$colorByLabels),
               cutHeightLabels = reactive(input$cutHeightLabels)

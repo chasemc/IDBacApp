@@ -1,7 +1,3 @@
-
-
-
-
 #' Layout for the databaseTabUI
 #'
 #' @param id namespace
@@ -71,8 +67,11 @@ databaseTabUI <- function(id) {
                                                                                value = "experiment_metaData_tab",
                                                                        IDBacApp::updateMeta_UI(ns("updateMeta"))
                                                                                   
-                                                                      )
-                                                          ) 
+                                                                      ),
+                                                                      tabPanel("Experiment Summary",
+                                                                               value = "experiment_summary_tab",
+                                                                               IDBacApp::experimentSummary_UI(ns("experimentSummary"))
+                                                          ) )
                                  )
              )
            )
@@ -101,14 +100,16 @@ databaseTabServer <- function(input,
                             workingDirectory = workingDirectory)
 
   
+  shiny::callModule(IDBacApp::experimentSummary_Server,
+                    "experimentSummary",
+                    pool = selectedDB$userDBCon)
   
   
   
+  # Update Metadata ---------------------------------------------------------
   
-# Update Metadata ---------------------------------------------------------
-
-
-
+  
+  
   callModule(IDBacApp::updateMeta_server,
              "updateMeta",
              pool = selectedDB$userDBCon,
@@ -121,9 +122,10 @@ databaseTabServer <- function(input,
              "transferToNewDB",
              pool = selectedDB$userDBCon,
              workingDirectory = workingDirectory,
-             selectedDB  = selectedDB$inputs)
+             selectedDB  = selectedDB$inputs,
+             availableExperiments = availableExperiments)
   
-
+  
   
   
   
@@ -143,7 +145,7 @@ databaseTabServer <- function(input,
   
   
   
-
+  
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   #----
   observe({
@@ -260,7 +262,7 @@ databaseTabServer <- function(input,
   
   return(list(pool = selectedDB$userDBCon,
               move = selectedDB$inputs)
-              )
+  )
   
 }
 

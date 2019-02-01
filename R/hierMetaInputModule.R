@@ -27,7 +27,7 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, te
     DBI::dbBind(query, list(dendLabs))
     selectedMeta <- DBI::dbFetch(query)
     
-    dbClearResult(query)
+    DBI::dbClearResult(query)
     
     
     selectedMeta <- selectedMeta[ ,colnames(selectedMeta) %in% columnID]
@@ -40,11 +40,11 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, te
       selectedMeta[,i][which(selectedMeta[, i] == TRUE)] <- colors[[i]]
     }
     
-        selectedMeta[selectedMeta == FALSE] <- "#00000000" 
-
-   
+    selectedMeta[selectedMeta == FALSE] <- "#00000000" 
+    
+    
     colnames(selectedMeta) <- uniq
-
+    
     IDBacApp::colored_dots(selectedMeta,
                            trimdLabsDend,
                            horiz = T,
@@ -52,10 +52,10 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, te
                            sort_by_labels_order = FALSE,
                            text_shift = text_shift)
     
-  
+    
 }
 
 
 
 
-  
+

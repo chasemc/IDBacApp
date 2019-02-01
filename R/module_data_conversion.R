@@ -46,7 +46,7 @@ convertDataTabServer <- function(input,
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   #----
   observeEvent(c(input$ConversionsNav,
-                 input$typeOfRawData), 
+                 input$typeOfRawData),
                ignoreInit = TRUE, 
                {
                  ns <- session$ns
@@ -58,7 +58,7 @@ convertDataTabServer <- function(input,
                      
                    } else if (input$typeOfRawData == "1") {
                      output$conversionMainUI1 <- renderUI({
-                       IDBacApp::oneMaldiPlate(ns)
+                       IDBacApp::oneMaldiPlate(ns("oneMaldiPlate"))
                      }) 
                    } else if (input$typeOfRawData == 2) {
                      output$conversionMainUI1 <- renderUI({
@@ -105,7 +105,7 @@ convertDataTabServer <- function(input,
       return("No Folder Selected")
     } else {
       folders <- NULL
-      # Get the folders contained within the chosen folder.
+      i# Get the folders contained within the chosen folder.
       foldersInFolder <- list.dirs(rawFilesLocation(),
                                    recursive = FALSE,
                                    full.names = FALSE) 
@@ -342,40 +342,13 @@ convertDataTabServer <- function(input,
                      
                      
                    }
-                 }
+                 } 
                  
-                 validate(need(length(forProcessing$mzFile) == length(forProcessing$sampleID), 
-                               "Temp mzML files and sample ID lengths don't match."
-                 ))
-                 
-                 lengthProgress <- length(forProcessing$mzFile)
-                 
-                 # Create DB
-                 
-                 userDB <- createNewSQLITEdb(input$newExperimentName)
-                 
-                 
-                 progLength <- base::length(forProcessing$mzFile)
-                 withProgress(message = 'Processing in progress',
-                              value = 0,
-                              max = progLength, {
-                                
-                                for (i in base::seq_along(forProcessing$mzFile)) {
-                                  setProgress(value = i,
-                                              message = 'Processing in progress',
-                                              detail = glue::glue(" \n Sample: {forProcessing$sampleID[[i]]},
-                                                            {i} of {progLength}"),
-                                              session = getDefaultReactiveDomain())
-                                  
-                                  IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
-                                                                      sampleID = forProcessing$sampleID[[i]],
-                                                                      userDBCon = userDB) # pool connection
-                                }
-                                
-                              })
-                 
-                 
-                 pool::poolReturn(userDB)
+                   
+                   IDBacApp::processMZML(forProcessing = forProcessing,
+                                         newExperimentName = input$newExperimentName)
+                   
+                   
                  
                  
                  
@@ -429,36 +402,57 @@ convertDataTabServer <- function(input,
   })
   
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 }
 
 
 
 
+
+#' Title
+#'
+#' @param forProcessing 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+processMZML <- function(forProcessing,
+                        newExperimentName){
+  
+  
+  validate(need(length(forProcessing$mzFile) == length(forProcessing$sampleID), 
+                "Temp mzML files and sample ID lengths don't match."
+  ))
+  
+  lengthProgress <- length(forProcessing$mzFile)
+  
+  # Create DB
+  
+  userDB <- createNewSQLITEdb(newExperimentName)
+  
+  
+  progLength <- base::length(forProcessing$mzFile)
+  withProgress(message = 'Processing in progress',
+               value = 0,
+               max = progLength, {
+                 
+                 for (i in base::seq_along(forProcessing$mzFile)) {
+                   setProgress(value = i,
+                               message = 'Processing in progress',
+                               detail = glue::glue(" \n Sample: {forProcessing$sampleID[[i]]},
+                                                   {i} of {progLength}"),
+                               session = getDefaultReactiveDomain())
+                   
+                   IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
+                                                       sampleID = forProcessing$sampleID[[i]],
+                                                       userDBCon = userDB) # pool connection
+                 }
+                 
+               })
+  pool::poolReturn(userDB)
+  
+  
+}
 
 
 
@@ -633,6 +627,7 @@ multipleMaldiPlates <- function(id){
 #'
 #' @examples NA
 beginWithMZ <- function(id){
+  ns <- NS(id)
   fluidRow(
     column(width = 10, offset = 2, wellPanel(class = "intro_WellPanel", align= "center",
                                              h3("Starting with mzML or mzXML Data:"),
@@ -648,7 +643,7 @@ beginWithMZ <- function(id){
                                              p(strong("2: Click to select the location of your mzML files"), align= "center"),
                                              actionButton(ns("mzmlRawFileDirectory"),
                                                           label = "Raw Data Folder"),
-                                             verbatimTextOutput(ns("mzmlRawFileDirectory"),
+                                             verbatimTextOutput(ns("mzmlRawFileDirectorytext"),
                                                                 placeholder = TRUE),
                                              tags$hr(size = 20),
                                              br(),

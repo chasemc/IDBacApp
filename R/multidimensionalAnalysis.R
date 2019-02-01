@@ -17,7 +17,7 @@ pcaCalculation <- function(dataMatrix,
                            scaled = TRUE,
                            centered = TRUE,
                            missing = .00001){
-  
+  DJHB<<-dataMatrix
   names <- rownames(dataMatrix)
   # log10 if chosen
   if(logged){
@@ -28,8 +28,6 @@ pcaCalculation <- function(dataMatrix,
   dataMatrix[is.infinite(dataMatrix)] <- missing
   # Check for NAs
   dataMatrix[is.na(dataMatrix)] <- missing
-  
-  #
   
   dataMatrix <- irlba::prcomp_irlba(dataMatrix,
                                     n = 3,

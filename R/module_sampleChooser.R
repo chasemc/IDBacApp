@@ -9,9 +9,7 @@
 sampleChooser_UI <- function(id) {
   ns <- shiny::NS(id)
   tagList(
-    p("pp"),
-    uiOutput(ns("chooseSamples")),
-    p("pp2")
+    uiOutput(ns("chooseSamples"))
   )
 }
 
@@ -64,9 +62,6 @@ sampleChooser_server <- function(input,
     )
     
   })
-  
-  
-  
   
   
   
