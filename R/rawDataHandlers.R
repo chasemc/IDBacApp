@@ -60,9 +60,9 @@ startingFromBrukerFlex <- function(chosenDir,
                                            mustWork = FALSE)
   msconvertLocation <- base::shQuote(msconvertLocation)
   
-
-    
-
+  
+  
+  
   #Command-line MSConvert, converts from proprietary vendor data to mzML
   msconvertCmdLineCommands <- base::lapply(base::seq_along(convertFrom), 
                                            function(x){
@@ -100,7 +100,7 @@ startingFromBrukerFlex <- function(chosenDir,
                       functionTOrunMSCONVERTonCMDline)
   parallel::stopCluster(cl)
   
-
+  
   validate(need(all(file.exists(convertTo)), 
                 cbind(convertTo, exists(convertTo))
   ))
@@ -108,10 +108,10 @@ startingFromBrukerFlex <- function(chosenDir,
   
   
   return(list(mzFile = convertTo,
-         sampleID = names(convertFrom)))
+              sampleID = names(convertFrom)))
   
   
-   
+  
   
 }
 
