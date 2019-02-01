@@ -9,13 +9,14 @@
 #'
 app_server <- function(input, output, session) {
 
-#######
-# For during Dev
+
+# Develepment Functions ---------------------------------------------------
   options(shiny.reactlog = TRUE)
   workingDirectory <- getwd()
-#######
-  
-  # Register sample-choosing JS
+
+
+# Register sample-choosing JS ---------------------------------------------
+
   shiny::registerInputHandler("shinyjsexamples.chooser", function(data, ...) {
     if (is.null(data)) {
       NULL
@@ -24,7 +25,8 @@ app_server <- function(input, output, session) {
     }}, force = TRUE)
   
     
-# Setup working directories
+
+# Setup working directories -----------------------------------------------
 
 # Create a directory for temporary mzml files
 tempMZDir <- file.path(workingDirectory, "temp_mzML")
@@ -35,9 +37,6 @@ file.remove(list.files(tempMZDir,
                        pattern = ".mzML",
                        recursive = FALSE,
                        full.names = TRUE))
-
-
-
 
 
 # Conversions Tab ---------------------------------------------------------
@@ -63,8 +62,6 @@ availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(w
                                                                                pattern = ".sqlite",
                                                                                full.names = FALSE)))
 
-databasePools <- reactiveValues(userDBcon = NULL)
-
 
 
 #This "observe" event creates the SQL tab UI.
@@ -87,18 +84,6 @@ workingDB <- callModule(IDBacApp::databaseTabServer,
              workingDirectory = workingDirectory,
              availableExperiments = availableDatabases)
 
-
-# 
-# 
-# observeEvent(pw()$move,{
-#   
-#   workingDB$pool() <- workingDB$pool$userDBCon
-# 
-# 
-#   updateTabsetPanel(session, "mainIDBacNav",
-#                     selected = "inversePeaks")
-# 
-#   })
 
 
 
@@ -165,7 +150,6 @@ observeEvent(workingDB$move$selectExperiment,
 # Mirror Plots ------------------------------------------------------------
 
       # Mirror plot UI
-      #----
       output$inversepeakui <-  renderUI({
         
         sidebarLayout(
@@ -222,7 +206,6 @@ observeEvent(workingDB$move$selectExperiment,
       
 # Retrieve all available sample names that have protein peak data
 # Used to display inputs for user to select for mirror plots
-      #----
 inverseComparisonNames <- reactive({
   conn <- pool::poolCheckout(workingDB$pool())
   
@@ -240,7 +223,6 @@ inverseComparisonNames <- reactive({
       
       
       #This retrieves data a processes/formats it for the mirror plots
-      #----
       dataForInversePeakComparisonPlot <- reactive({
         
         mirrorPlotEnv <- new.env(parent = parent.frame())
@@ -363,14 +345,14 @@ inverseComparisonNames <- reactive({
         
       })
       
+# Used in the the inverse-peak plot for zooming ---------------------------
       
-      #Used in the the inverse-peak plot for zooming
-      #----
       ranges2 <- reactiveValues(x = NULL, y = NULL)
+
+
       
       
       # Output for the non-zoomed mirror plot
-      #----
       output$inversePeakComparisonPlot <- renderPlot({
         
         mirrorPlotEnv <- dataForInversePeakComparisonPlot()
@@ -411,9 +393,10 @@ inverseComparisonNames <- reactive({
         })
       })
       
-      
-      # Output the zoomed mirror plot
-      #----
+
+# Output the zoomed mirror plot -------------------------------------------
+
+
       output$inversePeakComparisonPlotZoom <- renderPlot({
         
         mirrorPlotEnv <- dataForInversePeakComparisonPlot()
@@ -439,9 +422,9 @@ inverseComparisonNames <- reactive({
              border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
       })
       
-      
-      # Download svg of top mirror plot
-      #----
+
+# Download svg of top mirror plot -----------------------------------------
+
       output$downloadInverse <- downloadHandler(
         filename = function(){
           paste0("top-", input$Spectra1,"_", "bottom-", input$Spectra2, ".svg")
@@ -491,10 +474,10 @@ inverseComparisonNames <- reactive({
           if (file.exists(paste0(file1, ".svg")))
             file.rename(paste0(file1, ".svg"), file1)
         })
-      
-      
-      # Download svg of zoomed mirror plot
-      #----
+    
+
+# Download svg of zoomed mirror plot --------------------------------------
+
       output$downloadInverseZoom <- downloadHandler(
         filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")
         },
@@ -542,9 +525,8 @@ inverseComparisonNames <- reactive({
 
 # Protein processing ------------------------------------------------------
 
-# User chooses which samples to include
-      #-----
 
+# User chooses which samples to include -----------------------------------
 
 chosenProteinSampleIDs <-  shiny::callModule(IDBacApp::sampleChooser_server,
                                                  "proteinSampleChooser",
@@ -554,18 +536,28 @@ chosenProteinSampleIDs <-  shiny::callModule(IDBacApp::sampleChooser_server,
                                                  selectedDB = workingDB$move)
 
       
-      # Merge and trim protein replicates
-# Collapse peaks
-      #----
-      collapsedPeaksP <- reactive({
-        req(length(chosenProteinSampleIDs$addSampleChooser$right) > 1)
+# Collapse peaks ----------------------------------------------------------
+      collapsedPeaksForDend <- reactive({
+
+
+
+        right <- chosenProteinSampleIDs
+        
+        right <- right$addSampleChooser$right
+        
+        
+        print(right)
+        req(length(right) > 1)
+        req(workingDB$pool())
         # For each sample:
         # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
         # merge into a single peak list per sample
         # trim m/z based on user input
         # connect to sql
         conn <- pool::poolCheckout(workingDB$pool())
-        temp <- lapply(chosenProteinSampleIDs$addSampleChooser$right,
+        print(conn@dbname)
+
+        temp <- lapply(right,
                        function(ids){
                          IDBacApp::collapseReplicates(checkedPool = conn,
                                                       sampleIDs = ids,
@@ -590,12 +582,13 @@ chosenProteinSampleIDs <-  shiny::callModule(IDBacApp::sampleChooser_server,
      
       
      
-      
+
+# Protein matrix ----------------------------------------------------------
 
 
 proteinMatrix <- reactive({
   req(input$lowerMass, input$upperMass)
-  pm <<- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
+  pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
                              ppm = 2000,
                              massStart = input$lowerMass,
                              massEnd = input$upperMass)
@@ -626,10 +619,9 @@ proteinDendColored <- shiny::callModule(IDBacApp::dendDotsServer,
 unifiedProteinColor <- reactive(dendextend::labels_colors(proteinDendrogram$dendrogram))
 
 
-# 
-# #Create the hierarchical clustering based upon the user input for distance method and clustering technique
-# PCoA Calculation
-#----
+#  PCoA Calculation -------------------------------------------------------
+
+
 pcoaResults <- reactive({
   # number of samples should be greater than k
   shiny::req(nrow(as.matrix(proteinDistance())) > 10)
@@ -637,9 +629,10 @@ pcoaResults <- reactive({
 })
 
 
-# output Plotly plot of PCoA results
-# PCoA Plot
-#----
+
+# PCoA Plot ---------------------------------------------------------------
+
+
 output$pcoaPlot <- plotly::renderPlotly({
   
   colorsToUse <- 
@@ -675,8 +668,10 @@ output$pcoaPlot <- plotly::renderPlotly({
       ))
 })
 
-# PCA Calculation      
-#----
+
+# PCA Calculation  --------------------------------------------------------
+
+
 callModule(IDBacApp::pca_Server,
            "proteinPCA",
            dataframe = proteinMatrix,
@@ -687,8 +682,8 @@ callModule(IDBacApp::pca_Server,
 
 
 
-# Calculate tSNE based on PCA calculation already performed
-#----
+# Calculate tSNE based on PCA calculation already performed ---------------
+
 tsneResults <- reactive({
   shiny::req(nrow(as.matrix(proteinMatrix())) > 15)
   
@@ -696,12 +691,14 @@ tsneResults <- reactive({
                             perplexity = input$tsnePerplexity,
                             theta = input$tsneTheta,
                             iterations = input$tsneIterations)
-  
+
 })
 
 
-# Output Plotly plot of tSNE results
-#----
+
+# Output Plotly plot of tSNE results --------------------------------------
+
+
 output$tsnePlot <- plotly::renderPlotly({
   
   colorsToUse <- dendextend::leaf_colors(coloredDend())
@@ -730,13 +727,12 @@ output$tsnePlot <- plotly::renderPlotly({
 
 
 
-
-
 # Protein Hierarchical clustering calculation and plotting ----------------
 
 
-# Create Heir ui
-#----
+
+# Create Protein Dendrogram UI --------------------------------------------
+
 output$Heirarchicalui <-  renderUI({
   
   if (is.null(input$Spectra1)) {
@@ -772,10 +768,10 @@ output$Heirarchicalui <-  renderUI({
 
 
 
-# UI of paragraph explaining which variables were used
 
-# Paragraph to relay info for reporting
-#----
+# Paragraph to relay info for reporting protein ---------------------------
+
+
 output$proteinReport <- renderUI(
   
   p("This dendrogram was created by analyzing ",tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
@@ -788,8 +784,7 @@ output$proteinReport <- renderUI(
 # Generate Rmarkdown report -----------------------------------------------
 
 
-# Markdown report generation and download
-#----
+
 output$downloadReport <- downloadHandler(
   filename = function() {
     paste('my-report', sep = '.', switch(
@@ -817,8 +812,10 @@ output$downloadReport <- downloadHandler(
 
 
 
-# Download svg of dendrogram
-#----
+
+# Download svg of dendrogram ----------------------------------------------
+
+
 output$downloadHeirSVG <- downloadHandler(
   filename = function(){paste0("Dendrogram.svg")
   },
@@ -873,8 +870,10 @@ output$downloadHeirSVG <- downloadHandler(
 )
 
 
-# Download dendrogram as Newick
-#----
+
+# Download dendrogram as Newick -------------------------------------------
+
+
 output$downloadHierarchical <- downloadHandler(
   
   filename = function() {
@@ -887,31 +886,11 @@ output$downloadHierarchical <- downloadHandler(
 
 
 
-
-
-    
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-
 # Small molecule data processing ------------------------------------------
 
 
-# This observe controls the generation and display of the
-# protein hierarchical clustering page
+# Display protien dend fro brushing for small mol -------------------------
 
-
-  
   smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend_Server,
                                       "manProtDend",
                                       dendrogram = proteinDendrogram,
@@ -924,18 +903,14 @@ output$downloadHierarchical <- downloadHandler(
   
   
 
+# Small mol PCA Calculation -----------------------------------------------
 
-
-
-# PCA Calculation      
-#----
 callModule(IDBacApp::pca_Server,
            "smallMolPcaPlot",
            dataframe = smallMolDataFrame,
            namedColors = function() NULL)
       
-      
-
+    
 subtractedMatrixBlank <- reactive({
   
   
@@ -955,6 +930,9 @@ subtractedMatrixBlank <- reactive({
 
 
 
+# Small mol MAN serve module ----------------------------------------------
+
+
 callModule(IDBacApp::MAN_Server,
           "smMAN",
           subtractedMatrixBlank = subtractedMatrixBlank)
@@ -962,6 +940,7 @@ callModule(IDBacApp::MAN_Server,
 
 
 
+# Small molecule data frame reactive --------------------------------------
 
 smallMolDataFrame <- reactive({
   
@@ -980,10 +959,8 @@ smallMolDataFrame <- reactive({
 
 
 
+# plotHeightHeirNetwork ---------------------------------------------------
 
-      
-      
-      # -----------------
       # User input changes the height of the heirarchical clustering plot within the network analysis pane
       plotHeightHeirNetwork <- reactive({
         return(as.numeric(input$hclustHeightNetwork))
@@ -991,10 +968,9 @@ smallMolDataFrame <- reactive({
       
      
     
-    # Suggested Reporting Paragraphs ------------------------------------------
-    
-      # Output a paragraph about which paramters were used to create the currently-displayed MAN
-      #----
+
+# Suggested Reporting Paragraphs for small molecule data ------------------
+
       output$manReport <- renderUI({
         p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,", if (input$matrixSamplePresent == 1) {("subtracting a matrix blank,") } else {},
           "and retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), " and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
@@ -1002,13 +978,12 @@ smallMolDataFrame <- reactive({
       })
       
       
+
+# Updating IDBac ----------------------------------------------------------
+
    
-      
-    
-    # Updating IDBac ----------------------------------------------------------
-    
       # Updating IDBac Functions
-      #----
+
       observeEvent(input$updateIDBac, 
                    ignoreInit = TRUE, {
         withConsoleRedirect <- function(containerId, expr) {
@@ -1216,21 +1191,12 @@ smallMolDataFrame <- reactive({
       })
       
     
-    # Old Database Stuff ------------------------------------------------------
-    
-      # Popup summarizing the final status of the conversion
-      popupDBCreation <- function(failed = FALSE){
-        modalDialog(
-          title = "Are you sure?",
-          p("There is already a database with this name."),
-          p(paste0("Pressing save below will append to the existing database: \"", isolate(input$newDatabaseName),"\"")),
-          footer = tagList(actionButton("saveNewDatabase", paste0("Append to: \"", isolate(input$newDatabaseName),"\"")), modalButton("Close"))
-        )}
+
       
-    
-      
-      
-      #--------------------------------------
+
+# Code to stop shiny/R when app is closed ---------------------------------
+
+
       
       
       
