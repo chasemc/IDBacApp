@@ -71,8 +71,11 @@ databaseTabUI <- function(id) {
                                                                                value = "experiment_metaData_tab",
                                                                        IDBacApp::updateMeta_UI(ns("updateMeta"))
                                                                                   
-                                                                      )
-                                                          ) 
+                                                                      ),
+                                                                      tabPanel("Experiment Summary",
+                                                                               value = "experiment_summary_tab",
+                                                                               IDBacApp::experimentSummary_UI(ns("experimentSummary"))
+                                                          ) )
                                  )
              )
            )
@@ -101,7 +104,9 @@ databaseTabServer <- function(input,
                             workingDirectory = workingDirectory)
 
   
-  
+  shiny::callModule(IDBacApp::experimentSummary_Server,
+                    "experimentSummary",
+                    pool = selectedDB$userDBCon)
   
   
   

@@ -120,7 +120,7 @@ observeEvent(workingDB$move$selectExperiment,
                          
                )
                
-               pool <- pool::poolCheckout(workingDB$pool())
+               pool <<- pool::poolCheckout(workingDB$pool())
              p <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE proteinPeaks IS NOT NULL")[,1]
              s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaks IS NOT NULL")[,1]
              pool::poolReturn(pool)
