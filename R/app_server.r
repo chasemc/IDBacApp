@@ -104,29 +104,49 @@ workingDB <- callModule(IDBacApp::databaseTabServer,
 
 # Trigger add tabs --------------------------------------------------------
 observeEvent(workingDB$move$selectExperiment,
-             once = T,
              ignoreInit = TRUE, {
-
-               print("go2")
-
-
+               removeTab(inputId = "mainIDBacNav",
+                         target = "inversePeaks"
+                         
+                       
+               )
+               removeTab(inputId = "mainIDBacNav",
+                         target = "Hierarchical Clustering (Protein)"
+               )
+                         
+               
+               removeTab(inputId = "mainIDBacNav",
+                         target = "Metabolite Association Network (Small-Molecule)"
+                         
+               )
+               
+               pool <- pool::poolCheckout(workingDB$pool())
+             p <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE proteinPeaks IS NOT NULL")[,1]
+             s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaks IS NOT NULL")[,1]
+             pool::poolReturn(pool)
+              if (p > 0) {
+               
                appendTab(inputId = "mainIDBacNav",
                          tabPanel("Compare Two Samples (Protein)",
                                   value = "inversePeaks",
                                   uiOutput("inversepeakui")
                          )
                )
+               
+               
                appendTab(inputId = "mainIDBacNav",
                          tabPanel("Hierarchical Clustering (Protein)",
                                   uiOutput("Heirarchicalui")
                          )
                )
+              }
+             if (s > 0){
                appendTab(inputId = "mainIDBacNav",
                          tabPanel("Metabolite Association Network (Small-Molecule)",
                                   IDBacApp::ui_smallMolMan()
                          )
                )
-
+             }
 
                })
 
