@@ -110,10 +110,10 @@ databaseTabServer <- function(input,
   
   
   
-# Update Metadata ---------------------------------------------------------
-
-
-
+  # Update Metadata ---------------------------------------------------------
+  
+  
+  
   callModule(IDBacApp::updateMeta_server,
              "updateMeta",
              pool = selectedDB$userDBCon,
@@ -129,7 +129,7 @@ databaseTabServer <- function(input,
              selectedDB  = selectedDB$inputs,
              availableExperiments = availableExperiments)
   
-
+  
   
   
   
@@ -149,7 +149,7 @@ databaseTabServer <- function(input,
   
   
   
-
+  
   #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
   #----
   observe({
@@ -266,7 +266,7 @@ databaseTabServer <- function(input,
   
   return(list(pool = selectedDB$userDBCon,
               move = selectedDB$inputs)
-              )
+  )
   
 }
 

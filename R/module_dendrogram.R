@@ -403,7 +403,7 @@ dendDotsServer <- function(input,
       } else {
         
         trimdLabsDend <- dendrogram$dendrogram
-        trimdLabsDend <- strtrim(labels(trimdLabsDend), 20)
+        labels(trimdLabsDend) <- strtrim(labels(trimdLabsDend), 20)
         IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
                               trimdLabsDend = trimdLabsDend,
                               pool = pool(),

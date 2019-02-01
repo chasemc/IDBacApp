@@ -15,7 +15,7 @@
 #' @examples NA
 runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, text_shift) {
   
-  conn <- pool::poolCheckout(pool())
+  conn <- pool::poolCheckout(pool)
   dendLabs <- labels(rawDendrogram)
   
   
@@ -40,11 +40,11 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, te
       selectedMeta[,i][which(selectedMeta[, i] == TRUE)] <- colors[[i]]
     }
     
-        selectedMeta[selectedMeta == FALSE] <- "#00000000" 
-
-   
+    selectedMeta[selectedMeta == FALSE] <- "#00000000" 
+    
+    
     colnames(selectedMeta) <- uniq
-
+    
     IDBacApp::colored_dots(selectedMeta,
                            trimdLabsDend,
                            horiz = T,
