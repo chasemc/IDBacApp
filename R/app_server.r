@@ -595,7 +595,7 @@ chosenProteinSampleIDs <-  shiny::callModule(IDBacApp::sampleChooser_server,
 
 proteinMatrix <- reactive({
   req(input$lowerMass, input$upperMass)
-  pm <- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
+  pm <<- IDBacApp::peakBinner(peakList = collapsedPeaksP(),
                              ppm = 2000,
                              massStart = input$lowerMass,
                              massEnd = input$upperMass)

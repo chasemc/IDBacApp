@@ -65,12 +65,15 @@ dendrogramCreator <- function(input,
     
     req(nrow(proteinMatrix() > 1))
     
-    dend <- IDBacApp::distMatrix(data = proteinMatrix(),
-                                                 method = input$distanceMethod,
-                                                 booled = input$booled)
+    dend <- proteinMatrix()[rowSums(is.na(proteinMatrix())) > 0, ]
+    
+    
+    dend <- IDBacApp::distMatrix(data = dend,
+                                 method = input$distanceMethod,
+                                 booled = input$booled)
     
     dend <- stats::hclust(dend,
-                                          method = input$clustering)
+                          method = input$clustering)
     dend <- stats::as.dendrogram(dend)
     
     

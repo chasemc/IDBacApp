@@ -17,7 +17,7 @@ distMatrix <- function(data,
   data[base::is.null(data)] <- 0
   
   if(booled == "TRUE"){
-    data[data > 1] <- 1
+    data[data > 0] <- 1
   }
   
   if(method == "cosine"){
