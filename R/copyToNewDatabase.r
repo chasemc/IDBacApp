@@ -11,7 +11,9 @@
 copyToNewDatabase <- function(existingDBPool,
                               newdbPath, 
                               sampleIDs){
-  
+  existingDBPool<<-existingDBPool
+  newdbPath <<- newdbPath
+  sampleIDs <<- sampleIDs
   # Run everything with a Shiny progress bar  
   shiny::withProgress(message = 'Copying data to new database',
                       detail = 'Connecting experiments...',
@@ -27,19 +29,13 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         existingDBconnection <- pool::poolCheckout(existingDBPool)
                         newDBconnection <- pool::poolCheckout(newDBPool)
-              warning(paste0("Begin migration of \n",
-                             existingDBconnection@dbname,
-                             " to \n", newDBconnection@dbname))
-            
                         
-                        metaColumns <- base::colnames(DBI::dbGetQuery(conn = existingDBconnection,
-                                                                      "SELECT * FROM metaData", 
-                                                                      n = 1))
-                        df <- data.frame(matrix(ncol = length(metaColumns), nrow = 0))
-                        colnames(df) <- metaColumns
-                        metaColumns <- df
-                        remove(df)
+                        warning(paste0("Begin migration of \n",
+                                       existingDBconnection@dbname,
+                                       " to \n", newDBconnection@dbname))
                         
+                        
+                     
                         # Attach new database to existing database
                         #----
                         sqlQ <- glue::glue_sql("attach database ({dbPath*}) as newDB;",
@@ -59,29 +55,60 @@ copyToNewDatabase <- function(existingDBPool,
                         # Create sqlite tables in new database
                         #-----
                         # Get IDBac database table structures
-                        a <- IDBacApp::sqlTableArchitecture(1)
+                        arch <- IDBacApp::sqlTableArchitecture(1)
                         
+                        
+
+# Account for modifications to DB structure -------------------------------
+
+
+                         # Below, when setting up the new tables, we need to add the existing columns which may not be present in 
+                        # the current architecture, and also have the current architecture (ie we can't just copy/paste from the old DB)
+                        
+
+                        # Setup New metaData ------------------------------------------------------
+                        a <- DBI::dbListFields(existingDBconnection, "metaData") 
+                        colToAppend <- a[which(! a %in% colnames(arch$metaData))]                        
+                        if(length(colToAppend) > 0){
+                        colToAppend <- setNames(rep(NA, length(colToAppend)), colToAppend)
+                        arch$metaData <- cbind(arch$metaData, colToAppend)
+                        }
                         #Write table structures to database
                         DBI::dbWriteTable(conn = newDBconnection,
                                           name = "metaData", # SQLite table to insert into
-                                          metaColumns, # Insert single row into DB
+                                          arch$metaData, # Insert single row into DB
                                           append = TRUE, # Append to existing table
                                           overwrite = FALSE) # Do not overwrite
                         
+                        # Setup New XML -----------------------------------------------------------
+                        
+                        a <- DBI::dbListFields(existingDBconnection, "XML") 
+                        colToAppend <- a[which(! a %in% colnames(arch$XML))]                        
+                        if(length(colToAppend) > 0){
+                          colToAppend <- setNames(rep(NA, length(colToAppend)), colToAppend)
+                          arch$XML <- cbind(arch$XML, colToAppend)
+                        }
                         DBI::dbWriteTable(conn = newDBconnection,
                                           name = "XML", # SQLite table to insert into
-                                          a$XML, # Insert single row into DB
+                                          arch$XML, # Insert single row into DB
                                           append = TRUE, # Append to existing table
                                           overwrite = FALSE) # Do not overwrite
                         
+                        # Setup New IndividualSpectra ---------------------------------------------
+                        
+                        a <- DBI::dbListFields(existingDBconnection, "IndividualSpectra") 
+                        colToAppend <- a[which(! a %in% colnames(arch$IndividualSpectra))]                        
+                        if(length(colToAppend) > 0){
+                          colToAppend <- setNames(rep(NA, length(colToAppend)), colToAppend)
+                          arch$IndividualSpectra <- cbind(arch$IndividualSpectra, colToAppend)
+                        }
                         DBI::dbWriteTable(conn = newDBconnection,
                                           name = "IndividualSpectra", # SQLite table to insert into
-                                          a$IndividualSpectra, # Insert single row into DB
+                                          arch$IndividualSpectra, # Insert single row into DB
                                           append = TRUE, # Append to existing table
                                           overwrite = FALSE) # Do not overwrite
                         
-                        # Copy over the data corresponding to the samples selected
-                        #-----
+                        # Copy over the data corresponding to the samples selected ----------------
                         
                         Sys.sleep(1) 
                         setProgress(value = 0.5, 
@@ -142,24 +169,24 @@ copyToNewDatabase <- function(existingDBPool,
                         warning(newdbshas1@sql)
                         newdbshas <- DBI::dbFetch(newdbshas1)[ , 1]
                         DBI::dbClearResult(newdbshas1) 
-                        newdbshas <- olddbshas[!olddbshas %in% newdbshas]
                         
+                        
+                        
+                        newdbshas <- olddbshas[!olddbshas %in% newdbshas]
+                        a <- DBI::dbListFields(existingDBconnection, "IndividualSpectra")
                         if(length(newdbshas) > 0){
-                          
-                          sqlQ <- glue::glue_sql("INSERT INTO newDB.IndividualSpectra
-                                                 SELECT * 
-                                                 FROM `IndividualSpectra`
-                                                 WHERE (`spectrumSHA` IN ({spectrumSHAs*}))",
-                                                 spectrumSHAs = newdbshas,
-                                                 .con = existingDBconnection
-                          )
-                          
+                          sqlQ <- glue::glue_sql("INSERT INTO newDB.IndividualSpectra ({`a`*})
+                                                 SELECT {`a`*}
+                                                 FROM IndividualSpectra
+                                                 WHERE (`spectrumSHA` = ?)",
+                                                 .con = existingDBconnection)
                           temp <- DBI::dbSendStatement(existingDBconnection, sqlQ)
-                          warning(temp@sql)
+                          rw <- DBI::dbBind(temp, list(newdbshas))
+                          
+                          warning(rw@sql)
                           DBI::dbClearResult(temp)
                         }
-                        
-                        
+
                         setProgress(value = 0.8, 
                                     message = 'Copying data to new database',
                                     detail = 'Copying mzML files...',
@@ -241,15 +268,15 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(temp)
                         
                         
-                       pool::poolReturn(existingDBconnection)
-                       pool::poolReturn(newDBconnection)
-                       pool::poolClose(newDBPool)
+                        pool::poolReturn(existingDBconnection)
+                        pool::poolReturn(newDBconnection)
+                        pool::poolClose(newDBPool)
                         
                         
                         shiny::setProgress(value = 0.9, 
-                                    message = 'Copying data to new database',
-                                    detail = 'Finishing...',
-                                    session = getDefaultReactiveDomain())
+                                           message = 'Copying data to new database',
+                                           detail = 'Finishing...',
+                                           session = getDefaultReactiveDomain())
                         
                         Sys.sleep(1)
                         warning(paste0("End migration of \n",
