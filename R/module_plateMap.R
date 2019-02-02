@@ -49,9 +49,7 @@ platemod <- function(input,
 
 
  observeEvent(input$save, {
-   print("s")
    aq <- rhandsontable::hot_to_r(input$plateDefault)
-   print(aq)
   })
       
 return(reactive(qwerty$rtab))

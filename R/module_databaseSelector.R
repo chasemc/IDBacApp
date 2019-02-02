@@ -63,10 +63,8 @@ databaseSelector_server <- function(input,
    userDBCon <- reactive({
     
     req(!is.null(input$selectExperiment))
-    print(input$selectExperiment)
     validate(need(length(input$selectExperiment) == length(workingDirectory), 
                   "databaseTabServer: userDBCon, createPool inputs are different lengths."))
-    print("hello")
     IDBacApp::createPool(fileName = input$selectExperiment,
                          filePath = workingDirectory)[[1]]
     
