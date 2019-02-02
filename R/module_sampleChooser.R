@@ -32,30 +32,30 @@ sampleChooser_server <- function(input,
                                  session,
                                  pool,
                                  whetherProtein = FALSE,
-                                 allSamples = FALSE,
-                                 selectedDB){
-  nams <- reactiveValues()
+                                 allSamples = FALSE){
+  
+  chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
+  nams <- reactiveValues(av = NULL)
+  
+  observe({
+    
+    chosenProteinSampleIDs$chosen <- NULL
+    
+  })
 
-  observeEvent(selectedDB$selectExperiment, {
+  
+  output$chooseSamples <- renderUI({
     req(class(pool())[[1]] == "Pool")
     conn <- pool::poolCheckout(pool())
     
-    nams$av <- IDBacApp::availableSampleNames(checkedPool = conn,
+    nams <- IDBacApp::availableSampleNames(checkedPool = conn,
                                               whetherProtein = whetherProtein,
                                               allSamples = allSamples)
     pool::poolReturn(conn)
-    
-    
-  })
-  
-  
-  
-  output$chooseSamples <- renderUI({
-    
-     tagList(IDBacApp::chooserInput(inputId = session$ns("addSampleChooser"),
+    tagList(IDBacApp::chooserInput(inputId = session$ns("addSampleChooser"),
                                    leftLabel = "Available samples",
                                    rightLabel = "Selected samples",
-                                   leftChoices = nams$av,
+                                   leftChoices = nams,
                                    rightChoices = c(),
                                    size = 10,
                                    multiple = TRUE)

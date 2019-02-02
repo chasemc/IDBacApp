@@ -527,25 +527,20 @@ app_server <- function(input, output, session) {
   
   
   # User chooses which samples to include -----------------------------------
-  
-  chosenProteinSampleIDs <-  shiny::callModule(IDBacApp::sampleChooser_server,
-                                               "proteinSampleChooser",
-                                               pool = workingDB$pool,
-                                               allSamples = FALSE,
-                                               whetherProtein = TRUE,
-                                               selectedDB = workingDB$move)
+  chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
+  observe({
+  chosenProteinSampleIDs$chosen <- shiny::callModule(IDBacApp::sampleChooser_server,
+                                                     "proteinSampleChooser",
+                                                     pool = workingDB$pool,
+                                                     allSamples = FALSE,
+                                                     whetherProtein = TRUE)$addSampleChooser$right
+})
   
   
   # Collapse peaks ----------------------------------------------------------
   collapsedPeaksForDend <- reactive({
-    
-    
-    
-    right <<- chosenProteinSampleIDs
-    
-    right <- right$addSampleChooser$right
-    
-    req(length(right) > 1)
+    req(!is.null(chosenProteinSampleIDs$chosen))
+    req(length(chosenProteinSampleIDs$chosen) > 0)
     req(workingDB$pool())
     # For each sample:
     # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
@@ -553,9 +548,8 @@ app_server <- function(input, output, session) {
     # trim m/z based on user input
     # connect to sql
     conn <- pool::poolCheckout(workingDB$pool())
-    print(conn@dbname)
     
-    temp <- lapply(right,
+    temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
                      IDBacApp::collapseReplicates(checkedPool = conn,
                                                   sampleIDs = ids,
@@ -568,7 +562,7 @@ app_server <- function(input, output, session) {
                    })
     
     
-    names(temp) <- chosenProteinSampleIDs$addSampleChooser$right
+    names(temp) <- chosenProteinSampleIDs$chosen
     pool::poolReturn(conn)
     
     
@@ -594,8 +588,14 @@ app_server <- function(input, output, session) {
     do.call(rbind, pm)
   })
   
-  
   proteinDendrogram <- reactiveValues(dendrogram  = NULL)
+  
+  
+  observeEvent(workingDB$move$selectExperiment, {
+    proteinDendrogram$dendrogram <- NULL
+    
+      })
+  
   
   observe({
     proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,

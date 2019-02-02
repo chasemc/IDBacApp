@@ -50,7 +50,6 @@ convertDataTabServer <- function(input,
                ignoreInit = TRUE, 
                {
                  ns <- session$ns
-                 print(input$typeOfRawData)
                  
                  if (input$ConversionsNav == ns("convert_bruker_nav")) {
                    

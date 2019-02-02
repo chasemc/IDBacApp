@@ -48,8 +48,7 @@ transferToNewDB_server <- function(input,
                                       "chooseNewDBSamples",
                                       pool = pool,
                                       allSamples = TRUE,
-                                      whetherProtein = FALSE,
-                                      selectedDB = selectedDB)
+                                      whetherProtein = FALSE)
   
   
   
