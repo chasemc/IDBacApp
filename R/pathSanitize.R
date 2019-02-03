@@ -11,8 +11,10 @@
 #'   `COM3`, COM4, `COM5`, `COM6`, `COM7`, `COM8`, `COM9`, `LPT1`, `LPT2`,
 #'   `LPT3`, `LPT4`, `LPT5`, `LPT6`, LPT7, `LPT8`, and `LPT9`)
 #' The resulting string is then truncated to [255 bytes in length](https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits)
+#'
 #' @param filename A character vector to be sanitized.
 #' @param replacement A character vector used to replace invalid characters.
+#'
 #' @seealso <https://www.npmjs.com/package/sanitize-filename>, upon which this
 #'   function is based.
 #' @export

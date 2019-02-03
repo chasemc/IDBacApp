@@ -7,7 +7,7 @@
 getOS()
 }
 \value{
-NA
+text representing the user's os
 }
 \description{
 Get OS

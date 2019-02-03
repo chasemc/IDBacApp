@@ -10,72 +10,61 @@
 #' @export
 #'
 #' @examples NA
-parseDelimitedMS <- function(sampleNames = NULL,
-                             proteinDirectory = NULL,
-                             smallMolDirectory = NULL,
+parseDelimitedMS <- function(proteinPaths,
+                             proteinNames,
+                             smallMolPaths,
+                             smallMolNames,
                              exportDirectory,
                              centroid){
   
-  
-req((is.null(proteinDirectory) + is.null(smallMolDirectory)) > 0)
-  
-  dd<<-centroid
-  if (is.null(smallMolDirectory)) {
-    smallMolFiles <- NULL
-  } else {
-    smallMolFiles <- list.files(smallMolDirectory, full.names = TRUE)
-    sampleNameSM <- tools::file_path_sans_ext(basename(smallMolFiles))
-    sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-")[[1]][[1]]))
-    smallMolFiles <- base::split(smallMolFiles, sampleNameSM)
-    smallMolFiles <- lapply(smallMolFiles, function(x) MALDIquantForeign::import(x, centroided = as.logical(centroid)))
-    
-  }
-  
-  if (is.null(proteinDirectory)) {
-    proteinFiles <- NULL
-  } else {
-    proteinFiles <- list.files(proteinDirectory, full.names = TRUE)
-    sampleNameP <- tools::file_path_sans_ext(basename(proteinFiles))
-    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
-    proteinFiles <- base::split(proteinFiles, sampleNameP)
-    proteinFiles <- lapply(proteinFiles, function(x) MALDIquantForeign::import(x, centroided = as.logical(centroid)))
-    
-  }
+  req(length(proteinPaths) == length(proteinNames))
+  req(length(smallMolPaths) == length(smallMolNames))
   
   
+  IDBacApp::popup3()
   
-  keys <- unique(labels(c(proteinFiles, smallMolFiles)))
+  combPaths <- c(proteinPaths,
+                 smallMolPaths)
+  
+  #lapply in case someone provides different file types at same time -_-
+  importedFiles <- unlist(lapply(combPaths, 
+                             function(x) 
+                               MALDIquantForeign::import(x,
+                                                         centroided = as.logical(centroid))))
+
+  combNames <- c(proteinNames, 
+                 smallMolNames)
+  
+  mzFilePaths <- file.path(exportDirectory,
+                          paste0(combNames,
+                                 ".mzML"))
+  
+  mzFilePaths <- normalizePath(mzFilePaths, 
+                             mustWork = FALSE)
+  
+  key <- base::split(importedFiles, mzFilePaths)
   
   
-  
-  lengthProgress <- length(keys)
+  lengthProgress <- length(key)
   count <- 0
   
   withProgress(message = 'Conversion in progress',
                detail = 'This may take a while...', value = 0, {
                  
                  
-                 for (i in keys) {
+                 for (i in seq_along(key)) {
                    incProgress(1/lengthProgress)
                    
-                   toMerge <- unlist(c(proteinFiles[i],
-                                       smallMolFiles[i]))
                    
-                   mzmlPath <- normalizePath(file.path(exportDirectory,
-                                                       paste0(i,
-                                                              ".mzML")),
-                                             mustWork = FALSE)
-                   
-                   MALDIquantForeign::exportMzMl(as.list(toMerge),
-                                                 mzmlPath,
+                   MALDIquantForeign::exportMzMl(x = as.list(key[[i]]),
+                                                 path = names(key)[[i]],
                                                  force = TRUE)
-                   
                    
                  }
                  
                  
                })
-  
-  return(keys)
+  return(list(mzFilePaths = mzFilePaths,
+              sampleIds = combNames))
   
 }

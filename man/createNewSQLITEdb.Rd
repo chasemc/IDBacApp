@@ -4,10 +4,15 @@
 \alias{createNewSQLITEdb}
 \title{Create New, Empty SQLite Database}
 \usage{
-createNewSQLITEdb(newExperimentName)
+createNewSQLITEdb(newExperimentName, sqlDirectory)
 }
 \arguments{
-\item{newExperimentName}{}
+\item{newExperimentName}{name for the sqlite DB}
+
+\item{sqlDirectory}{directory to which the sqlite DB will be written into}
+}
+\value{
+pool connection
 }
 \description{
 Create New, Empty SQLite Database
