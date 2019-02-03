@@ -4,39 +4,41 @@
 #' @param proteinDirectory NA
 #' @param smallMolDirectory NA
 #' @param exportDirectory NA
+#' @param sampleNames sample names if provided (not used yet)
 #'
 #' @return NA
 #' @export
 #'
 #' @examples NA
-parseDelimitedMS <- function(proteinDirectory = NULL,
+parseDelimitedMS <- function(sampleNames = NULL,
+                             proteinDirectory = NULL,
                              smallMolDirectory = NULL,
-                             exportDirectory){
+                             exportDirectory,
+                             centroid){
   
   
-  if(is.null(proteinDirectory) & is.null(smallMolDirectory)){
-    stop("No delimited file directories provided")
-  }
+req((is.null(proteinDirectory) + is.null(smallMolDirectory)) > 0)
   
-  
-  if(is.null(smallMolDirectory)){
+  dd<<-centroid
+  if (is.null(smallMolDirectory)) {
     smallMolFiles <- NULL
-  }else{
+  } else {
     smallMolFiles <- list.files(smallMolDirectory, full.names = TRUE)
     sampleNameSM <- tools::file_path_sans_ext(basename(smallMolFiles))
     sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-")[[1]][[1]]))
     smallMolFiles <- base::split(smallMolFiles, sampleNameSM)
-    smallMolFiles <- lapply(smallMolFiles, MALDIquantForeign::import)
+    smallMolFiles <- lapply(smallMolFiles, function(x) MALDIquantForeign::import(x, centroided = as.logical(centroid)))
     
   }
-  if(is.null(proteinDirectory)){
+  
+  if (is.null(proteinDirectory)) {
     proteinFiles <- NULL
-  }else{
+  } else {
     proteinFiles <- list.files(proteinDirectory, full.names = TRUE)
     sampleNameP <- tools::file_path_sans_ext(basename(proteinFiles))
     sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
     proteinFiles <- base::split(proteinFiles, sampleNameP)
-    proteinFiles <- lapply(proteinFiles, MALDIquantForeign::import)
+    proteinFiles <- lapply(proteinFiles, function(x) MALDIquantForeign::import(x, centroided = as.logical(centroid)))
     
   }
   
@@ -53,7 +55,7 @@ parseDelimitedMS <- function(proteinDirectory = NULL,
                detail = 'This may take a while...', value = 0, {
                  
                  
-                 for(i in keys){
+                 for (i in keys) {
                    incProgress(1/lengthProgress)
                    
                    toMerge <- unlist(c(proteinFiles[i],
@@ -65,7 +67,8 @@ parseDelimitedMS <- function(proteinDirectory = NULL,
                                              mustWork = FALSE)
                    
                    MALDIquantForeign::exportMzMl(as.list(toMerge),
-                                                 mzmlPath)
+                                                 mzmlPath,
+                                                 force = TRUE)
                    
                    
                  }
@@ -73,6 +76,6 @@ parseDelimitedMS <- function(proteinDirectory = NULL,
                  
                })
   
-  
+  return(keys)
   
 }

@@ -34,7 +34,7 @@ convertDataTab_UI <- function(id) {
                         value = ns("convert_txt_nav"),
                         wellPanel(class = "intro_WellPanel",
                                   align = "center",
-                          uiOutput(ns("conversionMainUI3"))
+                                  IDBacApp::convertDelim_UI(ns("convertDelim"))
                         )
                )
   )
@@ -63,28 +63,15 @@ convertDataTab_Server <- function(input,
   
   
   
+  shiny::callModule(convertDelim_Server,
+                    "convertDelim",
+                    tempMZDir,
+                    sqlDirectory)
   
   
   
   
-  
-  
-  # Run raw data processing on delimited-type input files
-  #----
-  observeEvent(input$runDelim, 
-               ignoreInit = TRUE, {
-                 
-                 popup1()
-                 
-                 IDBacApp::parseDelimitedMS(proteinDirectory = delimitedLocationP(),
-                                            smallMolDirectory = delimitedLocationSM(),
-                                            exportDirectory =  tempdir())
-                 popup2()
-               })
-  
-  
-  
-} 
+}
   
 
 
@@ -166,31 +153,6 @@ multipleMaldiPlates <- function(id){
   )
 }
 
-
-#' beginWithTXT
-#'
-#' @param id NA
-#'
-#' @return NA
-#' @export
-#'
-#' @examples NA
-beginWithTXT <- function(id){
-  ns <- NS(id)
-  fluidRow(
-    p(".txt and .csv support coming soon!"),
-    actionButton(ns("delimitedDirectoryP"),
-                 label = "Raw Data P Folder"),
-    actionButton(ns("delimitedDirectorySM"),
-                 label = "Raw Data SM Folder"),
-    actionButton(ns("runDelim"),
-                 label = "Process Data"),
-    verbatimTextOutput(ns("delimitedLocationPo"),
-                       placeholder = TRUE),
-    verbatimTextOutput(ns("delimitedLocationSMo"),
-                       placeholder = TRUE)
-  )
-}
 
 
 

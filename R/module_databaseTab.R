@@ -146,68 +146,9 @@ databaseTabServer <- function(input,
   
   
   
-  #This "observe" event creates the UI element for analyzing a single MALDI plate, based on user-input.
-  #----
-  observe({
-    if (is.null(input$startingWith)) { } else if (input$startingWith == 3) {
-      output$mzConversionUI <- renderUI({
-        IDBacApp::beginWithMZ("beginWithMZ")
-      })
-    }
-  })
   
   
 
-  
-  
-  
-  # Reactive variable returning the user-chosen location of the raw delim files as string
-  #----
-  delimitedLocationP <- reactive({
-    if (input$delimitedDirectoryP > 0) {
-      IDBacApp::choose_dir()
-    }
-  })
-  
-  
-  # Reactive variable returning the user-chosen location of the raw delim files as string
-  #----
-  delimitedLocationSM <- reactive({
-    if (input$delimitedDirectorySM > 0) {
-      IDBacApp::choose_dir()
-    }
-  })
-  
-  
-  # Creates text showing the user which directory they chose for raw files
-  #----
-  output$delimitedLocationSMo <- renderText({
-    if (is.null(delimitedLocationSM())) {
-      return("No Folder Selected")} else {
-        folders <- NULL
-        foldersInFolder <- list.files(delimitedLocationSM(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
-        for (i in 1:length(foldersInFolder)) {
-          folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-        }
-        folders
-      }
-  })
-  
-  
-  # Creates text showing the user which directory they chose for raw files
-  #----
-  output$delimitedLocationPo <- renderText({
-    if (is.null(delimitedLocationP())) {
-      return("No Folder Selected")} else {
-        folders <- NULL
-        foldersInFolder <- list.files(delimitedLocationP(), recursive = FALSE, full.names = FALSE) # Get the folders contained directly within the chosen folder.
-        for (i in 1:length(foldersInFolder)) {
-          folders <- paste0(folders, "\n", foldersInFolder[[i]]) # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-        }
-        folders
-      }
-  })
-  
   
   
   
