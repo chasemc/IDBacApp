@@ -46,22 +46,23 @@ createPool <- function(fileName,
 #----
 #' Create New, Empty SQLite Database
 #'
-#' @param newExperimentName 
+#' @param newExperimentName name for the sqlite DB
+#' @param sqlDirectory directory to which the sqlite DB will be written into
 #'
-#' @return
+#' @return pool connection
 #' @export
 #'
 #' @examples
-createNewSQLITEdb <- function(newExperimentName){
+createNewSQLITEdb <- function(newExperimentName,
+                              sqlDirectory){
   # This pool is used when creating an entirely new "experiment" .sqlite db
-  name <- base::make.names(newExperimentName)
+  name <- IDBacApp::path_sanitize(newExperimentName)
+  name <- gsub(" ", "", name)
   
   # max 50 character file length
   name <-  base::substr(name, 1, 50)
   
-  conn <- pool::dbPool(drv = RSQLite::SQLite(),
-               dbname = paste0(name, ".sqlite"))
-  
-  pool::poolCheckout(conn)
-  
+  pool <- IDBacApp::createPool(name,
+                               sqlDirectory)
+  return(pool)
 }

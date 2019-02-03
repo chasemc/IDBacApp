@@ -30,18 +30,19 @@ convertMZ_UI <- function(id){
     p("Samples will be named according to the file name of the provided files"),
     br(),
     p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
-    actionButton(ns("run"),
+    actionButton(ns("runMsconvert"),
                  label = "Process Data"),
     tags$hr(size = 20)
   )
   
-
+  
 }
 
 
 convertMZ_Server <-  function(input,
                               output,
-                              session){
+                              session,
+                              sqlDirectory){
   
   
   
@@ -53,7 +54,6 @@ convertMZ_Server <-  function(input,
     }
   })
   
-  
   # Creates text showing the user which directory they chose for raw files
   #----
   output$mzmlRawFileDirectorytext <- renderText({
@@ -62,19 +62,13 @@ convertMZ_Server <-  function(input,
     } else {
       folders <- NULL
       
-      findmz <- function(){
-        # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
-        return(list.files(mzmlRawFilesLocation(),
-                          recursive = TRUE,
-                          full.names = FALSE,
-                          pattern = "\\.mz"))
-        setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-        
-      }
+     
       
       
       # Get the folders contained within the chosen folder.
-      foldersInFolder <- tryCatch(findmz(),
+      foldersInFolder <- tryCatch(IDBacApp::findmz(mzmlRawFilesLocation(),
+                                                   recursive = TRUE,
+                                                   full = FALSE),
                                   error = function(x) paste("Timed out"),
                                   finally = function(x) x)
       
@@ -92,12 +86,25 @@ convertMZ_Server <-  function(input,
                return(folders)
              }}
     
+    
+  })
   
-    })
-  
-  
-  
-  return(input)  
+  observeEvent(input$runMsconvert, {
+    IDBacApp::popup3()
+    
+    mzFilePaths <- IDBacApp::findmz(mzmlRawFilesLocation(),
+                                    recursive = TRUE,
+                                    full = TRUE)
+    
+    
+    IDBacApp::processMZML(mzFilePaths = mzFilePaths,
+                          sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
+                          sqlDirectory = sqlDirectory,
+                          newExperimentName = input$newExperimentName)
+      
+      
+
+    IDBacApp::popup4() 
+  })
   
 }
-  

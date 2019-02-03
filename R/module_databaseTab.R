@@ -89,7 +89,7 @@ databaseTabUI <- function(id) {
 databaseTabServer <- function(input,
                               output,
                               session,
-                              workingDirectory,
+                              sqlDirectory,
                               availableExperiments){
   
   #outputs reactive inputs, access via $
@@ -97,7 +97,7 @@ databaseTabServer <- function(input,
                             "databaseSelector",
                             h3Label = "First, select an experiment:",
                             availableExperiments = availableExperiments,
-                            workingDirectory = workingDirectory)
+                            sqlDirectory = sqlDirectory)
 
   
   shiny::callModule(IDBacApp::experimentSummary_Server,
@@ -121,7 +121,7 @@ databaseTabServer <- function(input,
   callModule(IDBacApp::transferToNewDB_server,
              "transferToNewDB",
              pool = selectedDB$userDBCon,
-             workingDirectory = workingDirectory,
+             sqlDirectory = sqlDirectory,
              selectedDB  = selectedDB$inputs,
              availableExperiments = availableExperiments)
   

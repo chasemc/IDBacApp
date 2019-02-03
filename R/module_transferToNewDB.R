@@ -39,7 +39,7 @@ transferToNewDB_server <- function(input,
                                    output,
                                    session,
                                    pool,
-                                   workingDirectory,
+                                   sqlDirectory,
                                    selectedDB,
                                    availableExperiments){
   
@@ -71,14 +71,14 @@ transferToNewDB_server <- function(input,
   observeEvent(input$addtoNewDB, {
     copyingDbPopup()
     
-    newdbPath <- file.path(workingDirectory, paste0(input$nameformixNmatch, ".sqlite"))
+    newdbPath <- file.path(sqlDirectory, paste0(input$nameformixNmatch, ".sqlite"))
     copyToNewDatabase(existingDBPool = pool(),
                       newdbPath = newdbPath, 
                       sampleIDs = chosenSamples$addSampleChooser$right)
     
     
     removeModal()
-    availableExperiments$db <- tools::file_path_sans_ext(list.files(workingDirectory,
+    availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory,
                                                                     pattern = ".sqlite",
                                                                     full.names = FALSE))
   })

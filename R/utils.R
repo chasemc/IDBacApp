@@ -111,17 +111,18 @@ createMZsha <- function(peaklist){
 
 #' Get OS
 #'
-#' @return NA
+#' @return text representing the user's os
 #' @export
 #'
 #' @examples NA
 getOS <- function(){
   sysinf <- Sys.info()
-  if (!is.null(sysinf)){
+  if (!is.null(sysinf)) {
     os <- sysinf['sysname']
     if (os == 'Darwin')
       os <- "osx"
-  } else { ## mystery machine
+  } else { 
+    ## mystery machine
     os <- .Platform$OS.type
     if (grepl("^darwin", R.version$os))
       os <- "osx"
@@ -129,4 +130,27 @@ getOS <- function(){
       os <- "linux"
   }
   return(as.character(tolower(os)))
-  }
+}
+
+
+
+#' Find mzML and mzXML files
+#'
+#' @param recursive search directories recursively? T/F
+#' @param full full.names? T/F
+#' @param inputPath path to search
+#'
+#' @return file paths of found files
+#' @export
+#'
+findmz <- function(inputPath,
+                   recursive = FALSE,
+                   full = FALSE){
+  # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
+  return(list.files(inputPath,
+                    recursive = recursive,
+                    full.names = full,
+                    pattern = "\\.mz"))
+  setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+  
+}

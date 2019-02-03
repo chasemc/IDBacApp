@@ -1,4 +1,4 @@
-convertDataTabUI <- function(id) {
+convertDataTab_UI <- function(id) {
   ns <- shiny::NS(id)
   
   
@@ -42,16 +42,17 @@ convertDataTabUI <- function(id) {
 
 
 
-convertDataTabServer <- function(input,
+convertDataTab_Server <- function(input,
                                  output,
                                  session,
-                                 tempMZDir){
-  
+                                 tempMZDir,
+                                 sqlDirectory){
   
   
   
   convertMZinputs <- shiny::callModule(convertMZ_Server,
-                                       session$ns("beginWithMZ"))
+                                       "beginWithMZ",
+                                       sqlDirectory = sqlDirectory)
   
 
   convertOneBrukerInputs <- shiny::callModule(convertOneBruker_Server,
@@ -144,14 +145,10 @@ convertDataTabServer <- function(input,
   
   
   
-  
-  
-  
   # Call the Spectra processing function when the spectra processing button is pressed
   #----
-  observeEvent(input$run, 
+  observeEvent(c(convertMZinputs$runMsconvert), 
                ignoreInit = TRUE,  {
-                 
                  ns <- session$ns
                  popup3()
                  
@@ -178,7 +175,8 @@ convertDataTabServer <- function(input,
                  
                    
                    IDBacApp::processMZML(forProcessing = forProcessing,
-                                         newExperimentName = input$newExperimentName)
+                                         newExperimentName = input$newExperimentName,
+                                         sqlDirectory = sqlDirectory)
                    
                    
                  
@@ -206,85 +204,12 @@ convertDataTabServer <- function(input,
   
   
   # Modal displayed while speactra -> peak processing is ocurring
-  #----
-  popup3 <- reactive({
-    showModal(modalDialog(
-      size = "m",
-      title = "Important message",
-      "When spectra processing is complete you will be able to begin with the data analysis",
-      br(),
-      "To check the progress, observe the progress bar at bottom right.",
-      easyClose = FALSE, 
-      footer = ""))
-  })
-  
-  
-  # Popup notifying user when spectra processing is complete
-  #----
-  popup4 <- reactive({
-    showModal(modalDialog(
-      size = "m",
-      title = "Spectra Processing is Now Complete",
-      br(),
-      easyClose = FALSE,
-      tagList(actionButton("processToAnalysis", 
-                           "Click to continue"))
-    ))
-    
-  })
   
   
 }
 
 
 
-
-
-#' Title
-#'
-#' @param forProcessing 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-processMZML <- function(forProcessing,
-                        newExperimentName){
-  
-  
-  validate(need(length(forProcessing$mzFile) == length(forProcessing$sampleID), 
-                "Temp mzML files and sample ID lengths don't match."
-  ))
-  
-  lengthProgress <- length(forProcessing$mzFile)
-  
-  # Create DB
-  
-  userDB <- createNewSQLITEdb(newExperimentName)
-  
-  
-  progLength <- base::length(forProcessing$mzFile)
-  withProgress(message = 'Processing in progress',
-               value = 0,
-               max = progLength, {
-                 
-                 for (i in base::seq_along(forProcessing$mzFile)) {
-                   setProgress(value = i,
-                               message = 'Processing in progress',
-                               detail = glue::glue(" \n Sample: {forProcessing$sampleID[[i]]},
-                                                   {i} of {progLength}"),
-                               session = getDefaultReactiveDomain())
-                   
-                   IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
-                                                       sampleID = forProcessing$sampleID[[i]],
-                                                       userDBCon = userDB) # pool connection
-                 }
-                 
-               })
-  pool::poolReturn(userDB)
-  
-  
-}
 
 
 
