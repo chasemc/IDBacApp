@@ -11,37 +11,37 @@ convertOneBruker_UI<- function(id){
   ns <- NS(id)
   tagList( 
     wellPanel(
-              align = "center",
-
-             h3("Starting with a Single MALDI Plate of Raw Data", align = "center"),
-             
-             br(),
-                    p(strong("1: Enter a Name for this New Experiment")),
-                    p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
-                    textInput(ns("newExperimentName"),
-                              label = "",
-                              width = "50%"),
-                    tags$hr(size = 20),
-             br(),
-             p(strong("2: Click to select the location of your RAW data"), align = "center"),
-                    actionButton(ns("rawFileDirectory"),
-                                 label = "Raw Data Folder"),
-                    verbatimTextOutput(ns("rawFileDirectoryText"),
-                                       placeholder = TRUE),
-                    tags$hr(size = 20),
-             br(),
-                    p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
-                    
-                    actionButton(ns("showSampleMap"), "Click to name samples"),
-                    br(),
-                    p(strong("Missing sample IDs for the following spots:")),
-                    shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
-                    p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
-                    actionButton(ns("run"),
-                                 label = "Process Data"),
-                    tags$hr(size = 20)
-           )
+      align = "center",
+      
+      h3("Starting with a Single MALDI Plate of Raw Data", align = "center"),
+      
+      br(),
+      p(strong("1: Enter a Name for this New Experiment")),
+      p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
+      textInput(ns("newExperimentName"),
+                label = "",
+                width = "50%"),
+      tags$hr(size = 20),
+      br(),
+      p(strong("2: Click to select the location of your RAW data"), align = "center"),
+      actionButton(ns("rawFileDirectory"),
+                   label = "Raw Data Folder"),
+      verbatimTextOutput(ns("rawFileDirectoryText"),
+                         placeholder = TRUE),
+      tags$hr(size = 20),
+      br(),
+      p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
+      
+      actionButton(ns("showSampleMap"), "Click to name samples"),
+      br(),
+      p(strong("Missing sample IDs for the following spots:")),
+      shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
+      p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
+      actionButton(ns("convertSingleBruker"),
+                   label = "Process Data"),
+      tags$hr(size = 20)
     )
+  )
 }
 
 #' 
@@ -82,7 +82,9 @@ convertOneBruker_UI<- function(id){
 
 convertOneBruker_Server <- function(input,
                                     output,
-                                    session){
+                                    session,
+                                    tempMZDir,
+                                    sqlDirectory){
   
   
   
@@ -102,7 +104,7 @@ convertOneBruker_Server <- function(input,
       return("No Folder Selected")
     } else {
       folders <- NULL
-      i# Get the folders contained within the chosen folder.
+      # Get the folders contained within the chosen folder.
       foldersInFolder <- list.dirs(rawFilesLocation(),
                                    recursive = FALSE,
                                    full.names = FALSE) 
@@ -234,4 +236,66 @@ convertOneBruker_Server <- function(input,
                  
                })
   
-  }
+  
+  # Spectra conversion
+  #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
+  #----
+  spectraConversion <- reactive({
+    
+    IDBacApp::excelMaptoPlateLocation(typeOfRawData = input$typeOfRawData,
+                                      excelFileLocation = input$excelFile$datapath,
+                                      rawFilesLocation = rawFilesLocation(),
+                                      multipleMaldiRawFileLocation = multipleMaldiRawFileLocation())
+    
+  })
+  
+  
+  
+  
+  # Call the Spectra processing function when the spectra processing button is pressed
+  #----
+  observeEvent(input$convertSingleBruker,
+               ignoreInit = TRUE,  {
+                 IDBacApp::brukerToMzml_popup()
+                 
+                 validate(need(any(!is.na(sampleMapReactive$rt)), 
+                               "No samples entered into sample map, please try entering them again"))
+                 aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
+                 aa <- matrix(aa, nrow = 16, ncol = 24)
+                 
+                 spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+                 s1 <- base::as.matrix(sampleMapReactive$rt)
+                 sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
+                 
+                 forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
+                                                         msconvertPath = "",
+                                                         sampleMap = sampleMap,
+                                                         tempDir = tempMZDir)
+                 
+                 
+                 
+                 IDBacApp::popup3()
+                 
+                 
+                 
+                 IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
+                                       sampleIds = forProcessing$sampleID,
+                                       sqlDirectory = sqlDirectory,
+                                       newExperimentName = input$newExperimentName)
+                 
+                 
+                 
+                 
+                 
+                 
+                 IDBacApp::popup4()
+               })
+  
+  
+  
+  
+  
+}
+
+
+

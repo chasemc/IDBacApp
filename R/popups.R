@@ -24,3 +24,19 @@ popup4 <- function(){
   ))
   
 }
+
+
+# Modal to display while converting to mzML
+#----
+brukerToMzml_popup <- function(){
+  showModal(modalDialog(
+    size = "m",
+    title = "Important message",
+    p("IDBac is converting your Bruker files to open-source mzML, 
+    during this step there is no progress bar."),
+    p("After this step IDBac will begin to convert your files into an
+      IDBac experiment."),
+    easyClose = FALSE, 
+    footer = ""))
+}
+
