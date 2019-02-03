@@ -37,19 +37,6 @@ h1 {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*.navbar-static-top {//
     font-family: 'Arial', cursive;
     background-color: #e7e7e7;
@@ -73,3 +60,42 @@ h1 {
   height:100%;
   
 }
+
+
+
+
+
+.publicationTitle {
+
+font-family: 'Arial';
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: black;
+}
+
+
+.publicationAuthor {
+
+font-family: 'Arial';
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: black;
+}
+
+
+.publicationDetails {
+
+font-family: 'Arial';
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: black;
+}
+
+
+
+
+
+

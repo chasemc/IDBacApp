@@ -20,7 +20,7 @@ app_ui <- function(){
              id = "mainIDBacNav",
              tabPanel(
                title = "Introduction",
-               div(class="introPage",
+               div(class = "introPage",
                    #includeCSS(file.path(system.file('www', package = 'IDBacApp'), 'style.css')),
                    tags$head(tags$link(href = "www/styles.css", rel = "stylesheet")),
                    tags$head(tags$link(href = "www/collapse/shinyBS.js")),
@@ -63,18 +63,23 @@ app_ui <- function(){
                                       ),
                                       br(),
                                       br(),
-                                      h4("Citing IDBac:",
-                                         align = "center"),
                                       tags$ul(
                                         tags$li(
                                           p("Publication:")),
                                         tags$ul(
                                           tags$li(
-                                            p(("Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function"),br(),
-                                              "Chase M. Clark, Maria S. Costa, Laura M. Sanchez, Brian T. Murphy;
-                                PNAS May 8, 2018 115 (19) 4981-4986; doi:",
-                                              a(href = "https://doi.org/10.1073/pnas.1801247115", 
-                                                target = "_blank", "10.1073/pnas.1801247115")
+                                            
+                                            div(id = 'pnasTitle',
+                                                class = 'publicationTitle',
+                                                "Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function"),
+                                            div(id = 'pnasauthors',
+                                                class = 'publicationAuthors',
+                                                "Chase M. Clark, Maria S. Costa, Laura M. Sanchez, Brian T. Murphy"),
+                                            div(id = 'pnasDetails',
+                                                class = 'publicationDetails',
+                                                "PNAS May 8, 2018 115 (19) 4981-4986; doi:",
+                                                a(href = "https://doi.org/10.1073/pnas.1801247115", 
+                                                  target = "_blank", "10.1073/pnas.1801247115")
                                             )
                                           )
                                         )
