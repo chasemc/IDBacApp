@@ -157,56 +157,7 @@ databaseTabServer <- function(input,
   })
   
   
-  # Reactive variable returning the user-chosen location of the raw MALDI files as string
-  #----
-  mzmlRawFilesLocation <- reactive({
-    if (input$mzmlRawFileDirectory > 0) {
-      IDBacApp::choose_dir()
-    }
-  })
-  
-  
-  # Creates text showing the user which directory they chose for raw files
-  #----
-  output$mzmlRawFileDirectory <- renderText({
-    if (is.null(mzmlRawFilesLocation())) {
-      return("No Folder Selected")
-    } else {
-      folders <- NULL
-      
-      findmz <- function(){
-        # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
-        return(list.files(mzmlRawFilesLocation(),
-                          recursive = TRUE,
-                          full.names = FALSE,
-                          pattern = "\\.mz"))
-        setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
-        
-      }
-      
-      
-      # Get the folders contained within the chosen folder.
-      foldersInFolder <- tryCatch(findmz(),
-                                  error = function(x) paste("Timed out"),
-                                  finally = function(x) x)
-      
-      if (foldersInFolder == "Timed out") {
-        return("Timed out looking for mzML/mzXML files. This can happen if the folder you 
-             selected has lots of folders within it... because IDBac looks through all 
-             of them for mzML/mzXML files.")}else{
-               
-               for (i in 1:length(foldersInFolder)) {
-                 # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
-                 folders <- paste0(folders, 
-                                   "\n",
-                                   basename(foldersInFolder[[i]]))
-               }
-               return(folders)
-             }}
-    
-    
-  })
-  
+
   
   
   
