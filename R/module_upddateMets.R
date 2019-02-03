@@ -66,6 +66,16 @@ updateMeta_server <- function(input,
   
   observeEvent(input$saven, 
                ignoreInit = TRUE, {
+                 #make sure not to use the wrong metadata table
+                 query <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
+                                          FROM `IndividualSpectra`",
+                                         .con =  pool())
+                 query <- DBI::dbGetQuery(pool(), query)[ ,1]
+                 userTab <- as.character(rhandsontable::hot_to_r(input$metaTable)[-1, 1])
+                 req(userTab == query)
+                 
+                 
+                 
                  DBI::dbWriteTable(conn = pool(),
                                    name = "metaData",
                                    value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 

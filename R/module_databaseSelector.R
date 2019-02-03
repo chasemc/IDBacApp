@@ -34,7 +34,7 @@ databaseSelector_server <- function(input,
                                     session,
                                     h3Label = "First, select an experiment:",
                                     availableExperiments,
-                                    workingDirectory){
+                                    sqlDirectory){
   
   
   output$availableDB <- renderUI({
@@ -49,10 +49,10 @@ databaseSelector_server <- function(input,
   
   output$selectedSQLText <- renderPrint({
     
-    fileNames <- tools::file_path_sans_ext(list.files(workingDirectory,
+    fileNames <- tools::file_path_sans_ext(list.files(sqlDirectory,
                                                       pattern = ".sqlite",
                                                       full.names = FALSE))
-    filePaths <- list.files(workingDirectory,
+    filePaths <- list.files(sqlDirectory,
                             pattern = ".sqlite",
                             full.names = TRUE)
     
@@ -63,10 +63,10 @@ databaseSelector_server <- function(input,
    userDBCon <- reactive({
     
     req(!is.null(input$selectExperiment))
-    validate(need(length(input$selectExperiment) == length(workingDirectory), 
+    validate(need(length(input$selectExperiment) == length(sqlDirectory), 
                   "databaseTabServer: userDBCon, createPool inputs are different lengths."))
     IDBacApp::createPool(fileName = input$selectExperiment,
-                         filePath = workingDirectory)[[1]]
+                         filePath = sqlDirectory)[[1]]
     
     
   })  

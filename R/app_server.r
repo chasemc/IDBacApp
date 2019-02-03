@@ -12,7 +12,7 @@ app_server <- function(input, output, session) {
   
   # Develepment Functions ---------------------------------------------------
   options(shiny.reactlog = TRUE)
-  workingDirectory <- getwd()
+  sqlDirectory <- getwd()
   
   
   # Register sample-choosing JS ---------------------------------------------
@@ -27,9 +27,9 @@ app_server <- function(input, output, session) {
   
   
   # Setup working directories -----------------------------------------------
-  
+  # This  doesn't go in modules, so that temp folder cleanup is sure to happen more often
   # Create a directory for temporary mzml files
-  tempMZDir <- file.path(workingDirectory, "temp_mzML")
+  tempMZDir <- file.path(sqlDirectory, "temp_mzML")
   dir.create(tempMZDir)
   
   # Cleanup mzML temp folder on initialization of app
@@ -42,9 +42,10 @@ app_server <- function(input, output, session) {
   # Conversions Tab ---------------------------------------------------------
   
   
-  callModule(IDBacApp::convertDataTabServer,
+  callModule(IDBacApp::convertDataTab_Server,
              "convertDataTab",
-             tempMZDir)
+             tempMZDir = tempMZDir,
+             sqlDirectory = sqlDirectory)
   
   
   observeEvent(input$processToAnalysis,  
@@ -58,7 +59,7 @@ app_server <- function(input, output, session) {
   
   
   # Find the available databases, and make reactive so can be updated if more are created
-  availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(workingDirectory,
+  availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(sqlDirectory,
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE)))
   
@@ -81,7 +82,7 @@ app_server <- function(input, output, session) {
   
   workingDB <- callModule(IDBacApp::databaseTabServer,
                           "sqlUIcreator",
-                          workingDirectory = workingDirectory,
+                          sqlDirectory = sqlDirectory,
                           availableExperiments = availableDatabases)
   
   

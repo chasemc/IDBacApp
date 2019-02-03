@@ -4,7 +4,7 @@
 \alias{getSmallMolSpectra}
 \title{Retrieve small molecule and matrix peak lists and make consensus peak lists}
 \usage{
-getSmallMolSpectra(pool, sampleIDs, dendrogram, ymin, ymax,
+getSmallMolSpectra(pool, sampleIDs, dendrogram, brushInputs,
   matrixIDs = NULL, peakPercentPresence, lowerMassCutoff,
   upperMassCutoff, minSNR)
 }
@@ -15,9 +15,7 @@ getSmallMolSpectra(pool, sampleIDs, dendrogram, ymin, ymax,
 
 \item{dendrogram}{protein dendrogram that was brushed}
 
-\item{ymin}{brush y-min}
-
-\item{ymax}{brush y-max}
+\item{brushInputs}{brusked dendrogram outputs}
 
 \item{matrixIDs}{sampleID that will be used as a matrix}
 

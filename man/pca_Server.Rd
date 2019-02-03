@@ -2,7 +2,7 @@
 % Please edit documentation in R/module_PCA.R
 \name{pca_Server}
 \alias{pca_Server}
-\title{PCA Server}
+\title{Plotly PCA Server using irlba}
 \usage{
 pca_Server(input, output, session, dataframe, namedColors)
 }
@@ -15,12 +15,11 @@ pca_Server(input, output, session, dataframe, namedColors)
 
 \item{dataframe}{dataframe that PCA will be performed on}
 
-\item{namedColors}{named vector, names are sample labels, hex colors are the vector
-172-10     172-7     172-1    172-11}
+\item{namedColors}{named vector, names are sample labels, hex colors are the vector}
 }
 \value{
-PCA server, returns PCA for report
+returns PCA results as reactive data frame
 }
 \description{
-PCA Server
+Plotly PCA Server using irlba
 }
