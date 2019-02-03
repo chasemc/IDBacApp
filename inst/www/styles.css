@@ -37,12 +37,12 @@ h1 {
 }
 
 
-/*.navbar-static-top {//
-    font-family: 'Arial', cursive;
+.navbar-static-top {
+    font-family: 'Arial';
     background-color: #e7e7e7;
-    font-weight: 800;
+    font-weight: 700;
 
-}*/
+}
 
 .intro_WellPanel{
   margin:50px;
@@ -60,9 +60,6 @@ h1 {
   height:100%;
   
 }
-
-
-
 
 
 .publicationTitle {
