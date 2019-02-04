@@ -217,6 +217,7 @@ dendDotsServer <- function(input,
     output$absPanelDendLabels <- renderUI(
       
       shiny::absolutePanel(
+        class = "dendMod_WellPanel",
         bottom = "0%",
         right = "0%",
         width = "20%",
@@ -288,13 +289,14 @@ dendDotsServer <- function(input,
     
     output$absPanelDendLines <- renderUI(
       shiny::absolutePanel(
+        class = "dendMod_WellPanel",
         bottom = "50%",
         right =  "0%",
         width = "20%",
         fixed = TRUE,
         draggable = TRUE,
         style = "z-index:1002;",
-        style = "opacity: 0.80",
+     #   style = "opacity: 0.80",
         shiny::wellPanel(
           shiny::h4("Adjust Dendrogram Lines"),
           shiny::selectInput(ns("colorByLines"),

@@ -16,6 +16,8 @@ convertMZ_UI <- function(id){
     textInput(ns("newExperimentName"),
               label = "",
               width = "50%"),
+    verbatimTextOutput(ns("newExperimentNameText"),
+                       placeholder = TRUE),
     tags$hr(size = 20),
     
     br(),
@@ -54,6 +56,19 @@ convertMZ_Server <-  function(input,
     }
   })
   
+  
+  output$newExperimentNameText <- renderText({
+    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    
+    if (a == "") {
+      "Enter a valid file name"
+    } else {
+      a
+    }
+    
+  })
+  
+  
   # Creates text showing the user which directory they chose for raw files
   #----
   output$mzmlRawFileDirectorytext <- renderText({
@@ -62,7 +77,7 @@ convertMZ_Server <-  function(input,
     } else {
       folders <- NULL
       
-     
+      
       
       
       # Get the folders contained within the chosen folder.
@@ -89,7 +104,18 @@ convertMZ_Server <-  function(input,
     
   })
   
+  
+  sanity <- reactive({
+    a <- IDBacApp::path_sanitize(input$newExperimentName)
+    gsub(" ","",a)
+  })
+  
   observeEvent(input$runMsconvert, {
+    
+    req(!is.null(mzmlRawFilesLocation()))
+    req(!is.null(sanity()))
+    req(sanity() != "")
+    
     IDBacApp::popup3()
     
     mzFilePaths <- IDBacApp::findmz(mzmlRawFilesLocation(),
@@ -100,10 +126,10 @@ convertMZ_Server <-  function(input,
     IDBacApp::processMZML(mzFilePaths = mzFilePaths,
                           sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
                           sqlDirectory = sqlDirectory,
-                          newExperimentName = input$newExperimentName)
-      
-      
-
+                          newExperimentName = sanity())
+    
+    
+    
     IDBacApp::popup4() 
   })
   

@@ -21,6 +21,8 @@ convertOneBruker_UI<- function(id){
       textInput(ns("newExperimentName"),
                 label = "",
                 width = "50%"),
+      verbatimTextOutput(ns("newExperimentNameText"),
+                         placeholder = TRUE),
       tags$hr(size = 20),
       br(),
       p(strong("2: Click to select the location of your RAW data"), align = "center"),
@@ -44,38 +46,6 @@ convertOneBruker_UI<- function(id){
   )
 }
 
-#' 
-#' #' oneMaldiPlateHelpUI
-#' #'
-#' #' @param id NA
-#' #'
-#' #' @return NA
-#' #' @export
-#' #'
-#' #' @examples NA
-#' oneMaldiPlateHelpUI <- function(id){
-#'   ns <- shiny::NS(id)
-#'   tagList(
-#'     h3("Instructions", align = "center"),
-#'     
-#'     br(),
-#'     p(strong("1: Working Directory"), " This directs where on your computer you would like to create an IDBac working directory."),
-#'     p("In the folder you select, IDBac will create sub-folders within a main directory named \"IDBac\":"),
-#'     img(src = "WorkingDirectory.png",
-#'         style = "width:60%;height:60%"),
-#'     br(),
-#'     p(strong("2: Raw Data"), "Your RAW data is a single folder that contains: one subfolder containing protein
-#'       data and one subfolder containing small-molecule data"),
-#'     img(src = "Single-MALDI-Plate.png",
-#'         style = "width:60%;height:60%"),
-#'     br(),
-#'     p("*Note: Sometimes the browser window won't pop up, but will still appear in the application bar. See below:"),
-#'     img(src = "window.png",
-#'         width = "100%")
-#'     )
-#'   
-#' }
-
 
 
 
@@ -97,6 +67,15 @@ convertOneBruker_Server <- function(input,
   })
   
   
+  output$newExperimentNameText <- renderText({
+    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    
+    if (a == "") {
+      "Enter a valid file name"
+    } else {
+      a
+    }
+  })
   # Creates text showing the user which directory they chose for raw files
   #----
   output$rawFileDirectoryText <- renderText({
@@ -152,8 +131,7 @@ convertOneBruker_Server <- function(input,
   
   # Sample Map --------------------------------------------------------------
   
-  
-  output$missingSampleNames <- shiny::renderText({
+  anyMissing <- reactive({
     req(rawFilesLocation())
     req(sampleMapReactive$rt)
     
@@ -164,12 +142,17 @@ convertOneBruker_Server <- function(input,
     spots <- IDBacApp::brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
     s1 <- base::as.matrix(sampleMapReactive$rt)
     b <- sapply(spots, function(x) s1[which(aa %in% x)])
-    b <- as.character(spots[which(is.na(b))])
+    as.character(spots[which(is.na(b))])
+  })
+  
+  
+  output$missingSampleNames <- shiny::renderText({
     
-    if (length(b) == 0) {
+    
+    if (length(anyMissing()) == 0) {
       paste0("No missing IDs")
     } else {
-      paste0(paste0(b, collapse = " \n ", sep = ","))
+      paste0(paste0(anyMissing(), collapse = " \n ", sep = ","))
     }
   })
   
@@ -252,11 +235,20 @@ convertOneBruker_Server <- function(input,
   
   
   
+  
+  sanity <- reactive({
+    a <- IDBacApp::path_sanitize(input$newExperimentName)
+    gsub(" ","",a)
+  })
+  
   # Call the Spectra processing function when the spectra processing button is pressed
   #----
   observeEvent(input$convertSingleBruker,
                ignoreInit = TRUE,  {
-                 IDBacApp::brukerToMzml_popup()
+                 
+                 req(length(anyMissing()) == 0)
+                 req(!is.null(sanity()))
+                 req(sanity() != "")
                  
                  validate(need(any(!is.na(sampleMapReactive$rt)), 
                                "No samples entered into sample map, please try entering them again"))
@@ -266,6 +258,8 @@ convertOneBruker_Server <- function(input,
                  spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
                  s1 <- base::as.matrix(sampleMapReactive$rt)
                  sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
+                 
+                 IDBacApp::brukerToMzml_popup()
                  
                  forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
                                                          msconvertPath = "",
