@@ -8,7 +8,7 @@
 #' @return .
 #' @export
 #'
-#' @examples . 
+ 
 addClass <- function(tag, class) {
   
   if(!is.null(class)) {
@@ -26,7 +26,7 @@ addClass <- function(tag, class) {
 #' @return .
 #' @export
 #'
-#' @examples .
+
 getAttribs <- function(tag) {
   tag$attribs
 }
@@ -34,7 +34,7 @@ getAttribs <- function(tag) {
 
 #' Title
 #'
-#' @param ... 
+#' @param ... .
 #' @param id  .
 #' @param multiple  .
 #' @param open  .
@@ -42,7 +42,7 @@ getAttribs <- function(tag) {
 #' @return .
 #' @export
 #'
-#' @examples .
+
 bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
   
 
@@ -79,7 +79,7 @@ bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
 #' @return .
 #' @export
 #'
-#' @examples .
+
 bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
   
   content <- list(...)
@@ -114,7 +114,7 @@ bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
 #' @return .
 #' @export
 #'
-#' @examples .
+
 addAttribs <- function(tag, ...) {
   a <- list(...)
   for(i in seq(length(a))) {

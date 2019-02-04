@@ -86,6 +86,18 @@ databaseTabUI <- function(id) {
 
 
 
+#' databaseTabServer
+#'
+#' @param input module
+#' @param output  module
+#' @param session  module
+#' @param sqlDirectory  sqlDirectory
+#' @param availableExperiments availableExperiments 
+#'
+#' @return .
+#' @export
+#'
+
 databaseTabServer <- function(input,
                               output,
                               session,
@@ -157,16 +169,6 @@ databaseTabServer <- function(input,
   )
   
 }
-
-
-
-
-
-
-
-
-
-
 
 
 

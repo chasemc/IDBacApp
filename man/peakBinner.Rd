@@ -9,11 +9,14 @@ peakBinner(peakList, ppm, massStart, massEnd)
 \arguments{
 \item{peakList}{should be MALDIquant}
 
-\item{ppm}{}
+\item{ppm}{ppm}
 
-\item{massStart}{}
+\item{massStart}{massStart}
 
-\item{massEnd}{}
+\item{massEnd}{massEnd}
+}
+\value{
+list of bin vectors
 }
 \description{
 peakBinner

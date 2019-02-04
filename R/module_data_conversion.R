@@ -61,7 +61,7 @@ convertDataTab_UI <- function(id) {
 #' @return .
 #' @export
 #'
-#' @examples .
+
 convertDataTab_Server <- function(input,
                                  output,
                                  session,
@@ -105,7 +105,7 @@ convertDataTab_Server <- function(input,
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 multipleMaldiPlates <- function(id){
   ns <- shiny::NS(id)
   fluidRow(

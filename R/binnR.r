@@ -10,7 +10,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 binnR <- function(vectorList,
                   ppm, 
                   massStart,

@@ -17,7 +17,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 findRawSHAandFile <- function(singlemzMLpath){
   if(!exists("sha")){
     sha <- list()
@@ -64,7 +64,7 @@ findRawSHAandFile <- function(singlemzMLpath){
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 findAcquisitionInfo <- function(rawFilepaths,
                                 manufacturer){
 

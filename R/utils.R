@@ -114,7 +114,7 @@ createMZsha <- function(peaklist){
 #' @return text representing the user's os
 #' @export
 #'
-#' @examples NA
+
 getOS <- function(){
   sysinf <- Sys.info()
   if (!is.null(sysinf)) {

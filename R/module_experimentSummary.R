@@ -1,9 +1,30 @@
 
+#' experimentSummary_UI
+#'
+#' @param id namespace
+#'
+#' @return .
+#' @export
+#'
+
 experimentSummary_UI <- function(id) {
   ns <- shiny::NS(id)
   rhandsontable::rHandsontableOutput(ns("summaryTable"), height = 800)
 }
 
+
+
+
+#' experimentSummary_Server
+#'
+#' @param input modules
+#' @param output modules 
+#' @param session modules
+#' @param pool modules
+#'
+#' @return modules
+#' @export
+#'
 
 experimentSummary_Server <- function(input,
                                      output,

@@ -6,7 +6,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 convertMZ_UI <- function(id){
   ns <- NS(id)
   tagList(
@@ -42,6 +42,17 @@ convertMZ_UI <- function(id){
   
 }
 
+
+#' convertMZ_Server
+#'
+#' @param input module
+#' @param output module
+#' @param session module
+#' @param sqlDirectory sqlDirectory 
+#'
+#' @return .
+#' @export
+#'
 
 convertMZ_Server <-  function(input,
                               output,

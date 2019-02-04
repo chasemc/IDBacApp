@@ -5,7 +5,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 convertDelim_UI <- function(id){
   ns <- NS(id)
   fluidRow(
@@ -50,6 +50,18 @@ convertDelim_UI <- function(id){
 
 
 
+
+#' convertDelim_Server
+#'
+#' @param input module
+#' @param output module
+#' @param session module
+#' @param tempMZDir tempMZDir 
+#' @param sqlDirectory sqlDirectory 
+#'
+#' @return .
+#' @export
+#'
 
 convertDelim_Server <- function(input,
                                 output,

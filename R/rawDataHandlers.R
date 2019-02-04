@@ -5,7 +5,6 @@
 #' @return named character vector: values are mzXX file paths, names are the file names
 #' @export
 #'
-#' @examples
 startingFromMZ <- function(chosenDir){
   
   paths <- list.files(chosenDir,
@@ -34,7 +33,6 @@ startingFromMZ <- function(chosenDir){
 #'
 #' @return
 #'
-#' @examples
 startingFromBrukerFlex <- function(chosenDir, 
                                    msconvertPath = "",
                                    sampleMap,
@@ -158,15 +156,13 @@ brukerDataSpotsandPaths <- function(brukerDataPath){
 
 
 
-#' @title Find msconvert.exe
-#' @export
-#' @rdname findMSconvert NA
+#' Title
 #'
-#' @param proteoWizardLocation optional filepath of msconvert.exe to be checked for validity
+#' @param proteoWizardLocation proteoWizardLocation 
 #'
-#' @return filepath of the folder containing msconvert.exe
+#' @return user's os
 #' @export
-
+#'
 findMSconvert <- function(proteoWizardLocation = ""){
   
   # Msconvert only works on Windows so abort function if not on Windows
@@ -174,7 +170,7 @@ findMSconvert <- function(proteoWizardLocation = ""){
   if (os == "windows") {
     
     # Look for msconvert if a path wasn't provided
-    if(!file.exists(file.path(dirname(proteoWizardLocation), "msconvert.exe"))) {
+    if (!file.exists(file.path(dirname(proteoWizardLocation), "msconvert.exe"))) {
       
       warning("Given path to msconvert didn't work, trying to auto-find in Programs")
       

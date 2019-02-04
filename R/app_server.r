@@ -646,16 +646,16 @@ app_server <- function(input, output, session) {
                     colorsToUse,
                     by = "nam")
     
-    plot_ly(data = pcaDat,
-            x = ~Dim1,
-            y = ~Dim2,
-            z = ~Dim3,
-            type = "scatter3d",
-            mode = "markers",
-            marker = list(color = ~fac),
-            hoverinfo = 'text',
-            text = ~nam) %>%
-      layout(
+    plotly::plot_ly(data = pcaDat,
+                    x = ~Dim1,
+                    y = ~Dim2,
+                    z = ~Dim3,
+                    type = "scatter3d",
+                    mode = "markers",
+                    marker = list(color = ~fac),
+                    hoverinfo = 'text',
+                    text = ~nam) %>%
+      plotly::layout(
         xaxis = list(
           title = ""
         ),

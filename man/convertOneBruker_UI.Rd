@@ -15,6 +15,3 @@ NA
 \description{
 oneMaldiPlate
 }
-\examples{
-NA
-}

@@ -19,6 +19,3 @@ NA
 \description{
 Copy from one database to another, selecting by Sample ID
 }
-\examples{
-NA
-}

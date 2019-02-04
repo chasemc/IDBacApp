@@ -12,6 +12,3 @@ NA
 \description{
 searchNCBI
 }
-\examples{
-NA
-}

@@ -20,7 +20,7 @@ dendDotsServer(input, output, session, dendrogram, pool, plotWidth,
 
 \item{plotWidth}{NA}
 
-\item{dendTrimmedLabels}{NA}
+\item{plotHeight}{NA}
 }
 \value{
 NA

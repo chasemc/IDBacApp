@@ -6,8 +6,8 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
-convertOneBruker_UI<- function(id){
+
+convertOneBruker_UI <- function(id){
   ns <- NS(id)
   tagList( 
     wellPanel(
@@ -50,6 +50,17 @@ convertOneBruker_UI<- function(id){
 
 
 
+#' convertOneBruker_Server
+#'
+#' @param input NS
+#' @param output NS
+#' @param session NS
+#' @param tempMZDir tempMZDir 
+#' @param sqlDirectory sqlDirectory
+#'
+#' @return
+#' @export
+#'
 convertOneBruker_Server <- function(input,
                                     output,
                                     session,

@@ -17,6 +17,3 @@ NA
 \description{
 readAcquFile
 }
-\examples{
-NA
-}

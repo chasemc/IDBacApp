@@ -17,6 +17,3 @@ NA
 \description{
 .grepAcquDoubleValue
 }
-\examples{
-NA
-}

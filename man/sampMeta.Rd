@@ -21,6 +21,3 @@ NA
 \description{
 sampMeta
 }
-\examples{
-NA
-}

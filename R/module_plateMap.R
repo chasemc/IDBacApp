@@ -1,5 +1,13 @@
 
 
+#' plateMapUI
+#'
+#' @param id namespace
+#'
+#' @return UI
+#' @export
+#'
+
 plateMapUI <- function(id) {
   ns <- shiny::NS(id)
   
@@ -19,14 +27,14 @@ plateMapUI <- function(id) {
 
 #' platemod
 #'
-#' @param input .
-#' @param output .
-#' @param session .
+#' @param input shiny module
+#' @param output shiny module
+#' @param session shiny module
 #'
-#' @return .
+#' @return rhandsontable 
 #' @export
 #'
-#' @examples .
+
 platemod <- function(input,
                      output,
                      session){

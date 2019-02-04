@@ -21,6 +21,3 @@ NA
 \description{
 binnR
 }
-\examples{
-NA
-}

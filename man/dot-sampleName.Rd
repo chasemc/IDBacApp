@@ -15,6 +15,3 @@ NA
 \description{
 .sampleName
 }
-\examples{
-NA
-}

@@ -26,6 +26,3 @@ NA
 \description{
 createSpectraSQL
 }
-\examples{
-NA
-}

@@ -12,6 +12,3 @@ text representing the user's os
 \description{
 Get OS
 }
-\examples{
-NA
-}

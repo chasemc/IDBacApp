@@ -4,7 +4,6 @@
 #' @return Main UI of IDBac
 #' @export
 #'
-
 app_ui <- function(){
   
   #----------

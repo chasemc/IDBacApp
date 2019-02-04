@@ -7,9 +7,14 @@
 availableSampleNames(checkedPool, whetherProtein, allSamples)
 }
 \arguments{
-\item{whetherProtein}{}
+\item{checkedPool}{checkedPool}
 
-\item{pool}{}
+\item{whetherProtein}{T/F protein spectra (T), small mol (F)}
+
+\item{allSamples}{both protein and small mol? Takes precedence over whetherProtein}
+}
+\value{
+vector of sample names in database with protein or small mol spectra
 }
 \description{
 Search an IDBac database to see which sample IDs have protein or small molecule data

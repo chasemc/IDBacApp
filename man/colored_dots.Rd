@@ -44,6 +44,3 @@ NA
 colored_dots
 I submitted this and it was pulled into dendextend but is left here for less dependency/more control
 }
-\examples{
-NA
-}

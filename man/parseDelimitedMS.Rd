@@ -4,24 +4,25 @@
 \alias{parseDelimitedMS}
 \title{parseDelimitedMS}
 \usage{
-parseDelimitedMS(sampleNames = NULL, proteinDirectory = NULL,
-  smallMolDirectory = NULL, exportDirectory, centroid)
+parseDelimitedMS(proteinPaths, proteinNames, smallMolPaths, smallMolNames,
+  exportDirectory, centroid)
 }
 \arguments{
-\item{sampleNames}{sample names if provided (not used yet)}
+\item{proteinPaths}{proteinPaths}
 
-\item{proteinDirectory}{NA}
+\item{proteinNames}{proteinNames}
 
-\item{smallMolDirectory}{NA}
+\item{smallMolPaths}{smallMolPaths}
+
+\item{smallMolNames}{smallMolNames}
 
 \item{exportDirectory}{NA}
+
+\item{centroid}{centroid}
 }
 \value{
 NA
 }
 \description{
 parseDelimitedMS
-}
-\examples{
-NA
 }

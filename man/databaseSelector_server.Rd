@@ -18,6 +18,8 @@ databaseSelector_server(input, output, session,
 \item{h3Label}{h3Label}
 
 \item{availableExperiments}{availableExperiments}
+
+\item{sqlDirectory}{sqlDirectory}
 }
 \value{
 filepath of selected database

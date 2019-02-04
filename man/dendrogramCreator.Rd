@@ -13,7 +13,7 @@ dendrogramCreator(input, output, session, proteinMatrix)
 
 \item{session}{shiny modules default}
 
-\item{data}{matrix or dataframe, where columns are variables and rows are samples}
+\item{proteinMatrix}{proteinMatrix , rows are samples, cols are peak intensities}
 }
 \value{
 dendrogram

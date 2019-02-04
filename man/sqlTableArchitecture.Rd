@@ -15,6 +15,3 @@ NA
 \description{
 sqlTableArchitecture
 }
-\examples{
-NA
-}

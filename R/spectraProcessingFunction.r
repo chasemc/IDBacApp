@@ -68,7 +68,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 createSpectraSQL <- function(mzML_con, 
                              scanNumber,
                              userDBCon,
@@ -229,7 +229,7 @@ createSpectraSQL <- function(mzML_con,
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 createMetaSQL <- function(sampleID,
                           userDBCon){
   
@@ -290,7 +290,7 @@ createMetaSQL <- function(sampleID,
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 createXMLSQL <- function(rawDataFilePath,
                          sampleID,
                          userDBCon,

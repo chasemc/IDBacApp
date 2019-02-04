@@ -28,6 +28,3 @@ NA
 \description{
 chooserInput
 }
-\examples{
-NA
-}

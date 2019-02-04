@@ -12,7 +12,7 @@
 #'
 #' @return NA
 #'
-#' @examples NA
+
 readAcquFile <- function(fidFile, verbose=FALSE) {
   acquFile <- sub(pattern="fid$", x=fidFile, replacement="acqu")
 
@@ -233,7 +233,7 @@ readAcquFile <- function(fidFile, verbose=FALSE) {
 #'
 #' @return NA
 #'
-#' @examples NA
+
 .grepAcquValue <- function(patternStr, srcStr) {
   tmpLine <- grep(pattern=patternStr, x=srcStr, value=TRUE)
   gsub(pattern="(^.*= *<?)|(>? *$)", replacement="", x=tmpLine)
@@ -248,7 +248,7 @@ readAcquFile <- function(fidFile, verbose=FALSE) {
 #'
 #' @return NA
 #'
-#' @examples NA
+
 .grepAcquDoubleValue <- function(patternStr, srcStr) {
   strValue <- .grepAcquValue(patternStr, srcStr)
 
@@ -264,7 +264,7 @@ readAcquFile <- function(fidFile, verbose=FALSE) {
 #'
 #' @return NA
 #'
-#' @examples NA
+
 .sampleName <- function(fidFile) {
   # regular expression for directory separator (on unix: /+, on windows \+)
   # sadly .Platform$file.sep == "/" on both

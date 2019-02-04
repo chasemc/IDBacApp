@@ -13,80 +13,96 @@
 
 smallMolSettings_UI <- function(id) {
   ns <- shiny::NS(id)
-# sidebar for now   
-shiny::tagList(
-                 radioButtons(ns("matrixSamplePresent"),
-                              label = h5(strong("Do you have a matrix blank?")),
-                              choices = list("Yes" = 1, 
-                                             "No (Also Turns Off Matrix Subtraction)" = 2),
-                              selected = 1),
-                 numericInput(ns("percentPresenceSM"),
-                              label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
-                              value = 70,
-                              step = 10,
-                              min = 0,
-                              max = 100),
-                 numericInput(ns("smSNR"),
-                              label = h5(strong("Signal To Noise Cutoff")),
-                              value = 4,
-                              step = 0.5,
-                              min = 1.5,
-                              max = 100),
-                 numericInput(ns("upperMassSM"),
-                              label = h5(strong("Upper Mass Cutoff")),
-                              value = 2000,
-                              step = 20,
-                              max = 3000),
-                 numericInput(ns("lowerMassSM"),
-                              label = h5(strong("Lower Mass Cutoff")),
-                              value = 200,
-                              step = 20,
-                              min = 3000),
-                 numericInput(ns("hclustHeightNetwork"),
-                              label = h5(strong("Expand Tree")),
-                              value = 750,
-                              step = 50,
-                              min = 100),
-                 numericInput(ns("dendparmar2"),
-                              label = h5(strong("Adjust right margin of dendrogram")),
-                              value = 5),
-                 downloadButton(ns("downloadSmallMolNetworkData"),
-                                label = "Download Current Network Data",
-                                value = FALSE),
-                 br(),
-                 p(strong("Hint 1:"),
-                   "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
-                 p(strong("Hint 2:"),
-                   "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),
-                 br(),
-                 
-                 p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network.\"
+  # sidebar for now   
+  shiny::tagList(
+    radioButtons(ns("matrixSamplePresent"),
+                 label = h5(strong("Do you have a matrix blank?")),
+                 choices = list("Yes" = 1, 
+                                "No (Also Turns Off Matrix Subtraction)" = 2),
+                 selected = 1),
+    numericInput(ns("percentPresenceSM"),
+                 label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
+                 value = 70,
+                 step = 10,
+                 min = 0,
+                 max = 100),
+    numericInput(ns("smSNR"),
+                 label = h5(strong("Signal To Noise Cutoff")),
+                 value = 4,
+                 step = 0.5,
+                 min = 1.5,
+                 max = 100),
+    numericInput(ns("upperMassSM"),
+                 label = h5(strong("Upper Mass Cutoff")),
+                 value = 2000,
+                 step = 20,
+                 max = 3000),
+    numericInput(ns("lowerMassSM"),
+                 label = h5(strong("Lower Mass Cutoff")),
+                 value = 200,
+                 step = 20,
+                 min = 3000),
+    numericInput(ns("hclustHeightNetwork"),
+                 label = h5(strong("Expand Tree")),
+                 value = 750,
+                 step = 50,
+                 min = 100),
+    numericInput(ns("dendparmar2"),
+                 label = h5(strong("Adjust right margin of dendrogram")),
+                 value = 5),
+    downloadButton(ns("downloadSmallMolNetworkData"),
+                   label = "Download Current Network Data",
+                   value = FALSE),
+    br(),
+    p(strong("Hint 1:"),
+      "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
+    p(strong("Hint 2:"),
+      "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),
+    br(),
+    
+    p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network.\"
                    while selected- this saves a .csv file of the currently-displayed
                    network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
                    While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
                    means this box is checked and the file is open in another program, either uncheck or close the file."),
-                 br(),
-                 h4("Suggestions for Reporting MAN Analysis:"),
-                 uiOutput("manReport"),
-                 br(),
-                 h4("Suggestions for Reporting Protein Analysis"),
-                 uiOutput("proteinReport2")
-                 )
-    
-    
+    br(),
+    h4("Suggestions for Reporting MAN Analysis:"),
+    uiOutput("manReport"),
+    br(),
+    h4("Suggestions for Reporting Protein Analysis"),
+    uiOutput("proteinReport2")
+  )
+  
+  
 }
- 
+
+
+#' smallMolMAN_UI
+#'
+#' @param id . 
+#'
+#' @return .
+#' @export
+#'
 
 smallMolMAN_UI <- function(id){
   ns <- shiny::NS(id)
   
   networkD3::simpleNetworkOutput("metaboliteAssociationNetwork",
                                  width = "100%")
-
+  
 }
 
 
 #nothing yet
+#' smallMolDendrogram_UI
+#'
+#' @param id .
+#'
+#' @return .
+#' @export
+#'
+
 smallMolDendrogram_UI <- function(id){
   ns <- shiny::NS(id)
   #empty
@@ -184,6 +200,14 @@ manPageProtDend_UI <- function(id) {
 # MAN Creator -------------------------------------------------------------
 
 
+#' smMANPlot_UI
+#'
+#' @param id .
+#'
+#' @return . 
+#' @export
+#'
+
 smMANPlot_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -192,13 +216,25 @@ smMANPlot_UI <- function(id) {
   )
 }
 
+
+
+
+
+#' downloadSmNet_UI
+#'
+#' @param id .
+#'
+#' @return .
+#' @export
+#'
+
 downloadSmNet_UI <- function(id) {
   ns <- shiny::NS(id)
-shiny::tagList(
-downloadButton(ns("downloadSmallMolNetworkData"),
-               label = "Download Current Network Data",
-               value = FALSE)
-)
+  shiny::tagList(
+    downloadButton(ns("downloadSmallMolNetworkData"),
+                   label = "Download Current Network Data",
+                   value = FALSE)
+  )
 }
 
 
@@ -216,18 +252,18 @@ MAN_Server <- function(input,
                        output,
                        session,
                        subtractedMatrixBlank){
-
-
+  
+  
   
   
   
   #----
   smallMolNetworkDataFrame <- reactive({
-
+    
     IDBacApp::smallMolDFtoNetwork(peakList = subtractedMatrixBlank())
     
   })
-
+  
   #----
   
   output$downloadSmallMolNetworkData <- downloadHandler(
@@ -249,7 +285,7 @@ MAN_Server <- function(input,
     for (i in seq_along(subtractedMatrixBlank())) {
       manEnvironment$sampleNodes[i] <- subtractedMatrixBlank()[[i]]@metaData$Strain
     }
-
+    
     a <- igraph::as.undirected(igraph::graph_from_data_frame(smallMolNetworkDataFrame()))
     a <- igraph::simplify(a)
     manEnvironment$wc <- igraph::fastgreedy.community(a)
@@ -262,7 +298,7 @@ MAN_Server <- function(input,
     manEnvironment$zz <- cbind(manEnvironment$zz, biggerSampleNodes = rep(1,times = length(manEnvironment$zz[,1])))
     manEnvironment$zz$biggerSampleNodes[which(manEnvironment$zz[,1] %in% manEnvironment$sampleNodes)] <- 50
     
-   manEnvironment
+    manEnvironment
     
   })
   
@@ -293,8 +329,8 @@ MAN_Server <- function(input,
   })
   
   
-
-
+  
+  
 }
 
 

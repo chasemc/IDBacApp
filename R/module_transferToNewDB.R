@@ -48,7 +48,7 @@ transferToNewDB_UI <- function(id) {
 #' @return .
 #' @export
 #'
-#' @examples .
+
 transferToNewDB_server <- function(input,
                                    output,
                                    session,

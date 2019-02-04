@@ -3,7 +3,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 ui_proteinClustering <- function() {
   
   fluidPage(

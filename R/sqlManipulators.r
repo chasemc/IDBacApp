@@ -11,7 +11,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 getAllStrain_IDsfromSQL <- function(databaseConnection, table){
   # Gets unique Strain_IDs given a RSQLite database connecction and table name
   
