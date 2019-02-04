@@ -76,11 +76,15 @@ convertDelim_Server <- function(input,
   })
   
   
-  
   output$newExperimentNameText <- renderText({
-    gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    
+    if (a == "") {
+      "Enter a valid file name"
+    } else {
+      a
+    }
   })
-  
   
   
   # Creates text showing the user which directory they chose for raw files
@@ -88,7 +92,7 @@ convertDelim_Server <- function(input,
   output$delimitedLocationSMo <- renderText({
     req(smallMolFiles())
     names <- tools::file_path_sans_ext(base::basename(smallMolFiles()))
-    names <- paste0(a, collapse = " \n ")
+    names <- paste0(names, collapse = " \n ")
   })
   
   
@@ -106,11 +110,11 @@ convertDelim_Server <- function(input,
     if (is.null(delimitedLocationP())) {
       NULL
     } else {
-    
-    foldersInFolder <- list.files(delimitedLocationP(), 
-                                  recursive = TRUE, 
-                                  full.names = TRUE,
-                                  pattern = "(.txt|.tab|.csv)$") # Get the folders contained directly within the chosen folder.
+      
+      foldersInFolder <- list.files(delimitedLocationP(), 
+                                    recursive = TRUE, 
+                                    full.names = TRUE,
+                                    pattern = "(.txt|.tab|.csv)$") # Get the folders contained directly within the chosen folder.
     }
   })
   
@@ -118,26 +122,23 @@ convertDelim_Server <- function(input,
   
   smallMolFiles <- reactive({
     
-if (is.null(delimitedLocationSM())) {
-  NULL
-} else {    
-    foldersInFolder <- list.files(delimitedLocationSM(), 
-                                  recursive = TRUE, 
-                                  full.names = TRUE,
-                                  pattern = "(.txt|.tab|.csv)$") # Get the folders contained directly within the chosen folder.
-}
+    if (is.null(delimitedLocationSM())) {
+      NULL
+    } else {    
+      foldersInFolder <- list.files(delimitedLocationSM(), 
+                                    recursive = TRUE, 
+                                    full.names = TRUE,
+                                    pattern = "(.txt|.tab|.csv)$") # Get the folders contained directly within the chosen folder.
+    }
   })
   
   
   
   
-  
-  
-  
-  
-  
-  
-  
+  sanity <- reactive({
+    a <- IDBacApp::path_sanitize(input$newExperimentName)
+    gsub(" ","",a)
+  })
   
   
   
@@ -146,10 +147,14 @@ if (is.null(delimitedLocationSM())) {
   #----
   observeEvent(input$runDelim, 
                ignoreInit = TRUE, {
+                 req(!is.null(sanity()))
+                 req(sanity() != "")
+          
+                 req(is.null(proteinFiles()) + is.null(smallMolFiles()) == 0)
+                 req(length(proteinFiles()) + length(smallMolFiles()) > 0)
                  
-
-                 req((is.null(proteinFiles()) + is.null(smallMolFiles())) > 0)
-
+                
+                 
                  
                  if (is.null(smallMolFiles())) {
                    smallPaths <- NULL
@@ -158,7 +163,7 @@ if (is.null(delimitedLocationSM())) {
                    smallPaths <- smallMolFiles()
                    sampleNameSM <- tools::file_path_sans_ext(basename(smallPaths))
                    sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-")[[1]][[1]]))
-               
+                   
                  }
                  
                  if (is.null(proteinFiles())) {
@@ -173,7 +178,7 @@ if (is.null(delimitedLocationSM())) {
                  
                  
                  
-                 keys <<- IDBacApp::parseDelimitedMS(proteinPaths = proteinPaths,
+                 keys <- IDBacApp::parseDelimitedMS(proteinPaths = proteinPaths,
                                                     proteinNames = sampleNameP,
                                                     smallMolPaths = smallPaths,
                                                     smallMolNames = sampleNameSM,

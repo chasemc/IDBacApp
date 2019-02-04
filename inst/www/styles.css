@@ -37,25 +37,12 @@ h1 {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*.navbar-static-top {//
-    font-family: 'Arial', cursive;
+.navbar-static-top {
+    font-family: 'Arial';
     background-color: #e7e7e7;
-    font-weight: 800;
+    font-weight: 700;
 
-}*/
+}
 
 .intro_WellPanel{
   margin:50px;
@@ -73,3 +60,63 @@ h1 {
   height:100%;
   
 }
+
+
+.publicationTitle {
+
+font-family: 'Arial';
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: black;
+}
+
+
+.publicationAuthor {
+
+font-family: 'Arial';
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: black;
+}
+
+
+.publicationDetails {
+
+font-family: 'Arial';
+  font-size: 1.3rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: black;
+}
+
+
+
+
+
+
+
+.dendDots_WellPanel{
+  padding-left:50px;
+}
+
+
+.dendMod_WellPanel {
+  /* Appearance */
+  background-color: white;
+  padding: 0 20px 20px 20px;
+  cursor: move;
+  /* Fade out while not hovering */
+  opacity: 0.65;
+  zoom: 0.9;
+  transition: opacity 500ms ease;
+}
+.dendMod_WellPanel:hover {
+  /* Fade in while hovering */
+  opacity: 0.95;
+  transition-delay: 0;
+}
+
+
+

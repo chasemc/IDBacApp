@@ -119,14 +119,13 @@ dendDotsServer <- function(input,
     output$absPaneldendDots <- renderUI(
       
       shiny::absolutePanel(
+        class = "dendMod_WellPanel",
         bottom = "50%",
         right =  "0%",
         width = "20%",
-        ##   width = "20%",
         fixed = T,
         draggable = TRUE,
         style = "z-index:1002;",
-        style = "opacity: 1",
         shiny::wellPanel(class = "dendDots_WellPanel",
                          fluidRow(
                            fluidRow(
@@ -217,13 +216,13 @@ dendDotsServer <- function(input,
     output$absPanelDendLabels <- renderUI(
       
       shiny::absolutePanel(
+        class = "dendMod_WellPanel",
         bottom = "0%",
         right = "0%",
         width = "20%",
         fixed = TRUE,
         draggable = TRUE,
         style = "z-index:1002;",
-        style = "opacity: 0.80",
         shiny::wellPanel(
           shiny::h4("Adjust Dendrogram Labels"),
           shiny::selectInput(ns("colorByLabels"),
@@ -288,13 +287,13 @@ dendDotsServer <- function(input,
     
     output$absPanelDendLines <- renderUI(
       shiny::absolutePanel(
+        class = "dendMod_WellPanel",
         bottom = "50%",
         right =  "0%",
         width = "20%",
         fixed = TRUE,
         draggable = TRUE,
         style = "z-index:1002;",
-        style = "opacity: 0.80",
         shiny::wellPanel(
           shiny::h4("Adjust Dendrogram Lines"),
           shiny::selectInput(ns("colorByLines"),
@@ -397,7 +396,7 @@ dendDotsServer <- function(input,
     shiny::validate(shiny::need(dendrogram$dendrogram, "Try selecting samples using the menu to the left."))
     
     
-    par(mar = c(5, 5, 5, plotWidth))
+    par(mar = c(5, 5, 5, plotWidth()))
    plot(dendrogram$dendrogram, horiz = T)
      if (!is.null(input$selectMetaColumn[[1]])) {
       
