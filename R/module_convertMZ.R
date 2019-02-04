@@ -12,12 +12,12 @@ convertMZ_UI <- function(id){
   tagList(
     h3("Starting with mzML or mzXML Data:"),
     p(strong("1: Enter a name for this new experiment")),
-    p("This will become a filename, so avoid non-valid characters
-      as they will be removed."),
-    p("Hint: Intead of \" \", use \"_\"."),
+    p("This will become a filename, non-valid characters will be removed."),
+    p("Hint: Intead of a space, use \"_\"."),
     textInput(ns("newExperimentName"),
               label = "",
-              width = "50%"),
+              width = "50%",
+              placeholder = "Enter Experiment Name Here"),
     verbatimTextOutput(ns("newExperimentNameText"),
                        placeholder = TRUE),
     tags$hr(size = 20),
@@ -65,7 +65,11 @@ convertMZ_Server <-  function(input,
   #----
   mzmlRawFilesLocation <- reactive({
     if (input$mzmlRawFileDirectory > 0) {
-      IDBacApp::choose_dir()
+      loc <- IDBacApp::choose_dir()
+      
+      if(!is.na(loc)){
+        return(loc)
+      }
     }
   })
   
@@ -74,11 +78,10 @@ convertMZ_Server <-  function(input,
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
     
     if (a == "") {
-      "Enter a valid file name"
+      "Your experiment, as it will be saved, will appear here when entered."
     } else {
       a
     }
-    
   })
   
   

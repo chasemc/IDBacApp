@@ -538,13 +538,14 @@ app_server <- function(input, output, session) {
   
   # User chooses which samples to include -----------------------------------
   chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
+  
   observe({
-  chosenProteinSampleIDs$chosen <- shiny::callModule(IDBacApp::sampleChooser_server,
-                                                     "proteinSampleChooser",
-                                                     pool = workingDB$pool,
-                                                     allSamples = FALSE,
-                                                     whetherProtein = TRUE)$addSampleChooser$right
-})
+    chosenProteinSampleIDs$chosen <- shiny::callModule(IDBacApp::sampleChooser_server,
+                                                       "proteinSampleChooser",
+                                                       pool = workingDB$pool,
+                                                       allSamples = FALSE,
+                                                       whetherProtein = TRUE)$addSampleChooser$right
+  })
   
   
   # Collapse peaks ----------------------------------------------------------
@@ -608,6 +609,7 @@ app_server <- function(input, output, session) {
   
   
   observe({
+    req(nrow(proteinMatrix()) > 2)
     proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
                                                       "proteinHierOptions",
                                                       proteinMatrix = proteinMatrix)

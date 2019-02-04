@@ -10,12 +10,12 @@ convertDelim_UI <- function(id){
   ns <- NS(id)
   fluidRow(
     p(strong("1: Enter a name for this new experiment")),
-    p("This will become a filename, so avoid non-valid characters
-       as they will be removed."),
-    p("Hint: Intead of \" \", use \"_\"."),
+    p("This will become a filename, non-valid characters will be removed."),
+    p("Hint: Intead of a space, use \"_\"."),
     textInput(ns("newExperimentName"),
               label = "",
-              width = "50%"),
+              width = "50%",
+              placeholder = "Enter Experiment Name Here"),
     verbatimTextOutput(ns("newExperimentNameText"),
                        placeholder = TRUE),
     tags$hr(size = 20),
@@ -88,11 +88,12 @@ convertDelim_Server <- function(input,
   })
   
   
+  
   output$newExperimentNameText <- renderText({
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
     
     if (a == "") {
-      "Enter a valid file name"
+      "Your experiment, as it will be saved, will appear here when entered."
     } else {
       a
     }

@@ -63,7 +63,7 @@ dendrogramCreator <- function(input,
   
   pMatrixReactive <- reactive({
     
-    req(nrow(proteinMatrix() > 1))
+    req(nrow(proteinMatrix() > 2))
     
     dend <- proteinMatrix()[rowSums(is.na(proteinMatrix())) > 0, ]
     
