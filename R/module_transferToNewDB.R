@@ -21,11 +21,7 @@ transferToNewDB_UI <- function(id) {
     br(),
     textInput(ns("nameformixNmatch"),
               label = "Enter name for new experiment"),
-    p("1"),
     IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
-    
-    
-    p("2"),
     actionButton(ns("addtoNewDB"),
                  label = "Add to new Experiment")
   )
