@@ -63,7 +63,16 @@ app_server <- function(input, output, session) {
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE)))
   
+
   
+  observeEvent(input$mainIDBacNav,
+               ignoreInit = TRUE, {
+                 req(input$mainIDBacNav == "sqlUiTab")
+                 availableDatabases$db <- tools::file_path_sans_ext(list.files(sqlDirectory,
+                                                                               pattern = ".sqlite",
+                                                                               full.names = FALSE))
+  
+  })
   
   #This "observe" event creates the SQL tab UI.
   observeEvent(availableDatabases$db,{
