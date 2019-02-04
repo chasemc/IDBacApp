@@ -14,10 +14,10 @@ convertOneBruker_UI<- function(id){
       align = "center",
       
       h3("Starting with a Single MALDI Plate of Raw Data", align = "center"),
-      
-      br(),
-      p(strong("1: Enter a Name for this New Experiment")),
-      p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
+      p(strong("1: Enter a name for this new experiment")),
+      p("This will become a filename, so avoid non-valid characters
+       as they will be removed."),
+      p("Hint: Intead of \" \", use \"_\"."),
       textInput(ns("newExperimentName"),
                 label = "",
                 width = "50%"),

@@ -17,9 +17,11 @@ pcaCalculation <- function(dataMatrix,
                            scaled = TRUE,
                            centered = TRUE,
                            missing = .00001){
+  shiny::validate(shiny::need(nrow(dataMatrix) > 3, "Select more samples for PCA."))
+  
   names <- rownames(dataMatrix)
   # log10 if chosen
-  if(logged){
+  if (logged) {
     dataMatrix <- log10(dataMatrix)
   }
   

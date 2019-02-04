@@ -11,8 +11,10 @@ convertMZ_UI <- function(id){
   ns <- NS(id)
   tagList(
     h3("Starting with mzML or mzXML Data:"),
-    p(strong("1: Enter a filename for this new experiment")),
-    p("Only numbers, \"_\", and A-Z. Shouldn't start with a number."),
+    p(strong("1: Enter a name for this new experiment")),
+    p("This will become a filename, so avoid non-valid characters
+      as they will be removed."),
+    p("Hint: Intead of \" \", use \"_\"."),
     textInput(ns("newExperimentName"),
               label = "",
               width = "50%"),
