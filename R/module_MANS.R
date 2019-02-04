@@ -132,7 +132,7 @@ manPageProtDend_Server <- function(input,
   output$hierOut <- renderPlot({
     req(!is.null(dendrogram$dendrogram))
     
-    par(mar = c(5, 5, 5, plotWidth))
+    par(mar = c(5, 5, 5, plotWidth()))
     
     plot(dendrogram$dendrogram, horiz = TRUE)
     
