@@ -3,14 +3,16 @@
 
 #' Search an IDBac database to see which sample IDs have protein or small molecule data
 #'
-#' @param pool 
-#' @param whetherProtein
+#' @param whetherProtein T/F protein spectra (T), small mol (F)
+#' @param checkedPool checkedPool 
+#' @param allSamples both protein and small mol? Takes precedence over whetherProtein
 #'
-#' @return
+#' @return vector of sample names in database with protein or small mol spectra
 #' @export
 #'
-#' @examples
-availableSampleNames <- function(checkedPool, whetherProtein, allSamples){
+availableSampleNames <- function(checkedPool, 
+                                 whetherProtein, 
+                                 allSamples){
   
   
   if (allSamples == TRUE) {

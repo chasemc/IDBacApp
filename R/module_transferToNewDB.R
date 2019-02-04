@@ -35,6 +35,20 @@ transferToNewDB_UI <- function(id) {
 
 
 
+#' transferToNewDB_server
+#'
+#' @param input .
+#' @param output .
+#' @param session .
+#' @param pool .
+#' @param sqlDirectory .
+#' @param selectedDB .
+#' @param availableExperiments .
+#'
+#' @return .
+#' @export
+#'
+#' @examples .
 transferToNewDB_server <- function(input,
                                    output,
                                    session,

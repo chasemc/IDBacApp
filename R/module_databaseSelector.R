@@ -25,6 +25,7 @@ databaseSelector_UI <- function(id) {
 #' @param session session 
 #' @param h3Label h3Label 
 #' @param availableExperiments availableExperiments 
+#' @param sqlDirectory sqlDirectory 
 #'
 #' @return filepath of selected database
 #' @export

@@ -1,7 +1,5 @@
 #' ui_proteinClustering
 #'
-#' @param x NA
-#'
 #' @return NA
 #' @export
 #'
@@ -11,8 +9,8 @@ ui_proteinClustering <- function() {
   fluidPage(
     sidebarLayout(
       
-      sidebarPanel(style = "background-color:#7777770d", width=3,
-                   
+      sidebarPanel(style = "background-color:#7777770d", 
+                   width = 3,
                    selectInput("proteinUIselector",
                                label = "Available options:",
                                choices = list("Hierarchical Clustering Settings" = 1,

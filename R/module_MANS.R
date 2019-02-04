@@ -202,6 +202,16 @@ downloadButton(ns("downloadSmallMolNetworkData"),
 }
 
 
+#' MAN_Server
+#'
+#' @param input mod
+#' @param output mod
+#' @param session mod
+#' @param subtractedMatrixBlank subtractedMatrixBlank 
+#'
+#' @return NA
+#' @export
+#'
 MAN_Server <- function(input,
                        output,
                        session,

@@ -799,7 +799,6 @@ app_server <- function(input, output, session) {
       on.exit(setwd(owd))
       file.copy(src, 'report.Rmd', overwrite = TRUE)
       
-      library(rmarkdown)
       out <- render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
         input$format,
         HTML = html_document()

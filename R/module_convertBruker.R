@@ -220,21 +220,8 @@ convertOneBruker_Server <- function(input,
                })
   
   
-  # Spectra conversion
-  #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
-  #----
-  spectraConversion <- reactive({
-    
-    IDBacApp::excelMaptoPlateLocation(typeOfRawData = input$typeOfRawData,
-                                      excelFileLocation = input$excelFile$datapath,
-                                      rawFilesLocation = rawFilesLocation(),
-                                      multipleMaldiRawFileLocation = multipleMaldiRawFileLocation())
-    
-  })
   
-  
-  
-  
+
   
   sanity <- reactive({
     a <- IDBacApp::path_sanitize(input$newExperimentName)

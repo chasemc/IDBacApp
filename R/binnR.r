@@ -59,14 +59,13 @@ binnR <- function(vectorList,
 #' peakBinner
 #'
 #' @param peakList should be MALDIquant 
-#' @param ppm 
-#' @param massStart 
-#' @param massEnd 
+#' @param ppm ppm
+#' @param massStart massStart 
+#' @param massEnd massEnd 
 #'
-#' @return
+#' @return list of bin vectors
 #' @export
 #'
-#' @examples
 peakBinner <- function(peakList,
                        ppm,
                        massStart,
@@ -75,10 +74,10 @@ peakBinner <- function(peakList,
   
   binvec <- IDBacApp::mQuantToMassVec(peakList)
  
-   if(is.null(massStart)){
+   if (is.null(massStart)) {
     massStart <- min(as.vector(unlist(binvec)))
   }
-  if(is.null(massEnd)){
+  if (is.null(massEnd)) {
     massStart <- min(as.vector(unlist(binvec)))
   }
   
@@ -106,10 +105,9 @@ peakBinner <- function(peakList,
 #' @return list of mass vectors
 #' @export
 #'
-#' @examples
 mQuantToMassVec <- function(peakList){
   
-  if(MALDIquant::isMassPeaksList(peakList)){
+  if (MALDIquant::isMassPeaksList(peakList)) {
     
     return(lapply(peakList, function(x) x@mass))
     

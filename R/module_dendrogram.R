@@ -87,9 +87,9 @@ plotHier <- function(id) {
 #' @param output NA
 #' @param session NA
 #' @param dendrogram NA
-#' @param dendTrimmedLabels NA
 #' @param pool NA
 #' @param plotWidth NA
+#' @param plotHeight NA
 #'
 #' @return NA
 #' @export

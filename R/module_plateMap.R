@@ -17,6 +17,16 @@ plateMapUI <- function(id) {
 
 
 
+#' platemod
+#'
+#' @param input .
+#' @param output .
+#' @param session .
+#'
+#' @return .
+#' @export
+#'
+#' @examples .
 platemod <- function(input,
                      output,
                      session){

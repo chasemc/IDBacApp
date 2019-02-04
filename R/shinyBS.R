@@ -1,5 +1,14 @@
 # Taken from shinyBS package
 
+#' Title
+#'
+#' @param tag .
+#' @param class .
+#'
+#' @return .
+#' @export
+#'
+#' @examples . 
 addClass <- function(tag, class) {
   
   if(!is.null(class)) {
@@ -10,11 +19,30 @@ addClass <- function(tag, class) {
   
 }
 
+#' Title
+#'
+#' @param tag .
+#'
+#' @return .
+#' @export
+#'
+#' @examples .
 getAttribs <- function(tag) {
   tag$attribs
 }
 
 
+#' Title
+#'
+#' @param ... 
+#' @param id  .
+#' @param multiple  .
+#' @param open  .
+#'
+#' @return .
+#' @export
+#'
+#' @examples .
 bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
   
 
@@ -41,6 +69,17 @@ bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
 
 
 
+#' Title
+#'
+#' @param title . 
+#' @param ...  .
+#' @param value ..
+#' @param style  .
+#'
+#' @return .
+#' @export
+#'
+#' @examples .
 bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
   
   content <- list(...)
@@ -67,6 +106,15 @@ bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
 
 }
 
+#' Title
+#'
+#' @param tag .
+#' @param ...  .
+#'
+#' @return .
+#' @export
+#'
+#' @examples .
 addAttribs <- function(tag, ...) {
   a <- list(...)
   for(i in seq(length(a))) {

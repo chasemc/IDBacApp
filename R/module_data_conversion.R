@@ -1,3 +1,10 @@
+#' convertDataTab_UI
+#'
+#' @param id namespace
+#'
+#' @return ui
+#' @export
+#'
 convertDataTab_UI <- function(id) {
   ns <- shiny::NS(id)
   
@@ -43,6 +50,18 @@ convertDataTab_UI <- function(id) {
 
 
 
+#' convertDataTab_Server
+#'
+#' @param input . 
+#' @param output  .
+#' @param session  .
+#' @param tempMZDir  .
+#' @param sqlDirectory  .
+#'
+#' @return .
+#' @export
+#'
+#' @examples .
 convertDataTab_Server <- function(input,
                                  output,
                                  session,

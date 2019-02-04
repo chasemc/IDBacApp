@@ -29,6 +29,18 @@ updateMeta_UI <- function(id) {
 
 
 
+#' updateMeta_server
+#'
+#' @param input  .
+#' @param output  .
+#' @param session  .
+#' @param pool  .
+#' @param selectedDB  .
+#'
+#' @return .
+#' @export
+#'
+#' @examples .
 updateMeta_server <- function(input,
                               output,
                               session,
