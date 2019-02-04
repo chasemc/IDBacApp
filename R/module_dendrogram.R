@@ -119,14 +119,13 @@ dendDotsServer <- function(input,
     output$absPaneldendDots <- renderUI(
       
       shiny::absolutePanel(
+        class = "dendMod_WellPanel",
         bottom = "50%",
         right =  "0%",
         width = "20%",
-        ##   width = "20%",
         fixed = T,
         draggable = TRUE,
         style = "z-index:1002;",
-        style = "opacity: 1",
         shiny::wellPanel(class = "dendDots_WellPanel",
                          fluidRow(
                            fluidRow(
@@ -224,7 +223,6 @@ dendDotsServer <- function(input,
         fixed = TRUE,
         draggable = TRUE,
         style = "z-index:1002;",
-        style = "opacity: 0.80",
         shiny::wellPanel(
           shiny::h4("Adjust Dendrogram Labels"),
           shiny::selectInput(ns("colorByLabels"),
@@ -296,7 +294,6 @@ dendDotsServer <- function(input,
         fixed = TRUE,
         draggable = TRUE,
         style = "z-index:1002;",
-     #   style = "opacity: 0.80",
         shiny::wellPanel(
           shiny::h4("Adjust Dendrogram Lines"),
           shiny::selectInput(ns("colorByLines"),
