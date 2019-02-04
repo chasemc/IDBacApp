@@ -13,29 +13,24 @@ convertDataTab_UI <- function(id) {
                "Create an IDBac experiment",
                tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
                         value = ns("convert_bruker_nav"),
-                        fluidRow(
-                          column(width = 9, offset = 2,
-                                  tabsetPanel(
-                                    
-                                   tabPanel(title = "Data from single MALDI plate",
-                                     
-                                          IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
-                                     
-                                   ) 
-                                    
-                                   ))         
-                                    
-                          )            
-                 
                         
-               
+                          wellPanel(class = "intro_WellPanel",
+                                    align = "center",
+                                    #       tabsetPanel(
+                                    #          tabPanel(title = "Data from single MALDI plate",
+                                    IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
+                                    #           ) 
+                                    #                                        )
+                          
+                          
+                        )
                ),
                tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
                         value = ns("convert_mzml_nav"),
-                                 wellPanel(class = "intro_WellPanel",
-                                           align = "center",
-                          IDBacApp::convertMZ_UI(ns("beginWithMZ"))
-               )
+                        wellPanel(class = "intro_WellPanel",
+                                  align = "center",
+                                  IDBacApp::convertMZ_UI(ns("beginWithMZ"))
+                        )
                ),
                tabPanel(tags$ul(tags$li("Click here to convert txt files")),
                         value = ns("convert_txt_nav"),
@@ -63,10 +58,10 @@ convertDataTab_UI <- function(id) {
 #'
 
 convertDataTab_Server <- function(input,
-                                 output,
-                                 session,
-                                 tempMZDir,
-                                 sqlDirectory){
+                                  output,
+                                  session,
+                                  tempMZDir,
+                                  sqlDirectory){
   
   
   
@@ -91,7 +86,7 @@ convertDataTab_Server <- function(input,
   
   
 }
-  
+
 
 
 

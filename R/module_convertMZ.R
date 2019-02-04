@@ -78,7 +78,8 @@ convertMZ_Server <-  function(input,
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
     
     if (a == "") {
-      "Your experiment, as it will be saved, will appear here when entered."
+      "Once entered, the filename-friendly version of the entered name will appear here once. \n
+      This will be the version of your experiment name that is saved."
     } else {
       a
     }

@@ -55,7 +55,7 @@ databaseTabUI <- function(id) {
              IDBacApp::bsCollapse(id = ns("modifySqlCollapse"),
                                   IDBacApp::bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
                                                           tabsetPanel(id = ns("ExperimentNav"), 
-                                                                      tabPanel("Create an experiment, pulling samples from the selected experiment",
+                                                                      tabPanel("Create a new experiment, copying samples from a previous experiment",
                                                                                value = "experiment_mixMatch_tab",
                                                                                column(12, align = "center",
                                                                                       style = "background-color: #7777770d",

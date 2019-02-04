@@ -10,40 +10,37 @@
 convertOneBruker_UI <- function(id){
   ns <- NS(id)
   tagList( 
-    wellPanel(
-      align = "center",
-      
-      h3("Starting with a Single MALDI Plate of Raw Data", align = "center"),
-      p(strong("1: Enter a name for this new experiment")),
-      p("This will become a filename, non-valid characters will be removed."),
-      p("Hint: Intead of a space, use \"_\"."),
-      textInput(ns("newExperimentName"),
-                label = "",
-                width = "50%",
-                placeholder = "Enter Experiment Name Here"),
-      verbatimTextOutput(ns("newExperimentNameText"),
-                         placeholder = TRUE),
-      tags$hr(size = 20),
-      br(),
-      p(strong("2: Click to select the location of your RAW data"), align = "center"),
-      actionButton(ns("rawFileDirectory"),
-                   label = "Raw Data Folder"),
-      verbatimTextOutput(ns("rawFileDirectoryText"),
-                         placeholder = TRUE),
-      tags$hr(size = 20),
-      br(),
-      p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
-      
-      actionButton(ns("showSampleMap"), "Click to name samples"),
-      br(),
-      p(strong("Missing sample IDs for the following spots:")),
-      shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
-      p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
-      actionButton(ns("convertSingleBruker"),
-                   label = "Process Data"),
-      tags$hr(size = 20)
-    )
+    h3("Starting with a single MALDI plate of Bruker data", align = "center"),
+    p(strong("1: Enter a name for this new experiment")),
+    p("This will become a filename, non-valid characters will be removed."),
+    p("Hint: Intead of a space, use \"_\"."),
+    textInput(ns("newExperimentName"),
+              label = "",
+              width = "50%",
+              placeholder = "Enter Experiment Name Here"),
+    verbatimTextOutput(ns("newExperimentNameText"),
+                       placeholder = TRUE),
+    tags$hr(size = 20),
+    br(),
+    p(strong("2: Click to select the location of your RAW data"), align = "center"),
+    actionButton(ns("rawFileDirectory"),
+                 label = "Raw Data Folder"),
+    verbatimTextOutput(ns("rawFileDirectoryText"),
+                       placeholder = TRUE),
+    tags$hr(size = 20),
+    br(),
+    p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
+    
+    actionButton(ns("showSampleMap"), "Click to name samples"),
+    br(),
+    p(strong("Missing sample IDs for the following spots:")),
+    shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
+    p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
+    actionButton(ns("convertSingleBruker"),
+                 label = "Process Data"),
+    tags$hr(size = 20)
   )
+  
 }
 
 
@@ -73,12 +70,12 @@ convertOneBruker_Server <- function(input,
   #----
   rawFilesLocation <- reactive({
     if (input$rawFileDirectory > 0) {
-    loc <- IDBacApp::choose_dir()
-    
-     if(!is.na(loc)){
-     return(loc)
+      loc <- IDBacApp::choose_dir()
+      
+      if(!is.na(loc)){
+        return(loc)
+      }
     }
-     }
   })
   
   
@@ -86,7 +83,7 @@ convertOneBruker_Server <- function(input,
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
     
     if (a == "") {
-      "Your experiment, as it will be saved, will appear here when entered."
+      "The filename-friendly version of your entrywill appear here."
     } else {
       a
     }
@@ -236,7 +233,7 @@ convertOneBruker_Server <- function(input,
   
   
   
-
+  
   
   sanity <- reactive({
     a <- IDBacApp::path_sanitize(input$newExperimentName)
