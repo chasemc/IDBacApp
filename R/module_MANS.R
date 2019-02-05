@@ -55,22 +55,17 @@ smallMolSettings_UI <- function(id) {
                    value = FALSE),
     br(),
     p(strong("Hint 1:"),
-      "Use mouse to select parts of the tree and display the MAN of corresponding samples."),
+      "Use mouse to select parts of the tree and to display the corresponding MAN."),
     p(strong("Hint 2:"),
       "Use mouse to click & drag parts (nodes) of the MAN if it appears congested."),
     br(),
     
-    p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network.\"
-                   while selected- this saves a .csv file of the currently-displayed
-                   network to the \"Saved_MANs\" folder in your working directory This can be easily imported into Gephi or Cytoscape.
-                   While checked, any update of the network will overwrite this file. Also, an error saying: \"cannot open the connection\"
-                   means this box is checked and the file is open in another program, either uncheck or close the file."),
+    p(strong("Note 1:"), "For publication-quality networks click \"Download Current Network\".
+                   This saves a .csv file that can be easily imported into Gephi or Cytoscape."),
     br(),
     h4("Suggestions for Reporting MAN Analysis:"),
-    uiOutput("manReport"),
-    br(),
-    h4("Suggestions for Reporting Protein Analysis"),
-    uiOutput("proteinReport2")
+    uiOutput("manReport")
+
   )
   
   
