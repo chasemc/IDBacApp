@@ -357,7 +357,6 @@ createXMLSQL <- function(rawDataFilePath,
                       overwrite = FALSE) # Do not overwrite
   }
   
-  QQ<<-(list(mzMLSHA = sqlDataFrame$XML$mzMLSHA,
-             mzMLInfo = acquisitonInfo))
+
 }
 
