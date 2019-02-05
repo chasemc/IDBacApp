@@ -82,7 +82,7 @@ createSpectraSQL <- function(mzML_con,
    
     spectraImport <- mzR::peaks(mzML_con, 
                                 scans = individualSpectrum)
-    sqlDataFrame$IndividualSpectra$spectrumSHA <- IDBacApp::createMZsha(spectraImport)
+    sqlDataFrame$IndividualSpectra$spectrumSHA <- IDBacApp::createSpectrumSha(spectraImport)
     
      
     if("IndividualSpectra" %in% DBI::dbListTables(userDBCon)){
