@@ -74,20 +74,6 @@ app_server <- function(input, output, session) {
   
   })
   
-  #This "observe" event creates the SQL tab UI.
-  observeEvent(availableDatabases$db,{
-    if (length(availableDatabases$db) > 0) {
-      appendTab(inputId = "mainIDBacNav",
-                tabPanel("Select/Manipulate Experiments",
-                         value = "sqlUiTab",
-                         IDBacApp::databaseTabUI("sqlUIcreator")
-                         
-                )
-      )
-      
-    }
-  })
-  
   
   workingDB <- callModule(IDBacApp::databaseTabServer,
                           "sqlUIcreator",
@@ -98,6 +84,25 @@ app_server <- function(input, output, session) {
   
   
   # Trigger add tabs --------------------------------------------------------
+  
+  
+  #This "observe" event creates the SQL tab UI.
+  observeEvent(availableDatabases$db,
+               ignoreNULL = TRUE,
+               once = TRUE, {
+                 
+                 appendTab(inputId = "mainIDBacNav",
+                           tabPanel("Select/Manipulate Experiments",
+                                    value = "sqlUiTab",
+                                    IDBacApp::databaseTabUI("sqlUIcreator")
+                                    
+                           )
+                 )
+                 
+                 
+               })
+
+  
   observeEvent(workingDB$move$selectExperiment,
                ignoreInit = TRUE, {
                  removeTab(inputId = "mainIDBacNav",
