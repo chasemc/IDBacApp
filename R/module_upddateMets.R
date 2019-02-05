@@ -23,7 +23,7 @@ updateMeta_UI <- function(id) {
                      label = "New Column Name"),
            actionButton(ns("insertNewMetaColumn"),
                         label = "Insert Column")),
-    rhandsontable::rHandsontableOutput(ns("metaTable"), height = 800)
+    rhandsontable::rHandsontableOutput(ns("metaTable"))
   )
 }
 
