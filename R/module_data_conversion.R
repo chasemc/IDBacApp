@@ -109,7 +109,7 @@ multipleMaldiPlates <- function(id){
            br(),
            fluidRow(
              column(12,offset = 3,
-                    h3("Starting with Multiple MALDI Plates of Raw Data"))), br(), br(),
+                    h3("Starting with Multiple MALDI Plates of raw data"))), br(), br(),
            column(5,
                   fluidRow(column(5,
                                   offset = 3,
@@ -122,7 +122,7 @@ multipleMaldiPlates <- function(id){
                   p("If there is already an \"IDBac\" folder present in the working directory,
                     files will be added into the already-present IDBac folder ", strong("and any samples with the same name will be overwritten.")),
                   br(),
-                  p(strong("2:"),"The RAW data file will be one folder that contains individual folders for each
+                  p(strong("2:"),"The raw data file will be one folder that contains individual folders for each
                     MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
                     containing protein data and the other containing small molecule data:"),
                   img(src = "Multi-MALDI-Plate.png", 
@@ -148,11 +148,11 @@ multipleMaldiPlates <- function(id){
                            verbatimTextOutput(ns("newExperimentNameText"),
                                               placeholder = TRUE))),
                   br(),
-                  p(strong("2:"), "Your RAW data will be one folder that contains folders for each MALDI plate."),
+                  p(strong("2:"), "Your raw data will be one folder that contains folders for each MALDI plate."),
                   br(),
-                  p(strong("2: Click to select the location of your RAW data"), align = "center"),
+                  p(strong("2: Click to select the location of your raw data"), align = "center"),
                   actionButton(ns("multipleMaldiRawFileDirectory"),
-                               label = "Click to select the location of your RAW data"),
+                               label = "Click to select the location of your raw data"),
                   fluidRow(column(12,
                                   verbatimTextOutput(ns("multipleMaldiRawFileDirectory"),
                                                      placeholder = TRUE))),

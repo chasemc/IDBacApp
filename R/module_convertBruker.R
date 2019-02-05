@@ -21,7 +21,7 @@ convertOneBruker_UI <- function(id){
     verbatimTextOutput(ns("newExperimentNameText"),
                        placeholder = TRUE),
     tags$hr(size = 20),
-    p(strong("2: Click to select the location of your RAW data"), align = "center"),
+    p(strong("2: Click to select the location of your raw data"), align = "center"),
     actionButton(ns("rawFileDirectory"),
                  label = "Raw Data Folder"),
     verbatimTextOutput(ns("rawFileDirectoryText"),
