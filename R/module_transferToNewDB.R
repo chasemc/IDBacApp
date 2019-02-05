@@ -13,17 +13,22 @@ transferToNewDB_UI <- function(id) {
     
     
     h3("Transfer samples from previous experiments to new/other experiments.", align = "center"),
-    p("Note: For data integrity, samples cannot be removed from experiments.", align = "center"),
     p("Move strains between boxes by clicking the strain's name
   and then an arrow. Strains in the right box will be used for analysis."),
-    uiOutput("ploo"),
+    IDBacApp::databaseSelector_UI(ns("dbselector")),   
     verbatimTextOutput(ns("selection")),
     br(),
     textInput(ns("nameformixNmatch"),
-              label = "Enter name for new experiment"),
+              label = "New experiment name:",
+              width = "50%",
+              placeholder = "Enter new experiment name here"),
     IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
     actionButton(ns("addtoNewDB"),
-                 label = "Add to new Experiment")
+                 label = "Add to new Experiment"),
+  
+  p("Note: For data integrity, samples cannot be removed from experiments.", 
+    align = "center",
+    class = "note")
   )
   
 }
@@ -36,9 +41,7 @@ transferToNewDB_UI <- function(id) {
 #' @param input .
 #' @param output .
 #' @param session .
-#' @param pool .
 #' @param sqlDirectory .
-#' @param selectedDB .
 #' @param availableExperiments .
 #'
 #' @return .
@@ -48,15 +51,20 @@ transferToNewDB_UI <- function(id) {
 transferToNewDB_server <- function(input,
                                    output,
                                    session,
-                                   pool,
                                    sqlDirectory,
-                                   selectedDB,
                                    availableExperiments){
+  
+  
+  selectedDB <-  shiny::callModule(IDBacApp::databaseSelector_server,
+                                   "dbselector",
+                                   availableExperiments = availableExperiments,
+                                   sqlDirectory = sqlDirectory)
+  
   
   
   chosenSamples <-  shiny::callModule(IDBacApp::sampleChooser_server,
                                       "chooseNewDBSamples",
-                                      pool = pool,
+                                      pool = selectedDB$userDBCon,
                                       allSamples = TRUE,
                                       whetherProtein = FALSE)
   
@@ -82,7 +90,7 @@ transferToNewDB_server <- function(input,
     copyingDbPopup()
     
     newdbPath <- file.path(sqlDirectory, paste0(input$nameformixNmatch, ".sqlite"))
-    copyToNewDatabase(existingDBPool = pool(),
+    copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
                       newdbPath = newdbPath, 
                       sampleIDs = chosenSamples$addSampleChooser$right)
     
