@@ -1,4 +1,9 @@
 #----
+#' popup3
+#'
+#' @return NA
+#' @export
+#'
 popup3 <- function(){
   showModal(modalDialog(
     size = "m",
@@ -13,6 +18,11 @@ popup3 <- function(){
 
 # Popup notifying user when spectra processing is complete
 #----
+#' popup4
+#'
+#' @return NA
+#' @export
+#'
 popup4 <- function(){
   showModal(modalDialog(
     size = "m",
@@ -28,6 +38,11 @@ popup4 <- function(){
 
 # Modal to display while converting to mzML
 #----
+#' brukerToMzml_popup
+#'
+#' @return NA
+#' @export
+#'
 brukerToMzml_popup <- function(){
   showModal(modalDialog(
     size = "m",

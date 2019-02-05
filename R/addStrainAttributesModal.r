@@ -9,7 +9,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 sampMetaOutput <- function(id, label = "Sample Metadata Input") {
   # Create a namespace function using the provided id
   ns <- NS(id)
@@ -29,7 +29,7 @@ sampMetaOutput <- function(id, label = "Sample Metadata Input") {
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 sampMeta <- function(input, output, session, databaseConnection) {
   
   

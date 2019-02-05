@@ -17,6 +17,3 @@ NA
 \description{
 findAcquisitionInfo
 }
-\examples{
-NA
-}

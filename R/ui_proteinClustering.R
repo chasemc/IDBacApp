@@ -1,18 +1,16 @@
 #' ui_proteinClustering
 #'
-#' @param x NA
-#'
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 ui_proteinClustering <- function() {
   
   fluidPage(
     sidebarLayout(
       
-      sidebarPanel(style = "background-color:#7777770d", width=3,
-                   
+      sidebarPanel(style = "background-color:#7777770d", 
+                   width = 3,
                    selectInput("proteinUIselector",
                                label = "Available options:",
                                choices = list("Hierarchical Clustering Settings" = 1,
@@ -25,8 +23,8 @@ ui_proteinClustering <- function() {
                    conditionalPanel(
                      condition = "input.proteinUIselector == '1'",
                      h5(strong("Select Samples")),
-                     p("Move strains between boxes by clicking the strain's name
-                       and then an arrow. Strains in the right box will be used for analysis."),
+                     p("Move samples between boxes by clicking the samples's name
+                       and then an arrow. Samples in the right box will be used for analysis."),
                      IDBacApp::sampleChooser_UI("proteinSampleChooser")
                    ),
                    IDBacApp::dendrogramCreatorUI("proteinHierOptions"),

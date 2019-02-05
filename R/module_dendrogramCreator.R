@@ -48,8 +48,8 @@ dendrogramCreatorUI <- function(id) {
 #'
 #' @param input shiny modules default
 #' @param output shiny modules default
+#' @param proteinMatrix proteinMatrix , rows are samples, cols are peak intensities
 #' @param session shiny modules default
-#' @param data matrix or dataframe, where columns are variables and rows are samples
 #'
 #' @return dendrogram
 #' @export
@@ -63,7 +63,7 @@ dendrogramCreator <- function(input,
   
   pMatrixReactive <- reactive({
     
-    req(nrow(proteinMatrix() > 1))
+    req(nrow(proteinMatrix() > 2))
     
     dend <- proteinMatrix()[rowSums(is.na(proteinMatrix())) > 0, ]
     

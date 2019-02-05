@@ -26,6 +26,3 @@ NA
 \description{
 Run Dend and dots
 }
-\examples{
-NA
-}

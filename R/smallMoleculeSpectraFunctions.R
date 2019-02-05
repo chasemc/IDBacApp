@@ -85,21 +85,7 @@ getSmallMolSpectra <- function(pool,
   
   
   
-  if (!is.null(matrixIDs)){
-    
-    # Not lapply because we are just going to merge anyways
-    
-    matrix <- IDBacApp::collapseSmallMolReplicates(checkedPool = checkedPool,
-                                                   sampleIDs = matrixIDs ,
-                                                   peakPercentPresence = peakPercentPresence,
-                                                   lowerMassCutoff =lowerMassCutoff,
-                                                   upperMassCutoff = upperMassCutoff, 
-                                                   minSNR = minSNR)
-    
-    
-  } else {
-    matrix <- NULL
-  }
+  
   
   
   

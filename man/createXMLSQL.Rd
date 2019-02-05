@@ -21,6 +21,3 @@ NA
 \description{
 createXMLSQL
 }
-\examples{
-NA
-}

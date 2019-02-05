@@ -55,7 +55,7 @@ colordendLinesUI <- function(id) {
 addDotsActionUI <- function(id) {
   ns <- shiny::NS(id)
   tagList(
-    actionButton(ns("openDendots"), "Click to add Dots"),
+    actionButton(ns("openDendots"), "Incorporate info about samples"),
     actionButton(ns("openLineMod"), "Click to modify lines"),
     actionButton(ns("openLabelMod"), "Click to modify labels")
   )
@@ -87,9 +87,9 @@ plotHier <- function(id) {
 #' @param output NA
 #' @param session NA
 #' @param dendrogram NA
-#' @param dendTrimmedLabels NA
 #' @param pool NA
 #' @param plotWidth NA
+#' @param plotHeight NA
 #'
 #' @return NA
 #' @export

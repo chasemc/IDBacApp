@@ -43,7 +43,9 @@ Imports:
     xml2,
     irlba,
     mzR,
-    shinyBS
+    shinyBS,
+    S4Vectors,
+    httr
 Suggests: testthat
 RoxygenNote: 6.1.1
 Depends: 

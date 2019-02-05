@@ -63,20 +63,15 @@ app_server <- function(input, output, session) {
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE)))
   
+
   
+  observeEvent(input$mainIDBacNav,
+               ignoreInit = TRUE, {
+                 req(input$mainIDBacNav == "sqlUiTab")
+                 availableDatabases$db <- tools::file_path_sans_ext(list.files(sqlDirectory,
+                                                                               pattern = ".sqlite",
+                                                                               full.names = FALSE))
   
-  #This "observe" event creates the SQL tab UI.
-  observeEvent(availableDatabases$db,{
-    if (length(availableDatabases$db) > 0) {
-      appendTab(inputId = "mainIDBacNav",
-                tabPanel("Select/Manipulate Experiments",
-                         value = "sqlUiTab",
-                         IDBacApp::databaseTabUI("sqlUIcreator")
-                         
-                )
-      )
-      
-    }
   })
   
   
@@ -89,6 +84,25 @@ app_server <- function(input, output, session) {
   
   
   # Trigger add tabs --------------------------------------------------------
+  
+  
+  #This "observe" event creates the SQL tab UI.
+  observeEvent(availableDatabases$db,
+               ignoreNULL = TRUE,
+               once = TRUE, {
+                 
+                 appendTab(inputId = "mainIDBacNav",
+                           tabPanel("Work With Previous Experiments",
+                                    value = "sqlUiTab",
+                                    IDBacApp::databaseTabUI("sqlUIcreator")
+                                    
+                           )
+                 )
+                 
+                 
+               })
+
+  
   observeEvent(workingDB$move$selectExperiment,
                ignoreInit = TRUE, {
                  removeTab(inputId = "mainIDBacNav",
@@ -529,13 +543,14 @@ app_server <- function(input, output, session) {
   
   # User chooses which samples to include -----------------------------------
   chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
+  
   observe({
-  chosenProteinSampleIDs$chosen <- shiny::callModule(IDBacApp::sampleChooser_server,
-                                                     "proteinSampleChooser",
-                                                     pool = workingDB$pool,
-                                                     allSamples = FALSE,
-                                                     whetherProtein = TRUE)$addSampleChooser$right
-})
+    chosenProteinSampleIDs$chosen <- shiny::callModule(IDBacApp::sampleChooser_server,
+                                                       "proteinSampleChooser",
+                                                       pool = workingDB$pool,
+                                                       allSamples = FALSE,
+                                                       whetherProtein = TRUE)$addSampleChooser$right
+  })
   
   
   # Collapse peaks ----------------------------------------------------------
@@ -599,6 +614,7 @@ app_server <- function(input, output, session) {
   
   
   observe({
+    req(nrow(proteinMatrix()) > 2)
     proteinDendrogram$dendrogram <- shiny::callModule(IDBacApp::dendrogramCreator,
                                                       "proteinHierOptions",
                                                       proteinMatrix = proteinMatrix)
@@ -646,16 +662,16 @@ app_server <- function(input, output, session) {
                     colorsToUse,
                     by = "nam")
     
-    plot_ly(data = pcaDat,
-            x = ~Dim1,
-            y = ~Dim2,
-            z = ~Dim3,
-            type = "scatter3d",
-            mode = "markers",
-            marker = list(color = ~fac),
-            hoverinfo = 'text',
-            text = ~nam) %>%
-      layout(
+    plotly::plot_ly(data = pcaDat,
+                    x = ~Dim1,
+                    y = ~Dim2,
+                    z = ~Dim3,
+                    type = "scatter3d",
+                    mode = "markers",
+                    marker = list(color = ~fac),
+                    hoverinfo = 'text',
+                    text = ~nam) %>%
+      plotly::layout(
         xaxis = list(
           title = ""
         ),
@@ -799,7 +815,6 @@ app_server <- function(input, output, session) {
       on.exit(setwd(owd))
       file.copy(src, 'report.Rmd', overwrite = TRUE)
       
-      library(rmarkdown)
       out <- render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
         input$format,
         HTML = html_document()

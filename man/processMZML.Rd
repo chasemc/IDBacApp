@@ -10,6 +10,10 @@ processMZML(mzFilePaths, sampleIds, sqlDirectory, newExperimentName)
 \item{mzFilePaths}{file paths of the mzml files}
 
 \item{sampleIds}{sampleIds that are in the same order as the paths}
+
+\item{sqlDirectory}{sqlDirectory}
+
+\item{newExperimentName}{newExperimentName}
 }
 \value{
 Nothing direct, creates a sqlite database

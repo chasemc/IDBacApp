@@ -1,15 +1,16 @@
 
 #' parseDelimitedMS
 #'
-#' @param proteinDirectory NA
-#' @param smallMolDirectory NA
+#' @param proteinPaths proteinPaths 
+#' @param proteinNames proteinNames 
+#' @param smallMolPaths smallMolPaths 
+#' @param smallMolNames smallMolNames 
+#' @param centroid centroid 
 #' @param exportDirectory NA
-#' @param sampleNames sample names if provided (not used yet)
 #'
 #' @return NA
 #' @export
 #'
-#' @examples NA
 parseDelimitedMS <- function(proteinPaths,
                              proteinNames,
                              smallMolPaths,

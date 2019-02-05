@@ -6,50 +6,56 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
-convertOneBruker_UI<- function(id){
+
+convertOneBruker_UI <- function(id){
   ns <- NS(id)
   tagList( 
-    wellPanel(
-      align = "center",
-      
-      h3("Starting with a Single MALDI Plate of Raw Data", align = "center"),
-      p(strong("1: Enter a name for this new experiment")),
-      p("This will become a filename, so avoid non-valid characters
-       as they will be removed."),
-      p("Hint: Intead of \" \", use \"_\"."),
-      textInput(ns("newExperimentName"),
-                label = "",
-                width = "50%"),
-      verbatimTextOutput(ns("newExperimentNameText"),
-                         placeholder = TRUE),
-      tags$hr(size = 20),
-      br(),
-      p(strong("2: Click to select the location of your RAW data"), align = "center"),
-      actionButton(ns("rawFileDirectory"),
-                   label = "Raw Data Folder"),
-      verbatimTextOutput(ns("rawFileDirectoryText"),
-                         placeholder = TRUE),
-      tags$hr(size = 20),
-      br(),
-      p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
-      
-      actionButton(ns("showSampleMap"), "Click to name samples"),
-      br(),
-      p(strong("Missing sample IDs for the following spots:")),
-      shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
-      p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
-      actionButton(ns("convertSingleBruker"),
-                   label = "Process Data"),
-      tags$hr(size = 20)
-    )
+    h3("Starting with a single MALDI plate of Bruker data", align = "center"),
+    p(strong("1: Enter a name for this new experiment")),
+    p("This will become a filename, non-valid characters will be removed."),
+    p("Hint: Intead of a space, use \"_\"."),
+    textInput(ns("newExperimentName"),
+              label = "",
+              width = "50%",
+              placeholder = "Enter Experiment Name Here"),
+    verbatimTextOutput(ns("newExperimentNameText"),
+                       placeholder = TRUE),
+    tags$hr(size = 20),
+    p(strong("2: Click to select the location of your raw data"), align = "center"),
+    actionButton(ns("rawFileDirectory"),
+                 label = "Raw Data Folder"),
+    verbatimTextOutput(ns("rawFileDirectoryText"),
+                       placeholder = TRUE),
+    tags$hr(size = 20),
+    p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
+    
+    actionButton(ns("showSampleMap"), "Click to Open Spreadsheet"),
+    br(),
+    p(strong("Missing sample IDs for the following spots:")),
+    shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
+    p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
+    actionButton(ns("convertSingleBruker"),
+                 label = "Process Data"),
+    tags$hr(size = 20)
   )
+  
 }
 
 
 
 
 
+#' convertOneBruker_Server
+#'
+#' @param input NS
+#' @param output NS
+#' @param session NS
+#' @param tempMZDir tempMZDir 
+#' @param sqlDirectory sqlDirectory
+#'
+#' @return
+#' @export
+#'
 convertOneBruker_Server <- function(input,
                                     output,
                                     session,
@@ -62,7 +68,11 @@ convertOneBruker_Server <- function(input,
   #----
   rawFilesLocation <- reactive({
     if (input$rawFileDirectory > 0) {
-      IDBacApp::choose_dir()
+      loc <- IDBacApp::choose_dir()
+      
+      if(!is.na(loc)){
+        return(loc)
+      }
     }
   })
   
@@ -71,7 +81,7 @@ convertOneBruker_Server <- function(input,
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
     
     if (a == "") {
-      "Enter a valid file name"
+      "The filename-friendly version of your entrywill appear here."
     } else {
       a
     }
@@ -164,8 +174,11 @@ convertOneBruker_Server <- function(input,
   observeEvent(input$showSampleMap, 
                ignoreInit = TRUE, {  
                  ns <- session$ns
-                 showModal(modalDialog(footer = actionButton(ns("saveSampleMap"), "Save"),{
+                 showModal(modalDialog(footer = actionButton(ns("saveSampleMap"), "Save/Close"),{
                    tagList(
+                     HTML("This spreadsheet represents a MALDI plate and will work with plate sizes of 384-spots or less. <br>
+                          Enter sample names as they were arranged on your MALDI plate. <br>
+                          You can also copy/paste from Excel."),
                      rhandsontable::rHandsontableOutput(ns("plateDefault"))
                      
                    )
@@ -218,19 +231,6 @@ convertOneBruker_Server <- function(input,
                  
                  
                })
-  
-  
-  # Spectra conversion
-  #This observe event waits for the user to select the "run" action button and then creates the folders for storing data and converts the raw data to mzML
-  #----
-  spectraConversion <- reactive({
-    
-    IDBacApp::excelMaptoPlateLocation(typeOfRawData = input$typeOfRawData,
-                                      excelFileLocation = input$excelFile$datapath,
-                                      rawFilesLocation = rawFilesLocation(),
-                                      multipleMaldiRawFileLocation = multipleMaldiRawFileLocation())
-    
-  })
   
   
   

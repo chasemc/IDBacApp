@@ -6,15 +6,9 @@
 \usage{
 ui_proteinClustering()
 }
-\arguments{
-\item{x}{NA}
-}
 \value{
 NA
 }
 \description{
 ui_proteinClustering
-}
-\examples{
-NA
 }

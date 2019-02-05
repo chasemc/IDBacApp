@@ -72,17 +72,6 @@ pca_Server <- function(input,
             hoverinfo = 'text',
             text = ~nam) 
   
-  # %>%
-  #     layout(
-  #       xaxis = list(
-  #         title = ""
-  #       ),
-  #       yaxis = list(
-  #         title = " "
-  #       ),
-  #       zaxis = list(
-  #         title = ""
-  #       ))
   })
   
   

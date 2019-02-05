@@ -12,7 +12,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 chooserInput <- function(inputId, 
                          leftLabel,
                          rightLabel,

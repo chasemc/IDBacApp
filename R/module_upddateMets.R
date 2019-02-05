@@ -23,11 +23,23 @@ updateMeta_UI <- function(id) {
                      label = "New Column Name"),
            actionButton(ns("insertNewMetaColumn"),
                         label = "Insert Column")),
-    rhandsontable::rHandsontableOutput(ns("metaTable"), height = 800)
+    rhandsontable::rHandsontableOutput(ns("metaTable"))
   )
 }
 
 
+
+#' updateMeta_server
+#'
+#' @param input  .
+#' @param output  .
+#' @param session  .
+#' @param pool  .
+#' @param selectedDB  .
+#'
+#' @return .
+#' @export
+#'
 
 updateMeta_server <- function(input,
                               output,

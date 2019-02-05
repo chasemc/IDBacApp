@@ -17,6 +17,3 @@ NA
 \description{
 createMetaSQL
 }
-\examples{
-NA
-}

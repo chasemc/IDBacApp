@@ -71,7 +71,7 @@ decompress <- function(input){
 
 
 #----
-#' createMZsha
+#' createSpectrumSha
 #'    Given a mzR 
 #'
 #' @param  peaklist matrix
@@ -80,30 +80,22 @@ decompress <- function(input){
 #' @export
 
 
-createMZsha <- function(peaklist){
-
-  if(base::class(peaklist) == "double"){
-    peaklist <- list(peaklist)
-  }
+createSpectrumSha <- function(peaklist){
   
-  if(base::class(peaklist) == "matrix"){
-    peaklist <- list(peaklist)
-  }
   
-  numScans <- length(peaklist)
-  
-  if(numScans==0){
-    warning("No data found in mzML. If you think this is an error, please submit an issue to GitHub
-          with an example file.")
-  } else if (numScans == 1){
-    peaklist <-  list(IDBacApp::hashR(IDBacApp::serial(peaklist)))
+  if(base::class(peaklist) != "matrix"){
+    warning("createSpectrumSha: peakList given was not of type matrix")  
+    
   } else {
-    peaklist <- lapply(peaklist, function(x) IDBacApp::hashR(IDBacApp::serial(x)))
+    if(is.null(peaklist)){
+      warning("No data found in mzML scan. If you think this is an error, please submit an issue to GitHub
+          with an example file.")
+    } else {
+      
+      return(IDBacApp::hashR(IDBacApp::serial(peaklist)))
+    }
   }
-  return(IDBacApp::hashR(IDBacApp::serial(peaklist)))
 }
-
-
 
 
 
@@ -114,7 +106,7 @@ createMZsha <- function(peaklist){
 #' @return text representing the user's os
 #' @export
 #'
-#' @examples NA
+
 getOS <- function(){
   sysinf <- Sys.info()
   if (!is.null(sysinf)) {

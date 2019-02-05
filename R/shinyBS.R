@@ -1,5 +1,14 @@
 # Taken from shinyBS package
 
+#' Title
+#'
+#' @param tag .
+#' @param class .
+#'
+#' @return .
+#' @export
+#'
+ 
 addClass <- function(tag, class) {
   
   if(!is.null(class)) {
@@ -10,10 +19,29 @@ addClass <- function(tag, class) {
   
 }
 
+#' Title
+#'
+#' @param tag .
+#'
+#' @return .
+#' @export
+#'
+
 getAttribs <- function(tag) {
   tag$attribs
 }
 
+
+#' Title
+#'
+#' @param ... .
+#' @param id  .
+#' @param multiple  .
+#' @param open  .
+#'
+#' @return .
+#' @export
+#'
 
 bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
   
@@ -41,6 +69,17 @@ bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
 
 
 
+#' Title
+#'
+#' @param title . 
+#' @param ...  .
+#' @param value ..
+#' @param style  .
+#'
+#' @return .
+#' @export
+#'
+
 bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
   
   content <- list(...)
@@ -66,6 +105,15 @@ bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
   
 
 }
+
+#' Title
+#'
+#' @param tag .
+#' @param ...  .
+#'
+#' @return .
+#' @export
+#'
 
 addAttribs <- function(tag, ...) {
   a <- list(...)

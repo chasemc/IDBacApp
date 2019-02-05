@@ -12,7 +12,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, text_shift) {
   
   conn <- pool::poolCheckout(pool)

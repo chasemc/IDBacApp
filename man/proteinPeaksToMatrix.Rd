@@ -17,6 +17,3 @@ NA
 \description{
 proteinPeaksToMatrix
 }
-\examples{
-NA
-}

@@ -17,6 +17,3 @@ NA
 \description{
 sampMetaOutput
 }
-\examples{
-NA
-}

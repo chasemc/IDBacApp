@@ -15,6 +15,3 @@ NA
 \description{
 Choose Directory, choose.dir vs tcltk
 }
-\examples{
-NA
-}

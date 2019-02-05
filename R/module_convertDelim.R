@@ -5,17 +5,22 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 convertDelim_UI <- function(id){
   ns <- NS(id)
-  fluidRow(
+  tagList(
+    h3("Starting with tab, csv, or txt files:"),
+    p("Each file should only contain a single profile spectrum formatted in two columns,", 
+      br(),
+      "the first being ", tags$i("m/z")," and the second column being intensity values"),
+   br(),
     p(strong("1: Enter a name for this new experiment")),
-    p("This will become a filename, so avoid non-valid characters
-       as they will be removed."),
-    p("Hint: Intead of \" \", use \"_\"."),
+    p("This will become a filename, non-valid characters will be removed."),
+    p("Hint: Intead of a space, use \"_\"."),
     textInput(ns("newExperimentName"),
               label = "",
-              width = "50%"),
+              width = "50%",
+              placeholder = "Enter Experiment Name Here"),
     verbatimTextOutput(ns("newExperimentNameText"),
                        placeholder = TRUE),
     tags$hr(size = 20),
@@ -27,13 +32,13 @@ convertDelim_UI <- function(id){
                  choices = list("Currently IDBac only accepts profile data" = FALSE),
                  selected = FALSE),
     actionButton(ns("delimitedDirectoryP"),
-                 label = "Folder containing protein data"),
+                 label = "Click to select folder containing protein data"),
     
     verbatimTextOutput(ns("delimitedLocationPo"),
                        placeholder = FALSE),
     
     actionButton(ns("delimitedDirectorySM"),
-                 label = "Raw Data SM Folder"),
+                 label = "Click to select folder containing small-molecule data"),
     
     verbatimTextOutput(ns("delimitedLocationSMo"),
                        placeholder = FALSE),
@@ -50,6 +55,18 @@ convertDelim_UI <- function(id){
 
 
 
+
+#' convertDelim_Server
+#'
+#' @param input module
+#' @param output module
+#' @param session module
+#' @param tempMZDir tempMZDir 
+#' @param sqlDirectory sqlDirectory 
+#'
+#' @return .
+#' @export
+#'
 
 convertDelim_Server <- function(input,
                                 output,
@@ -76,11 +93,13 @@ convertDelim_Server <- function(input,
   })
   
   
+  
   output$newExperimentNameText <- renderText({
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
     
     if (a == "") {
-      "Enter a valid file name"
+      "Once entered, the filename-friendly version of the entered name will appear here once. \n
+      This will be the version of your experiment name that is saved."
     } else {
       a
     }

@@ -7,7 +7,7 @@
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 copyToNewDatabase <- function(existingDBPool,
                               newdbPath, 
                               sampleIDs){

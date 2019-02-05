@@ -17,6 +17,3 @@ NA
 \description{
 getAllStrain_IDsfromSQL
 }
-\examples{
-NA
-}

@@ -68,7 +68,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 createSpectraSQL <- function(mzML_con, 
                              scanNumber,
                              userDBCon,
@@ -82,7 +82,7 @@ createSpectraSQL <- function(mzML_con,
    
     spectraImport <- mzR::peaks(mzML_con, 
                                 scans = individualSpectrum)
-    sqlDataFrame$IndividualSpectra$spectrumSHA <- IDBacApp::createMZsha(spectraImport)
+    sqlDataFrame$IndividualSpectra$spectrumSHA <- IDBacApp::createSpectrumSha(spectraImport)
     
      
     if("IndividualSpectra" %in% DBI::dbListTables(userDBCon)){
@@ -101,7 +101,6 @@ createSpectraSQL <- function(mzML_con,
     if(sqlDataFrame$IndividualSpectra$spectrumSHA %in% existingSHA[,1]) {
       warning ("One of the spectra for \"", sampleID, "\" already seems to be present, spectrum not added again.")
     } else {
-    
     
     sqlDataFrame$IndividualSpectra$mzMLSHA <- XMLinfo$mzMLSHA
     sqlDataFrame$IndividualSpectra$Strain_ID <- sampleID
@@ -229,7 +228,7 @@ createSpectraSQL <- function(mzML_con,
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 createMetaSQL <- function(sampleID,
                           userDBCon){
   
@@ -290,7 +289,7 @@ createMetaSQL <- function(sampleID,
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 createXMLSQL <- function(rawDataFilePath,
                          sampleID,
                          userDBCon,
@@ -357,7 +356,7 @@ createXMLSQL <- function(rawDataFilePath,
                       overwrite = FALSE) # Do not overwrite
   }
   
-  QQ<<-(list(mzMLSHA = sqlDataFrame$XML$mzMLSHA,
+  return(list(mzMLSHA = sqlDataFrame$XML$mzMLSHA,
              mzMLInfo = acquisitonInfo))
 }
 

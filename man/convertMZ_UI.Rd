@@ -15,6 +15,3 @@ NA
 \description{
 beginWithMZ
 }
-\examples{
-NA
-}

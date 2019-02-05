@@ -1,3 +1,10 @@
+#' convertDataTab_UI
+#'
+#' @param id namespace
+#'
+#' @return ui
+#' @export
+#'
 convertDataTab_UI <- function(id) {
   ns <- shiny::NS(id)
   
@@ -6,29 +13,24 @@ convertDataTab_UI <- function(id) {
                "Create an IDBac experiment",
                tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
                         value = ns("convert_bruker_nav"),
-                        fluidRow(
-                          column(width = 9, offset = 2,
-                                  tabsetPanel(
-                                    
-                                   tabPanel(title = "Data from single MALDI plate",
-                                     
-                                          IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
-                                     
-                                   ) 
-                                    
-                                   ))         
-                                    
-                          )            
-                 
                         
-               
+                          wellPanel(class = "intro_WellPanel",
+                                    align = "center",
+                                    #       tabsetPanel(
+                                    #          tabPanel(title = "Data from single MALDI plate",
+                                    IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
+                                    #           ) 
+                                    #                                        )
+                          
+                          
+                        )
                ),
                tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
                         value = ns("convert_mzml_nav"),
-                                 wellPanel(class = "intro_WellPanel",
-                                           align = "center",
-                          IDBacApp::convertMZ_UI(ns("beginWithMZ"))
-               )
+                        wellPanel(class = "intro_WellPanel",
+                                  align = "center",
+                                  IDBacApp::convertMZ_UI(ns("beginWithMZ"))
+                        )
                ),
                tabPanel(tags$ul(tags$li("Click here to convert txt files")),
                         value = ns("convert_txt_nav"),
@@ -43,11 +45,23 @@ convertDataTab_UI <- function(id) {
 
 
 
+#' convertDataTab_Server
+#'
+#' @param input . 
+#' @param output  .
+#' @param session  .
+#' @param tempMZDir  .
+#' @param sqlDirectory  .
+#'
+#' @return .
+#' @export
+#'
+
 convertDataTab_Server <- function(input,
-                                 output,
-                                 session,
-                                 tempMZDir,
-                                 sqlDirectory){
+                                  output,
+                                  session,
+                                  tempMZDir,
+                                  sqlDirectory){
   
   
   
@@ -72,7 +86,7 @@ convertDataTab_Server <- function(input,
   
   
 }
-  
+
 
 
 
@@ -86,7 +100,7 @@ convertDataTab_Server <- function(input,
 #' @return NA
 #' @export
 #'
-#' @examples NA
+
 multipleMaldiPlates <- function(id){
   ns <- shiny::NS(id)
   fluidRow(
@@ -95,7 +109,7 @@ multipleMaldiPlates <- function(id){
            br(),
            fluidRow(
              column(12,offset = 3,
-                    h3("Starting with Multiple MALDI Plates of Raw Data"))), br(), br(),
+                    h3("Starting with Multiple MALDI Plates of raw data"))), br(), br(),
            column(5,
                   fluidRow(column(5,
                                   offset = 3,
@@ -108,7 +122,7 @@ multipleMaldiPlates <- function(id){
                   p("If there is already an \"IDBac\" folder present in the working directory,
                     files will be added into the already-present IDBac folder ", strong("and any samples with the same name will be overwritten.")),
                   br(),
-                  p(strong("2:"),"The RAW data file will be one folder that contains individual folders for each
+                  p(strong("2:"),"The raw data file will be one folder that contains individual folders for each
                     MALDI plate. Each MALDI plate folder will contain an Excel map and two folders: one
                     containing protein data and the other containing small molecule data:"),
                   img(src = "Multi-MALDI-Plate.png", 
@@ -134,11 +148,11 @@ multipleMaldiPlates <- function(id){
                            verbatimTextOutput(ns("newExperimentNameText"),
                                               placeholder = TRUE))),
                   br(),
-                  p(strong("2:"), "Your RAW data will be one folder that contains folders for each MALDI plate."),
+                  p(strong("2:"), "Your raw data will be one folder that contains folders for each MALDI plate."),
                   br(),
-                  p(strong("2: Click to select the location of your RAW data"), align = "center"),
+                  p(strong("2: Click to select the location of your raw data"), align = "center"),
                   actionButton(ns("multipleMaldiRawFileDirectory"),
-                               label = "Click to select the location of your RAW data"),
+                               label = "Click to select the location of your raw data"),
                   fluidRow(column(12,
                                   verbatimTextOutput(ns("multipleMaldiRawFileDirectory"),
                                                      placeholder = TRUE))),

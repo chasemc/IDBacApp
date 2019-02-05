@@ -15,6 +15,3 @@ NA
 \description{
 findRawSHAandFile
 }
-\examples{
-NA
-}
