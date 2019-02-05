@@ -14,8 +14,10 @@ databaseTabUI <- function(id) {
            fluidRow(
              column(width = 12,
                     align = "center",
+                wellPanel(    
                     IDBacApp::databaseSelector_UI(ns("databaseSelector"))
              )
+           )
            )
     ),
     column(width = 8,
@@ -109,7 +111,7 @@ databaseTabServer <- function(input,
   #outputs reactive inputs, access via $
   selectedDB <- callModule(IDBacApp::databaseSelector_server,
                            "databaseSelector",
-                           h3Label = "First, select an experiment:",
+                           h3Label = "Select an Experiment to Work With:",
                            availableExperiments = availableExperiments,
                            sqlDirectory = sqlDirectory)
   

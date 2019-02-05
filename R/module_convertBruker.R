@@ -29,7 +29,7 @@ convertOneBruker_UI <- function(id){
     tags$hr(size = 20),
     p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
     
-    actionButton(ns("showSampleMap"), "Click to name samples"),
+    actionButton(ns("showSampleMap"), "Click to Open Spreadsheet"),
     br(),
     p(strong("Missing sample IDs for the following spots:")),
     shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
