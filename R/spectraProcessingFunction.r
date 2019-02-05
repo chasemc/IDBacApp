@@ -102,7 +102,6 @@ createSpectraSQL <- function(mzML_con,
       warning ("One of the spectra for \"", sampleID, "\" already seems to be present, spectrum not added again.")
     } else {
     
-    
     sqlDataFrame$IndividualSpectra$mzMLSHA <- XMLinfo$mzMLSHA
     sqlDataFrame$IndividualSpectra$Strain_ID <- sampleID
     
@@ -357,6 +356,7 @@ createXMLSQL <- function(rawDataFilePath,
                       overwrite = FALSE) # Do not overwrite
   }
   
-
+  return(list(mzMLSHA = sqlDataFrame$XML$mzMLSHA,
+             mzMLInfo = acquisitonInfo))
 }
 
