@@ -11,24 +11,25 @@ transferToNewDB_UI <- function(id) {
   
   tagList(
     
-    
-    h3("Transfer samples from previous experiments to new/other experiments.", align = "center"),
-    p("Move strains between boxes by clicking the strain's name
-  and then an arrow. Strains in the right box will be used for analysis."),
-    IDBacApp::databaseSelector_UI(ns("dbselector")),   
-    verbatimTextOutput(ns("selection")),
-    br(),
-    textInput(ns("nameformixNmatch"),
-              label = "New experiment name:",
-              width = "50%",
-              placeholder = "Enter new experiment name here"),
-    IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
-    actionButton(ns("addtoNewDB"),
-                 label = "Add to new Experiment"),
-  
-  p("Note: For data integrity, samples cannot be removed from experiments.", 
-    align = "center",
-    class = "note")
+    div(align = "center",  
+        h3("Transfer samples from previous experiments to new/other experiments."),
+        tags$hr(size = 20),
+        
+        IDBacApp::databaseSelector_UI(ns("dbselector")),   
+        verbatimTextOutput(ns("selection")),
+        tags$hr(size = 20),
+        textInput(ns("nameformixNmatch"),
+                  label = "New experiment name:",
+                  width = "50%",
+                  placeholder = "Enter new experiment name here"),
+        tags$hr(size = 20),
+        p("Move samples between boxes by clicking the strain's name
+  and then an arrow. Samples in the right box will be used for analysis."),
+        IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
+        tags$hr(size = 20),
+        actionButton(ns("addtoNewDB"),
+                     label = "Add to new Experiment")
+    )
   )
   
 }
@@ -58,7 +59,8 @@ transferToNewDB_server <- function(input,
   selectedDB <-  shiny::callModule(IDBacApp::databaseSelector_server,
                                    "dbselector",
                                    availableExperiments = availableExperiments,
-                                   sqlDirectory = sqlDirectory)
+                                   sqlDirectory = sqlDirectory,
+                                   h3Label = "Select an existing experiment to copy samples from:")
   
   
   
@@ -87,13 +89,17 @@ transferToNewDB_server <- function(input,
   
   
   observeEvent(input$addtoNewDB, {
+    
+    nam <- gsub(" ", "", IDBacApp::path_sanitize(input$nameformixNmatch))
+    
+    req(nam != "")
+    
     copyingDbPopup()
     
-    newdbPath <- file.path(sqlDirectory, paste0(input$nameformixNmatch, ".sqlite"))
+    newdbPath <- file.path(sqlDirectory, paste0(nam, ".sqlite"))
     copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
                       newdbPath = newdbPath, 
                       sampleIDs = chosenSamples$addSampleChooser$right)
-    
     
     removeModal()
     availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory,

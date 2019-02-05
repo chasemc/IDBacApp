@@ -33,7 +33,7 @@ databaseSelector_UI <- function(id) {
 databaseSelector_server <- function(input,
                                     output,
                                     session,
-                                    h3Label = "First, select an experiment:",
+                                    h3Label = h3("First, select an experiment:"),
                                     availableExperiments,
                                     sqlDirectory){
   
@@ -41,7 +41,7 @@ databaseSelector_server <- function(input,
   output$availableDB <- renderUI({
     ns <- session$ns
     selectInput(ns("selectExperiment"),
-                label = h3(h3Label),
+                label = h3Label,
                 choices = availableExperiments$db,
                 selected = NULL,
                 width = "50%"

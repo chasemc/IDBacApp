@@ -21,14 +21,12 @@ convertOneBruker_UI <- function(id){
     verbatimTextOutput(ns("newExperimentNameText"),
                        placeholder = TRUE),
     tags$hr(size = 20),
-    br(),
     p(strong("2: Click to select the location of your RAW data"), align = "center"),
     actionButton(ns("rawFileDirectory"),
                  label = "Raw Data Folder"),
     verbatimTextOutput(ns("rawFileDirectoryText"),
                        placeholder = TRUE),
     tags$hr(size = 20),
-    br(),
     p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
     
     actionButton(ns("showSampleMap"), "Click to name samples"),
@@ -176,8 +174,11 @@ convertOneBruker_Server <- function(input,
   observeEvent(input$showSampleMap, 
                ignoreInit = TRUE, {  
                  ns <- session$ns
-                 showModal(modalDialog(footer = actionButton(ns("saveSampleMap"), "Save"),{
+                 showModal(modalDialog(footer = actionButton(ns("saveSampleMap"), "Save/Close"),{
                    tagList(
+                     HTML("This spreadsheet represents a MALDI plate and will work with plate sizes of 384-spots or less. <br>
+                          Enter sample names as they were arranged on your MALDI plate. <br>
+                          You can also copy/paste from Excel."),
                      rhandsontable::rHandsontableOutput(ns("plateDefault"))
                      
                    )

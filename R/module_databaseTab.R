@@ -35,7 +35,8 @@ databaseTabUI <- function(id) {
                                                             
                                                             tags$ul(
                                                               tags$li("Experiments should only contain the samples you want to analyze."),
-                                                              tags$li("It is possible to \"mix and match\" samples from different experiments to create new experiments.")
+                                                              tags$li("It is possible to \"mix and match\" samples from different experiments to create new experiments.
+                                                                      However it should be noted that is not possible to remove samples from an experiment.")
                                                             ),
                                                             tags$b("Begin analysis by selecting a previously-created experiment."), 
                                                             br(),
@@ -63,7 +64,7 @@ databaseTabUI <- function(id) {
            ),
            fluidRow(
              IDBacApp::bsCollapse(id = ns("createDbFromDb"),
-                                  IDBacApp::bsCollapsePanel(h4("Click here to copy samples from an experiment to a new experiment",
+                                  IDBacApp::bsCollapsePanel(h4("Click here to copy samples from an existing experiment to a new experiment",
                                                                align = "center"),  
                                                             wellPanel(
                                      

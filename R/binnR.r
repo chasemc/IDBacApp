@@ -86,7 +86,6 @@ peakBinner <- function(peakList,
                             massStart = massStart,
                             massEnd = massEnd)
   
-  #  collected <- lapply(zq, function(x) S4Vectors::unique(S4Vectors::subjectHits(x)))
   collected <- lapply(binvec, function(x) S4Vectors::unique(S4Vectors::subjectHits(x)))
   
   cvec <- sort(unique(unlist(collected)))

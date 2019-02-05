@@ -21,8 +21,6 @@ convertMZ_UI <- function(id){
     verbatimTextOutput(ns("newExperimentNameText"),
                        placeholder = TRUE),
     tags$hr(size = 20),
-    
-    br(),
     p(strong("2: Click to select the location of your mzML files"),
       align = "center"),
     actionButton(ns("mzmlRawFileDirectory"),
@@ -30,7 +28,6 @@ convertMZ_UI <- function(id){
     verbatimTextOutput(ns("mzmlRawFileDirectorytext"),
                        placeholder = TRUE),
     tags$hr(size = 20),
-    br(),
     p("Samples will be named according to the file name of the provided files"),
     br(),
     p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
