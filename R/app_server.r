@@ -92,7 +92,7 @@ app_server <- function(input, output, session) {
                once = TRUE, {
                  
                  appendTab(inputId = "mainIDBacNav",
-                           tabPanel("Select/Manipulate Experiments",
+                           tabPanel("Work With Previous Experiments",
                                     value = "sqlUiTab",
                                     IDBacApp::databaseTabUI("sqlUIcreator")
                                     
