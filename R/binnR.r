@@ -21,6 +21,7 @@ binnR <- function(vectorList,
   # massStart: the first m/z in the IRanges object
   # massEnd: the last m/z in the IRanges object
   
+  #smallest difference is smallest ppm, so get scale of that to 1
   scaleFactor <- ppm / 10e5 * massStart 
   mrange <- IRanges::IRanges(start = seq(massStart * scaleFactor,
                                          massEnd * scaleFactor, 1),
@@ -68,17 +69,18 @@ binnR <- function(vectorList,
 #'
 peakBinner <- function(peakList,
                        ppm,
-                       massStart,
-                       massEnd){
+                       massStart = NULL,
+                       massEnd = NULL){
 
   
   binvec <- IDBacApp::mQuantToMassVec(peakList)
+  if(!is.null(binvec)){
  
    if (is.null(massStart)) {
-    massStart <- min(as.vector(unlist(binvec)))
+    massStart <- min(unlist(binvec))
   }
   if (is.null(massEnd)) {
-    massStart <- min(as.vector(unlist(binvec)))
+    massEnd <- max(unlist(binvec))
   }
   
   binvec <- IDBacApp::binnR(vectorList = binvec,
@@ -86,12 +88,14 @@ peakBinner <- function(peakList,
                             massStart = massStart,
                             massEnd = massEnd)
   
-  collected <- lapply(binvec, function(x) S4Vectors::unique(S4Vectors::subjectHits(x)))
+  collected <- lapply(binvec, 
+                      function(x) 
+                        S4Vectors::unique(S4Vectors::subjectHits(x)))
   
   cvec <- sort(unique(unlist(collected)))
   
   return(lapply(collected, function(x) match(cvec, x)))
-  
+  }
 }
 
 
@@ -112,15 +116,15 @@ mQuantToMassVec <- function(peakList){
     
   } else {
     
-    warning("mQuantToMassVec: not a MALDIquant mass peaks list, trying to convert to MALDIquant mass peaks list")
     peakList <- list(unlist(peakList))
-    if(MALDIquant::isMassPeaksList(peakList)){
+    if (MALDIquant::isMassPeaksList(peakList)) {
       
       return(lapply(peakList, function(x) x@mass))
       
     } else {
       warning("mQuantToMassVec: not a MALDIquant mass peaks list, unable to convert to MALDIquant mass peaks list")
-    }
+    return(NULL)
+      }
     
   }
 }
