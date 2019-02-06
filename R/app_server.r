@@ -542,21 +542,22 @@ app_server <- function(input, output, session) {
   
   
   # User chooses which samples to include -----------------------------------
-  chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
+ # chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   
-  observe({
-    chosenProteinSampleIDs$chosen <- shiny::callModule(IDBacApp::sampleChooser_server,
+ # observe({
+    chosenProteinSampleIDs <- shiny::callModule(IDBacApp::sampleChooser_server,
                                                        "proteinSampleChooser",
                                                        pool = workingDB$pool,
                                                        allSamples = FALSE,
-                                                       whetherProtein = TRUE)$addSampleChooser$right
-  })
+                                                       whetherProtein = TRUE)
+#  })
   
   
   # Collapse peaks ----------------------------------------------------------
   collapsedPeaksForDend <- reactive({
-    req(!is.null(chosenProteinSampleIDs$chosen))
-    req(length(chosenProteinSampleIDs$chosen) > 0)
+    req(!is.null(chosenProteinSampleIDs$addSampleChooser$right))
+    req(length(chosenProteinSampleIDs$addSampleChooser$right) > 0)
+   
     req(workingDB$pool())
     # For each sample:
     # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
@@ -565,7 +566,7 @@ app_server <- function(input, output, session) {
     # connect to sql
     conn <- pool::poolCheckout(workingDB$pool())
     
-    temp <- lapply(chosenProteinSampleIDs$chosen,
+    temp <- lapply(chosenProteinSampleIDs$addSampleChooser$right,
                    function(ids){
                      IDBacApp::collapseReplicates(checkedPool = conn,
                                                   sampleIDs = ids,
@@ -578,7 +579,7 @@ app_server <- function(input, output, session) {
                    })
     
     
-    names(temp) <- chosenProteinSampleIDs$chosen
+    names(temp) <- chosenProteinSampleIDs$addSampleChooser$right
     pool::poolReturn(conn)
     
     
