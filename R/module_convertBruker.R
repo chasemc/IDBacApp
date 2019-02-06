@@ -81,7 +81,7 @@ convertOneBruker_Server <- function(input,
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
     
     if (a == "") {
-      "The filename-friendly version of your entrywill appear here."
+      "The filename-friendly version of your entry will appear here."
     } else {
       a
     }
