@@ -14,15 +14,15 @@ qc_module_variance_smooth_UI <- function(id){
   tagList(
     selectInput(inputId = ns("vs"),
                 label = "Variance Stabilization:",
-                choices=c("sqrt",
-                          "log",
-                          "log2",
-                          "log10"),
+                choices = c("sqrt",
+                            "log",
+                            "log2",
+                            "log10"),
                 selected = "sqrt"),
     selectInput(inputId = ns("smoothingAlgo"),
                 label = "Smoothing:",
-                choices = c("Savitzky-Golay"="SavitzkyGolay",
-                            "Moving-Average"="MovingAverage"),
+                choices = c("Savitzky-Golay" = "SavitzkyGolay",
+                            "Moving-Average" = "MovingAverage"),
                 selected = "Savitzky-Golay"),
     sliderInput(inputId = ns("smoothingHW"),
                 label = "halfWindowSize:",
@@ -30,9 +30,6 @@ qc_module_variance_smooth_UI <- function(id){
                 max = 100,
                 value = 10)
   )
-  
-  
-  
   
 }
 
@@ -53,20 +50,20 @@ qc_module_baseline_UI <- function(id){
                             "ConvexHull" = "ConvexHull",
                             "Median" = "median"),
                 selected = "SNIP"),
-    conditionalPanel(condition='inputbaseline != "ConvexHull"', ns = ns,
+    conditionalPanel(condition ='inputbaseline != "ConvexHull"', ns = ns,
                      sliderInput(inputId = ns("baselineHW"),
                                  label = "halfWindowSize:",
                                  min = 1,
                                  max = 500,
                                  value = 100)),
     tags$hr(),
-
+    
     checkboxInput(inputId = ns("bcUS"),
                   label = "Show estimated baseline",
                   value = TRUE),
     checkboxInput(inputId = ns("bcBC"),
-                  label="Show baseline corrected spectrum",
-                  value=TRUE)
+                  label = "Show baseline corrected spectrum",
+                  value = TRUE)
   )
   
 }
@@ -104,8 +101,8 @@ qc_module_detection_UI <- function(id){
                 max = 100,
                 value = 5),
     checkboxInput(inputId = ns("rotatePeakLables"),
-                  label="Rotate Peak Labels",
-                  value=TRUE)
+                  label = "Rotate Peak Labels",
+                  value = TRUE)
     
   )
 }
@@ -159,7 +156,7 @@ qc_module_sliders_UI <- function(id){
 qc_module_main_UI <- function(id){
   ns <- NS(id)
   fluidPage(
-    column(width = 5,
+    column(width = 7,
            fluidRow(
              IDBacApp::bsCollapse(id = ns("variance"),
                                   IDBacApp::bsCollapsePanel(h4("Variance and Smoothing"), 
@@ -167,13 +164,13 @@ qc_module_main_UI <- function(id){
                                                                    IDBacApp::qc_module_variance_smooth_UI(id)
                                                             ), 
                                                             column(width = 8,
-                                                                      plotOutput(ns("plotSmooth"))
+                                                                   plotOutput(ns("plotSmooth"))
                                                             )
                                                             
                                   )),
              IDBacApp::bsCollapse(id = ns("baseline"),
                                   
-                                  IDBacApp::bsCollapsePanel(h4("Baseline"), 
+                                  IDBacApp::bsCollapsePanel(h4("Baseline Correction"), 
                                                             column(width = 4,
                                                                    IDBacApp::qc_module_baseline_UI(id)
                                                             ),
@@ -189,20 +186,21 @@ qc_module_main_UI <- function(id){
                                                                    IDBacApp::qc_module_detection_UI(id)
                                                             ),
                                                             column(width = 8,
-                                                                      plotOutput(ns("peakPlots"))
+                                                                   plotOutput(ns("peakPlots"))
                                                             )
-                                                                   
-                                                            ))
-             )
-           ), 
-           column(width = 7,
-                  fluidRow(IDBacApp::qc_module_sliders_UI(id)),
-                  fluidRow(
-                    h4("Original Spectrum"),
-                    plotOutput(ns("plotRaw"))
-                    )
-                      
+                                                            
+                                  ))
            )
+    ), 
+    column(width = 4, offset = 1,
+           fluidRow(IDBacApp::qc_module_sliders_UI(id)),
+           fluidRow(
+             div(align = "center",
+             h4("Original Spectrum"),
+             plotOutput(ns("plotRaw"))
+             )
+           )
+    )
     
     
     
@@ -213,22 +211,27 @@ qc_module_main_UI <- function(id){
 
 
 
-
-
-
-
 qc_module_server <- function(input,
                              output,
-                             session){
+                             session,
+                             mzFilePaths){
   
   
-  currentSpectra <- reactive({
+  output$tempMzFiles <- renderUI({
     
-    readRDS("a.rds")
+    list.files(tempMZ, tempMZ)
+    
     
   })
   
-  
+  currentSpectra <- reactive({
+    
+    
+    lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[ , 1],
+                                                                                      intensity = x[ , 2],
+                                                                                      metaData = list(File = rawDataFilePath,
+                                                                                                      Strain = sampleID)))    
+  })
   
   
   output$xlimSlider <- renderUI({
@@ -241,9 +244,6 @@ qc_module_server <- function(input,
                 ticks = TRUE)
   })
   
-
-  
-  
   
   vsSpectra <- reactive({
     if (is.null(input$vs)) {
@@ -251,7 +251,7 @@ qc_module_server <- function(input,
     } else {
       method <- input$vs
     }
-    return(transformIntensity(currentSpectra(), method = method))
+    return(MALDIquant::transformIntensity(currentSpectra(), method = method))
   })
   
   smoothedSpectra <- reactive({
@@ -262,7 +262,9 @@ qc_module_server <- function(input,
       method <- input$smoothingAlgo
       hws <- input$smoothingHW
     }
-    return(smoothIntensity(vsSpectra(), method = method, halfWindowSize=hws))
+    return(MALDIquant::smoothIntensity(vsSpectra(),
+                                       method = method, 
+                                       halfWindowSize = hws))
   })
   
   baselineCorrectedSpectra <- reactive({
@@ -275,17 +277,19 @@ qc_module_server <- function(input,
     }
     
     y <- smoothedSpectra()
-    bl <- estimateBaseline(y, method = method, hws)
-    intensity(y) <- intensity(y)-bl[, 2]
-      return(y)
+    bl <- MALDIquant::estimateBaseline(y, 
+                                       method = method,
+                                       hws)
+    MALDIquant::intensity(y) <- MALDIquant::intensity(y) - bl[ , 2]
+    return(y)
     
   })
   
   detectedPeaks <- reactive({
-    return(detectPeaks(baselineCorrectedSpectra(),
-                       method = input$noise,
-                       halfWindowSize = input$detectHW, 
-                       SNR =input$snr))
+    return(MALDIquant::detectPeaks(baselineCorrectedSpectra(),
+                                   method = input$noise,
+                                   halfWindowSize = input$detectHW, 
+                                   SNR = input$snr))
   })
   
   
@@ -308,18 +312,18 @@ qc_module_server <- function(input,
                      ylim = c(max(vsSpectra()@intensity) * (input$ylim[[1]]  / 100), 
                               max(vsSpectra()@intensity) * (input$ylim[[2]]  / 100))
     )
-    MALDIquant::lines(smoothIntensity(vsSpectra(), 
-                                      method = input$smoothingAlgo,
-                                      halfWindowSize = input$smoothingHW), 
+    MALDIquant::lines(MALDIquant::smoothIntensity(vsSpectra(), 
+                                                  method = input$smoothingAlgo,
+                                                  halfWindowSize = input$smoothingHW), 
                       col = "red")
     
-
+    
   })
   
   output$baselinePlots <- renderPlot({
-    bl <- estimateBaseline(smoothedSpectra(), 
-                           method = input$baseline,
-                           input$baselineHW)
+    bl <- MALDIquant::estimateBaseline(smoothedSpectra(), 
+                                       method = input$baseline,
+                                       input$baselineHW)
     
     MALDIquant::plot(smoothedSpectra(),
                      xlim = input$xlim,
@@ -327,15 +331,15 @@ qc_module_server <- function(input,
                               max(smoothedSpectra()@intensity) * (input$ylim[[2]]  / 100))
     )
     
-   
+    
     if (input$bcUS) {
       MALDIquant::lines(bl, 
-            col = "red",
-            lwd = 2)
+                        col = "red",
+                        lwd = 2)
     }
     if (input$bcBC) {
-      MALDIquant::lines(baselineCorrectedSpectra(), col=4)
-                       
+      MALDIquant::lines(baselineCorrectedSpectra(), col = 4)
+      
       
     }
     
@@ -347,41 +351,40 @@ qc_module_server <- function(input,
                      ylim = c(max(baselineCorrectedSpectra()@intensity) * (input$ylim[[1]]  / 100), 
                               max(baselineCorrectedSpectra()@intensity) * (input$ylim[[2]]  / 100))
     )
-
-              n <- estimateNoise(baselineCorrectedSpectra(), method=input$noise)
-              lines(n[, 1], input$snr*n[, 2], col=2, lwd=2)
-              p <- detectPeaks(baselineCorrectedSpectra(), method=input$noise,
-                               halfWindowSize=input$detecthalfWindow,
-                               SNR=input$snr)
-              MALDIquant::points(p, col=4, pch=4, lwd=2)
-              
-              if (input$topN) {
-                top <- sort(intensity(p), decreasing=TRUE,
-                            index.return=TRUE,
-                            method="quick")$ix[1:input$topN]
-                if (input$rotatePeakLables) {
-                  srt <- 90
-                  adj <- c(-0.1, 0.5)
-                } else {
-                  srt <- 0
-                  adj <- c(0.5, 0)
-                }
-                MALDIquant::labelPeaks(p[top], srt=srt, adj=adj)
-              }
-            
+    
+    n <- MALDIquant::estimateNoise(baselineCorrectedSpectra(),
+                                   method = input$noise)
+    lines(n[, 1],
+          input$snr*n[ , 2],
+          col = 2,
+          lwd = 2)
+    p <- MALDIquant::detectPeaks(baselineCorrectedSpectra(), 
+                                 method = input$noise,
+                                 halfWindowSize = input$detecthalfWindow,
+                                 SNR = input$snr)
+    MALDIquant::points(p,
+                       col = 4,
+                       pch = 4,
+                       lwd = 2)
+    
+    if (input$topN) {
+      top <- sort(MALDIquant::intensity(p), 
+                  decreasing = TRUE,
+                  index.return = TRUE,
+                  method = "quick")$ix[1:input$topN]
+      if (input$rotatePeakLables) {
+        srt <- 90
+        adj <- c(-0.1, 0.5)
+      } else {
+        srt <- 0
+        adj <- c(0.5, 0)
+      }
+      MALDIquant::labelPeaks(p[top], 
+                             srt = srt,
+                             adj = adj)
+    }
+    
   })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
 }
 

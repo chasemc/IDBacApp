@@ -16,12 +16,9 @@ convertDataTab_UI <- function(id) {
                         
                           wellPanel(class = "intro_WellPanel",
                                     align = "center",
-                                    #       tabsetPanel(
-                                    #          tabPanel(title = "Data from single MALDI plate",
+                                 
                                     IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
-                                    #           ) 
-                                    #                                        )
-                          
+                 
                           
                         )
                ),
