@@ -21,7 +21,7 @@ convertOneBruker_UI <- function(id){
     verbatimTextOutput(ns("newExperimentNameText"),
                        placeholder = TRUE),
     tags$hr(size = 20),
-    p(strong("2: Click to select the location of your raw data"), align = "center"),
+    p(strong("2: Click to select your folder that contains data from a single MALDI plate."), align = "center"),
     actionButton(ns("rawFileDirectory"),
                  label = "Raw Data Folder"),
     verbatimTextOutput(ns("rawFileDirectoryText"),
@@ -30,8 +30,10 @@ convertOneBruker_UI <- function(id){
     p(strong("3:", "Fill in the Sample-ID spreadsheet.")),
     
     actionButton(ns("showSampleMap"), "Click to Open Spreadsheet"),
-    br(),
-    p(strong("Missing sample IDs for the following spots:")),
+    tags$hr(size = 20),
+    p(strong("You must label all spots that contain data."), br(),
+      strong("IDBac found data for the following spots that aren't labelled in the spreadsheet.")
+      ),
     shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
     p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
     actionButton(ns("convertSingleBruker"),
