@@ -10,6 +10,12 @@
 app_server <- function(input, output, session) {
   
   
+  
+  callModule(IDBacApp::qc_module_server,"qcr")
+  
+  
+  
+  
   # Develepment Functions ---------------------------------------------------
   options(shiny.reactlog = TRUE)
   sqlDirectory <- getwd()
