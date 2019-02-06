@@ -21,18 +21,15 @@ environment:
     R_ARCH: x64
     GCC_PATH: mingw_64
 
-  - R_VERSION: devel
-    R_ARCH: x64
-    GCC_PATH: mingw_64
 
-  - R_VERSION: patched
-    GCC_PATH: mingw_32
 
 matrix:
   fast_finish: true
 
 build_script:
+  - Rscript -e "source('http://bioconductor.org/biocLite.R')"
   - travis-tool.sh install_deps
+  - travis-tool.sh r_binary_install curl
 
 test_script:
   - travis-tool.sh run_tests
