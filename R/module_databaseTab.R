@@ -40,7 +40,7 @@ databaseTabUI <- function(id) {
                                                               tags$li("It is possible to \"mix and match\" samples from different experiments to create new experiments.
                                                                       However it should be noted that is not possible to remove samples from an experiment.")
                                                             ),
-                                                            tags$b("Begin analysis by selecting a previously-created experiment."), 
+                                                            tags$b("Begin analysis by selecting a previously-created experiment to the left."), 
                                                             br(),
                                                             br(),
                                                             tags$b("You also have the option, below, to:")
@@ -111,7 +111,7 @@ databaseTabServer <- function(input,
   #outputs reactive inputs, access via $
   selectedDB <- callModule(IDBacApp::databaseSelector_server,
                            "databaseSelector",
-                           h3Label = "Select an Experiment to Work With:",
+                           h3Label = tags$h4("Select an experiment ", br(), "to work with:"),
                            availableExperiments = availableExperiments,
                            sqlDirectory = sqlDirectory)
   
