@@ -127,7 +127,7 @@ qc_module_detection_UI <- function(id){
 qc_module_sliders_UI <- function(id){
   ns <- NS(id)
   
-  wellPanel(
+  tagList(
     p(strong("Zoom:")),
     uiOutput(ns("xlimSlider")),
     sliderInput(inputId = ns("ylim"),
@@ -155,7 +155,7 @@ qc_module_sliders_UI <- function(id){
 #' @examples
 qc_module_main_UI <- function(id){
   ns <- NS(id)
-  fluidPage(
+  tagList(
     column(width = 7,
            fluidRow(
              IDBacApp::bsCollapse(id = ns("variance"),
@@ -196,8 +196,8 @@ qc_module_main_UI <- function(id){
            fluidRow(IDBacApp::qc_module_sliders_UI(id)),
            fluidRow(
              div(align = "center",
-             h4("Original Spectrum"),
-             plotOutput(ns("plotRaw"))
+                 h4("Original Spectrum"),
+                 plotOutput(ns("plotRaw"))
              )
            )
     )
@@ -214,23 +214,16 @@ qc_module_main_UI <- function(id){
 qc_module_server <- function(input,
                              output,
                              session,
-                             mzFilePaths){
+                             mzFilePaths
+                             ){
   
   
-  output$tempMzFiles <- renderUI({
-    
-    list.files(tempMZ, tempMZ)
-    
-    
-  })
   
   currentSpectra <- reactive({
-    
-    
-    lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[ , 1],
-                                                                                      intensity = x[ , 2],
-                                                                                      metaData = list(File = rawDataFilePath,
-                                                                                                      Strain = sampleID)))    
+    a1<<-mzFilePaths()
+    awq<<-IDBacApp::spFinder(mzFilePaths(),
+                       proteinORsmall = "protein")
+    awq[[1]]
   })
   
   

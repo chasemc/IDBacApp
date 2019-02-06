@@ -113,11 +113,8 @@ app_ui <- function(){
              tabPanel(
                "Starting With Raw Data",
                value = "rawDataUiTab",
-               IDBacApp::convertDataTab_UI("convertDataTab")),
-             tabPanel(
-               "QC",
-               value = "qctab",
-               IDBacApp::qc_module_main_UI("qcr"))
+               IDBacApp::convertDataTab_UI("convertDataTab"))
+            
              
   )
 }

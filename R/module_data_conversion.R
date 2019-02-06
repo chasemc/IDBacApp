@@ -24,10 +24,9 @@ convertDataTab_UI <- function(id) {
                ),
                tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
                         value = ns("convert_mzml_nav"),
-                        wellPanel(class = "intro_WellPanel",
-                                  align = "center",
+                       
                                   IDBacApp::convertMZ_UI(ns("beginWithMZ"))
-                        )
+                     
                ),
                tabPanel(tags$ul(tags$li("Click here to convert txt files")),
                         value = ns("convert_txt_nav"),

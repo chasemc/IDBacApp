@@ -10,6 +10,8 @@
 convertMZ_UI <- function(id){
   ns <- NS(id)
   tagList(
+  wellPanel(class = "intro_WellPanel",
+            align = "center",
     h3("Starting with mzML or mzXML Data:"),
     p(strong("1: Enter a name for this new experiment")),
     p("This will become a filename, non-valid characters will be removed."),
@@ -33,7 +35,8 @@ convertMZ_UI <- function(id){
     p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
     actionButton(ns("runMsconvert"),
                  label = "Process Data"),
-    tags$hr(size = 20)
+    tags$hr(size = 20)),
+    uiOutput(ns("tty"))
   )
   
   
@@ -124,27 +127,45 @@ convertMZ_Server <-  function(input,
     gsub(" ","",a)
   })
   
-  observeEvent(input$runMsconvert, {
+
     
-    req(!is.null(mzmlRawFilesLocation()))
-    req(!is.null(sanity()))
-    req(sanity() != "")
     
-    IDBacApp::popup3()
-    
-    mzFilePaths <- IDBacApp::findmz(mzmlRawFilesLocation(),
+    mzFilePaths <- reactive({
+      IDBacApp::findmz(mzmlRawFilesLocation(),
                                     recursive = TRUE,
                                     full = TRUE)
+    })
+
+    
+
+ 
+    observeEvent(input$runMsconvert, {
+ output$tty <- renderUI({
+      
+      
+      IDBacApp::qc_module_main_UI(session$ns("qcr"))
     
     
-    IDBacApp::processMZML(mzFilePaths = mzFilePaths,
-                          sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
-                          sqlDirectory = sqlDirectory,
-                          newExperimentName = sanity())
+ })
+ 
+    })
+ callModule(IDBacApp::qc_module_server,"qcr" ,mzFilePaths)
+ 
     
-    
-    
-    IDBacApp::popup4() 
-  })
-  
+  #   
+  #   observeEvent(input$runMsconvert, {  
+  #     req(!is.null(mzmlRawFilesLocation()))
+  #     req(!is.null(sanity()))
+  #     req(sanity() != "")
+  #     IDBacApp::popup3()  
+  #   IDBacApp::processMZML(mzFilePaths = mzFilePaths,
+  #                         sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
+  #                         sqlDirectory = sqlDirectory,
+  #                         newExperimentName = sanity())
+  #   
+  #   
+  #   
+  #   IDBacApp::popup4() 
+  # })
+  # 
 }

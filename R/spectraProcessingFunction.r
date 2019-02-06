@@ -16,7 +16,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
   
   #Doesn't do anything currently, but put here to help future-proof
   
-  if(!"version" %in%  DBI::dbListTables(userDBCon)){
+  if (!"version" %in%  DBI::dbListTables(userDBCon)) {
   
   # Write to SQL DB
   DBI::dbWriteTable(conn = userDBCon,
