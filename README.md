@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.org/chasemc/IDBacApp.svg?branch=master)](https://travis-ci.org/chasemc/IDBacApp)
+
+
 Every IDBac release (Including this Manual) is preserved at Zenodo for citability/reproducibility:   
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115619.svg)](https://doi.org/10.5281/zenodo.1115619)
 
