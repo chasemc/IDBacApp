@@ -13,9 +13,7 @@ p <- c(MALDIquant::createMassPeaks(mass = c(1, 1.01, 3),
 binned <- IDBacApp::peakBinner(peakList = p,
                       ppm = 100000)
 
-binned2 <- IDBacApp::peakBinner(peakList = list(p),
-                               ppm = 100000)
-digest::sha1(binned2)
+
 
 
 
