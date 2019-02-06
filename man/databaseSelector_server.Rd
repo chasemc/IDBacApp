@@ -5,7 +5,7 @@
 \title{databaseSelector_server}
 \usage{
 databaseSelector_server(input, output, session,
-  h3Label = "First, select an experiment:", availableExperiments,
+  h3Label = h3("First, select an experiment:"), availableExperiments,
   sqlDirectory)
 }
 \arguments{
