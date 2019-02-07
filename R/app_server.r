@@ -1216,14 +1216,11 @@ app_server <- function(input, output, session) {
   
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
-  #   session$onSessionEnded(function() {
-  # file.remove(list.files(tempMZDir,
-  #                        pattern = ".mzML",
-  #                        recursive = FALSE,
-  #                        full.names = TRUE))
-  #      stopApp()
-  #      q("no")
-  #    })
+    session$onSessionEnded(function() {
+ 
+       stopApp()
+       q("no")
+     })
   
   
   # wq <-pool::dbPool(drv = RSQLite::SQLite(),
