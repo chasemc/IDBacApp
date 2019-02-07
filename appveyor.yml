@@ -6,25 +6,11 @@ init:
         $ErrorActionPreference = "Stop"
         Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
         Import-Module '..\appveyor-tool.ps1'
+
 install:
   ps: Bootstrap
 
 # Adapt as necessary starting from here
-
-environment:
-  global:
-    WARNINGS_ARE_ERRORS: 1
-   
-
-  matrix:
-  - R_VERSION: 3.5.2
-    R_ARCH: x64
-    GCC_PATH: mingw_64
-
-
-
-matrix:
-  fast_finish: true
 
 build_script:
   - Rscript -e "source('http://bioconductor.org/biocLite.R')"
@@ -37,6 +23,20 @@ test_script:
 on_failure:
   - 7z a failure.zip *.Rcheck\*
   - appveyor PushArtifact failure.zip
+
+before_test:
+  - cinst pandoc
+  - ps: $env:Path += ";C:\Program Files (x86)\Pandoc\"
+
+environment:
+  global:
+    WARNINGS_ARE_ERRORS: 1
+    _R_CHECK_FORCE_SUGGESTS_: 0
+    R_ARCH: x64
+    USE_RTOOLS: true ## to be able to use Remotes (i.e. packages from non-CRAN sources)
+
+  matrix:
+    - R_VERSION: release
 
 artifacts:
   - path: '*.Rcheck\**\*.log'
@@ -56,3 +56,6 @@ artifacts:
 
   - path: '\*_*.zip'
     name: Bits
+
+cache:
+  - C:\RLibrary
