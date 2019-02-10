@@ -555,7 +555,6 @@ app_server <- function(input, output, session) {
   
   # Collapse peaks ----------------------------------------------------------
   collapsedPeaksForDend <- reactive({
-    
     req(!is.null(chosenProteinSampleIDs$chosen))
     req(length(chosenProteinSampleIDs$chosen) > 0)
    
@@ -565,8 +564,9 @@ app_server <- function(input, output, session) {
     # merge into a single peak list per sample
     # trim m/z based on user input
     # connect to sql
+    isolate(
     conn <- pool::poolCheckout(workingDB$pool())
-    
+    )
     temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
                      IDBacApp::collapseReplicates(checkedPool = conn,
@@ -619,7 +619,7 @@ app_server <- function(input, output, session) {
                        proteinMatrix = proteinMatrix)
 
   
-  observe({
+  observeEvent(proteinMatrix(),{
     req(nrow(proteinMatrix()) > 2)
     proteinDendrogram$dendrogram <- dendMaker()$dend
   })
