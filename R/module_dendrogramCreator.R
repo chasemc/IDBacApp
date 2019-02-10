@@ -37,7 +37,12 @@ dendrogramCreatorUI <- function(id) {
     shiny::radioButtons(ns("booled"),
                         label = shiny::h5(shiny::strong("Include peak intensities, or use presence/absence?")),
                         choices = list("Presence/Absence" = TRUE,
-                                       "Intensities" = FALSE))
+                                       "Intensities" = FALSE)),
+    shiny::numericInput(ns("bootstraps"),
+                        label = "Bootstraps",
+                        value = "",
+                        min = 1,
+                        max = 1000)
   )
   
 }
@@ -65,21 +70,43 @@ dendrogramCreator <- function(input,
     
     req(nrow(proteinMatrix() > 2))
     
+    
+    # Remove if row is all NA (no peaks left)
     dend <- proteinMatrix()[rowSums(is.na(proteinMatrix())) > 0, ]
     
     
-    dend <- IDBacApp::distMatrix(data = dend,
-                                 method = input$distanceMethod,
-                                 booled = input$booled)
+    createHclustObject <- function(x){
+      x <- IDBacApp::distMatrix(data = x,
+                                method = input$distanceMethod,
+                                booled = input$booled)
+      
+      stats::hclust(x,
+                    method = input$clustering)
+    }
+    ppp<<-input$bootstrap
+    bootstraps <- ""
+    if (is.numeric(input$bootstraps)) {
+      if ((input$bootstraps > 1) & (input$bootstraps < 1000)) {
+        
+        bootstraps <- IDBacApp::bootstrap(dend,
+                                          fun = createHclustObject,
+                                          n = input$bootstraps)
+        
+        
+      }
+    }
     
-    dend <- stats::hclust(dend,
-                          method = input$clustering)
+    
+    dend <- createHclustObject(dend)
+    
     dend <- stats::as.dendrogram(dend)
     
     
+    return(list(dendrogram = dend,
+                bootstraps = bootstraps))
   })
   
-  return(pMatrixReactive())
+  return(pMatrixReactive)
   
 }
 

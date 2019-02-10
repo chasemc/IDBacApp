@@ -91,6 +91,8 @@ collapseReplicates <- function(checkedPool,
                                tolerance = 0.002,
                                protein){
   
+
+  
   temp <- IDBacApp::getPeakData(checkedPool = checkedPool,
                                 sampleIDs = sampleIDs,
                                 protein = protein) 

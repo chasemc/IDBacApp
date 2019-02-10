@@ -101,7 +101,8 @@ dendDotsServer <- function(input,
                            dendrogram,
                            pool,
                            plotWidth,
-                           plotHeight){
+                           plotHeight,
+                           boots){
   
   
   observeEvent(input$closeDendDots, {
@@ -383,11 +384,6 @@ dendDotsServer <- function(input,
   })
  
  
- 
-  
-    
-  
-  
   
   
   
@@ -428,6 +424,14 @@ dendDotsServer <- function(input,
         abline(v = input$cutHeightLines, lty = 2)
       }
     }
+   print(boots()$bootstraps)
+   if (boots()$bootstraps[1] != "") {
+
+     IDBacApp::bootlabels.hclust(as.hclust(dendrogram$dendrogram), 
+                                 boots()$bootstraps,
+                                 horiz = TRUE,
+                                 col = "blue")
+   }
     
   }, height = plotHeight)
   
