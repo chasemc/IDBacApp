@@ -38,24 +38,27 @@ sampleChooser_server <- function(input,
   nams <- reactiveValues(av = NULL)
   
   observe({
-    
     chosenProteinSampleIDs$chosen <- NULL
+    conn <- pool::poolCheckout(pool())
+    nams$av <- IDBacApp::availableSampleNames(checkedPool = conn,
+                                           whetherProtein = whetherProtein,
+                                           allSamples = allSamples)
+    pool::poolReturn(conn)
     
   })
 
+  observeEvent(input$addSampleChooser, ignoreInit = TRUE, {
+    chosenProteinSampleIDs$chosen <- input$addSampleChooser$right 
+  })
+  
+  
   
   output$chooseSamples <- renderUI({
-    req(class(pool())[[1]] == "Pool")
-    conn <- pool::poolCheckout(pool())
-    
-    nams <- IDBacApp::availableSampleNames(checkedPool = conn,
-                                              whetherProtein = whetherProtein,
-                                              allSamples = allSamples)
-    pool::poolReturn(conn)
+
     tagList(IDBacApp::chooserInput(inputId = session$ns("addSampleChooser"),
                                    leftLabel = "Available samples",
                                    rightLabel = "Selected samples",
-                                   leftChoices = nams,
+                                   leftChoices = nams$av,
                                    rightChoices = c(),
                                    size = 10,
                                    multiple = TRUE)
@@ -67,5 +70,5 @@ sampleChooser_server <- function(input,
   
   
   
-  return(input)
+  return(chosenProteinSampleIDs)
 }

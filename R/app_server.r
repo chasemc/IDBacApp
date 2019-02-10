@@ -120,7 +120,7 @@ app_server <- function(input, output, session) {
                            
                  )
                  
-                 pool <<- pool::poolCheckout(workingDB$pool())
+                 pool <- pool::poolCheckout(workingDB$pool())
                  p <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE proteinPeaks IS NOT NULL")[,1]
                  s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaks IS NOT NULL")[,1]
                  pool::poolReturn(pool)
@@ -555,8 +555,9 @@ app_server <- function(input, output, session) {
   
   # Collapse peaks ----------------------------------------------------------
   collapsedPeaksForDend <- reactive({
-    req(!is.null(chosenProteinSampleIDs$addSampleChooser$right))
-    req(length(chosenProteinSampleIDs$addSampleChooser$right) > 0)
+    
+    req(!is.null(chosenProteinSampleIDs$chosen))
+    req(length(chosenProteinSampleIDs$chosen) > 0)
    
     req(workingDB$pool())
     # For each sample:
@@ -566,7 +567,7 @@ app_server <- function(input, output, session) {
     # connect to sql
     conn <- pool::poolCheckout(workingDB$pool())
     
-    temp <- lapply(chosenProteinSampleIDs$addSampleChooser$right,
+    temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
                      IDBacApp::collapseReplicates(checkedPool = conn,
                                                   sampleIDs = ids,
@@ -579,7 +580,7 @@ app_server <- function(input, output, session) {
                    })
     
     
-    names(temp) <- chosenProteinSampleIDs$addSampleChooser$right
+    names(temp) <- chosenProteinSampleIDs$chosen
     pool::poolReturn(conn)
     
     
