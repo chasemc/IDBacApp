@@ -755,26 +755,24 @@ app_server <- function(input, output, session) {
     
     if (is.null(input$Spectra1)) {
       fluidPage(
-        h1(" There is no data to display",
-           img(src = "errors/hit3.gif",
-               width = "200",
-               height = "100")),
+        h1(" There is no data to display", align = "center"),
         br(),
         h4("Troubleshooting:"),
         tags$ul(
-          tags$li("Please ensure you have followed the instructions in the \"PreProcessing\" tab, and then visited the
-                      \"Compare Two Samples\" tab."),
-          tags$li("If you have already tried that, make sure there are \".rds\" files in your IDBac folder, within a folder
-                      named \"Peak_Lists\""),
-          tags$li("If it seems there is a bug in the software, this can be reported on the",
+          tags$li("Please visit the
+                      \"Compare Two Samples (Protein)\" tab first."),
+          tags$li("If it seems like there is a bug in the software, this can be reported on the",
                   a(href = "https://github.com/chasemc/IDBacApp/issues",
                     target = "_blank",
                     "IDBac Issues Page at GitHub.",
                     img(border = "0",
                         title = "https://github.com/chasemc/IDBacApp/issues",
-                        src = "GitHub.png",
+                        src = "www/GitHub.png",
                         width = "25",
-                        height = "25")))
+                        height = "25")
+                  )
+                  
+          )
         )
       )
     } else {
