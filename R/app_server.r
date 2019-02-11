@@ -591,7 +591,10 @@ app_server <- function(input, output, session) {
   
   
   
-  
+  callModule(IDBacApp::selectInjections_server,
+          "proteinInject",
+          sqlDirectory = sqlDirectory,
+          availableExperiments = availableDatabases)
   
   # Protein matrix ----------------------------------------------------------
   

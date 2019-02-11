@@ -42,6 +42,8 @@ ui_proteinClustering <- function() {
                    IDBacApp::colordendLabelsUI("proth"),
                    IDBacApp::colordendLinesUI("proth"),
                    br(),
+                   IDBacApp::selectInjections_UI("proteinInject"),
+                   br(),
                    h4("Suggestions for Reporting Protein Analysis:"),
                    uiOutput("proteinReport")
                    # shiny::absolutePanel(
