@@ -1342,12 +1342,12 @@ return(samples)
   
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
-    # session$onSessionEnded(function() {
-    # 
-    #    stopApp()
-    #    q("no")
-    #  })
-    # 
+    session$onSessionEnded(function() {
+
+       stopApp()
+       q("no")
+     })
+
   
   # wq <-pool::dbPool(drv = RSQLite::SQLite(),
   #              dbname = paste0("wds", ".sqlite"))
