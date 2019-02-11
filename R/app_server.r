@@ -964,28 +964,105 @@ app_server <- function(input, output, session) {
   
   
   
-  # Small mol PCA Calculation -----------------------------------------------
+  # Small mol pca Calculation -----------------------------------------------
   
   callModule(IDBacApp::pca_Server,
              "smallMolPcaPlot",
              dataframe = smallMolDataFrame,
              namedColors = function() NULL)
   
+
+# Small mol ---------------------------------------------------------------
+
+  output$matrixSelector <- renderUI({
+    IDBacApp::bsCollapse(id = "collapseMatrixSelection",
+                         open = "Panel 1",
+                         IDBacApp::bsCollapsePanel(p("Select a Sample to Subtract", 
+                                                      align = "center"),
+                                                   selectInput("selectMatrix",
+                                                               label = "",
+                                                               choices = c("None", smallMolIDs()))
+                                                   
+                         )
+    )
+})
+
+  
+  
+  smallMolIDs <- reactive({
+    checkedPool <- pool::poolCheckout(workingDB$pool())
+    # retrieve all Strain_IDs in db that have small molecule spectra
+    sampleIDs <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
+                                FROM `IndividualSpectra`
+                                WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                                .con = checkedPool)
+    sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)
+    
+     pool::poolReturn(checkedPool)
+    
+    return(sampleIDs)
+    
+  })  
+  
+    
   
   subtractedMatrixBlank <- reactive({
     
     
-    a <-  IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
-                                       sampleIDs,
-                                       dendrogram = proteinDendrogram$dendrogram,
-                                       brushInputs = smallProtDend,
-                                       matrixIDs = NULL,
-                                       peakPercentPresence = input$percentPresenceSM,
-                                       lowerMassCutoff = input$lowerMassSM,
-                                       upperMassCutoff = input$upperMassSM,
-                                       minSNR = input$smSNR)
+    samples <-  IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
+                                             sampleIDs = NULL,
+                                             dendrogram = proteinDendrogram$dendrogram,
+                                             brushInputs = smallProtDend,
+                                             matrixIDs = NULL,
+                                             peakPercentPresence = input$percentPresenceSM,
+                                             lowerMassCutoff = input$lowerMassSM,
+                                             upperMassCutoff = input$upperMassSM,
+                                             minSNR = input$smSNR)
     
-    MALDIquant::binPeaks(a, tolerance = .002)
+    if ( (input$selectMatrix != "None") ) {
+      
+      matrixSample <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
+                                               sampleIDs = input$selectMatrix,
+                                               dendrogram = proteinDendrogram$dendrogram,
+                                               brushInputs = smallProtDend,
+                                               matrixIDs = NULL,
+                                               peakPercentPresence = input$percentPresenceSM,
+                                               lowerMassCutoff = input$lowerMassSM,
+                                               upperMassCutoff = input$upperMassSM,
+                                               minSNR = input$smSNR)
+      
+      
+      
+      samples <- MALDIquant::binPeaks(c(matrixSample, samples),
+                                     tolerance = .002)
+      
+      
+      for (i in 2:(length(samples))) {
+      
+      toKeep <- !samples[[i]]@mass %in% samples[[1]]@mass 
+      
+      samples[[i]]@mass <- samples[[i]]@mass[toKeep]
+      samples[[i]]@intensity <- samples[[i]]@intensity[toKeep]
+      samples[[i]]@snr <- samples[[i]]@snr[toKeep]
+      
+      }
+      
+      samples <- samples[-1]
+      
+      
+      
+    } else {
+      
+      
+      samples <- MALDIquant::binPeaks(samples, tolerance = .002)
+    }
+    
+
+return(samples)
+
+    
+    
+    
     
   })
   
@@ -1033,8 +1110,11 @@ app_server <- function(input, output, session) {
   # Suggested Reporting Paragraphs for small molecule data ------------------
   
   output$manReport <- renderUI({
-    p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,", if (input$matrixSamplePresent == 1) {("subtracting a matrix blank,") } else {},
-      "and retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), " and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
+    p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,",
+      if (input$selectMatrix != "None") {
+        ("subtracting a matrix blank,") 
+        } else {},
+      " retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), ", and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
           Peaks occuring below ", tags$code(input$lowerMassSM), " m/z or above ", tags$code(input$upperMassSM), " m/z were removed from the analysis. ")
   })
   

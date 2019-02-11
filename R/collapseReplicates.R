@@ -11,11 +11,11 @@
 
 getPeakData <-  function(checkedPool, sampleIDs, protein){
   
-  if(protein == TRUE){
+  if (protein == TRUE) {
     query <- DBI::dbSendStatement("SELECT `proteinPeaks`
                                 FROM IndividualSpectra
-                                WHERE (`proteinPeaks` IS NOT NULL)
-                                AND (`Strain_ID` = ?)",
+                                WHERE (`Strain_ID` = ?)
+                                AND (`proteinPeaks` IS NOT NULL)",
                                   con = checkedPool)
     
     
@@ -35,8 +35,8 @@ getPeakData <-  function(checkedPool, sampleIDs, protein){
     
     query <- DBI::dbSendStatement("SELECT `smallMoleculePeaks`
                                 FROM IndividualSpectra
-                                  WHERE (`smallMoleculePeaks` IS NOT NULL)
-                                  AND (`Strain_ID` = ?)",
+                                  WHERE (`Strain_ID` = ?)
+                                  AND (`smallMoleculePeaks` IS NOT NULL)",
                                   con = checkedPool)
     
     
@@ -91,7 +91,7 @@ collapseReplicates <- function(checkedPool,
                                tolerance = 0.002,
                                protein){
   
-
+  
   
   temp <- IDBacApp::getPeakData(checkedPool = checkedPool,
                                 sampleIDs = sampleIDs,

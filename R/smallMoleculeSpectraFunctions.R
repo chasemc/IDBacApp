@@ -21,7 +21,7 @@
 #' @export
 #'
 getSmallMolSpectra <- function(pool,
-                               sampleIDs,
+                               sampleIDs = NULL,
                                dendrogram,
                                brushInputs,
                                matrixIDs = NULL,
@@ -34,6 +34,10 @@ getSmallMolSpectra <- function(pool,
 
   checkedPool <- pool::poolCheckout(pool)
   
+  
+  if (is.null(sampleIDs)) {
+  
+    
   if (!is.null(dendrogram)) {  
     
     # If there is a protein dendrogram but a user hasn't brushed:
@@ -66,6 +70,7 @@ getSmallMolSpectra <- function(pool,
     sampleIDs <- as.vector(sampleIDs)[,1]
   }
   
+}
   
 
   samples <- lapply(sampleIDs, 
