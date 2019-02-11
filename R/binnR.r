@@ -22,6 +22,7 @@ binnR <- function(vectorList,
   # massEnd: the last m/z in the IRanges object
   
   #smallest difference is smallest ppm, so get scale of that to 1
+  validate(need(massStart < massEnd, "Lower mass cutoff should be higher than upper mass cutoff."))
   scaleFactor <- ppm / 10e5 * massStart 
   mrange <- IRanges::IRanges(start = seq(massStart * scaleFactor,
                                          massEnd * scaleFactor, 1),

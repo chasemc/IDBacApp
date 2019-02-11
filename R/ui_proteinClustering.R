@@ -10,7 +10,7 @@ ui_proteinClustering <- function() {
     sidebarLayout(
       
       sidebarPanel(style = "background-color:#7777770d", 
-                   width = 3,
+                   width = 4,
                    selectInput("proteinUIselector",
                                label = "Available options:",
                                choices = list("Hierarchical Clustering Settings" = 1,
@@ -41,6 +41,8 @@ ui_proteinClustering <- function() {
                    IDBacApp::addDotsActionUI("proth"),
                    IDBacApp::colordendLabelsUI("proth"),
                    IDBacApp::colordendLinesUI("proth"),
+                   br(),
+                   IDBacApp::selectInjections_UI("proteinInject"),
                    br(),
                    h4("Suggestions for Reporting Protein Analysis:"),
                    uiOutput("proteinReport")

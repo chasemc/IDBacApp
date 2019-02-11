@@ -544,20 +544,21 @@ app_server <- function(input, output, session) {
   # User chooses which samples to include -----------------------------------
  # chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   
- # observe({
     chosenProteinSampleIDs <- shiny::callModule(IDBacApp::sampleChooser_server,
                                                        "proteinSampleChooser",
                                                        pool = workingDB$pool,
                                                        allSamples = FALSE,
                                                        whetherProtein = TRUE)
-#  })
   
   
   # Collapse peaks ----------------------------------------------------------
+  
+ # collapsedPeaksForDend <- reactiveValues(vals = NULL)  
+  
+#observe({
   collapsedPeaksForDend <- reactive({
     req(!is.null(chosenProteinSampleIDs$chosen))
     req(length(chosenProteinSampleIDs$chosen) > 0)
-   
     req(workingDB$pool())
     # For each sample:
     # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
@@ -578,10 +579,46 @@ app_server <- function(input, output, session) {
                                                   tolerance = 0.002,
                                                   protein = TRUE)
                    })
+    temp <- lapply(chosenProteinSampleIDs$chosen,
+                   function(ids){
+                     IDBacApp::collapseReplicates(checkedPool = conn,
+                                                  sampleIDs = ids,
+                                                  peakPercentPresence = input$percentPresenceP,
+                                                  lowerMassCutoff = input$lowerMass,
+                                                  upperMassCutoff = input$upperMass, 
+                                                  minSNR = 6, 
+                                                  tolerance = 0.002,
+                                                  protein = TRUE)
+                   })
     
-    
-    names(temp) <- chosenProteinSampleIDs$chosen
     pool::poolReturn(conn)
+    
+    if (length(proteinSamplesToInject$chosen$chosen) > 0) {
+      
+      conn <- pool::poolCheckout(proteinSamplesToInject$db())
+      
+      temp <- c(temp, lapply(proteinSamplesToInject$chosen$chosen,
+                     function(ids){
+                       IDBacApp::collapseReplicates(checkedPool = conn,
+                                                    sampleIDs = ids,
+                                                    peakPercentPresence = input$percentPresenceP,
+                                                    lowerMassCutoff = input$lowerMass,
+                                                    upperMassCutoff = input$upperMass, 
+                                                    minSNR = 6, 
+                                                    tolerance = 0.002,
+                                                    protein = TRUE)
+                     })
+                )
+                pool::poolReturn(conn)
+                
+      
+      names(temp) <- c(chosenProteinSampleIDs$chosen, proteinSamplesToInject$chosen$chosen)
+      
+    } else {
+      names(temp) <- chosenProteinSampleIDs$chosen
+      
+    }
+    
     
     
     return(temp)
@@ -591,19 +628,27 @@ app_server <- function(input, output, session) {
   
   
   
-  
+  proteinSamplesToInject <- callModule(IDBacApp::selectInjections_server,
+                                       "proteinInject",
+                                       sqlDirectory = sqlDirectory,
+                                       availableExperiments = availableDatabases,
+                                       watchMainDb = workingDB$move)
   
   # Protein matrix ----------------------------------------------------------
   
   
   proteinMatrix <- reactive({
     req(input$lowerMass, input$upperMass)
+    req(!is.null(collapsedPeaksForDend()))
+    validate(need(input$lowerMass < input$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
                                ppm = 2000,
                                massStart = input$lowerMass,
                                massEnd = input$upperMass)
     
-    do.call(rbind, pm)
+  do.call(rbind, pm)
+    
+    
   })
   
   proteinDendrogram <- reactiveValues(dendrogram  = NULL)

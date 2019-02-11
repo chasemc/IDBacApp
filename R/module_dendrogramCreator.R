@@ -83,7 +83,6 @@ dendrogramCreator <- function(input,
       stats::hclust(x,
                     method = input$clustering)
     }
-    ppp<<-input$bootstrap
     bootstraps <- ""
     if (is.numeric(input$bootstraps)) {
       if ((input$bootstraps > 1) & (input$bootstraps < 1000)) {
