@@ -68,11 +68,11 @@ dendrogramCreator <- function(input,
   
   pMatrixReactive <- reactive({
     
-    req(nrow(proteinMatrix$matrix > 2))
+    req(nrow(proteinMatrix() > 2))
     
     
     # Remove if row is all NA (no peaks left)
-    dend <- proteinMatrix$matrix[rowSums(is.na(proteinMatrix$matrix)) > 0, ]
+    dend <- proteinMatrix()[rowSums(is.na(proteinMatrix())) > 0, ]
     
     
     createHclustObject <- function(x){

@@ -554,10 +554,12 @@ app_server <- function(input, output, session) {
   
   
   # Collapse peaks ----------------------------------------------------------
-  collapsedPeaksForDend <- reactive({
-    req(!is.null(chosenProteinSampleIDs$chosen))
+  
+ # collapsedPeaksForDend <- reactiveValues(vals = NULL)  
+  
+#observe({
+  collapsedPeaksForDend <- reactive({  req(!is.null(chosenProteinSampleIDs$chosen))
     req(length(chosenProteinSampleIDs$chosen) > 0)
-   
     req(workingDB$pool())
     # For each sample:
     # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
@@ -578,10 +580,46 @@ app_server <- function(input, output, session) {
                                                   tolerance = 0.002,
                                                   protein = TRUE)
                    })
+    temp <- lapply(chosenProteinSampleIDs$chosen,
+                   function(ids){
+                     IDBacApp::collapseReplicates(checkedPool = conn,
+                                                  sampleIDs = ids,
+                                                  peakPercentPresence = input$percentPresenceP,
+                                                  lowerMassCutoff = input$lowerMass,
+                                                  upperMassCutoff = input$upperMass, 
+                                                  minSNR = 6, 
+                                                  tolerance = 0.002,
+                                                  protein = TRUE)
+                   })
     
-    
-    names(temp) <- chosenProteinSampleIDs$chosen
     pool::poolReturn(conn)
+    
+    if (length(proteinSamplesToInject$chosen$chosen) > 0) {
+      
+      conn <- pool::poolCheckout(proteinSamplesToInject$db())
+      
+      temp <- c(temp, lapply(proteinSamplesToInject$chosen$chosen,
+                     function(ids){
+                       IDBacApp::collapseReplicates(checkedPool = conn,
+                                                    sampleIDs = ids,
+                                                    peakPercentPresence = input$percentPresenceP,
+                                                    lowerMassCutoff = input$lowerMass,
+                                                    upperMassCutoff = input$upperMass, 
+                                                    minSNR = 6, 
+                                                    tolerance = 0.002,
+                                                    protein = TRUE)
+                     })
+                )
+                pool::poolReturn(conn)
+                
+      
+      names(temp) <- c(chosenProteinSampleIDs$chosen, proteinSamplesToInject$chosen$chosen)
+      
+    } else {
+      names(temp) <- chosenProteinSampleIDs$chosen
+      
+    }
+    
     
     
     return(temp)
@@ -591,17 +629,15 @@ app_server <- function(input, output, session) {
   
   
   
-  callModule(IDBacApp::selectInjections_server,
-          "proteinInject",
-          sqlDirectory = sqlDirectory,
-          availableExperiments = availableDatabases)
+  proteinSamplesToInject <<- callModule(IDBacApp::selectInjections_server,
+                                       "proteinInject",
+                                       sqlDirectory = sqlDirectory,
+                                       availableExperiments = availableDatabases)
   
   # Protein matrix ----------------------------------------------------------
   
-  proteinMatrix <- reactiveValues(matrix = NULL)  
   
-  observe({
-    print("hiu")
+  proteinMatrix <- reactive({
     req(input$lowerMass, input$upperMass)
     req(!is.null(collapsedPeaksForDend()))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
@@ -609,9 +645,9 @@ app_server <- function(input, output, session) {
                                massStart = input$lowerMass,
                                massEnd = input$upperMass)
     
-    pm <- do.call(rbind, pm)
+  do.call(rbind, pm)
     
-    proteinMatrix$matrix <- pm
+    
   })
   
   proteinDendrogram <- reactiveValues(dendrogram  = NULL)
@@ -627,8 +663,8 @@ app_server <- function(input, output, session) {
                        proteinMatrix = proteinMatrix)
 
   
-  observeEvent(proteinMatrix$matrix,{
-    req(nrow(proteinMatrix$matrix) > 2)
+  observeEvent(proteinMatrix(),{
+    req(nrow(proteinMatrix()) > 2)
     proteinDendrogram$dendrogram <- dendMaker()$dend
   })
   
@@ -712,9 +748,9 @@ app_server <- function(input, output, session) {
   # Calculate tSNE based on PCA calculation already performed ---------------
   
   tsneResults <- reactive({
-    shiny::req(nrow(as.matrix(proteinMatrix$matrix)) > 15)
+    shiny::req(nrow(as.matrix(proteinMatrix())) > 15)
     
-    IDBacApp::tsneCalculation(dataMatrix = proteinMatrix$matrix,
+    IDBacApp::tsneCalculation(dataMatrix = proteinMatrix(),
                               perplexity = input$tsnePerplexity,
                               theta = input$tsneTheta,
                               iterations = input$tsneIterations)

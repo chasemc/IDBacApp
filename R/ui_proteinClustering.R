@@ -10,7 +10,7 @@ ui_proteinClustering <- function() {
     sidebarLayout(
       
       sidebarPanel(style = "background-color:#7777770d", 
-                   width = 3,
+                   width = 4,
                    selectInput("proteinUIselector",
                                label = "Available options:",
                                choices = list("Hierarchical Clustering Settings" = 1,
