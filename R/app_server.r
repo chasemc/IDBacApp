@@ -1110,8 +1110,11 @@ return(samples)
   # Suggested Reporting Paragraphs for small molecule data ------------------
   
   output$manReport <- renderUI({
-    p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,", if (input$matrixSamplePresent == 1) {("subtracting a matrix blank,") } else {},
-      "and retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), " and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
+    p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,",
+      if (input$selectMatrix != "None") {
+        ("subtracting a matrix blank,") 
+        } else {},
+      " retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), ", and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
           Peaks occuring below ", tags$code(input$lowerMassSM), " m/z or above ", tags$code(input$upperMassSM), " m/z were removed from the analysis. ")
   })
   

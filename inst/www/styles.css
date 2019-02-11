@@ -112,11 +112,25 @@ font-family: 'Arial';
   zoom: 0.9;
   transition: opacity 500ms ease;
 }
+
 .dendMod_WellPanel:hover {
   /* Fade in while hovering */
   opacity: 0.95;
   transition-delay: 0;
 }
+
+
+
+
+
+.panel {
+  
+    background-color: #f5f5f5;
+}
+
+
+
+
 
 
 
