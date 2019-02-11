@@ -12,11 +12,7 @@ ui_smallMolMan <-  function(){
     
     
     sidebarPanel(style = 'padding:30px',
-                 radioButtons("matrixSamplePresent",
-                              label = h5(strong("Do you have a matrix blank?")),
-                              choices = list("Yes" = 1, 
-                                             "No (Also Turns Off Matrix Subtraction)" = 2),
-                              selected = 1),
+                 uiOutput("matrixSelector"),
                  numericInput("percentPresenceSM",
                               label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
                               value = 70,
