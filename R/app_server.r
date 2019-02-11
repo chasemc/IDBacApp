@@ -664,7 +664,7 @@ app_server <- function(input, output, session) {
                        proteinMatrix = proteinMatrix)
 
   
-  observeEvent(proteinMatrix(),{
+  observe({
     req(nrow(proteinMatrix()) > 2)
     proteinDendrogram$dendrogram <- dendMaker()$dend
   })

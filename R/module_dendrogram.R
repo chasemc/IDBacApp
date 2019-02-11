@@ -230,8 +230,7 @@ dendDotsServer <- function(input,
                              "Color By:",
                              c("None" = "none",
                                "Choose Number of Groups" = "groups",
-                               "Color by cutting at height" = "height",
-                               "Color by sample info" = "metadata"
+                               "Color by cutting at height" = "height"
                              ),
                              selected = "groups"
           ),
@@ -301,9 +300,8 @@ dendDotsServer <- function(input,
                              "Color By:",
                              c("None" = "none",
                                "Choose Number of Groups" = "groups",
-                               "Color by cutting at height" = "height",
-                               "Color by sample info" = "metadata"
-                             ),
+                               "Color by cutting at height" = "height"
+                               ),
                              selected = "groups"
           ),
           shiny::conditionalPanel(
