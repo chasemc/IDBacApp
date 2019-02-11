@@ -544,13 +544,11 @@ app_server <- function(input, output, session) {
   # User chooses which samples to include -----------------------------------
  # chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   
- # observe({
     chosenProteinSampleIDs <- shiny::callModule(IDBacApp::sampleChooser_server,
                                                        "proteinSampleChooser",
                                                        pool = workingDB$pool,
                                                        allSamples = FALSE,
                                                        whetherProtein = TRUE)
-#  })
   
   
   # Collapse peaks ----------------------------------------------------------
@@ -558,7 +556,8 @@ app_server <- function(input, output, session) {
  # collapsedPeaksForDend <- reactiveValues(vals = NULL)  
   
 #observe({
-  collapsedPeaksForDend <- reactive({  req(!is.null(chosenProteinSampleIDs$chosen))
+  collapsedPeaksForDend <- reactive({
+    req(!is.null(chosenProteinSampleIDs$chosen))
     req(length(chosenProteinSampleIDs$chosen) > 0)
     req(workingDB$pool())
     # For each sample:
@@ -629,10 +628,11 @@ app_server <- function(input, output, session) {
   
   
   
-  proteinSamplesToInject <<- callModule(IDBacApp::selectInjections_server,
+  proteinSamplesToInject <- callModule(IDBacApp::selectInjections_server,
                                        "proteinInject",
                                        sqlDirectory = sqlDirectory,
-                                       availableExperiments = availableDatabases)
+                                       availableExperiments = availableDatabases,
+                                       watchMainDb = workingDB$move)
   
   # Protein matrix ----------------------------------------------------------
   
@@ -640,6 +640,7 @@ app_server <- function(input, output, session) {
   proteinMatrix <- reactive({
     req(input$lowerMass, input$upperMass)
     req(!is.null(collapsedPeaksForDend()))
+    validate(need(input$lowerMass < input$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
                                ppm = 2000,
                                massStart = input$lowerMass,

@@ -96,10 +96,11 @@ collapseReplicates <- function(checkedPool,
   temp <- IDBacApp::getPeakData(checkedPool = checkedPool,
                                 sampleIDs = sampleIDs,
                                 protein = protein) 
+  req(length(temp) > 0)
   # Binning peaks lists belonging to a single sample so we can filter 
   # peaks outside the given threshold of presence 
   
-  for(i in 1:length(temp)){
+  for (i in 1:length(temp)) {
     snr1 <-  which(MALDIquant::snr(temp[[i]]) >= minSNR)
     temp[[i]]@mass <- temp[[i]]@mass[snr1]
     temp[[i]]@snr <- temp[[i]]@snr[snr1]

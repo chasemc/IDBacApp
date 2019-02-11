@@ -1,7 +1,9 @@
 selectInjections_UI <- function(id){
   ns <- NS(id)
   tagList(
-  actionButton(ns("openInject"), "Inject Samples"),
+  div(align = "center",
+    actionButton(ns("openInject"), "Insert samples from another experiment")
+  ),
   uiOutput(ns("injectSelection"))
   )
                      
@@ -13,7 +15,8 @@ selectInjections_UI <- function(id){
                                       output,
                                       session,
                                       sqlDirectory,
-                                      availableExperiments){
+                                      availableExperiments,
+                                      watchMainDb){
     
     
     
@@ -43,25 +46,21 @@ selectInjections_UI <- function(id){
                            IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
                            shiny::actionButton(ns("closeInject"),
                                                "Close")
-                           
-                           
-                           
-                           
+                          
           )
         )
         
       )  
     })
     
+    chosenSamples <- reactiveValues(chosen = NULL)
     
     
-    
-    
-    
-    
-    
-    
-    
+    observeEvent(watchMainDb$selectExperiment, {
+      
+      chosenSamples$chosen <- NULL  
+      
+    })
     
     
     
@@ -72,11 +71,16 @@ selectInjections_UI <- function(id){
                              availableExperiments = availableExperiments,
                              sqlDirectory = sqlDirectory)
     
-    chosenSamples <-  shiny::callModule(IDBacApp::sampleChooser_server,
-                                        "chooseNewDBSamples",
-                                        pool = selectedDB$userDBCon,
-                                        allSamples = TRUE,
-                                        whetherProtein = FALSE)
+    chosen <-  shiny::callModule(IDBacApp::sampleChooser_server,
+                                 "chooseNewDBSamples",
+                                 pool = selectedDB$userDBCon,
+                                 allSamples = TRUE,
+                                 whetherProtein = FALSE)
+  observeEvent(chosen$chosen, {  
+    chosenSamples$chosen <- chosen$chosen
+    
+  })
+    
     return(list(chosen = chosenSamples,
                 db = selectedDB$userDBCon))
   }
