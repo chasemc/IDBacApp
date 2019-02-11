@@ -63,7 +63,6 @@ platemod <- function(input,
   })
   
 
- observe(print(qwerty$rtab))
 
 
  observeEvent(input$save, {

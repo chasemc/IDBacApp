@@ -424,7 +424,6 @@ dendDotsServer <- function(input,
         abline(v = input$cutHeightLines, lty = 2)
       }
     }
-   print(boots()$bootstraps)
    if (boots()$bootstraps[1] != "") {
 
      IDBacApp::bootlabels.hclust(as.hclust(dendrogram$dendrogram), 
