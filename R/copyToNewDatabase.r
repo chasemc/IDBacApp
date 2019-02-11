@@ -11,9 +11,7 @@
 copyToNewDatabase <- function(existingDBPool,
                               newdbPath, 
                               sampleIDs){
-  existingDBPool<<-existingDBPool
-  newdbPath <<- newdbPath
-  sampleIDs <<- sampleIDs
+
   # Run everything with a Shiny progress bar  
   shiny::withProgress(message = 'Copying data to new database',
                       detail = 'Connecting experiments...',

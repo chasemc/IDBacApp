@@ -16,7 +16,7 @@ binned <- binPeaks(peakList,
                    tolerance = binTolerance)
 
 #Next, find which ID contains "matrix", in any capitalization
-matrixIndex <<- grep("^matrix",
+matrixIndex <- grep("^matrix",
                     sampleIds,
                     ignore.case=TRUE)
 

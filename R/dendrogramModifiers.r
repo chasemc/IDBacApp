@@ -23,7 +23,7 @@ changeDendPartColor <- function(dendrogram,
   } else if (part == "labels") {
     dendFunc <- dendextend::color_labels
   }
-  wet <<- dendrogram
+  wet <- dendrogram
   if(class(dendrogram) != "dendrogram"){
     warning("Dendrogram input wasn't of class \"dendrogram\"")
   } else if (class(colorBy) != "character") {
