@@ -68,11 +68,11 @@ dendrogramCreator <- function(input,
   
   pMatrixReactive <- reactive({
     
-    req(nrow(proteinMatrix() > 2))
+    req(nrow(proteinMatrix$matrix > 2))
     
     
     # Remove if row is all NA (no peaks left)
-    dend <- proteinMatrix()[rowSums(is.na(proteinMatrix())) > 0, ]
+    dend <- proteinMatrix$matrix[rowSums(is.na(proteinMatrix$matrix)) > 0, ]
     
     
     createHclustObject <- function(x){
@@ -83,7 +83,6 @@ dendrogramCreator <- function(input,
       stats::hclust(x,
                     method = input$clustering)
     }
-    ppp<<-input$bootstrap
     bootstraps <- ""
     if (is.numeric(input$bootstraps)) {
       if ((input$bootstraps > 1) & (input$bootstraps < 1000)) {

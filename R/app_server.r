@@ -598,15 +598,20 @@ app_server <- function(input, output, session) {
   
   # Protein matrix ----------------------------------------------------------
   
+  proteinMatrix <- reactiveValues(matrix = NULL)  
   
-  proteinMatrix <- reactive({
+  observe({
+    print("hiu")
     req(input$lowerMass, input$upperMass)
+    req(!is.null(collapsedPeaksForDend()))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
                                ppm = 2000,
                                massStart = input$lowerMass,
                                massEnd = input$upperMass)
     
-    do.call(rbind, pm)
+    pm <- do.call(rbind, pm)
+    
+    proteinMatrix$matrix <- pm
   })
   
   proteinDendrogram <- reactiveValues(dendrogram  = NULL)
@@ -622,8 +627,8 @@ app_server <- function(input, output, session) {
                        proteinMatrix = proteinMatrix)
 
   
-  observeEvent(proteinMatrix(),{
-    req(nrow(proteinMatrix()) > 2)
+  observeEvent(proteinMatrix$matrix,{
+    req(nrow(proteinMatrix$matrix) > 2)
     proteinDendrogram$dendrogram <- dendMaker()$dend
   })
   
@@ -707,9 +712,9 @@ app_server <- function(input, output, session) {
   # Calculate tSNE based on PCA calculation already performed ---------------
   
   tsneResults <- reactive({
-    shiny::req(nrow(as.matrix(proteinMatrix())) > 15)
+    shiny::req(nrow(as.matrix(proteinMatrix$matrix)) > 15)
     
-    IDBacApp::tsneCalculation(dataMatrix = proteinMatrix(),
+    IDBacApp::tsneCalculation(dataMatrix = proteinMatrix$matrix,
                               perplexity = input$tsnePerplexity,
                               theta = input$tsneTheta,
                               iterations = input$tsneIterations)
