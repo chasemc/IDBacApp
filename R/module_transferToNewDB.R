@@ -99,7 +99,7 @@ transferToNewDB_server <- function(input,
     newdbPath <- file.path(sqlDirectory, paste0(nam, ".sqlite"))
     copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
                       newdbPath = newdbPath, 
-                      sampleIDs = chosenSamples$addSampleChooser$right)
+                      sampleIDs = chosenSamples$chosen)
     
     removeModal()
     availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory,

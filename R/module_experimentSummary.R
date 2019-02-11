@@ -9,7 +9,7 @@
 
 experimentSummary_UI <- function(id) {
   ns <- shiny::NS(id)
-  rhandsontable::rHandsontableOutput(ns("summaryTable"), height = 800)
+  rhandsontable::rHandsontableOutput(ns("summaryTable"))
 }
 
 

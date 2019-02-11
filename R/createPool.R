@@ -12,7 +12,7 @@ createPool <- function(fileName,
                        filePath){
   
   
-  if(length(fileName) != length(filePath)){
+  if (length(fileName) != length(filePath)) {
     warning("createPool: Length of fileName and filePath are different")
     
   } else { 
@@ -28,9 +28,15 @@ createPool <- function(fileName,
     if(length(filePaths) == 0){
       con <- pool::dbPool(drv = RSQLite::SQLite(),
                           dbname = base::file.path(filePath, fileName))
+      tried <- try(DBI::dbListTables(con), silent = TRUE)
+      req(class(tried) != "try-error")
+      
     } else {
       con <- lapply(filePaths, function(x) pool::dbPool(drv = RSQLite::SQLite(),
                                                         dbname = x))
+      tried <- try(DBI::dbListTables(con[[1]]), silent = TRUE)
+      req(class(tried) != "try-error")
+      
     }
     
     return(con)
