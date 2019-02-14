@@ -53,6 +53,8 @@ ui_proteinClustering <- function() {
                                         )
                    ),
                    br(),
+                   IDBacApp::downloadHier("proth"),
+                   IDBacApp::downloadSvg("proth"),
                    h4("Suggestions for Reporting Protein Analysis:"),
                    uiOutput("proteinReport")
                    
