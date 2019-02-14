@@ -76,6 +76,37 @@ plotHier <- function(id) {
 
 
 
+#' Download newick hierarchical dendrogram
+#'
+#' @param id namespace
+#'
+#' @return NA
+#'
+downloadHier <- function(id) {
+  ns <- shiny::NS(id)
+
+downloadButton(ns("downloadHierarchical"),
+               "Save dendrogram as a Newick File")
+
+}
+
+
+
+#' Download svg hierarchical dendrogram
+#'
+#' @param id namespace
+#'
+#' @return NA
+#' @export
+#'
+downloadSvg <- function(id) {
+  ns <- shiny::NS(id)
+  
+  downloadButton(ns("downloadSVG"),
+                 "Save dendrogram as SVG image")
+  
+}
+
 
 
 
@@ -431,6 +462,98 @@ dendDotsServer <- function(input,
    }
     
   }, height = plotHeight)
+  
+  
+
+  
+  
+  # Download dendrogram as Newick
+  #----
+  output$downloadHierarchical <- downloadHandler(
+    
+    filename = function() {
+      base::paste0(base::Sys.Date(), ".newick")
+    },
+    content = function(file) {
+
+      ape::write.tree(ape::as.phylo(dendrogram$dendrogram), file=file)
+    }
+  )
+  
+  
+  
+  
+  
+  output$downloadSVG <- downloadHandler(
+    filename = function(){
+      base::paste0("dendrogram_",base::Sys.Date(),".svg")
+      
+    }, 
+    content = function(file1){
+      
+      shiny::validate(shiny::need(dendrogram$dendrogram, "Try selecting samples using the menu to the left."))
+      
+      
+      svglite::svglite(file1,
+                       width = 10,
+                       height = 8, 
+                       bg = "white",
+                       pointsize = 12,
+                       standalone = TRUE)
+      
+      par(mar = c(5, 5, 5, plotWidth()))
+      plot(dendrogram$dendrogram, horiz = T)
+      if (!is.null(input$selectMetaColumn[[1]])) {
+        
+        if (input$closeDendDots == 1) {
+          
+        } else {
+          
+          trimdLabsDend <- dendrogram$dendrogram
+          labels(trimdLabsDend) <- strtrim(labels(trimdLabsDend), 20)
+          IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
+                                trimdLabsDend = trimdLabsDend,
+                                pool = pool(),
+                                columnID = input$selectMetaColumn,
+                                colors = colorsChosen(),
+                                text_shift = 1)
+        }
+      }
+      
+      
+      if (!is.null(input$colorByLines)) {
+        if (input$colorByLines == "height") {
+          abline(v = input$cutHeightLines, lty = 2)
+          
+        }
+      }
+      
+      if (!is.null(input$colorByLabels)) {
+        if (input$colorByLabels == "height") {
+          abline(v = input$cutHeightLines, lty = 2)
+        }
+      }
+      if (boots()$bootstraps[1] != "") {
+        
+        IDBacApp::bootlabels.hclust(as.hclust(dendrogram$dendrogram), 
+                                    boots()$bootstraps,
+                                    horiz = TRUE,
+                                    col = "blue")
+      }
+      
+     
+      
+      dev.off()
+      if (file.exists(paste0(file1, ".svg")))
+        file.rename(paste0(file1, ".svg"), file1)
+    })
+  
+  
+  
+  
+  
+  
+  
   
   
   return(list(colorByLines = reactive(input$colorByLines),
