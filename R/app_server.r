@@ -169,13 +169,13 @@ app_server <- function(input, output, session) {
     
     sidebarLayout(
       sidebarPanel(width = 3, style = "background-color:#7777770d",
-                   selectInput("Spectra1", label = h5(strong("Spectrum 1 (up)"), 
+                   selectInput("Spectra1", label = h5(strong("Spectrum 1 (positive y-axis)"), 
                                                       br(),
                                                       "(Peak matches to bottom spectrum are blue, non-matches are red)"),
                                choices = inverseComparisonNames()), 
                    selected = inverseComparisonNames()[[1]] ,
                    selectInput("Spectra2", 
-                               label = h5(strong("Spectrum 2 (down)")),
+                               label = h5(strong("Spectrum 2 (negative y-axis)")),
                                choices = inverseComparisonNames(),
                                selected = inverseComparisonNames()[[1]]),
                    downloadButton("downloadInverse", 
@@ -202,7 +202,7 @@ app_server <- function(input, output, session) {
                                 label = h5(strong("Upper Mass Cutoff")),
                                 value = 15000,
                                 step = 50),
-                   p("Note: Mass Cutoff and Percent Replicate values selected here will be used in all later analyses."),
+                   p("Note: Settings selected above will be used in all later analyses."),
                    p("Note 2: Displayed spectra represent the mean spectrum for a sample. Example: if you observe a peak
                          in your mean spectrum but it isn't represented as a red or blue line, then either it doesn't occur often enough across your replicates
                          or its signal to noise ratio is less than what is selected.")
@@ -1342,11 +1342,11 @@ return(samples)
   
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
-    session$onSessionEnded(function() {
-
-       stopApp()
-       q("no")
-     })
+    # session$onSessionEnded(function() {
+    # 
+    #    stopApp()
+    #    q("no")
+    #  })
 
   
   # wq <-pool::dbPool(drv = RSQLite::SQLite(),

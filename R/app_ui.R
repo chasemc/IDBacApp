@@ -53,6 +53,13 @@ app_ui <- function(){
                                             )
                                           )
                                         ),
+                                        tags$li(
+                                          p("For discussions and general questions please use the ",
+                                            a(href = "https://groups.google.com/forum/#!forum/idbac",
+                                              target = "_blank","IDBac Google group forum"
+                                            )
+                                          )
+                                        ),
                                         column(width = 12,
                                                align = "center",
                                                actionButton("updateIDBac",
