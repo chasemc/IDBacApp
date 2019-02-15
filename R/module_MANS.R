@@ -112,11 +112,9 @@ manPageProtDend_Server <- function(input,
 
 manPageProtDend_UI <- function(id) {
   ns <- shiny::NS(id)
-  tagList(
+  
     plotOutput(ns("hierOut"),
                brush = ns("plot_brush"))
-  )
-  
   
   
 }

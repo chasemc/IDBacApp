@@ -52,9 +52,17 @@ ui_proteinClustering <- function() {
                                                                   IDBacApp::selectInjections_UI("proteinInject")
                                         )
                    ),
+                   IDBacApp::bsCollapse(id = "saveProteinHier",
+                                        open = "Panel 1",
+                                        IDBacApp::bsCollapsePanel(p("Save Dendrogram", 
+                                                                    align = "center"),          
+
+                                                                  IDBacApp::downloadHier("proth"),
+                                                                  IDBacApp::downloadSvg("proth")
+                                                                  )
+                   ),
                    br(),
-                   IDBacApp::downloadHier("proth"),
-                   IDBacApp::downloadSvg("proth"),
+                  
                    h4("Suggestions for Reporting Protein Analysis:"),
                    uiOutput("proteinReport")
                    
