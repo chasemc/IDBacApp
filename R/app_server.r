@@ -1,4 +1,4 @@
-#' @import shiny
+#' @import  shiny
 NULL
 
 #' Main UI of IDBac
@@ -12,7 +12,7 @@ NULL
 #'
 app_server <- function(input, output, session) {
   
-  
+
   # Develepment Functions ---------------------------------------------------
   options(shiny.reactlog = TRUE)
   sqlDirectory <- getwd()
@@ -373,30 +373,9 @@ app_server <- function(input, output, session) {
   # Output for the non-zoomed mirror plot
   output$inversePeakComparisonPlot <- renderPlot({
     
-    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-    
-    #Create peak plots and color each peak according to whether it occurs in the other spectrum
-    plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-         y = mirrorPlotEnv$spectrumSampleOne@intensity,
-         ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                  max(mirrorPlotEnv$spectrumSampleOne@intensity)),
-         type = "l",
-         col = adjustcolor("Black", alpha = 0.3),
-         xlab = "m/z",
-         ylab = "Intensity")
-    lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-          y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-    rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-         ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-         border = mirrorPlotEnv$SampleOneColors)
-    rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-         ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-         border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
-    
+   
+    mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
+      
     # Watch for brushing of the top mirror plot
     observe({
       brush <- input$plot2_brush
@@ -417,27 +396,9 @@ app_server <- function(input, output, session) {
   
   output$inversePeakComparisonPlotZoom <- renderPlot({
     
-    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-    
-    plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-         y = mirrorPlotEnv$spectrumSampleOne@intensity,
-         xlim = ranges2$x, ylim = ranges2$y,
-         type = "l",
-         col = adjustcolor("Black", alpha = 0.3),
-         xlab = "m/z",
-         ylab = "Intensity")
-    lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-          y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-    rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-         ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-         border = mirrorPlotEnv$SampleOneColors)
-    rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-         ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-         border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+    IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
+                             nameOne = input$Spectra1,
+                             nameTwo = input$Spectra2)
   })
   
   
@@ -457,36 +418,8 @@ app_server <- function(input, output, session) {
                        pointsize = 12,
                        standalone = TRUE)
       
-      mirrorPlotEnv <- dataForInversePeakComparisonPlot()
+      mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
       
-      #Create peak plots and color each peak according to whether it occurs in the other spectrum
-      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-           y = mirrorPlotEnv$spectrumSampleOne@intensity,
-           ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                    max(mirrorPlotEnv$spectrumSampleOne@intensity)),
-           type = "l",
-           col = adjustcolor("Black", alpha = 0.3),
-           xlab = "m/z",
-           ylab = "Intensity")
-      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-           border = mirrorPlotEnv$SampleOneColors)
-      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
-      legend(max(mirrorPlotEnv$spectrumSampleOne@mass) * .6,
-             max(max(mirrorPlotEnv$spectrumSampleOne@intensity)) * .7,
-             legend = c(paste0("Top: ", input$Spectra1), 
-                        paste0("Bottom: ", input$Spectra2)),
-             col = c("black", "black"),
-             lty = 1:1,
-             cex = 1)
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))
@@ -504,34 +437,9 @@ app_server <- function(input, output, session) {
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
       
-      mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-      
-      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-           y = mirrorPlotEnv$spectrumSampleOne@intensity,
-           xlim = ranges2$x, ylim = ranges2$y,
-           type = "l",
-           col = adjustcolor("Black", alpha = 0.3),
-           xlab = "m/z",
-           ylab = "Intensity")
-      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-           border = mirrorPlotEnv$SampleOneColors)
-      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
-      legend(max(ranges2$x) * .85,
-             max(ranges2$y) * .7, 
-             legend = c(paste0("Top: ", input$Spectra1),
-                        paste0("Bottom: ", input$Spectra2)),
-             col = c("black", "black"),
-             lty = 1:1,
-             cex = 1)
+      IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
+                               nameOne = input$Spectra1,
+                               nameTwo = input$Spectra2)
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))

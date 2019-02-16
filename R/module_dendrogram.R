@@ -82,6 +82,7 @@ plotHier <- function(id) {
 #'
 #' @return NA
 #'
+#' @export
 downloadHier <- function(id) {
   ns <- shiny::NS(id)
 

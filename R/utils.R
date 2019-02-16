@@ -146,3 +146,14 @@ findmz <- function(inputPath,
   setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
   
 }
+
+
+
+#' pipe
+#'
+#' @return NA
+#' @export
+#'
+`%>%` <- function(){
+  magrittr::`%>%`  
+}

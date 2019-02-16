@@ -1,3 +1,10 @@
+#' selectInjections_UI
+#'
+#' @param id namespace
+#'
+#' @return NA
+#' @export
+#'
 selectInjections_UI <- function(id){
   ns <- NS(id)
   tagList(
@@ -11,6 +18,18 @@ selectInjections_UI <- function(id){
   
   
   
+#' Inject samples from another database into dendrogram
+#'
+#' @param input shiny
+#' @param output shiny 
+#' @param session shiny
+#' @param sqlDirectory directory containing sqlite files
+#' @param availableExperiments available sqlite files
+#' @param watchMainDb for reacttivity
+#'
+#' @return NA
+#' @export
+#'
   selectInjections_server <- function(input,
                                       output,
                                       session,

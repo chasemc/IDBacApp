@@ -23,7 +23,9 @@ pca_UI <- function(id){
 #' @param namedColors named vector, names are sample labels, hex colors are the vector
 #'
 #' @return returns PCA results as reactive data frame
-#'
+#' 
+#' @export
+#' 
 pca_Server <- function(input,
                        output,
                        session,
