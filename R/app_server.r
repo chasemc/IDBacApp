@@ -1,3 +1,6 @@
+#' @import shiny
+NULL
+
 #' Main UI of IDBac
 #'
 #' @param input input
