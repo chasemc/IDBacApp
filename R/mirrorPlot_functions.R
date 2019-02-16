@@ -4,7 +4,7 @@
 #' @param nameOne sample id of top spectrunm
 #' @param nameTwo sample id of bottom spectrum
 #' @param ranges2 brushed ranges
-#'
+#' @export
 #' @return
 #'
 mirrorPlotZoom <- function(mirrorPlotEnv,
@@ -16,7 +16,7 @@ mirrorPlotZoom <- function(mirrorPlotEnv,
                  y = mirrorPlotEnv$spectrumSampleOne@intensity,
                  xlim = ranges2$x, ylim = ranges2$y,
                  type = "l",
-                 col = adjustcolor("Black", alpha = 0.3),
+                 col = adjustcolor("Black", alpha.f = 0.3),
                  xlab = "m/z",
                  ylab = "Intensity")
   graphics::lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
@@ -63,7 +63,7 @@ mirrorPlot <- function(mirrorPlotEnv){
                  ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
                           max(mirrorPlotEnv$spectrumSampleOne@intensity)),
                  type = "l",
-                 col = adjustcolor("Black", alpha = 0.3),
+                 col = adjustcolor("Black", alpha.f = 0.3),
                  xlab = "m/z",
                  ylab = "Intensity")
   graphics::lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,

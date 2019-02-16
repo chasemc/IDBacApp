@@ -431,7 +431,9 @@ dendDotsServer <- function(input,
       } else {
         
         trimdLabsDend <- dendrogram$dendrogram
-        labels(trimdLabsDend) <- strtrim(labels(trimdLabsDend), 20)
+        
+        dendextend::set_labels(trimdLabsDend,
+                               strtrim(labels(trimdLabsDend), 20))
         IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
                               trimdLabsDend = trimdLabsDend,
                               pool = pool(),
@@ -513,7 +515,9 @@ dendDotsServer <- function(input,
         } else {
           
           trimdLabsDend <- dendrogram$dendrogram
-          labels(trimdLabsDend) <- strtrim(labels(trimdLabsDend), 20)
+          
+          dendextend::set_labels(trimdLabsDend,
+                                 strtrim(labels(trimdLabsDend), 20))
           IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
                                 trimdLabsDend = trimdLabsDend,
                                 pool = pool(),

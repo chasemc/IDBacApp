@@ -66,11 +66,16 @@ tsneCalculation <- function(dataMatrix,
 
   names <- rownames(dataMatrix)
   dataMatrix[is.na(dataMatrix)] <- 0
+  dataMatrix <- irlba::prcomp_irlba(dataMatrix,
+                                    n = 50,
+                                    retx = TRUE,
+                                    scale = TRUE,
+                                    centered = TRUE)
   dataMatrix <- Rtsne::Rtsne(dataMatrix,
-                             pca = TRUE,
-                             pca_center = TRUE,
-                             pca_scale = TRUE,
-                           #  partial_pca = TRUE,
+                             pca = FALSE,
+                             pca_center = FALSE,
+                             pca_scale = FALSE,
+                             partial_pca = FALSE,
                              normalize = TRUE,                           
                              dims = 3,
                              perplexity = perplexity,

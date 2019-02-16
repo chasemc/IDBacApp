@@ -1,5 +1,11 @@
-#' @import  shiny
+#' @importFrom stats as.dendrogram as.hclust order.dendrogram setNames
+#' @importFrom utils capture.output capture.output choose.dir compareVersion packageVersion read.delim write.csv
+#' @importFrom grDevices adjustcolor dev.off
+#' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
 #' @importFrom magrittr "%>%"
+#' @import shiny
+#' @import rhandsontable
+
 NULL
 
 #' Main UI of IDBac
@@ -605,56 +611,12 @@ app_server <- function(input, output, session) {
   
   #  PCoA Calculation -------------------------------------------------------
   
-  
-  pcoaResults <- reactive({
-    # number of samples should be greater than k
-    shiny::req(nrow(as.matrix(proteinDistance())) > 10)
-    IDBacApp::pcoaCalculation(proteinDistance())
-  })
-  
-  
-  
-  # PCoA Plot ---------------------------------------------------------------
-  
-  
-  output$pcoaPlot <- plotly::renderPlotly({
-    
-    colorsToUse <- 
-      
-      if (any(is.na(as.vector(colorsToUse)))) {
-        colorsToUse <-  dendextend::labels_colors(coloredDend())
-      }
-    
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
-                                    nam = (names(colorsToUse)))
-    pcaDat <- merge(pcoaResults(),
-                    colorsToUse,
-                    by = "nam")
-    
-    plotly::plot_ly(data = pcaDat,
-                    x = ~Dim1,
-                    y = ~Dim2,
-                    z = ~Dim3,
-                    type = "scatter3d",
-                    mode = "markers",
-                    marker = list(color = ~fac),
-                    hoverinfo = 'text',
-                    text = ~nam) %>%
-      plotly::layout(
-        xaxis = list(
-          title = ""
-        ),
-        yaxis = list(
-          title = " "
-        ),
-        zaxis = list(
-          title = ""
-        ))
-  })
-  
+  callModule(IDBacApp::pcoa_Server,
+             "proteinpcoa",
+             distanceMatrix = dendMaker,
+             namedColors = unifiedProteinColor)
   
   # PCA Calculation  --------------------------------------------------------
-  
   
   callModule(IDBacApp::pca_Server,
              "proteinPCA",
@@ -663,20 +625,12 @@ app_server <- function(input, output, session) {
   
   
   
-  
-  
-  
   # Calculate tSNE based on PCA calculation already performed ---------------
   
-  tsneResults <- reactive({
-    shiny::req(nrow(as.matrix(proteinMatrix())) > 15)
-    
-    IDBacApp::tsneCalculation(dataMatrix = proteinMatrix(),
-                              perplexity = input$tsnePerplexity,
-                              theta = input$tsneTheta,
-                              iterations = input$tsneIterations)
-    
-  })
+  callModule(IDBacApp::tsne_Server,
+             "proteintsne",
+             dataframe = proteinMatrix,
+             namedColors = unifiedProteinColor)
   
   
   

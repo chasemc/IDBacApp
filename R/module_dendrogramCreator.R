@@ -96,6 +96,13 @@ dendrogramCreator <- function(input,
       }
     }
     
+    disty <- IDBacApp::distMatrix(data = dend,
+                              method = input$distanceMethod,
+                              booled = input$booled)
+    
+    dend <- stats::hclust(disty,
+                          method = input$clustering)
+    
     
     dend <- createHclustObject(dend)
     
@@ -103,7 +110,8 @@ dendrogramCreator <- function(input,
     
     
     return(list(dendrogram = dend,
-                bootstraps = bootstraps))
+                bootstraps = bootstraps,
+                distance = disty))
   })
   
   return(pMatrixReactive)
