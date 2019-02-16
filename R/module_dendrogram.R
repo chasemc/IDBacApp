@@ -471,13 +471,15 @@ dendDotsServer <- function(input,
   # Download dendrogram as Newick
   #----
   output$downloadHierarchical <- downloadHandler(
-    
+
     filename = function() {
       base::paste0(base::Sys.Date(), ".newick")
     },
     content = function(file) {
-
-      ape::write.tree(ape::as.phylo(dendrogram$dendrogram), file=file)
+      req(!is.null(attributes(dendrogram$dendrogram)$members))
+      
+      ape::write.tree(ape::as.phylo(as.hclust(dendrogram$dendrogram)), 
+                      file = file)
     }
   )
   

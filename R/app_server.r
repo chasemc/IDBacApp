@@ -579,9 +579,14 @@ app_server <- function(input, output, session) {
                        proteinMatrix = proteinMatrix)
 
   
-  observe({
+  observeEvent(dendMaker()$dend,{
+    
+    if (length(chosenProteinSampleIDs$chosen) < 3) {
+      proteinDendrogram$dendrogram <- NULL
+    } else {
     req(nrow(proteinMatrix()) > 2)
     proteinDendrogram$dendrogram <- dendMaker()$dend
+    }
   })
   
   
