@@ -5,7 +5,7 @@
 IDBacApp.Rproj
 .Rbuildignore
 /inst/app/temp_mzML
-/inst/app/*.sqlite
+*.sqlite
 .Rproj.user
 IDBac_App.Rproj
 Getting_Started.Rmd
