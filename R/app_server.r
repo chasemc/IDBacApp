@@ -1,4 +1,5 @@
 #' @import  shiny
+#' @importFrom magrittr "%>%"
 NULL
 
 #' Main UI of IDBac
@@ -91,8 +92,9 @@ app_server <- function(input, output, session) {
   
   #This "observe" event creates the SQL tab UI.
   observeEvent(availableDatabases$db,
-               ignoreNULL = TRUE,
-               once = TRUE, {
+               ignoreNULL = TRUE, {
+                 
+                 if (length(availableDatabases$db) >= 1) {
                  
                  appendTab(inputId = "mainIDBacNav",
                            tabPanel("Work With Previous Experiments",
@@ -102,7 +104,7 @@ app_server <- function(input, output, session) {
                            )
                  )
                  
-                 
+                 }
                })
 
   
@@ -373,8 +375,8 @@ app_server <- function(input, output, session) {
   # Output for the non-zoomed mirror plot
   output$inversePeakComparisonPlot <- renderPlot({
     
-   
-    mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
+    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
+    mirrorPlot(mirrorPlotEnv = mirrorPlotEnv)
       
     # Watch for brushing of the top mirror plot
     observe({
@@ -398,7 +400,8 @@ app_server <- function(input, output, session) {
     
     IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
                              nameOne = input$Spectra1,
-                             nameTwo = input$Spectra2)
+                             nameTwo = input$Spectra2,
+                             ranges2 = ranges2)
   })
   
   
@@ -439,7 +442,8 @@ app_server <- function(input, output, session) {
       
       IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
                                nameOne = input$Spectra1,
-                               nameTwo = input$Spectra2)
+                               nameTwo = input$Spectra2,
+                               ranges2 = ranges2)
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))
@@ -745,13 +749,21 @@ app_server <- function(input, output, session) {
   # Paragraph to relay info for reporting protein ---------------------------
   
   
-  output$proteinReport <- renderUI(
-    
-    p("This dendrogram was created by analyzing ",tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
+  output$proteinReport <- renderUI({
+    req(!is.null(chosenProteinSampleIDs$chosen))
+    req(length(chosenProteinSampleIDs$chosen) > 2)
+    req(!is.null(attributes(proteinDendrogram$dendrogram)$members))
+
+  
+      shiny::tagList(
+      h4("Suggestions for Reporting Protein Analysis:"),
+      p("This dendrogram was created by analyzing ",tags$code(attributes(proteinDendrogram$dendrogram)$members), " samples,
           and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
           Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
-      "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
-  )
+        "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
+      )
+      
+  })
   
   
   # Generate Rmarkdown report -----------------------------------------------

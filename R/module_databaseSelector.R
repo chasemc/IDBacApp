@@ -42,8 +42,8 @@ databaseSelector_server <- function(input,
     ns <- session$ns
     selectInput(ns("selectExperiment"),
                 label = h3Label,
-                choices = availableExperiments$db,
-                selected = NULL,
+                choices = c("None", availableExperiments$db),
+                selected = "None",
                 width = "50%"
     )
   })
@@ -64,8 +64,14 @@ databaseSelector_server <- function(input,
    userDBCon <- reactive({
     
     req(!is.null(input$selectExperiment))
+    req(nchar(input$selectExperiment) > 0)
     validate(need(length(input$selectExperiment) == length(sqlDirectory), 
                   "databaseTabServer: userDBCon, createPool inputs are different lengths."))
+    
+    # pool will create a new sqlite if one doesn't exist, so let's stop that from happening here:
+    req(file.exists(file.path(sqlDirectory, 
+                              paste0(input$selectExperiment, ".sqlite"))))
+    
     IDBacApp::createPool(fileName = input$selectExperiment,
                          filePath = sqlDirectory)[[1]]
     

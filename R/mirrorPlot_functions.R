@@ -3,12 +3,14 @@
 #' @param mirrorPlotEnv data for plot
 #' @param nameOne sample id of top spectrunm
 #' @param nameTwo sample id of bottom spectrum
+#' @param ranges2 brushed ranges
 #'
 #' @return
 #'
 mirrorPlotZoom <- function(mirrorPlotEnv,
                            nameOne,
-                           nameTwo){
+                           nameTwo,
+                           ranges2){
   
   graphics::plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
                  y = mirrorPlotEnv$spectrumSampleOne@intensity,
@@ -54,7 +56,6 @@ mirrorPlotZoom <- function(mirrorPlotEnv,
 #'
 mirrorPlot <- function(mirrorPlotEnv){
   
-  mirrorPlotEnv <- dataForInversePeakComparisonPlot()
   
   #Create peak plots and color each peak according to whether it occurs in the other spectrum
   graphics::plot(x = mirrorPlotEnv$spectrumSampleOne@mass,

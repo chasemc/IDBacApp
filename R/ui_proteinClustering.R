@@ -62,8 +62,6 @@ ui_proteinClustering <- function() {
                                                                   )
                    ),
                    br(),
-                  
-                   h4("Suggestions for Reporting Protein Analysis:"),
                    uiOutput("proteinReport")
                    
       ),

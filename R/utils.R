@@ -149,11 +149,4 @@ findmz <- function(inputPath,
 
 
 
-#' pipe
-#'
-#' @return NA
-#' @export
-#'
-`%>%` <- function(){
-  magrittr::`%>%`  
-}
+
