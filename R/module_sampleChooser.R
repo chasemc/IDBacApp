@@ -24,7 +24,7 @@ sampleChooser_UI <- function(id) {
 #' @param whetherProtein T  "allSamples takes precedence
 #' @param allSamples T/F
 #'
-#' @return 
+#' @return NA
 #' @export
 #'
 sampleChooser_server <- function(input,

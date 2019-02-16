@@ -56,7 +56,6 @@ convertOneBruker_UI <- function(id){
 #' @param sqlDirectory sqlDirectory
 #'
 #' @return
-#' @export
 #'
 convertOneBruker_Server <- function(input,
                                     output,

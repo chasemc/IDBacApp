@@ -58,7 +58,6 @@ createPool <- function(fileName,
 #' @return pool connection
 #' @export
 #'
-#' @examples
 createNewSQLITEdb <- function(newExperimentName,
                               sqlDirectory){
   # This pool is used when creating an entirely new "experiment" .sqlite db
