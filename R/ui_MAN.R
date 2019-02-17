@@ -88,9 +88,9 @@ ui_smallMolMan <-  function(){
                            tabsetPanel(type = "tabs",           
                                        tabPanel(value = "smallMolMANUI","Small Molecule MAN",
                                                 IDBacApp::smMANPlot_UI("smMAN")),
-                                       tabPanel(value = "smallMolPCAUi","SmallMolecule PCA",
+                                       tabPanel(value = "smallMolPCAUi","SmallMolecule PCA"
                                                 
-                                                IDBacApp::pca_UI("smallMolPcaPlot")
+                                               # IDBacApp::pca_UI("smallMolPcaPlot")
                                        )               
                            
                            

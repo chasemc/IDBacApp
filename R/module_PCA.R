@@ -1,17 +1,18 @@
 
-#' UI module for creating plotly PCA
+#' UI module for creating absolute panel popup
 #'
 #' @param id namespace
+#' @param name name
 #'
 #' @return PCA UI
 #' @export
 #'
-pca_UI <- function(id){
+pca2_UI <- function(id){
   ns <- shiny::NS(id)
-  plotly::plotlyOutput(ns("pcaPlot"),
-                       width = "100%")
+  
+    IDBacApp::popupPlot_UI(ns("output2"),"PCA")
+  
 }
-
 
 
 #' Plotly PCA Server using irlba
@@ -32,11 +33,11 @@ pca_Server <- function(input,
                        dataframe,
                        namedColors){ 
   
+ 
   
-  
-  pcaCalc <- reactive({
+  calculation <- reactive({
     
-    IDBacApp::pcaCalculation(dataMatrix = dataframe(),
+   IDBacApp::pcaCalculation(dataMatrix = dataframe(),
                              logged = TRUE,
                              scaled = TRUE,
                              centered = TRUE,
@@ -44,38 +45,12 @@ pca_Server <- function(input,
   })
   
   
+  callModule(IDBacApp::popupPlot_server,
+            "output2",
+             dataFrame = calculation,
+             namedColors = namedColors)
+             
+             
+
   
-  output$pcaPlot <- plotly::renderPlotly({
-    req(nrow(pcaCalc()) > 2,
-        ncol(pcaCalc()) > 2)
-    
-    if (is.null(namedColors())) {
-      colorsToUse <- cbind.data.frame(fac = rep("#000000", nrow(pcaCalc())), 
-                                      pcaCalc())
-    } else {
-    
-    colorsToUse <- cbind.data.frame(fac = as.vector(namedColors()), 
-                                    nam = (names(namedColors())))
-    
-    
-    
-    colorsToUse <- merge(pcaCalc(),
-                         colorsToUse, 
-                         by = "nam")
-    }
-    
-  plotly::plot_ly(data = colorsToUse,
-            x = ~Dim1,
-            y = ~Dim2,
-            z = ~Dim3,
-            type = "scatter3d",
-            mode = "markers",
-            marker = list(color = ~fac),
-            hoverinfo = 'text',
-            text = ~nam) 
-  
-  })
-  
-  
-  return(pcaCalc)
 }

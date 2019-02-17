@@ -584,15 +584,17 @@ app_server <- function(input, output, session) {
                        "proteinHierOptions",
                        proteinMatrix = proteinMatrix)
 
-  
-  observeEvent(dendMaker()$dend,{
+ observe({ 
+#  observeEvent(dendMaker()$dend,{
     
-    if (length(chosenProteinSampleIDs$chosen) < 3) {
-      proteinDendrogram$dendrogram <- NULL
-    } else {
+    # if (length(chosenProteinSampleIDs$chosen) < 3) {
+    #   proteinDendrogram$dendrogram <- NULL
+    # } else {
     req(nrow(proteinMatrix()) > 2)
+  
     proteinDendrogram$dendrogram <- dendMaker()$dend
-    }
+    
+    # }
   })
   
   
@@ -612,14 +614,14 @@ app_server <- function(input, output, session) {
   #  PCoA Calculation -------------------------------------------------------
   
   callModule(IDBacApp::pcoa_Server,
-             "proteinpcoa",
+             "proteinPCOA",
              distanceMatrix = dendMaker,
              namedColors = unifiedProteinColor)
   
   # PCA Calculation  --------------------------------------------------------
   
   callModule(IDBacApp::pca_Server,
-             "proteinPCA",
+             "proteinPpCA",
              dataframe = proteinMatrix,
              namedColors = unifiedProteinColor)
   
@@ -628,7 +630,7 @@ app_server <- function(input, output, session) {
   # Calculate tSNE based on PCA calculation already performed ---------------
   
   callModule(IDBacApp::tsne_Server,
-             "proteintsne",
+             "proteinTSNE",
              dataframe = proteinMatrix,
              namedColors = unifiedProteinColor)
   

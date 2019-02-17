@@ -419,8 +419,8 @@ dendDotsServer <- function(input,
   
   output$hierOut <- renderPlot({
 
+
     shiny::validate(shiny::need(dendrogram$dendrogram, "Try selecting samples using the menu to the left."))
-    
     
     par(mar = c(5, 5, 5, plotWidth()))
    plot(dendrogram$dendrogram, horiz = T)

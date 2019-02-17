@@ -77,49 +77,10 @@ tsne_Server <- function(input,
     
   })
   
+  callModule(IDBacApp::popupPlot_server,
+             "proteinTSNE",
+             dataFrame = tsneCalc)
   
   
-  output$tsnePlot <- plotly::renderPlotly({
-    req(nrow(tsneCalc()) > 2,
-        ncol(tsneCalc()) > 2)
-    
-    if (is.null(namedColors())) {
-      colorsToUse <- cbind.data.frame(fac = rep("#000000", nrow(tsneCalc())), 
-                                      tsneCalc())
-    } else {
-      
-      colorsToUse <- cbind.data.frame(fac = as.vector(namedColors()), 
-                                      nam = (names(namedColors())))
-      
-      
-      
-      colorsToUse <- merge(tsneCalc(),
-                           colorsToUse, 
-                           by = "nam")
-    }
-    
-    plotly::plot_ly(data = colorsToUse,
-                    x = ~Dim1,
-                    y = ~Dim2,
-                    z = ~Dim3,
-                    type = "scatter3d",
-                    mode = "markers",
-                    marker = list(color = ~fac),
-                    hoverinfo = 'text',
-                    text = ~nam) %>%
-      plotly::layout(
-        xaxis = list(
-          title = ""
-        ),
-        yaxis = list(
-          title = " "
-        ),
-        zaxis = list(
-          title = ""
-        ))
-    
-  })
   
-  
-  return(tsneCalc)
 }

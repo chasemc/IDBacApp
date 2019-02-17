@@ -104,7 +104,7 @@ dendrogramCreator <- function(input,
                           method = input$clustering)
     
     
-    dend <- createHclustObject(dend)
+   
     
     dend <- stats::as.dendrogram(dend)
     

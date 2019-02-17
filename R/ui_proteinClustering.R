@@ -55,10 +55,16 @@ ui_proteinClustering <- function() {
                    IDBacApp::bsCollapse(id = "multidim",
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("PCA, PCoA, t-SNE", 
-                                                                    align = "center"),          
-                                                                  IDBacApp::pca_UI("proteinpca"),
-                                                                  IDBacApp::pcoa_UI("proteinpcoa"),
-                                                                  IDBacApp::tsne_UI("proteintsne")
+                                                                    align = "center"),   
+                                                                    p("Principal Component Analysis (PCA)"),
+                                                                  IDBacApp::pca2_UI("proteinPpCA"),
+                                                                 
+                                                                    p("Principal Coordinates Analysis (PCoA)"),
+                                                         #         IDBacApp::popupPlot_UI("proteinPCOA", "PCoA"),
+                                                                
+                                                                    p("t-Distributed Stochastic Neighbor Embedding (t-SNE)")
+                                                           #       IDBacApp::popupPlot_UI("proteinTSNE", "t-SNE")
+                                                                  
                                         )
                    ),
                    IDBacApp::bsCollapse(id = "saveProteinHier",
