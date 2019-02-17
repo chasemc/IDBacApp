@@ -29,7 +29,8 @@ popupPlot_server <- function(input,
                              output,
                              session,
                              dataFrame,
-                             namedColors){ 
+                             namedColors,
+                             plotTitle){ 
   
   
   output$plot <- plotly::renderPlotly({
@@ -58,7 +59,8 @@ popupPlot_server <- function(input,
                     mode = "markers",
                     marker = list(color = ~fac),
                     hoverinfo = 'text',
-                    text = ~nam) 
+                    text = ~nam) %>% 
+      plotly::layout(title = plotTitle)
   })
   
   observeEvent(input$closeAbsPanel, {
@@ -79,6 +81,7 @@ popupPlot_server <- function(input,
                      width = "60%",
                      draggable = F,
                      style = "z-index:1002;",
+                     p(plotTitle),
                      absolutePanel(
                        top = "0%",
                        bottom = "95%",
