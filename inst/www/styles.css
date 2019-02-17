@@ -139,7 +139,7 @@ font-family: 'Arial';
 
 .popup_Plots {
   /* Appearance */
-  background-color: grey;
+  background-color: Gainsboro;
   padding: 20px 20px 20px 20px;
   cursor: move;
   /* Fade out while not hovering */

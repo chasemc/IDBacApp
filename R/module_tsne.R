@@ -9,32 +9,48 @@
 tsne_UI <- function(id){
   ns <- shiny::NS(id)
   tagList(
-  shiny::numericInput(inputId = "tsnePerplexity",
-                      label = "Perplexity",
-                      value = 10,
-                      min = 1,
-                      max = 100,
-                      step = 1,
-                      width = NULL),
-  shiny::numericInput(inputId = "tsneTheta",
-                      label = "Theta",
-                      value = .5,
-                      min = 0,
-                      max = 1,
-                      step = 0.1,
-                      width = NULL),
-  shiny::numericInput(inputId = "tsneIterations",
-                      label = "Iterations",
-                      value = 1000,
-                      min = 1,
-                      max = 10000,
-                      step = 1,
-                      width = NULL),
-  plotly::plotlyOutput(ns("tsnePlot"),
-                       width = "100%")
+    shiny::numericInput(inputId = ns("tsnePerplexity"),
+                        label = "Perplexity",
+                        value = 10,
+                        min = 1,
+                        max = 100,
+                        step = 1,
+                        width = NULL),
+    shiny::numericInput(inputId = ns("tsneTheta"),
+                        label = "Theta",
+                        value = .5,
+                        min = 0,
+                        max = 1,
+                        step = 0.1,
+                        width = NULL),
+    shiny::numericInput(inputId = ns("tsneIterations"),
+                        label = "Iterations",
+                        value = 1000,
+                        min = 1,
+                        max = 10000,
+                        step = 1,
+                        width = NULL)
+    
   )
 }
 
+
+
+
+
+#' UI module for creating plotly tsne
+#'
+#' @param id namespace
+#'
+#' @return tsne UI
+#' @export
+#'
+proteinTsnePlot_UI <- function(id){
+  ns <- shiny::NS(id)
+  tagList(
+    IDBacApp::popupPlot_UI("tsnePanel", "tsne")
+  )
+}
 
 
 #' Plotly tsne Server using irlba
@@ -59,11 +75,11 @@ tsne_Server <- function(input,
   
   tsneCalc <- reactive({
     
-    validate(need(nrow(dataframe()) > 15, "t-SNE requires more samples"))
+    validate(need(nrow(dataframe()) > 1, "t-SNE requires more samples"))
     
     validate(need(input$tsnePerplexity > 0, "Perplexity must be greater than 0"))
     validate(need(input$tsnePerplexity < 101, "Perplexity must be less than 101"))
-
+    
     validate(need(input$tsneTheta > 0, "Theta must be greater than 0"))
     validate(need(input$tsneTheta < 1, "Theta must be less than 101"))
     
@@ -78,8 +94,9 @@ tsne_Server <- function(input,
   })
   
   callModule(IDBacApp::popupPlot_server,
-             "proteinTSNE",
-             dataFrame = tsneCalc)
+             "tsnePanel",
+             dataFrame = tsneCalc,
+             extraUI = tsne_UI)
   
   
   

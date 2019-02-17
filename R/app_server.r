@@ -613,24 +613,52 @@ app_server <- function(input, output, session) {
   
   #  PCoA Calculation -------------------------------------------------------
   
-  callModule(IDBacApp::pcoa_Server,
+
+  
+   proteinPcoaCalculation <- reactive({
+
+    IDBacApp::pcoaCalculation(distanceMatrix = dendMaker()$distance)
+
+  })
+
+  callModule(IDBacApp::popupPlot_server,
              "proteinPCOA",
-             distanceMatrix = dendMaker,
-             namedColors = unifiedProteinColor)
+             dataFrame = proteinPcoaCalculation,
+             namedColors = unifiedProteinColor,
+             plotTitle = "Principle Components Analysis")
+  
   
   # PCA Calculation  --------------------------------------------------------
   
-  callModule(IDBacApp::pca_Server,
-             "proteinPpCA",
-             dataframe = proteinMatrix,
-             namedColors = unifiedProteinColor)
+  
+  
+  proteinPcaCalculation <- reactive({
+    
+    IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
+                             logged = TRUE,
+                             scaled = TRUE,
+                             centered = TRUE,
+                             missing = 0.00001)
+  })
+  
+  
+  
+  
+  callModule(IDBacApp::popupPlot_server,
+             "proteinPCA",
+             dataFrame = proteinPcaCalculation,
+             namedColors = unifiedProteinColor,
+             plotTitle = "Principle Components Analysis")
+  
+  
+  
   
   
   
   # Calculate tSNE based on PCA calculation already performed ---------------
   
   callModule(IDBacApp::tsne_Server,
-             "proteinTSNE",
+             "tse",
              dataframe = proteinMatrix,
              namedColors = unifiedProteinColor)
   

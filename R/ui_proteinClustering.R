@@ -56,14 +56,14 @@ ui_proteinClustering <- function() {
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("PCA, PCoA, t-SNE", 
                                                                     align = "center"),   
-                                                                    p("Principal Component Analysis (PCA)"),
-                                                                  IDBacApp::pca2_UI("proteinPpCA"),
-                                                                 
-                                                                    p("Principal Coordinates Analysis (PCoA)"),
-                                                         #         IDBacApp::popupPlot_UI("proteinPCOA", "PCoA"),
-                                                                
-                                                                    p("t-Distributed Stochastic Neighbor Embedding (t-SNE)")
-                                                           #       IDBacApp::popupPlot_UI("proteinTSNE", "t-SNE")
+                                                                  p("Principal Component Analysis (PCA)"),
+                                                                  IDBacApp::popupPlot_UI("proteinPCA", name="PCA"),
+                                                                  
+                                                                  p("Principal Coordinates Analysis (PCoA)"),
+                                                                  IDBacApp::popupPlot_UI("proteinPCOA", "PCoA"),
+                                                                  
+                                                                  p("t-Distributed Stochastic Neighbor Embedding (t-SNE)"),
+                                                                  IDBacApp::proteinTsnePlot_UI("tse")
                                                                   
                                         )
                    ),

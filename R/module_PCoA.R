@@ -29,7 +29,9 @@ pcoa_Server <- function(input,
   
   callModule(IDBacApp::popupPlot_server,
              "proteinPCOA",
-             dataFrame = calculation)
+             dataFrame = calculation,
+             namedColors = namedColors,
+             plotTitle = "proteinPCOA")
   
   
 }

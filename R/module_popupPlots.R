@@ -30,12 +30,14 @@ popupPlot_server <- function(input,
                              session,
                              dataFrame,
                              namedColors,
-                             plotTitle){ 
+                             plotTitle,
+                             extraUI = NULL){ 
   
   
   output$plot <- plotly::renderPlotly({
     req(nrow(dataFrame()) > 2,
         ncol(dataFrame()) > 2)
+    
     
     if (is.null(namedColors())) {
       colorsToUse <- cbind.data.frame(fac = rep("#000000", nrow(dataFrame())), 
@@ -93,6 +95,7 @@ popupPlot_server <- function(input,
                                            label = "",
                                            icon = icon("far fa-window-close"))
                      ),
+                     if (!is.null(extraUI)) { extraUI },
                      absolutePanel(
                        top = "8%",
                        bottom = "1%",

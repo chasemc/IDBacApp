@@ -17,7 +17,9 @@ pcaCalculation <- function(dataMatrix,
                            scaled = TRUE,
                            centered = TRUE,
                            missing = .00001){
-  shiny::validate(shiny::need(nrow(dataMatrix) > 3, "Select more samples for PCA."))
+  
+  validate(need(nrow(dataMatrix) > 3, "Select more samples for PCA"))
+  validate(need(ncol(dataMatrix) > 5, "Only 5-peaks found between all samples"))
   
   names <- rownames(dataMatrix)
   # log10 if chosen
@@ -63,7 +65,10 @@ tsneCalculation <- function(dataMatrix,
                             perplexity,
                             theta,
                             iterations){
-
+  
+  validate(need(nrow(dataMatrix) > 10, "Need more samples for t-SNE"))
+  validate(need(ncol(dataMatrix) > 5, "Only 5-peaks found between all samples"))
+  
   names <- rownames(dataMatrix)
   dataMatrix[is.na(dataMatrix)] <- 0
   dataMatrix <- irlba::prcomp_irlba(dataMatrix,
@@ -105,6 +110,7 @@ tsneCalculation <- function(dataMatrix,
 
 pcoaCalculation <- function(distanceMatrix){
   
+ validate(need(nrow(as.matrix(distanceMatrix)) > 1, "Select more samples for PCoA"))
   
   distanceMatrix <- as.data.frame(stats::cmdscale(distanceMatrix, k = 3))
   distanceMatrix <- distanceMatrix[,1:3]
