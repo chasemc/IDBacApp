@@ -10,7 +10,7 @@
 pca2_UI <- function(id){
   ns <- shiny::NS(id)
   
-    IDBacApp::popupPlot_UI(ns("output2"),"PCA")
+  IDBacApp::popupPlot_UI(ns("output2"),"PCA")
   
 }
 
@@ -33,11 +33,11 @@ pca_Server <- function(input,
                        dataframe,
                        namedColors){ 
   
- 
+  
   
   calculation <- reactive({
     
-   IDBacApp::pcaCalculation(dataMatrix = dataframe(),
+    IDBacApp::pcaCalculation(dataMatrix = dataframe(),
                              logged = TRUE,
                              scaled = TRUE,
                              centered = TRUE,
@@ -46,11 +46,11 @@ pca_Server <- function(input,
   
   
   callModule(IDBacApp::popupPlot_server,
-            "output2",
+             "output2",
              dataFrame = calculation,
              namedColors = namedColors)
-             
-             
-
+  
+  
+  
   
 }
