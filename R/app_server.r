@@ -24,6 +24,16 @@ app_server <- function(input, output, session) {
   options(shiny.reactlog = TRUE)
   sqlDirectory <- getwd()
   
+  selectedWd <- callModule(IDBacApp::selectDirectory_Server,
+                           "userWorkingDirectory")
+  
+  
+  callModule(IDBacApp::showSelectedDirectory_Server,
+             "userWorkingDirectory",
+             location = selectedWd)
+             
+  
+  
   
   # Register sample-choosing JS ---------------------------------------------
   
