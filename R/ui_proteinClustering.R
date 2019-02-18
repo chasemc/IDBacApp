@@ -6,6 +6,9 @@
 
 ui_proteinClustering <- function() {
   
+  
+  # Choose peaks retaINED FOR ANALYSIS
+  # in hier -> delineatwe settings menu vs optional
   fluidPage(
     sidebarLayout(
       
@@ -29,20 +32,20 @@ ui_proteinClustering <- function() {
                    ),
                    IDBacApp::bsCollapse(id = "collapseManSettings",
                                         open = "Panel 1",
-                                        IDBacApp::bsCollapsePanel(p("Modify the Tree", 
+                                        IDBacApp::bsCollapsePanel(p("Adjust the Dendrogram", 
                                                                     align = "center"),
                                                                   numericInput("hclustHeight",
-                                                                               label = h5(strong("Expand tree")),
+                                                                               label = h5(strong("Expand dendrogram")),
                                                                                value = 750,
                                                                                step = 50,
                                                                                min = 100),
                                                                   numericInput("dendparmar",
-                                                                               label = h5(strong("Adjust right margin of tree")),
+                                                                               label = h5(strong("Adjust right margin of dendrogram")),
                                                                                value = 20),
                                                                   radioButtons("dendOrPhylo", 
-                                                                               label = p("Type of tree:"),
-                                                                               choices = list("Dendrogram" = "Dendrogram", 
-                                                                                              "Phylogram" = "Phylogram"),
+                                                                               label = p("Label Positions:"),
+                                                                               choices = list("Plot all labels at x = 0" = "Dendrogram", 
+                                                                                              "Hang labels" = "Phylogram"),
                                                                                selected = "Dendrogram"),
                                                                   fluidRow(IDBacApp::colordendLabelsUI("proth")),
                                                                   fluidRow(IDBacApp::colordendLinesUI("proth")),
