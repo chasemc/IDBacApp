@@ -7,14 +7,13 @@
 ui_proteinClustering <- function() {
   
   
-  # Choose peaks retaINED FOR ANALYSIS
   # in hier -> delineatwe settings menu vs optional
   fluidPage(
     sidebarLayout(
       
       sidebarPanel(style = "background-color:#7777770d", 
                    width = 4,
-                   IDBacApp::bsCollapse(id = "collapseManSettings",
+                   IDBacApp::bsCollapse(id = "selectProteinSamplesDropDown",
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("Select Samples", 
                                                                     align = "center"),
@@ -23,14 +22,22 @@ ui_proteinClustering <- function() {
                                                                   IDBacApp::sampleChooser_UI("proteinSampleChooser")
                                         )
                    ),
-                   IDBacApp::bsCollapse(id = "collapseManSettings",
+                   IDBacApp::bsCollapse(id = "proteinPeakSettingsDropDown",
+                                        open = "Panel 1",
+                                        IDBacApp::bsCollapsePanel(p("Choose Peaks Retained for Analayses", 
+                                                                    align = "center"),
+                                                                  strong("Settings chosen will effect all protein analyses."),
+                                                                  IDBacApp::proteinPeakRetentionSettings_UI("proteinPeakSettings")
+                                        )
+                   ),
+                   IDBacApp::bsCollapse(id = "proteinClustSettingsDropDown",
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("Choose Clustering Settings", 
                                                                     align = "center"),
                                                                   IDBacApp::dendrogramCreatorUI("proteinHierOptions")
                                         )
                    ),
-                   IDBacApp::bsCollapse(id = "collapseManSettings",
+                   IDBacApp::bsCollapse(id = "adjustProteinDendDropDown",
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("Adjust the Dendrogram", 
                                                                     align = "center"),
@@ -53,14 +60,14 @@ ui_proteinClustering <- function() {
                                         )
                    ),
                    
-                   IDBacApp::bsCollapse(id = "collapseManSettings",
+                   IDBacApp::bsCollapse(id = "proteinInjectDropDown",
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("Insert Samples from Another Experiment", 
                                                                     align = "center"),          
                                                                   IDBacApp::selectInjections_UI("proteinInject")
                                         )
                    ),
-                   IDBacApp::bsCollapse(id = "multidim",
+                   IDBacApp::bsCollapse(id = "proteinMuliDimDropDown",
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("PCA, PCoA, t-SNE", 
                                                                     align = "center"),   
@@ -76,7 +83,7 @@ ui_proteinClustering <- function() {
                                                                   
                                         )
                    ),
-                   IDBacApp::bsCollapse(id = "saveProteinHier",
+                   IDBacApp::bsCollapse(id = "proteinDendSaveDropDown",
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("Save Dendrogram", 
                                                                     align = "center"),          
