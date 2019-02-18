@@ -40,7 +40,7 @@ ui_proteinClustering <- function() {
                                                                                label = h5(strong("Adjust right margin of dendrogram")),
                                                                                value = 20),
                                                                   radioButtons("dendOrPhylo", 
-                                                                               label = h3("Tree Type"),
+                                                                               label = p("Type of tree:"),
                                                                                choices = list("Dendrogram" = "Dendrogram", 
                                                                                               "Phylogram" = "Phylogram"),
                                                                                selected = "Dendrogram"),
