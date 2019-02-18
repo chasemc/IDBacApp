@@ -19,7 +19,7 @@ pcaCalculation <- function(dataMatrix,
                            missing = .00001){
   
   validate(need(nrow(dataMatrix) > 3, "Select more samples for PCA"))
-  validate(need(ncol(dataMatrix) > 5, "Only 5-peaks found between all samples"))
+  validate(need(ncol(dataMatrix) > 1, "Only 1 peak found between all samples"))
   
   names <- rownames(dataMatrix)
   # log10 if chosen
@@ -66,8 +66,8 @@ tsneCalculation <- function(dataMatrix,
                             theta,
                             iterations){
   
-  validate(need(nrow(dataMatrix) > 10, "Need more samples for t-SNE"))
-  validate(need(ncol(dataMatrix) > 5, "Only 5-peaks found between all samples"))
+  validate(need(nrow(dataMatrix) > 1, "Need more samples for t-SNE"))
+  validate(need(ncol(dataMatrix) > 5, "Only 1-peak found between all samples"))
   
   names <- rownames(dataMatrix)
   dataMatrix[is.na(dataMatrix)] <- 0
@@ -110,7 +110,7 @@ tsneCalculation <- function(dataMatrix,
 
 pcoaCalculation <- function(distanceMatrix){
   
- validate(need(nrow(as.matrix(distanceMatrix)) > 1, "Select more samples for PCoA"))
+ validate(need(nrow(as.matrix(distanceMatrix)) > 3, "Select more samples for PCoA"))
   
   distanceMatrix <- as.data.frame(stats::cmdscale(distanceMatrix, k = 3))
   distanceMatrix <- distanceMatrix[,1:3]

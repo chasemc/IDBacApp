@@ -39,6 +39,11 @@ ui_proteinClustering <- function() {
                                                                   numericInput("dendparmar",
                                                                                label = h5(strong("Adjust right margin of dendrogram")),
                                                                                value = 20),
+                                                                  radioButtons("dendOrPhylo", 
+                                                                               label = h3("Tree Type"),
+                                                                               choices = list("Dendrogram" = "Dendrogram", 
+                                                                                              "Phylogram" = "Phylogram"),
+                                                                               selected = "Dendrogram"),
                                                                   fluidRow(IDBacApp::colordendLabelsUI("proth")),
                                                                   fluidRow(IDBacApp::colordendLinesUI("proth")),
                                                                   fluidRow(IDBacApp::addDotsActionUI("proth"))
@@ -57,13 +62,14 @@ ui_proteinClustering <- function() {
                                         IDBacApp::bsCollapsePanel(p("PCA, PCoA, t-SNE", 
                                                                     align = "center"),   
                                                                   p("Principal Component Analysis (PCA)"),
-                                                                  IDBacApp::popupPlot_UI("proteinPCA", name="PCA"),
+                                                                  IDBacApp::popupPlot_UI("proteinPCA", "PCA"),
                                                                   
                                                                   p("Principal Coordinates Analysis (PCoA)"),
                                                                   IDBacApp::popupPlot_UI("proteinPCOA", "PCoA"),
                                                                   
                                                                   p("t-Distributed Stochastic Neighbor Embedding (t-SNE)"),
-                                                                  IDBacApp::proteinTsnePlot_UI("tse")
+                                                                  IDBacApp::popupPlotTsne_UI("tsnePanel")
+                                                                  
                                                                   
                                         )
                    ),
