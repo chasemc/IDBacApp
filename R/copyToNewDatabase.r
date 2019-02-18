@@ -266,15 +266,26 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(temp)
                         
                         
+                       
+                        
+                        shiny::setProgress(value = 0.9, 
+                                           message = 'Copying data to new database',
+                                           detail = 'Indexing new database...',
+                                           session = getDefaultReactiveDomain())
+                        warning("Creating index")
+                        DBI::dbSendStatement('CREATE INDEX ids ON IndividualSpectra (Strain_ID);',
+                                             conn = newDBconnection)
+                        DBI::dbClearResult(newDBconnection)
+                        warning("Created index")
+                        
+                        shiny::setProgress(value = 0.99, 
+                                           message = 'Copying data to new database',
+                                           detail = 'Finishing...',
+                                           session = getDefaultReactiveDomain())
                         pool::poolReturn(existingDBconnection)
                         pool::poolReturn(newDBconnection)
                         pool::poolClose(newDBPool)
                         
-                        
-                        shiny::setProgress(value = 0.9, 
-                                           message = 'Copying data to new database',
-                                           detail = 'Finishing...',
-                                           session = getDefaultReactiveDomain())
                         
                         Sys.sleep(1)
                         warning(paste0("End migration of \n",

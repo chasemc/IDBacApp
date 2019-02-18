@@ -93,14 +93,14 @@ selectInjections_UI <- function(id){
     chosen <-  shiny::callModule(IDBacApp::sampleChooser_server,
                                  "chooseNewDBSamples",
                                  pool = selectedDB$userDBCon,
-                                 allSamples = TRUE,
-                                 whetherProtein = FALSE)
-  observeEvent(chosen$chosen, {  
-    chosenSamples$chosen <- chosen$chosen
-    
-  })
+                                 allSamples = FALSE,
+                                 whetherProtein = TRUE)
+    observeEvent(chosen$chosen, {  
+      chosenSamples$chosen <- chosen$chosen
+      
+    })
     
     return(list(chosen = chosenSamples,
                 db = selectedDB$userDBCon))
   }
-    
+  

@@ -80,39 +80,39 @@ popupPlot_server <- function(input,
                  
                  if (nrow(dataFrame()) < 2 || ncol(dataFrame()) < 3) {
                    output$absPanel <- renderUI(
-                    glue::glue("Select more samples for {plotTitle}")
+                     glue::glue("Select more samples for {plotTitle}")
                    )
                  } else {
-                 
-                 
-                 output$absPanel <- renderUI(
                    
-                   shiny::fixedPanel(
-                     class = "popup_Plots",
-                     top = "20%",
-                     bottom = "20%",
-                     width = "60%",
-                     draggable = F,
-                     style = "z-index:1002;",
-                     p(plotTitle),
-                     absolutePanel(
-                       top = "0%",
-                       bottom = "95%",
-                       right = "5%",
-                       left = "95%",
-                       fixed = F,
-                       shiny::actionButton(session$ns("closeAbsPanel"),
-                                           class = "closeX",
-                                           label = "",
-                                           icon = icon("far fa-window-close"))
-                     ),
-                     fluidRow(                     
-                       plotly::plotlyOutput(session$ns("plot"),
-                                            width = "100%", 
-                                            height = "100%")
+                   
+                   output$absPanel <- renderUI(
+                     
+                     shiny::fixedPanel(
+                       class = "popup_Plots",
+                       top = "20%",
+                       bottom = "20%",
+                       width = "60%",
+                       draggable = F,
+                       style = "z-index:1002;",
+                       p(plotTitle),
+                       absolutePanel(
+                         top = "0%",
+                         bottom = "95%",
+                         right = "5%",
+                         left = "95%",
+                         fixed = F,
+                         shiny::actionButton(session$ns("closeAbsPanel"),
+                                             class = "closeX",
+                                             label = "",
+                                             icon = icon("far fa-window-close"))
+                       ),
+                       fluidRow(                     
+                         plotly::plotlyOutput(session$ns("plot"),
+                                              width = "100%", 
+                                              height = "100%")
+                       )
                      )
                    )
-                 )
                  }
                })
 }

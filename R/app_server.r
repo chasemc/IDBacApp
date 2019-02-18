@@ -31,7 +31,7 @@ app_server <- function(input, output, session) {
   
   
   output$userWorkingDirectoryText <- renderText(sqlDirectory$sqlDirectory)
-
+  
   
   
   # Register sample-choosing JS ---------------------------------------------
@@ -80,20 +80,20 @@ app_server <- function(input, output, session) {
   # Find the available databases, and make reactive so can be updated if more are created
   
   
- observe({
-   w<-input$processToAnalysis
+  observe({
+    w<-input$processToAnalysis
     hello <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
-                                                                  pattern = ".sqlite",
-                                                                  full.names = FALSE,
-                                                                  recursive = FALSE)
-                                                       )
-  if (length(hello) == 0){
-    availableDatabases$db <- NULL
-  } else {
-    availableDatabases$db <- hello
-  }
+                                                  pattern = ".sqlite",
+                                                  full.names = FALSE,
+                                                  recursive = FALSE)
+    )
+    if (length(hello) == 0){
+      availableDatabases$db <- NULL
+    } else {
+      availableDatabases$db <- hello
+    }
     
-  
+    
   })
   
   
@@ -395,7 +395,7 @@ app_server <- function(input, output, session) {
     
     mirrorPlotEnv <- dataForInversePeakComparisonPlot()
     mirrorPlot(mirrorPlotEnv = mirrorPlotEnv)
-      
+    
     # Watch for brushing of the top mirror plot
     observe({
       brush <- input$plot2_brush
@@ -475,20 +475,20 @@ app_server <- function(input, output, session) {
   
   
   # User chooses which samples to include -----------------------------------
- # chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
+  # chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   
-    chosenProteinSampleIDs <- shiny::callModule(IDBacApp::sampleChooser_server,
-                                                       "proteinSampleChooser",
-                                                       pool = workingDB$pool,
-                                                       allSamples = FALSE,
-                                                       whetherProtein = TRUE)
+  chosenProteinSampleIDs <- shiny::callModule(IDBacApp::sampleChooser_server,
+                                              "proteinSampleChooser",
+                                              pool = workingDB$pool,
+                                              allSamples = FALSE,
+                                              whetherProtein = TRUE)
   
   
   # Collapse peaks ----------------------------------------------------------
   
- # collapsedPeaksForDend <- reactiveValues(vals = NULL)  
+  # collapsedPeaksForDend <- reactiveValues(vals = NULL)  
   
-#observe({
+  #observe({
   collapsedPeaksForDend <- reactive({
     req(!is.null(chosenProteinSampleIDs$chosen))
     req(length(chosenProteinSampleIDs$chosen) > 0)
@@ -499,7 +499,7 @@ app_server <- function(input, output, session) {
     # trim m/z based on user input
     # connect to sql
     isolate(
-    conn <- pool::poolCheckout(workingDB$pool())
+      conn <- pool::poolCheckout(workingDB$pool())
     )
     temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
@@ -531,19 +531,19 @@ app_server <- function(input, output, session) {
       conn <- pool::poolCheckout(proteinSamplesToInject$db())
       
       temp <- c(temp, lapply(proteinSamplesToInject$chosen$chosen,
-                     function(ids){
-                       IDBacApp::collapseReplicates(checkedPool = conn,
-                                                    sampleIDs = ids,
-                                                    peakPercentPresence = input$percentPresenceP,
-                                                    lowerMassCutoff = input$lowerMass,
-                                                    upperMassCutoff = input$upperMass, 
-                                                    minSNR = 6, 
-                                                    tolerance = 0.002,
-                                                    protein = TRUE)
-                     })
-                )
-                pool::poolReturn(conn)
-                
+                             function(ids){
+                               IDBacApp::collapseReplicates(checkedPool = conn,
+                                                            sampleIDs = ids,
+                                                            peakPercentPresence = input$percentPresenceP,
+                                                            lowerMassCutoff = input$lowerMass,
+                                                            upperMassCutoff = input$upperMass, 
+                                                            minSNR = 6, 
+                                                            tolerance = 0.002,
+                                                            protein = TRUE)
+                             })
+      )
+      pool::poolReturn(conn)
+      
       
       names(temp) <- c(chosenProteinSampleIDs$chosen, proteinSamplesToInject$chosen$chosen)
       
@@ -579,7 +579,7 @@ app_server <- function(input, output, session) {
                                massStart = input$lowerMass,
                                massEnd = input$upperMass)
     
-  do.call(rbind, pm)
+    do.call(rbind, pm)
     
     
   })
@@ -590,20 +590,20 @@ app_server <- function(input, output, session) {
   observeEvent(workingDB$move$selectExperiment, {
     proteinDendrogram$dendrogram <- NULL
     
-      })
+  })
   
- dendMaker <- shiny::callModule(IDBacApp::dendrogramCreator,
-                       "proteinHierOptions",
-                       proteinMatrix = proteinMatrix)
-
- observe({ 
-#  observeEvent(dendMaker()$dend,{
+  dendMaker <- shiny::callModule(IDBacApp::dendrogramCreator,
+                                 "proteinHierOptions",
+                                 proteinMatrix = proteinMatrix)
+  
+  observe({ 
+    #  observeEvent(dendMaker()$dend,{
     
     # if (length(chosenProteinSampleIDs$chosen) < 3) {
     #   proteinDendrogram$dendrogram <- NULL
     # } else {
     req(nrow(proteinMatrix()) > 2)
-  
+    
     proteinDendrogram$dendrogram <- dendMaker()$dend
     
     # }
@@ -626,14 +626,14 @@ app_server <- function(input, output, session) {
   
   #  PCoA Calculation -------------------------------------------------------
   
-
   
-   proteinPcoaCalculation <- reactive({
-
+  
+  proteinPcoaCalculation <- reactive({
+    
     IDBacApp::pcoaCalculation(distanceMatrix = dendMaker()$distance)
-
+    
   })
-
+  
   callModule(IDBacApp::popupPlot_server,
              "proteinPCOA",
              dataFrame = proteinPcoaCalculation,
@@ -669,7 +669,7 @@ app_server <- function(input, output, session) {
   
   
   # Calculate tSNE based on PCA calculation already performed ---------------
-
+  
   
   
   
@@ -679,7 +679,7 @@ app_server <- function(input, output, session) {
              data = proteinMatrix,
              plotTitle = "t-SNE",
              namedColors = unifiedProteinColor)
-
+  
   
   
   
@@ -730,16 +730,16 @@ app_server <- function(input, output, session) {
     req(!is.null(chosenProteinSampleIDs$chosen))
     req(length(chosenProteinSampleIDs$chosen) > 2)
     req(!is.null(attributes(proteinDendrogram$dendrogram)$members))
-
-  
-      shiny::tagList(
+    
+    
+    shiny::tagList(
       h4("Suggestions for Reporting Protein Analysis:"),
       p("This dendrogram was created by analyzing ",tags$code(attributes(proteinDendrogram$dendrogram)$members), " samples,
           and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
           Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
         "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
-      )
-      
+    )
+    
   })
   
   
@@ -866,12 +866,40 @@ app_server <- function(input, output, session) {
   
   # Small mol pca Calculation -----------------------------------------------
   
-  # callModule(IDBacApp::pca_Server,
-  #            "smallMolPcaPlot",
-  #            dataframe = smallMolDataFrame,
-  #            namedColors = function() NULL)
-  # 
-
+  
+  
+  output$smallMolPcaPlot <- plotly::renderPlotly({
+    req(nrow(smallMolDataFrame()) > 2,
+        ncol(smallMolDataFrame()) > 2)
+    
+    princ <- IDBacApp::pcaCalculation(smallMolDataFrame())
+    namedColors <- NULL
+    
+    if (is.null(namedColors)) {
+      colorsToUse <- cbind.data.frame(fac = rep("#000000", nrow(princ)), 
+                                      princ)
+    } else {
+      
+      colorsToUse <- cbind.data.frame(fac = as.vector(namedColors), 
+                                      nam = (names(namedColors)))
+      
+      
+      colorsToUse <- merge(princ,
+                           colorsToUse, 
+                           by = "nam")
+    }
+    
+    plotly::plot_ly(data = colorsToUse,
+                    x = ~Dim1,
+                    y = ~Dim2,
+                    z = ~Dim3,
+                    type = "scatter3d",
+                    mode = "markers",
+                    marker = list(color = ~fac),
+                    hoverinfo = 'text',
+                    text = ~nam) 
+    
+  })
 # Small mol ---------------------------------------------------------------
 
   output$matrixSelector <- renderUI({
