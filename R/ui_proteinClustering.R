@@ -29,16 +29,21 @@ ui_proteinClustering <- function() {
                    ),
                    IDBacApp::bsCollapse(id = "collapseManSettings",
                                         open = "Panel 1",
-                                        IDBacApp::bsCollapsePanel(p("Adjust the Dendrogram", 
+                                        IDBacApp::bsCollapsePanel(p("Modify the Tree", 
                                                                     align = "center"),
                                                                   numericInput("hclustHeight",
-                                                                               label = h5(strong("Expand Tree")),
+                                                                               label = h5(strong("Expand tree")),
                                                                                value = 750,
                                                                                step = 50,
                                                                                min = 100),
                                                                   numericInput("dendparmar",
-                                                                               label = h5(strong("Adjust right margin of dendrogram")),
+                                                                               label = h5(strong("Adjust right margin of tree")),
                                                                                value = 20),
+                                                                  radioButtons("dendOrPhylo", 
+                                                                               label = p("Type of tree:"),
+                                                                               choices = list("Dendrogram" = "Dendrogram", 
+                                                                                              "Phylogram" = "Phylogram"),
+                                                                               selected = "Dendrogram"),
                                                                   fluidRow(IDBacApp::colordendLabelsUI("proth")),
                                                                   fluidRow(IDBacApp::colordendLinesUI("proth")),
                                                                   fluidRow(IDBacApp::addDotsActionUI("proth"))
@@ -52,18 +57,32 @@ ui_proteinClustering <- function() {
                                                                   IDBacApp::selectInjections_UI("proteinInject")
                                         )
                    ),
+                   IDBacApp::bsCollapse(id = "multidim",
+                                        open = "Panel 1",
+                                        IDBacApp::bsCollapsePanel(p("PCA, PCoA, t-SNE", 
+                                                                    align = "center"),   
+                                                                  p("Principal Component Analysis (PCA)"),
+                                                                  IDBacApp::popupPlot_UI("proteinPCA", "PCA"),
+                                                                  
+                                                                  p("Principal Coordinates Analysis (PCoA)"),
+                                                                  IDBacApp::popupPlot_UI("proteinPCOA", "PCoA"),
+                                                                  
+                                                                  p("t-Distributed Stochastic Neighbor Embedding (t-SNE)"),
+                                                                  IDBacApp::popupPlotTsne_UI("tsnePanel")
+                                                                  
+                                                                  
+                                        )
+                   ),
                    IDBacApp::bsCollapse(id = "saveProteinHier",
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("Save Dendrogram", 
                                                                     align = "center"),          
-
+                                                                  
                                                                   IDBacApp::downloadHier("proth"),
                                                                   IDBacApp::downloadSvg("proth")
-                                                                  )
+                                        )
                    ),
                    br(),
-                  
-                   h4("Suggestions for Reporting Protein Analysis:"),
                    uiOutput("proteinReport")
                    
       ),

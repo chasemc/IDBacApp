@@ -1,3 +1,13 @@
+#' @importFrom stats as.dendrogram as.hclust order.dendrogram setNames
+#' @importFrom utils capture.output capture.output choose.dir compareVersion packageVersion read.delim write.csv
+#' @importFrom grDevices adjustcolor dev.off
+#' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
+#' @importFrom magrittr "%>%"
+#' @import shiny
+#' @import rhandsontable
+
+NULL
+
 #' Main UI of IDBac
 #'
 #' @param input input
@@ -9,10 +19,19 @@
 #'
 app_server <- function(input, output, session) {
   
-  
+
   # Develepment Functions ---------------------------------------------------
   options(shiny.reactlog = TRUE)
-  sqlDirectory <- getwd()
+  
+  sqlDirectory <- reactiveValues(sqlDirectory = getwd())
+  
+  selectedNewWD <- callModule(IDBacApp::selectDirectory_Server,
+                              "userWorkingDirectory",
+                              sqlDirectory)
+  
+  
+  output$userWorkingDirectoryText <- renderText(sqlDirectory$sqlDirectory)
+  
   
   
   # Register sample-choosing JS ---------------------------------------------
@@ -29,7 +48,7 @@ app_server <- function(input, output, session) {
   # Setup working directories -----------------------------------------------
   # This  doesn't go in modules, so that temp folder cleanup is sure to happen more often
   # Create a directory for temporary mzml files
-  tempMZDir <- file.path(sqlDirectory, "temp_mzML")
+  tempMZDir <- file.path(getwd(), "temp_mzML")
   dir.create(tempMZDir)
   
   # Cleanup mzML temp folder on initialization of app
@@ -57,21 +76,24 @@ app_server <- function(input, output, session) {
   
   # SQL Tab -----------------------------------------------------------------
   
-  
+  availableDatabases <- reactiveValues(db = NULL)
   # Find the available databases, and make reactive so can be updated if more are created
-  availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(sqlDirectory,
-                                                                                 pattern = ".sqlite",
-                                                                                 full.names = FALSE)))
   
-
   
-  observeEvent(input$mainIDBacNav,
-               ignoreInit = TRUE, {
-                 req(input$mainIDBacNav == "sqlUiTab")
-                 availableDatabases$db <- tools::file_path_sans_ext(list.files(sqlDirectory,
-                                                                               pattern = ".sqlite",
-                                                                               full.names = FALSE))
-  
+  observe({
+    w<-input$processToAnalysis
+    hello <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                  pattern = ".sqlite",
+                                                  full.names = FALSE,
+                                                  recursive = FALSE)
+    )
+    if (length(hello) == 0){
+      availableDatabases$db <- NULL
+    } else {
+      availableDatabases$db <- hello
+    }
+    
+    
   })
   
   
@@ -89,19 +111,20 @@ app_server <- function(input, output, session) {
   #This "observe" event creates the SQL tab UI.
   observeEvent(availableDatabases$db,
                ignoreNULL = TRUE,
-               once = TRUE, {
-                 
-                 appendTab(inputId = "mainIDBacNav",
-                           tabPanel("Work With Previous Experiments",
-                                    value = "sqlUiTab",
-                                    IDBacApp::databaseTabUI("sqlUIcreator")
-                                    
-                           )
-                 )
-                 
-                 
+               once = TRUE,{
+                 if (length(availableDatabases$db) > 0) {
+                   
+                   appendTab(inputId = "mainIDBacNav",
+                             tabPanel("Work With Previous Experiments",
+                                      value = "sqlUiTab",
+                                      IDBacApp::databaseTabUI("sqlUIcreator")
+                                      
+                             )
+                   )
+                   
+                 }
                })
-
+  
   
   observeEvent(workingDB$move$selectExperiment,
                ignoreInit = TRUE, {
@@ -140,7 +163,7 @@ app_server <- function(input, output, session) {
                              )
                    )
                  }
-                 if (s > 0){
+                 if (s > 0) {
                    appendTab(inputId = "mainIDBacNav",
                              tabPanel("Metabolite Association Network (Small-Molecule)",
                                       IDBacApp::ui_smallMolMan()
@@ -371,28 +394,7 @@ app_server <- function(input, output, session) {
   output$inversePeakComparisonPlot <- renderPlot({
     
     mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-    
-    #Create peak plots and color each peak according to whether it occurs in the other spectrum
-    plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-         y = mirrorPlotEnv$spectrumSampleOne@intensity,
-         ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                  max(mirrorPlotEnv$spectrumSampleOne@intensity)),
-         type = "l",
-         col = adjustcolor("Black", alpha = 0.3),
-         xlab = "m/z",
-         ylab = "Intensity")
-    lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-          y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-    rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-         ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-         border = mirrorPlotEnv$SampleOneColors)
-    rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-         ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-         border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+    mirrorPlot(mirrorPlotEnv = mirrorPlotEnv)
     
     # Watch for brushing of the top mirror plot
     observe({
@@ -414,27 +416,10 @@ app_server <- function(input, output, session) {
   
   output$inversePeakComparisonPlotZoom <- renderPlot({
     
-    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-    
-    plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-         y = mirrorPlotEnv$spectrumSampleOne@intensity,
-         xlim = ranges2$x, ylim = ranges2$y,
-         type = "l",
-         col = adjustcolor("Black", alpha = 0.3),
-         xlab = "m/z",
-         ylab = "Intensity")
-    lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-          y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-    rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-         ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-         border = mirrorPlotEnv$SampleOneColors)
-    rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-         ybottom = 0,
-         xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-         ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-         border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+    IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
+                             nameOne = input$Spectra1,
+                             nameTwo = input$Spectra2,
+                             ranges2 = ranges2)
   })
   
   
@@ -454,36 +439,8 @@ app_server <- function(input, output, session) {
                        pointsize = 12,
                        standalone = TRUE)
       
-      mirrorPlotEnv <- dataForInversePeakComparisonPlot()
+      mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
       
-      #Create peak plots and color each peak according to whether it occurs in the other spectrum
-      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-           y = mirrorPlotEnv$spectrumSampleOne@intensity,
-           ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                    max(mirrorPlotEnv$spectrumSampleOne@intensity)),
-           type = "l",
-           col = adjustcolor("Black", alpha = 0.3),
-           xlab = "m/z",
-           ylab = "Intensity")
-      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-           border = mirrorPlotEnv$SampleOneColors)
-      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
-      legend(max(mirrorPlotEnv$spectrumSampleOne@mass) * .6,
-             max(max(mirrorPlotEnv$spectrumSampleOne@intensity)) * .7,
-             legend = c(paste0("Top: ", input$Spectra1), 
-                        paste0("Bottom: ", input$Spectra2)),
-             col = c("black", "black"),
-             lty = 1:1,
-             cex = 1)
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))
@@ -501,34 +458,10 @@ app_server <- function(input, output, session) {
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
       
-      mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-      
-      plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
-           y = mirrorPlotEnv$spectrumSampleOne@intensity,
-           xlim = ranges2$x, ylim = ranges2$y,
-           type = "l",
-           col = adjustcolor("Black", alpha = 0.3),
-           xlab = "m/z",
-           ylab = "Intensity")
-      lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
-            y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
-      rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
-           ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
-           border = mirrorPlotEnv$SampleOneColors)
-      rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
-           ybottom = 0,
-           xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
-           ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
-           border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
-      legend(max(ranges2$x) * .85,
-             max(ranges2$y) * .7, 
-             legend = c(paste0("Top: ", input$Spectra1),
-                        paste0("Bottom: ", input$Spectra2)),
-             col = c("black", "black"),
-             lty = 1:1,
-             cex = 1)
+      IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
+                               nameOne = input$Spectra1,
+                               nameTwo = input$Spectra2,
+                               ranges2 = ranges2)
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))
@@ -542,20 +475,20 @@ app_server <- function(input, output, session) {
   
   
   # User chooses which samples to include -----------------------------------
- # chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
+  # chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   
-    chosenProteinSampleIDs <- shiny::callModule(IDBacApp::sampleChooser_server,
-                                                       "proteinSampleChooser",
-                                                       pool = workingDB$pool,
-                                                       allSamples = FALSE,
-                                                       whetherProtein = TRUE)
+  chosenProteinSampleIDs <- shiny::callModule(IDBacApp::sampleChooser_server,
+                                              "proteinSampleChooser",
+                                              pool = workingDB$pool,
+                                              allSamples = FALSE,
+                                              whetherProtein = TRUE)
   
   
   # Collapse peaks ----------------------------------------------------------
   
- # collapsedPeaksForDend <- reactiveValues(vals = NULL)  
+  # collapsedPeaksForDend <- reactiveValues(vals = NULL)  
   
-#observe({
+  #observe({
   collapsedPeaksForDend <- reactive({
     req(!is.null(chosenProteinSampleIDs$chosen))
     req(length(chosenProteinSampleIDs$chosen) > 0)
@@ -566,7 +499,7 @@ app_server <- function(input, output, session) {
     # trim m/z based on user input
     # connect to sql
     isolate(
-    conn <- pool::poolCheckout(workingDB$pool())
+      conn <- pool::poolCheckout(workingDB$pool())
     )
     temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
@@ -598,19 +531,19 @@ app_server <- function(input, output, session) {
       conn <- pool::poolCheckout(proteinSamplesToInject$db())
       
       temp <- c(temp, lapply(proteinSamplesToInject$chosen$chosen,
-                     function(ids){
-                       IDBacApp::collapseReplicates(checkedPool = conn,
-                                                    sampleIDs = ids,
-                                                    peakPercentPresence = input$percentPresenceP,
-                                                    lowerMassCutoff = input$lowerMass,
-                                                    upperMassCutoff = input$upperMass, 
-                                                    minSNR = 6, 
-                                                    tolerance = 0.002,
-                                                    protein = TRUE)
-                     })
-                )
-                pool::poolReturn(conn)
-                
+                             function(ids){
+                               IDBacApp::collapseReplicates(checkedPool = conn,
+                                                            sampleIDs = ids,
+                                                            peakPercentPresence = input$percentPresenceP,
+                                                            lowerMassCutoff = input$lowerMass,
+                                                            upperMassCutoff = input$upperMass, 
+                                                            minSNR = 6, 
+                                                            tolerance = 0.002,
+                                                            protein = TRUE)
+                             })
+      )
+      pool::poolReturn(conn)
+      
       
       names(temp) <- c(chosenProteinSampleIDs$chosen, proteinSamplesToInject$chosen$chosen)
       
@@ -642,11 +575,11 @@ app_server <- function(input, output, session) {
     req(!is.null(collapsedPeaksForDend()))
     validate(need(input$lowerMass < input$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
-                               ppm = 2000,
+                               ppm = 300,
                                massStart = input$lowerMass,
                                massEnd = input$upperMass)
     
-  do.call(rbind, pm)
+    do.call(rbind, pm)
     
     
   })
@@ -657,16 +590,23 @@ app_server <- function(input, output, session) {
   observeEvent(workingDB$move$selectExperiment, {
     proteinDendrogram$dendrogram <- NULL
     
-      })
+  })
   
- dendMaker <- shiny::callModule(IDBacApp::dendrogramCreator,
-                       "proteinHierOptions",
-                       proteinMatrix = proteinMatrix)
-
+  dendMaker <- shiny::callModule(IDBacApp::dendrogramCreator,
+                                 "proteinHierOptions",
+                                 proteinMatrix = proteinMatrix)
   
-  observe({
+  observe({ 
+    #  observeEvent(dendMaker()$dend,{
+    
+    # if (length(chosenProteinSampleIDs$chosen) < 3) {
+    #   proteinDendrogram$dendrogram <- NULL
+    # } else {
     req(nrow(proteinMatrix()) > 2)
+    
     proteinDendrogram$dendrogram <- dendMaker()$dend
+    
+    # }
   })
   
   
@@ -677,7 +617,8 @@ app_server <- function(input, output, session) {
                                           pool = workingDB$pool,
                                           plotWidth = reactive(input$dendparmar),
                                           plotHeight = reactive(input$hclustHeight),
-                                          boots = dendMaker)
+                                          boots = dendMaker,
+                                          dendOrPhylo = reactive(input$dendOrPhylo))
   
   
   unifiedProteinColor <- reactive(dendextend::labels_colors(proteinDendrogram$dendrogram))
@@ -686,60 +627,41 @@ app_server <- function(input, output, session) {
   #  PCoA Calculation -------------------------------------------------------
   
   
-  pcoaResults <- reactive({
-    # number of samples should be greater than k
-    shiny::req(nrow(as.matrix(proteinDistance())) > 10)
-    IDBacApp::pcoaCalculation(proteinDistance())
+  
+  proteinPcoaCalculation <- reactive({
+    
+    IDBacApp::pcoaCalculation(distanceMatrix = dendMaker()$distance)
+    
   })
   
-  
-  
-  # PCoA Plot ---------------------------------------------------------------
-  
-  
-  output$pcoaPlot <- plotly::renderPlotly({
-    
-    colorsToUse <- 
-      
-      if (any(is.na(as.vector(colorsToUse)))) {
-        colorsToUse <-  dendextend::labels_colors(coloredDend())
-      }
-    
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse),
-                                    nam = (names(colorsToUse)))
-    pcaDat <- merge(pcoaResults(),
-                    colorsToUse,
-                    by = "nam")
-    
-    plotly::plot_ly(data = pcaDat,
-                    x = ~Dim1,
-                    y = ~Dim2,
-                    z = ~Dim3,
-                    type = "scatter3d",
-                    mode = "markers",
-                    marker = list(color = ~fac),
-                    hoverinfo = 'text',
-                    text = ~nam) %>%
-      plotly::layout(
-        xaxis = list(
-          title = ""
-        ),
-        yaxis = list(
-          title = " "
-        ),
-        zaxis = list(
-          title = ""
-        ))
-  })
+  callModule(IDBacApp::popupPlot_server,
+             "proteinPCOA",
+             dataFrame = proteinPcoaCalculation,
+             namedColors = unifiedProteinColor,
+             plotTitle = "Principle Coordinates Analysis")
   
   
   # PCA Calculation  --------------------------------------------------------
   
   
-  callModule(IDBacApp::pca_Server,
+  
+  proteinPcaCalculation <- reactive({
+    
+    IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
+                             logged = TRUE,
+                             scaled = TRUE,
+                             centered = TRUE,
+                             missing = 0.00001)
+  })
+  
+  
+  
+  
+  callModule(IDBacApp::popupPlot_server,
              "proteinPCA",
-             dataframe = proteinMatrix,
-             namedColors = unifiedProteinColor)
+             dataFrame = proteinPcaCalculation,
+             namedColors = unifiedProteinColor,
+             plotTitle = "Principle Components Analysis")
   
   
   
@@ -748,45 +670,15 @@ app_server <- function(input, output, session) {
   
   # Calculate tSNE based on PCA calculation already performed ---------------
   
-  tsneResults <- reactive({
-    shiny::req(nrow(as.matrix(proteinMatrix())) > 15)
-    
-    IDBacApp::tsneCalculation(dataMatrix = proteinMatrix(),
-                              perplexity = input$tsnePerplexity,
-                              theta = input$tsneTheta,
-                              iterations = input$tsneIterations)
-    
-  })
   
   
   
-  # Output Plotly plot of tSNE results --------------------------------------
   
-  
-  output$tsnePlot <- plotly::renderPlotly({
-    
-    colorsToUse <- dendextend::leaf_colors(coloredDend())
-    
-    if (any(is.na(as.vector(colorsToUse)))) {
-      colorsToUse <-  dendextend::labels_colors(coloredDend())
-    }
-    
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
-                                    nam = (names(colorsToUse)))
-    pcaDat <- merge(tsneResults(), 
-                    colorsToUse,
-                    by = "nam")
-    
-    plot_ly(data = pcaDat,
-            x = ~Dim1,
-            y = ~Dim2,
-            z = ~Dim3,
-            type = "scatter3d",
-            mode = "markers",
-            marker = list(color = ~fac),
-            hoverinfo = 'text',
-            text = ~nam)
-  })
+  callModule(IDBacApp::popupPlotTsne_server,
+             "tsnePanel",
+             data = proteinMatrix,
+             plotTitle = "t-SNE",
+             namedColors = unifiedProteinColor)
   
   
   
@@ -834,13 +726,21 @@ app_server <- function(input, output, session) {
   # Paragraph to relay info for reporting protein ---------------------------
   
   
-  output$proteinReport <- renderUI(
+  output$proteinReport <- renderUI({
+    req(!is.null(chosenProteinSampleIDs$chosen))
+    req(length(chosenProteinSampleIDs$chosen) > 2)
+    req(!is.null(attributes(proteinDendrogram$dendrogram)$members))
     
-    p("This dendrogram was created by analyzing ",tags$code(length(labels(proteinDendrogram$dendrogram))), " samples,
+    
+    shiny::tagList(
+      h4("Suggestions for Reporting Protein Analysis:"),
+      p("This dendrogram was created by analyzing ",tags$code(attributes(proteinDendrogram$dendrogram)$members), " samples,
           and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
           Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
-      "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
-  )
+        "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
+    )
+    
+  })
   
   
   # Generate Rmarkdown report -----------------------------------------------
@@ -966,12 +866,40 @@ app_server <- function(input, output, session) {
   
   # Small mol pca Calculation -----------------------------------------------
   
-  callModule(IDBacApp::pca_Server,
-             "smallMolPcaPlot",
-             dataframe = smallMolDataFrame,
-             namedColors = function() NULL)
   
-
+  
+  output$smallMolPcaPlot <- plotly::renderPlotly({
+    req(nrow(smallMolDataFrame()) > 2,
+        ncol(smallMolDataFrame()) > 2)
+    
+    princ <- IDBacApp::pcaCalculation(smallMolDataFrame())
+    namedColors <- NULL
+    
+    if (is.null(namedColors)) {
+      colorsToUse <- cbind.data.frame(fac = rep("#000000", nrow(princ)), 
+                                      princ)
+    } else {
+      
+      colorsToUse <- cbind.data.frame(fac = as.vector(namedColors), 
+                                      nam = (names(namedColors)))
+      
+      
+      colorsToUse <- merge(princ,
+                           colorsToUse, 
+                           by = "nam")
+    }
+    
+    plotly::plot_ly(data = colorsToUse,
+                    x = ~Dim1,
+                    y = ~Dim2,
+                    z = ~Dim3,
+                    type = "scatter3d",
+                    mode = "markers",
+                    marker = list(color = ~fac),
+                    hoverinfo = 'text',
+                    text = ~nam) 
+    
+  })
 # Small mol ---------------------------------------------------------------
 
   output$matrixSelector <- renderUI({

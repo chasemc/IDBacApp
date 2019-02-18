@@ -20,6 +20,9 @@ sampleChooser_server(input, output, session, pool,
 
 \item{allSamples}{T/F}
 }
+\value{
+NA
+}
 \description{
 Server for choosing all samples fromm an IDBac DB
 }

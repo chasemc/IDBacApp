@@ -5,7 +5,7 @@
 \title{Title}
 \usage{
 dendDotsServer(input, output, session, dendrogram, pool, plotWidth,
-  plotHeight)
+  plotHeight, boots)
 }
 \arguments{
 \item{input}{NA}

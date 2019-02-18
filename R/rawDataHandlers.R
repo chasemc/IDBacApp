@@ -127,7 +127,6 @@ startingFromBrukerFlex <- function(chosenDir,
 #' @return named list, names are sample IDs, values are paths
 #' @export
 #'
-#' @examples
 brukerDataSpotsandPaths <- function(brukerDataPath){
   
   files <- list.files(brukerDataPath, pattern = "acqus", recursive = TRUE, full.names = TRUE)

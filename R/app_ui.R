@@ -29,6 +29,7 @@ app_ui <- function(){
                      column(width = 8,
                             offset = 2,
                             wellPanel(class = "intro_WellPanel",
+                                      style = "opacity: 0.92",
                                       h1("Welcome to IDBac",
                                          align = "center"),
                                       br(),
@@ -111,7 +112,11 @@ app_ui <- function(){
                                       br(),
                                       h4("Use the navigation bar at the top of the page to begin", 
                                          align = "center"),
-                                      style = "opacity: 0.92"
+                                      div(align = "center",
+                                          IDBacApp::selectDirectory_UI("userWorkingDirectory",
+                                                                       label = "Select IDBac Storage Location"),
+                                          verbatimTextOutput("userWorkingDirectoryText")
+                                      )
                             )
                      )
                    )

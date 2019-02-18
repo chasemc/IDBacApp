@@ -89,6 +89,7 @@ transferToNewDB_server <- function(input,
   
   
   observeEvent(input$addtoNewDB, {
+    req(length(chosenSamples$chosen) > 0)
     
     nam <- gsub(" ", "", IDBacApp::path_sanitize(input$nameformixNmatch))
     
@@ -96,13 +97,13 @@ transferToNewDB_server <- function(input,
     
     copyingDbPopup()
     
-    newdbPath <- file.path(sqlDirectory, paste0(nam, ".sqlite"))
+    newdbPath <- file.path(sqlDirectory$sqlDirectory, paste0(nam, ".sqlite"))
     copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
                       newdbPath = newdbPath, 
                       sampleIDs = chosenSamples$chosen)
     
     removeModal()
-    availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory,
+    availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                     pattern = ".sqlite",
                                                                     full.names = FALSE))
   })

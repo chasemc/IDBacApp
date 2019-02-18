@@ -75,6 +75,18 @@ databaseTabUI <- function(id) {
                                                             
                                   )
              )
+           ),
+           fluidRow(
+             IDBacApp::bsCollapse(id = ns("exportmzml"),
+                                  IDBacApp::bsCollapsePanel(h4("Click here to export samples as mzML",
+                                                               align = "center"),  
+                                                            wellPanel(
+                                            
+                                                              
+                                                            )
+                                                            
+                                  )
+             )
            )
            
            

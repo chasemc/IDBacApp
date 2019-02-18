@@ -74,27 +74,27 @@ ui_smallMolMan <-  function(){
     ),
     mainPanel(
       column(width = 5,
-
-             
-                           tabsetPanel(type = "tabs",           
-                                       tabPanel(value = "protd","Protein Dendrogram",
-                                               
-                                                manPageProtDend_UI("manProtDend")
              
              
-      ))),
+             tabsetPanel(type = "tabs",           
+                         tabPanel(value = "protd","Protein Dendrogram",
+                                  
+                                  manPageProtDend_UI("manProtDend")
+                                  
+                                  
+                         ))),
       column(width = 6,
-        
-                           tabsetPanel(type = "tabs",           
-                                       tabPanel(value = "smallMolMANUI","Small Molecule MAN",
-                                                IDBacApp::smMANPlot_UI("smMAN")),
-                                       tabPanel(value = "smallMolPCAUi","SmallMolecule PCA",
-                                                
-                                                IDBacApp::pca_UI("smallMolPcaPlot")
-                                       )               
-                           
-                           
-                           
+             
+             tabsetPanel(type = "tabs",           
+                         tabPanel(value = "smallMolMANUI","Small Molecule MAN",
+                                  IDBacApp::smMANPlot_UI("smMAN")),
+                         tabPanel(value = "smallMolPCAUi","SmallMolecule PCA",
+                                  
+                                  plotly::plotlyOutput("smallMolPcaPlot")
+                         )               
+                         
+                         
+                         
              ))
     )
   ))

@@ -42,18 +42,18 @@ databaseSelector_server <- function(input,
     ns <- session$ns
     selectInput(ns("selectExperiment"),
                 label = h3Label,
-                choices = availableExperiments$db,
-                selected = NULL,
+                choices = c("None", availableExperiments$db),
+                selected = "None",
                 width = "50%"
     )
   })
   
   output$selectedSQLText <- renderPrint({
     
-    fileNames <- tools::file_path_sans_ext(list.files(sqlDirectory,
+    fileNames <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                       pattern = ".sqlite",
                                                       full.names = FALSE))
-    filePaths <- list.files(sqlDirectory,
+    filePaths <- list.files(sqlDirectory$sqlDirectory,
                             pattern = ".sqlite",
                             full.names = TRUE)
     
@@ -64,14 +64,31 @@ databaseSelector_server <- function(input,
    userDBCon <- reactive({
     
     req(!is.null(input$selectExperiment))
-    validate(need(length(input$selectExperiment) == length(sqlDirectory), 
+    req(nchar(input$selectExperiment) > 0)
+    validate(need(length(input$selectExperiment) == length(sqlDirectory$sqlDirectory), 
                   "databaseTabServer: userDBCon, createPool inputs are different lengths."))
-    IDBacApp::createPool(fileName = input$selectExperiment,
-                         filePath = sqlDirectory)[[1]]
+    
+    # pool will create a new sqlite if one doesn't exist, so let's stop that from happening here:
+    req(file.exists(file.path(sqlDirectory$sqlDirectory, 
+                              paste0(input$selectExperiment, ".sqlite"))))
+    
+    z <- IDBacApp::createPool(fileName = input$selectExperiment,
+                         filePath = sqlDirectory$sqlDirectory)[[1]]
     
     
-  })  
-  
- return(list(userDBCon = userDBCon,
-             inputs = input))
+    q <- c("IndividualSpectra",
+           "XML",
+           "metaData",
+           "version" )
+    
+    req(all(q %in%  DBI::dbListTables(z)))
+    
+    return(z)
+    
+    
+    
+   })  
+   
+   return(list(userDBCon = userDBCon,
+               inputs = input))
 }

@@ -38,7 +38,12 @@ dendrogramCreatorUI <- function(id) {
                         label = shiny::h5(shiny::strong("Include peak intensities, or use presence/absence?")),
                         choices = list("Presence/Absence" = TRUE,
                                        "Intensities" = FALSE),
-                          selected = FALSE),
+                        selected = FALSE),
+    # shiny::numericInput(ns("ppm"),
+    #                     label = shiny::h5(shiny::strong("Select ppm tolerance for peak binning")),
+    #                     min =  50,
+    #                     max = 10000,
+    #                     value = 300),
     shiny::numericInput(ns("bootstraps"),
                         label = "Bootstraps",
                         value = "",
@@ -96,14 +101,22 @@ dendrogramCreator <- function(input,
       }
     }
     
+    disty <- IDBacApp::distMatrix(data = dend,
+                                  method = input$distanceMethod,
+                                  booled = input$booled)
     
-    dend <- createHclustObject(dend)
+    dend <- stats::hclust(disty,
+                          method = input$clustering)
+    
+    
+    
     
     dend <- stats::as.dendrogram(dend)
     
     
     return(list(dendrogram = dend,
-                bootstraps = bootstraps))
+                bootstraps = bootstraps,
+                distance = disty))
   })
   
   return(pMatrixReactive)

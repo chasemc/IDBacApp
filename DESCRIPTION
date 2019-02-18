@@ -45,7 +45,11 @@ Imports:
     mzR,
     shinyBS,
     S4Vectors,
-    httr
+    httr,
+    utils,
+    stats,
+    graphics,
+    grDevices
 Suggests: testthat
 RoxygenNote: 6.1.1
 Depends: 
