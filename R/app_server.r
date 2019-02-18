@@ -80,13 +80,18 @@ app_server <- function(input, output, session) {
   # Find the available databases, and make reactive so can be updated if more are created
   
   
-  observeEvent(sqlDirectory$sqlDirectory,{
-    
-    availableDatabases$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+ observe({
+   w<-input$processToAnalysis
+    hello <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                   pattern = ".sqlite",
                                                                   full.names = FALSE,
                                                                   recursive = FALSE)
                                                        )
+  if (length(hello) == 0){
+    availableDatabases$db <- NULL
+  } else {
+    availableDatabases$db <- hello
+  }
     
   
   })
@@ -106,10 +111,8 @@ app_server <- function(input, output, session) {
   #This "observe" event creates the SQL tab UI.
   observeEvent(availableDatabases$db,
                ignoreNULL = TRUE,
-               once = TRUE, 
-               ignoreInit = T,{
-                 
-                 if (length(availableDatabases$db) >= 1) {
+               once = TRUE,{
+                 if (length(availableDatabases$db) > 0) {
                    
                    appendTab(inputId = "mainIDBacNav",
                              tabPanel("Work With Previous Experiments",

@@ -30,7 +30,8 @@ popup4 <- function(){
     br(),
     easyClose = FALSE,
     tagList(actionButton("processToAnalysis", 
-                         "Click to continue"))
+                         "Click to continue")),
+    footer = NULL
   ))
   
 }

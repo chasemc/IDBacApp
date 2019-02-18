@@ -136,7 +136,6 @@ convertMZ_Server <-  function(input,
                                     recursive = TRUE,
                                     full = TRUE)
     
-    print(sqlDirectory$sqlDirectory)
     IDBacApp::processMZML(mzFilePaths = mzFilePaths,
                           sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
                           sqlDirectory = sqlDirectory$sqlDirectory,
