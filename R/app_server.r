@@ -25,15 +25,14 @@ app_server <- function(input, output, session) {
   
   sqlDirectory <- reactiveValues(sqlDirectory = getwd())
   
-  callModule(IDBacApp::selectDirectory_Server,
-             "userWorkingDirectory",
-             sqlDirectory)
+  selectedNewWD <- callModule(IDBacApp::selectDirectory_Server,
+                              "userWorkingDirectory",
+                              sqlDirectory)
   
   
   output$userWorkingDirectoryText <- renderText(sqlDirectory$sqlDirectory)
 
   
-observe(print(sqlDirectory$sqlDirectory))
   
   # Register sample-choosing JS ---------------------------------------------
   
@@ -102,25 +101,27 @@ observe(print(sqlDirectory$sqlDirectory))
   
   
   # Trigger add tabs --------------------------------------------------------
-  
+
   
   #This "observe" event creates the SQL tab UI.
   observeEvent(availableDatabases$db,
-               ignoreNULL = TRUE, {
+               ignoreNULL = TRUE,
+               once = TRUE, 
+               ignoreInit = T,{
                  
                  if (length(availableDatabases$db) >= 1) {
-                 
-                 appendTab(inputId = "mainIDBacNav",
-                           tabPanel("Work With Previous Experiments",
-                                    value = "sqlUiTab",
-                                    IDBacApp::databaseTabUI("sqlUIcreator")
-                                    
-                           )
-                 )
-                 
+                   
+                   appendTab(inputId = "mainIDBacNav",
+                             tabPanel("Work With Previous Experiments",
+                                      value = "sqlUiTab",
+                                      IDBacApp::databaseTabUI("sqlUIcreator")
+                                      
+                             )
+                   )
+                   
                  }
                })
-
+  
   
   observeEvent(workingDB$move$selectExperiment,
                ignoreInit = TRUE, {
@@ -159,7 +160,7 @@ observe(print(sqlDirectory$sqlDirectory))
                              )
                    )
                  }
-                 if (s > 0){
+                 if (s > 0) {
                    appendTab(inputId = "mainIDBacNav",
                              tabPanel("Metabolite Association Network (Small-Molecule)",
                                       IDBacApp::ui_smallMolMan()
