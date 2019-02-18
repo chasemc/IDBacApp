@@ -21,9 +21,9 @@ convertDataTab_UI <- function(id) {
                                     IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
                                     #           ) 
                                     #                                        )
-                          
-                          
-                        )
+                                    
+                                    
+                          )
                ),
                tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
                         value = ns("convert_mzml_nav"),

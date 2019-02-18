@@ -50,10 +50,10 @@ databaseSelector_server <- function(input,
   
   output$selectedSQLText <- renderPrint({
     
-    fileNames <- tools::file_path_sans_ext(list.files(sqlDirectory,
+    fileNames <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                       pattern = ".sqlite",
                                                       full.names = FALSE))
-    filePaths <- list.files(sqlDirectory,
+    filePaths <- list.files(sqlDirectory$sqlDirectory,
                             pattern = ".sqlite",
                             full.names = TRUE)
     
@@ -65,15 +65,15 @@ databaseSelector_server <- function(input,
     
     req(!is.null(input$selectExperiment))
     req(nchar(input$selectExperiment) > 0)
-    validate(need(length(input$selectExperiment) == length(sqlDirectory), 
+    validate(need(length(input$selectExperiment) == length(sqlDirectory$sqlDirectory), 
                   "databaseTabServer: userDBCon, createPool inputs are different lengths."))
     
     # pool will create a new sqlite if one doesn't exist, so let's stop that from happening here:
-    req(file.exists(file.path(sqlDirectory, 
+    req(file.exists(file.path(sqlDirectory$sqlDirectory, 
                               paste0(input$selectExperiment, ".sqlite"))))
     
     IDBacApp::createPool(fileName = input$selectExperiment,
-                         filePath = sqlDirectory)[[1]]
+                         filePath = sqlDirectory$sqlDirectory)[[1]]
     
     
   })  

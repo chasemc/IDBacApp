@@ -115,7 +115,7 @@ app_ui <- function(){
                                       div(align = "center",
                                       IDBacApp::selectDirectory_UI("userWorkingDirectory",
                                                                    label = "Select IDBac Storage Location"),
-                                      IDBacApp::showSelectedDirectory_UI("userWorkingDirectory")
+                                      verbatimTextOutput("userWorkingDirectoryText")
                                       )
                             )
                      )

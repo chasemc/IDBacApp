@@ -5,58 +5,30 @@ selectDirectory_UI <- function(id, label){
   actionButton(ns("rawFileDirectory"),
                label = label)
   
-
+  
 }
 
 
 selectDirectory_Server <- function(input,
                                    output,
-                                   session){
+                                   session,
+                                   sqlDirectory){
   
   
-  rawFilesLocation <- shiny::reactive({
+  observeEvent(input$rawFileDirectory, {
+    loc <- IDBacApp::choose_dir()
     
-    if (input$rawFileDirectory > 0) {
-      loc <- IDBacApp::choose_dir()
-      
-      if (!is.na(loc)) {
-        return(loc)
-      } else {
-        return(getwd())
-      }
+    if (!is.na(loc)) {
+      sqlDirectory$sqlDirectory <- loc
     } else {
-      return(getwd())
+      sqlDirectory$sqlDirectory <- normalizePath(getwd())
     }
+    
+    
   })
   
-  return(rawFilesLocation)
+  
 }
 
 #----
 
-
-showSelectedDirectory_UI <- function(id){
-  
-  ns <- NS(id)
-  textOutput(ns("rawFileDirectorytext"))
-                     
-}
-
-
-showSelectedDirectory_Server <- function(input,
-                                         output,
-                                         session,
-                                         location){
-  
-  # Creates text showing the user which directory they chose for raw files
-  #----
-  output$rawFileDirectorytext <- renderText({
-(location)
-    if (!is.null(location())) {
-      return(location()) 
-    } else {
-      return(getwd())
-    }
-  })
-}
-  

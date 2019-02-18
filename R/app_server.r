@@ -22,18 +22,18 @@ app_server <- function(input, output, session) {
 
   # Develepment Functions ---------------------------------------------------
   options(shiny.reactlog = TRUE)
-  sqlDirectory <- getwd()
   
-  selectedWd <- callModule(IDBacApp::selectDirectory_Server,
-                           "userWorkingDirectory")
+  sqlDirectory <- reactiveValues(sqlDirectory = getwd())
   
-  
-  callModule(IDBacApp::showSelectedDirectory_Server,
+  callModule(IDBacApp::selectDirectory_Server,
              "userWorkingDirectory",
-             location = selectedWd)
-             
+             sqlDirectory)
   
   
+  output$userWorkingDirectoryText <- renderText(sqlDirectory$sqlDirectory)
+
+  
+observe(print(sqlDirectory$sqlDirectory))
   
   # Register sample-choosing JS ---------------------------------------------
   
@@ -49,7 +49,7 @@ app_server <- function(input, output, session) {
   # Setup working directories -----------------------------------------------
   # This  doesn't go in modules, so that temp folder cleanup is sure to happen more often
   # Create a directory for temporary mzml files
-  tempMZDir <- file.path(sqlDirectory, "temp_mzML")
+  tempMZDir <- file.path(getwd(), "temp_mzML")
   dir.create(tempMZDir)
   
   # Cleanup mzML temp folder on initialization of app
@@ -77,20 +77,18 @@ app_server <- function(input, output, session) {
   
   # SQL Tab -----------------------------------------------------------------
   
-  
+  availableDatabases <- reactiveValues(db = NULL)
   # Find the available databases, and make reactive so can be updated if more are created
-  availableDatabases <- reactiveValues(db = tools::file_path_sans_ext(list.files(sqlDirectory,
-                                                                                 pattern = ".sqlite",
-                                                                                 full.names = FALSE)))
   
-
   
-  observeEvent(input$mainIDBacNav,
-               ignoreInit = TRUE, {
-                 req(input$mainIDBacNav == "sqlUiTab")
-                 availableDatabases$db <- tools::file_path_sans_ext(list.files(sqlDirectory,
-                                                                               pattern = ".sqlite",
-                                                                               full.names = FALSE))
+  observeEvent(sqlDirectory$sqlDirectory,{
+    
+    availableDatabases$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                  pattern = ".sqlite",
+                                                                  full.names = FALSE,
+                                                                  recursive = FALSE)
+                                                       )
+    
   
   })
   

@@ -22,7 +22,7 @@ processMZML <- function(mzFilePaths,
   lengthProgress <- length(mzFilePaths)
   
   userDB <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
-                                        sqlDirectory = sqlDirectory)[[1]]
+                                        sqlDirectory = sqlDirectory$sqlDirectory)[[1]]
   userDB <- pool::poolCheckout(userDB)
   
   progLength <- base::length(mzFilePaths)
