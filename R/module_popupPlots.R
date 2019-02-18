@@ -17,10 +17,13 @@ popupPlot_UI <- function(id, name){
 
 #' popupPlot_server
 #' 
-#' @param input shinyi nput
+#' @param input shiny nput
 #' @param output shiny output
 #' @param session shiny session
 #' @param dataFrame input dataframe, rows = samples, columns = variables
+#' @param namedColors 
+#' @param plotTitle 
+#' @param extraUI 
 #'
 #' @return NA
 #' @export
@@ -30,8 +33,7 @@ popupPlot_server <- function(input,
                              session,
                              dataFrame,
                              namedColors,
-                             plotTitle,
-                             extraUI = NULL){ 
+                             plotTitle){ 
   
   
   output$plot <- plotly::renderPlotly({
@@ -75,7 +77,16 @@ popupPlot_server <- function(input,
                ignoreInit = T,
                ignoreNULL = T,
                {
+                 
+                 if (nrow(dataFrame()) < 2 || ncol(dataFrame()) < 3) {
+                   output$absPanel <- renderUI(
+                    glue::glue("Select more samples for {plotTitle}")
+                   )
+                 } else {
+                 
+                 
                  output$absPanel <- renderUI(
+                   
                    shiny::fixedPanel(
                      class = "popup_Plots",
                      top = "20%",
@@ -95,18 +106,13 @@ popupPlot_server <- function(input,
                                            label = "",
                                            icon = icon("far fa-window-close"))
                      ),
-                     if (!is.null(extraUI)) { extraUI },
-                     absolutePanel(
-                       top = "8%",
-                       bottom = "1%",
-                       right = "1%",
-                       left = "1%",
-                       fixed = F,
+                     fluidRow(                     
                        plotly::plotlyOutput(session$ns("plot"),
                                             width = "100%", 
                                             height = "100%")
                      )
                    )
                  )
+                 }
                })
 }

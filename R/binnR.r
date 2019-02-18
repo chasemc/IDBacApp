@@ -69,7 +69,7 @@ binnR <- function(vectorList,
 #' @export
 #'
 peakBinner <- function(peakList,
-                       ppm,
+                       ppm = 300,
                        massStart = NULL,
                        massEnd = NULL){
 

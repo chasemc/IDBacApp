@@ -563,7 +563,7 @@ app_server <- function(input, output, session) {
     req(!is.null(collapsedPeaksForDend()))
     validate(need(input$lowerMass < input$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
-                               ppm = 2000,
+                               ppm = 300,
                                massStart = input$lowerMass,
                                massEnd = input$upperMass)
     
@@ -605,7 +605,8 @@ app_server <- function(input, output, session) {
                                           pool = workingDB$pool,
                                           plotWidth = reactive(input$dendparmar),
                                           plotHeight = reactive(input$hclustHeight),
-                                          boots = dendMaker)
+                                          boots = dendMaker,
+                                          dendOrPhylo = reactive(input$dendOrPhylo))
   
   
   unifiedProteinColor <- reactive(dendextend::labels_colors(proteinDendrogram$dendrogram))
@@ -625,7 +626,7 @@ app_server <- function(input, output, session) {
              "proteinPCOA",
              dataFrame = proteinPcoaCalculation,
              namedColors = unifiedProteinColor,
-             plotTitle = "Principle Components Analysis")
+             plotTitle = "Principle Coordinates Analysis")
   
   
   # PCA Calculation  --------------------------------------------------------
@@ -656,42 +657,17 @@ app_server <- function(input, output, session) {
   
   
   # Calculate tSNE based on PCA calculation already performed ---------------
+
   
-  callModule(IDBacApp::tsne_Server,
-             "tse",
-             dataframe = proteinMatrix,
+  
+  
+  
+  callModule(IDBacApp::popupPlotTsne_server,
+             "tsnePanel",
+             data = proteinMatrix,
+             plotTitle = "t-SNE",
              namedColors = unifiedProteinColor)
-  
-  
-  
-  # Output Plotly plot of tSNE results --------------------------------------
-  
-  
-  output$tsnePlot <- plotly::renderPlotly({
-    
-    colorsToUse <- dendextend::leaf_colors(coloredDend())
-    
-    if (any(is.na(as.vector(colorsToUse)))) {
-      colorsToUse <-  dendextend::labels_colors(coloredDend())
-    }
-    
-    colorsToUse <- cbind.data.frame(fac = as.vector(colorsToUse), 
-                                    nam = (names(colorsToUse)))
-    pcaDat <- merge(tsneResults(), 
-                    colorsToUse,
-                    by = "nam")
-    
-    plot_ly(data = pcaDat,
-            x = ~Dim1,
-            y = ~Dim2,
-            z = ~Dim3,
-            type = "scatter3d",
-            mode = "markers",
-            marker = list(color = ~fac),
-            hoverinfo = 'text',
-            text = ~nam)
-  })
-  
+
   
   
   
@@ -878,11 +854,11 @@ app_server <- function(input, output, session) {
   
   # Small mol pca Calculation -----------------------------------------------
   
-  callModule(IDBacApp::pca_Server,
-             "smallMolPcaPlot",
-             dataframe = smallMolDataFrame,
-             namedColors = function() NULL)
-  
+  # callModule(IDBacApp::pca_Server,
+  #            "smallMolPcaPlot",
+  #            dataframe = smallMolDataFrame,
+  #            namedColors = function() NULL)
+  # 
 
 # Small mol ---------------------------------------------------------------
 

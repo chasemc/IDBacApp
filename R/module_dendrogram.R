@@ -134,7 +134,8 @@ dendDotsServer <- function(input,
                            pool,
                            plotWidth,
                            plotHeight,
-                           boots){
+                           boots,
+                           dendOrPhylo = "Dendrogram"){
   
   
   observeEvent(input$closeDendDots, {
@@ -423,7 +424,16 @@ dendDotsServer <- function(input,
     shiny::validate(shiny::need(dendrogram$dendrogram, "Try selecting samples using the menu to the left."))
     
     par(mar = c(5, 5, 5, plotWidth()))
-   plot(dendrogram$dendrogram, horiz = T)
+    
+    
+    if (dendOrPhylo() == "Dendrogram") {
+      plot(dendrogram$dendrogram, horiz = T)
+    } else if (dendOrPhylo() == "Phylogram") {
+      plot(dendextend::hang.dendrogram(dendrogram$dendrogram, hang = 0), horiz = T)
+    }
+        
+    
+    
      if (!is.null(input$selectMetaColumn[[1]])) {
       
       if (input$closeDendDots == 1) {
