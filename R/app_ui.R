@@ -113,9 +113,9 @@ app_ui <- function(){
                                       h4("Use the navigation bar at the top of the page to begin", 
                                          align = "center"),
                                       div(align = "center",
-                                      IDBacApp::selectDirectory_UI("userWorkingDirectory",
-                                                                   label = "Select IDBac Storage Location"),
-                                      verbatimTextOutput("userWorkingDirectoryText")
+                                          IDBacApp::selectDirectory_UI("userWorkingDirectory",
+                                                                       label = "Select IDBac Storage Location"),
+                                          verbatimTextOutput("userWorkingDirectoryText")
                                       )
                             )
                      )

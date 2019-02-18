@@ -72,12 +72,23 @@ databaseSelector_server <- function(input,
     req(file.exists(file.path(sqlDirectory$sqlDirectory, 
                               paste0(input$selectExperiment, ".sqlite"))))
     
-    IDBacApp::createPool(fileName = input$selectExperiment,
+    z <- IDBacApp::createPool(fileName = input$selectExperiment,
                          filePath = sqlDirectory$sqlDirectory)[[1]]
     
     
-  })  
-  
- return(list(userDBCon = userDBCon,
-             inputs = input))
+    q <- c("IndividualSpectra",
+           "XML",
+           "metaData",
+           "version" )
+    
+    req(all(q %in%  DBI::dbListTables(z)))
+    
+    return(z)
+    
+    
+    
+   })  
+   
+   return(list(userDBCon = userDBCon,
+               inputs = input))
 }

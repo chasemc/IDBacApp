@@ -85,10 +85,10 @@ plotHier <- function(id) {
 #' @export
 downloadHier <- function(id) {
   ns <- shiny::NS(id)
-
-downloadButton(ns("downloadHierarchical"),
-               "Save dendrogram as a Newick File")
-
+  
+  downloadButton(ns("downloadHierarchical"),
+                 "Save dendrogram as a Newick File")
+  
 }
 
 
@@ -206,7 +206,7 @@ dendDotsServer <- function(input,
     pool::poolReturn(conn)
     selectedMeta <- selectedMeta[ , colnames(selectedMeta) %in% input$selectMetaColumn]
     selectedMeta[is.na(selectedMeta)] <- "Missing MetaData"
-
+    
     return(unique(selectedMeta))
   })
   
@@ -334,7 +334,7 @@ dendDotsServer <- function(input,
                              c("None" = "none",
                                "Choose Number of Groups" = "groups",
                                "Color by cutting at height" = "height"
-                               ),
+                             ),
                              selected = "groups"
           ),
           shiny::conditionalPanel(
@@ -378,14 +378,14 @@ dendDotsServer <- function(input,
   
   
   observeEvent(c(input$colorByLabels,input$cutHeightLabels,input$chosenKLabels), {
-  
-  dendrogram$dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram$dendrogram,
-                                                         colorBy = input$colorByLabels,
-                                                         colorBlindPalette = colorBlindPalette(),
-                                                         cutHeight = input$cutHeightLabels,
-                                                         chosenK = input$chosenKLabels,
-                                                         part = "labels")
-  
+    
+    dendrogram$dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram$dendrogram,
+                                                           colorBy = input$colorByLabels,
+                                                           colorBlindPalette = colorBlindPalette(),
+                                                           cutHeight = input$cutHeightLabels,
+                                                           chosenK = input$chosenKLabels,
+                                                           part = "labels")
+    
   })
   
   observeEvent(c(input$colorByLines,input$cutHeightLines,input$chosenKLines), {
@@ -399,7 +399,7 @@ dendDotsServer <- function(input,
   })
   
   observeEvent(input$dendLabelSize, {
-
+    
     dendrogram$dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram$dendrogram,
                                                           dendPartSize = input$dendLabelSize,
                                                           part = "labels")
@@ -409,18 +409,18 @@ dendDotsServer <- function(input,
   observeEvent(input$dendLineWidth, {
     
     dendrogram$dendrogram <- IDBacApp::changeDendPartSize(dendrogram =  dendrogram$dendrogram,
-                                               dendPartSize = input$dendLineWidth,
-                                               part = "branches")
+                                                          dendPartSize = input$dendLineWidth,
+                                                          part = "branches")
     
   })
- 
- 
+  
+  
   
   
   
   output$hierOut <- renderPlot({
-
-
+    
+    
     shiny::validate(shiny::need(dendrogram$dendrogram, "Try selecting samples using the menu to the left."))
     
     par(mar = c(5, 5, 5, plotWidth()))
@@ -431,10 +431,10 @@ dendDotsServer <- function(input,
     } else if (dendOrPhylo() == "Phylogram") {
       plot(dendextend::hang.dendrogram(dendrogram$dendrogram, hang = 0), horiz = T)
     }
-        
     
     
-     if (!is.null(input$selectMetaColumn[[1]])) {
+    
+    if (!is.null(input$selectMetaColumn[[1]])) {
       
       if (input$closeDendDots == 1) {
         
@@ -453,7 +453,7 @@ dendDotsServer <- function(input,
       }
     }
     
-
+    
     if (!is.null(input$colorByLines)) {
       if (input$colorByLines == "height") {
         abline(v = input$cutHeightLines, lty = 2)
@@ -466,13 +466,14 @@ dendDotsServer <- function(input,
         abline(v = input$cutHeightLines, lty = 2)
       }
     }
-   if (boots()$bootstraps[1] != "") {
-
-     IDBacApp::bootlabels.hclust(as.hclust(dendrogram$dendrogram), 
-                                 boots()$bootstraps,
-                                 horiz = TRUE,
-                                 col = "blue")
-   }
+    print(boots()$bootstraps[1] )
+    if (boots()$bootstraps[1] != "") {
+      
+      IDBacApp::bootlabels.hclust(as.hclust(dendrogram$dendrogram), 
+                                  boots()$bootstraps,
+                                  horiz = TRUE,
+                                  col = "blue")
+    }
     
   }, height = plotHeight)
   

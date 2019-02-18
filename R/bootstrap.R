@@ -158,8 +158,9 @@ bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
   if (horiz) {
     p[, c(2,1)] <- p
   }
- # labs <- sprintf("%.2f", bootstrapValues)
-#  text(p, labels=labs, ...)
+  
+  labs <- sprintf("%.2f", bootstrapValues)
+  text(p, labels=labs, ...)
   invisible(NULL)
 }
 

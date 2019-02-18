@@ -89,6 +89,7 @@ transferToNewDB_server <- function(input,
   
   
   observeEvent(input$addtoNewDB, {
+    req(length(chosenSamples$chosen) > 0)
     
     nam <- gsub(" ", "", IDBacApp::path_sanitize(input$nameformixNmatch))
     

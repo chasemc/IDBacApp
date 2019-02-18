@@ -53,7 +53,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
                              sampleID = sampleID,
                              XMLinfo = XMLinfo, 
                              rawDataFilePath = rawDataFilePath)
-
+  
 }
 
 

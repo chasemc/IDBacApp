@@ -24,16 +24,19 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         newDBPool <- pool::dbPool(drv = RSQLite::SQLite(),
                                                   dbname = newdbPath)
+                        newDBconnection <- pool::poolCheckout(newDBPool)
+                        
+                        
                         
                         existingDBconnection <- pool::poolCheckout(existingDBPool)
-                        newDBconnection <- pool::poolCheckout(newDBPool)
+                        
                         
                         warning(paste0("Begin migration of \n",
                                        existingDBconnection@dbname,
                                        " to \n", newDBconnection@dbname))
                         
                         
-                     
+                        
                         # Attach new database to existing database
                         #----
                         sqlQ <- glue::glue_sql("attach database ({dbPath*}) as newDB;",
@@ -56,20 +59,20 @@ copyToNewDatabase <- function(existingDBPool,
                         arch <- IDBacApp::sqlTableArchitecture(1)
                         
                         
-
-# Account for modifications to DB structure -------------------------------
-
-
-                         # Below, when setting up the new tables, we need to add the existing columns which may not be present in 
+                        
+                        # Account for modifications to DB structure -------------------------------
+                        
+                        
+                        # Below, when setting up the new tables, we need to add the existing columns which may not be present in 
                         # the current architecture, and also have the current architecture (ie we can't just copy/paste from the old DB)
                         
-
+                        
                         # Setup New metaData ------------------------------------------------------
                         a <- DBI::dbListFields(existingDBconnection, "metaData") 
                         colToAppend <- a[which(! a %in% colnames(arch$metaData))]                        
                         if(length(colToAppend) > 0){
-                        colToAppend <- setNames(rep(NA, length(colToAppend)), colToAppend)
-                        arch$metaData <- cbind(arch$metaData, colToAppend)
+                          colToAppend <- setNames(rep(NA, length(colToAppend)), colToAppend)
+                          arch$metaData <- cbind(arch$metaData, colToAppend)
                         }
                         #Write table structures to database
                         DBI::dbWriteTable(conn = newDBconnection,
@@ -273,15 +276,19 @@ copyToNewDatabase <- function(existingDBPool,
                                            detail = 'Indexing new database...',
                                            session = getDefaultReactiveDomain())
                         warning("Creating index")
-                        DBI::dbSendStatement('CREATE INDEX ids ON IndividualSpectra (Strain_ID);',
-                                             conn = newDBconnection)
-                        DBI::dbClearResult(newDBconnection)
+                       
+                        
+                        a <- DBI::dbSendStatement('CREATE INDEX IF NOT EXISTS ids ON IndividualSpectra (Strain_ID);',
+                                                      conn = newDBconnection)
+                        DBI::dbClearResult(a)
+                        
                         warning("Created index")
                         
                         shiny::setProgress(value = 0.99, 
                                            message = 'Copying data to new database',
                                            detail = 'Finishing...',
                                            session = getDefaultReactiveDomain())
+                        
                         pool::poolReturn(existingDBconnection)
                         pool::poolReturn(newDBconnection)
                         pool::poolClose(newDBPool)

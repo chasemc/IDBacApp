@@ -106,7 +106,7 @@ app_server <- function(input, output, session) {
   
   
   # Trigger add tabs --------------------------------------------------------
-
+  
   
   #This "observe" event creates the SQL tab UI.
   observeEvent(availableDatabases$db,

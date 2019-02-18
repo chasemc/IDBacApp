@@ -67,7 +67,7 @@ updateMeta_server <- function(input,
       rhandsontable::hot_cols(fixedColumnsLeft = 1)
     
   })
-    
+  
   
   
   observeEvent(input$insertNewMetaColumn, 
