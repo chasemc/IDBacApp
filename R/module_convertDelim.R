@@ -13,7 +13,7 @@ convertDelim_UI <- function(id){
     p("Each file should only contain a single profile spectrum formatted in two columns,", 
       br(),
       "the first being ", tags$i("m/z")," and the second column being intensity values"),
-   br(),
+    br(),
     p(strong("1: Enter a name for this new experiment")),
     p("This will become a filename, non-valid characters will be removed."),
     p("Hint: Intead of a space, use \"_\"."),
@@ -168,11 +168,12 @@ convertDelim_Server <- function(input,
                ignoreInit = TRUE, {
                  req(!is.null(sanity()))
                  req(sanity() != "")
-          
-                 req(is.null(proteinFiles()) + is.null(smallMolFiles()) == 0)
+                 
+              
+                 req(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0)
                  req(length(proteinFiles()) + length(smallMolFiles()) > 0)
                  
-                
+                 
                  
                  
                  if (is.null(smallMolFiles())) {
