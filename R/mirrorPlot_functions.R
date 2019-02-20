@@ -26,7 +26,7 @@ mirrorPlot <- function(mirrorPlotEnv){
                  list(type = "rect",
                       fillcolor = mirrorPlotEnv$SampleOneColors[[x]],
                       line = list(color = mirrorPlotEnv$SampleOneColors[[x]]),
-                      opacity = .5,
+                      opacity = 0.4,
                       x0 = mLeft[[x]],
                       x1 = mRight[[x]], 
                       xref = "x",
@@ -42,8 +42,8 @@ mirrorPlot <- function(mirrorPlotEnv){
   
   
   
-  mLeft <- mirrorPlotEnv$peaksSampleTwo@mass - 10
-  mRight <- mirrorPlotEnv$peaksSampleTwo@mass + 10
+  mLeft <- mirrorPlotEnv$peaksSampleTwo@mass - 5
+  mRight <- mirrorPlotEnv$peaksSampleTwo@mass + 5
   intTop <- -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity))
   
   lp2 <- lapply(seq_along(mirrorPlotEnv$SampleTwoSNR), 
@@ -52,7 +52,7 @@ mirrorPlot <- function(mirrorPlotEnv){
                  list(type = "rect",
                       fillcolor = "grey",
                       line = list(color = "grey"),
-                      opacity = 0.5,
+                      opacity = 0.4,
                       x0 = mLeft[[x]],
                       x1 = mRight[[x]], 
                       xref = "x",

@@ -99,9 +99,21 @@ ui_proteinClustering <- function() {
     
     tabsetPanel(type = "tabs",           
                 tabPanel(value = "proteinMirror","Mirror Plots",
-                         IDBacApp::mirrorPlotsSettings_UI("protMirror"),
-                         
-                         IDBacApp::mirrorPlots_UI("protMirror")
+                         h3("Mirror Plots", align = "center"),
+                         br(),
+                         p("Choose two samples to compare in the mirror plots below.
+                           Matching peaks will be colored blue and non-matching peaks
+                           will be colored red."),
+                         br(),
+                         fluidRow(
+                         IDBacApp::mirrorPlotsSettings_UI("protMirror")
+                         ),
+                         fluidRow(
+                           IDBacApp::mirrorPlots_UI("protMirror")
+                         ),
+                         fluidRow(
+                           IDBacApp::mirrorPlotDownload_UI("protMirror")
+                         )
                 ),
                 tabPanel(value = "proteinDendrogram","Dendrogram",
                          

@@ -156,7 +156,7 @@ app_server <- function(input, output, session) {
                  }
                  if (s > 0) {
                    appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Small Molecule Data Analysis)",
+                             tabPanel("Small Molecule Data Analysis",
                                       IDBacApp::ui_smallMolMan()
                              )
                    )

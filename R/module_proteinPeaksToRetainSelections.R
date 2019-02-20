@@ -7,8 +7,8 @@ peakRetentionSettings_UI <- function(id){
         span(class = "tooltippytext", 
              p("In what percentage of replicates must a peak be
                present to be kept? (0-100%) (Experiment/Hypothesis dependent)")
-             )
-        ),
+        )
+    ),
     numericInput(ns("percentPresence"), 
                  label = NULL,
                  value = 70,
@@ -16,16 +16,11 @@ peakRetentionSettings_UI <- function(id){
                  min = 0,
                  max = 100,
                  width = "50%"),
-    div(class = "tooltippy", "Signal To Noise Cutoff", 
+    div(class = "tooltippy", "Signal to Noise Cutoff", 
         span(class = "tooltippytext", 
-             p("Choose an appropriate SNR for your spectra. In the picture below, the SNR of peaks decreases "),
-             img(border = "0",
-                 #  title = "https://github.com/chasemc/IDBacApp/issues",
-                 src = "www/snr.png",
-                 width = "500",
-                 height = "500")
-             )
-        ),
+             p("Choose an appropriate SNR for your spectra. In the picture below, the SNR of peaks decreases ")
+        )
+    ),
     numericInput(ns("SNR"),
                  label = NULL,
                  value = 4,

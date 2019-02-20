@@ -1,13 +1,15 @@
 
-
 mirrorPlotsSettings_UI <- function(id){
   ns <- NS(id)
+    uiOutput(ns("mirrorSpectraSelector"))
+}
+
+mirrorPlotDownload_UI <- function(id){
+  ns <- NS(id)
   tagList(
-    uiOutput(ns("mirrorSpectraSelector")),
     downloadButton(ns("downloadInverse"), 
-                   label = "Download Main Plot"),
-    downloadButton(ns("downloadInverseZoom"), 
-                   label = "Download Zoomed Plot")
+                   label = "Download SVG")
+    
   )
   
 }  
@@ -57,7 +59,7 @@ mirrorPlots_Sever <- function(input,
     
     tagList(
     
-      column(width = 6,
+      column(width = 5, offset = 1,
              selectInput(session$ns("Spectra1"), 
                          label = strong("Spectrum 1 (positive y-axis)"),
                          choices = inverseComparisonNames(), 
@@ -101,7 +103,7 @@ mirrorPlots_Sever <- function(input,
                                                                  peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
                                                                  upperMassCutoff = input$upperMass,
-                                                                 minSNR = 6,
+                                                                 minSNR = input$SNR,
                                                                  tolerance = 0.002,
                                                                  protein = TRUE)
     
