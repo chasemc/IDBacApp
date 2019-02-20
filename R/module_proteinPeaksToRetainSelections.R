@@ -2,24 +2,26 @@ peakRetentionSettings_UI <- function(id){
   ns <- NS(id)
   
   tagList(
+    strong("Percent Presence"),
     numericInput(ns("percentPresence"), 
-                 label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
+                 label = p("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
                  value = 70,
                  step = 10,
                  min = 0,
-                 max = 100),
+                 max = 100,
+                 width="50%"),
     numericInput(ns("SNR"),
-                 label = h5(strong("Signal To Noise Cutoff")),
+                 label = strong("Signal To Noise Cutoff"),
                  value = 4,
                  step = 0.5,
                  min = 1.5,
                  max = 100),
     numericInput(ns("lowerMass"), 
-                 label = h5(strong("Lower Mass Cutoff")),
+                 label = strong("Lower Mass Cutoff"),
                  value = 3000,
                  step = 50),
     numericInput(ns("upperMass"), 
-                 label = h5(strong("Upper Mass Cutoff")),
+                 label = strong("Upper Mass Cutoff"),
                  value = 15000,
                  step = 50)
   )
@@ -29,8 +31,8 @@ peakRetentionSettings_UI <- function(id){
 
 
 peakRetentionSettings_Server <- function(input,
-                                                output,
-                                                session){
+                                         output,
+                                         session){
   
   
   

@@ -9,7 +9,7 @@ ui_proteinClustering <- function() {
   
   # in hier -> delineatwe settings menu vs optional
   fluidPage(
-    sidebarLayout(
+   # sidebarLayout(
       
       sidebarPanel(style = "background-color:#7777770d", 
                    width = 4,
@@ -19,7 +19,9 @@ ui_proteinClustering <- function() {
                                                                     align = "center"),
                                                                   value = "proteinPeakSettingsDropDown2",
                                                                   strong("Settings chosen will effect all protein analyses."),
-                                                                  IDBacApp::peakRetentionSettings_UI("protMirror"),
+                                                                  div(align = "center",
+                                                                  IDBacApp::peakRetentionSettings_UI("protMirror")
+                                                                  ),
                                                                   IDBacApp::mirrorPlotsSettings_UI("protMirror"),
                                                                   absolutePanel(width="100%",fixed = T,p("sdafasdfd"))
                                                                   
@@ -95,15 +97,23 @@ ui_proteinClustering <- function() {
       ),
       
       
-      mainPanel(
-        IDBacApp::mirrorPlots_UI("protMirror"),
+       
+      mainPanel(   IDBacApp::bsCollapse(id = "mirrorPlots",
+                                        #
+                           open = "mirr",
+                           IDBacApp::bsCollapsePanel("",align = "center",
+                                                     value = "mirr",
+                                                     
+                           IDBacApp::mirrorPlots_UI("protMirror")
+      )),
+ 
         IDBacApp::plotHier("proth"),
         IDBacApp::dendDotsUI("proth")
         
         
       )
     )
-  )
+  
 }
 
 
