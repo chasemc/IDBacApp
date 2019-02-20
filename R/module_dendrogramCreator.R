@@ -14,7 +14,9 @@ dendrogramCreatorUI <- function(id) {
     
     div(class = "tooltippy", "Distance Algorithm", 
         span(class = "tooltippytext", 
-             p("Method for measuring the similarity of the peaks of o spectra."))),
+             p("Method for measuring the similarity of peaks between spectra.")
+        )
+    ),
     shiny::selectInput(ns("distanceMethod"),
                        label = NULL,
                        choices = list("cosine" = "cosine",
@@ -23,11 +25,13 @@ dendrogramCreatorUI <- function(id) {
                                       "manhattan" = "manhattan",
                                       "canberra" = "canberra",
                                       "binary" = "binary",
-                                      "minkowski"= "minkowski"),
+                                      "minkowski" = "minkowski"),
                        selected = "cosine"),
-    
+    div(class = "tooltippy", "Clustering Algorithm", 
+        span(class = "tooltippytext", 
+             p("Method for creating the dendrogram from a similarity/distance matrix."))),
     shiny::selectInput(ns("clustering"),
-                       label = shiny::h5(shiny::strong("Clustering Algorithm")),
+                       label = NULL,
                        choices = list("ward.D" = "ward.D",
                                       "ward.D2" = "ward.D2",
                                       "single" = "single",
@@ -37,9 +41,9 @@ dendrogramCreatorUI <- function(id) {
                                       "median (WPGMC)" = "median",
                                       "centroid (UPGMC)" = "centroid"),
                        selected = "average"),
-    
+    p("Include peak intensities, or use presence/absence?"),
     shiny::radioButtons(ns("booled"),
-                        label = shiny::h5(shiny::strong("Include peak intensities, or use presence/absence?")),
+                        label = NULL,
                         choices = list("Presence/Absence" = TRUE,
                                        "Intensities" = FALSE),
                         selected = FALSE),

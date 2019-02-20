@@ -220,7 +220,7 @@ mirrorPlots_Sever <- function(input,
 
   # Download svg of zoomed mirror plot --------------------------------------
   
-  output$downloadInverseZoom <- downloadHandler(
+  output$downloadInverse <- downloadHandler(
     filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")
     },
     content = function(file1){
@@ -228,10 +228,7 @@ mirrorPlots_Sever <- function(input,
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
       
-      IDBacApp::baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
-                                nameOne = input$Spectra1,
-                                nameTwo = input$Spectra2,
-                                ranges2 = ranges2)
+      IDBacApp::baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))

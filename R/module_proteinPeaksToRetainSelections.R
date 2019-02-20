@@ -27,16 +27,18 @@ peakRetentionSettings_UI <- function(id){
                  step = 0.5,
                  min = 1.5,
                  max = 100,width = "50%"),
+    p("Lower Mass Cutoff"),
     numericInput(ns("lowerMass"), 
-                 label = strong("Lower Mass Cutoff"),
+                 label = NULL,
                  value = 3000,
                  step = 50,
-                 width ="50%"),
+                 width = "50%"),
+    p("Upper Mass Cutoff"),
     numericInput(ns("upperMass"), 
-                 label = strong("Upper Mass Cutoff"),
+                 label = NULL,
                  value = 15000,
                  step = 50,
-                 width="50%")
+                 width = "50%")
   )
   
   
