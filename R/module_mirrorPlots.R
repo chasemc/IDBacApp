@@ -56,17 +56,16 @@ mirrorPlots_Sever <- function(input,
   output$mirrorSpectraSelector <- renderUI({
     
     tagList(
+    
       column(width = 6,
              selectInput(session$ns("Spectra1"), 
-                         label = h5(strong("Spectrum 1 (positive y-axis)"), 
-                                    br(),
-                                    "(Peak matches to bottom spectrum are blue, non-matches are red)"),
+                         label = strong("Spectrum 1 (positive y-axis)"),
                          choices = inverseComparisonNames(), 
                          selected = inverseComparisonNames()[[1]])
       ),
       column(width = 6,
              selectInput(session$ns("Spectra2"), 
-                         label = h5(strong("Spectrum 2 (negative y-axis)")),
+                         label = strong("Spectrum 2 (negative y-axis)"),
                          choices = inverseComparisonNames(),
                          selected = inverseComparisonNames()[[1]])
       )

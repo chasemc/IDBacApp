@@ -16,8 +16,8 @@ mirrorPlot <- function(mirrorPlotEnv){
   
   
   
-  mLeft <- mirrorPlotEnv$peaksSampleOne@mass - 1
-  mRight <- mirrorPlotEnv$peaksSampleOne@mass + 1
+  mLeft <- mirrorPlotEnv$peaksSampleOne@mass - 5
+  mRight <- mirrorPlotEnv$peaksSampleOne@mass + 5
   intTop <- (mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)
   
   lp <- lapply(seq_along(mirrorPlotEnv$SampleOneColors), 
@@ -25,8 +25,8 @@ mirrorPlot <- function(mirrorPlotEnv){
                  
                  list(type = "rect",
                       fillcolor = mirrorPlotEnv$SampleOneColors[[x]],
-                      line = list(color = "grey"),
-                      opacity = 0.3,
+                      line = list(color = mirrorPlotEnv$SampleOneColors[[x]]),
+                      opacity = .5,
                       x0 = mLeft[[x]],
                       x1 = mRight[[x]], 
                       xref = "x",
@@ -42,8 +42,8 @@ mirrorPlot <- function(mirrorPlotEnv){
   
   
   
-  mLeft <- mirrorPlotEnv$peaksSampleTwo@mass - 1
-  mRight <- mirrorPlotEnv$peaksSampleTwo@mass + 1
+  mLeft <- mirrorPlotEnv$peaksSampleTwo@mass - 10
+  mRight <- mirrorPlotEnv$peaksSampleTwo@mass + 10
   intTop <- -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity))
   
   lp2 <- lapply(seq_along(mirrorPlotEnv$SampleTwoSNR), 
@@ -52,7 +52,7 @@ mirrorPlot <- function(mirrorPlotEnv){
                  list(type = "rect",
                       fillcolor = "grey",
                       line = list(color = "grey"),
-                      opacity = 0.3,
+                      opacity = 0.5,
                       x0 = mLeft[[x]],
                       x1 = mRight[[x]], 
                       xref = "x",
@@ -68,11 +68,26 @@ mirrorPlot <- function(mirrorPlotEnv){
                   x = ~x,
                   y = ~y,
                   type = "scatter",
-                  mode = "line") %>% 
+                  mode = "line",
+                  text  = paste("m/z:", round(top$x, 3),
+                                "<br> Intensity:", round(top$y, 1),
+                                    "<br> Sample:",
+                                    mirrorPlotEnv$peaksSampleOne@metaData$Strain),
+                  hoverinfo = 'text',
+                  line = list(color = "#000000"),
+                  name = mirrorPlotEnv$peaksSampleOne@metaData$Strain) %>% 
     plotly::add_lines(data = bottom,
                       x = ~x,
-                      y = ~-y) %>% 
-    plotly::layout(shapes = c(lp, lp2)) 
+                      y = ~-y,
+                      line = list(color = "#E69F00"),
+                      name = mirrorPlotEnv$peaksSampleTwo@metaData$Strain,
+                      text  = paste("m/z:", round(bottom$x, 3),
+                                    "<br> Intensity:", round(bottom$y, 1),
+                                    "<br> Sample:",
+                                    mirrorPlotEnv$peaksSampleTwo@metaData$Strain),
+                      hoverinfo = 'text') %>% 
+    plotly::layout(shapes = c(lp, lp2),
+                   showlegend = FALSE) 
                    
   
   

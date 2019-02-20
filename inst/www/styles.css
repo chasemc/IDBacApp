@@ -163,4 +163,39 @@ font-family: 'Arial';
 }
 
 
+  /* Center numeric input text in inputnumeric */
 
+.form-control, .shiny-bound-input, .shinyjs-resettable { 
+         display: table-cell; 
+         text-align: center; 
+         vertical-align: middle; 
+      }
+
+
+
+.tooltippy {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+}
+
+.tooltippy .tooltippytext {
+  visibility: hidden;
+  width: 320px;
+  background-color: black;
+  color: #fff;
+  opacity: 0.65;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  
+  /* Position the tooltippy */
+  position: absolute;
+  z-index: 1001;
+  top: -5px;
+  left: 105%;
+}
+
+.tooltippy:hover .tooltippytext {
+  visibility: visible;
+}
