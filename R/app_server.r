@@ -148,24 +148,15 @@ app_server <- function(input, output, session) {
                  s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaks IS NOT NULL")[,1]
                  pool::poolReturn(pool)
                  if (p > 0) {
-                   
-                   appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Compare Two Samples (Protein)",
-                                      value = "inversePeaks",
-                                      uiOutput("inversepeakui")
-                             )
-                   )
-                   
-                   
-                   appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Hierarchical Clustering (Protein)",
+                appendTab(inputId = "mainIDBacNav",
+                             tabPanel("Protein Data Analysis",
                                       uiOutput("Heirarchicalui")
                              )
                    )
                  }
                  if (s > 0) {
                    appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Metabolite Association Network (Small-Molecule)",
+                             tabPanel("Small Molecule Data Analysis)",
                                       IDBacApp::ui_smallMolMan()
                              )
                    )

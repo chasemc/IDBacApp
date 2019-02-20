@@ -11,8 +11,12 @@ dendrogramCreatorUI <- function(id) {
   ns <- shiny::NS(id)
   
   shiny::tagList(
+    
+    div(class = "tooltippy", "Distance Algorithm", 
+        span(class = "tooltippytext", 
+             p("Method for measuring the similarity of the peaks of two spectra."))),
     shiny::selectInput(ns("distanceMethod"),
-                       label = shiny::h5(shiny::strong("Distance Algorithm")),
+                       label = NULL,
                        choices = list("cosine" = "cosine",
                                       "euclidean" = "euclidean",
                                       "maximum" = "maximum",

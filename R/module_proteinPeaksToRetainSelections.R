@@ -2,12 +2,13 @@ peakRetentionSettings_UI <- function(id){
   ns <- NS(id)
   
   tagList(
-   
+    
     div(class = "tooltippy", "Percent Presence", 
         span(class = "tooltippytext", 
              p("In what percentage of replicates must a peak be
-               present to be kept? (0-100%) (Experiment/Hypothesis dependent)"))),
-    
+               present to be kept? (0-100%) (Experiment/Hypothesis dependent)")
+             )
+        ),
     numericInput(ns("percentPresence"), 
                  label = NULL,
                  value = 70,
@@ -19,16 +20,12 @@ peakRetentionSettings_UI <- function(id){
         span(class = "tooltippytext", 
              p("Choose an appropriate SNR for your spectra. In the picture below, the SNR of peaks decreases "),
              img(border = "0",
-               #  title = "https://github.com/chasemc/IDBacApp/issues",
+                 #  title = "https://github.com/chasemc/IDBacApp/issues",
                  src = "www/snr.png",
                  width = "500",
-                 height = "500"))),
-   
-    
-    
-    
-    
-    
+                 height = "500")
+             )
+        ),
     numericInput(ns("SNR"),
                  label = NULL,
                  value = 4,
