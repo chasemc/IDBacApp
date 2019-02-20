@@ -88,7 +88,7 @@ manPageProtDend_Server <- function(input,
     
     if (!is.null(colorByLabels())) {
       if (colorByLabels() == "height") {
-        abline(v = cutHeightLines(), lty = 2)
+        abline(v = cutHeightLabels(), lty = 2)
       }
     }
     

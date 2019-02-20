@@ -79,7 +79,7 @@ mirrorPlot <- function(mirrorPlotEnv){
     plotly::add_lines(data = bottom,
                       x = ~x,
                       y = ~-y,
-                      line = list(color = "#E69F00"),
+                      line = list(color = "grey"),
                       name = mirrorPlotEnv$peaksSampleTwo@metaData$Strain,
                       text  = paste("m/z:", round(bottom$x, 3),
                                     "<br> Intensity:", round(bottom$y, 1),

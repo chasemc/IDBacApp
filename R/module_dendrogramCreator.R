@@ -29,7 +29,9 @@ dendrogramCreatorUI <- function(id) {
                        selected = "cosine"),
     div(class = "tooltippy", "Clustering Algorithm", 
         span(class = "tooltippytext", 
-             p("Method for creating the dendrogram from a similarity/distance matrix."))),
+             p("Method for creating the dendrogram from a similarity/distance matrix.")
+             )
+        ),
     shiny::selectInput(ns("clustering"),
                        label = NULL,
                        choices = list("ward.D" = "ward.D",
@@ -41,22 +43,25 @@ dendrogramCreatorUI <- function(id) {
                                       "median (WPGMC)" = "median",
                                       "centroid (UPGMC)" = "centroid"),
                        selected = "average"),
-    p("Include peak intensities, or use presence/absence?"),
-    shiny::radioButtons(ns("booled"),
-                        label = NULL,
-                        choices = list("Presence/Absence" = TRUE,
-                                       "Intensities" = FALSE),
-                        selected = FALSE),
+    fluidRow(
+      shiny::radioButtons(ns("booled"),
+                          label =  p("Include peak intensities, or use presence/absence?"),
+                          choices = list("Presence/Absence" = TRUE,
+                                         "Intensities" = FALSE),
+                          selected = FALSE)
+    ),
     # shiny::numericInput(ns("ppm"),
     #                     label = shiny::h5(shiny::strong("Select ppm tolerance for peak binning")),
     #                     min =  50,
     #                     max = 10000,
     #                     value = 300),
-    shiny::numericInput(ns("bootstraps"),
-                        label = "Bootstraps",
-                        value = "",
-                        min = 1,
-                        max = 1000)
+    fluidRow(
+      shiny::numericInput(ns("bootstraps"),
+                          label = "Bootstraps",
+                          value = "",
+                          min = 1,
+                          max = 1000)
+    )
   )
   
 }
