@@ -14,7 +14,7 @@ dendrogramCreatorUI <- function(id) {
     
     div(class = "tooltippy", "Distance Algorithm", 
         span(class = "tooltippytext", 
-             p("Method for measuring the similarity of the peaks of two spectra."))),
+             p("Method for measuring the similarity of the peaks of o spectra."))),
     shiny::selectInput(ns("distanceMethod"),
                        label = NULL,
                        choices = list("cosine" = "cosine",

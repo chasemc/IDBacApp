@@ -14,13 +14,9 @@ mirrorPlotsSettings_UI <- function(id){
 
 mirrorPlots_UI <- function(id){
   ns <- NS(id)
-  fluidRow(plotOutput(ns("inversePeakComparisonPlot"),
-                      brush = brushOpts(
-                        id = ns("plot2_brush"),
-                        resetOnNew = FALSE)),
-           h3("Click and Drag on the plot above to zoom (Will zoom in plot below)"),
-           plotOutput(ns("inversePeakComparisonPlotZoom"))
-  )
+  fluidRow(plotly::plotlyOutput(ns("inversePeakComparisonPlot")
+
+  ))
   
 }
 
@@ -37,10 +33,10 @@ mirrorPlots_UI <- function(id){
 #'
 #' @examples
 mirrorPlots_Sever <- function(input,
-                                  output,
-                                  session,
-                                  workingDB,
-                                  proteinOrSmall){
+                              output,
+                              session,
+                              workingDB,
+                              proteinOrSmall){
   
   
   inverseComparisonNames <- reactive({
@@ -60,32 +56,36 @@ mirrorPlots_Sever <- function(input,
   output$mirrorSpectraSelector <- renderUI({
     
     tagList(
-      selectInput(session$ns("Spectra1"), 
-                  label = h5(strong("Spectrum 1 (positive y-axis)"), 
-                                         br(),
-                                         "(Peak matches to bottom spectrum are blue, non-matches are red)"),
-                  choices = inverseComparisonNames(), 
-                  selected = inverseComparisonNames()[[1]]),
-      selectInput(session$ns("Spectra2"), 
-                  label = h5(strong("Spectrum 2 (negative y-axis)")),
-                  choices = inverseComparisonNames(),
-                  selected = inverseComparisonNames()[[1]])
+      column(width = 6,
+             selectInput(session$ns("Spectra1"), 
+                         label = h5(strong("Spectrum 1 (positive y-axis)"), 
+                                    br(),
+                                    "(Peak matches to bottom spectrum are blue, non-matches are red)"),
+                         choices = inverseComparisonNames(), 
+                         selected = inverseComparisonNames()[[1]])
+      ),
+      column(width = 6,
+             selectInput(session$ns("Spectra2"), 
+                         label = h5(strong("Spectrum 2 (negative y-axis)")),
+                         choices = inverseComparisonNames(),
+                         selected = inverseComparisonNames()[[1]])
+      )
     )
     
   })
   
   dataForInversePeakComparisonPlot <- reactive({
     
-    mirrorPlotEnv <<- new.env(parent = parent.frame())
+    mirrorPlotEnv <- new.env(parent = parent.frame())
     
     # connect to sql
     conn <- pool::poolCheckout(workingDB$pool())
     
     # get protein peak data for the 1st mirror plot selection
-  
     
     
-    mirrorPlotEnv$peaksSampleOne <<- IDBacApp::collapseReplicates(checkedPool = conn,
+    
+    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                  sampleIDs = input$Spectra1,
                                                                  peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
@@ -206,61 +206,17 @@ mirrorPlots_Sever <- function(input,
   
   
   # Output for the non-zoomed mirror plot
-  output$inversePeakComparisonPlot <- renderPlot({
+  output$inversePeakComparisonPlot <- plotly::renderPlotly({
     
-    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-    mirrorPlot(mirrorPlotEnv = mirrorPlotEnv)
+    mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
     
-    # Watch for brushing of the top mirror plot
-
-      brush <- input$plot2_brush
-      if (!is.null(brush)) {
-        ranges2$x <- c(brush$xmin, brush$xmax)
-        ranges2$y <- c(brush$ymin, brush$ymax)
-      } else {
-        ranges2$x <- NULL
-        ranges2$y <- c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                       max(mirrorPlotEnv$spectrumSampleOne@intensity))
-      }
-  
+    
   })
   
   
   # Output the zoomed mirror plot -------------------------------------------
   
-  
-  output$inversePeakComparisonPlotZoom <- renderPlot({
-    IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
-                             nameOne = input$Spectra1,
-                             nameTwo = input$Spectra2,
-                             ranges2 = ranges2)
-  })
-  
-  
 
-  output$downloadInverse <- downloadHandler(
-    filename = function(){
-      paste0("top-", input$Spectra1,"_", "bottom-", input$Spectra2, ".svg")
-      
-    }, 
-    content = function(file1){
-      
-      svglite::svglite(file1,
-                       width = 10,
-                       height = 8, 
-                       bg = "white",
-                       pointsize = 12,
-                       standalone = TRUE)
-      
-      mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
-      
-      
-      dev.off()
-      if (file.exists(paste0(file1, ".svg")))
-        file.rename(paste0(file1, ".svg"), file1)
-    })
-  
-  
   # Download svg of zoomed mirror plot --------------------------------------
   
   output$downloadInverseZoom <- downloadHandler(
@@ -271,10 +227,10 @@ mirrorPlots_Sever <- function(input,
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
       
-      IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
-                               nameOne = input$Spectra1,
-                               nameTwo = input$Spectra2,
-                               ranges2 = ranges2)
+      IDBacApp::baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
+                                nameOne = input$Spectra1,
+                                nameTwo = input$Spectra2,
+                                ranges2 = ranges2)
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))
@@ -286,7 +242,7 @@ mirrorPlots_Sever <- function(input,
   
   
   
-  }
+}
 
 
 
