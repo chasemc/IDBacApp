@@ -170,7 +170,6 @@ app_server <- function(input, output, session) {
   
   
   
-  observe(a23 <<- shiny::reactiveValuesToList(input))
   
   
   
@@ -213,7 +212,7 @@ app_server <- function(input, output, session) {
     req(length(chosenProteinSampleIDs$chosen) > 0)
     req(workingDB$pool())
     # For each sample:
-    # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
+    # bin peaks and keep only the peaks that occur in proteinPeakSettings$percentPresence percent of replicates
     # merge into a single peak list per sample
     # trim m/z based on user input
     # connect to sql
@@ -224,10 +223,10 @@ app_server <- function(input, output, session) {
                    function(ids){
                      IDBacApp::collapseReplicates(checkedPool = conn,
                                                   sampleIDs = ids,
-                                                  peakPercentPresence = input$percentPresenceP,
-                                                  lowerMassCutoff = input$lowerMass,
-                                                  upperMassCutoff = input$upperMass, 
-                                                  minSNR = 6, 
+                                                  peakPercentPresence = proteinPeakSettings$percentPresence,
+                                                  lowerMassCutoff = proteinPeakSettings$lowerMass,
+                                                  upperMassCutoff = proteinPeakSettings$upperMass, 
+                                                  minSNR = proteinPeakSettings$SNR, 
                                                   tolerance = 0.002,
                                                   protein = TRUE)
                    })
@@ -235,9 +234,9 @@ app_server <- function(input, output, session) {
                    function(ids){
                      IDBacApp::collapseReplicates(checkedPool = conn,
                                                   sampleIDs = ids,
-                                                  peakPercentPresence = input$percentPresenceP,
-                                                  lowerMassCutoff = input$lowerMass,
-                                                  upperMassCutoff = input$upperMass, 
+                                                  peakPercentPresence = proteinPeakSettings$percentPresence,
+                                                  lowerMassCutoff = proteinPeakSettings$lowerMass,
+                                                  upperMassCutoff = proteinPeakSettings$upperMass, 
                                                   minSNR = 6, 
                                                   tolerance = 0.002,
                                                   protein = TRUE)
@@ -253,9 +252,9 @@ app_server <- function(input, output, session) {
                              function(ids){
                                IDBacApp::collapseReplicates(checkedPool = conn,
                                                             sampleIDs = ids,
-                                                            peakPercentPresence = input$percentPresenceP,
-                                                            lowerMassCutoff = input$lowerMass,
-                                                            upperMassCutoff = input$upperMass, 
+                                                            peakPercentPresence = proteinPeakSettings$percentPresence,
+                                                            lowerMassCutoff = proteinPeakSettings$lowerMass,
+                                                            upperMassCutoff = proteinPeakSettings$upperMass, 
                                                             minSNR = 6, 
                                                             tolerance = 0.002,
                                                             protein = TRUE)
@@ -290,13 +289,13 @@ app_server <- function(input, output, session) {
   
   
   proteinMatrix <- reactive({
-    req(input$lowerMass, input$upperMass)
+    req(proteinPeakSettings$lowerMass, proteinPeakSettings$upperMass)
     req(!is.null(collapsedPeaksForDend()))
-    validate(need(input$lowerMass < input$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
+    validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
                                ppm = 300,
-                               massStart = input$lowerMass,
-                               massEnd = input$upperMass)
+                               massStart = proteinPeakSettings$lowerMass,
+                               massEnd = proteinPeakSettings$upperMass)
     
     do.call(rbind, pm)
     
@@ -431,8 +430,8 @@ app_server <- function(input, output, session) {
     shiny::tagList(
       h4("Suggestions for Reporting Protein Analysis:"),
       p("This dendrogram was created by analyzing ",tags$code(attributes(proteinDendrogram$dendrogram)$members), " samples,
-          and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
-          Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
+          and retaining peaks with a signal to noise ratio above ",tags$code(proteinPeakSettings$SNR)," and occurring in greater than ",tags$code(proteinPeakSettings$percentPresence),"% of replicate spectra.
+          Peaks occuring below ",tags$code(proteinPeakSettings$lowerMass)," m/z or above ",tags$code(proteinPeakSettings$upperMass)," m/z were removed from the analyses. ",
         "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
     )
     

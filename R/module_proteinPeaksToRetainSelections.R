@@ -49,43 +49,6 @@ peakRetentionSettings_Server <- function(input,
                                          output,
                                          session){
   
-  
-  
-  return(reactive(shiny::reactiveValuesToList(input)))
-  
+  #return(reactive(shiny::reactiveValuesToList(input)))
+  return(input)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# p("Note: Settings selected above will be used in all later analyses."),
-# p("Note 2: Displayed spectra represent the mean spectrum for a sample. Example: if you observe a peak
-#                  in your mean spectrum but it isn't represented as a red or blue line, then either it doesn't occur often enough across your replicates
-#                  or its signal to noise ratio is less than what is selected.")
-# ),
-# mainPanel(
-#   fluidRow(plotOutput("inversePeakComparisonPlot",
-#                       brush = brushOpts(
-#                         id = "plot2_brush",
-#                         resetOnNew = TRUE)),
-#            h3("Click and Drag on the plot above to zoom (Will zoom in plot below)"),
-#            plotOutput("inversePeakComparisonPlotZoom")
-#   )
-# )
-# )
-# }
-# 
-
