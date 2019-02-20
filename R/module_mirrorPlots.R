@@ -16,8 +16,8 @@ mirrorPlots_UI <- function(id){
   ns <- NS(id)
   fluidRow(plotOutput(ns("inversePeakComparisonPlot"),
                       brush = brushOpts(
-                        id = "plot2_brush",
-                        resetOnNew = TRUE)),
+                        id = ns("plot2_brush"),
+                        resetOnNew = FALSE)),
            h3("Click and Drag on the plot above to zoom (Will zoom in plot below)"),
            plotOutput(ns("inversePeakComparisonPlotZoom"))
   )
@@ -60,11 +60,12 @@ mirrorPlots_Sever <- function(input,
   output$mirrorSpectraSelector <- renderUI({
     
     tagList(
-      selectInput(session$ns("Spectra1"), label = h5(strong("Spectrum 1 (positive y-axis)"), 
+      selectInput(session$ns("Spectra1"), 
+                  label = h5(strong("Spectrum 1 (positive y-axis)"), 
                                          br(),
                                          "(Peak matches to bottom spectrum are blue, non-matches are red)"),
                   choices = inverseComparisonNames(), 
-                  selected = inverseComparisonNames())[[1]],
+                  selected = inverseComparisonNames()[[1]]),
       selectInput(session$ns("Spectra2"), 
                   label = h5(strong("Spectrum 2 (negative y-axis)")),
                   choices = inverseComparisonNames(),
@@ -82,12 +83,22 @@ mirrorPlots_Sever <- function(input,
     
     # get protein peak data for the 1st mirror plot selection
     
+    conn<<-conn
+    sampleIDs <<- input$Spectra1
+    peakPercentPresence <<- input$percentPresence
+    lowerMassCutoff <<- input$lowerMass
+    upperMassCutoff <<- input$upperMass
+    minSNR <<- input$SNR
+    tolerance <<- 0.002
+    protein <<- TRUE
+    
+    
     mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                  sampleIDs = input$Spectra1,
-                                                                 peakPercentPresence = input$percentPresenceP,
+                                                                 peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
                                                                  upperMassCutoff = input$upperMass,
-                                                                 minSNR = 6,
+                                                                 minSNR = input$SNR,
                                                                  tolerance = 0.002,
                                                                  protein = TRUE) 
     
@@ -209,7 +220,7 @@ mirrorPlots_Sever <- function(input,
     mirrorPlot(mirrorPlotEnv = mirrorPlotEnv)
     
     # Watch for brushing of the top mirror plot
-    observe({
+
       brush <- input$plot2_brush
       if (!is.null(brush)) {
         ranges2$x <- c(brush$xmin, brush$xmax)
@@ -219,7 +230,7 @@ mirrorPlots_Sever <- function(input,
         ranges2$y <- c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
                        max(mirrorPlotEnv$spectrumSampleOne@intensity))
       }
-    })
+  
   })
   
   
@@ -227,7 +238,7 @@ mirrorPlots_Sever <- function(input,
   
   
   output$inversePeakComparisonPlotZoom <- renderPlot({
-    
+    print("sds")
     IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
                              nameOne = input$Spectra1,
                              nameTwo = input$Spectra2,

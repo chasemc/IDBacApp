@@ -19,7 +19,7 @@ ui_proteinClustering <- function() {
                                                                     align = "center"),
                                                                   value = "proteinPeakSettingsDropDown2",
                                                                   strong("Settings chosen will effect all protein analyses."),
-                                                                  IDBacApp::peakRetentionSettings_UI("proteinPeakSettings"),
+                                                                  IDBacApp::peakRetentionSettings_UI("protMirror"),
                                                                   IDBacApp::mirrorPlotsSettings_UI("protMirror"),
                                                                   absolutePanel(width="100%",fixed = T,p("sdafasdfd"))
                                                                   

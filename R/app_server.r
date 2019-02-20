@@ -184,13 +184,13 @@ app_server <- function(input, output, session) {
   
   
   proteinPeakSettings <-  callModule(IDBacApp::peakRetentionSettings_Server,
-                                             "proteinPeakSettings")
+                                             "protMirror")
   
   
   # Mirror Plots ------------------------------------------------------------
   
   callModule(IDBacApp::mirrorPlots_Sever,
-             "proteinPeakSettings",
+             "protMirror",
              workingDB,
              proteinOrSmall = "proteinPeaks")
   
