@@ -6,13 +6,11 @@
 #' @export
 #'
 
-convertDelim_UI <- function(id){
+convertMicrotyper_UI <- function(id){
   ns <- NS(id)
   tagList(
-    h3("Starting with tab, csv, or txt files:"),
-    p("Each file should only contain a single profile spectrum formatted in two columns,", 
-      br(),
-      "the first being ", tags$i("m/z")," and the second column being intensity values"),
+    h3("Starting with Microtyper Data:"),
+    p("Each input file is a \".txt\" file exported from Microtyper."),
     br(),
     p(strong("1: Enter a name for this new experiment")),
     p("This will become a filename, non-valid characters will be removed."),
@@ -68,11 +66,11 @@ convertDelim_UI <- function(id){
 #' @export
 #'
 
-convertDelim_Server <- function(input,
-                                output,
-                                session,
-                                tempMZDir,
-                                sqlDirectory){
+convertMicrotyper_Server <- function(input,
+                                     output,
+                                     session,
+                                     tempMZDir,
+                                     sqlDirectory){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -131,9 +129,9 @@ convertDelim_Server <- function(input,
     } else {
       
       foldersInFolder <- list.files(delimitedLocationP(), 
-                                    recursive = TRUE, 
+                                    recursive = FALSE, 
                                     full.names = TRUE,
-                                    pattern = "(.txt|.tab|.csv)$") # Get the folders contained directly within the chosen folder.
+                                    pattern = "(.txt)$") # Get the folders contained directly within the chosen folder.
     }
   })
   
@@ -145,9 +143,9 @@ convertDelim_Server <- function(input,
       NULL
     } else {    
       foldersInFolder <- list.files(delimitedLocationSM(), 
-                                    recursive = TRUE, 
+                                    recursive = FALSE, 
                                     full.names = TRUE,
-                                    pattern = "(.txt|.tab|.csv)$") # Get the folders contained directly within the chosen folder.
+                                    pattern = "(.txt)$") # Get the folders contained directly within the chosen folder.
     }
   })
   
@@ -169,7 +167,6 @@ convertDelim_Server <- function(input,
                  req(!is.null(sanity()))
                  req(sanity() != "")
                  
-              
                  req(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0)
                  req(length(proteinFiles()) + length(smallMolFiles()) > 0)
                  
@@ -182,7 +179,7 @@ convertDelim_Server <- function(input,
                  } else {
                    smallPaths <- smallMolFiles()
                    sampleNameSM <- tools::file_path_sans_ext(basename(smallPaths))
-                   sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-")[[1]][[1]]))
+                #   sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-rep-")[[1]][[1]]))
                    
                  }
                  
@@ -192,13 +189,13 @@ convertDelim_Server <- function(input,
                  } else {
                    proteinPaths <- proteinFiles()
                    sampleNameP <- tools::file_path_sans_ext(basename(proteinPaths))
-                   sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
+               #    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
                  }
                  
                  
                  
                  
-                 keys <- IDBacApp::parseDelimitedMS(proteinPaths = proteinPaths,
+                 keys <- IDBacApp::microtyperTomzML(proteinPaths = proteinPaths,
                                                     proteinNames = sampleNameP,
                                                     smallMolPaths = smallPaths,
                                                     smallMolNames = sampleNameSM,

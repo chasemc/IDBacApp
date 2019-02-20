@@ -148,24 +148,15 @@ app_server <- function(input, output, session) {
                  s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaks IS NOT NULL")[,1]
                  pool::poolReturn(pool)
                  if (p > 0) {
-                   
-                   appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Compare Two Samples (Protein)",
-                                      value = "inversePeaks",
-                                      uiOutput("inversepeakui")
-                             )
-                   )
-                   
-                   
-                   appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Hierarchical Clustering (Protein)",
+                appendTab(inputId = "mainIDBacNav",
+                             tabPanel("Protein Data Analysis",
                                       uiOutput("Heirarchicalui")
                              )
                    )
                  }
                  if (s > 0) {
                    appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Metabolite Association Network (Small-Molecule)",
+                             tabPanel("Small Molecule Data Analysis",
                                       IDBacApp::ui_smallMolMan()
                              )
                    )
@@ -182,294 +173,21 @@ app_server <- function(input, output, session) {
   
   
   
-  
+  proteinPeakSettings <-  callModule(IDBacApp::peakRetentionSettings_Server,
+                                             "protMirror")
   
   
   # Mirror Plots ------------------------------------------------------------
   
-  # Mirror plot UI
-  output$inversepeakui <-  renderUI({
-    
-    sidebarLayout(
-      sidebarPanel(width = 3, style = "background-color:#7777770d",
-                   selectInput("Spectra1", label = h5(strong("Spectrum 1 (positive y-axis)"), 
-                                                      br(),
-                                                      "(Peak matches to bottom spectrum are blue, non-matches are red)"),
-                               choices = inverseComparisonNames()), 
-                   selected = inverseComparisonNames()[[1]] ,
-                   selectInput("Spectra2", 
-                               label = h5(strong("Spectrum 2 (negative y-axis)")),
-                               choices = inverseComparisonNames(),
-                               selected = inverseComparisonNames()[[1]]),
-                   downloadButton("downloadInverse", 
-                                  label = "Download Main Plot"),
-                   downloadButton("downloadInverseZoom", 
-                                  label = "Download Zoomed Plot"),
-                   numericInput("percentPresenceP", 
-                                label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
-                                value = 70,
-                                step = 10,
-                                min = 0,
-                                max = 100),
-                   numericInput("pSNR",
-                                label = h5(strong("Signal To Noise Cutoff")),
-                                value = 4,
-                                step = 0.5,
-                                min = 1.5,
-                                max = 100),
-                   numericInput("lowerMass", 
-                                label = h5(strong("Lower Mass Cutoff")),
-                                value = 3000,
-                                step = 50),
-                   numericInput("upperMass", 
-                                label = h5(strong("Upper Mass Cutoff")),
-                                value = 15000,
-                                step = 50),
-                   p("Note: Settings selected above will be used in all later analyses."),
-                   p("Note 2: Displayed spectra represent the mean spectrum for a sample. Example: if you observe a peak
-                         in your mean spectrum but it isn't represented as a red or blue line, then either it doesn't occur often enough across your replicates
-                         or its signal to noise ratio is less than what is selected.")
-      ),
-      mainPanel(
-        fluidRow(plotOutput("inversePeakComparisonPlot",
-                            brush = brushOpts(
-                              id = "plot2_brush",
-                              resetOnNew = TRUE)),
-                 h3("Click and Drag on the plot above to zoom (Will zoom in plot below)"),
-                 plotOutput("inversePeakComparisonPlotZoom")
-        )
-      )
-    )
-  })
-  
-  # Retrieve all available sample names that have protein peak data
-  # Used to display inputs for user to select for mirror plots
-  inverseComparisonNames <- reactive({
-    conn <- pool::poolCheckout(workingDB$pool())
-    
-    
-    
-    
-    a <-DBI::dbGetQuery(conn, "SELECT DISTINCT `Strain_ID`
-                              FROM IndividualSpectra
-                              WHERE (`proteinPeaks` IS NOT NULL)")
-    pool::poolReturn(conn)
-    
-    a[ ,1]
-    
-  })
-  
-  
-  #This retrieves data a processes/formats it for the mirror plots
-  dataForInversePeakComparisonPlot <- reactive({
-    
-    mirrorPlotEnv <- new.env(parent = parent.frame())
-    
-    # connect to sql
-    conn <- pool::poolCheckout(workingDB$pool())
-    
-    # get protein peak data for the 1st mirror plot selection
-    
-    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
-                                                                 sampleIDs = input$Spectra1,
-                                                                 peakPercentPresence = input$percentPresenceP,
-                                                                 lowerMassCutoff = input$lowerMass,
-                                                                 upperMassCutoff = input$upperMass,
-                                                                 minSNR = 6,
-                                                                 tolerance = 0.002,
-                                                                 protein = TRUE) 
-    
-    
-    
-    
-    mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
-                                                                 sampleIDs = input$Spectra2,
-                                                                 peakPercentPresence = input$percentPresenceP,
-                                                                 lowerMassCutoff = input$lowerMass,
-                                                                 upperMassCutoff = input$upperMass,
-                                                                 minSNR = 6,
-                                                                 tolerance = 0.002,
-                                                                 protein = TRUE)
-    
-    
-    
-    
-    # pSNR= the User-Selected Signal to Noise Ratio for protein
-    
-    # Remove peaks from the two peak lists that are less than the chosen SNR cutoff
-    mirrorPlotEnv$SampleOneSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleOne) >= input$pSNR)
-    mirrorPlotEnv$SampleTwoSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleTwo) >= input$pSNR)
-    
-    
-    mirrorPlotEnv$peaksSampleOne@mass <- mirrorPlotEnv$peaksSampleOne@mass[mirrorPlotEnv$SampleOneSNR]
-    mirrorPlotEnv$peaksSampleOne@snr <- mirrorPlotEnv$peaksSampleOne@snr[mirrorPlotEnv$SampleOneSNR]
-    mirrorPlotEnv$peaksSampleOne@intensity <- mirrorPlotEnv$peaksSampleOne@intensity[mirrorPlotEnv$SampleOneSNR]
-    
-    mirrorPlotEnv$peaksSampleTwo@mass <- mirrorPlotEnv$peaksSampleTwo@mass[mirrorPlotEnv$SampleTwoSNR]
-    mirrorPlotEnv$peaksSampleTwo@snr <- mirrorPlotEnv$peaksSampleTwo@snr[mirrorPlotEnv$SampleTwoSNR]
-    mirrorPlotEnv$peaksSampleTwo@intensity <- mirrorPlotEnv$peaksSampleTwo@intensity[mirrorPlotEnv$SampleTwoSNR]
-    
-    # Binpeaks for the two samples so we can color code similar peaks within the plot
-    
-    validate(
-      need(sum(length(mirrorPlotEnv$peaksSampleOne@mass),
-               length(mirrorPlotEnv$peaksSampleTwo@mass)) > 0,
-           "No peaks found in either sample, double-check the settings or your raw data.")
-    )
-    temp <- MALDIquant::binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .002)
-    
-    
-    
-    mirrorPlotEnv$peaksSampleOne <- temp[[1]]
-    mirrorPlotEnv$peaksSampleTwo <- temp[[2]]
-    
-    
-    # Set all peak colors for positive spectrum as red
-    mirrorPlotEnv$SampleOneColors <- rep("red", length(mirrorPlotEnv$peaksSampleOne@mass))
-    # Which peaks top samaple one are also in the bottom sample:
-    temp <- mirrorPlotEnv$peaksSampleOne@mass %in% mirrorPlotEnv$peaksSampleTwo@mass
-    # Color matching peaks in positive spectrum blue
-    mirrorPlotEnv$SampleOneColors[temp] <- "blue"
-    remove(temp)
-    
-    
-    query <- DBI::dbSendStatement("SELECT `proteinSpectrum`
-                                      FROM IndividualSpectra
-                                      WHERE (`proteinSpectrum` IS NOT NULL)
-                                      AND (`Strain_ID` = ?)",
-                                  con = conn)
-    
-    
-    DBI::dbBind(query, list(as.character(as.vector(input$Spectra1))))
-    mirrorPlotEnv$spectrumSampleOne <- DBI::dbFetch(query)
-    DBI::dbClearResult(query)
-    
-    mirrorPlotEnv$spectrumSampleOne <- lapply(mirrorPlotEnv$spectrumSampleOne[ , 1],
-                                              function(x){
-                                                unserialize(memDecompress(x, 
-                                                                          type = "gzip"))
-                                              })
-    mirrorPlotEnv$spectrumSampleOne <- unlist(mirrorPlotEnv$spectrumSampleOne, recursive = TRUE)
-    mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(mirrorPlotEnv$spectrumSampleOne,
-                                                                      method = "mean") 
-    
-    
-    
-    
-    query <- DBI::dbSendStatement("SELECT `proteinSpectrum`
-                                      FROM IndividualSpectra
-                                      WHERE (`proteinSpectrum` IS NOT NULL)
-                                      AND (`Strain_ID` = ?)",
-                                  con = conn)
-    
-    
-    DBI::dbBind(query, list(as.character(as.vector(input$Spectra2))))
-    mirrorPlotEnv$spectrumSampleTwo <- DBI::dbFetch(query)
-    DBI::dbClearResult(query)
-    
-    mirrorPlotEnv$spectrumSampleTwo <- lapply(mirrorPlotEnv$spectrumSampleTwo[ , 1],
-                                              function(x){
-                                                unserialize(memDecompress(x, 
-                                                                          type = "gzip"))
-                                              })
-    mirrorPlotEnv$spectrumSampleTwo <- unlist(mirrorPlotEnv$spectrumSampleTwo, recursive = TRUE)
-    mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(mirrorPlotEnv$spectrumSampleTwo,
-                                                                      method = "mean") 
-    
-    
-    pool::poolReturn(conn)
-    # Return the entire saved environment
-    mirrorPlotEnv
-    
-  })
-  
-  # Used in the the inverse-peak plot for zooming ---------------------------
-  
-  ranges2 <- reactiveValues(x = NULL, y = NULL)
+  callModule(IDBacApp::mirrorPlots_Sever,
+             "protMirror",
+             workingDB,
+             proteinOrSmall = "proteinPeaks")
   
   
   
   
-  # Output for the non-zoomed mirror plot
-  output$inversePeakComparisonPlot <- renderPlot({
-    
-    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
-    mirrorPlot(mirrorPlotEnv = mirrorPlotEnv)
-    
-    # Watch for brushing of the top mirror plot
-    observe({
-      brush <- input$plot2_brush
-      if (!is.null(brush)) {
-        ranges2$x <- c(brush$xmin, brush$xmax)
-        ranges2$y <- c(brush$ymin, brush$ymax)
-      } else {
-        ranges2$x <- NULL
-        ranges2$y <- c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
-                       max(mirrorPlotEnv$spectrumSampleOne@intensity))
-      }
-    })
-  })
-  
-  
-  # Output the zoomed mirror plot -------------------------------------------
-  
-  
-  output$inversePeakComparisonPlotZoom <- renderPlot({
-    
-    IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
-                             nameOne = input$Spectra1,
-                             nameTwo = input$Spectra2,
-                             ranges2 = ranges2)
-  })
-  
-  
-  # Download svg of top mirror plot -----------------------------------------
-  
-  output$downloadInverse <- downloadHandler(
-    filename = function(){
-      paste0("top-", input$Spectra1,"_", "bottom-", input$Spectra2, ".svg")
-      
-    }, 
-    content = function(file1){
-      
-      svglite::svglite(file1,
-                       width = 10,
-                       height = 8, 
-                       bg = "white",
-                       pointsize = 12,
-                       standalone = TRUE)
-      
-      mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
-      
-      
-      dev.off()
-      if (file.exists(paste0(file1, ".svg")))
-        file.rename(paste0(file1, ".svg"), file1)
-    })
-  
-  
-  # Download svg of zoomed mirror plot --------------------------------------
-  
-  output$downloadInverseZoom <- downloadHandler(
-    filename = function(){paste0("top-",input$Spectra1,"_","bottom-",input$Spectra2,"-Zoom.svg")
-    },
-    content = function(file1){
-      
-      svglite::svglite(file1, width = 10, height = 8, bg = "white",
-                       pointsize = 12, standalone = TRUE)
-      
-      IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
-                               nameOne = input$Spectra1,
-                               nameTwo = input$Spectra2,
-                               ranges2 = ranges2)
-      
-      dev.off()
-      if (file.exists(paste0(file1, ".svg")))
-        file.rename(paste0(file1, ".svg"), file1)
-      
-    })
-  
-  
+ 
   
   # Protein processing ------------------------------------------------------
   
@@ -494,7 +212,7 @@ app_server <- function(input, output, session) {
     req(length(chosenProteinSampleIDs$chosen) > 0)
     req(workingDB$pool())
     # For each sample:
-    # bin peaks and keep only the peaks that occur in input$percentPresenceP percent of replicates
+    # bin peaks and keep only the peaks that occur in proteinPeakSettings$percentPresence percent of replicates
     # merge into a single peak list per sample
     # trim m/z based on user input
     # connect to sql
@@ -505,10 +223,10 @@ app_server <- function(input, output, session) {
                    function(ids){
                      IDBacApp::collapseReplicates(checkedPool = conn,
                                                   sampleIDs = ids,
-                                                  peakPercentPresence = input$percentPresenceP,
-                                                  lowerMassCutoff = input$lowerMass,
-                                                  upperMassCutoff = input$upperMass, 
-                                                  minSNR = 6, 
+                                                  peakPercentPresence = proteinPeakSettings$percentPresence,
+                                                  lowerMassCutoff = proteinPeakSettings$lowerMass,
+                                                  upperMassCutoff = proteinPeakSettings$upperMass, 
+                                                  minSNR = proteinPeakSettings$SNR, 
                                                   tolerance = 0.002,
                                                   protein = TRUE)
                    })
@@ -516,9 +234,9 @@ app_server <- function(input, output, session) {
                    function(ids){
                      IDBacApp::collapseReplicates(checkedPool = conn,
                                                   sampleIDs = ids,
-                                                  peakPercentPresence = input$percentPresenceP,
-                                                  lowerMassCutoff = input$lowerMass,
-                                                  upperMassCutoff = input$upperMass, 
+                                                  peakPercentPresence = proteinPeakSettings$percentPresence,
+                                                  lowerMassCutoff = proteinPeakSettings$lowerMass,
+                                                  upperMassCutoff = proteinPeakSettings$upperMass, 
                                                   minSNR = 6, 
                                                   tolerance = 0.002,
                                                   protein = TRUE)
@@ -534,9 +252,9 @@ app_server <- function(input, output, session) {
                              function(ids){
                                IDBacApp::collapseReplicates(checkedPool = conn,
                                                             sampleIDs = ids,
-                                                            peakPercentPresence = input$percentPresenceP,
-                                                            lowerMassCutoff = input$lowerMass,
-                                                            upperMassCutoff = input$upperMass, 
+                                                            peakPercentPresence = proteinPeakSettings$percentPresence,
+                                                            lowerMassCutoff = proteinPeakSettings$lowerMass,
+                                                            upperMassCutoff = proteinPeakSettings$upperMass, 
                                                             minSNR = 6, 
                                                             tolerance = 0.002,
                                                             protein = TRUE)
@@ -571,13 +289,13 @@ app_server <- function(input, output, session) {
   
   
   proteinMatrix <- reactive({
-    req(input$lowerMass, input$upperMass)
+    req(proteinPeakSettings$lowerMass, proteinPeakSettings$upperMass)
     req(!is.null(collapsedPeaksForDend()))
-    validate(need(input$lowerMass < input$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
+    validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
                                ppm = 300,
-                               massStart = input$lowerMass,
-                               massEnd = input$upperMass)
+                               massStart = proteinPeakSettings$lowerMass,
+                               massEnd = proteinPeakSettings$upperMass)
     
     do.call(rbind, pm)
     
@@ -691,37 +409,14 @@ app_server <- function(input, output, session) {
   
   output$Heirarchicalui <-  renderUI({
     
-    if (is.null(input$Spectra1)) {
-      fluidPage(
-        h1(" There is no data to display", align = "center"),
-        br(),
-        h4("Troubleshooting:"),
-        tags$ul(
-          tags$li("Please visit the
-                      \"Compare Two Samples (Protein)\" tab first."),
-          tags$li("If it seems like there is a bug in the software, this can be reported on the",
-                  a(href = "https://github.com/chasemc/IDBacApp/issues",
-                    target = "_blank",
-                    "IDBac Issues Page at GitHub.",
-                    img(border = "0",
-                        title = "https://github.com/chasemc/IDBacApp/issues",
-                        src = "www/GitHub.png",
-                        width = "25",
-                        height = "25")
-                  )
-                  
-          )
-        )
-      )
-    } else {
       
       IDBacApp::ui_proteinClustering()
       
-    }
+    
   })
   
   
-  
+  observe(print(input$proteinPeakSettingsDropDown))
   
   # Paragraph to relay info for reporting protein ---------------------------
   
@@ -735,8 +430,8 @@ app_server <- function(input, output, session) {
     shiny::tagList(
       h4("Suggestions for Reporting Protein Analysis:"),
       p("This dendrogram was created by analyzing ",tags$code(attributes(proteinDendrogram$dendrogram)$members), " samples,
-          and retaining peaks with a signal to noise ratio above ",tags$code(input$pSNR)," and occurring in greater than ",tags$code(input$percentPresenceP),"% of replicate spectra.
-          Peaks occuring below ",tags$code(input$lowerMass)," m/z or above ",tags$code(input$upperMass)," m/z were removed from the analyses. ",
+          and retaining peaks with a signal to noise ratio above ",tags$code(proteinPeakSettings$SNR)," and occurring in greater than ",tags$code(proteinPeakSettings$percentPresence),"% of replicate spectra.
+          Peaks occuring below ",tags$code(proteinPeakSettings$lowerMass)," m/z or above ",tags$code(proteinPeakSettings$upperMass)," m/z were removed from the analyses. ",
         "For clustering spectra, ",tags$code(input$distance), " distance and ",tags$code(input$clustering), " algorithms were used.")
     )
     

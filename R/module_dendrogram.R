@@ -463,7 +463,7 @@ dendDotsServer <- function(input,
     
     if (!is.null(input$colorByLabels)) {
       if (input$colorByLabels == "height") {
-        abline(v = input$cutHeightLines, lty = 2)
+        abline(v = input$cutHeightLabels, lty = 2)
       }
     }
     print(boots()$bootstraps[1] )

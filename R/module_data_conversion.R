@@ -38,6 +38,13 @@ convertDataTab_UI <- function(id) {
                                   align = "center",
                                   IDBacApp::convertDelim_UI(ns("convertDelim"))
                         )
+               ),
+               tabPanel(tags$ul(tags$li("Click here to convert Microtyper files")),
+                        value = ns("convert_microtyper_nav"),
+                        wellPanel(class = "intro_WellPanel",
+                                  align = "center",
+                                  IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
+                        )
                )
   )
 }
@@ -83,6 +90,10 @@ convertDataTab_Server <- function(input,
                     sqlDirectory)
   
   
+  shiny::callModule(convertMicrotyper_Server,
+                    "convertMicrotyper",
+                    tempMZDir,
+                    sqlDirectory)
   
   
 }
