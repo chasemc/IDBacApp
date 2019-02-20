@@ -76,24 +76,16 @@ mirrorPlots_Sever <- function(input,
   
   dataForInversePeakComparisonPlot <- reactive({
     
-    mirrorPlotEnv <- new.env(parent = parent.frame())
+    mirrorPlotEnv <<- new.env(parent = parent.frame())
     
     # connect to sql
     conn <- pool::poolCheckout(workingDB$pool())
     
     # get protein peak data for the 1st mirror plot selection
-    
-    conn<<-conn
-    sampleIDs <<- input$Spectra1
-    peakPercentPresence <<- input$percentPresence
-    lowerMassCutoff <<- input$lowerMass
-    upperMassCutoff <<- input$upperMass
-    minSNR <<- input$SNR
-    tolerance <<- 0.002
-    protein <<- TRUE
+  
     
     
-    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
+    mirrorPlotEnv$peaksSampleOne <<- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                  sampleIDs = input$Spectra1,
                                                                  peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
@@ -107,7 +99,7 @@ mirrorPlots_Sever <- function(input,
     
     mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                  sampleIDs = input$Spectra2,
-                                                                 peakPercentPresence = input$percentPresenceP,
+                                                                 peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
                                                                  upperMassCutoff = input$upperMass,
                                                                  minSNR = 6,
@@ -120,8 +112,8 @@ mirrorPlots_Sever <- function(input,
     # pSNR= the User-Selected Signal to Noise Ratio for protein
     
     # Remove peaks from the two peak lists that are less than the chosen SNR cutoff
-    mirrorPlotEnv$SampleOneSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleOne) >= input$pSNR)
-    mirrorPlotEnv$SampleTwoSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleTwo) >= input$pSNR)
+    mirrorPlotEnv$SampleOneSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleOne) >= input$SNR)
+    mirrorPlotEnv$SampleTwoSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleTwo) >= input$SNR)
     
     
     mirrorPlotEnv$peaksSampleOne@mass <- mirrorPlotEnv$peaksSampleOne@mass[mirrorPlotEnv$SampleOneSNR]
@@ -238,7 +230,6 @@ mirrorPlots_Sever <- function(input,
   
   
   output$inversePeakComparisonPlotZoom <- renderPlot({
-    print("sds")
     IDBacApp::mirrorPlotZoom(mirrorPlotEnv = dataForInversePeakComparisonPlot(),
                              nameOne = input$Spectra1,
                              nameTwo = input$Spectra2,

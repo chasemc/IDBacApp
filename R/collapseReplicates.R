@@ -91,14 +91,13 @@ collapseReplicates <- function(checkedPool,
                                tolerance = 0.002,
                                protein){
   
+  validate(need(is.numeric(peakPercentPresence), "peakPercentPresence not numeric"))
+  validate(need(is.numeric(lowerMassCutoff), "lowerMassCutoff not numeric"))
+  validate(need(is.numeric(upperMassCutoff), "upperMassCutoff not numeric"))
+  validate(need(is.numeric(minSNR), "minSNR not numeric"))
+  validate(need(is.numeric(tolerance), "tolerance not numeric"))
+  validate(need(is.logical(protein), "protein not logical"))
   
-  req(is.numeric(peakPercentPresence))
-  req(is.numeric(lowerMassCutoff))
-  req(is.numeric(upperMassCutoff))
-  req(is.numeric(minSNR))
-  req(is.numeric(tolerance))
-  req(is.logical(protein))
-              
   
   
   temp <- IDBacApp::getPeakData(checkedPool = checkedPool,
