@@ -2,28 +2,49 @@ peakRetentionSettings_UI <- function(id){
   ns <- NS(id)
   
   tagList(
-    strong("Percent Presence"),
+   
+    div(class = "tooltippy", "Percent Presence", 
+        span(class = "tooltippytext", 
+             p("In what percentage of replicates must a peak be
+               present to be kept? (0-100%) (Experiment/Hypothesis dependent)"))),
+    
     numericInput(ns("percentPresence"), 
-                 label = p("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
+                 label = NULL,
                  value = 70,
                  step = 10,
                  min = 0,
                  max = 100,
                  width="50%"),
+    div(class = "tooltippy", "Signal To Noise Cutoff", 
+        span(class = "tooltippytext", 
+             p("Choose an appropriate SNR for your spectra. In the picture below, the SNR of peaks decreases "),
+             img(border = "0",
+               #  title = "https://github.com/chasemc/IDBacApp/issues",
+                 src = "www/snr.png",
+                 width = "500",
+                 height = "500"))),
+   
+    
+    
+    
+    
+    
     numericInput(ns("SNR"),
-                 label = strong("Signal To Noise Cutoff"),
+                 label = NULL,
                  value = 4,
                  step = 0.5,
                  min = 1.5,
-                 max = 100),
+                 max = 100,width="50%"),
     numericInput(ns("lowerMass"), 
                  label = strong("Lower Mass Cutoff"),
                  value = 3000,
-                 step = 50),
+                 step = 50,
+                 width="50%"),
     numericInput(ns("upperMass"), 
                  label = strong("Upper Mass Cutoff"),
                  value = 15000,
-                 step = 50)
+                 step = 50,
+                 width="50%")
   )
   
   

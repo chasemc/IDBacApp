@@ -15,15 +15,15 @@ ui_proteinClustering <- function() {
                    width = 4,
                    IDBacApp::bsCollapse(id = "proteinPeakSettingsDropDown",
                                         open = "Panel 1",
-                                        IDBacApp::bsCollapsePanel(p("Choose How Peaks are Retained for Analayses", 
-                                                                    align = "center"),
+                                        IDBacApp::bsCollapsePanel(title = div(p("Choose How Peaks are Retained for Analayses", align = "center"),
+                                                                              p("(Effects all protein analysis)",
+                                                                                style = "font-size: 0.75em",
+                                                                                align = "center")), 
                                                                   value = "proteinPeakSettingsDropDown2",
-                                                                  strong("Settings chosen will effect all protein analyses."),
                                                                   div(align = "center",
                                                                   IDBacApp::peakRetentionSettings_UI("protMirror")
-                                                                  ),
-                                                                  IDBacApp::mirrorPlotsSettings_UI("protMirror"),
-                                                                  absolutePanel(width="100%",fixed = T,p("sdafasdfd"))
+                                                                  )
+                                                               
                                                                   
                                                                   
                                         ),
