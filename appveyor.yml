@@ -6,28 +6,26 @@ init:
         $ErrorActionPreference = "Stop"
         Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
         Import-Module '..\appveyor-tool.ps1'
+
 install:
-  - ps: Bootstrap
+  ps: Bootstrap
 
 # Adapt as necessary starting from here
 
 environment:
   global:
+    WARNINGS_ARE_ERRORS: 1
+  
+  matrix:
+  - R_VERSION: 3.4.4
     R_ARCH: x64
-    USE_RTOOLS: true
-    _R_CHECK_FORCE_SUGGESTS_: false
+    GCC_PATH: mingw_64
+
 matrix:
- - R_VERSION: 3.4.4
-   R_ARCH: x64
-   GCC_PATH: mingw_64
+  fast_finish: true
 
 build_script:
   - travis-tool.sh install_deps
-  - travis-tool.sh r_binary_install curl
-  - travis-tool.sh bioc_install mzR
-  - travis-tool.sh bioc_install S4Vectors
-  - travis-tool.sh bioc_install IRanges
-
 
 test_script:
   - travis-tool.sh run_tests
