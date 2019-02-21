@@ -61,10 +61,9 @@ popupPlotTsne_UI <- function(id){
 #' @param input shiny nput
 #' @param output shiny output
 #' @param session shiny session
-#' @param dataFrame input dataframe, rows = samples, columns = variables
-#' @param namedColors 
-#' @param plotTitle 
-#' @param extraUI 
+#' @param namedColors named colors to have same colors as dend
+#' @param data data
+#' @param plotTitle title of plot
 #'
 #' @return NA
 #' @export

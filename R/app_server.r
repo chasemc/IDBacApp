@@ -457,9 +457,9 @@ app_server <- function(input, output, session) {
       on.exit(setwd(owd))
       file.copy(src, 'report.Rmd', overwrite = TRUE)
       
-      out <- render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
+      out <- rmarkdown::render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
         input$format,
-        HTML = html_document()
+        HTML = rmarkdown::html_document()
       ))
       file.rename(out, file)
     }
@@ -479,7 +479,7 @@ app_server <- function(input, output, session) {
       
       svglite::svglite(file1, 
                        width = 10,
-                       height = plotHeight() / 100,
+                       #height = plotHeight() / 100,
                        bg = "white",
                        pointsize = 12, 
                        standalone = TRUE)
@@ -505,18 +505,18 @@ app_server <- function(input, output, session) {
         par(mar = c(5, 5, 5, input$dendparmar))
         if (input$colDotsOrColDend == "1") {
           
-          coloredDend()  %>%
-            hang.dendrogram %>% 
-            plot(., horiz = T)
+          IDBacApp::coloredDend()  %>%
+            dendextend::hang.dendrogram %>% 
+            dendextend::plot(., horiz = T)
           IDBacApp::colored_dots(coloredDend()$bigMatrix,
                                  coloredDend()$shortenedNames,
                                  rowLabels = names(coloredDend()$bigMatrix),
                                  horiz = T,
                                  sort_by_labels_order = FALSE)
         } else {
-          coloredDend()  %>%  
-            hang.dendrogram %>% 
-            plot(., horiz = T)
+          IDBacApp::coloredDend()  %>%  
+            dendextend::hang.dendrogram %>% 
+            dendextend::plot(., horiz = T)
         }
       }
       dev.off()

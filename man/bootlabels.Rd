@@ -12,6 +12,8 @@ bootlabels.hclust(x, bootstrapValues, horiz = FALSE, ...)
 \item{bootstrapValues}{\code{numeric}, bootstrap values}
 
 \item{horiz}{print values for a horizontal tree?}
+
+\item{...}{see: https://github.com/sgibb/bootstrap}
 }
 \description{
 This function prints bootstrap values to the corresponding node.

@@ -1,7 +1,7 @@
 #' beginWithTXT
 #'
 #' @param id NA
-#'
+#' 
 #' @return NA
 #' @export
 #'

@@ -5,7 +5,7 @@
 \title{Title}
 \usage{
 dendDotsServer(input, output, session, dendrogram, pool, plotWidth,
-  plotHeight, boots)
+  plotHeight, boots, dendOrPhylo = "Dendrogram")
 }
 \arguments{
 \item{input}{NA}
@@ -21,6 +21,10 @@ dendDotsServer(input, output, session, dendrogram, pool, plotWidth,
 \item{plotWidth}{NA}
 
 \item{plotHeight}{NA}
+
+\item{boots}{bootstraps}
+
+\item{dendOrPhylo}{should the dendrogram labels hang?}
 }
 \value{
 NA

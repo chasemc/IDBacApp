@@ -15,47 +15,16 @@
 ##
 ## See <http://www.gnu.org/licenses/>
 
-#' bootstrap
+
+#' Bootstrap
 #'
-#' This function provides bootstrapping for hierarchical clustering
-#' (\code{\link{hclust}} objects).
+#' @param x see: https://github.com/sgibb/bootstrap
+#' @param fun see: https://github.com/sgibb/bootstrap
+#' @param n see: https://github.com/sgibb/bootstrap
 #'
-#' @param x \code{matrix}, rows: individuals, columns: observations
-#' @param fun function which creates the individual hclust object
-#' @param n \code{integer}, number of bootstrap replicates
-#' @param mc.cores \code{integer}, number of processes to run in parallel
-#'
-#' @seealso \code{\link{dist}}, \code{link{hclust}}
-#'
-#' @return \code{numeric} vector with frequencies of each node
-#'
-#' @references
-#' Felsenstein, Joseph.
-#' \emph{Confidence limits on phylogenies: an approach using the bootstrap.}
-#' Evolution (1985): 783-791.
-#'
-#' Efron, Bradley, Elizabeth Halloran, and Susan Holmes.
-#' \emph{Bootstrap confidence levels for phylogenetic trees.}
-#' Proceedings of the National Academy of Sciences 93.23 (1996): 13429-13429.
-#'
-#' @examples
-#'
-#' ## hclust example
-#' createHclustObject <- function(x)hclust(dist(x), "ave")
-#'
-#' ## bootstrap
-#' b <- bootstrap(USArrests, fun=createHclustObject, n=100L)
-#'
-#' ## plot
-#' hc <- createHclustObject(USArrests)
-#' plot(hc)
-#'
-#' ## draw bootstrap values to corresponding node
-#' bootlabels.hclust(hc, b, col="blue")
-#'
-#' @rdname bootstrap
-#' @importFrom parallel mclapply
+#' @return see: https://github.com/sgibb/bootstrap
 #' @export
+#'
 bootstrap <- function(x, fun, n=1000L) {
   fun <- match.fun(fun)
   
@@ -75,6 +44,13 @@ bootstrap <- function(x, fun, n=1000L) {
 
 ## based on pvclust:::hc2split (pvclust 1.2-2) by
 ## Ryota Suzuki <suzuki@ef-prime.com>
+#' as.binary.matrix.hclust 
+#'
+#' @param x see: https://github.com/sgibb/bootstrap
+#'
+#' @return see: https://github.com/sgibb/bootstrap
+#' @export
+#'
 as.binary.matrix.hclust <- function(x) {
   nr <- as.integer(nrow(x$merge))
   
@@ -107,6 +83,13 @@ as.binary.matrix.hclust <- function(x) {
 
 ## based on pvclust:::hc2axes (pvclust 1.2-2) by
 ## Ryota Suzuki <suzuki@ef-prime.com>
+#' .text.coord.hclust
+#'
+#' @param x  see: https://github.com/sgibb/bootstrap
+#'
+#' @return see: https://github.com/sgibb/bootstrap
+#' @export 
+#'
 .text.coord.hclust <- function(x) {
   nr <- as.integer(nrow(x$merge))
   
@@ -149,6 +132,7 @@ as.binary.matrix.hclust <- function(x) {
 #' @param x \code{hclust} object
 #' @param bootstrapValues \code{numeric}, bootstrap values
 #' @param horiz print values for a horizontal tree?
+#' @param ...   see: https://github.com/sgibb/bootstrap
 #'
 #' @seealso \code{\link{bootstrap}}
 #' @rdname bootlabels
@@ -164,11 +148,28 @@ bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
   invisible(NULL)
 }
 
+#' .clust
+#'
+#' @param x   see: https://github.com/sgibb/bootstrap
+#' @param fun   see: https://github.com/sgibb/bootstrap
+#'
+#' @return  see: https://github.com/sgibb/bootstrap
+#' @export
+#'
 .clust <- function(x, fun) {
   hc <- fun(x)
   return(as.binary.matrix.hclust(hc))
 }
 
+#' .calculateMatches
+#'
+#' @param origin   see: https://github.com/sgibb/bootstrap
+#' @param current   see: https://github.com/sgibb/bootstrap
+#' @param nc   see: https://github.com/sgibb/bootstrap
+#'
+#' @return  see: https://github.com/sgibb/bootstrap
+#' @export
+#'
 .calculateMatches <- function(origin, current, nc=ncol(origin)) {
   ## both 1
   one <- tcrossprod(origin, current)
@@ -179,28 +180,18 @@ bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
   return(rowSums(one + zero == nc))
 }
 
+#' resample
+#'
+#' @param x  see: https://github.com/sgibb/bootstrap
+#' @param size  see: https://github.com/sgibb/bootstrap
+#'
+#' @return see: https://github.com/sgibb/bootstrap
+#' @export
+#'
 .resample <- function(x, size=ncol(x)) {
   sel <- sample.int(ncol(x), size=size, replace=TRUE)
   return(x[, sel])
 }
 
-#' Simple Bootstrapping for Hierarchical Clustering
-#'
-#' This package provides bootstrapping for hierarchical clustering.
-#'
-#' \tabular{ll}{
-#' Package: \tab bootstrap \cr
-#' Version: \tab 0.1\cr
-#' Date: \tab 2013-06-27\cr
-#' License: \tab GPL (>= 3)\cr
-#' URL: \tab http://www.github.com/sgibb/bootstrap/ \cr
-#' }
-#'
-#' @docType package
-#' @name bootstrap-package
-#' @author Sebastian Gibb <\email{mail@@sebastiangibb.de}>
-#' @references \url{http://www.github.com/sgibb/bootstrap/}
-#' @keywords package
-#' @rdname bootstrap-package
-#'
-NULL
+
+

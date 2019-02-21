@@ -1,3 +1,11 @@
+#' selectDirectory_UI
+#'
+#' @param id namespace
+#' @param label label of the directory action button
+#'
+#' @return NA
+#' @export
+#'
 selectDirectory_UI <- function(id, label){
   
   ns <- NS(id)
@@ -8,6 +16,17 @@ selectDirectory_UI <- function(id, label){
   
 }
 
+
+#' selectDirectory_Server
+#'
+#' @param input shiny
+#' @param output shiny
+#' @param session shiny
+#' @param sqlDirectory sqlDirectory
+#'
+#' @return NA
+#' @export
+#'
 
 selectDirectory_Server <- function(input,
                                    output,

@@ -122,6 +122,8 @@ downloadSvg <- function(id) {
 #' @param pool NA
 #' @param plotWidth NA
 #' @param plotHeight NA
+#' @param boots bootstraps
+#' @param dendOrPhylo should the dendrogram labels hang?
 #'
 #' @return NA
 #' @export

@@ -53,12 +53,12 @@ microtyperTomzML <- function(proteinPaths,
                    specs <- lapply(key[[i]],
                                    function(x) {     
                                      
-                                     z <- read.table(x, 
-                                                     skip = 8,
-                                                     sep = ";", 
-                                                     row.names = NULL,
-                                                     colClasses = "numeric",
-                                                     fileEncoding = "UTF-16LE")
+                                     z <- utils::read.table(x, 
+                                                            skip = 8,
+                                                            sep = ";", 
+                                                            row.names = NULL,
+                                                            colClasses = "numeric",
+                                                            fileEncoding = "UTF-16LE")
                                      return(
                                        MALDIquantForeign:::.createMassObject(mass = z[ , 1], 
                                                                              intensity = z[ , 2],
