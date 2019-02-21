@@ -11,7 +11,7 @@ subtractMatrixBlank <- function(sampleIds,
                                 binTolerance){
 
 
-binned <- binPeaks(peakList, 
+binned <- MALDIquant::binPeaks(peakList, 
                    method = "strict", 
                    tolerance = binTolerance)
 

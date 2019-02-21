@@ -4,16 +4,20 @@
 \alias{popupPlot_server}
 \title{popupPlot_server}
 \usage{
-popupPlot_server(input, output, session, dataFrame)
+popupPlot_server(input, output, session, dataFrame, namedColors, plotTitle)
 }
 \arguments{
-\item{input}{shiny}
+\item{input}{shiny nput}
 
-\item{output}{shiny}
+\item{output}{shiny output}
 
-\item{session}{shiny}
+\item{session}{shiny session}
 
-\item{dataFrame}{input dataframe, rows=samples, cols =variables}
+\item{dataFrame}{input dataframe, rows = samples, columns = variables}
+
+\item{namedColors}{named colors}
+
+\item{plotTitle}{plot title}
 }
 \value{
 NA

@@ -55,7 +55,7 @@ convertOneBruker_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory
 #'
-#' @return
+#' @return NA
 #'
 convertOneBruker_Server <- function(input,
                                     output,

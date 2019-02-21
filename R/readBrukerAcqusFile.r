@@ -60,7 +60,7 @@ readAcquFile <- function(fidFile, verbose=FALSE) {
 
   if (isHPCused) {
     hpcStr <- .grepAcquValue("##\\$HPCStr=", acquLines)
-    hpcConstants <- .extractHPCConstants(hpcStr)
+    hpcConstants <- IDBacApp::extractHPCConstants(hpcStr)
     metaData$hpcCoefficients <- hpcConstants$coefficients
     metaData$hpcCalibrationConstant0 <- hpcConstants$calibrationConstant0
     metaData$hpcCalibrationConstant2 <- hpcConstants$calibrationConstant2
@@ -296,4 +296,27 @@ readAcquFile <- function(fidFile, verbose=FALSE) {
   }
 
   sampleName
+}
+
+
+
+
+
+#' from https://github.com/sgibb/readBrukerFlexData
+#'
+#' @param hpcStr https://github.com/sgibb/readBrukerFlexData
+#'
+#' @return https://github.com/sgibb/readBrukerFlexData
+#' @export
+#'
+extractHPCConstants <- function(hpcStr) {
+  tmpLine <- strsplit(x=hpcStr, split=" ")[[1L]]
+  ## remove emtpy elements
+  tmpLine <- tmpLine[nzchar(tmpLine)]
+  
+  ## extract only coefficients
+  list(coefficients=as.double(tmpLine[(which(tmpLine == "V1.0VectorDouble") + 2L):
+                                        (which(tmpLine == "c2") - 1L)]),
+       calibrationConstant0=as.double(tmpLine[which(tmpLine == "c0") + 1L]),
+       calibrationConstant2=as.double(tmpLine[which(tmpLine == "c2") + 1L]))
 }

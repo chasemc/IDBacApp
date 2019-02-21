@@ -18,7 +18,7 @@ convertOneBruker_Server(input, output, session, tempMZDir, sqlDirectory)
 \item{sqlDirectory}{sqlDirectory}
 }
 \value{
-
+NA
 }
 \description{
 convertOneBruker_Server

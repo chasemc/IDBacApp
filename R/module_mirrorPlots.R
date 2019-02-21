@@ -1,9 +1,23 @@
 
+#' mirrorPlotsSettings_UI
+#'
+#' @param id namespace
+#'
+#' @return NA
+#' @export
+#'
 mirrorPlotsSettings_UI <- function(id){
   ns <- NS(id)
     uiOutput(ns("mirrorSpectraSelector"))
 }
 
+#' mirrorPlotDownload_UI
+#'
+#' @param id namespace
+#'
+#' @return NA
+#' @export
+#'
 mirrorPlotDownload_UI <- function(id){
   ns <- NS(id)
   tagList(
@@ -14,6 +28,13 @@ mirrorPlotDownload_UI <- function(id){
   
 }  
 
+#' mirrorPlots_UI
+#'
+#' @param id  namespace
+#'
+#' @return NA
+#' @export
+#'
 mirrorPlots_UI <- function(id){
   ns <- NS(id)
   fluidRow(plotly::plotlyOutput(ns("inversePeakComparisonPlot")
@@ -24,16 +45,15 @@ mirrorPlots_UI <- function(id){
 
 #' Title
 #'
-#' @param input 
-#' @param output 
-#' @param session 
-#' @param workingDB 
+#' @param input shiny
+#' @param output shiny
+#' @param session shiny
+#' @param workingDB reactive containing SQLite DB pool
 #' @param proteinOrSmall values = "proteinPeaks" or "smallMoleculePeaks" 
 #'
-#' @return
+#' @return NA
 #' @export
 #'
-#' @examples
 mirrorPlots_Sever <- function(input,
                               output,
                               session,

@@ -1,3 +1,10 @@
+#' peakRetentionSettings_UI
+#'
+#' @param id namespace
+#'
+#' @return NA
+#' @export
+#'
 peakRetentionSettings_UI <- function(id){
   ns <- NS(id)
   
@@ -44,6 +51,16 @@ peakRetentionSettings_UI <- function(id){
   
 } 
 
+
+#' peakRetentionSettings_Server
+#'
+#' @param input shiny
+#' @param output shiny
+#' @param session shiny
+#'
+#' @return NA
+#' @export
+#'
 
 peakRetentionSettings_Server <- function(input,
                                          output,

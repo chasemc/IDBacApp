@@ -4,6 +4,7 @@
 #' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
 #' @importFrom magrittr "%>%"
 #' @import shiny
+#' @import dendextend
 #' @import rhandsontable
 
 NULL
@@ -457,9 +458,9 @@ app_server <- function(input, output, session) {
       on.exit(setwd(owd))
       file.copy(src, 'report.Rmd', overwrite = TRUE)
       
-      out <- render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
+      out <- rmarkdown::render('C:/Users/chase/Documents/GitHub/IDBacApp/ResultsReport.Rmd', switch(
         input$format,
-        HTML = html_document()
+        HTML = rmarkdown::html_document()
       ))
       file.rename(out, file)
     }
@@ -468,77 +469,6 @@ app_server <- function(input, output, session) {
   
   
   
-  
-  # Download svg of dendrogram ----------------------------------------------
-  
-  
-  output$downloadHeirSVG <- downloadHandler(
-    filename = function(){paste0("Dendrogram.svg")
-    },
-    content = function(file1){
-      
-      svglite::svglite(file1, 
-                       width = 10,
-                       height = plotHeight() / 100,
-                       bg = "white",
-                       pointsize = 12, 
-                       standalone = TRUE)
-      
-      par(mar = c(5, 5, 5, input$dendparmar))
-      
-      if (input$kORheight == "1") {
-        
-        proteinDendrogram$dendrogram %>% 
-          dendextend::color_branches(k = input$kClusters) %>% 
-          plot(horiz = TRUE, lwd = 8)
-        
-      } else if (input$kORheight == "2") {
-        
-        proteinDendrogram$dendrogram %>% 
-          dendextend::color_branches(h = input$cutHeight) %>%
-          plot(horiz = TRUE, lwd = 8)
-        abline(v = input$cutHeight,
-               lty = 2)
-        
-      } else if (input$kORheight == "3") {
-        
-        par(mar = c(5, 5, 5, input$dendparmar))
-        if (input$colDotsOrColDend == "1") {
-          
-          coloredDend()  %>%
-            hang.dendrogram %>% 
-            plot(., horiz = T)
-          IDBacApp::colored_dots(coloredDend()$bigMatrix,
-                                 coloredDend()$shortenedNames,
-                                 rowLabels = names(coloredDend()$bigMatrix),
-                                 horiz = T,
-                                 sort_by_labels_order = FALSE)
-        } else {
-          coloredDend()  %>%  
-            hang.dendrogram %>% 
-            plot(., horiz = T)
-        }
-      }
-      dev.off()
-      if (file.exists(paste0(file1, ".svg")))
-        file.rename(paste0(file1, ".svg"), file1)
-    }
-  )
-  
-  
-  
-  # Download dendrogram as Newick -------------------------------------------
-  
-  
-  output$downloadHierarchical <- downloadHandler(
-    
-    filename = function() {
-      paste0(Sys.Date(), ".newick")
-    },
-    content = function(file) {
-      ape::write.tree(as.phylo(proteinDendrogram$dendrogram), file = file)
-    }
-  )
   
   
   
