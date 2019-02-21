@@ -9,7 +9,7 @@ os:
 r: bioc-release
 
 repos:
-  CRAN: https://cran.microsoft.com/snapshot/2019-01-12
+  CRAN: https://cran.r-project.org/
   
 addons:
   apt:
