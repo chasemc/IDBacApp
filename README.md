@@ -6,6 +6,19 @@ Every IDBac release (Including this Manual) is preserved at Zenodo for citabilit
 
 We have setup a discussion forum at https://groups.google.com/forum/#!forum/idbac
 
+If you would rather run IDBac directly from R:
+
+```{r}
+# install.packages("devtools") # Run this if you don't have the devtools package
+devtools::install_github("chasemc/IDBacApp")
+
+# And, to run the app:
+IDBacApp::run_app()
+
+```
+
+
+
 <H1 align="center"> IDBac Instruction Manual for MALDI-TOF MS Acquistion and Data Analysis </H1>  
 
 - If you haven't already, please see the IDBac publication:
