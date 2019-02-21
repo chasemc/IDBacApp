@@ -17,7 +17,11 @@ environment:
     USE_RTOOLS: true
     _R_CHECK_FORCE_SUGGESTS_: false
 
-
+ matrix:
+  - R_VERSION: 3.5.2
+    R_ARCH: x64
+    GCC_PATH: mingw_64
+    
 build_script:
   - travis-tool.sh install_deps
   - travis-tool.sh r_binary_install curl
