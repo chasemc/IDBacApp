@@ -3,12 +3,17 @@
 language: R
 cache: packages
 os:
-    - linux
-- osx
+  - linux
+  - osx
 
+r: bioc-release
+
+repos:
+  CRAN: https://cran.microsoft.com/snapshot/2019-01-12
+  
 addons:
-    apt:
+  apt:
     packages:
-    - libnetcdf-dev
-- netcdf-bin # libnetcdf-dev doesn't contain nc-config in ubuntu 12.04 (in 16.04 it is part of libnetcdf-dev)
-- libhdf5-dev
+      - libnetcdf-dev
+      - netcdf-bin # libnetcdf-dev doesn't contain nc-config in ubuntu 12.04 (in 16.04 it is part of libnetcdf-dev)
+      - libhdf5-dev
