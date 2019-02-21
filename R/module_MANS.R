@@ -228,9 +228,7 @@ MAN_Server <- function(input,
   })
   
   
-  output$metaboliteAssociationNetwork <- networkD3::renderSimpleNetwork({
-    
-    
+  output$metaboliteAssociationNetwork <- networkD3::renderForceNetwork({
     cbp <- as.vector(IDBacApp::colorBlindPalette()[1:100])
     
     
@@ -238,10 +236,14 @@ MAN_Server <- function(input,
                          .domain([',paste0(shQuote(1:100), collapse = ", "),'])
                          .range([', paste0(shQuote(cbp), collapse = ", "),' ])')
     
+   
+    
+    
     
     networkD3::forceNetwork(Links = calcNetwork()$z, 
                             Nodes = calcNetwork()$zz, 
                             Source = "source",
+                            Value = smallMolNetworkDataFrame()$Weight,
                             Nodesize = "biggerSampleNodes",
                             Target = "target",
                             NodeID = "name",
@@ -249,7 +251,15 @@ MAN_Server <- function(input,
                             opacity = 1,
                             opacityNoHover = 0.8, 
                             zoom = TRUE,
-                            colourScale = networkD3::JS(YourColors))
+                            colourScale = networkD3::JS(YourColors),
+                            charge=-50, 
+                            linkWidth = networkD3::JS("function(d) { return 1; }"),
+                            linkDistance = networkD3::JS("function(d){return d.value * 10}"))
+    
+    
+    
+    
+    
     
   })
   
