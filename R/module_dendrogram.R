@@ -458,20 +458,20 @@ dendDotsServer <- function(input,
     
     if (!is.null(input$colorByLines)) {
       if (input$colorByLines == "height") {
-        abline(v = input$cutHeightLines, lty = 2)
+        graphics::abline(v = input$cutHeightLines, lty = 2)
         
       }
     }
     
     if (!is.null(input$colorByLabels)) {
       if (input$colorByLabels == "height") {
-        abline(v = input$cutHeightLabels, lty = 2)
+        graphics::abline(v = input$cutHeightLabels, lty = 2)
       }
     }
     print(boots()$bootstraps[1] )
     if (boots()$bootstraps[1] != "") {
       
-      IDBacApp::bootlabels.hclust(as.hclust(dendrogram$dendrogram), 
+      IDBacApp::bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram), 
                                   boots()$bootstraps,
                                   horiz = TRUE,
                                   col = "blue")
@@ -493,7 +493,7 @@ dendDotsServer <- function(input,
     content = function(file) {
       req(!is.null(attributes(dendrogram$dendrogram)$members))
       
-      ape::write.tree(ape::as.phylo(as.hclust(dendrogram$dendrogram)), 
+      ape::write.tree(ape::as.phylo(stats::as.hclust(dendrogram$dendrogram)), 
                       file = file)
     }
   )
@@ -543,19 +543,19 @@ dendDotsServer <- function(input,
       
       if (!is.null(input$colorByLines)) {
         if (input$colorByLines == "height") {
-          abline(v = input$cutHeightLines, lty = 2)
+          graphics::abline(v = input$cutHeightLines, lty = 2)
           
         }
       }
       
       if (!is.null(input$colorByLabels)) {
         if (input$colorByLabels == "height") {
-          abline(v = input$cutHeightLines, lty = 2)
+          graphics::abline(v = input$cutHeightLines, lty = 2)
         }
       }
       if (boots()$bootstraps[1] != "") {
         
-        IDBacApp::bootlabels.hclust(as.hclust(dendrogram$dendrogram), 
+        IDBacApp::bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram), 
                                     boots()$bootstraps,
                                     horiz = TRUE,
                                     col = "blue")
@@ -563,7 +563,7 @@ dendDotsServer <- function(input,
       
      
       
-      dev.off()
+      grDevices::dev.off()
       if (file.exists(paste0(file1, ".svg")))
         file.rename(paste0(file1, ".svg"), file1)
     })
