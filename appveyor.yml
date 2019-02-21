@@ -7,15 +7,24 @@ init:
         Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
         Import-Module '..\appveyor-tool.ps1'
 install:
-  ps: Bootstrap
-
-cache:
-  - C:\RLibrary
+  - ps: Bootstrap
 
 # Adapt as necessary starting from here
 
+environment:
+  global:
+    R_ARCH: x64
+    USE_RTOOLS: true
+    _R_CHECK_FORCE_SUGGESTS_: false
+
+
 build_script:
   - travis-tool.sh install_deps
+  - travis-tool.sh r_binary_install curl
+  - travis-tool.sh bioc_install mzR
+  - travis-tool.sh bioc_install S4Vectors
+  - travis-tool.sh bioc_install IRanges
+
 
 test_script:
   - travis-tool.sh run_tests
@@ -42,8 +51,3 @@ artifacts:
 
   - path: '\*_*.zip'
     name: Bits
-    
- environment:
-  global:
-    USE_RTOOLS: true   
-    
