@@ -1,7 +1,3 @@
-#' @importFrom stats as.dendrogram as.hclust order.dendrogram setNames
-#' @importFrom utils capture.output capture.output choose.dir compareVersion packageVersion read.delim write.csv
-#' @importFrom grDevices adjustcolor dev.off
-#' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
 #' @importFrom magrittr "%>%"
 #' @import shiny
 #' @import dendextend
@@ -683,7 +679,7 @@ return(samples)
                  withConsoleRedirect <- function(containerId, expr) {
                    # Change type="output" to type="message" to catch stderr
                    # (messages, warnings, and errors) instead of stdout.
-                   txt <- capture.output(results <- expr, type = "message")
+                   txt <- utils::capture.output(results <- expr, type = "message")
                    if (length(txt) > 0) {
                      insertUI(paste0("#", containerId), where = "beforeEnd",
                               ui = paste0(txt, "\n", collapse = "")
@@ -720,9 +716,9 @@ return(samples)
                    Sys.sleep(.75)
                    
                    # Currently installed version
-                   local_version <- tryCatch(packageVersion("IDBacApp"),
+                   local_version <- tryCatch(utils::packageVersion("IDBacApp"),
                                              error = function(x) paste("Installed version is latest version"),
-                                             finally = function(x) packageVersion("IDBacApp"))
+                                             finally = function(x) utils::packageVersion("IDBacApp"))
                    
                    showModal(modalDialog(
                      title = "IDBac Update",
@@ -825,7 +821,7 @@ return(samples)
                          }
                        )
                        
-                     } else if (compareVersion(as.character(local_version), 
+                     } else if (utils::compareVersion(as.character(local_version), 
                                                as.character(latestStableVersion)) == -1) {
                        
                        showModal(modalDialog(

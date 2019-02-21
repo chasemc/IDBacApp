@@ -16,7 +16,9 @@
 #'
 #' @return NA
 #' @export
-#'
+#' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
+#' @importFrom stats as.dendrogram as.hclust order.dendrogram 
+
 
 colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
                         add = TRUE, y_scale, y_shift, text_shift = 1, sort_by_labels_order = TRUE,
@@ -134,7 +136,7 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
   step <- 1/(n_colors - 1)
   ystep <- 1/n_groups
   if (!add) {
-    barplot(height = 1, col = "white", border = FALSE, space = 0,
+    graphics::barplot(height = 1, col = "white", border = FALSE, space = 0,
             axes = FALSE, ...)
   }
   charWidth <- strwidth("W")/2
@@ -253,11 +255,11 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
     the_x <- rescale(c(0, 1), to = c(1 - 0.5, n_colors +
                                        0.5))
     if (horiz) {
-      lines(y = the_x, x = -(c(ystep * j, ystep * j) *
+      graphics::lines(y = the_x, x = -(c(ystep * j, ystep * j) *
                                y_scale + y_shift))
     }
     else {
-      lines(x = the_x, y = c(ystep * j, ystep * j) * y_scale +
+      graphics::lines(x = the_x, y = c(ystep * j, ystep * j) * y_scale +
               y_shift)
     }
   }
