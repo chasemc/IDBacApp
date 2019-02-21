@@ -31,7 +31,7 @@ startingFromMZ <- function(chosenDir){
 #' @param tempDir directory to temp mzML files are written to
 #' @param chosenDir user-chosen directory containing bruker raw data files
 #'
-#' @return
+#' @return NA
 #'
 startingFromBrukerFlex <- function(chosenDir, 
                                    msconvertPath = "",

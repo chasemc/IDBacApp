@@ -24,7 +24,7 @@ smallMolDFtoNetwork <- function(peakList){
   smallNetwork <- cbind(rownames(smallNetwork),smallNetwork)
   smallNetwork <- reshape2::melt(smallNetwork)
   # Remove zero length edges
-  smallNetwork <- base::subset(smallNetwork, value != 0)
+  smallNetwork <- base::subset(smallNetwork, smallNetwork$value != 0)
   colnames(smallNetwork) <- c("Source","Target","Weight")
   # Round m/z values to two decimals, use sprintf to preserve trailing zeros
   smallNetwork$Target <- sprintf(as.numeric(as.matrix(smallNetwork$Target)), fmt = '%#.2f')

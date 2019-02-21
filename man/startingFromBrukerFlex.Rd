@@ -16,7 +16,7 @@ startingFromBrukerFlex(chosenDir, msconvertPath = "", sampleMap, tempDir)
 \item{tempDir}{directory to temp mzML files are written to}
 }
 \value{
-
+NA
 }
 \description{
 When user is starting with Bruker Flex file(s)

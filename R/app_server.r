@@ -4,6 +4,7 @@
 #' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
 #' @importFrom magrittr "%>%"
 #' @import shiny
+#' @import dendextend
 #' @import rhandsontable
 
 NULL
