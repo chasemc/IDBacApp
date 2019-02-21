@@ -1,0 +1,9 @@
+^ReadMe_Images$
+^NEWS\.Rmd$
+^MALDIparameters$
+^MALDI-Plate_Template$
+^LICENSE\.md$
+^\.travis\.yml$
+^appveyor\.yml$
+^.*\.Rproj$
+^\.Rproj\.user$

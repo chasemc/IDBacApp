@@ -3,7 +3,6 @@
 .RData
 .Ruserdata
 IDBacApp.Rproj
-.Rbuildignore
 /inst/app/temp_mzML
 *.sqlite
 .Rproj.user
