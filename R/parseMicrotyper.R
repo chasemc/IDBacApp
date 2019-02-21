@@ -5,7 +5,6 @@
 #' @param proteinNames proteinNames 
 #' @param smallMolPaths smallMolPaths 
 #' @param smallMolNames smallMolNames 
-#' @param centroid centroid 
 #' @param exportDirectory NA
 #'
 #' @return NA
@@ -15,8 +14,7 @@ microtyperTomzML <- function(proteinPaths,
                              proteinNames,
                              smallMolPaths,
                              smallMolNames,
-                             exportDirectory,
-                             centroid = FALSE){
+                             exportDirectory){
   
 
   
@@ -60,14 +58,9 @@ microtyperTomzML <- function(proteinPaths,
                                                             colClasses = "numeric",
                                                             fileEncoding = "UTF-16LE")
                                      return(
-                                       MALDIquantForeign:::.createMassObject(mass = z[ , 1], 
+                                       MALDIquant::createMassSpectrum(mass = z[ , 1], 
                                                                              intensity = z[ , 2],
-                                                                             snr = NULL, 
-                                                                             metaData = list(file = x),
-                                                                             centroided = as.logical(centroid), 
-                                                                             massRange = c(0, Inf), 
-                                                                             minIntensity = 0, 
-                                                                             verbose = FALSE)
+                                                                             metaData = list(file = x))
                                        
                                        
                                      )

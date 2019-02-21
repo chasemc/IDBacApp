@@ -160,10 +160,10 @@ databaseTabServer <- function(input,
   observeEvent(input$styleSelect, 
                ignoreInit = TRUE, {
                  ns <- session$ns
-                 updateCollapse(session, ns("collapseSQLInstructions"))
-                 updateCollapse(session, ns("modifySqlCollapse"))
+                 IDBacApp::updateCollapse(session, ns("collapseSQLInstructions"))
+                 IDBacApp::updateCollapse(session, ns("modifySqlCollapse"))
                  isolate(
-                   updateCollapse(session, ns("collapseSQLSelector"))
+                   IDBacApp::updateCollapse(session, ns("collapseSQLSelector"))
                  )
                }
   )

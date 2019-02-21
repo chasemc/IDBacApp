@@ -5,7 +5,7 @@
 \title{Parse Microtyper files}
 \usage{
 microtyperTomzML(proteinPaths, proteinNames, smallMolPaths, smallMolNames,
-  exportDirectory, centroid = FALSE)
+  exportDirectory)
 }
 \arguments{
 \item{proteinPaths}{proteinPaths}
@@ -17,8 +17,6 @@ microtyperTomzML(proteinPaths, proteinNames, smallMolPaths, smallMolNames,
 \item{smallMolNames}{smallMolNames}
 
 \item{exportDirectory}{NA}
-
-\item{centroid}{centroid}
 }
 \value{
 NA

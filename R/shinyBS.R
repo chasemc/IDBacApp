@@ -122,3 +122,34 @@ addAttribs <- function(tag, ...) {
   }
   return(tag)
 }
+
+
+
+#' from shinyBS
+#'
+#' @param session https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
+#' @param id https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
+#' @param open https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
+#' @param close https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
+#' @param style https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
+#'
+#' @return https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
+#' @export
+#'
+updateCollapse <- function(session, id, open = NULL, close = NULL, style = NULL) {
+  
+  data <- dropNulls(list(open = open, close = close, style = style))
+  session$sendInputMessage(id, data)
+}
+
+
+#' from shinyBS
+#'
+#' @param x https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
+#'
+#' @return https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
+#' @export
+#'
+dropNulls <- function(x) {
+  x[!vapply(x, is.null, FUN.VALUE = logical(1))]
+}

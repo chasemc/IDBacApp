@@ -90,9 +90,9 @@ colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
     1
   else ncol(colors)
   if (!missing(dend)) {
-    if (is.hclust(dend))
+    if (dendextend::is.hclust(dend))
       dend <- as.dendrogram(dend)
-    if (!is.dendrogram(dend))
+    if (!dendextend::is.dendrogram(dend))
       stop("'dend' should be a dendrogram.")
     dend_labels <- labels(dend)
     dend_order <- order.dendrogram(dend)
