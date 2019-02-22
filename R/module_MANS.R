@@ -81,14 +81,14 @@ manPageProtDend_Server <- function(input,
     
     if (!is.null(colorByLines())) {
       if (colorByLines() == "height") {
-        abline(v = cutHeightLines(), lty = 2)
+        graphics::abline(v = cutHeightLines(), lty = 2)
         
       }
     }
     
     if (!is.null(colorByLabels())) {
       if (colorByLabels() == "height") {
-        abline(v = cutHeightLabels(), lty = 2)
+        graphics::abline(v = cutHeightLabels(), lty = 2)
       }
     }
     
@@ -195,7 +195,7 @@ MAN_Server <- function(input,
     filename = function(){"SmallMolecule_Network.csv"
     },
     content = function(file){
-      write.csv(as.matrix(smallMolNetworkDataFrame()),
+      utils::write.csv(as.matrix(smallMolNetworkDataFrame()),
                 file,
                 row.names = FALSE)
     }

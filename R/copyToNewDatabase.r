@@ -71,7 +71,7 @@ copyToNewDatabase <- function(existingDBPool,
                         a <- DBI::dbListFields(existingDBconnection, "metaData") 
                         colToAppend <- a[which(! a %in% colnames(arch$metaData))]                        
                         if(length(colToAppend) > 0){
-                          colToAppend <- setNames(rep(NA, length(colToAppend)), colToAppend)
+                          colToAppend <- stats::setNames(rep(NA, length(colToAppend)), colToAppend)
                           arch$metaData <- cbind(arch$metaData, colToAppend)
                         }
                         #Write table structures to database
@@ -86,7 +86,7 @@ copyToNewDatabase <- function(existingDBPool,
                         a <- DBI::dbListFields(existingDBconnection, "XML") 
                         colToAppend <- a[which(! a %in% colnames(arch$XML))]                        
                         if(length(colToAppend) > 0){
-                          colToAppend <- setNames(rep(NA, length(colToAppend)), colToAppend)
+                          colToAppend <- stats::setNames(rep(NA, length(colToAppend)), colToAppend)
                           arch$XML <- cbind(arch$XML, colToAppend)
                         }
                         DBI::dbWriteTable(conn = newDBconnection,
@@ -100,7 +100,7 @@ copyToNewDatabase <- function(existingDBPool,
                         a <- DBI::dbListFields(existingDBconnection, "IndividualSpectra") 
                         colToAppend <- a[which(! a %in% colnames(arch$IndividualSpectra))]                        
                         if(length(colToAppend) > 0){
-                          colToAppend <- setNames(rep(NA, length(colToAppend)), colToAppend)
+                          colToAppend <- stats::setNames(rep(NA, length(colToAppend)), colToAppend)
                           arch$IndividualSpectra <- cbind(arch$IndividualSpectra, colToAppend)
                         }
                         DBI::dbWriteTable(conn = newDBconnection,

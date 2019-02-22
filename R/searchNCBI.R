@@ -54,7 +54,7 @@
 #   
 #   
 #   keys <- unique(unlist(lapply(taxo, names)))
-#   taxo <-  setNames(do.call(mapply, c(FUN=c, lapply(taxo, `[`, keys))), keys)
+#   taxo <-  stats::setNames(do.call(mapply, c(FUN=c, lapply(taxo, `[`, keys))), keys)
 #   
 #   # get rhandsontable minus the example row
 #   awe <-  aqw[-1, ]
