@@ -41,6 +41,7 @@ Every IDBac release (Including this Manual) is preserved at Zenodo for citabilit
 
 Linux and Mac CI:
   - [![Build Status](https://travis-ci.org/chasemc/IDBacApp.svg?branch=master)](https://travis-ci.org/chasemc/IDBacApp)
+  
 Windows CI:
   - [![Build status](https://ci.appveyor.com/api/projects/status/amesadt9hg4j36fp/branch/master?svg=true)](https://ci.appveyor.com/project/chasemc/idbacapp-uslr2/branch/master)
 
