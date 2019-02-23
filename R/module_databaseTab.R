@@ -81,8 +81,7 @@ databaseTabUI <- function(id) {
                                   IDBacApp::bsCollapsePanel(h4("Click here to export samples as mzML",
                                                                align = "center"),  
                                                             wellPanel(
-                                            
-                                                              
+                                                              IDBacApp::exportSamples_ui("exportSamples")
                                                             )
                                                             
                                   )
