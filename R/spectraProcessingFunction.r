@@ -18,7 +18,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
   
   if(!"version" %in%  DBI::dbListTables(userDBCon)){
   
-  # Write to SQL DB
+  # Add version table
   DBI::dbWriteTable(conn = userDBCon,
                     name = "version", # SQLite table to insert into
                     IDBacApp::sqlTableArchitecture(numberScans = 1)$version, # Insert single row into DB
