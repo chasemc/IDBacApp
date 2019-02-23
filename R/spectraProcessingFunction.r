@@ -77,16 +77,29 @@ createSpectraSQL <- function(mzML_con,
                              XMLinfo,
                              rawDataFilePath){
   
-  for (individualSpectrum in 1:scanNumber){
     
-    sqlDataFrame <- IDBacApp::sqlTableArchitecture(numberScans = 1)
+    sqlDataFrame <- IDBacApp::sqlTableArchitecture(numberScans = scanNumber)
     
     spectraImport <- mzR::peaks(mzML_con, 
                                 scans = individualSpectrum)
+    
+    #List of serialized mass vectors
+    serializedMasses <- IDBacApp::mzRpeakSerializer(spectraImport, column = "mass")
+    
+    # List of hashes
+    massxxhash64 <- unlist(lapply(serializedMasses, function(x) IDBacApp::hashR(x)))
+   
+    #List of serialized intensity vectors 
+    serializedMasses <- IDBacApp::mzRpeakSerializer(spectraImport, column = "mass")
+    
+     intensityxxhash64 <- unlist(lapply(serializedMasses, function(x) IDBacApp::hashR(x)))
+    
+    
+    
     sqlDataFrame$IndividualSpectra$spectrumSHA <- IDBacApp::createSpectrumSha(spectraImport)
     
     
-    if("IndividualSpectra" %in% DBI::dbListTables(userDBCon)){
+    if ("IndividualSpectra" %in% DBI::dbListTables(userDBCon)) {
       
       existingSHA <- glue::glue_sql("SELECT `spectrumSHA`
                                     FROM `IndividualSpectra`",
@@ -99,28 +112,25 @@ createSpectraSQL <- function(mzML_con,
       existingSHA <- matrix(NA)
     }
     
-    if(sqlDataFrame$IndividualSpectra$spectrumSHA %in% existingSHA[,1]) {
-      warning ("One of the spectra for \"", sampleID, "\" already seems to be present, spectrum not added again.")
+    if (sqlDataFrame$IndividualSpectra$spectrumSHA %in% existingSHA[,1]) {
+      warning("One of the spectra for \"", sampleID, "\" already seems to be present, spectrum not added again.")
     } else {
       
       sqlDataFrame$IndividualSpectra$mzMLSHA <- XMLinfo$mzMLSHA
       sqlDataFrame$IndividualSpectra$Strain_ID <- sampleID
       
-      if("MassError" %in% ls(XMLinfo$mzMLInfo)){
+      if ("MassError" %in% ls(XMLinfo$mzMLInfo)) {
         sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
       }
       sqlDataFrame$IndividualSpectra$AcquisitionDate <- XMLinfo$mzMLInfo$AcquisitionDate
-      
-      
-      
-      
-      if(typeof(spectraImport) == "list"){
+  
+      if (typeof(spectraImport) == "list") {
         
         spectraImport <- lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[ , 1],
                                                                                           intensity = x[ , 2],
                                                                                           metaData = list(File = rawDataFilePath,
                                                                                                           Strain = sampleID)))
-      } else if(typeof(spectraImport) == "double") {
+      } else if (typeof(spectraImport) == "double") {
         
         spectraImport <- MALDIquant::createMassSpectrum(mass = spectraImport[ , 1],
                                                         intensity = spectraImport[ , 2],
@@ -218,7 +228,7 @@ createSpectraSQL <- function(mzML_con,
       
       
     }
-  }
+  
   
   
 }
@@ -239,7 +249,7 @@ createMetaSQL <- function(sampleID,
                           userDBCon){
   
   # If metaData table already exists, prevent adding a duplicate entry
-  if("metaData" %in% DBI::dbListTables(userDBCon)){
+  if ("metaData" %in% DBI::dbListTables(userDBCon)) {
     
     existingMeta <- glue::glue_sql("SELECT `Strain_ID`
                                  FROM `metaData`",
@@ -251,7 +261,7 @@ createMetaSQL <- function(sampleID,
     
     
     
-    if(sampleID %in% existingMeta){
+    if (sampleID %in% existingMeta){
       warning(base::paste0("The sample ID \"", sampleID, "\" already exists in \"", basename(userDBCon@dbname), "\", not adding again."))
     } else {
       # Generate base SQL table
@@ -314,7 +324,7 @@ createXMLSQL <- function(rawDataFilePath,
   sqlDataFrame$XML$mzMLSHA <- IDBacApp::hashR(sqlDataFrame$XML$XML)
   
   
-  if("XML" %in% DBI::dbListTables(userDBCon)){
+  if ("XML" %in% DBI::dbListTables(userDBCon)) {
     
     existingSHA <- glue::glue_sql("SELECT `mzMLSHA`
                                  FROM `XML`",
@@ -347,12 +357,12 @@ createXMLSQL <- function(rawDataFilePath,
   acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
                                                   instInfo$manufacturer)
   
-  if("Instrument_MetaFile" %in% ls(acquisitonInfo)){ 
+  if ("Instrument_MetaFile" %in% ls(acquisitonInfo)) { 
     sqlDataFrame$XML$Instrument_MetaFile <- IDBacApp::serial(acquisitonInfo$Instrument_MetaFile)
   }
   
   if (sqlDataFrame$XML$mzMLSHA %in% existingSHA[,1]) {
-    warning ("A mzML file matching \"", sampleID, "\" already seems to be present, file and contents not added again.")
+    warning("A mzML file matching \"", sampleID, "\" already seems to be present, file and contents not added again.")
   } else {
     # Write to SQL DB
     DBI::dbWriteTable(conn = userDBCon,

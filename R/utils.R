@@ -18,12 +18,13 @@ colorBlindPalette <- function(){
 #' @export
 
 hashR <- function(input){
-  digest::sha1(input, 
-               digits = 14,
-               zapsmall = 7,
-               algo = "sha1",
-               serialize = FALSE)
+  digest::digest(input, 
+                 algo = "xxhash64",
+                 serialize = FALSE,
+                 seed = 42)
 }
+
+
 
 
 #' serial
@@ -42,6 +43,7 @@ serial <- function(input){
 }
 
 
+
 #' compress
 #'   Settings for compressing in IDBac
 #' @param input character or raw vector to compressed (char will be converted to raw)
@@ -51,8 +53,9 @@ serial <- function(input){
 
 
 compress <- function(input){
-  base::memCompress(input, 
-              type = "gzip")
+  fst::compress_fst(input, 
+                    compressor = "ZSTD",
+                    compression = 50)
 }
 
 
@@ -64,38 +67,53 @@ compress <- function(input){
 #' @export
 
 decompress <- function(input){
-  base::memDecompress(input, 
-              type = "gzip",
-              asChar = FALSE)
+  fst::decompress_fst(input)
 }
 
 
-#----
-#' createSpectrumSha
-#'    Given a mzR 
+#' Serialize a list of mzR peak matrices (one column at a time)
 #'
-#' @param  peaklist matrix
+#' @param mzRPeaks mzR::Peaks result
+#' @param mass logical
+#' @param intensity  logical 
 #'
-#' @return sha
+#' @return list of serials
 #' @export
-
-
-createSpectrumSha <- function(peaklist){
+#'
+mzRpeakSerializer <- function(mzRPeaks,
+                              column = c("mass", "intensity")
+                              ){
   
-  
-  if(base::class(peaklist) != "matrix"){
-    warning("createSpectrumSha: peakList given was not of type matrix")  
-    
-  } else {
-    if(is.null(peaklist)){
-      warning("No data found in mzML scan. If you think this is an error, please submit an issue to GitHub
-          with an example file.")
-    } else {
-      
-      return(IDBacApp::hashR(IDBacApp::serial(peaklist)))
+  switch(column,
+         "mass" = {
+           col <- 1
+         },
+         "intensity" = {
+           col <- 2
+         }
+  )
+  if (class(mzRPeaks) == "matrix") {
+    if (ncol(mzRPeaks) == 2) {
+      return(as.list(IDBacApp::compress(IDBacApp::serial(mzRPeaks[, col]))))
     }
+  } else if (class(mzRPeaks) == "list") {
+    return(
+      lapply(spectraImport, 
+             function(x){
+               IDBacApp::compress(IDBacApp::serial(x[, col]))
+             }
+      )
+    )
   }
 }
+
+
+
+
+
+
+
+
 
 
 

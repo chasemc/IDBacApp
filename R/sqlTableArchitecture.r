@@ -62,16 +62,20 @@ sqlTableArchitecture <- function(numberScans){
                                       "MassError",
                                       "AcquisitionDate",
                                       "proteinPeaksMass",
-                                      "proteinPeakIntensity",
-                                      "proteinPeakSNR",
-                                      "proteinSpectrumMass",
+                                      "proteinPeaksIntensity",
+                                      "proteinPeaksSNR",
+                                      "proteinSpectrumMassSHA",
                                       "proteinSpectrumIntensity",
                                       "smallMoleculePeaksMass",
                                       "smallMoleculePeaksIntensity",
                                       "smallMoleculePeaksSNR",
-                                      "smallMoleculeSpectrumMass",
+                                      "smallMoleculeSpectrumMassSHA",
                                       "smallMoleculeSpectrumIntensity",
                                       "ignore")
+  
+  sqlDataFrame$massTable <- c("xxhash64",
+                              "binaryMassVector")
+  
   
   sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = 1,
                                                          ncol = length(sqlDataFrame$IndividualSpectra), 
