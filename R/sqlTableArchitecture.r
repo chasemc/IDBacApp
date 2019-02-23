@@ -61,10 +61,14 @@ sqlTableArchitecture <- function(numberScans){
                                       "Strain_ID",
                                       "MassError",
                                       "AcquisitionDate",
-                                      "proteinPeaks",
-                                      "proteinSpectrum",
-                                      "smallMoleculePeaks",
-                                      "smallMoleculeSpectrum",
+                                      "proteinPeakMass",
+                                      "proteinPeakIntensity",
+                                      "proteinSpectrumMass",
+                                      "proteinSpectrumIntensity",
+                                      "smallMoleculePeaksMass",
+                                      "smallMoleculePeaksMass",
+                                      "smallMoleculeSpectrumMass",
+                                      "smallMoleculeSpectrumIntensity",
                                       "ignore")
   
   sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = 1,
