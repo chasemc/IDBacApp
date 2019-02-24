@@ -65,6 +65,7 @@ databaseSelector_server <- function(input,
     
     req(!is.null(input$selectExperiment))
     req(nchar(input$selectExperiment) > 0)
+    req(input$selectExperiment != "None")
     validate(need(length(input$selectExperiment) == length(sqlDirectory$sqlDirectory), 
                   "databaseTabServer: userDBCon, createPool inputs are different lengths."))
     

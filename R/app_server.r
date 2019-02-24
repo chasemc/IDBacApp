@@ -125,18 +125,14 @@ app_server <- function(input, output, session) {
   
   observeEvent(workingDB$move$selectExperiment,
                ignoreInit = TRUE, {
+               
                  removeTab(inputId = "mainIDBacNav",
-                           target = "inversePeaks"
-                           
-                           
-                 )
-                 removeTab(inputId = "mainIDBacNav",
-                           target = "Hierarchical Clustering (Protein)"
+                           target = "Protein Data Analysis"
                  )
                  
                  
                  removeTab(inputId = "mainIDBacNav",
-                           target = "Metabolite Association Network (Small-Molecule)"
+                           target = "Small Molecule Data Analysis"
                            
                  )
                  
@@ -145,7 +141,7 @@ app_server <- function(input, output, session) {
                  s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaks IS NOT NULL")[,1]
                  pool::poolReturn(pool)
                  if (p > 0) {
-                appendTab(inputId = "mainIDBacNav",
+                   appendTab(inputId = "mainIDBacNav",
                              tabPanel("Protein Data Analysis",
                                       uiOutput("Heirarchicalui")
                              )
@@ -158,6 +154,11 @@ app_server <- function(input, output, session) {
                              )
                    )
                  }
+               })
+  
+  observeEvent(workingDB$move$selectExperiment,
+               ignoreInit = TRUE, {
+                
                  
                })
   
@@ -666,6 +667,7 @@ return(samples)
       " retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), ", and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
           Peaks occuring below ", tags$code(input$lowerMassSM), " m/z or above ", tags$code(input$upperMassSM), " m/z were removed from the analysis. ")
   })
+  
   
   
   
