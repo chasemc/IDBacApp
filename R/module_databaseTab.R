@@ -81,7 +81,7 @@ databaseTabUI <- function(id) {
                                   IDBacApp::bsCollapsePanel(h4("Click here to export samples as mzML",
                                                                align = "center"),  
                                                             wellPanel(
-                                                              IDBacApp::exportSamples_ui("exportSamples")
+                                                              IDBacApp::exportSamples_ui(ns("exportSamples"))
                                                             )
                                                             
                                   )
@@ -167,6 +167,15 @@ databaseTabServer <- function(input,
                }
   )
   
+  
+  
+  
+  # Export Data -------------------------------------------------------------
+  
+  shiny::callModule(IDBacApp::exportSamples_server,
+                    "exportSamples",
+                    availableExperiments = availableExperiments,
+                    sqlDirectory = sqlDirectory)
   
   
   

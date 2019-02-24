@@ -16,7 +16,6 @@ transferToNewDB_UI <- function(id) {
         tags$hr(size = 20),
         
         IDBacApp::databaseSelector_UI(ns("dbselector")),   
-        verbatimTextOutput(ns("selection")),
         tags$hr(size = 20),
         textInput(ns("nameformixNmatch"),
                   label = "New experiment name:",

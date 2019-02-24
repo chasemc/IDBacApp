@@ -670,15 +670,6 @@ return(samples)
   
   
   
-
-# Export Data -------------------------------------------------------------
-
-  shiny::callModule(IDBacApp::exportSamples_server,
-                    "exportSamples",
-                    availableExperiments = availableDatabases,
-                    sqlDirectory = sqlDirectory$sqlDirectory)
-                    
-  
   
   # Updating IDBac ----------------------------------------------------------
   
