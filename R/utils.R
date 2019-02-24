@@ -90,7 +90,7 @@ mzRpeakSerializer <- function(mzRPeaks,
   )
   if (class(mzRPeaks) == "matrix") {
     if (ncol(mzRPeaks) == 2) {
-      return(as.list(IDBacApp::compress(IDBacApp::serial(mzRPeaks[, col]))))
+      return(list(IDBacApp::compress(IDBacApp::serial(mzRPeaks[, col]))))
     }
   } else if (class(mzRPeaks) == "list") {
     return(

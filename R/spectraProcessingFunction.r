@@ -16,7 +16,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
   
   #Doesn't do anything currently, but put here to help future-proof
   
-  if(!"version" %in%  DBI::dbListTables(userDBCon)){
+  if (!"version" %in%  DBI::dbListTables(userDBCon)){
     
     # Add version table
     DBI::dbWriteTable(conn = userDBCon,
@@ -53,7 +53,6 @@ spectraProcessingFunction <- function(rawDataFilePath,
                              sampleID = sampleID,
                              XMLinfo = XMLinfo, 
                              rawDataFilePath = rawDataFilePath)
-  
 }
 
 
@@ -80,11 +79,28 @@ createSpectraSQL <- function(mzML_con,
                              smallRangeEnd = 6000){
   
 
+  mzML_con<<-mzML_con
+  scanNumber<<-scanNumber
+  userDBCon<<-userDBCon
+  sampleID<<-sampleID
+  XMLinfo<<-XMLinfo
+  rawDataFilePath<<-rawDataFilePath
+  smallRangeEnd <<-600
+  
+  print("0")
   
   
   sqlDataFrame <- IDBacApp::sqlTableArchitecture(numberScans = scanNumber)
   
   spectraImport <- mzR::peaks(mzML_con)
+  
+  # If only one spectrum, make it a list
+  if (class(spectraImport) == "matrix") {
+  
+    spectraImport <- list(spectraImport)
+
+  } 
+  
   
   #List of serialized mass vectors
   sqlDataFrame$massTable$binaryMassVector <- IDBacApp::mzRpeakSerializer(spectraImport, column = "mass")
@@ -98,6 +114,7 @@ createSpectraSQL <- function(mzML_con,
   
   
   # get maximum masses of mass vectors. True = small mol, False = protein
+  
   smallIndex <- unlist(lapply(spectraImport, function(x) max(x[,1])))
   smallIndex <- smallIndex < smallRangeEnd
   
@@ -198,13 +215,17 @@ createSpectraSQL <- function(mzML_con,
 # Write massTable ---------------------------------------------------------
 
   
-  if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
+  if (!DBI::dbExistsTable(userDBCon, "massTable")) {
     
     sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$massTableSQL)
     RSQLite::dbClearResult(sta)
   } 
-  
-  massTable
+  # Write to SQL DB
+  DBI::dbWriteTable(conn = userDBCon,
+                    name = "massTable", # SQLite table to insert into
+                    sqlDataFrame$massTable, # Insert single row into DB
+                    append = TRUE, # Append to existing table
+                    overwrite = FALSE) # Do not overwrite
   
  
   
@@ -225,7 +246,6 @@ createSpectraSQL <- function(mzML_con,
                     sqlDataFrame$IndividualSpectra, # Insert single row into DB
                     append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
-  
   
   
   

@@ -73,7 +73,7 @@ sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = numberScans,
                                                          ncol = length(sqlDataFrame$IndividualSpectra), 
-                                                         dimnames = list(NULL,sqlDataFrame$IndividualSpectra)))
+                                                         dimnames = list(NULL, sqlDataFrame$IndividualSpectra)))
   
   
   sqlDataFrame$IndividualSpectraSQL <-
@@ -108,11 +108,10 @@ sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame$massTableSQL <-
     
-    "CREATE TABLE IndividualSpectra (
+    "CREATE TABLE massTable (
   spectrumMassHash    TEXT PRIMARY KEY,
   binaryMassVector    BLOB,
  
-  
   UNIQUE(spectrumMassHash) ON CONFLICT IGNORE
   );"
   
