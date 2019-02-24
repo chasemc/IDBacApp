@@ -19,7 +19,7 @@ binned <- IDBacApp::peakBinner(peakList = p,
 
 
 test_that("multiplication works", {
-  expect_equal(digest::sha1(binned), "032cf3dc5d0cb6e9a13d84541f7096924fcb9432")
+  expect_identical(digest::sha1(binned), "032cf3dc5d0cb6e9a13d84541f7096924fcb9432")
   expect_warning(IDBacApp::peakBinner(peakList = list("A"),
                                       ppm = 100000))
 })
