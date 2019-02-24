@@ -9,7 +9,7 @@
 sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame <- new.env(parent = parent.frame())
-
+  
   sqlDataFrame$version <- data.frame(version = "1")
   
   sqlDataFrame$metaData <- c("Strain_ID",
@@ -34,10 +34,11 @@ sqlTableArchitecture <- function(numberScans){
                              "dna_16S")
   
   
-  sqlDataFrame$metaData <- as.data.frame(matrix(nrow = numberScans,
-                                                ncol = length(sqlDataFrame$metaData), 
-                                                dimnames = list(NULL,sqlDataFrame$metaData)))
+  temp <- as.data.frame(matrix(nrow = numberScans,
+                               ncol = length(sqlDataFrame$metaData)))
   
+  dimnames(temp)[[2]] <- sqlDataFrame$metaData
+  sqlDataFrame$metaData <- temp
   
   
   sqlDataFrame$XML <- c("mzMLHash",
@@ -50,10 +51,11 @@ sqlTableArchitecture <- function(numberScans){
                         "Instrument_MetaFile")
   
   
-  sqlDataFrame$XML <- as.data.frame(matrix(nrow = numberScans,
-                                           ncol = length(sqlDataFrame$XML), 
-                                           dimnames = list(NULL,sqlDataFrame$XML)))
+  temp <- as.data.frame(matrix(nrow = numberScans,
+                               ncol = length(sqlDataFrame$XML)))
   
+  dimnames(temp)[[2]] <- sqlDataFrame$XML
+  sqlDataFrame$XML <- temp
   
   
   sqlDataFrame$IndividualSpectra <- c("spectrumMassHash",
@@ -64,16 +66,21 @@ sqlTableArchitecture <- function(numberScans){
                                       "AcquisitionDate",
                                       "proteinPeaksIntensity",
                                       "proteinPeaksSNR",
+                                      "proteinPeaksMass",
                                       "proteinSpectrumIntensity",
                                       "smallMoleculePeaksIntensity",
                                       "smallMoleculePeaksSNR",
+                                      "smallMoleculePeaksMass",
                                       "smallMoleculeSpectrumIntensity",
                                       "ignore")
   
   
-  sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = numberScans,
-                                                         ncol = length(sqlDataFrame$IndividualSpectra), 
-                                                         dimnames = list(NULL, sqlDataFrame$IndividualSpectra)))
+  temp <- as.data.frame(matrix(nrow = numberScans,
+                               ncol = length(sqlDataFrame$IndividualSpectra)))
+  
+  dimnames(temp)[[2]] <- sqlDataFrame$IndividualSpectra
+  sqlDataFrame$IndividualSpectra <- temp
+  
   
   
   sqlDataFrame$IndividualSpectraSQL <-
@@ -86,25 +93,30 @@ sqlTableArchitecture <- function(numberScans){
   MassError                            REAL,
   AcquisitionDate                      TEXT,
   proteinPeaksIntensity                BLOB,
+  proteinPeaksMass                     BLOB,
   proteinPeaksSNR                      BLOB,
   proteinSpectrumIntensity             BLOB,
   smallMoleculePeaksIntensity          BLOB,
   smallMoleculePeaksSNR                BLOB,
+  smallMoleculePeaksMass               BLOB,
   smallMoleculeSpectrumIntensity       BLOB,
   ignore                               INTEGER,
   
   UNIQUE(Strain_ID, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
   );"
-
+  
   
   
   
   sqlDataFrame$massTable <- c("spectrumMassHash",
                               "binaryMassVector")
   
-  sqlDataFrame$massTable <- as.data.frame(matrix(nrow = numberScans,
-                                                         ncol = length(sqlDataFrame$massTable), 
-                                                         dimnames = list(NULL,sqlDataFrame$massTable)))
+  temp <- as.data.frame(matrix(nrow = numberScans,
+                               ncol = length(sqlDataFrame$massTable)))
+  
+  dimnames(temp)[[2]] <- sqlDataFrame$massTable
+  sqlDataFrame$massTable <- temp
+  
   
   sqlDataFrame$massTableSQL <-
     
@@ -115,6 +127,6 @@ sqlTableArchitecture <- function(numberScans){
   UNIQUE(spectrumMassHash) ON CONFLICT IGNORE
   );"
   
- return(sqlDataFrame)
+  return(sqlDataFrame)
   
 }

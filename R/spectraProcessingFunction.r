@@ -85,9 +85,7 @@ createSpectraSQL <- function(mzML_con,
   sampleID<<-sampleID
   XMLinfo<<-XMLinfo
   rawDataFilePath<<-rawDataFilePath
-  smallRangeEnd <<-600
-  
-  print("0")
+  smallRangeEnd <<-6000
   
   
   sqlDataFrame <- IDBacApp::sqlTableArchitecture(numberScans = scanNumber)
@@ -96,13 +94,11 @@ createSpectraSQL <- function(mzML_con,
   
   # If only one spectrum, make it a list
   if (class(spectraImport) == "matrix") {
-  
     spectraImport <- list(spectraImport)
-
   } 
   
   
-  #List of serialized mass vectors
+  # List of serialized mass vectors
   sqlDataFrame$massTable$binaryMassVector <- IDBacApp::mzRpeakSerializer(spectraImport, column = "mass")
   # List of hashes
   sqlDataFrame$massTable$spectrumMassHash <- unlist(lapply(sqlDataFrame$massTable$binaryMassVector,
@@ -123,11 +119,11 @@ createSpectraSQL <- function(mzML_con,
   if (any(smallIndex)) { 
     
     #List of serialized intensity vectors 
-    sqlDataFrame$IndividualSpectra$smallMoleculeSpectrumIntensity <- IDBacApp::mzRpeakSerializer(spectraImport[smallIndex], 
+    sqlDataFrame$IndividualSpectra$smallMoleculeSpectrumIntensity[smallIndex] <- IDBacApp::mzRpeakSerializer(spectraImport[smallIndex], 
                                                                                                  column = "intensity")
     # # List of hashes
-    sqlDataFrame$IndividualSpectra$spectrumIntensityHash <- unlist(
-      lapply(sqlDataFrame$IndividualSpectra$smallMoleculeSpectrumIntensity,
+    sqlDataFrame$IndividualSpectra$spectrumIntensityHash[smallIndex] <- unlist(
+      lapply(sqlDataFrame$IndividualSpectra$smallMoleculeSpectrumIntensity[smallIndex],
              function(x){
                IDBacApp::hashR(x)
              })
@@ -140,17 +136,21 @@ createSpectraSQL <- function(mzML_con,
     peaks <- IDBacApp::processSmallMolSpectra(peaks)
     
     
-   
-    
-    
-    sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity <- lapply(peaks, function(x) x@intensity)
-    sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity <- lapply(sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity, 
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksMass[smallIndex] <- lapply(peaks, function(x) x@mass)
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksMass[smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$smallMoleculePeaksMass[smallIndex], 
                                                                          function(x){
                                                                            IDBacApp::compress(IDBacApp::serial(x))
                                                                          })
     
-    sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR <- lapply(peaks, function(x) x@snr)
-    sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR <- lapply(sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR, 
+    
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity[smallIndex] <- lapply(peaks, function(x) x@intensity)
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity[smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity[smallIndex], 
+                                                                         function(x){
+                                                                           IDBacApp::compress(IDBacApp::serial(x))
+                                                                         })
+    
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR[smallIndex] <- lapply(peaks, function(x) x@snr)
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR[smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR[smallIndex], 
                                                                    function(x){
                                                                      IDBacApp::compress(IDBacApp::serial(x))
                                                                    })
@@ -166,11 +166,11 @@ createSpectraSQL <- function(mzML_con,
    if (any(!smallIndex)) {
     
     #List of serialized intensity vectors 
-    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity <- IDBacApp::mzRpeakSerializer(spectraImport[!smallIndex], 
+    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity[!smallIndex] <- IDBacApp::mzRpeakSerializer(spectraImport[!smallIndex], 
                                                                                         column = "intensity")
     # # List of hashes
-    sqlDataFrame$IndividualSpectra$spectrumIntensityHash <- unlist(
-      lapply(sqlDataFrame$IndividualSpectra$proteinPeaksIntensity,
+    sqlDataFrame$IndividualSpectra$spectrumIntensityHash[!smallIndex] <- unlist(
+      lapply(sqlDataFrame$IndividualSpectra$proteinPeaksIntensity[!smallIndex],
              function(x){
                IDBacApp::hashR(x)
              })
@@ -181,15 +181,20 @@ createSpectraSQL <- function(mzML_con,
     peaks <- IDBacApp::spectrumMatrixToMALDIqaunt(spectraImport[!smallIndex])
     peaks <- IDBacApp::processProteinSpectra(peaks)
     
- 
-    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity <- lapply(peaks, function(x) x@intensity)
-    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksIntensity, 
+    sqlDataFrame$IndividualSpectra$proteinPeaksMass[!smallIndex] <- lapply(peaks, function(x) x@mass)
+    sqlDataFrame$IndividualSpectra$proteinPeaksMass[!smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksMass[!smallIndex], 
+                                                                    function(x){
+                                                                      IDBacApp::compress(IDBacApp::serial(x))
+                                                                    })
+    
+    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity[!smallIndex] <- lapply(peaks, function(x) x@intensity)
+    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity[!smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksIntensity[!smallIndex], 
                                                                    function(x){
                                                                     IDBacApp::compress(IDBacApp::serial(x))
                                                                    })
     
-    sqlDataFrame$IndividualSpectra$proteinPeaksSNR <- lapply(peaks, function(x) x@snr)
-    sqlDataFrame$IndividualSpectra$proteinPeaksSNR <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksSNR, 
+    sqlDataFrame$IndividualSpectra$proteinPeaksSNR[!smallIndex] <- lapply(peaks, function(x) x@snr)
+    sqlDataFrame$IndividualSpectra$proteinPeaksSNR[!smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksSNR[!smallIndex], 
                                                              function(x){
                                                               IDBacApp::compress(IDBacApp::serial(x))
                                                              })
