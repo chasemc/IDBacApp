@@ -22,7 +22,8 @@ app_server <- function(input, output, session) {
   
   sqlDirectory <- reactiveValues(sqlDirectory = getwd())
   
-  selectedNewWD <- callModule(IDBacApp::selectDirectory_Server,
+  # module changes sqlDirectory reactiveValue
+  callModule(IDBacApp::selectDirectory_Server,
                               "userWorkingDirectory",
                               sqlDirectory)
   
@@ -78,13 +79,12 @@ app_server <- function(input, output, session) {
   
   
   observe({
-    w<-input$processToAnalysis
     hello <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                   pattern = ".sqlite",
                                                   full.names = FALSE,
                                                   recursive = FALSE)
     )
-    if (length(hello) == 0){
+    if (length(hello) == 0) {
       availableDatabases$db <- NULL
     } else {
       availableDatabases$db <- hello
