@@ -31,7 +31,7 @@ IDBacApp::run_app()
 
 ### IDBac Citations
 
-Clark, C. M., Costa, M. S., Sanchez, L. M., & Murphy, B. T. (2018). Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function. Proceedings of the National Academy of Sciences of the United States of America, 115(19), 4981-4986.
+Clark, C. M., Costa, M. S., Sanchez, L. M., & Murphy, B. T. (2018). Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function. Proceedings of the National Academy of Sciences of the United States of America, 115(19), 4981-4986. [https://www.doi.org/10.1073/pnas.1801247115](https://www.doi.org/10.1073/pnas.1801247115)
 
 Every IDBac release (Including this Manual) is preserved at Zenodo for citability/reproducibility:   
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1115619.svg)](https://doi.org/10.5281/zenodo.1115619)
