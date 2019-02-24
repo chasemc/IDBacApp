@@ -46,7 +46,8 @@ Imports:
     graphics,
     grDevices,
     rmarkdown,
-    fst
+    fst,
+    RProtoBuf
 Suggests: testthat
 RoxygenNote: 6.1.1
 Depends: 

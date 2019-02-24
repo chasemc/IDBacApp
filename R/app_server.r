@@ -15,8 +15,9 @@ NULL
 #' @export
 #'
 app_server <- function(input, output, session) {
-  
 
+  set.seed(42)
+  
   # Develepment Functions ---------------------------------------------------
   options(shiny.reactlog = TRUE)
   

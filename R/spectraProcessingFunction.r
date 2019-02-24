@@ -11,19 +11,19 @@
 spectraProcessingFunction <- function(rawDataFilePath,
                                       sampleID,
                                       userDBCon){
- 
+  
   
   
   #Doesn't do anything currently, but put here to help future-proof
   
   if(!"version" %in%  DBI::dbListTables(userDBCon)){
-  
-  # Add version table
-  DBI::dbWriteTable(conn = userDBCon,
-                    name = "version", # SQLite table to insert into
-                    IDBacApp::sqlTableArchitecture(numberScans = 1)$version, # Insert single row into DB
-                    append = TRUE, # Append to existing table
-                    overwrite = FALSE) # Do not overwrite
+    
+    # Add version table
+    DBI::dbWriteTable(conn = userDBCon,
+                      name = "version", # SQLite table to insert into
+                      IDBacApp::sqlTableArchitecture(numberScans = 1)$version, # Insert single row into DB
+                      append = TRUE, # Append to existing table
+                      overwrite = FALSE) # Do not overwrite
   }
   #----
   
@@ -65,6 +65,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
 #' @param sampleID NA
 #' @param XMLinfo NA
 #' @param rawDataFilePath NA
+#' @param smallRangeEnd end of mass region for small mol, if m/z above this- will be classified as "protein" spectrum
 #'
 #' @return NA
 #' @export
@@ -75,163 +76,164 @@ createSpectraSQL <- function(mzML_con,
                              userDBCon,
                              sampleID,
                              XMLinfo,
-                             rawDataFilePath){
+                             rawDataFilePath,
+                             smallRangeEnd = 6000){
   
+
+  
+  
+  sqlDataFrame <- IDBacApp::sqlTableArchitecture(numberScans = scanNumber)
+  
+  spectraImport <- mzR::peaks(mzML_con)
+  
+  #List of serialized mass vectors
+  sqlDataFrame$massTable$binaryMassVector <- IDBacApp::mzRpeakSerializer(spectraImport, column = "mass")
+  # List of hashes
+  sqlDataFrame$massTable$spectrumMassHash <- unlist(lapply(sqlDataFrame$massTable$binaryMassVector,
+                                                           function(x) {
+                                                             IDBacApp::hashR(x)
+                                                           })
+  )
+  sqlDataFrame$IndividualSpectra$spectrumMassHash <- sqlDataFrame$massTable$spectrumMassHash
+  
+  
+  # get maximum masses of mass vectors. True = small mol, False = protein
+  smallIndex <- unlist(lapply(spectraImport, function(x) max(x[,1])))
+  smallIndex <- smallIndex < smallRangeEnd
+  
+  # Small mol spectra -------------------------------------------------------
+  
+  if (any(smallIndex)) { 
     
-    sqlDataFrame <- IDBacApp::sqlTableArchitecture(numberScans = scanNumber)
-    
-    spectraImport <- mzR::peaks(mzML_con, 
-                                scans = individualSpectrum)
-    
-    #List of serialized mass vectors
-    serializedMasses <- IDBacApp::mzRpeakSerializer(spectraImport, column = "mass")
-    
-    # List of hashes
-    massxxhash64 <- unlist(lapply(serializedMasses, function(x) IDBacApp::hashR(x)))
-   
     #List of serialized intensity vectors 
-    serializedMasses <- IDBacApp::mzRpeakSerializer(spectraImport, column = "mass")
+    sqlDataFrame$IndividualSpectra$smallMoleculeSpectrumIntensity <- IDBacApp::mzRpeakSerializer(spectraImport[smallIndex], 
+                                                                                                 column = "intensity")
+    # # List of hashes
+    sqlDataFrame$IndividualSpectra$spectrumIntensityHash <- unlist(
+      lapply(sqlDataFrame$IndividualSpectra$smallMoleculeSpectrumIntensity,
+             function(x){
+               IDBacApp::hashR(x)
+             })
+    )
+
     
-     intensityxxhash64 <- unlist(lapply(serializedMasses, function(x) IDBacApp::hashR(x)))
+    
+    peaks <- IDBacApp::spectrumMatrixToMALDIqaunt(spectraImport[smallIndex])
+    
+    peaks <- IDBacApp::processSmallMolSpectra(peaks)
+    
+    
+   
+    
+    
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity <- lapply(peaks, function(x) x@intensity)
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity <- lapply(sqlDataFrame$IndividualSpectra$smallMoleculePeaksIntensity, 
+                                                                         function(x){
+                                                                           IDBacApp::compress(IDBacApp::serial(x))
+                                                                         })
+    
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR <- lapply(peaks, function(x) x@snr)
+    sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR <- lapply(sqlDataFrame$IndividualSpectra$smallMoleculePeaksSNR, 
+                                                                   function(x){
+                                                                     IDBacApp::compress(IDBacApp::serial(x))
+                                                                   })
     
     
     
-    sqlDataFrame$IndividualSpectra$spectrumSHA <- IDBacApp::createSpectrumSha(spectraImport)
     
     
-    if ("IndividualSpectra" %in% DBI::dbListTables(userDBCon)) {
-      
-      existingSHA <- glue::glue_sql("SELECT `spectrumSHA`
-                                    FROM `IndividualSpectra`",
-                                    .con = userDBCon)
-      
-      existingSHA <- DBI::dbGetQuery(conn = userDBCon,
-                                     statement = existingSHA)
-      
-    } else {
-      existingSHA <- matrix(NA)
-    }
+  }  
     
-    if (sqlDataFrame$IndividualSpectra$spectrumSHA %in% existingSHA[,1]) {
-      warning("One of the spectra for \"", sampleID, "\" already seems to be present, spectrum not added again.")
-    } else {
-      
-      sqlDataFrame$IndividualSpectra$mzMLSHA <- XMLinfo$mzMLSHA
-      sqlDataFrame$IndividualSpectra$Strain_ID <- sampleID
-      
-      if ("MassError" %in% ls(XMLinfo$mzMLInfo)) {
-        sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
-      }
-      sqlDataFrame$IndividualSpectra$AcquisitionDate <- XMLinfo$mzMLInfo$AcquisitionDate
+    # Protein Spectra ---------------------------------------------------------
+    
+   if (any(!smallIndex)) {
+    
+    #List of serialized intensity vectors 
+    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity <- IDBacApp::mzRpeakSerializer(spectraImport[!smallIndex], 
+                                                                                        column = "intensity")
+    # # List of hashes
+    sqlDataFrame$IndividualSpectra$spectrumIntensityHash <- unlist(
+      lapply(sqlDataFrame$IndividualSpectra$proteinPeaksIntensity,
+             function(x){
+               IDBacApp::hashR(x)
+             })
+    )
+    
+    
+    
+    peaks <- IDBacApp::spectrumMatrixToMALDIqaunt(spectraImport[!smallIndex])
+    peaks <- IDBacApp::processProteinSpectra(peaks)
+    
+ 
+    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity <- lapply(peaks, function(x) x@intensity)
+    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksIntensity, 
+                                                                   function(x){
+                                                                    IDBacApp::compress(IDBacApp::serial(x))
+                                                                   })
+    
+    sqlDataFrame$IndividualSpectra$proteinPeaksSNR <- lapply(peaks, function(x) x@snr)
+    sqlDataFrame$IndividualSpectra$proteinPeaksSNR <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksSNR, 
+                                                             function(x){
+                                                              IDBacApp::compress(IDBacApp::serial(x))
+                                                             })
+    
+    
+    
+  }
   
-      if (typeof(spectraImport) == "list") {
-        
-        spectraImport <- lapply(spectraImport, function(x) MALDIquant::createMassSpectrum(mass = x[ , 1],
-                                                                                          intensity = x[ , 2],
-                                                                                          metaData = list(File = rawDataFilePath,
-                                                                                                          Strain = sampleID)))
-      } else if (typeof(spectraImport) == "double") {
-        
-        spectraImport <- MALDIquant::createMassSpectrum(mass = spectraImport[ , 1],
-                                                        intensity = spectraImport[ , 2],
-                                                        metaData = list(File = rawDataFilePath,
-                                                                        Strain = sampleID))
-      }
-      
-      
-      # Make sure to return spectraImport as a MassSpectrumList
-      if(MALDIquant::isMassSpectrumList(spectraImport)){
-        
-      }else if(MALDIquant::isMassSpectrum(spectraImport)){
-        spectraImport <- list(spectraImport)
-      }
-      
-      
-      
-      
-      if(max(MALDIquant::mass(spectraImport[[1]])) > 5000){ # if it's a protein spectrum
-        
-        sqlDataFrame$IndividualSpectra$proteinSpectrum <- list(IDBacApp::compress(IDBacApp::serial(spectraImport)))
-        
-        
-        
-        # Why square root transformation and not log:
-        #  Anal Bioanal Chem. 2011 Jul; 401(1): 167–181.
-        # Published online 2011 Apr 12. doi:  10.1007/s00216-011-4929-z
-        #"Especially for multivariate treatment of MALDI imaging data, the square root transformation can be considered for the data preparation
-        #because for all three intensity groups in Table 1, the variance is approximately constant."
-        
-        
-        spectraImport <- MALDIquant::transformIntensity(spectraImport, 
-                                                        method = "sqrt") 
-        spectraImport <- MALDIquant::smoothIntensity(spectraImport,
-                                                     method = "SavitzkyGolay", 
-                                                     halfWindowSize = 20) 
-        spectraImport <- MALDIquant::removeBaseline(spectraImport,
-                                                    method = "TopHat") 
-        spectraImport <- MALDIquant::calibrateIntensity(spectraImport,
-                                                        method="TIC")  
-        spectraImport <- MALDIquant::detectPeaks(spectraImport, 
-                                                 method = "MAD", 
-                                                 halfWindowSize = 20, 
-                                                 SNR = 3)
-        spectraImport <- IDBacApp::serial(spectraImport)
-        spectraImport <- IDBacApp::compress(spectraImport)
-        sqlDataFrame$IndividualSpectra$proteinPeaks <- list(spectraImport)
-        
-        
-      }else{
-        ############
-        #Spectra Preprocessing, Peak Picking
-        
-        sqlDataFrame$IndividualSpectra$smallMoleculeSpectrum <- list(IDBacApp::compress(IDBacApp::serial(spectraImport)))
-        
-        
-        spectraImport <- MALDIquant::smoothIntensity(spectraImport,
-                                                     method = "SavitzkyGolay",
-                                                     halfWindowSize = 20) 
-        spectraImport <- MALDIquant::removeBaseline(spectraImport,
-                                                    method = "TopHat")
-        spectraImport <- MALDIquant::calibrateIntensity(spectraImport, 
-                                                        method="TIC") 
-        #Find all peaks with SNR >1, this will allow us to filter by SNR later, doesn't effect the peak-picking algorithm, just makes files bigger
-        spectraImport <- MALDIquant::detectPeaks(spectraImport, 
-                                                 method = "SuperSmoother",
-                                                 halfWindowSize = 20, 
-                                                 SNR = 1)
-        spectraImport <- IDBacApp::serial(spectraImport)
-        spectraImport <- IDBacApp::compress(spectraImport)
-        sqlDataFrame$IndividualSpectra$smallMoleculePeaks <- list(spectraImport)
-        
-      }
-      a <- colnames(IDBacApp::sqlTableArchitecture(numberScans = 1)$IndividualSpectra)
-      b <- colnames(sqlDataFrame$IndividualSpectra)
-      
-      for(i in a[!a %in% b]){
-        sqlDataFrame$IndividualSpectra[,i] <- NA
-      }
-      
-      
-      
-      
-      
-      
-      
-      # Write to SQL DB
-      DBI::dbWriteTable(conn = userDBCon,
-                        name = "IndividualSpectra", # SQLite table to insert into
-                        sqlDataFrame$IndividualSpectra[1, a], # Insert single row into DB
-                        append = TRUE, # Append to existing table
-                        overwrite = FALSE) # Do not overwrite
-      
-      
-      
-      
-    }
+  remove(peaks)
+  
+  
+  
+  sqlDataFrame$IndividualSpectra$mzMLHash <- XMLinfo$mzMLHash
+  sqlDataFrame$IndividualSpectra$Strain_ID <- sampleID
+  
+  if ("MassError" %in% ls(XMLinfo$mzMLInfo)) {
+    sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
+  }
+  sqlDataFrame$IndividualSpectra$AcquisitionDate <- XMLinfo$mzMLInfo$AcquisitionDate
+  
+
+
+# Write massTable ---------------------------------------------------------
+
+  
+  if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
+    
+    sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$massTableSQL)
+    RSQLite::dbClearResult(sta)
+  } 
+  
+  massTable
+  
+ 
+  
+
+# Write IndividualSpectra -------------------------------------------------
+
+  
+  
+  
+  if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
+    
+    sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$IndividualSpectraSQL)
+    RSQLite::dbClearResult(sta)
+  }
+  # Write to SQL DB
+  DBI::dbWriteTable(conn = userDBCon,
+                    name = "IndividualSpectra", # SQLite table to insert into
+                    sqlDataFrame$IndividualSpectra, # Insert single row into DB
+                    append = TRUE, # Append to existing table
+                    overwrite = FALSE) # Do not overwrite
+  
   
   
   
 }
+
+
+
+
 
 
 
@@ -321,12 +323,13 @@ createXMLSQL <- function(rawDataFilePath,
   # at least for mzML files generated using IDBac's msconvert settings
   sqlDataFrame$XML$XML <- list(IDBacApp::serial(sqlDataFrame$XML$XML))
   
-  sqlDataFrame$XML$mzMLSHA <- IDBacApp::hashR(sqlDataFrame$XML$XML)
+ 
+  sqlDataFrame$XML$mzMLHash <- IDBacApp::hashR(sqlDataFrame$XML$XML[[1]])
   
   
   if ("XML" %in% DBI::dbListTables(userDBCon)) {
     
-    existingSHA <- glue::glue_sql("SELECT `mzMLSHA`
+    existingSHA <- glue::glue_sql("SELECT `mzMLHash`
                                  FROM `XML`",
                                   .con = userDBCon)
     
@@ -361,7 +364,7 @@ createXMLSQL <- function(rawDataFilePath,
     sqlDataFrame$XML$Instrument_MetaFile <- IDBacApp::serial(acquisitonInfo$Instrument_MetaFile)
   }
   
-  if (sqlDataFrame$XML$mzMLSHA %in% existingSHA[,1]) {
+  if (sqlDataFrame$XML$mzMLHash %in% existingSHA[,1]) {
     warning("A mzML file matching \"", sampleID, "\" already seems to be present, file and contents not added again.")
   } else {
     # Write to SQL DB
@@ -372,7 +375,7 @@ createXMLSQL <- function(rawDataFilePath,
                       overwrite = FALSE) # Do not overwrite
   }
   
-  return(list(mzMLSHA = sqlDataFrame$XML$mzMLSHA,
+  return(list(mzMLHash = sqlDataFrame$XML$mzMLHash,
               mzMLInfo = acquisitonInfo))
 }
 

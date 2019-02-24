@@ -40,7 +40,7 @@ sqlTableArchitecture <- function(numberScans){
   
   
   
-  sqlDataFrame$XML <- c("mzMLSHA",
+  sqlDataFrame$XML <- c("mzMLHash",
                         "XML", 
                         "manufacturer",
                         "model",
@@ -56,32 +56,66 @@ sqlTableArchitecture <- function(numberScans){
   
   
   
-  sqlDataFrame$IndividualSpectra <- c("spectrumSHA",
-                                      "mzMLSHA",
+  sqlDataFrame$IndividualSpectra <- c("spectrumMassHash",
+                                      "spectrumIntensityHash",
+                                      "mzMLHash",
                                       "Strain_ID",
                                       "MassError",
                                       "AcquisitionDate",
-                                      "proteinPeaksMass",
                                       "proteinPeaksIntensity",
                                       "proteinPeaksSNR",
-                                      "proteinSpectrumMassSHA",
                                       "proteinSpectrumIntensity",
-                                      "smallMoleculePeaksMass",
                                       "smallMoleculePeaksIntensity",
                                       "smallMoleculePeaksSNR",
-                                      "smallMoleculeSpectrumMassSHA",
                                       "smallMoleculeSpectrumIntensity",
                                       "ignore")
   
-  sqlDataFrame$massTable <- c("xxhash64",
-                              "binaryMassVector")
   
-  
-  sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = 1,
+  sqlDataFrame$IndividualSpectra <- as.data.frame(matrix(nrow = numberScans,
                                                          ncol = length(sqlDataFrame$IndividualSpectra), 
                                                          dimnames = list(NULL,sqlDataFrame$IndividualSpectra)))
   
   
-  sqlDataFrame
+  sqlDataFrame$IndividualSpectraSQL <-
+    
+    "CREATE TABLE IndividualSpectra (
+  spectrumMassHash                     TEXT,
+  spectrumIntensityHash                TEXT,
+  mzMLHash                             TEXT,
+  Strain_ID                            TEXT,
+  MassError                            REAL,
+  AcquisitionDate                      TEXT,
+  proteinPeaksIntensity                BLOB,
+  proteinPeaksSNR                      BLOB,
+  proteinSpectrumIntensity             BLOB,
+  smallMoleculePeaksIntensity          BLOB,
+  smallMoleculePeaksSNR                BLOB,
+  smallMoleculeSpectrumIntensity       BLOB,
+  ignore                               INTEGER,
+  
+  UNIQUE(Strain_ID, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
+  );"
+
+  
+  
+  
+  sqlDataFrame$massTable <- c("spectrumMassHash",
+                              "binaryMassVector")
+  
+  sqlDataFrame$massTable <- as.data.frame(matrix(nrow = numberScans,
+                                                         ncol = length(sqlDataFrame$massTable), 
+                                                         dimnames = list(NULL,sqlDataFrame$massTable)))
+  
+  sqlDataFrame$massTableSQL <-
+    
+    "CREATE TABLE IndividualSpectra (
+  spectrumMassHash    TEXT PRIMARY KEY,
+  binaryMassVector    BLOB,
+ 
+  
+  UNIQUE(spectrumMassHash) ON CONFLICT IGNORE
+  );"
+  
+ return(sqlDataFrame)
   
 }

@@ -1,7 +1,7 @@
 
 
 # Given the path for a mzML file ("singlemzMLpath):
-  # "findmzMLsha" returns the mxML sha1 and spectrumSHA(s)
+  # "findmzMLHash" returns the mxML sha1 and spectrumSHA(s)
   # Assuming Bruker data, "findAcquisitionInfo" looks at the Acqu file and returns:
     # the Acqu file itself
     # the overall MassError

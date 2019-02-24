@@ -35,11 +35,7 @@ hashR <- function(input){
 #' @export
 
 serial <- function(input){
-  base::serialize(object = input ,
-                  connection = NULL,
-                  ascii = FALSE,
-                  xdr = FALSE,
-                  version = 3)
+  RProtoBuf::serialize_pb(input, NULL)
 }
 
 
@@ -98,7 +94,7 @@ mzRpeakSerializer <- function(mzRPeaks,
     }
   } else if (class(mzRPeaks) == "list") {
     return(
-      lapply(spectraImport, 
+      lapply(mzRPeaks, 
              function(x){
                IDBacApp::compress(IDBacApp::serial(x[, col]))
              }

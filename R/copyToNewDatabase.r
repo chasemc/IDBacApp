@@ -196,7 +196,7 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         
                         # Get fileshas from old db so we don't  add duplicates to new database
-                        sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLSHA`
+                        sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLHash`
                                                FROM `IndividualSpectra`
                                                WHERE (`Strain_ID` IN ({strainIds*}))",
                                                strainIds = sampleIDs,
@@ -207,7 +207,7 @@ copyToNewDatabase <- function(existingDBPool,
                         olddbshas <- DBI::dbFetch(olddbshas1)[ , 1]
                         DBI::dbClearResult(olddbshas1)
                         
-                        sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLSHA`
+                        sqlQ <- glue::glue_sql("SELECT DISTINCT `mzMLHash`
                                                FROM `IndividualSpectra`",
                                                .con = newDBPool
                         )
@@ -226,8 +226,8 @@ copyToNewDatabase <- function(existingDBPool,
                           sqlQ <- glue::glue_sql("INSERT INTO newDB.XML
                                                  SELECT * 
                                                  FROM `XML`
-                                                 WHERE (`mzMLSHA` IN ({mzMLSHA*}))",
-                                                 mzMLSHA = newdbshas,
+                                                 WHERE (`mzMLHash` IN ({mzMLHash*}))",
+                                                 mzMLHash = newdbshas,
                                                  .con = existingDBconnection
                           )
                           
@@ -244,7 +244,7 @@ copyToNewDatabase <- function(existingDBPool,
                         # but the ways it is now, a row of NA's are input so need to be removed 
                         
                         sqlQ <- glue::glue_sql("DELETE FROM `XML`
-                                               WHERE `mzMLSHA` IS NULL",
+                                               WHERE `mzMLHash` IS NULL",
                                                .con = newDBPool
                         )
                         
