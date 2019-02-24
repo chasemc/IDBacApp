@@ -2,18 +2,18 @@
 % Please edit documentation in R/readBrukerAcqusFile.r
 \name{readAcquFile}
 \alias{readAcquFile}
-\title{readAcquFile}
+\title{Title}
 \usage{
 readAcquFile(fidFile, verbose = FALSE)
 }
 \arguments{
-\item{fidFile}{NA}
+\item{fidFile}{a}
 
-\item{verbose}{NA}
+\item{verbose}{a}
 }
 \value{
-NA
+a
 }
 \description{
-readAcquFile
+Title
 }

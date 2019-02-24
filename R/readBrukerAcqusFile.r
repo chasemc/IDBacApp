@@ -5,14 +5,14 @@
 # input is fid file path
 
 
-#' readAcquFile
+#' Title
 #'
-#' @param fidFile NA
-#' @param verbose NA
+#' @param fidFile a
+#' @param verbose a
 #'
-#' @return NA
+#' @return a
+#' @export
 #'
-
 readAcquFile <- function(fidFile, verbose=FALSE) {
   acquFile <- sub(pattern="fid$", x=fidFile, replacement="acqu")
 
