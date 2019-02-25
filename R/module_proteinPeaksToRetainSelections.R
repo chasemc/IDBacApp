@@ -1,6 +1,8 @@
 #' peakRetentionSettings_UI
 #'
 #' @param id namespace
+#' @param minMass starting min mass
+#' @param maxMass starting max mass
 #'
 #' @return NA
 #' @export
