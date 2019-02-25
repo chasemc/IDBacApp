@@ -91,7 +91,6 @@ ui_proteinClustering <- function() {
                                                                   IDBacApp::popupPlotTsne_UI("tsnePanel")
                                                                   
                                                                   
-                                                                  
                                         ),
                                         IDBacApp::bsCollapsePanel(p("Save Dendrogram", 
                                                                     align = "center"),   
