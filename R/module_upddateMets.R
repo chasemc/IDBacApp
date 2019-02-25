@@ -48,12 +48,13 @@ updateMeta_server <- function(input,
                               selectedDB){
        
   #----
-  qwertyy <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
+  rhand <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
   
   #----
   output$metaTable <- rhandsontable::renderRHandsontable({
 
-    rhandsontable::rhandsontable(qwertyy$rtab,
+    
+    rhandsontable::rhandsontable(rhand$rtab,
                                  useTypes = FALSE,
                                  contextMenu = TRUE ) %>%
       rhandsontable::hot_col("Strain_ID",
@@ -100,13 +101,15 @@ updateMeta_server <- function(input,
   #----
   observeEvent(c(selectedDB$selectExperiment, input$insertNewMetaColumn),{
                  
+    req(!identical(selectedDB$selectExperiment, "None"))
+    
                  if (!is.null(pool())) {
                    conn <- pool::poolCheckout(pool())
                    
                    if (!"metaData" %in% DBI::dbListTables(conn)) {
                      
                      warning("It appears the experiment file may be corrupt, please create again.")
-                     qwertyy$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
+                     rhand$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
                      
                    } else{
                      
@@ -139,7 +142,7 @@ updateMeta_server <- function(input,
                                                          "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
                      )
                      
-                     qwertyy$rtab <- merge(exampleMetaData,
+                     rhand$rtab <- merge(exampleMetaData,
                                           dbQuery,
                                           all = TRUE,
                                           sort = FALSE)
@@ -150,18 +153,5 @@ updateMeta_server <- function(input,
                  }
                })
   
-  
-  
-  
-  
-  
 }
-
-
-
-
-
-
-
-
 
