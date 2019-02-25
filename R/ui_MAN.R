@@ -73,7 +73,6 @@ ui_smallMolMan <-  function(){
                          ),
                          tabPanel(value = "smallMirror", "Small Molecule Mirror PLot",
                                   IDBacApp::smallmirrorPlotsSampleSelect_UI("smallMirror"),
-                                  IDBacApp::smallmirrorPlotsSettings_UI("smallMirror"),
                                   IDBacApp::smallmirrorPlots_UI("smallMirror"))
                          
                          
