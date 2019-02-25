@@ -85,7 +85,8 @@ mirrorPlot <- function(mirrorPlotEnv){
                                     "<br> Intensity:", round(bottom$y, 1),
                                     "<br> Sample:",
                                     mirrorPlotEnv$peaksSampleTwo@metaData$Strain),
-                      hoverinfo = 'text') %>% 
+                      hoverinfo = 'text',
+                      uirevision = "TRUE") %>% 
     plotly::layout(shapes = c(lp, lp2),
                    showlegend = FALSE) 
                    
