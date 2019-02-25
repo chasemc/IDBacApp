@@ -38,9 +38,6 @@ popupPlotTsne_server <- function(input,
                                  plotTitle = "t-SNE"){ 
   
   
-  
-  
-  
   dataFrame <- reactive({
     
     validate(need(nrow(data()) > 1, "t-SNE requires more samples"))
@@ -49,10 +46,10 @@ popupPlotTsne_server <- function(input,
     validate(need(input$tsnePerplexity < 101, "Perplexity must be less than 101"))
     
     validate(need(input$tsneTheta > 0, "Theta must be greater than 0"))
-    validate(need(input$tsneTheta < 1, "Theta must be less than 101"))
+    validate(need(input$tsneTheta < 1, "Theta should be less than 1"))
     
     validate(need(input$tsneIterations > 0, "Iterations must be greater than 0"))
-    validate(need(input$tsneIterations < 10000, "Iterations must be less than 101"))
+    validate(need(input$tsneIterations < 10000, "Iterations must be less than 1000"))
     
     #IDBacApp::tsneCalculation(dataMatrix = dataframe(),
     IDBacApp::tsneCalculation(dataMatrix = data(),
