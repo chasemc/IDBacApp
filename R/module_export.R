@@ -12,7 +12,7 @@ exportSamples_ui <- function(id) {
   tagList(
     
     div(align = "center",  
-        h3("Export Samples"),
+        h3("Save/Export Samples"),
         tags$hr(size = 20),
         IDBacApp::databaseSelector_UI(ns("dbselector")),   
         tags$hr(size = 20),
@@ -26,7 +26,7 @@ exportSamples_ui <- function(id) {
                            placeholder = FALSE),
         tags$hr(size = 20),
         actionButton(ns("exportSpectra"),
-                     label = "Export Spectra as mzML")
+                     label = "Export spectra as mzML")
         
     )
   )
@@ -58,7 +58,7 @@ exportSamples_server <- function(input,
                                    "dbselector",
                                    availableExperiments = availableExperiments,
                                    sqlDirectory = sqlDirectory,
-                                   h3Label = "Select an existing experiment to copy samples from:")
+                                   h3Label = "Select an existing experiment to export samples from:")
   
   
   

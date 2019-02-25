@@ -40,10 +40,8 @@ databaseTabUI <- function(id) {
                                                               tags$li("It is possible to \"mix and match\" samples from different experiments to create new experiments.
                                                                       However it should be noted that is not possible to remove samples from an experiment.")
                                                             ),
-                                                            tags$b("Begin analysis by selecting a previously-created experiment to the left."), 
-                                                            br(),
-                                                            br(),
-                                                            tags$b("You also have the option, below, to:")
+                                                            tags$b("Begin analysis by selecting a previously-created experiment to the left or use the menus below to modify experiments.")
+                                                          
                                   )
              )
            ),
