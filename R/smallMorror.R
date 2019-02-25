@@ -25,9 +25,11 @@ smallmirrorPlots_UI <- function(id){
   ns <- NS(id)
   fluidRow(
     plotOutput(ns("inversePeakComparisonPlot"), 
-               brush = brushOpts(ns("brush_mirror"))
+               brush = brushOpts(ns("brush_mirror"), 
+                                    clip = FALSE,
+                                    delay = 1000))
     )
-  )
+  
   
 }
 
@@ -243,7 +245,7 @@ ranges2 <- reactive({
     ranges2$x1 <- input$brush_mirror$xmin
     ranges2$x2 <- input$brush_mirror$xmax
     
-    if (is.null(ranges2$y1)) {
+    if (is.null(input$brush_mirror$ymax)) {
       a <- max(dataForInversePeakComparisonPlot()$spectrumSampleOne@mass)
       b <- max(dataForInversePeakComparisonPlot()$spectrumSampleTwo@mass)
       a <- max(a, b)
@@ -258,8 +260,7 @@ ranges2 <- reactive({
    
     
     return(ranges2)
-    
-  })  
+})  
   
   
   
@@ -302,6 +303,7 @@ ranges2 <- reactive({
          border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
     
     
+    session$resetBrush("brush_mirror")
     
   })
   

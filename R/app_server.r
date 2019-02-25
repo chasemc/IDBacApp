@@ -112,7 +112,7 @@ app_server <- function(input, output, session) {
                  if (length(availableDatabases$db) > 0) {
                    
                    appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Work With Previous Experiments",
+                             tabPanel("Work with Previous Experiments",
                                       value = "sqlUiTab",
                                       IDBacApp::databaseTabUI("sqlUIcreator")
                                       

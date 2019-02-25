@@ -5,7 +5,9 @@
 #' @return NA
 #' @export
 #'
-peakRetentionSettings_UI <- function(id){
+peakRetentionSettings_UI <- function(id,
+                                     minMass = 3000, 
+                                     maxMass = 15000){
   ns <- NS(id)
   
   tagList(
@@ -38,13 +40,13 @@ peakRetentionSettings_UI <- function(id){
     p("Lower Mass Cutoff"),
     numericInput(ns("lowerMass"), 
                  label = NULL,
-                 value = 3000,
+                 value = minMass,
                  step = 50,
                  width = "50%"),
     p("Upper Mass Cutoff"),
     numericInput(ns("upperMass"), 
                  label = NULL,
-                 value = 15000,
+                 value = maxMass,
                  step = 50,
                  width = "50%")
   )
