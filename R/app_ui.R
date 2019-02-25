@@ -45,7 +45,7 @@ app_ui <- function(){
                                         tags$li(
                                           p("Bugs and suggestions may be reported on the ",
                                             a(href = "https://github.com/chasemc/IDBacApp/issues",
-                                              target = "_blank","IDBac Issues Page on GitHub", 
+                                              target = "_blank","IDBac issues page on GitHub", 
                                               img(border = "0",
                                                   title = "https://github.com/chasemc/IDBacApp/issues",
                                                   src = "www/GitHub.png",
@@ -101,9 +101,7 @@ app_ui <- function(){
                                               a(href = paste0("http://doi.org/10.5281/zenodo.",
                                                               "zenodoId"),
                                                 target = "_blank",
-                                                img(border = "0",
-                                                    title = "Click to go to Zenodo",
-                                                    src = "https://zenodo.org/badge/DOI/10.5281/zenodo.1185404.svg")
+                                                shiny::HTML('<a href="https://doi.org/10.5281/zenodo.1410518" target="_blank"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1410518.svg" alt="DOI"></a>')
                                               )
                                             )
                                           )
