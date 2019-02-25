@@ -112,7 +112,7 @@ app_server <- function(input, output, session) {
                  if (length(availableDatabases$db) > 0) {
                    
                    appendTab(inputId = "mainIDBacNav",
-                             tabPanel("Work With Previous Experiments",
+                             tabPanel("Work with Previous Experiments",
                                       value = "sqlUiTab",
                                       IDBacApp::databaseTabUI("sqlUIcreator")
                                       
@@ -171,17 +171,26 @@ app_server <- function(input, output, session) {
   
   
   
-  proteinPeakSettings <-  callModule(IDBacApp::peakRetentionSettings_Server,
-                                             "protMirror")
-  
   
   # Mirror Plots ------------------------------------------------------------
   
-  callModule(IDBacApp::mirrorPlots_Sever,
+  
+  proteinPeakSettings <-  callModule(IDBacApp::peakRetentionSettings_Server,
+                                             "protMirror")
+  callModule(IDBacApp::mirrorPlots_Server,
              "protMirror",
              workingDB,
              proteinOrSmall = "proteinPeaks")
   
+  
+  
+  
+  smallPeakSettings <- callModule(IDBacApp::peakRetentionSettings_Server,
+                                     "smallMirror")
+  callModule(IDBacApp::smallmirrorPlots_Server,
+             "smallMirror",
+             workingDB,
+             proteinOrSmall = "smallMoleculePeaks")
   
   
   
@@ -564,10 +573,10 @@ app_server <- function(input, output, session) {
                                              dendrogram = proteinDendrogram$dendrogram,
                                              brushInputs = smallProtDend,
                                              matrixIDs = NULL,
-                                             peakPercentPresence = input$percentPresenceSM,
-                                             lowerMassCutoff = input$lowerMassSM,
-                                             upperMassCutoff = input$upperMassSM,
-                                             minSNR = input$smSNR)
+                                             peakPercentPresence = smallPeakSettings$percentPresence,
+                                             lowerMassCutoff = smallPeakSettings$lowerMass,
+                                             upperMassCutoff = smallPeakSettings$upperMass,
+                                             minSNR = smallPeakSettings$SNR)
     
     if ( (input$selectMatrix != "None") ) {
       
@@ -576,10 +585,10 @@ app_server <- function(input, output, session) {
                                                dendrogram = proteinDendrogram$dendrogram,
                                                brushInputs = smallProtDend,
                                                matrixIDs = NULL,
-                                               peakPercentPresence = input$percentPresenceSM,
-                                               lowerMassCutoff = input$lowerMassSM,
-                                               upperMassCutoff = input$upperMassSM,
-                                               minSNR = input$smSNR)
+                                               peakPercentPresence = smallPeakSettings$percentPresence,
+                                               lowerMassCutoff = smallPeakSettings$lowerMass,
+                                               upperMassCutoff = smallPeakSettings$upperMass,
+                                               minSNR = smallPeakSettings$SNR)
       
       
       
@@ -664,8 +673,8 @@ return(samples)
       if (input$selectMatrix != "None") {
         ("subtracting a matrix blank,") 
         } else {},
-      " retaining peaks with a signal to noise ratio above ", tags$code(input$smSNR), ", and occurring in greater than ", tags$code(input$percentPresenceSM), "% of replicate spectra.
-          Peaks occuring below ", tags$code(input$lowerMassSM), " m/z or above ", tags$code(input$upperMassSM), " m/z were removed from the analysis. ")
+      " retaining peaks with a signal to noise ratio above ", tags$code(smallPeakSettings$SNR), ", and occurring in greater than ", tags$code(smallPeakSettings$percentPresence), "% of replicate spectra.
+          Peaks occuring below ", tags$code(smallPeakSettings$lowerMass), " m/z or above ", tags$code(smallPeakSettings$upperMass), " m/z were removed from the analysis. ")
   })
   
   

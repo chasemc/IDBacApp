@@ -1,11 +1,15 @@
 #' peakRetentionSettings_UI
 #'
 #' @param id namespace
+#' @param minMass starting min mass
+#' @param maxMass starting max mass
 #'
 #' @return NA
 #' @export
 #'
-peakRetentionSettings_UI <- function(id){
+peakRetentionSettings_UI <- function(id,
+                                     minMass = 3000, 
+                                     maxMass = 15000){
   ns <- NS(id)
   
   tagList(
@@ -23,9 +27,9 @@ peakRetentionSettings_UI <- function(id){
                  min = 0,
                  max = 100,
                  width = "50%"),
-    div(class = "tooltippy", "Signal to Noise Cutoff", 
+    div(class = "tooltippy", "Signal to Noise Ratio", 
         span(class = "tooltippytext", 
-             p("Choose an appropriate SNR for your spectra. In the picture below, the SNR of peaks decreases ")
+             p("Peaks with an SNR below the selected value will be removed from analyses.")
         )
     ),
     numericInput(ns("SNR"),
@@ -33,17 +37,18 @@ peakRetentionSettings_UI <- function(id){
                  value = 4,
                  step = 0.5,
                  min = 1.5,
-                 max = 100,width = "50%"),
+                 max = 100,
+                 width = "50%"),
     p("Lower Mass Cutoff"),
     numericInput(ns("lowerMass"), 
                  label = NULL,
-                 value = 3000,
+                 value = minMass,
                  step = 50,
                  width = "50%"),
     p("Upper Mass Cutoff"),
     numericInput(ns("upperMass"), 
                  label = NULL,
-                 value = 15000,
+                 value = maxMass,
                  step = 50,
                  width = "50%")
   )

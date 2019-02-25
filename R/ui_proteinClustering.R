@@ -42,8 +42,9 @@ ui_proteinClustering <- function() {
                                         IDBacApp::bsCollapsePanel(p("Choose Clustering Settings", 
                                                                     align = "center"),
                                                                   value = "proteinClustSettingsDropDown",
+                                                                  div(align = "center",
                                                                   IDBacApp::dendrogramCreatorUI("proteinHierOptions")
-                                                                  
+                                                                  )
                                         )           )
                  ),    
                  wellPanel(
@@ -109,11 +110,12 @@ ui_proteinClustering <- function() {
       
       tabsetPanel(type = "tabs",           
                   tabPanel(value = "proteinMirror","Mirror Plots",
-                           h3("Mirror Plots", align = "center"),
+                           h3("Mirror Plot", align = "center"),
                            br(),
-                           p("Choose two samples to compare in the mirror plots below.
+                           p("Choose two samples to compare in the mirror plot below.
                            Matching peaks will be colored blue and non-matching peaks
                            will be colored red."),
+                           p("Note: Binning algorithm for mirror plot and dendrogram is diffeerent.", style = "font-size: 0.75em"),
                            br(),
                            fluidRow(
                              IDBacApp::mirrorPlotsSettings_UI("protMirror")

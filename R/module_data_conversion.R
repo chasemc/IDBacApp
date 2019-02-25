@@ -7,45 +7,54 @@
 #'
 convertDataTab_UI <- function(id) {
   ns <- shiny::NS(id)
-  
-  
-  navlistPanel(widths = c(3, 8), id = ns("ConversionsNav"),
-               "Create an IDBac experiment",
-               tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
-                        value = ns("convert_bruker_nav"),
-                        
-                          wellPanel(class = "intro_WellPanel",
-                                    align = "center",
-                                    #       tabsetPanel(
-                                    #          tabPanel(title = "Data from single MALDI plate",
-                                    IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
-                                    #           ) 
-                                    #                                        )
-                                    
-                                    
-                          )
-               ),
-               tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
-                        value = ns("convert_mzml_nav"),
-                        wellPanel(class = "intro_WellPanel",
-                                  align = "center",
-                                  IDBacApp::convertMZ_UI(ns("beginWithMZ"))
-                        )
-               ),
-               tabPanel(tags$ul(tags$li("Click here to convert txt files")),
-                        value = ns("convert_txt_nav"),
-                        wellPanel(class = "intro_WellPanel",
-                                  align = "center",
-                                  IDBacApp::convertDelim_UI(ns("convertDelim"))
-                        )
-               ),
-               tabPanel(tags$ul(tags$li("Click here to convert Microtyper files")),
-                        value = ns("convert_microtyper_nav"),
-                        wellPanel(class = "intro_WellPanel",
-                                  align = "center",
-                                  IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
-                        )
-               )
+
+  navlistPanel(
+    widths = c(3, 8),
+    id = ns("ConversionsNav"),
+    "Create an IDBac experiment",
+    tabPanel(
+      tags$ul(
+        tags$li("Click here to convert Bruker files", align = "left")),
+             value = ns("convert_bruker_nav"),
+             
+             wellPanel(class = "intro_WellPanel",
+                       align = "center",
+                       #       tabsetPanel(
+                       #          tabPanel(title = "Data from single MALDI plate",
+                       IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
+                       #           ) 
+                       #                                        )
+                       
+                       
+             )
+    ),
+    tabPanel(
+      tags$ul(
+        tags$li("Click here to convert mzML/mzXML files", align="left")),
+             value = ns("convert_mzml_nav"),
+             wellPanel(class = "intro_WellPanel",
+                       align = "center",
+                       IDBacApp::convertMZ_UI(ns("beginWithMZ"))
+             )
+    ),
+    tabPanel(
+      tags$ul(
+        tags$li("Click here to convert txt files", align = "left")),
+             value = ns("convert_txt_nav"),
+             wellPanel(class = "intro_WellPanel",
+                       align = "center",
+                       IDBacApp::convertDelim_UI(ns("convertDelim"))
+             )
+    ),
+    tabPanel(
+      tags$ul(
+        tags$li("Click here to convert Microtyper files", align = "left")),
+             value = ns("convert_microtyper_nav"),
+             wellPanel(class = "intro_WellPanel",
+                       align = "center",
+                       IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
+             )
+    )
   )
 }
 
