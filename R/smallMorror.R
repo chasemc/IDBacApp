@@ -235,26 +235,30 @@ smallmirrorPlots_Server <- function(input,
   
   # Used in the the inverse-peak plot for zooming ---------------------------
   
-  ranges2 <- reactiveValues(x1 = NULL,
-                            x2 = NULL,
-                            y1 = NULL,
-                            y2 = NULL)
   
-  
- observe({
-    
+ranges2 <- reactive({
+  ranges2 <- list()
     ranges2$y1 <- input$brush_mirror$ymin
     ranges2$y2 <- input$brush_mirror$ymax
     ranges2$x1 <- input$brush_mirror$xmin
     ranges2$x2 <- input$brush_mirror$xmax
     
     if (is.null(ranges2$y1)) {
+      a <- max(dataForInversePeakComparisonPlot()$spectrumSampleOne@mass)
+      b <- max(dataForInversePeakComparisonPlot()$spectrumSampleTwo@mass)
+      a <- max(a, b)
+      w <- min(dataForInversePeakComparisonPlot()$spectrumSampleOne@mass)
+      b <- min(dataForInversePeakComparisonPlot()$spectrumSampleTwo@mass)
+      b <- min(w, b)
       ranges2$y1 <- max(dataForInversePeakComparisonPlot()$spectrumSampleOne@intensity)
-      ranges2$y2 <- max(dataForInversePeakComparisonPlot()$spectrumSampleTwo@intensity)
-      ranges2$x1 <- max(dataForInversePeakComparisonPlot()$spectrumSampleOne@mass)
-      ranges2$x2 <- max(dataForInversePeakComparisonPlot()$spectrumSampleTwo@mass)
+      ranges2$y2 <- -max(dataForInversePeakComparisonPlot()$spectrumSampleTwo@intensity)
+      ranges2$x1 <- b
+      ranges2$x2 <- a
     }
    
+    
+    return(ranges2)
+    
   })  
   
   
@@ -278,8 +282,8 @@ smallmirrorPlots_Server <- function(input,
     #Create peak plots and color each peak according to whether it occurs in the other spectrum
     plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
          y = mirrorPlotEnv$spectrumSampleOne@intensity,
-         ylim = isolate(c(ranges2$y1, ranges2$y2)),
-         xlim = isolate(c(ranges2$x1,ranges2$x2)),
+         ylim = c(ranges2()$y1, ranges2()$y2),
+         xlim = c(ranges2()$x1,ranges2()$x2),
          type = "l",
          col = adjustcolor("Black", alpha = 0.3),
          xlab = "m/z",
