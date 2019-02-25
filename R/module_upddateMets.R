@@ -77,22 +77,39 @@ updateMeta_server <- function(input,
                                                  columnNames = input$addMetaColumnName)
                })
   
+  
+  
   observeEvent(input$saven, 
                ignoreInit = TRUE, {
+                 
+                 
+                 showModal(modalDialog(
+                   size = "s",
+                   title = "Saving...",
+                   easyClose = FALSE, 
+                   footer = ""))   
+               })
+  
+  observeEvent(input$saven, 
+               ignoreInit = TRUE, {
+            
+                 
+                 
                  #make sure not to use the wrong metadata table
                  query <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
                                           FROM `IndividualSpectra`",
                                          .con =  pool())
                  query <- DBI::dbGetQuery(pool(), query)[ ,1]
                  userTab <- as.character(rhandsontable::hot_to_r(input$metaTable)[-1, 1])
-                 req(userTab == query)
-                 
-                 
+                 req(identical(userTab, query))
                  
                  DBI::dbWriteTable(conn = pool(),
                                    name = "metaData",
                                    value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
                                    overwrite = TRUE)  
+               
+                 removeModal()
+                 
                })
   
  
@@ -101,7 +118,10 @@ updateMeta_server <- function(input,
   #----
   observeEvent(c(selectedDB$selectExperiment, input$insertNewMetaColumn),{
                  
-    req(!identical(selectedDB$selectExperiment, "None"))
+     if (identical(selectedDB$selectExperiment, "None")) {
+       rhand$rtab <- data.frame("Strain_ID" = "Placeholder")
+       } else {
+         
     
                  if (!is.null(pool())) {
                    conn <- pool::poolCheckout(pool())
@@ -149,7 +169,7 @@ updateMeta_server <- function(input,
                      
                      pool::poolReturn(conn)
                    }
-                   
+                 }
                  }
                })
   

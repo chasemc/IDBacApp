@@ -44,7 +44,7 @@ GROUP BY Strain_ID;
                         while (!DBI::dbHasCompleted(query)) {
                           
                           chunk <- DBI::dbFetch(query, 5)
-                       
+                          
                           counter <- counter - inc
                           ids <- chunk$Strain_ID
                           fileLoc <- base::file.path(saveToDir, ids)
@@ -77,12 +77,12 @@ GROUP BY Strain_ID;
                             file.rename(fileLoc, paste0(fileLoc, ".", whichMZ))
                             
                             
-                          warning(glue::glue("Exported: {ids[[i]]}"))
-                          
+                            warning(glue::glue("Exported: {ids[[i]]}"))
+                            
                           }
                           
                         }
-                      
+                        
                       })
   removeModal()
   
@@ -91,7 +91,7 @@ GROUP BY Strain_ID;
   DBI::dbDisconnect(conn)
   
   pool::poolReturn(conn)
- # pool::poolClose(userDBCon)
+  # pool::poolClose(userDBCon)
   
   
   

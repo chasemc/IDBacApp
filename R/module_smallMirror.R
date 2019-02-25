@@ -24,12 +24,11 @@ smallmirrorPlotsSampleSelect_UI <- function(id){
 smallmirrorPlots_UI <- function(id){
   ns <- NS(id)
   fluidRow(
-    plotOutput(ns("inversePeakComparisonPlot"), 
-               brush = brushOpts(ns("brush_mirror"), 
-                                    clip = FALSE,
-                                    delay = 1000))
+      plotOutput(ns("inversePeakComparisonPlot"), 
+                 brush = brushOpts(ns("brush_mirror"), 
+                                   clip = FALSE,
+                                   delay = 2000))
     )
-  
   
 }
 
@@ -238,8 +237,8 @@ smallmirrorPlots_Server <- function(input,
   # Used in the the inverse-peak plot for zooming ---------------------------
   
   
-ranges2 <- reactive({
-  ranges2 <- list()
+  ranges2 <- reactive({
+    ranges2 <- list()
     ranges2$y1 <- input$brush_mirror$ymin
     ranges2$y2 <- input$brush_mirror$ymax
     ranges2$x1 <- input$brush_mirror$xmin
@@ -252,15 +251,15 @@ ranges2 <- reactive({
       w <- min(dataForInversePeakComparisonPlot()$spectrumSampleOne@mass)
       b <- min(dataForInversePeakComparisonPlot()$spectrumSampleTwo@mass)
       b <- min(w, b)
-      ranges2$y1 <- max(dataForInversePeakComparisonPlot()$spectrumSampleOne@intensity)
-      ranges2$y2 <- -max(dataForInversePeakComparisonPlot()$spectrumSampleTwo@intensity)
+      ranges2$y2 <- max(dataForInversePeakComparisonPlot()$spectrumSampleOne@intensity)
+      ranges2$y1 <- -max(dataForInversePeakComparisonPlot()$spectrumSampleTwo@intensity)
       ranges2$x1 <- b
       ranges2$x2 <- a
     }
-   
+    
     
     return(ranges2)
-})  
+  })  
   
   
   

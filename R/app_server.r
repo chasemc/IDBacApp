@@ -566,16 +566,17 @@ app_server <- function(input, output, session) {
   
   subtractedMatrixBlank <- reactive({
     
+    validate(need(smallPeakSettings$lowerMass < smallPeakSettings$upperMass, "Upper mass cutoff must be greater than lower mass curoff."))
     
-    samples <-  IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
-                                             sampleIDs = NULL,
-                                             dendrogram = proteinDendrogram$dendrogram,
-                                             brushInputs = smallProtDend,
-                                             matrixIDs = NULL,
-                                             peakPercentPresence = smallPeakSettings$percentPresence,
-                                             lowerMassCutoff = smallPeakSettings$lowerMass,
-                                             upperMassCutoff = smallPeakSettings$upperMass,
-                                             minSNR = smallPeakSettings$SNR)
+    samples <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
+                                            sampleIDs = NULL,
+                                            dendrogram = proteinDendrogram$dendrogram,
+                                            brushInputs = smallProtDend,
+                                            matrixIDs = NULL,
+                                            peakPercentPresence = smallPeakSettings$percentPresence,
+                                            lowerMassCutoff = smallPeakSettings$lowerMass,
+                                            upperMassCutoff = smallPeakSettings$upperMass,
+                                            minSNR = smallPeakSettings$SNR)
     
     if ( (input$selectMatrix != "None") ) {
       
