@@ -396,9 +396,6 @@ app_server <- function(input, output, session) {
   # Calculate tSNE based on PCA calculation already performed ---------------
   
   
-  
-  
-  
   callModule(IDBacApp::popupPlotTsne_server,
              "tsnePanel",
              data = proteinMatrix,
