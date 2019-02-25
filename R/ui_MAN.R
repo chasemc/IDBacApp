@@ -16,28 +16,7 @@ ui_smallMolMan <-  function(){
                                       open = "Panel 1",
                                       IDBacApp::bsCollapsePanel(p("Show/Hide MAN Settings", 
                                                                   align = "center"),
-                                                                numericInput("percentPresenceSM",
-                                                                             label = h5("In what percentage of replicates must a peak be present to be kept? (0-100%) (Experiment/Hypothesis dependent)"),
-                                                                             value = 70,
-                                                                             step = 10,
-                                                                             min = 0,
-                                                                             max = 100),
-                                                                numericInput("smSNR",
-                                                                             label = h5(strong("Signal To Noise Cutoff")),
-                                                                             value = 4,
-                                                                             step = 0.5,
-                                                                             min = 1.5,
-                                                                             max = 100),
-                                                                numericInput("upperMassSM",
-                                                                             label = h5(strong("Upper Mass Cutoff")),
-                                                                             value = 2000,
-                                                                             step = 20,
-                                                                             max = 3000),
-                                                                numericInput("lowerMassSM",
-                                                                             label = h5(strong("Lower Mass Cutoff")),
-                                                                             value = 200,
-                                                                             step = 20,
-                                                                             min = 3000)
+                                                                IDBacApp::peakRetentionSettings_UI("smallMirror")
                                       )),
                  uiOutput("matrixSelector"),
                  IDBacApp::bsCollapse(id = "collapseManSettings",
@@ -88,10 +67,14 @@ ui_smallMolMan <-  function(){
              tabsetPanel(type = "tabs",           
                          tabPanel(value = "smallMolMANUI","Small Molecule MAN",
                                   IDBacApp::smMANPlot_UI("smMAN")),
-                         tabPanel(value = "smallMolPCAUi","SmallMolecule PCA",
+                         tabPanel(value = "smallMolPCAUi","Small Molecule PCA",
                                   
                                   plotly::plotlyOutput("smallMolPcaPlot")
-                         )               
+                         ),
+                         tabPanel(value = "smallMirror", "Small Molecule Mirror PLot",
+                                  IDBacApp::smallmirrorPlotsSampleSelect_UI("smallMirror"),
+                                  IDBacApp::smallmirrorPlotsSettings_UI("smallMirror"),
+                                  IDBacApp::smallmirrorPlots_UI("smallMirror"))
                          
                          
                          
@@ -102,7 +85,7 @@ ui_smallMolMan <-  function(){
   
 }
 
-
+mirrorPlots_UI
 
 
 

@@ -1,4 +1,5 @@
 
+
 #' mirrorPlotsSettings_UI
 #'
 #' @param id namespace
@@ -6,40 +7,38 @@
 #' @return NA
 #' @export
 #'
-mirrorPlotsSettings_UI <- function(id){
+smallmirrorPlotsSampleSelect_UI <- function(id){
   ns <- NS(id)
-    uiOutput(ns("mirrorSpectraSelector"))
+  uiOutput(ns("mirrorSpectraSelector"))
 }
 
-#' mirrorPlotDownload_UI
+
+#' mirrorPlotsSettings_UI
 #'
 #' @param id namespace
 #'
 #' @return NA
 #' @export
 #'
-mirrorPlotDownload_UI <- function(id){
+smallmirrorPlotsSettings_UI <- function(id){
   ns <- NS(id)
-  tagList(
-    downloadButton(ns("downloadInverse"), 
-                   label = "Download SVG")
-    
-  )
-  
-}  
+  uiOutput(ns("mirrorSettings"))
+}
 
-#' mirrorPlots_UI
+#' smallmirrorPlots_UI
 #'
 #' @param id  namespace
 #'
 #' @return NA
 #' @export
 #'
-mirrorPlots_UI <- function(id){
+smallmirrorPlots_UI <- function(id){
   ns <- NS(id)
-  fluidRow(plotly::plotlyOutput(ns("inversePeakComparisonPlot")
-
-  ))
+  fluidRow(
+    plotOutput(ns("inversePeakComparisonPlot")
+               
+    )
+  )
   
 }
 
@@ -54,19 +53,19 @@ mirrorPlots_UI <- function(id){
 #' @return NA
 #' @export
 #'
-mirrorPlots_Server <- function(input,
-                              output,
-                              session,
-                              workingDB,
-                              proteinOrSmall){
+smallmirrorPlots_Server <- function(input,
+                                    output,
+                                    session,
+                                    workingDB,
+                                    proteinOrSmall){
   
   
   inverseComparisonNames <- reactive({
     conn <- pool::poolCheckout(workingDB$pool())
     
     a <- DBI::dbGetQuery(conn, glue::glue( "SELECT DISTINCT `Strain_ID`
-                                            FROM IndividualSpectra
-                                            WHERE (`{proteinOrSmall}` IS NOT NULL)"))
+                                           FROM IndividualSpectra
+                                           WHERE (`{proteinOrSmall}` IS NOT NULL)"))
     pool::poolReturn(conn)
     
     a[ ,1]
@@ -78,7 +77,7 @@ mirrorPlots_Server <- function(input,
   output$mirrorSpectraSelector <- renderUI({
     
     tagList(
-    
+      
       column(width = 5, offset = 1,
              selectInput(session$ns("Spectra1"), 
                          label = strong("Spectrum 1 (positive y-axis)"),
@@ -94,6 +93,47 @@ mirrorPlots_Server <- function(input,
     )
     
   })
+  
+  
+  output$mirrorSettings <- renderUI({
+    
+    tagList(
+      
+      sliderInput(session$ns("setmz"), 
+                  "m/z",
+                  min = 0, 
+                  max = 3000, 
+                  value = c(0, 3000),
+                  ticks = TRUE
+      ),
+      sliderInput(session$ns("setylims"), 
+                    "Adjust Intensity",
+                    min = -110, 
+                    max = 110, 
+                    value = c(-110, 110),
+                    ticks = TRUE
+      )
+    )
+  })
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   dataForInversePeakComparisonPlot <- reactive({
     
@@ -113,17 +153,17 @@ mirrorPlots_Server <- function(input,
                                                                  upperMassCutoff = input$upperMass,
                                                                  minSNR = input$SNR,
                                                                  tolerance = 0.002,
-                                                                 protein = TRUE) 
+                                                                 protein = FALSE) 
+    llp3<<-list(checkedPool = conn,
+                sampleIDs = input$Spectra1,
+                peakPercentPresence = input$percentPresence,
+                lowerMassCutoff = input$lowerMass,
+                upperMassCutoff = input$upperMass,
+                minSNR = input$SNR,
+                tolerance = 0.002,
+                protein = FALSE)
     
     
-    llp<<-list(checkedPool = conn,
-         sampleIDs = input$Spectra2,
-         peakPercentPresence = input$percentPresence,
-         lowerMassCutoff = input$lowerMass,
-         upperMassCutoff = input$upperMass,
-         minSNR = input$SNR,
-         tolerance = 0.002,
-         protein = TRUE)
     
     mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                  sampleIDs = input$Spectra2,
@@ -132,7 +172,7 @@ mirrorPlots_Server <- function(input,
                                                                  upperMassCutoff = input$upperMass,
                                                                  minSNR = input$SNR,
                                                                  tolerance = 0.002,
-                                                                 protein = TRUE)
+                                                                 protein = FALSE)
     
     
     
@@ -176,9 +216,9 @@ mirrorPlots_Server <- function(input,
     remove(temp)
     
     
-    query <- DBI::dbSendStatement("SELECT `proteinSpectrum`
+    query <- DBI::dbSendStatement("SELECT `smallMoleculeSpectrum`
                                   FROM IndividualSpectra
-                                  WHERE (`proteinSpectrum` IS NOT NULL)
+                                  WHERE (`smallMoleculeSpectrum` IS NOT NULL)
                                   AND (`Strain_ID` = ?)",
                                   con = conn)
     
@@ -198,10 +238,9 @@ mirrorPlots_Server <- function(input,
     
     
     
-    
-    query <- DBI::dbSendStatement("SELECT `proteinSpectrum`
+    query <- DBI::dbSendStatement("SELECT `smallMoleculeSpectrum`
                                   FROM IndividualSpectra
-                                  WHERE (`proteinSpectrum` IS NOT NULL)
+                                  WHERE (`smallMoleculeSpectrum` IS NOT NULL)
                                   AND (`Strain_ID` = ?)",
                                   con = conn)
     
@@ -234,9 +273,40 @@ mirrorPlots_Server <- function(input,
   
   
   # Output for the non-zoomed mirror plot
-  output$inversePeakComparisonPlot <- plotly::renderPlotly({
+  output$inversePeakComparisonPlot <- renderPlot({
     
-    mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
+    mirrorPlotEnv <- dataForInversePeakComparisonPlot()
+    
+    yscale1 <- 100 / max(mirrorPlotEnv$spectrumSampleOne@intensity)
+    yscale2 <- 100 / max(mirrorPlotEnv$spectrumSampleTwo@intensity)
+    
+    mirrorPlotEnv$spectrumSampleOne@intensity <- mirrorPlotEnv$spectrumSampleOne@intensity * yscale1 
+    mirrorPlotEnv$spectrumSampleTwo@intensity <- mirrorPlotEnv$spectrumSampleTwo@intensity * yscale2 
+    
+    
+    
+    #Create peak plots and color each peak according to whether it occurs in the other spectrum
+    plot(x = mirrorPlotEnv$spectrumSampleOne@mass,
+         y = mirrorPlotEnv$spectrumSampleOne@intensity,
+         ylim = input$setylims,
+         xlim = input$setmz,
+         type = "l",
+         col = adjustcolor("Black", alpha = 0.3),
+         xlab = "m/z",
+         ylab = "Intensity")
+    lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
+          y = -mirrorPlotEnv$spectrumSampleTwo@intensity)
+    rect(xleft = mirrorPlotEnv$peaksSampleOne@mass - 0.5,
+         ybottom = 0,
+         xright = mirrorPlotEnv$peaksSampleOne@mass + 0.5,
+         ytop = ((mirrorPlotEnv$peaksSampleOne@intensity) * max(mirrorPlotEnv$spectrumSampleOne@intensity) / max(mirrorPlotEnv$peaksSampleOne@intensity)),
+         border = mirrorPlotEnv$SampleOneColors)
+    rect(xleft = mirrorPlotEnv$peaksSampleTwo@mass - 0.5,
+         ybottom = 0,
+         xright = mirrorPlotEnv$peaksSampleTwo@mass + 0.5,
+         ytop = -((mirrorPlotEnv$peaksSampleTwo@intensity) * max(mirrorPlotEnv$spectrumSampleTwo@intensity) / max(mirrorPlotEnv$peaksSampleTwo@intensity)),
+         border = rep("grey", times = length(mirrorPlotEnv$peaksSampleTwo@intensity)))
+    
     
     
   })
@@ -244,7 +314,7 @@ mirrorPlots_Server <- function(input,
   
   # Output the zoomed mirror plot -------------------------------------------
   
-
+  
   # Download svg of zoomed mirror plot --------------------------------------
   
   output$downloadInverse <- downloadHandler(
@@ -268,8 +338,4 @@ mirrorPlots_Server <- function(input,
   
   
 }
-
-
-
-
 

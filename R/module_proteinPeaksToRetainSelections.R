@@ -23,9 +23,9 @@ peakRetentionSettings_UI <- function(id){
                  min = 0,
                  max = 100,
                  width = "50%"),
-    div(class = "tooltippy", "Signal to Noise Cutoff", 
+    div(class = "tooltippy", "Signal to Noise Ratio", 
         span(class = "tooltippytext", 
-             p("Choose an appropriate SNR for your spectra. In the picture below, the SNR of peaks decreases ")
+             p("Peaks with an SNR below the selected value will be removed from analyses.")
         )
     ),
     numericInput(ns("SNR"),

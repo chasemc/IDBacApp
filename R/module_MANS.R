@@ -3,24 +3,6 @@
 
 
 
-
-#' smallMolMAN_UI
-#'
-#' @param id . 
-#'
-#' @return .
-#' @export
-#'
-
-smallMolMAN_UI <- function(id){
-  ns <- shiny::NS(id)
-  
-  networkD3::simpleNetworkOutput("metaboliteAssociationNetwork",
-                                 width = "100%")
-  
-}
-
-
 #nothing yet
 #' smallMolDendrogram_UI
 #'
@@ -34,11 +16,6 @@ smallMolDendrogram_UI <- function(id){
   ns <- shiny::NS(id)
   #empty
 }
-
-
-
-
-
 
 
 # Brushable dend (protein) on small molecule page ---------------------------------------
