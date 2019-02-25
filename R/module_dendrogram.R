@@ -70,7 +70,9 @@ addDotsActionUI <- function(id) {
 #'
 plotHier <- function(id) {
   ns <- shiny::NS(id)
-  plotOutput(ns("hierOut"))
+  shinycssloaders::withSpinner(
+    plotOutput(ns("hierOut"))
+  )
   
 }
 

@@ -37,7 +37,10 @@ mirrorPlotDownload_UI <- function(id){
 #'
 mirrorPlots_UI <- function(id){
   ns <- NS(id)
-  fluidRow(plotly::plotlyOutput(ns("inversePeakComparisonPlot")
+  fluidRow(
+    shinycssloaders::withSpinner(
+    plotly::plotlyOutput(ns("inversePeakComparisonPlot")
+    )
 
   ))
   
