@@ -70,8 +70,8 @@ transferToNewDB_server <- function(input,
                                       whetherProtein = FALSE)
   
   
-    continue <- reactiveValues(val = FALSE)
-    
+  continue <- reactiveValues(val = FALSE)
+  
   shiny::callModule(IDBacApp::dbExists_server,
                     "dbExistsPopup", 
                     continue = continue)
@@ -79,53 +79,65 @@ transferToNewDB_server <- function(input,
   
   observeEvent(input$addtoNewDB,
                ignoreInit = TRUE, {
-    
-    # Number of samples for transferring must be > 0
-    req(length(chosenSamples$chosen) > 0)
-    
-    newdbName <- gsub(" ",
-                      "",
-                      IDBacApp::path_sanitize(input$newDBPath))
-    
-    req(newdbName != "")
-
-    
-    dbExist <- file.exists(file.path(sqlDirectory$sqlDirectory, paste0(newdbName,".sqlite")))
-    
-    if(dbExist){
-      IDBacApp::dbExists_UI(id = "dbExistsPopup", 
-                            dbName = newdbName)
-    } else {
-      continue$val <- TRUE
-    }
-    
-  })
+                 
+                 # Number of samples for transferring must be > 0
+                 req(length(chosenSamples$chosen) > 0)
+                 
+                 newDBName <- gsub(" ",
+                                   "",
+                                   IDBacApp::path_sanitize(input$newDBPath))
+                 
+                 req(newDBName != "")
+                 
+                 
+                 dbExist <- file.exists(file.path(sqlDirectory$sqlDirectory, paste0(newDBName,".sqlite")))
+                 
+                 if(dbExist){
+                   IDBacApp::dbExists_UI(id = "dbExistsPopup", 
+                                         dbName = newDBName)
+                 } else {
+                   continue$val <- TRUE
+                 }
+                 
+               })
   
   
   
   observeEvent(continue$val, 
                ignoreInit = TRUE, {
-    print(continue$val)
-    req(continue$val == TRUE)
-    
-    IDBacApp::copyingDbPopup()
-    
-    newCheckedPool <- IDBacApp::createPool(newdbName, 
-                                           sqlDirectory$sqlDirectory)
-    
-    IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
-                                newDBPool = newCheckedPool, 
-                                newdbName = newdbName,
-                                sampleIDs = chosenSamples$chosen)
-    
-    
-    removeModal()
-    
-    availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
-                                                                    pattern = ".sqlite",
-                                                                    full.names = FALSE))
-    
-  })
+                 
+                 print(continue$val)
+                 req(continue$val == TRUE)
+                 
+                 IDBacApp::copyingDbPopup()
+                 
+                 newDBName <- gsub(" ",
+                                   "",
+                                   IDBacApp::path_sanitize(input$newDBPath))
+                 
+                 req(newDBName != "")
+                 
+                 newCheckedPool <- IDBacApp::createPool(newDBName, 
+                                                        sqlDirectory$sqlDirectory)
+                 
+                 existingDBPool <<- selectedDB$userDBCon()
+                 newDBPool <<- newCheckedPool
+                 newDBName <<- newDBName
+                 sampleIDs <<- chosenSamples$chosen
+                 
+                 IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
+                                             newDBPool = newCheckedPool[[1]], 
+                                             newDBName = newDBName,
+                                             sampleIDs = chosenSamples$chosen)
+                 
+                 
+                 removeModal()
+                 
+                 availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                                 pattern = ".sqlite",
+                                                                                 full.names = FALSE))
+                 
+               })
   
   
   

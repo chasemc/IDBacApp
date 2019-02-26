@@ -4,16 +4,16 @@
 \alias{copyToNewDatabase}
 \title{Copy from one database to another, selecting by Sample ID}
 \usage{
-copyToNewDatabase(existingDBPool, newdbPath, newdbName, sampleIDs)
+copyToNewDatabase(existingDBPool, newDBPool, newdbName, sampleIDs)
 }
 \arguments{
 \item{existingDBPool}{un-checked pool that samples are being pulled from}
 
-\item{newdbPath}{path to where new db should be created}
-
 \item{newdbName}{new db name}
 
 \item{sampleIDs}{smaples to transfer}
+
+\item{newdbPath}{path to where new db should be created}
 }
 \value{
 NA

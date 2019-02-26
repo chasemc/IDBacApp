@@ -4,7 +4,7 @@
 \alias{dbExists_server}
 \title{Modular modal Warn user that database alredy exists}
 \usage{
-dbExists_server(input, output, session)
+dbExists_server(input, output, session, continue)
 }
 \arguments{
 \item{input}{shiny}
