@@ -1,8 +1,9 @@
 #' Copy from one database to another, selecting by Sample ID
 #'
-#' @param existingDBPool NA 
-#' @param newdbPath  NA
-#' @param sampleIDs  NA
+#' @param existingDBPool un-checked pool that samples are being pulled from 
+#' @param newdbPath  path to where new db should be created
+#' @param sampleIDs  smaples to transfer
+#' @param newdbName new db name
 #'
 #' @return NA
 #' @export
@@ -23,8 +24,9 @@ copyToNewDatabase <- function(existingDBPool,
                         # Connect to both databases (create pool and checkout)
                         
                         
-                        newDBPool <- pool::dbPool(drv = RSQLite::SQLite(),
-                                                  dbname = newdbPath)
+                        newDBPool <- IDBacApp::createPool(newdbName,
+                                                          newdbPath)
+                          
                         newDBconnection <- pool::poolCheckout(newDBPool)
                         
                         

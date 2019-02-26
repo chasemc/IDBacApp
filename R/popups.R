@@ -80,7 +80,10 @@ copyingDbPopup <- function(){
 
 #' Modular modal Warn user that database alredy exists
 #'
-#' @return 
+#' @param id namespace
+#' @param dbName name of database to be created
+#'
+#' @return modular modal
 #' @export
 #'
 dbExists_UI <- function(id, dbName){
@@ -94,10 +97,42 @@ dbExists_UI <- function(id, dbName){
       size = "l",
       footer = 
         actionButton("continue", "Continue"),
-      actionButton("nope", "Stop")
+      actionButton("stop", "Stop")
         
         )
   )
 }
 
+
+
+#' Modular modal Warn user that database alredy exists
+#'
+#' @param input shiny
+#' @param output shiny
+#' @param session shiny
+#'
+#' @return modular modal
+#' @export
+#'
+dbExists_server <- function(input, 
+                            output,
+                            session){
+  
+  
+  continue <- reactiveValues(val = NULL)
+  
+  
+  observeEvent(input$continue, 
+               ignoreInit  = TRUE, {
+                 continue$val <- TRUE                 
+               })
+  
+  observeEvent(input$stop, 
+               ignoreInit  = TRUE, {
+                 continue$val <- FALSE                 
+               })
+  
+  return(continue)
+  
+}
 
