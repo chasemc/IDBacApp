@@ -87,18 +87,18 @@ copyingDbPopup <- function(){
 #' @export
 #'
 dbExists_UI <- function(id, dbName){
+  ns <- NS(id)
   showModal(
     modalDialog(
       title = "Warning",
       glue::glue("Experiment: {dbName} already exists, overwrite?"),
-      br(),
-      "To check what has been converted, you can navigate to:",
       easyClose = FALSE, 
-      size = "l",
-      footer = 
-        actionButton("continue", "Continue"),
-      actionButton("stop", "Stop")
+      size = "s",
+        actionButton(ns("cont"),"Continue", icon("check")),
+      actionButton(ns("stop"), "Stop", icon = icon("remove")),
+      footer = NULL
         
+   
         )
   )
 }
@@ -116,20 +116,21 @@ dbExists_UI <- function(id, dbName){
 #'
 dbExists_server <- function(input, 
                             output,
-                            session){
+                            session,
+                            continue){
   
-  
-  continue <- reactiveValues(val = NULL)
-  
-  
-  observeEvent(input$continue, 
+  observe(print(input$cont))
+  observeEvent(input$cont, 
                ignoreInit  = TRUE, {
-                 continue$val <- TRUE                 
+                 removeModal(session)
+                 continue$val <- TRUE   
+                 
                })
   
   observeEvent(input$stop, 
                ignoreInit  = TRUE, {
-                 continue$val <- FALSE                 
+                 continue$val <- FALSE    
+                 removeModal(session)
                })
   
   return(continue)
