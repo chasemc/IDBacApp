@@ -9,7 +9,8 @@
 #'
 
 copyToNewDatabase <- function(existingDBPool,
-                              newdbPath, 
+                              newdbPath,
+                              newdbName,
                               sampleIDs){
   
   # Run everything with a Shiny progress bar  

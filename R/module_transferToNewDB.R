@@ -17,7 +17,7 @@ transferToNewDB_UI <- function(id) {
         
         IDBacApp::databaseSelector_UI(ns("dbselector")),   
         tags$hr(size = 20),
-        textInput(ns("nameformixNmatch"),
+        textInput(ns("newDBPath"),
                   label = "New experiment name:",
                   width = "50%",
                   placeholder = "Enter new experiment name here"),
@@ -71,40 +71,44 @@ transferToNewDB_server <- function(input,
   
   
   
-  copyingDbPopup <- reactive({
-    showModal(modalDialog(
-      title = "Important message",
-      "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
-      br(),
-      "To check what has been converted, you can navigate to:",
-      easyClose = FALSE, 
-      size = "l",
-      footer = ""))
-  })
-  
-  
-  
-  
-  
+  shiny::callModule(IDBacApp::dbExists_server,
+                    "dbExistsPopup")
   
   observeEvent(input$addtoNewDB, {
+    # Number of samples for transferring must be > 0
     req(length(chosenSamples$chosen) > 0)
     
-    nam <- gsub(" ", "", IDBacApp::path_sanitize(input$nameformixNmatch))
+    newdbName <- gsub(" ",
+                "",
+                IDBacApp::path_sanitize(input$newDBPath))
     
-    req(nam != "")
+    req(newdbName != "")
     
-    copyingDbPopup()
+    IDBacApp::copyingDbPopup()
     
-    newdbPath <- file.path(sqlDirectory$sqlDirectory, paste0(nam, ".sqlite"))
-    copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
-                      newdbPath = newdbPath, 
-                      sampleIDs = chosenSamples$chosen)
+    dbExist <- file.exists(file.path(sqlDirectory$sqlDirectory, newdbName))
     
-    removeModal()
+    if(dbExist){
+    continue <- IDBacApp::dbExists_UI("dbExistsPopup", 
+                            newdbName)
+    } else {
+      continue <- TRUE
+    }
+    if(continue == TRUE){
+    
+    
+    IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
+                                newdbPath = sqlDirectory$sqlDirectory, 
+                                newdbName = newdbName,
+                                sampleIDs = chosenSamples$chosen)
+    
+   
+    
     availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                     pattern = ".sqlite",
                                                                     full.names = FALSE))
+    }
+    removeModal()
   })
   
 }

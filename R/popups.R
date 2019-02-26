@@ -56,3 +56,48 @@ brukerToMzml_popup <- function(){
     footer = ""))
 }
 
+
+#' While Database is copying, block user-interaction
+#'
+#' @return modal
+#' @export
+#'
+copyingDbPopup <- function(){
+  showModal(
+    modalDialog(
+      title = "Important message",
+      "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
+      br(),
+      "To check what has been converted, you can navigate to:",
+      easyClose = FALSE, 
+      size = "l",
+      footer = "")
+  )
+}
+
+
+
+
+#' Modular modal Warn user that database alredy exists
+#'
+#' @return 
+#' @export
+#'
+dbExists_UI <- function(id, dbName){
+  showModal(
+    modalDialog(
+      title = "Warning",
+      glue::glue("Experiment: {dbName} already exists, overwrite?"),
+      br(),
+      "To check what has been converted, you can navigate to:",
+      easyClose = FALSE, 
+      size = "l",
+      footer = 
+        actionButton("continue", "Continue"),
+      actionButton("nope", "Stop")
+        
+        )
+  )
+}
+
+
