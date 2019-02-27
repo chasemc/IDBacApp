@@ -48,7 +48,7 @@ copyToNewDatabase <- function(existingDBPool,
                         #-----
                         # Get IDBac database table structures
                         arch <- IDBacApp::sqlTableArchitecture(1)
-                     
+                        
                         # Account for modifications to DB structure -------------------------------
                         
                         
@@ -63,34 +63,18 @@ copyToNewDatabase <- function(existingDBPool,
                                                    existingDBconn = existingDBconn,
                                                    arch = arch)
                         
-                      
+                        
                         # Setup New XML -----------------------------------------------------------
                         
-                        a <- DBI::dbListFields(existingDBconn, "XML") 
-                        colToAppend <- a[which(! a %in% colnames(arch$XML))]                        
-                        if(length(colToAppend) > 0){
-                          colToAppend <- stats::setNames(rep(NA, length(colToAppend)), colToAppend)
-                          arch$XML <- cbind(arch$XML, colToAppend)
-                        }
-                        DBI::dbWriteTable(conn = newDBconn,
-                                          name = "XML", # SQLite table to insert into
-                                          arch$XML, # Insert single row into DB
-                                          append = TRUE, # Append to existing table
-                                          overwrite = FALSE) # Do not overwrite
+                        IDBacApp::copyDB_setupXML(newDBconn = newDBconn,
+                                                  existingDBconn = existingDBconn,
+                                                  arch = arch)
                         
                         # Setup New IndividualSpectra ---------------------------------------------
                         
-                        a <- DBI::dbListFields(existingDBconn, "IndividualSpectra") 
-                        colToAppend <- a[which(! a %in% colnames(arch$IndividualSpectra))]                        
-                        if(length(colToAppend) > 0){
-                          colToAppend <- stats::setNames(rep(NA, length(colToAppend)), colToAppend)
-                          arch$IndividualSpectra <- cbind(arch$IndividualSpectra, colToAppend)
-                        }
-                        DBI::dbWriteTable(conn = newDBconn,
-                                          name = "IndividualSpectra", # SQLite table to insert into
-                                          arch$IndividualSpectra, # Insert single row into DB
-                                          append = TRUE, # Append to existing table
-                                          overwrite = FALSE) # Do not overwrite
+                        IDBacApp::copyDB_setupIndividualSpectra(newDBconn = newDBconn,
+                                                                existingDBconn = existingDBconn,
+                                                                arch = arch)
                         
                         # Copy over the data corresponding to the samples selected ----------------
                         
@@ -102,29 +86,8 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         
                         
-                        checkStrainIds <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
-                                                         FROM `metaData`",
-                                                         .con = newDBPool
-                        )
                         
-                        checkStrainIds1 <- DBI::dbSendStatement(newDBconn, checkStrainIds)
-                        warning(checkStrainIds1@sql)
-                        checkStrainIds <- DBI::dbFetch(checkStrainIds1)[ , 1]
-                        DBI::dbClearResult(checkStrainIds1) 
-                        sampleIDsneeded <- sampleIDs[!sampleIDs %in% checkStrainIds]
-                        
-                        if(length(sampleIDsneeded) > 0){
-                          sqlQ <- glue::glue_sql("INSERT INTO newDB.metaData
-                                                 SELECT * 
-                                                 FROM `metaData`
-                                                 WHERE (`Strain_ID` IN ({strainIds*}))",
-                                                 strainIds = sampleIDsneeded,
-                                                 .con = existingDBconn
-                          )
-                          temp <- DBI::dbSendStatement(existingDBconn, sqlQ)
-                          warning(temp@sql)
-                          DBI::dbClearResult(temp) 
-                        }
+                        #
                         
                         setProgress(value = 0.7, 
                                     message = 'Copying data to new database',
@@ -170,7 +133,7 @@ copyToNewDatabase <- function(existingDBPool,
                           warning(rw@sql)
                           DBI::dbClearResult(temp)
                         }
-
+                        
                         setProgress(value = 0.8, 
                                     message = 'Copying data to new database',
                                     detail = 'Copying mzML files...',
@@ -252,17 +215,17 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(temp)
                         
                         
-                       
+                        
                         
                         shiny::setProgress(value = 0.9, 
                                            message = 'Copying data to new database',
                                            detail = 'Indexing new database...',
                                            session = getDefaultReactiveDomain())
                         warning("Creating index")
-                       
+                        
                         
                         a <- DBI::dbSendStatement('CREATE INDEX IF NOT EXISTS ids ON IndividualSpectra (Strain_ID);',
-                                                      conn = newDBconn)
+                                                  conn = newDBconn)
                         DBI::dbClearResult(a)
                         
                         warning("Created index")
@@ -276,7 +239,6 @@ copyToNewDatabase <- function(existingDBPool,
                         pool::poolReturn(newDBconn)
                         pool::poolClose(newDBPool)
                         
-                        
                         Sys.sleep(1)
                         warning(paste0("End migration of \n",
                                        existingDBconn@dbname,
@@ -285,11 +247,6 @@ copyToNewDatabase <- function(existingDBPool,
                       })
   
 }
-
-
-
-
-
 
 
 #' Attach new database to existing database
@@ -302,20 +259,16 @@ copyToNewDatabase <- function(existingDBPool,
 #'
 #' @examples
 copyDB_dbAttach <- function(newdbPath, 
-                     existingDBconn){
+                            existingDBconn){
   
   sqlQ <- glue::glue_sql("attach database ({dbPath*}) as newDB;",
                          dbPath = newdbPath,
                          .con = existingDBconn) 
-  
   temp <- DBI::dbSendStatement(existingDBconn, sqlQ)
   warning(temp@sql)
   DBI::dbClearResult(temp)
   
 }
-
-
-
 
 
 #' Setup metadata DB table
@@ -332,15 +285,106 @@ copyDB_setupMeta <- function(newDBconn,
                              arch){
   
   a <- DBI::dbListFields(existingDBconn, "metaData") 
-  colToAppend <- a[which(! a %in% colnames(arch$metaData))]                        
-  if(length(colToAppend) > 0){
-    colToAppend <- stats::setNames(rep(NA, length(colToAppend)), colToAppend)
-    arch$metaData <- cbind(arch$metaData, colToAppend)
-  }
+  colToAppend <- a[which(!a %in% colnames(arch$metaData))]                        
+
   #Write table structures to database
   DBI::dbWriteTable(conn = newDBconn,
                     name = "metaData", # SQLite table to insert into
                     arch$metaData, # Insert single row into DB
                     append = TRUE, # Append to existing table
                     overwrite = FALSE) # Do not overwrite
+}
+
+
+#' Setup XML DB table
+#'
+#' @param newDBconn newDBconn 
+#' @param existingDBconn  existingDBconn
+#' @param arch DB architecture 
+#'
+#' @return NA
+#' @export
+#'
+copyDB_setupXML <- function(newDBconn,
+                            existingDBconn,
+                            arch){
+  a <- DBI::dbListFields(existingDBconn, "XML") 
+  colToAppend <- a[which(!a %in% colnames(arch$XML))]                        
+  if (length(colToAppend) > 0) {
+    colToAppend <- stats::setNames(rep(NA, length(colToAppend)), colToAppend)
+    arch$XML <- cbind(arch$XML, colToAppend)
+  }
+  DBI::dbWriteTable(conn = newDBconn,
+                    name = "XML", # SQLite table to insert into
+                    arch$XML, # Insert single row into DB
+                    append = TRUE, # Append to existing table
+                    overwrite = FALSE) # Do not overwrite
+}
+
+
+
+
+#' Setup IndividualSpectra DB table
+#'
+#' @param newDBconn newDBconn 
+#' @param existingDBconn  existingDBconn
+#' @param arch DB architecture 
+#'
+#' @return NA
+#' @export
+#'
+copyDB_setupIndividualSpectra <- function(newDBconn,
+                                          existingDBconn,
+                                          arch){
+  a <- DBI::dbListFields(existingDBconn, "IndividualSpectra") 
+  colToAppend <- a[which(!a %in% colnames(arch$IndividualSpectra))]                        
+  if (length(colToAppend) > 0) {
+    colToAppend <- stats::setNames(rep(NA, length(colToAppend)), colToAppend)
+    arch$IndividualSpectra <- cbind(arch$IndividualSpectra, colToAppend)
+  }
+  DBI::dbWriteTable(conn = newDBconn,
+                    name = "IndividualSpectra", # SQLite table to insert into
+                    arch$IndividualSpectra, # Insert single row into DB
+                    append = TRUE, # Append to existing table
+                    overwrite = FALSE) # Do not overwrite
+}
+
+
+
+
+
+
+function(newDBconn,
+         existingDBconn,
+         arch,
+         sampleIDs){
+ 
+  temp <- DBI::dbSendQuery(newDBconn,
+                                     "SELECT DISTINCT `Strain_ID` FROM `metaData`")
+  message(temp@conn@dbname)
+  message(temp@sql)
+  checkStrainIds <- DBI::dbFetch(checkStrainIds)[ , 1]
+  DBI::dbClearResult(temp) 
+  sampleIDsneeded <- sampleIDs[!sampleIDs %in% checkStrainIds]
+  
+  if (length(sampleIDsneeded) > 0) {
+    
+    temp <- DBI::dbSendStatement(existingDBconn, "INSERT INTO newDB.metaData
+                                                  SELECT * 
+                                                  FROM `metaData`
+                                                  WHERE (`Strain_ID` IN ?)")
+    
+    DBI::dbBind(temp, sampleIDsneeded)
+    
+    sqlQ <- glue::glue_sql("INSERT INTO newDB.metaData
+                         SELECT * 
+                                                 FROM `metaData`
+                                                 WHERE (`Strain_ID` IN ({strainIds*}))",
+                           strainIds = sampleIDsneeded,
+                           .con = existingDBconn
+    )
+    temp <- DBI::dbSendStatement(existingDBconn, sqlQ)
+    warning(temp@sql)
+    DBI::dbClearResult(temp) 
+  }
 }

@@ -1,7 +1,5 @@
 context("test-databasetransfer")
 
-
-
 a1 <- tempfile()
 b1 <- IDBacApp::createPool(basename(a1),
                            gsub("\\\\", "/", dirname(a1)))
@@ -40,12 +38,8 @@ pool::poolReturn(bb2)
 pool::poolClose(b1[[1]])
 pool::poolClose(b2[[1]])
 
-# -------------------------------------------------------------------------
 
-
-
-
-
+# Setup new db ------------------------------------------------------------
 
 a1 <- tempfile()
 b1 <- IDBacApp::createPool(basename(a1),
@@ -67,12 +61,15 @@ test_that("Provided and test sqlite DBs have correct tables", {
 })
 
 
+# metaData setup -------------------------------------------------------
+
 IDBacApp::copyDB_setupMeta(newDBconn = bb1,
                            existingDBconn = bb2,
                            arch = IDBacApp::sqlTableArchitecture(1)
                            )
 a <- DBI::dbGetQuery(bb1,"SELECT * FROM metaData")
-test_that("Provided test sqlite has correct tables", {
+
+test_that("Correctly transferred 'metaData' table", {
   expect_identical(DBI::dbListTables(bb2), c("IndividualSpectra", "XML", "metaData", "version"))
   expect_identical(DBI::dbListTables(bb1), c("metaData"))
   expect_identical(nrow(a), 1L)
@@ -81,8 +78,41 @@ test_that("Provided test sqlite has correct tables", {
   
 })
 
+# XML setup ------------------------------------------------------------
 
 
+IDBacApp::copyDB_setupXML(newDBconn = bb1,
+                           existingDBconn = bb2,
+                           arch = IDBacApp::sqlTableArchitecture(1)
+)
+a <- DBI::dbGetQuery(bb1,"SELECT * FROM XML")
 
+test_that("Correctly setup 'XML' table", {
+  expect_identical(DBI::dbListTables(bb2), c("IndividualSpectra", "XML", "metaData", "version"))
+  expect_identical(DBI::dbListTables(bb1), c("metaData", "XML"))
+  expect_identical(nrow(a), 1L)
+  expect_identical(ncol(a), 8L)
+  expect_identical(sum(is.na(a)), 8L) 
+  
+})
+
+
+# IndividualSpectra -------------------------------------------------------
+
+
+IDBacApp::copyDB_setupIndividualSpectra(newDBconn = bb1,
+                                        existingDBconn = bb2,
+                                        arch = IDBacApp::sqlTableArchitecture(1)
+)
+a <- DBI::dbGetQuery(bb1,"SELECT * FROM XML")
+
+test_that("Correctly setup 'IndividualSpectra' table", {
+  expect_identical(DBI::dbListTables(bb2), c("IndividualSpectra", "XML", "metaData", "version"))
+  expect_identical(DBI::dbListTables(bb1), c("metaData", "XML", "IndividualSpectra"))
+  expect_identical(nrow(a), 1L)
+  expect_identical(ncol(a), 8L)
+  expect_identical(sum(is.na(a)), 8L) 
+  
+})
 
 
