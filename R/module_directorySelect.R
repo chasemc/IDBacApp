@@ -46,7 +46,6 @@ selectDirectory_Server <- function(input,
     
   })
   
-  return(reactive(input$rawFileDirectory))
   
 }
 

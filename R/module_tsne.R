@@ -1,42 +1,4 @@
 
-#' UI module for creating plotly tsne
-#'
-#' @param id namespace
-#'
-#' @return tsne UI
-#' @export
-#'
-tsne_UI <- function(id){
-  ns <- shiny::NS(id)
-  tagList(
-    shiny::numericInput(inputId = ns("tsnePerplexity"),
-                        label = "Perplexity",
-                        value = 10,
-                        min = 1,
-                        max = 100,
-                        step = 1,
-                        width = NULL),
-    shiny::numericInput(inputId = ns("tsneTheta"),
-                        label = "Theta",
-                        value = .5,
-                        min = 0,
-                        max = 1,
-                        step = 0.1,
-                        width = NULL),
-    shiny::numericInput(inputId = ns("tsneIterations"),
-                        label = "Iterations",
-                        value = 1000,
-                        min = 1,
-                        max = 10000,
-                        step = 1,
-                        width = NULL)
-    
-  )
-}
-
-
-
-
 
 
 
@@ -50,7 +12,7 @@ tsne_UI <- function(id){
 popupPlotTsne_UI <- function(id){
   ns <- shiny::NS(id)
   tagList(
-    actionButton(ns("openAbsPanel"), glue::glue("Open t-SNE plot")),
+    actionButton(ns("openAbsPanel"), "Open t-SNE plot"),
     uiOutput(ns("absPanel"))
   )
 }
@@ -76,9 +38,6 @@ popupPlotTsne_server <- function(input,
                                  plotTitle = "t-SNE"){ 
   
   
-  
-  
-  
   dataFrame <- reactive({
     
     validate(need(nrow(data()) > 1, "t-SNE requires more samples"))
@@ -87,10 +46,10 @@ popupPlotTsne_server <- function(input,
     validate(need(input$tsnePerplexity < 101, "Perplexity must be less than 101"))
     
     validate(need(input$tsneTheta > 0, "Theta must be greater than 0"))
-    validate(need(input$tsneTheta < 1, "Theta must be less than 101"))
+    validate(need(input$tsneTheta < 1, "Theta should be less than 1"))
     
     validate(need(input$tsneIterations > 0, "Iterations must be greater than 0"))
-    validate(need(input$tsneIterations < 10000, "Iterations must be less than 101"))
+    validate(need(input$tsneIterations < 10000, "Iterations must be less than 1000"))
     
     #IDBacApp::tsneCalculation(dataMatrix = dataframe(),
     IDBacApp::tsneCalculation(dataMatrix = data(),
@@ -145,69 +104,63 @@ popupPlotTsne_server <- function(input,
                ignoreNULL = T,
                {
                  
-                 if (nrow(dataFrame()) < 2 || ncol(dataFrame()) < 3) {
-                   output$absPanel <- renderUI(
-                     glue::glue("Select more samples for {plotTitle}")
-                   )
-                 } else {
+                 
+                 output$absPanel <- renderUI(
                    
-                   
-                   output$absPanel <- renderUI(
+                   shiny::fixedPanel(
+                     class = "popup_Plots",
+                     top = "20%",
+                     bottom = "20%",
+                     width = "60%",
+                     draggable = F,
+                     style = "z-index:1002;",
+                     p(plotTitle),
+                     absolutePanel(
+                       top = "0%",
+                       bottom = "95%",
+                       right = "5%",
+                       left = "95%",
+                       fixed = F,
+                       shiny::actionButton(session$ns("closeAbsPanel"),
+                                           class = "closeX",
+                                           label = "",
+                                           icon = icon("far fa-window-close"))
+                     ),
                      
-                     shiny::fixedPanel(
-                       class = "popup_Plots",
-                       top = "20%",
-                       bottom = "20%",
-                       width = "60%",
-                       draggable = F,
-                       style = "z-index:1002;",
-                       p(plotTitle),
-                       absolutePanel(
-                         top = "0%",
-                         bottom = "95%",
-                         right = "5%",
-                         left = "95%",
-                         fixed = F,
-                         shiny::actionButton(session$ns("closeAbsPanel"),
-                                             class = "closeX",
-                                             label = "",
-                                             icon = icon("far fa-window-close"))
-                       ),
-                       
-                       fluidRow(
-                         tagList(
-                           shiny::numericInput(inputId = session$nsns("tsnePerplexity"),
-                                               label = "Perplexity",
-                                               value = 10,
-                                               min = 1,
-                                               max = 100,
-                                               step = 1,
-                                               width = NULL),
-                           shiny::numericInput(inputId = session$nsns("tsneTheta"),
-                                               label = "Theta",
-                                               value = .5,
-                                               min = 0,
-                                               max = 1,
-                                               step = 0.1,
-                                               width = NULL),
-                           shiny::numericInput(inputId = session$nsns("tsneIterations"),
-                                               label = "Iterations",
-                                               value = 1000,
-                                               min = 1,
-                                               max = 10000,
-                                               step = 1,
-                                               width = NULL)
-                           
-                         )
-                       ),
-                       
-                       fluidRow(                     
-                         plotly::plotlyOutput(session$ns("plot"),
-                                              width = "100%", 
-                                              height = "100%")
+                     fluidRow(
+                       tagList(
+                         shiny::numericInput(inputId = session$ns("tsnePerplexity"),
+                                             label = "Perplexity",
+                                             value = 10,
+                                             min = 1,
+                                             max = 100,
+                                             step = 1,
+                                             width = NULL),
+                         shiny::numericInput(inputId = session$ns("tsneTheta"),
+                                             label = "Theta",
+                                             value = .5,
+                                             min = 0,
+                                             max = 1,
+                                             step = 0.1,
+                                             width = NULL),
+                         shiny::numericInput(inputId = session$ns("tsneIterations"),
+                                             label = "Iterations",
+                                             value = 1000,
+                                             min = 1,
+                                             max = 10000,
+                                             step = 1,
+                                             width = NULL)
+                         
                        )
+                     ),
+                     
+                     fluidRow(                     
+                       plotly::plotlyOutput(session$ns("plot"),
+                                            width = "100%", 
+                                            height = "100%")
                      )
                    )
-                 }
+                 )
+                 
                })
 }

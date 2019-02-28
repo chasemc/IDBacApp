@@ -26,12 +26,13 @@ dendrogramCreatorUI <- function(id) {
                                       "canberra" = "canberra",
                                       "binary" = "binary",
                                       "minkowski" = "minkowski"),
-                       selected = "cosine"),
+                       selected = "cosine",
+                       width = "50%"),
     div(class = "tooltippy", "Clustering Algorithm", 
         span(class = "tooltippytext", 
              p("Method for creating the dendrogram from a similarity/distance matrix.")
-             )
-        ),
+        )
+    ),
     shiny::selectInput(ns("clustering"),
                        label = NULL,
                        choices = list("ward.D" = "ward.D",
@@ -42,13 +43,16 @@ dendrogramCreatorUI <- function(id) {
                                       "mcquitty (WPGMA)" = "mcquitty",
                                       "median (WPGMC)" = "median",
                                       "centroid (UPGMC)" = "centroid"),
-                       selected = "average"),
+                       selected = "average",
+                       width = "50%"),
     fluidRow(
-      shiny::radioButtons(ns("booled"),
-                          label =  p("Include peak intensities, or use presence/absence?"),
-                          choices = list("Presence/Absence" = TRUE,
-                                         "Intensities" = FALSE),
-                          selected = FALSE)
+      div(style = "text-align: left;",
+          shiny::radioButtons(ns("booled"),
+                              label =  p("Include peak intensities, or use presence/absence?"),
+                              choices = list("Presence/Absence" = TRUE,
+                                             "Intensities" = FALSE),
+                              selected = FALSE)
+      )
     ),
     # shiny::numericInput(ns("ppm"),
     #                     label = shiny::h5(shiny::strong("Select ppm tolerance for peak binning")),

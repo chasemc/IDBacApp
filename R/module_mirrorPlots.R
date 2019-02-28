@@ -37,7 +37,10 @@ mirrorPlotDownload_UI <- function(id){
 #'
 mirrorPlots_UI <- function(id){
   ns <- NS(id)
-  fluidRow(plotly::plotlyOutput(ns("inversePeakComparisonPlot")
+  fluidRow(
+    shinycssloaders::withSpinner(
+    plotly::plotlyOutput(ns("inversePeakComparisonPlot")
+    )
 
   ))
   
@@ -54,7 +57,7 @@ mirrorPlots_UI <- function(id){
 #' @return NA
 #' @export
 #'
-mirrorPlots_Sever <- function(input,
+mirrorPlots_Server <- function(input,
                               output,
                               session,
                               workingDB,
@@ -116,7 +119,7 @@ mirrorPlots_Sever <- function(input,
                                                                  protein = TRUE) 
     
     
-    
+   
     
     mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                  sampleIDs = input$Spectra2,

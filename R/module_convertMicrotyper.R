@@ -158,6 +158,7 @@ convertMicrotyper_Server <- function(input,
   })
   
   
+  success <- reactiveValues(val = FALSE)
   
   
   # Run raw data processing on delimited-type input files
@@ -210,6 +211,8 @@ convertMicrotyper_Server <- function(input,
                  
                  
                  IDBacApp::popup4()
+                 success$val <- TRUE
+                 
                })
   
   

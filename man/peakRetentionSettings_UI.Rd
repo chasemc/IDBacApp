@@ -4,10 +4,14 @@
 \alias{peakRetentionSettings_UI}
 \title{peakRetentionSettings_UI}
 \usage{
-peakRetentionSettings_UI(id)
+peakRetentionSettings_UI(id, minMass = 3000, maxMass = 15000)
 }
 \arguments{
 \item{id}{namespace}
+
+\item{minMass}{starting min mass}
+
+\item{maxMass}{starting max mass}
 }
 \value{
 NA

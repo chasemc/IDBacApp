@@ -7,45 +7,54 @@
 #'
 convertDataTab_UI <- function(id) {
   ns <- shiny::NS(id)
-  
-  
-  navlistPanel(widths = c(3, 8), id = ns("ConversionsNav"),
-               "Create an IDBac experiment",
-               tabPanel(tags$ul(tags$li("Click here to convert Bruker files")),
-                        value = ns("convert_bruker_nav"),
-                        
-                          wellPanel(class = "intro_WellPanel",
-                                    align = "center",
-                                    #       tabsetPanel(
-                                    #          tabPanel(title = "Data from single MALDI plate",
-                                    IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
-                                    #           ) 
-                                    #                                        )
-                                    
-                                    
-                          )
-               ),
-               tabPanel(tags$ul(tags$li("Click here to convert mzML/mzXML files")),
-                        value = ns("convert_mzml_nav"),
-                        wellPanel(class = "intro_WellPanel",
-                                  align = "center",
-                                  IDBacApp::convertMZ_UI(ns("beginWithMZ"))
-                        )
-               ),
-               tabPanel(tags$ul(tags$li("Click here to convert txt files")),
-                        value = ns("convert_txt_nav"),
-                        wellPanel(class = "intro_WellPanel",
-                                  align = "center",
-                                  IDBacApp::convertDelim_UI(ns("convertDelim"))
-                        )
-               ),
-               tabPanel(tags$ul(tags$li("Click here to convert Microtyper files")),
-                        value = ns("convert_microtyper_nav"),
-                        wellPanel(class = "intro_WellPanel",
-                                  align = "center",
-                                  IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
-                        )
-               )
+
+  navlistPanel(
+    widths = c(3, 8),
+    id = ns("ConversionsNav"),
+    "Create an IDBac experiment",
+    tabPanel(
+      tags$ul(
+        tags$li("Click here to convert Bruker files", align = "left")),
+             value = ns("convert_bruker_nav"),
+             
+             wellPanel(class = "intro_WellPanel",
+                       align = "center",
+                       #       tabsetPanel(
+                       #          tabPanel(title = "Data from single MALDI plate",
+                       IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
+                       #           ) 
+                       #                                        )
+                       
+                       
+             )
+    ),
+    tabPanel(
+      tags$ul(
+        tags$li("Click here to convert mzML/mzXML files", align="left")),
+             value = ns("convert_mzml_nav"),
+             wellPanel(class = "intro_WellPanel",
+                       align = "center",
+                       IDBacApp::convertMZ_UI(ns("beginWithMZ"))
+             )
+    ),
+    tabPanel(
+      tags$ul(
+        tags$li("Click here to convert txt files", align = "left")),
+             value = ns("convert_txt_nav"),
+             wellPanel(class = "intro_WellPanel",
+                       align = "center",
+                       IDBacApp::convertDelim_UI(ns("convertDelim"))
+             )
+    ),
+    tabPanel(
+      tags$ul(
+        tags$li("Click here to convert Microtyper files", align = "left")),
+             value = ns("convert_microtyper_nav"),
+             wellPanel(class = "intro_WellPanel",
+                       align = "center",
+                       IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
+             )
+    )
   )
 }
 
@@ -54,13 +63,14 @@ convertDataTab_UI <- function(id) {
 
 #' convertDataTab_Server
 #'
-#' @param input . 
-#' @param output  .
-#' @param session  .
-#' @param tempMZDir  .
-#' @param sqlDirectory  .
+#' @param input shiny
+#' @param output  shiny
+#' @param session  shiny
+#' @param tempMZDir  directory to create temp mzML if needed
+#' @param sqlDirectory  where to write new SQLite file
+#' @param availableExperiments update availableExperiments
 #'
-#' @return .
+#' @return none, updates availableExperiments reactive value though
 #' @export
 #'
 
@@ -68,11 +78,12 @@ convertDataTab_Server <- function(input,
                                   output,
                                   session,
                                   tempMZDir,
-                                  sqlDirectory){
+                                  sqlDirectory, 
+                                  availableExperiments){
   
   
   
-  shiny::callModule(convertMZ_Server,
+a <- shiny::callModule(convertMZ_Server,
                     "beginWithMZ",
                     sqlDirectory = sqlDirectory)
   
@@ -95,6 +106,14 @@ convertDataTab_Server <- function(input,
                     tempMZDir,
                     sqlDirectory)
   
+  observe(aa <<-a)
+  
+  observeEvent(a()$val,{
+       
+          availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                          pattern = ".sqlite",
+                                                                          full.names = FALSE))
+             })
   
 }
 

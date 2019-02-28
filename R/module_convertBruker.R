@@ -32,7 +32,7 @@ convertOneBruker_UI <- function(id){
     actionButton(ns("showSampleMap"), "Click to Open Spreadsheet"),
     tags$hr(size = 20),
     p(strong("You must label all spots that contain data."), br(),
-      strong("IDBac found data for the following spots that aren't labelled in the spreadsheet.")
+      strong("IDBac found data for the following spots that aren't labelled in the spreadsheet:")
       ),
     shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
     p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
@@ -242,6 +242,9 @@ convertOneBruker_Server <- function(input,
     gsub(" ","",a)
   })
   
+  
+  success <- reactiveValues(val = FALSE)
+  
   # Call the Spectra processing function when the spectra processing button is pressed
   #----
   observeEvent(input$convertSingleBruker,
@@ -277,13 +280,11 @@ convertOneBruker_Server <- function(input,
                                        sampleIds = forProcessing$sampleID,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = input$newExperimentName)
-                 
-                 
-                 
-                 
-                 
-                 
+
                  IDBacApp::popup4()
+                 
+                 success$val <- TRUE
+                 
                })
   
   

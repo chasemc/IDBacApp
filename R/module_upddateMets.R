@@ -48,12 +48,13 @@ updateMeta_server <- function(input,
                               selectedDB){
        
   #----
-  qwertyy <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
+  rhand <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
   
   #----
   output$metaTable <- rhandsontable::renderRHandsontable({
 
-    rhandsontable::rhandsontable(qwertyy$rtab,
+    
+    rhandsontable::rhandsontable(rhand$rtab,
                                  useTypes = FALSE,
                                  contextMenu = TRUE ) %>%
       rhandsontable::hot_col("Strain_ID",
@@ -76,22 +77,39 @@ updateMeta_server <- function(input,
                                                  columnNames = input$addMetaColumnName)
                })
   
+  
+  
   observeEvent(input$saven, 
                ignoreInit = TRUE, {
+                 
+                 
+                 showModal(modalDialog(
+                   size = "s",
+                   title = "Saving...",
+                   easyClose = FALSE, 
+                   footer = ""))   
+               })
+  
+  observeEvent(input$saven, 
+               ignoreInit = TRUE, {
+            
+                 
+                 
                  #make sure not to use the wrong metadata table
                  query <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
                                           FROM `IndividualSpectra`",
                                          .con =  pool())
                  query <- DBI::dbGetQuery(pool(), query)[ ,1]
                  userTab <- as.character(rhandsontable::hot_to_r(input$metaTable)[-1, 1])
-                 req(userTab == query)
-                 
-                 
+                 req(identical(userTab, query))
                  
                  DBI::dbWriteTable(conn = pool(),
                                    name = "metaData",
                                    value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
                                    overwrite = TRUE)  
+               
+                 removeModal()
+                 
                })
   
  
@@ -100,13 +118,18 @@ updateMeta_server <- function(input,
   #----
   observeEvent(c(selectedDB$selectExperiment, input$insertNewMetaColumn),{
                  
+     if (identical(selectedDB$selectExperiment, "None")) {
+       rhand$rtab <- data.frame("Strain_ID" = "Placeholder")
+       } else {
+         
+    
                  if (!is.null(pool())) {
                    conn <- pool::poolCheckout(pool())
                    
                    if (!"metaData" %in% DBI::dbListTables(conn)) {
                      
                      warning("It appears the experiment file may be corrupt, please create again.")
-                     qwertyy$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
+                     rhand$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
                      
                    } else{
                      
@@ -139,29 +162,16 @@ updateMeta_server <- function(input,
                                                          "dna_16S"                      = "TCCTGCCTCAGGACGAACGCTGGCGGCGTGCCTAATACATGCAAGTCGAGCGGAGTTGATGGAGTGCTTGCACTCCTGATGCTTAGCGGCGGACGGGTGAGTAACACGTAGGTAACCTGCCCGTAAGACTGGGATAACATTCGGAAACGAATGCTAATACCGGATACACAACTTGGTCGCATGATCGGAGTTGGGAAAGACGGAGTAATCTGTCACTTACGGATGGACCTGCGGCGCATTAGCTAGTTGGTGAGGTAACGGCTCACCAAGGCGACGATGCGTAGCCGACCTGAGAGGGTGATCGGCCACACTGGGACTGAGACACGGCCCAGACTCCTACGGGAGGCAGCAGTAGGGAATCTTCCGCAATGGACGAAAGTCTGACGGAGCAACGCCGCGTGAGTGATGAAGGTTTTCGGATCGTAAAGCTCTGTTGCCAGGGAAGAACGCTAAGGAGAGTAACTGCTCCTTAGGTGACGGTACCTGAGAAGAAAGCCCCGGCTAACTACGTGCCAGCAGCCGCGGTAATACGTAGGGGGCAAGCGTTGTCCGGAATTATTGGGCGTAAAGCGCGCGCAGGCGGCCTTGTAAGTCTGTTGTTTCAGGCACAAGCTCAACTTGTGTTCGCAATGGAAACTGCAAAGCTTGAGTGCAGAAGAGGAAAGTGGAATTCCACGTGTAGCGGTGAAATGCGTAGAGATGTGGAGGAACACCAGTGGCGAAGGCGACTTTCTGGGCTGTAACTGACGCTGAGGCGCGAAAGCGTGGGGAGCAAACAGGATTAGATACCCTGGTAGTCCACGCCGTAAACGATGAATGCTAGGTGTTAGGGGTTTCGATACCCTTGGTGCCGAAGTTAACACATTAAGCATTCCGCCTGGGGAGTACGGTCGCAAGACTGAAACTCAAAGGAATTGACGGGGACCCGCACAAGCAGTGGAGTATGTGGTTTAATTCGAAGCAACGCGAAGAACCTTACCAGGTCTTGACATCCCTCTGAATCTGCTAGAGATAGCGGCGGCCTTCGGGACAGAGGAGACAGGTGGTGCATGGTTGTCGTCAGCTCGTGTCGTGAGATGTTGGGTTAAGTCCCGCAACGAGCGCAACCCTTGATCTTAGTTGCCAGCAGGTKAAGCTGGGCACTCTAGGATGACTGCCGGTGACAAACCGGAGGAAGGTGGGGATGACGTCAAATCATCATGCCCCTTATGACCTGGGCTACACACGTACTACAATGGCCGATACAACGGGAAGCGAAACCGCGAGGTGGAGCCAATCCTATCAAAGTCGGTCTCAGTTCGGATTGCAGGCTGCAACTCGCCTGCATGAAGTCGGAATTGCTAGTAATCGCGGATCAGCATGCCGCGGTGAATACGTTCCCGGGTCTTGTACACACCGCCCGTCACACCACGAGAGTTTACAACACCCGAAGCCGGTGGGGTAACCGCAAGGAGCCAGCCGTCGAAGGTGGGGTAGATGATTGGGGTGAAGTCGTAAC"
                      )
                      
-                     qwertyy$rtab <- merge(exampleMetaData,
+                     rhand$rtab <- merge(exampleMetaData,
                                           dbQuery,
                                           all = TRUE,
                                           sort = FALSE)
                      
                      pool::poolReturn(conn)
                    }
-                   
+                 }
                  }
                })
   
-  
-  
-  
-  
-  
 }
-
-
-
-
-
-
-
-
 

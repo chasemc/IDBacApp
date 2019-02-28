@@ -124,6 +124,9 @@ convertMZ_Server <-  function(input,
     gsub(" ","",a)
   })
   
+  
+  success <- reactiveValues(val = FALSE)
+  
   observeEvent(input$runMsconvert, {
     
     req(!is.null(mzmlRawFilesLocation()))
@@ -144,6 +147,11 @@ convertMZ_Server <-  function(input,
     
     
     IDBacApp::popup4() 
+    
+    success$val <- TRUE
+    
   })
-  
+ 
+  return(reactive(success))
+   
 }
