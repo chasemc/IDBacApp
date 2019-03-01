@@ -122,7 +122,7 @@ createXMLSQL <- function(rawDataFilePath,
                           ionization = instInfo$ionisation[[1]],
                           analyzer = instInfo$analyzer[[1]],
                           detector = instInfo$detector[[1]],
-                          Instrument_MetaFile = "Uknown"))
+                          Instrument_MetaFile = "Unkown"))
   
   DBI::dbClearResult(query)
   
