@@ -5,7 +5,6 @@
 #' @return NA
 #' @export
 #'
-
 sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame <- new.env(parent = parent.frame())
@@ -41,11 +40,11 @@ sqlTableArchitecture <- function(numberScans){
   sqlDataFrame$metaData <- temp
   
   
-  sqlDataFrame$XML <- c("mzMLHash",
+  sqlDataFrame$XML <- c("XMLHash",
                         "XML", 
                         "manufacturer",
                         "model",
-                        "ionisation",
+                        "ionization",
                         "analyzer",
                         "detector",
                         "Instrument_MetaFile")
@@ -60,7 +59,7 @@ sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame$IndividualSpectra <- c("spectrumMassHash",
                                       "spectrumIntensityHash",
-                                      "mzMLHash",
+                                      "XMLHash",
                                       "Strain_ID",
                                       "MassError",
                                       "AcquisitionDate",
@@ -83,12 +82,39 @@ sqlTableArchitecture <- function(numberScans){
   
   
   
-  sqlDataFrame$IndividualSpectraSQL <-
+  sqlDataFrame$massTable <- c("spectrumMassHash",
+                              "binaryMassVector")
+  
+  temp <- as.data.frame(matrix(nrow = numberScans,
+                               ncol = length(sqlDataFrame$massTable)))
+  
+  dimnames(temp)[[2]] <- sqlDataFrame$massTable
+  sqlDataFrame$massTable <- temp
+  
+  
+  return(sqlDataFrame)
+  
+}
+
+
+
+
+
+#' SQL code to create the SQLite IndividualSpectra table
+#'
+#' @param sqlConnection sqlConnection
+#'
+#' @return SQL code as character
+#' @export
+#'
+sql_CreateIndividualSpectra <- function(sqlConnection){
+  if (!DBI::dbExistsTable(sqlConnection, "massTable")) {
     
-    "CREATE TABLE IndividualSpectra (
+    a <- DBI::dbSendStatement(sqlConnection, 
+                              "CREATE TABLE `IndividualSpectra` (
   spectrumMassHash                     TEXT,
   spectrumIntensityHash                TEXT,
-  mzMLHash                             TEXT,
+  XMLHash                              TEXT,
   Strain_ID                            TEXT,
   MassError                            REAL,
   AcquisitionDate                      TEXT,
@@ -104,29 +130,128 @@ sqlTableArchitecture <- function(numberScans){
   
   UNIQUE(Strain_ID, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
   );"
-  
-  
-  
-  
-  sqlDataFrame$massTable <- c("spectrumMassHash",
-                              "binaryMassVector")
-  
-  temp <- as.data.frame(matrix(nrow = numberScans,
-                               ncol = length(sqlDataFrame$massTable)))
-  
-  dimnames(temp)[[2]] <- sqlDataFrame$massTable
-  sqlDataFrame$massTable <- temp
-  
-  
-  sqlDataFrame$massTableSQL <-
+    )
     
-    "CREATE TABLE massTable (
-  spectrumMassHash    TEXT PRIMARY KEY,
+    
+    DBI::dbClearResult(a)
+  } else {
+    warning("IndividualSpecctra table already exists")
+  }
+}
+
+
+
+
+
+#' SQL code to create the SQLite massTable table
+#'
+#' @param sqlConnection sqlConnection
+#'
+#' @return SQL code as character
+#' @export
+#'
+sql_CreatemassTable <- function(sqlConnection){
+  
+  if (!DBI::dbExistsTable(sqlConnection, "massTable")) {
+    
+    a <- DBI::dbSendStatement(sqlConnection,
+                              "CREATE TABLE `massTable` (
+  spectrumMassHash    TEXT,
   binaryMassVector    BLOB,
  
   UNIQUE(spectrumMassHash) ON CONFLICT IGNORE
   );"
+    )
+    DBI::dbClearResult(a)
+  } else {
+    warning("massTable table already exists")
+  }
+}
+
+
+
+
+#' SQL code to create the SQLite metaData table
+#'
+#' @param sqlConnection sqlConnection
+#'
+#' @return SQL code as character
+#' @export
+#'
+sql_CreatemetaData <- function(sqlConnection){
   
-  return(sqlDataFrame)
+  if (!DBI::dbExistsTable(sqlConnection, "metaData")) {
+    
+    a <- DBI::dbSendStatement(sqlConnection,
+                              "CREATE TABLE `metaData` (
+'Strain_ID'                  TEXT,     
+'Genbank_Accession'          TEXT,             
+'NCBI_TaxID'                 TEXT,       
+'Kingdom'                    TEXT,   
+'Phylum'                     TEXT,   
+'Class'                      TEXT, 
+'Order'                      TEXT, 
+'Family'                     TEXT,   
+'Genus'                      TEXT, 
+'Species'                    TEXT,   
+'MALDI_Matrix'               TEXT,         
+'DSM_Agar_Media'             TEXT,           
+'Cultivation_Temp_Celsius'   TEXT,                     
+'Cultivation_Time_Days'      TEXT,                 
+'Cultivation_Other'          TEXT,             
+'User'                       TEXT, 
+'User_ORCID'                 TEXT,       
+'PI_FirstName_LastName'      TEXT,                 
+'PI_ORCID'                   TEXT,     
+'dna_16S'                    TEXT,   
+ 
+  UNIQUE(Strain_ID) ON CONFLICT IGNORE
+  );"
+    )
+    
+    
+    DBI::dbClearResult(a)
+  } else {
+    warning("metaData table already exists")
+  }
   
+}
+
+
+
+
+
+
+
+#' SQL code to create the SQLite xxml table
+#'
+#' @param sqlConnection sqlConnection
+#'
+#' @return SQL code as character
+#' @export
+#'
+sql_CreatexmlTable <- function(sqlConnection){
+  
+  if (!DBI::dbExistsTable(sqlConnection, "XML")) {
+    
+    a <- DBI::dbSendStatement(sqlConnection,
+                              "CREATE TABLE `XML` (
+  XMLHash         TEXT,
+  XML             BLOB,
+  manufacturer    TEXT,
+  model           TEXT,
+  ionization      TEXT,
+  analyzer        TEXT,
+  detector        TEXT,
+  Instrument_MetaFile BLOB,
+
+  UNIQUE(XMLHash) ON CONFLICT IGNORE
+    );"
+    )
+    
+    
+    DBI::dbClearResult(a)
+  } else {
+    warning("metaData table already exists")
+  }
 }

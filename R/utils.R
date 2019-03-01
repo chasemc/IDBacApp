@@ -28,21 +28,21 @@ hashR <- function(input){
 
 
 #' serial
-#'    Settings for serializing in IDBac
-#' @param input object to serialize
+#'    Settings for serializing in IDBac (convert to json)
+#' @param input matrix or vector
 #'
-#' @return serialized object in binary
+#' @return JSON
 #' @export
 
 serial <- function(input){
-  RProtoBuf::serialize_pb(input, NULL)
+  jsonlite::toJSON(input)
 }
 
 
 
 #' compress
-#'   Settings for compressing in IDBac
-#' @param input character or raw vector to compressed (char will be converted to raw)
+#'   Settings for compressing raw vectors
+#' @param input raw vector to compressed
 #'
 #' @return Raw vector
 #' @export
@@ -51,7 +51,7 @@ serial <- function(input){
 compress <- function(input){
   fst::compress_fst(input, 
                     compressor = "ZSTD",
-                    compression = 50)
+                    compression = 0)
 }
 
 
@@ -163,4 +163,48 @@ findmz <- function(inputPath,
 
 
 
+#' Read mzXML, XML and transform to raw character for storing in SQLite
+#'
+#' @param path xml2 connection
+#'
+#' @return raw 
+#' @export
+#'
+serializeXML <- function(path) {
+  path <- IDBacApp::readXML(path)
+  path <- base::as.character(path)
+  path <- base::charToRaw(path)
+  fst::compress_fst(path, 
+                    compressor = "ZSTD",
+                    compression = 100)
+  
+}
+
+
+#' ead mzXML, XML as XML
+#'
+#' @param path file path to mzML or mzXML
+#'
+#' @return xml2 connection
+#' @export
+#'
+readXML <- function(path) {
+  xml2::read_xml(path)
+}
+
+
+
+
+#' People have trouble with spaces
+#'
+#' @param input character vector 
+#'
+#' @return character vector
+#' @export
+#'
+cleanWSpace <- function(input){
+  
+  input <- trimws(input)
+  return(gsub(" ", "_", input))
+}
 

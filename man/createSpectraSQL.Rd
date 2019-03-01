@@ -5,7 +5,7 @@
 \title{createSpectraSQL}
 \usage{
 createSpectraSQL(mzML_con, scanNumber, userDBCon, sampleID, XMLinfo,
-  rawDataFilePath)
+  rawDataFilePath, smallRangeEnd = 6000)
 }
 \arguments{
 \item{mzML_con}{NA}
@@ -19,6 +19,8 @@ createSpectraSQL(mzML_con, scanNumber, userDBCon, sampleID, XMLinfo,
 \item{XMLinfo}{NA}
 
 \item{rawDataFilePath}{NA}
+
+\item{smallRangeEnd}{end of mass region for small mol, if m/z above this- will be classified as "protein" spectrum}
 }
 \value{
 NA
