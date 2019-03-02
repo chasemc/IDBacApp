@@ -66,6 +66,7 @@ sqlTableArchitecture <- function(numberScans){
                                       "peakMatrix",
                                       "spectrumIntensity",
                                       "maxMass",
+                                      "minMass",
                                       "ignore")
   
   
@@ -116,6 +117,7 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
   peakMatrix                           TEXT,
   spectrumIntensity                    BLOB,
   maxMass                              INTEGER,
+  minMass                              INTEGER,
   ignore                               INTEGER,
   
   UNIQUE(Strain_ID, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
@@ -125,7 +127,7 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
     
     DBI::dbClearResult(a)
   } else {
-    warning("IndividualSpecctra table already exists")
+    warning("IndividualSpectra table already exists")
   }
 }
 

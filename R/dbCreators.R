@@ -129,7 +129,7 @@ createXMLSQL <- function(rawDataFilePath,
   
   
   return(list(mzMLHash = mzMLHash,
-              mzMLInfo = NULL))
+              mzMLInfo = instInfo))
 }
 
 
@@ -157,13 +157,13 @@ createSpectraSQL <- function(mzML_con,
                              smallRangeEnd = 6000){
   
   
-  # mzML_con<<-mzML_con
-  # scanNumber<<-scanNumber
-  # userDBCon<<-userDBCon
-  # sampleID<<-sampleID
-  # XMLinfo<<-XMLinfo
-  # rawDataFilePath<<-rawDataFilePath
-  # smallRangeEnd <<-6000
+   mzML_con<<-mzML_con
+   scanNumber<<-scanNumber
+   userDBCon<<-userDBCon
+   sampleID<<-sampleID
+   XMLinfo<<-XMLinfo
+   rawDataFilePath<<-rawDataFilePath
+   smallRangeEnd <<-6000
   
   
   spectraImport <- mzR::peaks(mzML_con)
@@ -175,14 +175,18 @@ createSpectraSQL <- function(mzML_con,
   smallIndex <- unlist(lapply(spectraImport, function(x) max(x@mass)))
   smallIndex <- smallIndex < smallRangeEnd
   
+  
+  
 
-
-# Create IndividualSpectra table in DB if doesn't Exist -------------------
-
+# Create tables in DB if they don't exist ---------------------------------
 
   if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
     IDBacApp::sql_CreateIndividualSpectra(userDBCon)
   }  
+  if (!DBI::dbExistsTable(userDBCon, "massTable")) {
+    IDBacApp::sql_CreatemassTable(userDBCon)
+  }
+  
   # Small mol spectra -------------------------------------------------------
   
   if (any(smallIndex)) { 
@@ -192,6 +196,8 @@ createSpectraSQL <- function(mzML_con,
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
                                           userDBCon = userDBCon)
+    IDBacApp::insertIntoMassTable(env = env,
+                                  userDBCon = userDBCon)
   }
   # Protein Spectra ---------------------------------------------------------
   
@@ -203,17 +209,10 @@ createSpectraSQL <- function(mzML_con,
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
                                           userDBCon = userDBCon)
+    IDBacApp::insertIntoMassTable(env = env,
+                                  userDBCon = userDBCon)
   }
-    
-    # Write massTable ---------------------------------------------------------
-  if (!DBI::dbExistsTable(userDBCon, "massTable")) {
-    IDBacApp::sql_CreatemassTable(userDBCon)
-  }
-    
-    
   
-  
-   
   
 }
 
@@ -222,8 +221,37 @@ createSpectraSQL <- function(mzML_con,
 
 
 
-
-
+#' Write massTable data to SQLite
+#'
+#' @param env environment 
+#' @param userDBCon checked database connection
+#'
+#' @return nothing, writes to database
+#' @export
+#'
+insertIntoMassTable <- function(env,
+                                userDBCon){
+  
+  if (length(env$spectrumMassHash) != length(env$massVector)) {
+    stop("Error in IDBacApp::insertIntoMassTable(): IDBacApp::processXMLIndSpectra() provided
+                    spectrumMassHash and massVector variables with different lengths")
+  } else { 
+    query <- DBI::dbSendStatement(userDBCon, 
+                                  "INSERT INTO 'massTable'(
+                              'spectrumMassHash',
+                              'massVector')
+                              VALUES (
+                              $spectrumMassHash,
+                              $massVector;")
+    
+    DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
+                            massVector = env$massVector)
+    )
+    
+    DBI::dbClearResult(query)
+    
+  }
+}
 
 
 
@@ -234,24 +262,26 @@ createSpectraSQL <- function(mzML_con,
 #' @param env environment 
 #' @param XMLinfo xmlinfo
 #' @param userDBCon checked database connection
+#' @param acquisitonInfo acquisitonInfo
 #'
 #' @return nothing, writes to database
 #' @export
 #'
 insertIntoIndividualSpectra <- function(env,
                                         XMLinfo,
-                                        userDBCon){
+                                        userDBCon,
+                                        acquisitonInfo){
   
   temp <- base::lengths(base::mget(base::ls(env),
                                    envir = as.environment(env))) 
   
   # ensure equal lengths
   if ((sum(temp)/temp[[1]]) != length(temp)) {
-    stop(glue::glue("Eroor in IDBacApp::insertIntoIndividualSpectra(): IDBacApp::processXMLIndSpectra() provided variables of differing lengths: \n ",  
+    stop(glue::glue("Error in IDBacApp::insertIntoIndividualSpectra(): IDBacApp::processXMLIndSpectra() provided variables of differing lengths: \n ",  
                     paste0(names(temp),"=",temp, collapse = ", ")))
   } else { 
-  query <- DBI::dbSendStatement(userDBCon, 
-                                "INSERT INTO 'IndividualSpectra'(
+    query <- DBI::dbSendStatement(userDBCon, 
+                                  "INSERT INTO 'IndividualSpectra'(
                                   'spectrumMassHash',
                                   'spectrumIntensityHash',
                                   'XMLHash',
@@ -261,6 +291,7 @@ insertIntoIndividualSpectra <- function(env,
                                   'peakMatrix',
                                   'spectrumIntensity',
                                   'maxMass',
+                                  'minMass',
                                   'ignore')
                                   VALUES ($spectrumMassHash,
                                   $spectrumIntensityHash,
@@ -270,21 +301,31 @@ insertIntoIndividualSpectra <- function(env,
                                   $AcquisitionDate,
                                   $peakMatrix,
                                   $spectrumIntensity,
-                                  $minMass
+                                  $minMass,
                                   $maxMass,
                                   $ignore
                                   );"
-  )
-  
-  mzMLHash <- rep(XMLinfo$mzMLHash, times = temp[[1]])
-  acquisitionDate <- rep(XMLinfo$mzMLInfo$AcquisitionDate, times = temp[[1]])
-  ignore <- rep(0, times = temp[[1]])
-  
+    )
+    
+    
+    if (is.null(XMLinfo$mzMLInfo$AcquisitionDate)) {
+      XMLinfo$mzMLInfo$AcquisitionDate <- NA
+    }  
+    # if (is.null(acquisitonInfo$MassError)) {
+    #   acquisitonInfo$MassError <- NA
+    # } 
+    
+    mzMLHash <- rep(XMLinfo$mzMLHash, times = temp[[1]])
+    acquisitionDate <- rep(XMLinfo$mzMLInfo$AcquisitionDate, times = temp[[1]])
+    MassError <- rep(NA, times = temp[[1]])
+    ignore <- rep(0, times = temp[[1]])
+    sampleID <- rep(sampleID, times = temp[[1]])
+    
     DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
                             spectrumIntensityHash = env$spectrumIntensityHash,
                             XMLHash = mzMLHash,
                             Strain_ID = sampleID,
-                            MassError = acquisitonInfo$MassError,
+                            MassError = MassError,
                             AcquisitionDate = acquisitionDate,
                             peakMatrix = env$peakMatrix,
                             spectrumIntensity = env$spectrumIntensity,

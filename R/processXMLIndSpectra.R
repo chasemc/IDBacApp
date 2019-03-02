@@ -21,6 +21,16 @@ processXMLIndSpectra <- function(spectraImport,
                                                              compression = 100)
                            })
   
+  env$maxMass <- lapply(spectraImport[index], 
+                    function(x){
+                      max(x@mass)
+                    })
+  
+  env$minMass <- lapply(spectraImport[index], 
+                    function(x){
+                      min(x@mass)
+                    })
+  
   # List of whole-specctrum hashes
   env$spectrumMassHash <- lapply(env$massVector, 
                                  function(x){
