@@ -46,7 +46,8 @@ Imports:
     graphics,
     grDevices,
     rmarkdown,
-    shinycssloaders
+    shinycssloaders,
+    blob
 Suggests: testthat
 RoxygenNote: 6.1.1
 Depends: 

@@ -21,21 +21,21 @@ processXMLIndSpectra <- function(spectraImport,
                                                              compression = 100)
                            })
   
-  env$maxMass <- lapply(spectraImport[index], 
+  env$maxMass <- unlist(lapply(spectraImport[index], 
                     function(x){
-                      max(x@mass)
-                    })
+                      as.integer(max(x@mass))
+                    }))
   
-  env$minMass <- lapply(spectraImport[index], 
+  env$minMass <- unlist(lapply(spectraImport[index], 
                     function(x){
-                      min(x@mass)
-                    })
+                      as.integer(min(x@mass))
+                    }))
   
-  # List of whole-specctrum hashes
-  env$spectrumMassHash <- lapply(env$massVector, 
+  # List of whole-spectrum hashes
+  env$spectrumMassHash <- unlist(lapply(env$massVector, 
                                  function(x){
                                    IDBacApp::hashR(x)
-                                 })
+                                 }))
   
   env$spectrumIntensity <- lapply(spectraImport[index], 
                                   function(x){
@@ -44,10 +44,10 @@ processXMLIndSpectra <- function(spectraImport,
                                                                     compression = 100)
                                   })
   
-  env$spectrumIntensityHash <- lapply(env$spectrumIntensity, 
+  env$spectrumIntensityHash <- unlist(lapply(env$spectrumIntensity, 
                                       function(x){
                                         IDBacApp::hashR(x)
-                                      })
+                                      }))
   
   
   if (smallOrProtein == "small") {
@@ -65,6 +65,11 @@ processXMLIndSpectra <- function(spectraImport,
     cbind(x@mass, x@intensity, x@snr)
     
   })
+  
+  env$peakMatrix <- unlist(lapply(env$peakMatrix, 
+                           function(x)
+                             as.character(IDBacApp::serial(x))))
+  
   
   
   

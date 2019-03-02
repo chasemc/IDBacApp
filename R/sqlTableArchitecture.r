@@ -114,7 +114,7 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
   Strain_ID                            TEXT,
   MassError                            REAL,
   AcquisitionDate                      TEXT,
-  peakMatrix                           TEXT,
+  peakMatrix                           BLOB,
   spectrumIntensity                    BLOB,
   maxMass                              INTEGER,
   minMass                              INTEGER,

@@ -116,7 +116,7 @@ createXMLSQL <- function(rawDataFilePath,
                                 $Instrument_MetaFile);")
   
   DBI::dbBind(query, list(XMLHash = mzMLHash,
-                          XML = blob::as.blob(xmlFile),
+                          XML = list(xmlFile),
                           manufacturer = instInfo$manufacturer[[1]],
                           model = instInfo$model[[1]],
                           ionization = instInfo$ionisation[[1]],
@@ -242,7 +242,7 @@ insertIntoMassTable <- function(env,
                               'massVector')
                               VALUES (
                               $spectrumMassHash,
-                              $massVector;")
+                              $massVector);")
     
     DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
                             massVector = env$massVector)
@@ -319,7 +319,7 @@ insertIntoIndividualSpectra <- function(env,
     acquisitionDate <- rep(XMLinfo$mzMLInfo$AcquisitionDate, times = temp[[1]])
     MassError <- rep(NA, times = temp[[1]])
     ignore <- rep(0, times = temp[[1]])
-    sampleID <- rep(sampleID, times = temp[[1]])
+    sampleID <- rep(sampleID[[1]], times = temp[[1]])
     
     DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
                             spectrumIntensityHash = env$spectrumIntensityHash,
