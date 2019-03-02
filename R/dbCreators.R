@@ -175,6 +175,14 @@ createSpectraSQL <- function(mzML_con,
   smallIndex <- unlist(lapply(spectraImport, function(x) max(x@mass)))
   smallIndex <- smallIndex < smallRangeEnd
   
+
+
+# Create IndividualSpectra table in DB if doesn't Exist -------------------
+
+
+  if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
+    IDBacApp::sql_CreateIndividualSpectra(userDBCon)
+  }  
   # Small mol spectra -------------------------------------------------------
   
   if (any(smallIndex)) { 
@@ -195,46 +203,18 @@ createSpectraSQL <- function(mzML_con,
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
                                           userDBCon = userDBCon)
-    
+  }
     
     # Write massTable ---------------------------------------------------------
-    
-    
-    if (!DBI::dbExistsTable(userDBCon, "massTable")) {
-      
-      sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$massTableSQL)
-      RSQLite::dbClearResult(sta)
-    } 
-    # Write to SQL DB
-    DBI::dbWriteTable(conn = userDBCon,
-                      name = "massTable", # SQLite table to insert into
-                      sqlDataFrame$massTable, # Insert single row into DB
-                      append = TRUE, # Append to existing table
-                      overwrite = FALSE) # Do not overwrite
-    
-    
-    
-    
-    # Write IndividualSpectra -------------------------------------------------
-    
-    
-    
-    
-    if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
-      
-      sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$IndividualSpectraSQL)
-      RSQLite::dbClearResult(sta)
-    }
-    # Write to SQL DB
-    DBI::dbWriteTable(conn = userDBCon,
-                      name = "IndividualSpectra", # SQLite table to insert into
-                      sqlDataFrame$IndividualSpectra, # Insert single row into DB
-                      append = TRUE, # Append to existing table
-                      overwrite = FALSE) # Do not overwrite
-    
-    
-    
+  if (!DBI::dbExistsTable(userDBCon, "massTable")) {
+    IDBacApp::sql_CreatemassTable(userDBCon)
   }
+    
+    
+  
+  
+   
+  
 }
 
 
