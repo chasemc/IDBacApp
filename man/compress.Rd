@@ -5,7 +5,7 @@
 \title{compress
   Settings for compressing raw vectors}
 \usage{
-compress(input)
+compress(input, compression = 0)
 }
 \arguments{
 \item{input}{raw vector to compressed}
