@@ -48,10 +48,10 @@ serial <- function(input){
 #' @export
 
 
-compress <- function(input){
+compress <- function(input, compression = 0){
   fst::compress_fst(input, 
                     compressor = "ZSTD",
-                    compression = 0)
+                    compression = compression)
 }
 
 
@@ -67,49 +67,22 @@ decompress <- function(input){
 }
 
 
-#' Serialize a list of mzR peak matrices (one column at a time)
+
+
+#' Take character, turn to raw, then compress (note: base::charToRaw is not vectorized)
 #'
-#' @param mzRPeaks mzR::Peaks result
-#' @param mass logical
-#' @param intensity  logical 
+#' @param input character 
+#' @param compression 
 #'
-#' @return list of serials
+#' @return
 #' @export
 #'
-mzRpeakSerializer <- function(mzRPeaks,
-                              column = c("mass", "intensity")
-                              ){
-  
-  switch(column,
-         "mass" = {
-           col <- 1
-         },
-         "intensity" = {
-           col <- 2
-         }
-  )
-  if (class(mzRPeaks) == "matrix") {
-    if (ncol(mzRPeaks) == 2) {
-      return(list(IDBacApp::compress(IDBacApp::serial(mzRPeaks[, col]))))
-    }
-  } else if (class(mzRPeaks) == "list") {
-    return(
-      lapply(mzRPeaks, 
-             function(x){
-               IDBacApp::compress(IDBacApp::serial(x[, col]))
-             }
-      )
-    )
-  }
+#' @examples
+chartoRawtoCompressed <- function(input, compression){
+  input <- base::charToRaw(input)
+  IDBacApp::compress(input = input,
+                     compression = compression)
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -173,10 +146,8 @@ findmz <- function(inputPath,
 serializeXML <- function(path) {
   path <- IDBacApp::readXML(path)
   path <- base::as.character(path)
-  path <- base::charToRaw(path)
-  fst::compress_fst(path, 
-                    compressor = "ZSTD",
-                    compression = 100)
+  IDBacApp::chartoRawtoCompressed(input = path,
+                                  compression = 100)
   
 }
 
