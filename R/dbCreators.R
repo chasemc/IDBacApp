@@ -80,13 +80,13 @@ createXMLSQL <- function(rawDataFilePath,
   mzMLHash <- IDBacApp::hashR(xmlFile)
   
   if (!DBI::dbExistsTable(userDBCon, "XML")) {
-  IDBacApp::sql_CreatexmlTable(userDBCon)
+    IDBacApp::sql_CreatexmlTable(userDBCon)
   }
   
   
   # Get instrument Info
   instInfo <- mzR::instrumentInfo(mzML_con)
-
+  
   # # Find acquisitonInfo from mzML file
   # acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
   #                                                 instInfo$manufacturer)
@@ -169,8 +169,8 @@ createSpectraSQL <- function(mzML_con,
   spectraImport <- mzR::peaks(mzML_con)
   
   spectraImport <- IDBacApp::spectrumMatrixToMALDIqaunt(spectraImport)
-
-
+  
+  
   # logical vector of maximum masses of mass vectors. True = small mol, False = protein
   smallIndex <- unlist(lapply(spectraImport, function(x) max(x@mass)))
   smallIndex <- smallIndex < smallRangeEnd
@@ -178,13 +178,100 @@ createSpectraSQL <- function(mzML_con,
   # Small mol spectra -------------------------------------------------------
   
   if (any(smallIndex)) { 
-  
     env <- IDBacApp::processXMLIndSpectra(spectraImport = spectraImport,
                                           smallOrProtein = "small",
                                           index = smallIndex)
+    IDBacApp::insertIntoIndividualSpectra(env = env,
+                                          XMLinfo = XMLinfo,
+                                          userDBCon = userDBCon)
+  }
+  # Protein Spectra ---------------------------------------------------------
+  
+  if (any(!smallIndex)) {
     
-    query <- DBI::dbSendStatement(userDBCon, 
-                                  "INSERT INTO 'IndividualSpectra'(
+    env <- IDBacApp::processXMLIndSpectra(spectraImport = spectraImport,
+                                          smallOrProtein = "protein",
+                                          index = !smallIndex)
+    IDBacApp::insertIntoIndividualSpectra(env = env,
+                                          XMLinfo = XMLinfo,
+                                          userDBCon = userDBCon)
+    
+    
+    # Write massTable ---------------------------------------------------------
+    
+    
+    if (!DBI::dbExistsTable(userDBCon, "massTable")) {
+      
+      sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$massTableSQL)
+      RSQLite::dbClearResult(sta)
+    } 
+    # Write to SQL DB
+    DBI::dbWriteTable(conn = userDBCon,
+                      name = "massTable", # SQLite table to insert into
+                      sqlDataFrame$massTable, # Insert single row into DB
+                      append = TRUE, # Append to existing table
+                      overwrite = FALSE) # Do not overwrite
+    
+    
+    
+    
+    # Write IndividualSpectra -------------------------------------------------
+    
+    
+    
+    
+    if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
+      
+      sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$IndividualSpectraSQL)
+      RSQLite::dbClearResult(sta)
+    }
+    # Write to SQL DB
+    DBI::dbWriteTable(conn = userDBCon,
+                      name = "IndividualSpectra", # SQLite table to insert into
+                      sqlDataFrame$IndividualSpectra, # Insert single row into DB
+                      append = TRUE, # Append to existing table
+                      overwrite = FALSE) # Do not overwrite
+    
+    
+    
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' Write individual spectra to SQLite
+#'
+#' @param env environment 
+#' @param XMLinfo xmlinfo
+#' @param userDBCon checked database connection
+#'
+#' @return nothing, writes to database
+#' @export
+#'
+insertIntoIndividualSpectra <- function(env,
+                                        XMLinfo,
+                                        userDBCon){
+  
+  temp <- base::lengths(base::mget(base::ls(env),
+                                   envir = as.environment(env))) 
+  
+  # ensure equal lengths
+  if ((sum(temp)/temp[[1]]) != length(temp)) {
+    stop(glue::glue("Eroor in IDBacApp::insertIntoIndividualSpectra(): IDBacApp::processXMLIndSpectra() provided variables of differing lengths: \n ",  
+                    paste0(names(temp),"=",temp, collapse = ", ")))
+  } else { 
+  query <- DBI::dbSendStatement(userDBCon, 
+                                "INSERT INTO 'IndividualSpectra'(
                                   'spectrumMassHash',
                                   'spectrumIntensityHash',
                                   'XMLHash',
@@ -203,141 +290,31 @@ createSpectraSQL <- function(mzML_con,
                                   $AcquisitionDate,
                                   $peakMatrix,
                                   $spectrumIntensity,
+                                  $minMass
                                   $maxMass,
                                   $ignore
                                   );"
-                              )
-
-DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash
-                          spectrumIntensityHash = env$spectrumIntensityHash
-                          XMLHash =
-                          Strain_ID =
-                          MassError =
-                          AcquisitionDate =
-                            peakMatrix =
-                          proteinSpectrumIntensity = env$peakMatrix
-                          smallMoleculePeakMatrix =
-                          smallMoleculeSpectrumIntensity = 
-                          ignore = 0
-                          ))
-    
-    
-    
-    
-    sqlDataFrame$IndividualSpectra$mzMLHash <- XMLinfo$mzMLHash
-    sqlDataFrame$IndividualSpectra$Strain_ID <- sampleID
-    
-    if ("MassError" %in% ls(XMLinfo$mzMLInfo)) {
-      sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
-    }
-    sqlDataFrame$IndividualSpectra$AcquisitionDate <- XMLinfo$mzMLInfo$AcquisitionDate
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-  }  
+  )
   
-  # Protein Spectra ---------------------------------------------------------
+  mzMLHash <- rep(XMLinfo$mzMLHash, times = temp[[1]])
+  acquisitionDate <- rep(XMLinfo$mzMLInfo$AcquisitionDate, times = temp[[1]])
+  ignore <- rep(0, times = temp[[1]])
   
-  if (any(!smallIndex)) {
-    
-    #List of serialized intensity vectors 
-    spectrumIntensityHash <- IDBacApp::mzRpeakSerializer(spectraImport[!smallIndex], 
-                                                                                                     column = "intensity")
-    # vector of hashes
-    spectrumIntensityHash <- unlist(lapply(spectrumIntensityHash,
-                                           function(x) {
-                                             IDBacApp::hashR(x)
-                                           })
-                                    )
-    
-    
-    
-    peaks <- IDBacApp::spectrumMatrixToMALDIqaunt(spectraImport[!smallIndex])
-    peaks <- IDBacApp::processProteinSpectra(peaks)
-    
-    sqlDataFrame$IndividualSpectra$proteinPeaksMass[!smallIndex] <- lapply(peaks, function(x) x@mass)
-    sqlDataFrame$IndividualSpectra$proteinPeaksMass[!smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksMass[!smallIndex], 
-                                                                           function(x){
-                                                                             IDBacApp::compress(IDBacApp::serial(x))
-                                                                           })
-    
-    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity[!smallIndex] <- lapply(peaks, function(x) x@intensity)
-    sqlDataFrame$IndividualSpectra$proteinPeaksIntensity[!smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksIntensity[!smallIndex], 
-                                                                                function(x){
-                                                                                  IDBacApp::compress(IDBacApp::serial(x))
-                                                                                })
-    
-    sqlDataFrame$IndividualSpectra$proteinPeaksSNR[!smallIndex] <- lapply(peaks, function(x) x@snr)
-    sqlDataFrame$IndividualSpectra$proteinPeaksSNR[!smallIndex] <- lapply(sqlDataFrame$IndividualSpectra$proteinPeaksSNR[!smallIndex], 
-                                                                          function(x){
-                                                                            IDBacApp::compress(IDBacApp::serial(x))
-                                                                          })
+    DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
+                            spectrumIntensityHash = env$spectrumIntensityHash,
+                            XMLHash = mzMLHash,
+                            Strain_ID = sampleID,
+                            MassError = acquisitonInfo$MassError,
+                            AcquisitionDate = acquisitionDate,
+                            peakMatrix = env$peakMatrix,
+                            spectrumIntensity = env$spectrumIntensity,
+                            minMass = env$minMass,
+                            maxMass = env$maxMass,
+                            ignore = ignore
+    ))
     
     
+    DBI::dbClearResult(query)
     
   }
-  
-  remove(peaks)
-  
-  
-  
-  
-  
-  # Write massTable ---------------------------------------------------------
-  
-  
-  if (!DBI::dbExistsTable(userDBCon, "massTable")) {
-    
-    sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$massTableSQL)
-    RSQLite::dbClearResult(sta)
-  } 
-  # Write to SQL DB
-  DBI::dbWriteTable(conn = userDBCon,
-                    name = "massTable", # SQLite table to insert into
-                    sqlDataFrame$massTable, # Insert single row into DB
-                    append = TRUE, # Append to existing table
-                    overwrite = FALSE) # Do not overwrite
-  
-  
-  
-  
-  # Write IndividualSpectra -------------------------------------------------
-  
-  
-  
-  
-  if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
-    
-    sta <- RSQLite::dbSendStatement(userDBCon, sqlDataFrame$IndividualSpectraSQL)
-    RSQLite::dbClearResult(sta)
-  }
-  # Write to SQL DB
-  DBI::dbWriteTable(conn = userDBCon,
-                    name = "IndividualSpectra", # SQLite table to insert into
-                    sqlDataFrame$IndividualSpectra, # Insert single row into DB
-                    append = TRUE, # Append to existing table
-                    overwrite = FALSE) # Do not overwrite
-  
-  
-  
 }
