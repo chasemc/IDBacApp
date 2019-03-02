@@ -113,7 +113,7 @@ createXMLSQL <- function(rawDataFilePath,
                                 $ionization,
                                 $analyzer,
                                 $detector,
-                                $Instrument_MetaFile)")
+                                $Instrument_MetaFile);")
   
   DBI::dbBind(query, list(XMLHash = mzMLHash,
                           XML = blob::as.blob(xmlFile),
@@ -170,7 +170,7 @@ createSpectraSQL <- function(mzML_con,
   
   spectraImport <- IDBacApp::spectrumMatrixToMALDIqaunt(spectraImport)
 
- 
+
   # logical vector of maximum masses of mass vectors. True = small mol, False = protein
   smallIndex <- unlist(lapply(spectraImport, function(x) max(x@mass)))
   smallIndex <- smallIndex < smallRangeEnd
@@ -178,34 +178,74 @@ createSpectraSQL <- function(mzML_con,
   # Small mol spectra -------------------------------------------------------
   
   if (any(smallIndex)) { 
+  
+    env <- IDBacApp::processXMLIndSpectra(spectraImport = spectraImport,
+                                          smallOrProtein = "small",
+                                          index = smallIndex)
     
-    spectrumMass <- lapply(spectraImport[smallIndex], 
-                                   function(x){
-                                     x <- IDBacApp::serial(x@mass)
-                                     IDBacApp::chartoRawtoCompressed(x,
-                                                                     compression = 100)
-                                   })
+    query <- DBI::dbSendStatement(userDBCon, 
+                                  "INSERT INTO 'IndividualSpectra'(
+                                  'spectrumMassHash',
+                                  'spectrumIntensityHash',
+                                  'XMLHash',
+                                  'Strain_ID',
+                                  'MassError',
+                                  'AcquisitionDate',
+                                  'peakMatrix',
+                                  'spectrumIntensity',
+                                  'maxMass',
+                                  'ignore')
+                                  VALUES ($spectrumMassHash,
+                                  $spectrumIntensityHash,
+                                  $XMLHash,
+                                  $Strain_ID,
+                                  $MassError,
+                                  $AcquisitionDate,
+                                  $peakMatrix,
+                                  $spectrumIntensity,
+                                  $maxMass,
+                                  $ignore
+                                  );"
+                              )
+
+DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash
+                          spectrumIntensityHash = env$spectrumIntensityHash
+                          XMLHash =
+                          Strain_ID =
+                          MassError =
+                          AcquisitionDate =
+                            peakMatrix =
+                          proteinSpectrumIntensity = env$peakMatrix
+                          smallMoleculePeakMatrix =
+                          smallMoleculeSpectrumIntensity = 
+                          ignore = 0
+                          ))
     
-    # List of whole-specctrum hashes
-    spectrumMassHash <- lapply(spectrumMass, 
-                                       function(x){
-                                         IDBacApp::hashR(x)
-                                       })
     
-    spectrumIntensity <- lapply(spectraImport[smallIndex], 
-                                             function(x){
-                                               x <- IDBacApp::serial(x@intensity)
-                                               IDBacApp::chartoRawtoCompressed(x,
-                                                                               compression = 100)
-                                             })
     
-    spectrumIntensityHash <- lapply(spectrumIntensity, 
-                                        function(x){
-                                          IDBacApp::hashR(x)
-                                        })
- 
     
-    peaks <- IDBacApp::processSmallMolSpectra(spectraImport[smallIndex])
+    sqlDataFrame$IndividualSpectra$mzMLHash <- XMLinfo$mzMLHash
+    sqlDataFrame$IndividualSpectra$Strain_ID <- sampleID
+    
+    if ("MassError" %in% ls(XMLinfo$mzMLInfo)) {
+      sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
+    }
+    sqlDataFrame$IndividualSpectra$AcquisitionDate <- XMLinfo$mzMLInfo$AcquisitionDate
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
@@ -260,25 +300,6 @@ createSpectraSQL <- function(mzML_con,
   remove(peaks)
   
   
-  # List of raw vectors
-  binaryMassVector <- IDBacApp::mzRpeakSerializer(spectraImport, column = "mass")
-  
-  # List of hashes of same length as binaryMassVector
-  spectrumMassHash <- lapply(binaryMassVector,
-                             function(x) {
-                               IDBacApp::hashR(x)
-                             })
-  
-  
-  
-  
-  sqlDataFrame$IndividualSpectra$mzMLHash <- XMLinfo$mzMLHash
-  sqlDataFrame$IndividualSpectra$Strain_ID <- sampleID
-  
-  if ("MassError" %in% ls(XMLinfo$mzMLInfo)) {
-    sqlDataFrame$IndividualSpectra$MassError <- acquisitonInfo$MassError[[individualSpectrum]]
-  }
-  sqlDataFrame$IndividualSpectra$AcquisitionDate <- XMLinfo$mzMLInfo$AcquisitionDate
   
   
   

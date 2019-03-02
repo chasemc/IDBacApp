@@ -63,10 +63,9 @@ sqlTableArchitecture <- function(numberScans){
                                       "Strain_ID",
                                       "MassError",
                                       "AcquisitionDate",
-                                      "proteinPeakMatrix",
-                                      "proteinSpectrumIntensity",
-                                      "smallMoleculePeakMatrix",
-                                      "smallMoleculeSpectrumIntensity",
+                                      "peakMatrix",
+                                      "spectrumIntensity",
+                                      "maxMass",
                                       "ignore")
   
   
@@ -79,7 +78,7 @@ sqlTableArchitecture <- function(numberScans){
   
   
   sqlDataFrame$massTable <- c("spectrumMassHash",
-                              "binaryMassVector")
+                              "massVector")
   
   temp <- as.data.frame(matrix(nrow = numberScans,
                                ncol = length(sqlDataFrame$massTable)))
@@ -114,10 +113,9 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
   Strain_ID                            TEXT,
   MassError                            REAL,
   AcquisitionDate                      TEXT,
-  proteinPeakMatrix                    TEXT,
-  proteinSpectrumIntensity             BLOB,
-  smallMoleculePeakMatrix              TEXT,
-  smallMoleculeSpectrumIntensity       BLOB,
+  peakMatrix                           TEXT,
+  spectrumIntensity                    BLOB,
+  maxMass                              INTEGER,
   ignore                               INTEGER,
   
   UNIQUE(Strain_ID, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
@@ -149,7 +147,7 @@ sql_CreatemassTable <- function(sqlConnection){
     a <- DBI::dbSendStatement(sqlConnection,
                               "CREATE TABLE `massTable` (
   spectrumMassHash    TEXT,
-  binaryMassVector    BLOB,
+  massVector          BLOB,
  
   UNIQUE(spectrumMassHash) ON CONFLICT IGNORE
   );"
