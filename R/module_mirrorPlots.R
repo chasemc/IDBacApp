@@ -37,7 +37,10 @@ mirrorPlotDownload_UI <- function(id){
 #'
 mirrorPlots_UI <- function(id){
   ns <- NS(id)
-  fluidRow(plotly::plotlyOutput(ns("inversePeakComparisonPlot")
+  fluidRow(
+    shinycssloaders::withSpinner(
+    plotly::plotlyOutput(ns("inversePeakComparisonPlot")
+    )
 
   ))
   
@@ -116,14 +119,7 @@ mirrorPlots_Server <- function(input,
                                                                  protein = TRUE) 
     
     
-    llp<<-list(checkedPool = conn,
-         sampleIDs = input$Spectra2,
-         peakPercentPresence = input$percentPresence,
-         lowerMassCutoff = input$lowerMass,
-         upperMassCutoff = input$upperMass,
-         minSNR = input$SNR,
-         tolerance = 0.002,
-         protein = TRUE)
+   
     
     mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                  sampleIDs = input$Spectra2,
