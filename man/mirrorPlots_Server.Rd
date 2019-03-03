@@ -15,7 +15,7 @@ mirrorPlots_Server(input, output, session, workingDB, proteinOrSmall)
 
 \item{workingDB}{reactive containing SQLite DB pool}
 
-\item{proteinOrSmall}{values = "proteinPeaks" or "smallMoleculePeaks"}
+\item{proteinOrSmall}{'>' for protein '<' for small mol}
 }
 \value{
 NA

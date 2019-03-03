@@ -42,12 +42,12 @@ serial <- function(input){
 
 #' compress
 #'   Settings for compressing raw vectors
+#'
 #' @param input raw vector to compressed
+#' @param compression compression level 0-100
 #'
 #' @return Raw vector
 #' @export
-
-
 compress <- function(input, compression = 0){
   fst::compress_fst(input, 
                     compressor = "ZSTD",
@@ -72,12 +72,11 @@ decompress <- function(input){
 #' Take character, turn to raw, then compress (note: base::charToRaw is not vectorized)
 #'
 #' @param input character 
-#' @param compression 
+#' @param compression compression level 0-100
 #'
-#' @return
+#' @return NA
 #' @export
 #'
-#' @examples
 chartoRawtoCompressed <- function(input, compression){
   input <- base::charToRaw(input)
   IDBacApp::compress(input = input,

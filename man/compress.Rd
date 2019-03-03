@@ -9,6 +9,8 @@ compress(input, compression = 0)
 }
 \arguments{
 \item{input}{raw vector to compressed}
+
+\item{compression}{compression level 0-100}
 }
 \value{
 Raw vector

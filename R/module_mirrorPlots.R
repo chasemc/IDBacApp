@@ -235,7 +235,7 @@ mirrorPlots_Server <- function(input,
 }
 
 
-#' Title
+#' mquantSpecFromSQL
 #'
 #' @param checkedPool checkedPool
 #' @param sampleID sampleID 

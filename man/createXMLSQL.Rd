@@ -12,8 +12,6 @@ createXMLSQL(rawDataFilePath, userDBCon, mzML_con)
 \item{userDBCon}{NA}
 
 \item{mzML_con}{NA}
-
-\item{sampleID}{NA}
 }
 \value{
 NA

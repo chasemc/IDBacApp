@@ -9,6 +9,9 @@ spectrumMatrixToMALDIqaunt(input)
 \arguments{
 \item{input}{matrix/list of martrices , col 1 = masses, col 2 = intensities}
 }
+\value{
+NA
+}
 \description{
 SQL to MALDIquant
 }

@@ -1,6 +1,6 @@
 context("test-dbcreators")
 
-
+set.seed(42)
 # Create version ----------------------------------------------------------
 
 
@@ -78,7 +78,7 @@ test_that("XML database table creation", {
   expect_identical(nrow(a), 1L)
   expect_identical(ncol(a), 8L)
   expect_identical(class(b), "raw")
-  expect_identical(out$mzMLHash, "64f3fb3573d31748")
+  expect_identical(out$mzMLHash, "3b3a0e4975b86523")
   
 })
 

@@ -63,7 +63,6 @@ createMetaSQL <- function(sampleID,
 #' createXMLSQL
 #'
 #' @param rawDataFilePath NA
-#' @param sampleID NA
 #' @param userDBCon NA
 #' @param mzML_con NA
 #'
@@ -186,6 +185,7 @@ createSpectraSQL <- function(mzML_con,
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
                                           userDBCon = userDBCon,
+                                          acquisitonInfo = NULL,
                                           sampleID = sampleID)
     IDBacApp::insertIntoMassTable(env = env,
                                   userDBCon = userDBCon)
@@ -200,6 +200,7 @@ createSpectraSQL <- function(mzML_con,
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
                                           userDBCon = userDBCon,
+                                          acquisitonInfo = NULL,
                                           sampleID = sampleID)
     IDBacApp::insertIntoMassTable(env = env,
                                   userDBCon = userDBCon)

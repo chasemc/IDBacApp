@@ -1,7 +1,7 @@
 #' Copy from one database to another, selecting by Sample ID
 #'
 #' @param existingDBPool un-checked pool that samples are being pulled from 
-#' @param newdbPath  path to where new db should be created
+#' @param newDBPool  new unchecked pool
 #' @param sampleIDs  smaples to transfer
 #' @param newdbName new db name
 #'
@@ -252,13 +252,12 @@ copyToNewDatabase <- function(existingDBPool,
 
 #' Attach new database to existing database
 #'
-#' @param newdbPath 
-#' @param existingDBconn 
+#' @param newdbPath newdbPath
+#' @param existingDBconn existingDBconn
 #'
-#' @return
+#' @return NA
 #' @export
 #'
-#' @examples
 copyDB_dbAttach <- function(newdbPath, 
                             existingDBconn){
   

@@ -10,22 +10,17 @@ Encoding: UTF-8
 LazyData: true
 biocViews:
 Imports: 
-    Rcpp,
     MALDIquant,
     MALDIquantForeign,
     pool,
     RSQLite,
     DBI,
-    dbplyr,
-    dplyr,
     magrittr,
     reshape2,
     Rtsne,
     igraph,
-    plyr,
     networkD3,
     rhandsontable,
-    readxl,
     devtools,
     shinyjs,
     plotly,
@@ -47,7 +42,8 @@ Imports:
     grDevices,
     rmarkdown,
     shinycssloaders,
-    blob
+    jsonlite,
+    fst
 Suggests: testthat
 RoxygenNote: 6.1.1
 Depends: 

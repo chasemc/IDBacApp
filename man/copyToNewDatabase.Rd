@@ -9,11 +9,11 @@ copyToNewDatabase(existingDBPool, newDBPool, newdbName, sampleIDs)
 \arguments{
 \item{existingDBPool}{un-checked pool that samples are being pulled from}
 
+\item{newDBPool}{new unchecked pool}
+
 \item{newdbName}{new db name}
 
 \item{sampleIDs}{smaples to transfer}
-
-\item{newdbPath}{path to where new db should be created}
 }
 \value{
 NA

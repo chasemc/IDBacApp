@@ -9,7 +9,10 @@ chartoRawtoCompressed(input, compression)
 \arguments{
 \item{input}{character}
 
-\item{compression}{}
+\item{compression}{compression level 0-100}
+}
+\value{
+NA
 }
 \description{
 Take character, turn to raw, then compress (note: base::charToRaw is not vectorized)

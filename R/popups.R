@@ -110,6 +110,7 @@ dbExists_UI <- function(id, dbName){
 #' @param input shiny
 #' @param output shiny
 #' @param session shiny
+#' @param continue continue buttion
 #'
 #' @return modular modal
 #' @export
