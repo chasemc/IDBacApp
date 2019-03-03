@@ -41,10 +41,10 @@ getSmallMolSpectra <- function(pool,
   if (!is.null(dendrogram)) {  
     
     # If there is a protein dendrogram but a user hasn't brushed:
-    if(is.null(brushInputs()$ymin)){ 
+    if (is.null(brushInputs()$ymin)) { 
       
       # Don't ovrwhelm the browser by displaying everthing when page loads
-      if(length(labels(dendrogram)) >= 25){
+      if (length(labels(dendrogram)) >= 25) {
         # If more than 25 strains present, only display 10 to start, otherwise display all
         # Get random 10 strain IDs from dendrogram
         sampleIDs <- labels(dendrogram)[1:sample.int(10, 1)]
@@ -61,18 +61,14 @@ getSmallMolSpectra <- function(pool,
   } else {
     
     # retrieve all Strain_IDs in db that have small molecule spectra
-    sampleIDs <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
-                               FROM `IndividualSpectra`
-                               WHERE (`smallMoleculePeaksMass` IS NOT NULL)",
-                                .con = checkedPool)
-    
-    sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)
+    sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT Strain_ID
+                                      FROM IndividualSpectra 
+                                      WHERE maxMass < 6000"))
     sampleIDs <- as.vector(sampleIDs)[,1]
   }
   
 }
   
-
   samples <- lapply(sampleIDs, 
                     function(sampleIDs){ 
                       IDBacApp::collapseReplicates(checkedPool = checkedPool,
@@ -97,6 +93,7 @@ getSmallMolSpectra <- function(pool,
   # Return pool
   pool::poolReturn(checkedPool)
   
-  return(samples)
+  return(list(maldiQuantPeaks = samples,
+              sampleIDs = sampleIDs))
   
 }

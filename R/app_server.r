@@ -514,7 +514,8 @@ smallProteinMass <- 6000
   
   
   output$smallMolPcaPlot <- plotly::renderPlotly({
-    req(nrow(smallMolDataFrame()) > 2,
+
+        req(nrow(smallMolDataFrame()) > 2,
         ncol(smallMolDataFrame()) > 2)
     
     princ <- IDBacApp::pcaCalculation(smallMolDataFrame())
@@ -565,11 +566,10 @@ smallProteinMass <- 6000
   smallMolIDs <- reactive({
     checkedPool <- pool::poolCheckout(workingDB$pool())
     # retrieve all Strain_IDs in db that have small molecule spectra
-    sampleIDs <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
-                                FROM `IndividualSpectra`
-                                WHERE (`smallMoleculePeaksMass` IS NOT NULL)",
-                                .con = checkedPool)
-    sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)
+
+    sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT Strain_ID
+                                                          FROM IndividualSpectra 
+                                                          WHERE maxMass < {smallProteinMass}"))
     
     pool::poolReturn(checkedPool)
     
@@ -579,9 +579,26 @@ smallProteinMass <- 6000
   
   
   
-  subtractedMatrixBlank <- reactive({
+  
+  smallMolSamples <- reactive({
     
-    validate(need(smallPeakSettings$lowerMass < smallPeakSettings$upperMass, "Upper mass cutoff must be greater than lower mass curoff."))
+    
+  })
+  
+  
+  
+  
+  subtractedMatrixBlank <- reactiveValues(maldiQuantPeaks = NULL,
+                                          sampleIDs = NULL)
+    observe({
+    req(workingDB$pool(),
+        smallPeakSettings$percentPresence,
+        smallPeakSettings$lowerMass,
+        smallPeakSettings$upperMass,
+        smallPeakSettings$SNR,
+        input$selectMatrix)
+    
+    validate(need(smallPeakSettings$lowerMass < smallPeakSettings$upperMass, "Upper mass cutoff must be greater than lower mass cutoff."))
     
     samples <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
                                             sampleIDs = NULL,
@@ -592,6 +609,10 @@ smallProteinMass <- 6000
                                             lowerMassCutoff = smallPeakSettings$lowerMass,
                                             upperMassCutoff = smallPeakSettings$upperMass,
                                             minSNR = smallPeakSettings$SNR)
+    ids <- samples$sampleIDs
+    samples <- samples$maldiQuantPeaks
+    
+    
     
     if ( (input$selectMatrix != "None") ) {
       
@@ -631,12 +652,8 @@ smallProteinMass <- 6000
       samples <- MALDIquant::binPeaks(samples, tolerance = .002)
     }
     
-    
-    return(samples)
-    
-    
-    
-    
+    subtractedMatrixBlank$maldiQuantPeaks <- samples
+    subtractedMatrixBlank$sampleIDs <- ids
     
   })
   
@@ -655,15 +672,9 @@ smallProteinMass <- 6000
   # Small molecule data frame reactive --------------------------------------
   
   smallMolDataFrame <- reactive({
-    
-    smallNetwork <- MALDIquant::intensityMatrix(subtractedMatrixBlank())
-    temp <- NULL
-    
-    for (i in 1:length(subtractedMatrixBlank())) {
-      temp <- c(temp,subtractedMatrixBlank()[[i]]@metaData$Strain)
-    }
-    
-    rownames(smallNetwork) <- temp
+    req(MALDIquant::isMassPeaksList(subtractedMatrixBlank$maldiQuantPeaks))
+    smallNetwork <- MALDIquant::intensityMatrix(subtractedMatrixBlank$maldiQuantPeaks)
+    rownames(smallNetwork) <- subtractedMatrixBlank$sampleIDs
     smallNetwork[is.na(smallNetwork)] <- 0
     as.matrix(smallNetwork)
   })
@@ -684,7 +695,7 @@ smallProteinMass <- 6000
   # Suggested Reporting Paragraphs for small molecule data ------------------
   
   output$manReport <- renderUI({
-    p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,",
+    p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank$sampleIDs)), " samples,",
       if (input$selectMatrix != "None") {
         ("subtracting a matrix blank,") 
       } else {},

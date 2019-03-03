@@ -148,6 +148,7 @@ downloadSmNet_UI <- function(id) {
 #' @param output mod
 #' @param session mod
 #' @param subtractedMatrixBlank subtractedMatrixBlank 
+#' @param sampleIDs sampleIDs
 #'
 #' @return NA
 #' @export
@@ -155,7 +156,8 @@ downloadSmNet_UI <- function(id) {
 MAN_Server <- function(input,
                        output,
                        session,
-                       subtractedMatrixBlank){
+                       subtractedMatrixBlank,
+                       sampleIDs){
   
   
   
@@ -163,8 +165,8 @@ MAN_Server <- function(input,
   
   #----
   smallMolNetworkDataFrame <- reactive({
-    
-    IDBacApp::smallMolDFtoNetwork(peakList = subtractedMatrixBlank())
+    req(MALDIquant::isMassPeaksList(subtractedMatrixBlank$maldiQuantPeaks))
+    IDBacApp::smallMolDFtoNetwork(peakList = subtractedMatrixBlank$maldiQuantPeaks)
     
   })
   
@@ -185,10 +187,8 @@ MAN_Server <- function(input,
   #----
   calcNetwork <- reactive({
     manEnvironment <- new.env(parent = parent.frame())
-    manEnvironment$sampleNodes <- character(length(subtractedMatrixBlank()))
-    for (i in seq_along(subtractedMatrixBlank())) {
-      manEnvironment$sampleNodes[i] <- subtractedMatrixBlank()[[i]]@metaData$Strain
-    }
+    manEnvironment$sampleNodes <- subtractedMatrixBlank$sampleIDs
+    
     
     a <- igraph::as.undirected(igraph::graph_from_data_frame(smallMolNetworkDataFrame()))
     a <- igraph::simplify(a)
@@ -209,7 +209,6 @@ MAN_Server <- function(input,
   
   output$metaboliteAssociationNetwork <- networkD3::renderForceNetwork({
     cbp <- as.vector(IDBacApp::colorBlindPalette()[1:100])
-    
     
     YourColors <- paste0('d3.scaleOrdinal()
                          .domain([',paste0(shQuote(1:100), collapse = ", "),'])

@@ -11,14 +11,19 @@
 
 getPeakData <-  function(checkedPool, sampleIDs, protein){
   
+  if (!is.logical(protein)) {stop("In getPeakData, provided value for 'protein' wasn't logical-type.")}
+  
   if (protein == TRUE) {
-    query <- DBI::dbSendStatement("SELECT peakMatrix
+    sym <- '>'
+  } else {
+    sym <- '<'
+  }  
+    
+    query <- DBI::dbSendStatement(glue::glue("SELECT peakMatrix
                               FROM IndividualSpectra
-                                  WHERE maxMass > 6000
-                                  AND (Strain_ID = ?)",
+                                  WHERE maxMass {sym} 6000
+                                  AND (Strain_ID = ?)"),
                                   con = checkedPool)
-    
-    
     
     DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
     results <- DBI::dbFetch(query)
@@ -31,45 +36,12 @@ getPeakData <-  function(checkedPool, sampleIDs, protein){
                   MALDIquant::createMassPeaks(mass = x[ , 1],
                                               intensity = x[ , 2] ,
                                               snr = x[ , 3])
-                  
                 }
     )
    
-  } else {
-    
-    query <- DBI::dbSendStatement("SELECT peakMatrix
-                                  FROM IndividualSpectra
-                                  WHERE maxMass < 6000
-                                  AND (Strain_ID = ?)",
-                                  con = checkedPool)
-    
-    
-    
-    DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
-    results <- DBI::dbFetch(query)
-    DBI::dbClearResult(query)
-    
-    results <- lapply(results[,1], jsonlite::fromJSON)
-    
-    results <- lapply(results,
-                      function(x){
-                        MALDIquant::createMassPeaks(mass = x[ , 1],
-                                                    intensity = x[ , 2] ,
-                                                    snr = x[ , 3])
-                        
-                      }
-    )
     
   }
   
-  
-}
-
-
-
-
-
-
 
 
 
