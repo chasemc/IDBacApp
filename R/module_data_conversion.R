@@ -63,13 +63,14 @@ convertDataTab_UI <- function(id) {
 
 #' convertDataTab_Server
 #'
-#' @param input . 
-#' @param output  .
-#' @param session  .
-#' @param tempMZDir  .
-#' @param sqlDirectory  .
+#' @param input shiny
+#' @param output  shiny
+#' @param session  shiny
+#' @param tempMZDir  directory to create temp mzML if needed
+#' @param sqlDirectory  where to write new SQLite file
+#' @param availableExperiments update availableExperiments
 #'
-#' @return .
+#' @return none, updates availableExperiments reactive value though
 #' @export
 #'
 
@@ -77,11 +78,12 @@ convertDataTab_Server <- function(input,
                                   output,
                                   session,
                                   tempMZDir,
-                                  sqlDirectory){
+                                  sqlDirectory, 
+                                  availableExperiments){
   
   
   
-  shiny::callModule(convertMZ_Server,
+a <- shiny::callModule(convertMZ_Server,
                     "beginWithMZ",
                     sqlDirectory = sqlDirectory)
   
@@ -104,6 +106,14 @@ convertDataTab_Server <- function(input,
                     tempMZDir,
                     sqlDirectory)
   
+  observe(aa <<-a)
+  
+  observeEvent(a()$val,{
+       
+          availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                          pattern = ".sqlite",
+                                                                          full.names = FALSE))
+             })
   
 }
 

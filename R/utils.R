@@ -18,41 +18,40 @@ colorBlindPalette <- function(){
 #' @export
 
 hashR <- function(input){
-  digest::sha1(input, 
-               digits = 14,
-               zapsmall = 7,
-               algo = "sha1",
-               serialize = FALSE)
+  digest::digest(input, 
+                 algo = "xxhash64",
+                 serialize = FALSE,
+                 seed = 42)
 }
+
+
 
 
 #' serial
-#'    Settings for serializing in IDBac
-#' @param input object to serialize
+#'    Settings for serializing in IDBac (convert to json)
+#' @param input matrix or vector
 #'
-#' @return serialized object in binary
+#' @return JSON
 #' @export
 
 serial <- function(input){
-  base::serialize(object = input ,
-                  connection = NULL,
-                  ascii = FALSE,
-                  xdr = FALSE,
-                  version = 3)
+  jsonlite::toJSON(input)
 }
 
 
+
 #' compress
-#'   Settings for compressing in IDBac
-#' @param input character or raw vector to compressed (char will be converted to raw)
+#'   Settings for compressing raw vectors
+#'
+#' @param input raw vector to compressed
+#' @param compression compression level 0-100
 #'
 #' @return Raw vector
 #' @export
-
-
-compress <- function(input){
-  base::memCompress(input, 
-              type = "gzip")
+compress <- function(input, compression = 0){
+  fst::compress_fst(input, 
+                    compressor = "ZSTD",
+                    compression = compression)
 }
 
 
@@ -64,37 +63,24 @@ compress <- function(input){
 #' @export
 
 decompress <- function(input){
-  base::memDecompress(input, 
-              type = "gzip",
-              asChar = FALSE)
+  fst::decompress_fst(input)
 }
 
 
-#----
-#' createSpectrumSha
-#'    Given a mzR 
+
+
+#' Take character, turn to raw, then compress (note: base::charToRaw is not vectorized)
 #'
-#' @param  peaklist matrix
+#' @param input character 
+#' @param compression compression level 0-100
 #'
-#' @return sha
+#' @return NA
 #' @export
-
-
-createSpectrumSha <- function(peaklist){
-  
-  
-  if(base::class(peaklist) != "matrix"){
-    warning("createSpectrumSha: peakList given was not of type matrix")  
-    
-  } else {
-    if(is.null(peaklist)){
-      warning("No data found in mzML scan. If you think this is an error, please submit an issue to GitHub
-          with an example file.")
-    } else {
-      
-      return(IDBacApp::hashR(IDBacApp::serial(peaklist)))
-    }
-  }
+#'
+chartoRawtoCompressed <- function(input, compression){
+  input <- base::charToRaw(input)
+  IDBacApp::compress(input = input,
+                     compression = compression)
 }
 
 
@@ -149,4 +135,46 @@ findmz <- function(inputPath,
 
 
 
+#' Read mzXML, XML and transform to raw character for storing in SQLite
+#'
+#' @param path xml2 connection
+#'
+#' @return raw 
+#' @export
+#'
+serializeXML <- function(path) {
+  
+  path <- readChar(path, nchars = file.info(path)$size, useBytes = T)
+  IDBacApp::chartoRawtoCompressed(input = path,
+                                  compression = 100)
+  
+}
+
+
+#' ead mzXML, XML as XML
+#'
+#' @param path file path to mzML or mzXML
+#'
+#' @return xml2 connection
+#' @export
+#'
+readXML <- function(path) {
+  xml2::read_xml(path)
+}
+
+
+
+
+#' People have trouble with spaces
+#'
+#' @param input character vector 
+#'
+#' @return character vector
+#' @export
+#'
+cleanWSpace <- function(input){
+  
+  input <- trimws(input)
+  return(gsub(" ", "_", input))
+}
 

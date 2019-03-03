@@ -63,7 +63,7 @@ getSmallMolSpectra <- function(pool,
     # retrieve all Strain_IDs in db that have small molecule spectra
     sampleIDs <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
                                FROM `IndividualSpectra`
-                               WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                               WHERE (`smallMoleculePeaksMass` IS NOT NULL)",
                                 .con = checkedPool)
     
     sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)

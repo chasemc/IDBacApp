@@ -3,8 +3,7 @@
 .RData
 .Ruserdata
 IDBacApp.Rproj
-/inst/app/temp_mzML
-*.sqlite
+/*.sqlite
 .Rproj.user
 IDBac_App.Rproj
 Getting_Started.Rmd
