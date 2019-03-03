@@ -254,7 +254,7 @@ mquantSpecFromSQL <- function(checkedPool,
                                    ON massTable.spectrumMassHash = IndividualSpectra.spectrumMassHash
                                    WHERE Strain_ID == ?
                                    AND maxMass {proteinOrSmall} 6000"),
-                                 con = conn)
+                                 con = checkedPool)
   
   
   DBI::dbBind(query, list(as.character(as.vector(sampleID))))
