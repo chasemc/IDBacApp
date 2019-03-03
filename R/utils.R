@@ -144,8 +144,8 @@ findmz <- function(inputPath,
 #' @export
 #'
 serializeXML <- function(path) {
-  path <- IDBacApp::readXML(path)
-  path <- base::as.character(path)
+  
+  path <- readChar(path, nchars = file.info(path)$size, useBytes = T)
   IDBacApp::chartoRawtoCompressed(input = path,
                                   compression = 100)
   

@@ -59,7 +59,15 @@ app_server <- function(input, output, session) {
                          full.names = TRUE))
   
   availableDatabases <- reactiveValues(db = NULL)
+ 
+
+# Set constants -----------------------------------------------------------
+
+# m/z to separate small molecule and protein spectra:
+# If max mass is > than this, will be classified as protein spectrum 
+smallProteinMass <- 6000  
   
+    
   # Conversions Tab ---------------------------------------------------------
   
   

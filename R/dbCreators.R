@@ -155,17 +155,7 @@ createSpectraSQL <- function(mzML_con,
                              XMLinfo,
                              rawDataFilePath,
                              smallRangeEnd = 6000){
-  
-  
-   mzML_con<<-mzML_con
-   scanNumber<<-scanNumber
-   userDBCon<<-userDBCon
-   sampleID<<-sampleID
-   XMLinfo<<-XMLinfo
-   rawDataFilePath<<-rawDataFilePath
-   smallRangeEnd <<-6000
-  
-  
+
   spectraImport <- mzR::peaks(mzML_con)
   
   spectraImport <- IDBacApp::spectrumMatrixToMALDIqaunt(spectraImport)
@@ -195,7 +185,8 @@ createSpectraSQL <- function(mzML_con,
                                           index = smallIndex)
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
-                                          userDBCon = userDBCon)
+                                          userDBCon = userDBCon,
+                                          sampleID = sampleID)
     IDBacApp::insertIntoMassTable(env = env,
                                   userDBCon = userDBCon)
   }
@@ -208,7 +199,8 @@ createSpectraSQL <- function(mzML_con,
                                           index = !smallIndex)
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
-                                          userDBCon = userDBCon)
+                                          userDBCon = userDBCon,
+                                          sampleID = sampleID)
     IDBacApp::insertIntoMassTable(env = env,
                                   userDBCon = userDBCon)
   }
@@ -263,6 +255,7 @@ insertIntoMassTable <- function(env,
 #' @param XMLinfo xmlinfo
 #' @param userDBCon checked database connection
 #' @param acquisitonInfo acquisitonInfo
+#' @param sampleID sampleID
 #'
 #' @return nothing, writes to database
 #' @export
@@ -270,7 +263,8 @@ insertIntoMassTable <- function(env,
 insertIntoIndividualSpectra <- function(env,
                                         XMLinfo,
                                         userDBCon,
-                                        acquisitonInfo){
+                                        acquisitonInfo,
+                                        sampleID){
   
   temp <- base::lengths(base::mget(base::ls(env),
                                    envir = as.environment(env))) 
@@ -290,8 +284,8 @@ insertIntoIndividualSpectra <- function(env,
                                   'AcquisitionDate',
                                   'peakMatrix',
                                   'spectrumIntensity',
-                                  'maxMass',
                                   'minMass',
+                                  'maxMass',
                                   'ignore')
                                   VALUES ($spectrumMassHash,
                                   $spectrumIntensityHash,
