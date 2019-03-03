@@ -150,8 +150,12 @@ smallProteinMass <- 6000
                  )
                  
                  pool <- pool::poolCheckout(workingDB$pool())
-                 p <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE proteinPeaksMass IS NOT NULL")[,1]
-                 s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaksMass IS NOT NULL")[,1]
+                 p <- DBI::dbGetQuery(pool, glue::glue("SELECT COUNT(*) 
+                                            FROM IndividualSpectra 
+                                            WHERE maxMass > {smallProteinMass}"))[,1]
+                 s <- DBI::dbGetQuery(pool, glue::glue("SELECT COUNT(*) 
+                                            FROM IndividualSpectra 
+                                            WHERE maxMass < {smallProteinMass}"))[,1]
                  pool::poolReturn(pool)
                  if (p > 0) {
                    appendTab(inputId = "mainIDBacNav",
