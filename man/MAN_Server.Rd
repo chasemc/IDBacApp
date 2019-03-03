@@ -4,7 +4,7 @@
 \alias{MAN_Server}
 \title{MAN_Server}
 \usage{
-MAN_Server(input, output, session, subtractedMatrixBlank)
+MAN_Server(input, output, session, subtractedMatrixBlank, sampleIDs)
 }
 \arguments{
 \item{input}{mod}
@@ -14,6 +14,8 @@ MAN_Server(input, output, session, subtractedMatrixBlank)
 \item{session}{mod}
 
 \item{subtractedMatrixBlank}{subtractedMatrixBlank}
+
+\item{sampleIDs}{sampleIDs}
 }
 \value{
 NA
