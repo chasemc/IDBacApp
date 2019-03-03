@@ -2,10 +2,9 @@
 .Rhistory
 .RData
 .Ruserdata
-IDBacApp.Rproj
+IDBac_App.Rproj
 /*.sqlite
 .Rproj.user
-IDBac_App.Rproj
 Getting_Started.Rmd
 Getting_Started.pdf
 NEWS.Rmd
