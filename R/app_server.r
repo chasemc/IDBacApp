@@ -197,7 +197,7 @@ smallProteinMass <- 6000
   callModule(IDBacApp::mirrorPlots_Server,
              "protMirror",
              workingDB,
-             proteinOrSmall = "proteinPeaks")
+             proteinOrSmall = '>')
   
   
   

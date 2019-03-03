@@ -8,7 +8,7 @@
 #'
 mirrorPlotsSettings_UI <- function(id){
   ns <- NS(id)
-    uiOutput(ns("mirrorSpectraSelector"))
+  uiOutput(ns("mirrorSpectraSelector"))
 }
 
 #' mirrorPlotDownload_UI
@@ -39,10 +39,10 @@ mirrorPlots_UI <- function(id){
   ns <- NS(id)
   fluidRow(
     shinycssloaders::withSpinner(
-    plotly::plotlyOutput(ns("inversePeakComparisonPlot")
-    )
-
-  ))
+      plotly::plotlyOutput(ns("inversePeakComparisonPlot")
+      )
+      
+    ))
   
 }
 
@@ -52,27 +52,27 @@ mirrorPlots_UI <- function(id){
 #' @param output shiny
 #' @param session shiny
 #' @param workingDB reactive containing SQLite DB pool
-#' @param proteinOrSmall values = "proteinPeaks" or "smallMoleculePeaks" 
+#' @param proteinOrSmall  '>' for protein '<' for small mol
 #'
 #' @return NA
 #' @export
 #'
 mirrorPlots_Server <- function(input,
-                              output,
-                              session,
-                              workingDB,
-                              proteinOrSmall){
+                               output,
+                               session,
+                               workingDB,
+                               proteinOrSmall){
   
   
   inverseComparisonNames <- reactive({
     conn <- pool::poolCheckout(workingDB$pool())
     
-    a <- DBI::dbGetQuery(conn, glue::glue( "SELECT DISTINCT `Strain_ID`
+    a <- DBI::dbGetQuery(conn, glue::glue("SELECT DISTINCT Strain_ID
                                             FROM IndividualSpectra
-                                            WHERE (`{proteinOrSmall}` IS NOT NULL)"))
+                                            WHERE maxMass {proteinOrSmall} 6000"))
     pool::poolReturn(conn)
     
-    a[ ,1]
+    a[ , 1]
     
   })
   
@@ -81,7 +81,7 @@ mirrorPlots_Server <- function(input,
   output$mirrorSpectraSelector <- renderUI({
     
     tagList(
-    
+      
       column(width = 5, offset = 1,
              selectInput(session$ns("Spectra1"), 
                          label = strong("Spectrum 1 (positive y-axis)"),
@@ -119,7 +119,7 @@ mirrorPlots_Server <- function(input,
                                                                  protein = TRUE) 
     
     
-   
+    
     
     mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                  sampleIDs = input$Spectra2,
@@ -172,48 +172,17 @@ mirrorPlots_Server <- function(input,
     remove(temp)
     
     
-    query <- DBI::dbSendStatement("SELECT `proteinSpectrum`
-                                  FROM IndividualSpectra
-                                  WHERE (`proteinSpectrum` IS NOT NULL)
-                                  AND (`Strain_ID` = ?)",
-                                  con = conn)
     
-    
-    DBI::dbBind(query, list(as.character(as.vector(input$Spectra1))))
-    mirrorPlotEnv$spectrumSampleOne <- DBI::dbFetch(query)
-    DBI::dbClearResult(query)
-    
-    mirrorPlotEnv$spectrumSampleOne <- lapply(mirrorPlotEnv$spectrumSampleOne[ , 1],
-                                              function(x){
-                                                unserialize(memDecompress(x, 
-                                                                          type = "gzip"))
-                                              })
-    mirrorPlotEnv$spectrumSampleOne <- unlist(mirrorPlotEnv$spectrumSampleOne, recursive = TRUE)
-    mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(mirrorPlotEnv$spectrumSampleOne,
-                                                                      method = "mean") 
+    mirrorPlotEnv$spectrumSampleOne <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
+                                                                   sampleID = input$Spectra1, 
+                                                                   proteinOrSmall = '>')
     
     
     
     
-    query <- DBI::dbSendStatement("SELECT `proteinSpectrum`
-                                  FROM IndividualSpectra
-                                  WHERE (`proteinSpectrum` IS NOT NULL)
-                                  AND (`Strain_ID` = ?)",
-                                  con = conn)
-    
-    
-    DBI::dbBind(query, list(as.character(as.vector(input$Spectra2))))
-    mirrorPlotEnv$spectrumSampleTwo <- DBI::dbFetch(query)
-    DBI::dbClearResult(query)
-    
-    mirrorPlotEnv$spectrumSampleTwo <- lapply(mirrorPlotEnv$spectrumSampleTwo[ , 1],
-                                              function(x){
-                                                unserialize(memDecompress(x, 
-                                                                          type = "gzip"))
-                                              })
-    mirrorPlotEnv$spectrumSampleTwo <- unlist(mirrorPlotEnv$spectrumSampleTwo, recursive = TRUE)
-    mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(mirrorPlotEnv$spectrumSampleTwo,
-                                                                      method = "mean") 
+    mirrorPlotEnv$spectrumSampleTwo <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
+                                                                   sampleID = input$Spectra2, 
+                                                                   proteinOrSmall = '>')
     
     
     pool::poolReturn(conn)
@@ -240,7 +209,7 @@ mirrorPlots_Server <- function(input,
   
   # Output the zoomed mirror plot -------------------------------------------
   
-
+  
   # Download svg of zoomed mirror plot --------------------------------------
   
   output$downloadInverse <- downloadHandler(
@@ -266,6 +235,49 @@ mirrorPlots_Server <- function(input,
 }
 
 
+#' Title
+#'
+#' @param checkedPool checkedPool
+#' @param sampleID sampleID 
+#' @param proteinOrSmall '>' for protein '<' for small mol
+#'
+#' @return single, averaged MALDIquant spectrum
+#' @export
+#'
+mquantSpecFromSQL <- function(checkedPool,
+                              sampleID, 
+                              proteinOrSmall){
+  
+  query <-  DBI::dbSendStatement(glue::glue("SELECT massTable.massVector, IndividualSpectra.spectrumIntensity
+                                   FROM massTable
+                                   LEFT JOIN IndividualSpectra
+                                   ON massTable.spectrumMassHash = IndividualSpectra.spectrumMassHash
+                                   WHERE Strain_ID == ?
+                                   AND maxMass {proteinOrSmall} 6000"),
+                                 con = conn)
+  
+  
+  DBI::dbBind(query, list(as.character(as.vector(sampleID))))
+  result <- DBI::dbFetch(query)
+  DBI::dbClearResult(query)
+  
+  result <- lapply(1:nrow(result),
+                   function(x){
+                     cbind(jsonlite::fromJSON(rawToChar(fst::decompress_fst(result[x, 1][[1]]))),
+                           jsonlite::fromJSON(rawToChar(fst::decompress_fst(result[x, 2][[1]]))))
+                   })
+  
+  
+  result <- lapply(result,
+                   function(x){
+                     MALDIquant::createMassSpectrum(mass = x[ , 1],
+                                                    intensity = x[ , 2])
+                   }
+  )
+  
+  MALDIquant::averageMassSpectra(result,
+                                 method = "mean") 
+}
 
 
 

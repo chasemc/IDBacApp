@@ -61,8 +61,10 @@ processXMLIndSpectra <- function(spectraImport,
   }
   
   env$peakMatrix <- lapply(env$peakMatrix, function(x){
-    
-    cbind(x@mass, x@intensity, x@snr)
+    # note: names aren't transferred to JSON
+    cbind(mass = x@mass, 
+          intensity = x@intensity, 
+          snr = x@snr)
     
   })
   

@@ -12,46 +12,54 @@
 getPeakData <-  function(checkedPool, sampleIDs, protein){
   
   if (protein == TRUE) {
-    query <- DBI::dbSendStatement("SELECT `proteinPeaks`
-                                FROM IndividualSpectra
-                                WHERE (`Strain_ID` = ?)
-                                AND (`proteinPeaks` IS NOT NULL)",
+    query <- DBI::dbSendStatement("SELECT peakMatrix
+                              FROM IndividualSpectra
+                                  WHERE maxMass > 6000
+                                  AND (Strain_ID = ?)",
                                   con = checkedPool)
+    
     
     
     DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
     results <- DBI::dbFetch(query)
     DBI::dbClearResult(query)
     
-    results <- unname(unlist(results, recursive = FALSE))
-    unlist(lapply(results, 
-                  function(x) 
-                    unserialize(memDecompress(x, 
-                                              type = "gzip")
-                    )
-    ) 
+    results <- lapply(results[,1], jsonlite::fromJSON)
+    
+    results <- lapply(results,
+                function(x){
+                  MALDIquant::createMassPeaks(mass = x[ , 1],
+                                              intensity = x[ , 2] ,
+                                              snr = x[ , 3])
+                  
+                }
     )
+   
   } else {
     
-    query <- DBI::dbSendStatement("SELECT `smallMoleculePeaks`
-                                FROM IndividualSpectra
-                                  WHERE (`Strain_ID` = ?)
-                                  AND (`smallMoleculePeaks` IS NOT NULL)",
+    query <- DBI::dbSendStatement("SELECT peakMatrix
+                                  FROM IndividualSpectra
+                                  WHERE maxMass < 6000
+                                  AND (Strain_ID = ?)",
                                   con = checkedPool)
+    
     
     
     DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
     results <- DBI::dbFetch(query)
     DBI::dbClearResult(query)
     
-    results <- unname(unlist(results, recursive = FALSE))
-    unlist(lapply(results, 
-                  function(x) 
-                    unserialize(memDecompress(x, 
-                                              type = "gzip")
-                    )
-    ) 
+    results <- lapply(results[,1], jsonlite::fromJSON)
+    
+    results <- lapply(results,
+                      function(x){
+                        MALDIquant::createMassPeaks(mass = x[ , 1],
+                                                    intensity = x[ , 2] ,
+                                                    snr = x[ , 3])
+                        
+                      }
     )
+    
   }
   
   
