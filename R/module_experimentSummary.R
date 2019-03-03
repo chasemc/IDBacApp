@@ -38,11 +38,11 @@ experimentSummary_Server <- function(input,
     
     smallReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (Strain_ID) 
                                        FROM IndividualSpectra
-                                      WHERE smallMoleculePeaks IS NOT NULL")
+                                       WHERE maxMass < 6000")
     
     proteinReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (Strain_ID) 
                                        FROM IndividualSpectra
-                                      WHERE proteinPeaks IS NOT NULL")
+                                       WHERE maxMass > 6000")
     pool::poolReturn(checkedPool)
     
     

@@ -7,9 +7,12 @@
 copyDB_dbAttach(newdbPath, existingDBconn)
 }
 \arguments{
-\item{newdbPath}{}
+\item{newdbPath}{newdbPath}
 
-\item{existingDBconn}{}
+\item{existingDBconn}{existingDBconn}
+}
+\value{
+NA
 }
 \description{
 Attach new database to existing database

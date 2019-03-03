@@ -3,17 +3,17 @@
 \name{serial}
 \alias{serial}
 \title{serial
-   Settings for serializing in IDBac}
+   Settings for serializing in IDBac (convert to json)}
 \usage{
 serial(input)
 }
 \arguments{
-\item{input}{object to serialize}
+\item{input}{matrix or vector}
 }
 \value{
-serialized object in binary
+JSON
 }
 \description{
 serial
-   Settings for serializing in IDBac
+   Settings for serializing in IDBac (convert to json)
 }

@@ -15,9 +15,12 @@ NULL
 #' @export
 #'
 app_server <- function(input, output, session) {
-  
+
+  set.seed(42)
+   
   
   # Development Functions ---------------------------------------------------
+
   options(shiny.reactlog = TRUE)
   
   sqlDirectory <- reactiveValues(sqlDirectory = getwd())
@@ -56,7 +59,15 @@ app_server <- function(input, output, session) {
                          full.names = TRUE))
   
   availableDatabases <- reactiveValues(db = NULL)
+ 
+
+# Set constants -----------------------------------------------------------
+
+# m/z to separate small molecule and protein spectra:
+# If max mass is > than this, will be classified as protein spectrum 
+smallProteinMass <- 6000  
   
+    
   # Conversions Tab ---------------------------------------------------------
   
   
@@ -139,8 +150,12 @@ app_server <- function(input, output, session) {
                  )
                  
                  pool <- pool::poolCheckout(workingDB$pool())
-                 p <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE proteinPeaks IS NOT NULL")[,1]
-                 s <- DBI::dbGetQuery(pool, "SELECT COUNT(*) FROM IndividualSpectra WHERE smallMoleculePeaks IS NOT NULL")[,1]
+                 p <- DBI::dbGetQuery(pool, glue::glue("SELECT COUNT(*) 
+                                            FROM IndividualSpectra 
+                                            WHERE maxMass > {smallProteinMass}"))[,1]
+                 s <- DBI::dbGetQuery(pool, glue::glue("SELECT COUNT(*) 
+                                            FROM IndividualSpectra 
+                                            WHERE maxMass < {smallProteinMass}"))[,1]
                  pool::poolReturn(pool)
                  if (p > 0) {
                    appendTab(inputId = "mainIDBacNav",
@@ -182,7 +197,7 @@ app_server <- function(input, output, session) {
   callModule(IDBacApp::mirrorPlots_Server,
              "protMirror",
              workingDB,
-             proteinOrSmall = "proteinPeaks")
+             proteinOrSmall = '>')
   
   
   
@@ -552,7 +567,7 @@ app_server <- function(input, output, session) {
     # retrieve all Strain_IDs in db that have small molecule spectra
     sampleIDs <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
                                 FROM `IndividualSpectra`
-                                WHERE (`smallMoleculePeaks` IS NOT NULL)",
+                                WHERE (`smallMoleculePeaksMass` IS NOT NULL)",
                                 .con = checkedPool)
     sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)
     

@@ -3,17 +3,19 @@
 \name{compress}
 \alias{compress}
 \title{compress
-  Settings for compressing in IDBac}
+  Settings for compressing raw vectors}
 \usage{
-compress(input)
+compress(input, compression = 0)
 }
 \arguments{
-\item{input}{character or raw vector to compressed (char will be converted to raw)}
+\item{input}{raw vector to compressed}
+
+\item{compression}{compression level 0-100}
 }
 \value{
 Raw vector
 }
 \description{
 compress
-  Settings for compressing in IDBac
+  Settings for compressing raw vectors
 }

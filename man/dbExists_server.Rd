@@ -12,6 +12,8 @@ dbExists_server(input, output, session, continue)
 \item{output}{shiny}
 
 \item{session}{shiny}
+
+\item{continue}{continue buttion}
 }
 \value{
 modular modal
