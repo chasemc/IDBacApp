@@ -18,7 +18,7 @@ processXMLIndSpectra <- function(spectraImport,
                            function(x){
                              x <- IDBacApp::serial(x@mass)
                              IDBacApp::chartoRawtoCompressed(x,
-                                                             compression = 100)
+                                                             compression = 0)
                            })
   
   env$maxMass <- unlist(lapply(spectraImport[index], 
@@ -41,7 +41,7 @@ processXMLIndSpectra <- function(spectraImport,
                                   function(x){
                                     x <- IDBacApp::serial(x@intensity)
                                     IDBacApp::chartoRawtoCompressed(x,
-                                                                    compression = 100)
+                                                                    compression = 0)
                                   })
   
   env$spectrumIntensityHash <- unlist(lapply(env$spectrumIntensity, 

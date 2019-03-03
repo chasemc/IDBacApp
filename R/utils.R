@@ -146,7 +146,7 @@ serializeXML <- function(path) {
   
   path <- readChar(path, nchars = file.info(path)$size, useBytes = T)
   IDBacApp::chartoRawtoCompressed(input = path,
-                                  compression = 100)
+                                  compression = 0)
   
 }
 
