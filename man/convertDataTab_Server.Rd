@@ -4,24 +4,21 @@
 \alias{convertDataTab_Server}
 \title{convertDataTab_Server}
 \usage{
-convertDataTab_Server(input, output, session, tempMZDir, sqlDirectory,
-  availableExperiments)
+convertDataTab_Server(input, output, session, tempMZDir, sqlDirectory)
 }
 \arguments{
-\item{input}{shiny}
+\item{input}{.}
 
-\item{output}{shiny}
+\item{output}{.}
 
-\item{session}{shiny}
+\item{session}{.}
 
-\item{tempMZDir}{directory to create temp mzML if needed}
+\item{tempMZDir}{.}
 
-\item{sqlDirectory}{where to write new SQLite file}
-
-\item{availableExperiments}{update availableExperiments}
+\item{sqlDirectory}{.}
 }
 \value{
-none, updates availableExperiments reactive value though
+.
 }
 \description{
 convertDataTab_Server

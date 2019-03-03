@@ -242,9 +242,6 @@ convertOneBruker_Server <- function(input,
     gsub(" ","",a)
   })
   
-  
-  success <- reactiveValues(val = FALSE)
-  
   # Call the Spectra processing function when the spectra processing button is pressed
   #----
   observeEvent(input$convertSingleBruker,
@@ -280,11 +277,13 @@ convertOneBruker_Server <- function(input,
                                        sampleIds = forProcessing$sampleID,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = input$newExperimentName)
-
+                 
+                 
+                 
+                 
+                 
+                 
                  IDBacApp::popup4()
-                 
-                 success$val <- TRUE
-                 
                })
   
   

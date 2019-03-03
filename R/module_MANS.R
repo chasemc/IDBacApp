@@ -113,10 +113,8 @@ manPageProtDend_UI <- function(id) {
 smMANPlot_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
-    shinycssloaders::withSpinner(
     networkD3::simpleNetworkOutput(ns("metaboliteAssociationNetwork"),
                                    width = "100%")
-  )
   )
 }
 

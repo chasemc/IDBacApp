@@ -105,12 +105,10 @@ popupPlot_server <- function(input,
                                              label = "",
                                              icon = icon("far fa-window-close"))
                        ),
-                       fluidRow(   
-                         shinycssloaders::withSpinner(
-                           plotly::plotlyOutput(session$ns("plot"),
-                                                width = "100%", 
-                                                height = "100%")
-                         )
+                       fluidRow(                     
+                         plotly::plotlyOutput(session$ns("plot"),
+                                              width = "100%", 
+                                              height = "100%")
                        )
                      )
                    )

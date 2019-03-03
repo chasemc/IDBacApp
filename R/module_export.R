@@ -68,6 +68,7 @@ exportSamples_server <- function(input,
                                       allSamples = TRUE,
                                       whetherProtein = FALSE)
 
+    observe(pl<<-chosenSamples)
   
   copyingDbPopup <- reactive({
     showModal(modalDialog(
@@ -96,11 +97,14 @@ exportSamples_server <- function(input,
   
   observeEvent(input$exportSpectra, {
   
+    a1 <<- selectedDB$userDBCon()
+    a2 <<- chosenSamples$chosen
+    a3 <<- chosenDirectory$value
     req(class(selectedDB$userDBCon())[[1]] == "Pool")
     req(length(chosenSamples$chosen) > 0)
     req(dir.exists(chosenDirectory$value))
     
-   IDBacApp::exportmzML(userDBCon = selectedDB$userDBCon(),
+    exportmzML(userDBCon = selectedDB$userDBCon(),
              sampleIDs = chosenSamples$chosen,
              saveToDir = chosenDirectory$value)
   

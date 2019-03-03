@@ -16,16 +16,16 @@ NULL
 #'
 app_server <- function(input, output, session) {
   
-  
-  # Development Functions ---------------------------------------------------
+
+  # Develepment Functions ---------------------------------------------------
   options(shiny.reactlog = TRUE)
   
   sqlDirectory <- reactiveValues(sqlDirectory = getwd())
   
   # module changes sqlDirectory reactiveValue
   callModule(IDBacApp::selectDirectory_Server,
-             "userWorkingDirectory",
-             sqlDirectory)
+                              "userWorkingDirectory",
+                              sqlDirectory)
   
   
   output$userWorkingDirectoryText <- renderText(sqlDirectory$sqlDirectory)
@@ -55,16 +55,14 @@ app_server <- function(input, output, session) {
                          recursive = FALSE,
                          full.names = TRUE))
   
-  availableDatabases <- reactiveValues(db = NULL)
   
   # Conversions Tab ---------------------------------------------------------
   
   
-   callModule(IDBacApp::convertDataTab_Server,
+  callModule(IDBacApp::convertDataTab_Server,
              "convertDataTab",
              tempMZDir = tempMZDir,
-             sqlDirectory = sqlDirectory,
-             availableExperiments = availableDatabases)
+             sqlDirectory = sqlDirectory)
   
   
   observeEvent(input$processToAnalysis,  
@@ -76,20 +74,20 @@ app_server <- function(input, output, session) {
   
   # SQL Tab -----------------------------------------------------------------
   
-
+  availableDatabases <- reactiveValues(db = NULL)
   # Find the available databases, and make reactive so can be updated if more are created
   
   
   observe({
-    samps <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+    hello <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                   pattern = ".sqlite",
                                                   full.names = FALSE,
                                                   recursive = FALSE)
     )
-    if (length(samps) == 0) {
+    if (length(hello) == 0) {
       availableDatabases$db <- NULL
     } else {
-      availableDatabases$db <- samps
+      availableDatabases$db <- hello
     }
     
     
@@ -127,7 +125,7 @@ app_server <- function(input, output, session) {
   
   observeEvent(workingDB$move$selectExperiment,
                ignoreInit = TRUE, {
-                 
+               
                  removeTab(inputId = "mainIDBacNav",
                            target = "Protein Data Analysis"
                  )
@@ -160,7 +158,7 @@ app_server <- function(input, output, session) {
   
   observeEvent(workingDB$move$selectExperiment,
                ignoreInit = TRUE, {
-                 
+                
                  
                })
   
@@ -178,7 +176,7 @@ app_server <- function(input, output, session) {
   
   
   proteinPeakSettings <-  callModule(IDBacApp::peakRetentionSettings_Server,
-                                     "protMirror")
+                                             "protMirror")
   callModule(IDBacApp::mirrorPlots_Server,
              "protMirror",
              workingDB,
@@ -188,7 +186,7 @@ app_server <- function(input, output, session) {
   
   
   smallPeakSettings <- callModule(IDBacApp::peakRetentionSettings_Server,
-                                  "smallMirror")
+                                     "smallMirror")
   callModule(IDBacApp::smallmirrorPlots_Server,
              "smallMirror",
              workingDB,
@@ -196,7 +194,7 @@ app_server <- function(input, output, session) {
   
   
   
-  
+ 
   
   # Protein processing ------------------------------------------------------
   
@@ -415,9 +413,9 @@ app_server <- function(input, output, session) {
   
   output$Heirarchicalui <-  renderUI({
     
-    
-    IDBacApp::ui_proteinClustering()
-    
+      
+      IDBacApp::ui_proteinClustering()
+      
     
   })
   
@@ -530,21 +528,21 @@ app_server <- function(input, output, session) {
                     text = ~nam) 
     
   })
-  # Small mol ---------------------------------------------------------------
-  
+# Small mol ---------------------------------------------------------------
+
   output$matrixSelector <- renderUI({
     IDBacApp::bsCollapse(id = "collapseMatrixSelection",
                          open = "Panel 1",
                          IDBacApp::bsCollapsePanel(p("Select a Sample to Subtract", 
-                                                     align = "center"),
+                                                      align = "center"),
                                                    selectInput("selectMatrix",
                                                                label = "",
                                                                choices = c("None", smallMolIDs()))
                                                    
                          )
     )
-  })
-  
+})
+
   
   
   smallMolIDs <- reactive({
@@ -556,54 +554,53 @@ app_server <- function(input, output, session) {
                                 .con = checkedPool)
     sampleIDs <- DBI::dbGetQuery(checkedPool, sampleIDs)
     
-    pool::poolReturn(checkedPool)
+     pool::poolReturn(checkedPool)
     
     return(sampleIDs)
     
   })  
   
-  
+    
   
   subtractedMatrixBlank <- reactive({
     
-    validate(need(smallPeakSettings$lowerMass < smallPeakSettings$upperMass, "Upper mass cutoff must be greater than lower mass curoff."))
     
-    samples <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
-                                            sampleIDs = NULL,
-                                            dendrogram = proteinDendrogram$dendrogram,
-                                            brushInputs = smallProtDend,
-                                            matrixIDs = NULL,
-                                            peakPercentPresence = smallPeakSettings$percentPresence,
-                                            lowerMassCutoff = smallPeakSettings$lowerMass,
-                                            upperMassCutoff = smallPeakSettings$upperMass,
-                                            minSNR = smallPeakSettings$SNR)
+    samples <-  IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
+                                             sampleIDs = NULL,
+                                             dendrogram = proteinDendrogram$dendrogram,
+                                             brushInputs = smallProtDend,
+                                             matrixIDs = NULL,
+                                             peakPercentPresence = smallPeakSettings$percentPresence,
+                                             lowerMassCutoff = smallPeakSettings$lowerMass,
+                                             upperMassCutoff = smallPeakSettings$upperMass,
+                                             minSNR = smallPeakSettings$SNR)
     
     if ( (input$selectMatrix != "None") ) {
       
       matrixSample <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
-                                                   sampleIDs = input$selectMatrix,
-                                                   dendrogram = proteinDendrogram$dendrogram,
-                                                   brushInputs = smallProtDend,
-                                                   matrixIDs = NULL,
-                                                   peakPercentPresence = smallPeakSettings$percentPresence,
-                                                   lowerMassCutoff = smallPeakSettings$lowerMass,
-                                                   upperMassCutoff = smallPeakSettings$upperMass,
-                                                   minSNR = smallPeakSettings$SNR)
+                                               sampleIDs = input$selectMatrix,
+                                               dendrogram = proteinDendrogram$dendrogram,
+                                               brushInputs = smallProtDend,
+                                               matrixIDs = NULL,
+                                               peakPercentPresence = smallPeakSettings$percentPresence,
+                                               lowerMassCutoff = smallPeakSettings$lowerMass,
+                                               upperMassCutoff = smallPeakSettings$upperMass,
+                                               minSNR = smallPeakSettings$SNR)
       
       
       
       samples <- MALDIquant::binPeaks(c(matrixSample, samples),
-                                      tolerance = .002)
+                                     tolerance = .002)
       
       
       for (i in 2:(length(samples))) {
-        
-        toKeep <- !samples[[i]]@mass %in% samples[[1]]@mass 
-        
-        samples[[i]]@mass <- samples[[i]]@mass[toKeep]
-        samples[[i]]@intensity <- samples[[i]]@intensity[toKeep]
-        samples[[i]]@snr <- samples[[i]]@snr[toKeep]
-        
+      
+      toKeep <- !samples[[i]]@mass %in% samples[[1]]@mass 
+      
+      samples[[i]]@mass <- samples[[i]]@mass[toKeep]
+      samples[[i]]@intensity <- samples[[i]]@intensity[toKeep]
+      samples[[i]]@snr <- samples[[i]]@snr[toKeep]
+      
       }
       
       samples <- samples[-1]
@@ -616,9 +613,9 @@ app_server <- function(input, output, session) {
       samples <- MALDIquant::binPeaks(samples, tolerance = .002)
     }
     
-    
-    return(samples)
-    
+
+return(samples)
+
     
     
     
@@ -672,7 +669,7 @@ app_server <- function(input, output, session) {
     p("This MAN was created by analyzing ", tags$code(length(subtractedMatrixBlank())), " samples,",
       if (input$selectMatrix != "None") {
         ("subtracting a matrix blank,") 
-      } else {},
+        } else {},
       " retaining peaks with a signal to noise ratio above ", tags$code(smallPeakSettings$SNR), ", and occurring in greater than ", tags$code(smallPeakSettings$percentPresence), "% of replicate spectra.
           Peaks occuring below ", tags$code(smallPeakSettings$lowerMass), " m/z or above ", tags$code(smallPeakSettings$upperMass), " m/z were removed from the analysis. ")
   })
@@ -833,7 +830,7 @@ app_server <- function(input, output, session) {
                        )
                        
                      } else if (utils::compareVersion(as.character(local_version), 
-                                                      as.character(latestStableVersion)) == -1) {
+                                               as.character(latestStableVersion)) == -1) {
                        
                        showModal(modalDialog(
                          title = "IDBac Update",
@@ -902,12 +899,12 @@ app_server <- function(input, output, session) {
   
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
-  # session$onSessionEnded(function() {
-  # 
-  #    stopApp()
-  #    q("no")
-  #  })
-  
+    # session$onSessionEnded(function() {
+    # 
+    #    stopApp()
+    #    q("no")
+    #  })
+
   
   # wq <-pool::dbPool(drv = RSQLite::SQLite(),
   #              dbname = paste0("wds", ".sqlite"))
