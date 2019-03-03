@@ -15,6 +15,7 @@ install:
 environment:
   global:
     WARNINGS_ARE_ERRORS: 1
+    PKGTYPE: win.binary 
   
   matrix:
   - R_VERSION: 3.5.2
