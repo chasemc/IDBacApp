@@ -53,9 +53,9 @@ smallmirrorPlots_Server <- function(input,
   inverseComparisonNames <- reactive({
     conn <- pool::poolCheckout(workingDB$pool())
     
-    a <- DBI::dbGetQuery(conn, glue::glue( "SELECT DISTINCT `Strain_ID`
-                                           FROM IndividualSpectra
-                                           WHERE (`{proteinOrSmall}` IS NOT NULL)"))
+    a <- DBI::dbGetQuery(conn, glue::glue("SELECT DISTINCT Strain_ID
+                                           FROM IndividualSpectra 
+                                           WHERE maxMass < 6000"))
     pool::poolReturn(conn)
     
     a[ ,1]
@@ -123,15 +123,7 @@ smallmirrorPlots_Server <- function(input,
                                                                  minSNR = input$SNR,
                                                                  tolerance = 0.002,
                                                                  protein = FALSE) 
-    llp3<<-list(checkedPool = conn,
-                sampleIDs = input$Spectra1,
-                peakPercentPresence = input$percentPresence,
-                lowerMassCutoff = input$lowerMass,
-                upperMassCutoff = input$upperMass,
-                minSNR = input$SNR,
-                tolerance = 0.002,
-                protein = FALSE)
-    
+  
     
     
     mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
@@ -185,47 +177,22 @@ smallmirrorPlots_Server <- function(input,
     remove(temp)
     
     
-    query <- DBI::dbSendStatement("SELECT `smallMoleculeSpectrum`
-                                  FROM IndividualSpectra
-                                  WHERE (`smallMoleculeSpectrum` IS NOT NULL)
-                                  AND (`Strain_ID` = ?)",
-                                  con = conn)
     
-    
-    DBI::dbBind(query, list(as.character(as.vector(input$Spectra1))))
-    mirrorPlotEnv$spectrumSampleOne <- DBI::dbFetch(query)
-    DBI::dbClearResult(query)
-    
-    mirrorPlotEnv$spectrumSampleOne <- lapply(mirrorPlotEnv$spectrumSampleOne[ , 1],
-                                              function(x){
-                                                unserialize(memDecompress(x, 
-                                                                          type = "gzip"))
-                                              })
-    mirrorPlotEnv$spectrumSampleOne <- unlist(mirrorPlotEnv$spectrumSampleOne, recursive = TRUE)
-    mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(mirrorPlotEnv$spectrumSampleOne,
-                                                                      method = "mean") 
+    mirrorPlotEnv$spectrumSampleOne <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
+                                                                   sampleID = input$Spectra1, 
+                                                                   proteinOrSmall = '<')
     
     
     
-    query <- DBI::dbSendStatement("SELECT `smallMoleculeSpectrum`
-                                  FROM IndividualSpectra
-                                  WHERE (`smallMoleculeSpectrum` IS NOT NULL)
-                                  AND (`Strain_ID` = ?)",
-                                  con = conn)
+    
+    mirrorPlotEnv$spectrumSampleTwo <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
+                                                                   sampleID = input$Spectra2, 
+                                                                   proteinOrSmall = '<')
     
     
-    DBI::dbBind(query, list(as.character(as.vector(input$Spectra2))))
-    mirrorPlotEnv$spectrumSampleTwo <- DBI::dbFetch(query)
-    DBI::dbClearResult(query)
     
-    mirrorPlotEnv$spectrumSampleTwo <- lapply(mirrorPlotEnv$spectrumSampleTwo[ , 1],
-                                              function(x){
-                                                unserialize(memDecompress(x, 
-                                                                          type = "gzip"))
-                                              })
-    mirrorPlotEnv$spectrumSampleTwo <- unlist(mirrorPlotEnv$spectrumSampleTwo, recursive = TRUE)
-    mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(mirrorPlotEnv$spectrumSampleTwo,
-                                                                      method = "mean") 
+    
+    
     
     
     pool::poolReturn(conn)
