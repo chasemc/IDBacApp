@@ -114,7 +114,7 @@ ui_proteinClustering <- function() {
                            p("Choose two samples to compare in the mirror plot below.
                            Matching peaks will be colored blue and non-matching peaks
                            will be colored red."),
-                           p("Note: Binning algorithm for mirror plot and dendrogram is diffeerent.", style = "font-size: 0.75em"),
+                           p("Note: Binning algorithm for mirror plot and dendrogram is different.", style = "font-size: 0.75em"),
                            br(),
                            fluidRow(
                              IDBacApp::mirrorPlotsSettings_UI("protMirror")

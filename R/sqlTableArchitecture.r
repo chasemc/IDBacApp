@@ -104,7 +104,7 @@ sqlTableArchitecture <- function(numberScans){
 #' @export
 #'
 sql_CreateIndividualSpectra <- function(sqlConnection){
-  if (!DBI::dbExistsTable(sqlConnection, "massTable")) {
+  if (!DBI::dbExistsTable(sqlConnection, "CreateIndividualSpectra")) {
     
     a <- DBI::dbSendStatement(sqlConnection, 
                               "CREATE TABLE `IndividualSpectra` (
@@ -215,7 +215,7 @@ sql_CreatemetaData <- function(sqlConnection){
 
 
 
-#' SQL code to create the SQLite xxml table
+#' SQL code to create the SQLite xml table
 #'
 #' @param sqlConnection sqlConnection
 #'
@@ -244,6 +244,39 @@ sql_CreatexmlTable <- function(sqlConnection){
     
     DBI::dbClearResult(a)
   } else {
-    warning("metaData table already exists")
+    warning("XML table already exists")
   }
 }
+
+
+
+
+
+
+#' SQL code to create the SQLite version table
+#'
+#' @param sqlConnection sqlConnection
+#'
+#' @return SQL code as character
+#' @export
+#'
+sql_CreateVersionTable <- function(sqlConnection){
+  
+  if (!DBI::dbExistsTable(sqlConnection, "version")) {
+    
+    a <- DBI::dbSendStatement(sqlConnection,
+                              "CREATE TABLE version (
+  version         INTEGER,
+  UNIQUE(version) ON CONFLICT IGNORE
+    );"
+    )
+    
+    
+    DBI::dbClearResult(a)
+  } else {
+    warning("version table already exists")
+  }
+}
+
+
+

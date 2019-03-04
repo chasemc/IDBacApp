@@ -10,15 +10,13 @@
 exportmzML <- function(userDBCon,
                        sampleIDs,
                        saveToDir){
-  userDBCon<<-userDBCon
-  sampleIDs<<-sampleIDs
-  saveToDir <<-saveToDir
+ 
   conn <- pool::poolCheckout(userDBCon)
   
   query <-  DBI::dbSendStatement("SELECT XML.XML,IndividualSpectra.Strain_ID
 FROM `XML`
 LEFT JOIN `IndividualSpectra`
-ON XML.mzMLSHA = IndividualSpectra.mzMLSHA
+ON XML.XMLHash = IndividualSpectra.XMLHash
 WHERE Strain_ID == ?
 GROUP BY Strain_ID;
 ", con = conn)
@@ -49,7 +47,15 @@ GROUP BY Strain_ID;
                           ids <- chunk$Strain_ID
                           fileLoc <- base::file.path(saveToDir, ids)
                           
-                          chunk <- lapply(chunk$XML, function(x) unserialize(unlist(x)))
+                          
+                          
+                          chunk <- lapply(chunk$XML, 
+                                          function(x){
+                                            x <- IDBacApp::decompress(unlist(x))
+                                            rawToChar(x)
+                                            })
+
+                          
                           
                           for (i in seq_along(ids)) {
                             
@@ -57,20 +63,20 @@ GROUP BY Strain_ID;
                                                message = 'Exporting...',
                                                detail = glue::glue(" \n Sample: {ids[[i]]}"))
                             
-                            
+                         
                             
                             writeLines(unlist(chunk[[i]]), 
                                        fileLoc[[i]])
                             
+                            fl <- readLines(fileLoc[[i]],
+                                           n = 20)
                             
-                            whichMZ <- xml2::read_xml(fileLoc[[i]])
-                            
-                            whichMZ <- xml2::xml_name(whichMZ)
-                            
-                            if (grepl("mzml", whichMZ, ignore.case = TRUE)) {
+                            if (any(grepl("<mzML", fl, ignore.case = TRUE))) {
                               whichMZ <- "mzML"
-                            } else if (grepl("mzXml", whichMZ, ignore.case = TRUE)) {
+                            } else if (any(grepl("<mzXML", fl, ignore.case = TRUE))) {
                               whichMZ <- "mzXML"
+                            } else {
+                              stop("exportmzML() wasn't mzXML or mzML")
                             }
                             
                             
@@ -88,7 +94,6 @@ GROUP BY Strain_ID;
   
   
   DBI::dbClearResult(query)
-  DBI::dbDisconnect(conn)
   
   pool::poolReturn(conn)
   # pool::poolClose(userDBCon)

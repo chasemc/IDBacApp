@@ -120,14 +120,10 @@ transferToNewDB_server <- function(input,
                  newCheckedPool <- IDBacApp::createPool(newDBName, 
                                                         sqlDirectory$sqlDirectory)
                  
-                 existingDBPool <<- selectedDB$userDBCon()
-                 newDBPool <<- newCheckedPool
-                 newDBName <<- newDBName
-                 sampleIDs <<- chosenSamples$chosen
-                 
+               
                  IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
                                              newDBPool = newCheckedPool[[1]], 
-                                             newDBName = newDBName,
+                                             newdbName = newDBName,
                                              sampleIDs = chosenSamples$chosen)
                  
                  
