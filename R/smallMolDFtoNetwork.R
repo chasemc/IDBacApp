@@ -1,19 +1,21 @@
 #' Collapse a sample's MALDIquant peak objects into a single peak object
 #' 
-#' @param peakList NA
+#' @param sampleIDs sampleIDs 
+#' @param peakList  peakList
+#'
 #' @export
 #' @return a single trimmed and binned MALDIquant peak object
 
-smallMolDFtoNetwork <- function(peakList){
+smallMolDFtoNetwork <- function(peakList,
+                                sampleIDs){
   
   smallNetwork <- MALDIquant::intensityMatrix(peakList)
   temp <- NULL
   
-  for (i in 1:length(peakList)){
-    temp <- c(temp,peakList[[i]]@metaData$Strain)
-  }
   
-  rownames(smallNetwork) <- temp
+  
+  
+  rownames(smallNetwork) <- sampleIDs
   smallNetwork[is.na(smallNetwork)] <- 0
   smallNetwork <- ifelse(smallNetwork > 0,1,0)
   smallNetwork <- as.data.frame(smallNetwork)
