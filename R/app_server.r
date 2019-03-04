@@ -824,7 +824,7 @@ smallProteinMass <- 6000
                      # Check current version # and the latest github version. If github v is higher, download and install
                      # For more info on version comparison see: https://community.rstudio.com/t/comparing-string-version-numbers/6057/6
                      downFunc <- function() {
-                       devtools::install_github(paste0("chasemc/IDBacApp@",
+                       remotes::install_github(paste0("chasemc/IDBacApp@",
                                                        latestStableVersion),
                                                 force = TRUE,
                                                 quiet = F, 
@@ -935,13 +935,7 @@ smallProteinMass <- 6000
   #  })
   
   
-  # wq <-pool::dbPool(drv = RSQLite::SQLite(),
-  #              dbname = paste0("wds", ".sqlite"))
-  # 
-  # onStop(function() {
-  #   pool::poolClose(wq)
-  #   print(wq)
-  # }) # important!
+    
   
   
 }
