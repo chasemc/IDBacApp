@@ -4,10 +4,12 @@
 \alias{smallMolDFtoNetwork}
 \title{Collapse a sample's MALDIquant peak objects into a single peak object}
 \usage{
-smallMolDFtoNetwork(peakList)
+smallMolDFtoNetwork(peakList, sampleIDs)
 }
 \arguments{
-\item{peakList}{NA}
+\item{peakList}{peakList}
+
+\item{sampleIDs}{sampleIDs}
 }
 \value{
 a single trimmed and binned MALDIquant peak object
