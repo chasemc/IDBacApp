@@ -39,6 +39,17 @@ serial <- function(input){
 }
 
 
+#' deserial
+#'    Settings for serializing in IDBac (convert to json)
+#' @param input matrix or vector
+#'
+#' @return JSON
+#' @export
+
+deserial <- function(input){
+  jsonlite::fromJSON(input)
+}
+
 
 #' compress
 #'   Settings for compressing raw vectors
