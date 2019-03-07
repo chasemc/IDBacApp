@@ -553,8 +553,9 @@ smallProteinMass <- 6000
                          open = "Panel 1",
                          IDBacApp::bsCollapsePanel(p("Select a Sample to Subtract", 
                                                      align = "center"),
-                                                   selectInput("selectMatrix",
+                                                   selectizeInput("selectMatrix",
                                                                label = "",
+                                                               options= list(maxOptions = 2000),
                                                                choices = c("None", smallMolIDs()))
                                                    
                          )

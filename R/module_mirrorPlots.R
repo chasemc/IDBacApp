@@ -83,14 +83,16 @@ mirrorPlots_Server <- function(input,
     tagList(
       
       column(width = 5, offset = 1,
-             selectInput(session$ns("Spectra1"), 
+             selectizeInput(session$ns("Spectra1"), 
                          label = strong("Spectrum 1 (positive y-axis)"),
+                         options= list(maxOptions = 10000),
                          choices = inverseComparisonNames(), 
                          selected = inverseComparisonNames()[[1]])
       ),
       column(width = 6,
-             selectInput(session$ns("Spectra2"), 
+             selectizeInput(session$ns("Spectra2"), 
                          label = strong("Spectrum 2 (negative y-axis)"),
+                         options= list(maxOptions = 10000),
                          choices = inverseComparisonNames(),
                          selected = inverseComparisonNames()[[1]])
       )
