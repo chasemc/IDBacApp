@@ -35,7 +35,7 @@ hashR <- function(input){
 #' @export
 
 serial <- function(input){
-  jsonlite::toJSON(input)
+  jsonlite::toJSON(input, digits = 5)
 }
 
 
