@@ -87,7 +87,6 @@ copyingDbPopup <- function(){
 #' @export
 #'
 dbExists_UI <- function(id, dbName){
-  ns <- NS(id)
   showModal(
     modalDialog(
       title = "Warning",

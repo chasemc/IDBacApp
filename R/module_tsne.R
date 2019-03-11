@@ -81,16 +81,9 @@ popupPlotTsne_server <- function(input,
                            by = "nam")
     }
     
-    plotly::plot_ly(data = colorsToUse,
-                    x = ~Dim1,
-                    y = ~Dim2,
-                    z = ~Dim3,
-                    type = "scatter3d",
-                    mode = "markers",
-                    marker = list(color = ~fac),
-                    hoverinfo = 'text',
-                    text = ~nam) %>% 
-      plotly::layout(title = plotTitle)
+    IDBacApp::plotly_3d_scatter(data = colorsToUse,
+                                plotTitle = plotTitle)
+    
   })
   
   observeEvent(input$closeAbsPanel, {
@@ -103,64 +96,80 @@ popupPlotTsne_server <- function(input,
                ignoreInit = T,
                ignoreNULL = T,
                {
-                 
-                 
                  output$absPanel <- renderUI(
-                   
-                   shiny::fixedPanel(
-                     class = "popup_Plots",
-                     top = "20%",
-                     bottom = "20%",
-                     width = "60%",
-                     draggable = F,
-                     style = "z-index:1002;",
-                     p(plotTitle),
-                     absolutePanel(
-                       top = "0%",
-                       bottom = "95%",
-                       right = "5%",
-                       left = "95%",
-                       fixed = F,
-                       shiny::actionButton(session$ns("closeAbsPanel"),
-                                           class = "closeX",
-                                           label = "",
-                                           icon = icon("far fa-window-close"))
-                     ),
-                     
-                     fluidRow(
-                       tagList(
-                         shiny::numericInput(inputId = session$ns("tsnePerplexity"),
-                                             label = "Perplexity",
-                                             value = 10,
-                                             min = 1,
-                                             max = 100,
-                                             step = 1,
-                                             width = NULL),
-                         shiny::numericInput(inputId = session$ns("tsneTheta"),
-                                             label = "Theta",
-                                             value = .5,
-                                             min = 0,
-                                             max = 1,
-                                             step = 0.1,
-                                             width = NULL),
-                         shiny::numericInput(inputId = session$ns("tsneIterations"),
-                                             label = "Iterations",
-                                             value = 1000,
-                                             min = 1,
-                                             max = 10000,
-                                             step = 1,
-                                             width = NULL)
-                         
-                       )
-                     ),
-                     
-                     fluidRow(                     
-                       plotly::plotlyOutput(session$ns("plot"),
-                                            width = "100%", 
-                                            height = "100%")
-                     )
-                   )
+
+                IDBacApp::tsneUiPop(session$ns, 
+                                    plotTitle = plotTitle)
                  )
                  
                })
+}
+
+
+
+
+
+#' tSNE UI
+#'
+#' @param ns shiny namespace
+#' @param plotTitle plot title
+#'
+#' @return shiny ui
+#' @export
+#'
+tsneUiPop <- function(ns, plotTitle){
+  
+shiny::fixedPanel(
+  class = "popup_Plots",
+  top = "20%",
+  bottom = "20%",
+  width = "60%",
+  draggable = F,
+  style = "z-index:1002;",
+  p(plotTitle),
+  absolutePanel(
+    top = "0%",
+    bottom = "95%",
+    right = "5%",
+    left = "95%",
+    fixed = F,
+    shiny::actionButton(ns("closeAbsPanel"),
+                        class = "closeX",
+                        label = "",
+                        icon = icon("far fa-window-close"))
+  ),
+  
+  fluidRow(
+    tagList(
+      shiny::numericInput(inputId = ns("tsnePerplexity"),
+                          label = "Perplexity",
+                          value = 10,
+                          min = 1,
+                          max = 100,
+                          step = 1,
+                          width = NULL),
+      shiny::numericInput(inputId = ns("tsneTheta"),
+                          label = "Theta",
+                          value = .5,
+                          min = 0,
+                          max = 1,
+                          step = 0.1,
+                          width = NULL),
+      shiny::numericInput(inputId = ns("tsneIterations"),
+                          label = "Iterations",
+                          value = 1000,
+                          min = 1,
+                          max = 10000,
+                          step = 1,
+                          width = NULL)
+      
+    )
+  ),
+  
+  fluidRow(                     
+    plotly::plotlyOutput(ns("plot"),
+                         width = "100%", 
+                         height = "100%")
+  )
+)
 }

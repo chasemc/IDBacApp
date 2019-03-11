@@ -40,7 +40,7 @@ selectDirectory_Server <- function(input,
     if (!is.na(loc)) {
       sqlDirectory$sqlDirectory <- loc
     } else {
-      sqlDirectory$sqlDirectory <- normalizePath(getwd())
+      sqlDirectory$sqlDirectory <- sqlDirectory$sqlDirectory
     }
     
     
