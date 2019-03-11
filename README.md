@@ -44,8 +44,6 @@ Linux and Mac CI:
   
 Windows CI:
   - [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/chasemc/IDBacApp?branch=master&svg=true)](https://ci.appveyor.com/project/chasemc/IDBacApp)
-
-
-
-
-
+  
+Coverage:
+  - [![codecov](https://codecov.io/gh/chasemc/IDBacApp/branch/master/graph/badge.svg)](https://codecov.io/gh/chasemc/IDBacApp)
