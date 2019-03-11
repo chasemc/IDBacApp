@@ -57,7 +57,7 @@
 # 
 # test_that("Provided and test sqlite DBs have correct tables", {
 #   expect_identical(DBI::dbListTables(bb2), c("IndividualSpectra", "XML", "metaData", "version"))
-#   expect_identical(DBI::dbListTables(bb1), character(0))  
+#   expect_identical(DBI::dbListTables(bb1), character(0))
 # })
 # 
 # 
@@ -72,29 +72,36 @@
 # test_that("Correctly transferred 'metaData' table", {
 #   expect_identical(DBI::dbListTables(bb2), c("IndividualSpectra", "XML", "metaData", "version"))
 #   expect_identical(DBI::dbListTables(bb1), c("metaData"))
-#   expect_identical(nrow(a), 1L)
+#   expect_identical(nrow(a), 0L)
 #   expect_identical(ncol(a), 20L)
-#   expect_identical(sum(is.na(a)), 20L)
-#   
 # })
 # 
 # # XML setup ------------------------------------------------------------
 # 
+# IDBacApp::sql_CreatexmlTable(sqlConnection = bb1)
 # 
-# IDBacApp::copyDB_setupXML(newDBconn = bb1,
-#                            existingDBconn = bb2,
-#                            arch = IDBacApp::sqlTableArchitecture(1)
-# )
+# 
 # a <- DBI::dbGetQuery(bb1,"SELECT * FROM XML")
 # 
 # test_that("Correctly setup 'XML' table", {
 #   expect_identical(DBI::dbListTables(bb2), c("IndividualSpectra", "XML", "metaData", "version"))
-#   expect_identical(DBI::dbListTables(bb1), c("metaData", "XML"))
-#   expect_identical(nrow(a), 1L)
+#   expect_identical(DBI::dbListTables(bb1), c("XML", "metaData"))
+#   expect_identical(nrow(a), 0L)
 #   expect_identical(ncol(a), 8L)
-#   expect_identical(sum(is.na(a)), 8L) 
-#   
 # })
+# 
+# 
+# 
+# # masstable ---------------------------------------------------------------
+# 
+# IDBacApp::sql_CreatemassTable(sqlConnection = db1)
+# 
+# a <- DBI::dbGetQuery(bb1,"SELECT * FROM massTable")
+# 
+# 
+# 
+# 
+# 
 # 
 # 
 # # IndividualSpectra -------------------------------------------------------
@@ -111,8 +118,8 @@
 #   expect_identical(DBI::dbListTables(bb1), c("metaData", "XML", "IndividualSpectra"))
 #   expect_identical(nrow(a), 1L)
 #   expect_identical(ncol(a), 8L)
-#   expect_identical(sum(is.na(a)), 8L) 
-#   
+#   expect_identical(sum(is.na(a)), 8L)
+# 
 # })
 # 
 # 

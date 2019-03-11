@@ -29,13 +29,13 @@ getPeakData <-  function(checkedPool, sampleIDs, protein){
     results <- DBI::dbFetch(query)
     DBI::dbClearResult(query)
     
-    results <- lapply(results[,1], jsonlite::fromJSON)
+    results <- lapply(results[,1], IDBacApp::deserial)
     
     results <- lapply(results,
                 function(x){
-                  MALDIquant::createMassPeaks(mass = x[ , 1],
-                                              intensity = x[ , 2] ,
-                                              snr = x[ , 3])
+                  MALDIquant::createMassPeaks(mass = x$mass,
+                                              intensity = x$intensity,
+                                              snr = x$snr)
                 }
     )
    
@@ -93,6 +93,10 @@ collapseReplicates <- function(checkedPool,
     temp[[i]]@snr <- temp[[i]]@snr[snr1]
     temp[[i]]@intensity <- temp[[i]]@intensity[snr1]
   }
+
+  
+####   Error in d[left:(right - 1L)] : 
+  #only 0's may be mixed with negative subscripts 
   
   temp <- MALDIquant::binPeaks(temp,
                                tolerance = tolerance, 

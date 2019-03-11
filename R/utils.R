@@ -35,7 +35,7 @@ hashR <- function(input){
 #' @export
 
 serial <- function(input){
-  jsonlite::toJSON(input)
+  jsonlite::toJSON(input, digits = 5)
 }
 
 
@@ -162,18 +162,6 @@ serializeXML <- function(path) {
 }
 
 
-#' ead mzXML, XML as XML
-#'
-#' @param path file path to mzML or mzXML
-#'
-#' @return xml2 connection
-#' @export
-#'
-readXML <- function(path) {
-  xml2::read_xml(path)
-}
-
-
 
 
 #' People have trouble with spaces
@@ -186,6 +174,8 @@ readXML <- function(path) {
 cleanWSpace <- function(input){
   
   input <- trimws(input)
-  return(gsub(" ", "_", input))
+  input <- gsub(" ", "_", input)
+  input <- gsub("__", "_", input)
+  return(input)
 }
 

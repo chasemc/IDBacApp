@@ -36,6 +36,12 @@ path_sanitize <- function(filename, replacement = "") {
   filename <- gsub(reserved, replacement, filename)
   filename <- gsub(windows_reserved, replacement, filename, ignore.case = TRUE)
   filename <- gsub(windows_trailing, replacement, filename)
+  filename <- gsub("\\.","_", filename)
+  filename <- gsub(" ", "_", filename)
+  
+  while (grepl("__", filename)) {
+    filename <- gsub("__","_", filename)
+  }
   
   # TODO: this substr should really be unicode aware, so it doesn't chop a
   # multibyte code point in half.

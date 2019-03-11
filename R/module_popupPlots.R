@@ -53,17 +53,9 @@ popupPlot_server <- function(input,
                            colorsToUse, 
                            by = "nam")
     }
+    IDBacApp::plotly_3d_scatter(data = colorsToUse,
+                      plotTitle = plotTitle)
     
-    plotly::plot_ly(data = colorsToUse,
-                    x = ~Dim1,
-                    y = ~Dim2,
-                    z = ~Dim3,
-                    type = "scatter3d",
-                    mode = "markers",
-                    marker = list(color = ~fac),
-                    hoverinfo = 'text',
-                    text = ~nam) %>% 
-      plotly::layout(title = plotTitle)
   })
   
   observeEvent(input$closeAbsPanel, {

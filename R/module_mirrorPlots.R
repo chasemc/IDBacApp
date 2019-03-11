@@ -92,7 +92,7 @@ mirrorPlots_Server <- function(input,
       column(width = 6,
              selectizeInput(session$ns("Spectra2"), 
                          label = strong("Spectrum 2 (negative y-axis)"),
-                         options= list(maxOptions = 10000),
+                         options = list(maxOptions = 10000),
                          choices = inverseComparisonNames(),
                          selected = inverseComparisonNames()[[1]])
       )
@@ -265,8 +265,8 @@ mquantSpecFromSQL <- function(checkedPool,
   
   result <- lapply(1:nrow(result),
                    function(x){
-                     cbind(jsonlite::fromJSON(rawToChar(fst::decompress_fst(result[x, 1][[1]]))),
-                           jsonlite::fromJSON(rawToChar(fst::decompress_fst(result[x, 2][[1]]))))
+                     cbind(IDBacApp::deserial(rawToChar(fst::decompress_fst(result[x, 1][[1]]))),
+                           IDBacApp::deserial(rawToChar(fst::decompress_fst(result[x, 2][[1]]))))
                    })
   
   
