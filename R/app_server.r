@@ -316,7 +316,13 @@ smallProteinMass <- 6000
     req(proteinPeakSettings$lowerMass, proteinPeakSettings$upperMass)
     req(!is.null(collapsedPeaksForDend()))
     validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
-    pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend(),
+    
+    temp <- !unlist(lapply(collapsedPeaksForDend(),
+                           MALDIquant::isEmpty))
+    
+    req(any(temp))
+    
+    pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[temp],
                                ppm = 300,
                                massStart = proteinPeakSettings$lowerMass,
                                massEnd = proteinPeakSettings$upperMass)

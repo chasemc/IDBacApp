@@ -18,30 +18,30 @@ getPeakData <-  function(checkedPool, sampleIDs, protein){
   } else {
     sym <- '<'
   }  
-    
-    query <- DBI::dbSendStatement(glue::glue("SELECT peakMatrix
+  
+  query <- DBI::dbSendStatement(glue::glue("SELECT peakMatrix
                               FROM IndividualSpectra
                                   WHERE maxMass {sym} 6000
                                   AND (Strain_ID = ?)"),
-                                  con = checkedPool)
-    
-    DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
-    results <- DBI::dbFetch(query)
-    DBI::dbClearResult(query)
-    
-    results <- lapply(results[,1], jsonlite::fromJSON)
-    
-    results <- lapply(results,
-                function(x){
-                  MALDIquant::createMassPeaks(mass = x$mass,
-                                              intensity = x$intensity ,
-                                              snr = as.numeric(x$snr))
-                }
-    )
-   
-    
-  }
+                                con = checkedPool)
   
+  DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
+  results <- DBI::dbFetch(query)
+  DBI::dbClearResult(query)
+  
+  results <- lapply(results[,1], jsonlite::fromJSON)
+  
+  results <- lapply(results,
+                    function(x){
+                      MALDIquant::createMassPeaks(mass = x$mass,
+                                                  intensity = x$intensity ,
+                                                  snr = as.numeric(x$snr))
+                    }
+  )
+  
+  
+}
+
 
 
 
@@ -96,27 +96,31 @@ collapseReplicates <- function(checkedPool,
   
   specNotZero <- sapply(temp, function(x) length(x@mass) > 0)
   
-  
+  # Only binPeaks if spectra(um) has peaks.
+  # see: https://github.com/sgibb/MALDIquant/issues/61 for more info 
+  # note: MALDIquant::binPeaks does work if there is only one spectrum
   if (any(specNotZero)) {
-  
-  temp <- temp[specNotZero]
-  temp <- MALDIquant::binPeaks(temp,
-                               tolerance = tolerance, 
-                               method = c("strict")) 
-  
-  temp <- MALDIquant::filterPeaks(temp,
-                                  minFrequency = peakPercentPresence / 100) 
-  
-  temp <- MALDIquant::mergeMassPeaks(temp, 
-                                     method = "mean") 
+    
+    temp <- temp[specNotZero]
+    temp <- MALDIquant::binPeaks(temp,
+                                 tolerance = tolerance, 
+                                 method = c("strict")) 
+    
+    temp <- MALDIquant::filterPeaks(temp,
+                                    minFrequency = peakPercentPresence / 100) 
+    
+    temp <- MALDIquant::mergeMassPeaks(temp, 
+                                       method = "mean") 
+    temp <- MALDIquant::trim(temp,
+                             c(lowerMassCutoff,
+                               upperMassCutoff))
   } else {
-    # Intentionally blank
+    temp <- MALDIquant::mergeMassPeaks(temp, 
+                                       method = "mean") 
   }
   
   
-  return(MALDIquant::trim(temp,
-                          c(lowerMassCutoff,
-                            upperMassCutoff)))
+  return(temp)
 }
 
 
