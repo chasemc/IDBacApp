@@ -111,7 +111,26 @@ downloadSvg <- function(id) {
 }
 
 
+#' Display samples removed from analysis
+#'
+#' @param id namespace
+#' @param sampleIds sampleIds
+#' 
+#' @return shiny ui
+#' @export
+#'
+displayMissingProteinUI <- function(id, sampleIds) {
+  ns <- shiny::NS(id)
+   uiOutput(ns("missingSamples"))
+ 
+}
 
+
+
+
+
+
+# Module Server -----------------------------------------------------------
 
 
 
@@ -139,7 +158,16 @@ dendDotsServer <- function(input,
                            plotWidth,
                            plotHeight,
                            boots,
-                           dendOrPhylo = "Dendrogram"){
+                           dendOrPhylo = "Dendrogram",
+                           emptyProtein){
+  
+  
+  
+  output$missingSamples <- renderUI({
+    shiny::p("The following samples were removed because they contained no peaks: ", 
+             glue::glue_collapse(names(emptyProtein())[emptyProtein()], ", "))
+  })
+  
   
   
   observeEvent(input$closeDendDots, {
@@ -298,15 +326,21 @@ dendDotsServer <- function(input,
   output$hierOut <- renderPlot({
     
     
-    shiny::validate(shiny::need(dendrogram$dendrogram, "Try selecting samples using the menu to the left."))
+    shiny::validate(shiny::need(dendrogram$dendrogram, 
+                                "Try selecting samples using the menu to the left."))
     
-    par(mar = c(5, 5, 5, plotWidth()))
+    par(mar = c(5,
+                5,
+                5,
+                plotWidth()))
     
     
     if (dendOrPhylo() == "Dendrogram") {
       plot(dendrogram$dendrogram, horiz = T)
     } else if (dendOrPhylo() == "Phylogram") {
-      plot(dendextend::hang.dendrogram(dendrogram$dendrogram, hang = 0), horiz = T)
+      plot(dendextend::hang.dendrogram(dendrogram$dendrogram,
+                                       hang = 0),
+           horiz = T)
     }
     
     

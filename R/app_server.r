@@ -317,15 +317,24 @@ smallProteinMass <- 6000
     req(!is.null(collapsedPeaksForDend()))
     validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     
-    temp <- !unlist(lapply(collapsedPeaksForDend(),
-                           MALDIquant::isEmpty))
-    req(any(temp))
-    pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[temp],
+   
+    req(any(!emptyProtein()))
+    pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[!emptyProtein()],
                                ppm = 300,
                                massStart = proteinPeakSettings$lowerMass,
                                massEnd = proteinPeakSettings$upperMass)
     do.call(rbind, pm)
   })
+  
+  
+  
+  emptyProtein <- reactive({
+    unlist(lapply(collapsedPeaksForDend(),
+                   MALDIquant::isEmpty))
+  })
+  
+  
+  
   
   proteinDendrogram <- reactiveValues(dendrogram  = NULL)
   
@@ -361,7 +370,8 @@ smallProteinMass <- 6000
                                           plotWidth = reactive(input$dendparmar),
                                           plotHeight = reactive(input$hclustHeight),
                                           boots = dendMaker,
-                                          dendOrPhylo = reactive(input$dendOrPhylo))
+                                          dendOrPhylo = reactive(input$dendOrPhylo),
+                                          emptyProtein = emptyProtein)
   
   
   unifiedProteinColor <- reactive(dendextend::labels_colors(proteinDendrogram$dendrogram))

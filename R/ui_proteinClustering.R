@@ -127,7 +127,7 @@ ui_proteinClustering <- function() {
                            )
                   ),
                   tabPanel(value = "proteinDendrogram","Dendrogram",
-                           
+                           IDBacApp::displayMissingProteinUI("proth"),
                            IDBacApp::plotHier("proth"),
                            IDBacApp::dendDotsUI("proth")
                   )
