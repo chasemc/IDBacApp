@@ -319,17 +319,12 @@ smallProteinMass <- 6000
     
     temp <- !unlist(lapply(collapsedPeaksForDend(),
                            MALDIquant::isEmpty))
-    
     req(any(temp))
-    
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[temp],
                                ppm = 300,
                                massStart = proteinPeakSettings$lowerMass,
                                massEnd = proteinPeakSettings$upperMass)
-    
     do.call(rbind, pm)
-    
-    
   })
   
   proteinDendrogram <- reactiveValues(dendrogram  = NULL)
