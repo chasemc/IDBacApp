@@ -194,6 +194,7 @@ smallProteinMass <- 6000
   
   proteinPeakSettings <-  callModule(IDBacApp::peakRetentionSettings_Server,
                                      "protMirror")
+  
   callModule(IDBacApp::mirrorPlots_Server,
              "protMirror",
              workingDB,
@@ -314,15 +315,18 @@ smallProteinMass <- 6000
   
   proteinMatrix <- reactive({
     req(proteinPeakSettings$lowerMass, proteinPeakSettings$upperMass)
+    req(proteinPeakSettings$lowerMass > 0)
+    req(proteinPeakSettings$upperMass > 0)
     req(!is.null(collapsedPeaksForDend()))
+    req(proteinPeakSettings$ppm > 200)
     validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     
    
     req(any(!emptyProtein()))
     pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[!emptyProtein()],
-                               ppm = 300,
                                massStart = proteinPeakSettings$lowerMass,
-                               massEnd = proteinPeakSettings$upperMass)
+                               massEnd = proteinPeakSettings$upperMass,
+                               ppm = proteinPeakSettings$ppm)
     do.call(rbind, pm)
   })
   
