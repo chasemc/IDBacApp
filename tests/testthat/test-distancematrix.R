@@ -14,9 +14,9 @@ a3 <- IDBacApp::distMatrix(data = mtcars,
 
 
 test_that("distanceMatrix works", {
-  expect_known_hash(a1, "0a9a462784")
+  expect_known_hash(a1, "7c99636ec3")
   expect_known_hash(a2, "24df9e2d21")
-  expect_known_hash(a3, "68f1b2ddef")
+  expect_known_hash(a3, "85590a6b3d")
   
     
   })

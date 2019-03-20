@@ -1,63 +1,4 @@
 
-
-#' binnR
-#'
-#' @param vectorList  NA
-#' @param ppm  NA
-#' @param massStart  NA
-#' @param massEnd  NA
-#'
-#' @return NA
-#' @export
-#'
-
-binnR <- function(vectorList,
-                  ppm, 
-                  massStart,
-                  massEnd){
-  
-  # vectorList: A list of m/z vectors
-  # ppm: ppm tolerance 
-  # massStart: the first m/z in the IRanges object
-  # massEnd: the last m/z in the IRanges object
-  
-  #smallest difference is smallest ppm, so get scale of that to 1
-  validate(need(massStart < massEnd, "Lower mass cutoff should be higher than upper mass cutoff."))
-  scaleFactor <- ppm / 10e5 * massStart 
-  mrange <- IRanges::IRanges(start = seq(massStart * scaleFactor,
-                                         massEnd * scaleFactor, 1),
-                             end = seq((massStart * scaleFactor) + 1,
-                                       (massEnd * scaleFactor) + 1, 1))
-  
-  
-  mrange <- IRanges::IRanges(seq(massStart, massEnd, scaleFactor),
-                             rep(NA, length(seq(massStart, massEnd, scaleFactor))), scaleFactor)
-  
-  
-  
-  ranges <- lapply(vectorList, 
-                   function(massVector){
-                     # get ppm across mass vector
-                     pp <- ppm / 10e5 * massVector
-                     massVector <- massVector
-                     ir1 <- IRanges::IRanges(start = massVector - pp,
-                                             end = massVector + pp)
-                   }
-  )
-  lapply(ranges, function(x){
-    IRanges::findOverlaps(x, mrange)
-    #S4Vectors::unique(S4Vectors::subjectHits(z1))
-    
-  })
-}
-
-
-
-
-
-
-
-
 #' peakBinner
 #'
 #' @param peakList should be MALDIquant 
@@ -70,33 +11,65 @@ binnR <- function(vectorList,
 #'
 peakBinner <- function(peakList,
                        ppm = 300,
-                       massStart = NULL,
-                       massEnd = NULL){
+                       massStart = 3000,
+                       massEnd = 15000){
 
+  peakList <- IDBacApp::mQuantToMassVec(peakList)
+    scalePpm <- function(mass,
+                         ppm = ppm
+    ){
+      1 / ((ppm / 10e5) * mass)
+    }
+    
+    scaler <- scalePpm(ppm = ppm, 
+                       mass = massStart)
+    
+    toSub <- round(massStart * scaler)
+    
+    
+    mm <- lapply(peakList, function(x){
+      # scaling allows representing decimal places as integer
+      x <- round(x * scaler) - toSub
+      # get scaled and integerized ppm 
+      x2 <- round((x * ppm) / 10e5)
+      # create IRange.adjust scale so starts at 1L
+      IRanges::IRanges(start = x - x2, end = x + x2)
+      
+    })
+    
+    
+    poiz <- lapply(mm,
+                   function(x){
+                     x <- x@width
+                     yy <- lapply(x, function(x) 1:x)
+                     x <- unlist(mapply(dpois,yy, x/2, SIMPLIFY =  ))
+                     x <- x * 1000
+                     as.integer(x)
+                   })
+    
+    
+    #want subject hits
+    
+    vecLength <- (massEnd * scaler) - toSub
+    zz <- IRanges::IRanges(start = 1:vecLength, width = rep(1, vecLength))
+    z <- lapply(mm, function(x) IRanges::findOverlaps(zz, x)@from)
+    
+    
+    zz <- sort(unique(unlist(z)))
+    
+    
+    zx <- lapply(z, function(x) as.integer(zz %in% x))
+    
+    
+    w <- mapply(function(x,y){
+      x[x == 1] <- y
+      x  } , zx, poiz)
+    
+    #Matrix::Matrix(w)
+  w
   
-  binvec <- IDBacApp::mQuantToMassVec(peakList)
-  if(!is.null(binvec)){
- 
-   if (is.null(massStart)) {
-    massStart <- min(unlist(binvec))
-  }
-  if (is.null(massEnd)) {
-    massEnd <- max(unlist(binvec))
-  }
   
-  binvec <- IDBacApp::binnR(vectorList = binvec,
-                            ppm = ppm, 
-                            massStart = massStart,
-                            massEnd = massEnd)
   
-  collected <- lapply(binvec, 
-                      function(x) 
-                        S4Vectors::unique(S4Vectors::subjectHits(x)))
-  
-  cvec <- sort(unique(unlist(collected)))
-  
-  return(lapply(collected, function(x) match(cvec, x)))
-  }
 }
 
 

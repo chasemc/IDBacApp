@@ -43,6 +43,7 @@ peakRetentionSettings_UI <- function(id,
     numericInput(ns("lowerMass"), 
                  label = NULL,
                  value = minMass,
+                 min = 1,
                  step = 50,
                  width = "50%"),
     p("Upper Mass Cutoff"),
@@ -50,10 +51,19 @@ peakRetentionSettings_UI <- function(id,
                  label = NULL,
                  value = maxMass,
                  step = 50,
+                 width = "50%"),
+    div(class = "tooltippy", "ppm tolerance", 
+        span(class = "tooltippytext", 
+             p("Note: This tolerance effects everything except the mirror plots. Must be set to greater than 200.")
+        )
+    ),
+    numericInput(ns("ppm"), 
+                 label = NULL,
+                 value = 1000,
+                 min = 200,
+                 step = 100,
                  width = "50%")
   )
-  
-  
 } 
 
 

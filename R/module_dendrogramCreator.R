@@ -95,8 +95,8 @@ dendrogramCreator <- function(input,
     
     
     # Remove if row is all NA (no peaks left)
-    dend <- proteinMatrix()[rowSums(is.na(proteinMatrix())) > 0, ]
-    
+ #   dend <- proteinMatrix()[rowSums(is.na(proteinMatrix())) > 0, ]
+    dend <<- proteinMatrix()
     
     createHclustObject <- function(x){
       x <- IDBacApp::distMatrix(data = x,

@@ -5,7 +5,7 @@
 \title{Title}
 \usage{
 dendDotsServer(input, output, session, dendrogram, pool, plotWidth,
-  plotHeight, boots, dendOrPhylo = "Dendrogram")
+  plotHeight, boots, dendOrPhylo = "Dendrogram", emptyProtein)
 }
 \arguments{
 \item{input}{NA}
@@ -25,6 +25,8 @@ dendDotsServer(input, output, session, dendrogram, pool, plotWidth,
 \item{boots}{bootstraps}
 
 \item{dendOrPhylo}{should the dendrogram labels hang?}
+
+\item{emptyProtein}{empty protein sample IDs}
 }
 \value{
 NA
