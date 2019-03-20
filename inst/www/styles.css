@@ -214,3 +214,10 @@ font-family: 'Arial';
 .tooltippy:hover .tooltippytext {
   visibility: visible;
 }
+
+
+
+
+.mirror_select .selectize-input {
+   width:175%;
+}

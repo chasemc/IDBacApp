@@ -24,11 +24,11 @@ smallmirrorPlotsSampleSelect_UI <- function(id){
 smallmirrorPlots_UI <- function(id){
   ns <- NS(id)
   fluidRow(
-      plotOutput(ns("inversePeakComparisonPlot"), 
-                 brush = brushOpts(ns("brush_mirror"), 
-                                   clip = FALSE,
-                                   delay = 2000))
-    )
+    plotOutput(ns("inversePeakComparisonPlot"), 
+               brush = brushOpts(ns("brush_mirror"), 
+                                 clip = FALSE,
+                                 delay = 2000))
+  )
   
 }
 
@@ -67,20 +67,22 @@ smallmirrorPlots_Server <- function(input,
   output$mirrorSpectraSelector <- renderUI({
     
     tagList(
-      
-      column(width = 5, offset = 1,
-             selectizeInput(session$ns("Spectra1"), 
-                         label = strong("Spectrum 1 (positive y-axis)"),
-                         options= list(maxOptions = 10000),
-                         choices = inverseComparisonNames(), 
-                         selected = inverseComparisonNames()[[1]])
-      ),
-      column(width = 6,
-             selectizeInput(session$ns("Spectra2"), 
-                         label = strong("Spectrum 2 (negative y-axis)"),
-                         options= list(maxOptions = 10000),
-                         choices = inverseComparisonNames(),
-                         selected = inverseComparisonNames()[[1]])
+      tags$div(id='proteinMirror',
+               class='mirror_select',
+               column(width = 5, offset = 1,
+                      selectizeInput(session$ns("Spectra1"), 
+                                     label = strong("Spectrum 1 (positive y-axis)"),
+                                     options= list(maxOptions = 10000),
+                                     choices = inverseComparisonNames(), 
+                                     selected = inverseComparisonNames()[[1]])
+               ),
+               column(width = 6,
+                      selectizeInput(session$ns("Spectra2"), 
+                                     label = strong("Spectrum 2 (negative y-axis)"),
+                                     options= list(maxOptions = 10000),
+                                     choices = inverseComparisonNames(),
+                                     selected = inverseComparisonNames()[[1]])
+               )
       )
     )
     
@@ -125,7 +127,7 @@ smallmirrorPlots_Server <- function(input,
                                                                  minSNR = input$SNR,
                                                                  tolerance = 0.002,
                                                                  protein = FALSE) 
-  
+    
     
     
     mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
