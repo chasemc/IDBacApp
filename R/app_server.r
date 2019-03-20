@@ -314,20 +314,18 @@ smallProteinMass <- 6000
   
   
   proteinMatrix <- reactive({
-    req(proteinPeakSettings$lowerMass, proteinPeakSettings$upperMass)
-    req(proteinPeakSettings$lowerMass > 0)
-    req(proteinPeakSettings$upperMass > 0)
+    
     req(!is.null(collapsedPeaksForDend()))
+    validate(need(proteinPeakSettings$lowerMass >= 2000, "Lower mass cutoff must be greater than 2,000"))
+    validate(need(proteinPeakSettings$upperMass <= 20000, "Lower mass cutoff must be less than 20,000"))
     req(proteinPeakSettings$ppm > 200)
     validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
-    
-   
     req(any(!emptyProtein()))
-    pm <- IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[!emptyProtein()],
-                               massStart = proteinPeakSettings$lowerMass,
-                               massEnd = proteinPeakSettings$upperMass,
-                               ppm = proteinPeakSettings$ppm)
-    do.call(rbind, pm)
+    
+    IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[!emptyProtein()],
+                         massStart = proteinPeakSettings$lowerMass,
+                         massEnd = proteinPeakSettings$upperMass,
+                         ppm = proteinPeakSettings$ppm)
   })
   
   
