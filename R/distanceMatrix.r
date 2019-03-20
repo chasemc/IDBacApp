@@ -10,7 +10,7 @@
 distMatrix <- function(data,
                        method,
                        booled){
-  # req(nrow(data) > 2)
+   req(ncol(data) > 2)
   # data <- base::as.matrix(data)
   # # Change empty to 0
   # data[base::is.na(data)] <- 0

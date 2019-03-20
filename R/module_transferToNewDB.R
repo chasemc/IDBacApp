@@ -92,13 +92,14 @@ transferToNewDB_server <- function(input,
                  
                  dbExist <- file.exists(file.path(sqlDirectory$sqlDirectory, paste0(newDBName,".sqlite")))
                  
-                 if(dbExist){
-                   IDBacApp::dbExists_UI(id = "dbExistsPopup", 
-                                         dbName = newDBName)
-                 } else {
-                   continue$val <- TRUE
-                 }
-                 
+                 # if(dbExist){
+                 #   print("hi")
+                 #   IDBacApp::dbExists_UI(id = "dbExistsPopup", 
+                 #                         dbName = newDBName)
+                 # } else {
+                 #   continue$val <- TRUE
+                 # }
+                 continue$val <- TRUE
                })
   
   

@@ -87,6 +87,7 @@ copyingDbPopup <- function(){
 #' @export
 #'
 dbExists_UI <- function(id, dbName){
+  ns <- shiny::NS(id)
   showModal(
     modalDialog(
       title = "Warning",
