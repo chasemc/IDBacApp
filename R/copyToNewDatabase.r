@@ -84,6 +84,26 @@ copyToNewDatabase <- function(existingDBPool,
                         Sys.sleep(1) 
                         
                         
+                        
+                        setProgress(value = 0.5, 
+                                    message = 'Copying data to new database',
+                                    detail = 'Copying metadata...',
+                                    session = getDefaultReactiveDomain())
+                        
+                        
+                        
+                        state <- DBI::dbSendStatement(existingDBconn, 
+                                                      "INSERT INTO newDB.metaData
+                                                      SELECT *
+                                                      FROM main.metaData
+                                                      WHERE (Strain_ID = ?)")
+                        DBI::dbBind(state, list(sampleIDs))
+                        warning(state@sql)
+                        DBI::dbClearResult(state) 
+                        
+                        
+                        
+                        
                         setProgress(value = 0.7, 
                                     message = 'Copying data to new database',
                                     detail = 'Copying individual spectra...',
@@ -100,14 +120,12 @@ copyToNewDatabase <- function(existingDBPool,
                         warning(state@sql)
                         DBI::dbClearResult(state) 
                         
-                        
+                        # Copy XML table ----------------------------------------------------------
                         setProgress(value = 0.8, 
                                     message = 'Copying data to new database',
                                     detail = 'Copying mzML files...',
                                     session = getDefaultReactiveDomain())
                         
-                        
-                        # Copy XML table ----------------------------------------------------------
                         state <- DBI::dbSendQuery(existingDBconn, 
                                                   "SELECT DISTINCT XMLHash
                                                       FROM main.IndividualSpectra
@@ -207,8 +225,8 @@ copyDB_setupMeta <- function(newDBconn,
   
   IDBacApp::sql_CreatemetaData(sqlConnection = newDBconn)
   
-  a <- DBI::dbListFields(existingDBconn, "metaData") 
-  b <- DBI::dbListFields(newDBconn, "metaData") 
+  a <<- DBI::dbListFields(existingDBconn, "metaData") 
+  b <<- DBI::dbListFields(newDBconn, "metaData") 
   colToAppend <- a[which(!a %in% b)]            
   
   if (length(colToAppend) > 0) {
