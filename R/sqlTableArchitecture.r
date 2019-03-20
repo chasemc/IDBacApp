@@ -104,7 +104,7 @@ sqlTableArchitecture <- function(numberScans){
 #' @export
 #'
 sql_CreateIndividualSpectra <- function(sqlConnection){
-  if (!DBI::dbExistsTable(sqlConnection, "CreateIndividualSpectra")) {
+  if (!DBI::dbExistsTable(sqlConnection, "IndividualSpectra")) {
     
     a <- DBI::dbSendStatement(sqlConnection, 
                               "CREATE TABLE `IndividualSpectra` (

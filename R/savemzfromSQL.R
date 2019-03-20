@@ -45,6 +45,12 @@ GROUP BY Strain_ID;
                           
                           counter <- counter - inc
                           ids <- chunk$Strain_ID
+                          ids <- base::make.unique(path_sanitize(ids))
+                          ids <- gsub("\\.",
+                                      "_",
+                                      ids)
+                          
+                          
                           fileLoc <- base::file.path(saveToDir, ids)
                           
                           

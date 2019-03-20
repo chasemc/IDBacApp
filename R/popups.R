@@ -80,22 +80,21 @@ copyingDbPopup <- function(){
 
 #' Modular modal Warn user that database alredy exists
 #'
-#' @param id namespace
 #' @param dbName name of database to be created
 #'
 #' @return modular modal
 #' @export
 #'
-dbExists_UI <- function(id, dbName){
-  ns <- shiny::NS(id)
+dbExists_UI <- function(dbName){
+  
   showModal(
     modalDialog(
       title = "Warning",
       glue::glue("Experiment: {dbName} already exists, overwrite?"),
       easyClose = FALSE, 
-      size = "s",
-        actionButton(ns("cont"),"Continue", icon("check")),
-      actionButton(ns("stop"), "Stop", icon = icon("remove")),
+      size = "m",
+        actionButton("continueTransfer", "Continue", icon("check")),
+      actionButton("stopTransfer", "Stop", icon = icon("remove")),
       footer = NULL
         
    
@@ -107,23 +106,24 @@ dbExists_UI <- function(id, dbName){
 
 #' Modular modal Warn user that database alredy exists
 #'
-#' @param input shiny
-#' @param output shiny
-#' @param session shiny
-#' @param continue continue buttion
+#' @param newDBName newDBName
+#' @param continue reactivevalue
 #'
 #' @return modular modal
 #' @export
 #'
-dbExists_server <- function(input, 
+dbExists_server <- function(input,
                             output,
                             session,
+                            newDBName,
                             continue){
   
-  observe(print(input$cont))
-  observeEvent(input$cont, 
-               ignoreInit  = TRUE, {
-                 removeModal(session)
+  IDBacApp::dbExists_UI(newDBName)
+
+  observeEvent(input$continueTransfer, 
+               ignoreInit  = F, {
+                 print("dfsda")
+                 removeModal()
                  continue$val <- TRUE   
                  
                })
@@ -131,10 +131,11 @@ dbExists_server <- function(input,
   observeEvent(input$stop, 
                ignoreInit  = TRUE, {
                  continue$val <- FALSE    
-                 removeModal(session)
+                 removeModal()
                })
   
-  return(continue)
+  
+  
   
 }
 
