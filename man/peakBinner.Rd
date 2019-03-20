@@ -4,7 +4,7 @@
 \alias{peakBinner}
 \title{peakBinner}
 \usage{
-peakBinner(peakList, ppm = 300, massStart = NULL, massEnd = NULL)
+peakBinner(peakList, ppm = 300, massStart = 3000, massEnd = 15000)
 }
 \arguments{
 \item{peakList}{should be MALDIquant}

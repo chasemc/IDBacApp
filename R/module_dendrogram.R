@@ -145,6 +145,7 @@ displayMissingProteinUI <- function(id, sampleIds) {
 #' @param plotHeight NA
 #' @param boots bootstraps
 #' @param dendOrPhylo should the dendrogram labels hang?
+#' @param emptyProtein empty protein sample IDs
 #'
 #' @return NA
 #' @export
