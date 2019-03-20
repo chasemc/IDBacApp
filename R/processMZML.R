@@ -41,9 +41,7 @@ processMZML <- function(mzFilePaths,
                                                        sampleID = sampleIds[[i]],
                                                        userDBCon = userDB) # pool connection
                  }
-                 a <- DBI::dbSendStatement('CREATE INDEX ids ON IndividualSpectra (Strain_ID);',
-                                           conn = userDB)
-                 DBI::dbClearResult(a)
+                
                  
                })
   pool::poolReturn(userDB)
