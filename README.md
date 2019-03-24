@@ -43,7 +43,7 @@ Linux and Mac CI:
   - [![Build Status](https://travis-ci.org/chasemc/IDBacApp.svg?branch=master)](https://travis-ci.org/chasemc/IDBacApp)
   
 Windows CI:
-  - [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/chasemc/IDBacApp?branch=master&svg=true)](https://ci.appveyor.com/project/chasemc/IDBacApp)
-  
+  - [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/4tv71y660i6o58f8/branch/master?svg=true)](https://ci.appveyor.com/project/chasemc/IDBacApp)
+
 Coverage:
   - [![codecov](https://codecov.io/gh/chasemc/IDBacApp/branch/master/graph/badge.svg)](https://codecov.io/gh/chasemc/IDBacApp)
