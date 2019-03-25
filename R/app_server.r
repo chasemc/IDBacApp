@@ -315,12 +315,15 @@ smallProteinMass <- 6000
   
   proteinMatrix <- reactive({
     
+    
+
     req(!is.null(collapsedPeaksForDend()))
     validate(need(proteinPeakSettings$lowerMass >= 2000, "Lower mass cutoff must be greater than 2,000"))
     validate(need(proteinPeakSettings$upperMass <= 20000, "Lower mass cutoff must be less than 20,000"))
     req(proteinPeakSettings$ppm > 200)
     validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     req(any(!emptyProtein()))
+    req(length(!emptyProtein() > 3))
     
     IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[!emptyProtein()],
                          massStart = proteinPeakSettings$lowerMass,
@@ -566,10 +569,13 @@ smallProteinMass <- 6000
                          open = "Panel 1",
                          IDBacApp::bsCollapsePanel(p("Select a Sample to Subtract", 
                                                      align = "center"),
+                                                   tags$div(id='selectMatrixBlank',
+                                                            class='mirror_select',
                                                    selectizeInput("selectMatrix",
                                                                label = "",
                                                                options= list(maxOptions = 2000),
                                                                choices = c("None", smallMolIDs()))
+                                                   )
                                                    
                          )
     )
@@ -591,13 +597,6 @@ smallProteinMass <- 6000
     
   })  
   
-  
-  
-  
-  smallMolSamples <- reactive({
-    
-    
-  })
   
   
   
@@ -640,9 +639,8 @@ smallProteinMass <- 6000
                                                    upperMassCutoff = smallPeakSettings$upperMass,
                                                    minSNR = smallPeakSettings$SNR)
       
-      
-      
-      samples <- MALDIquant::binPeaks(c(matrixSample, samples),
+  
+      samples <- MALDIquant::binPeaks(c(matrixSample$maldiQuantPeaks, samples),
                                       tolerance = .002)
       
       
@@ -942,12 +940,12 @@ smallProteinMass <- 6000
   
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
-  session$onSessionEnded(function() {
-     stopApp()
-     q("no")
-   })
-  
-  
+  # session$onSessionEnded(function() {
+  #    stopApp()
+  #    q("no")
+  #  })
+
+
     
   
   

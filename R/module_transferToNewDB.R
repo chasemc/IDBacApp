@@ -72,9 +72,7 @@ transferToNewDB_server <- function(input,
   
   continue <- reactiveValues(val = FALSE)
   
-  shiny::callModule(IDBacApp::dbExists_server,
-                    "dbExistsPopup", 
-                    continue = continue)
+  
   
   
   observeEvent(input$addtoNewDB,
@@ -93,13 +91,48 @@ transferToNewDB_server <- function(input,
                  dbExist <- file.exists(file.path(sqlDirectory$sqlDirectory, paste0(newDBName,".sqlite")))
                  
                  if(dbExist){
-                   IDBacApp::dbExists_UI(id = "dbExistsPopup", 
-                                         dbName = newDBName)
+                   ns <- session$ns
+                   
+                   showModal(
+                     modalDialog(
+                       title = "Warning",
+                       glue::glue("Experiment: {newDBName} already exists, overwrite?"),
+                       easyClose = FALSE, 
+                       size = "m",
+                       actionButton(ns("continueTransfer"), "Continue", icon = icon("check")),
+                       actionButton(ns("stopTransfer"), "Stop", icon = icon("remove")),
+                       footer = NULL
+                     )
+                   )
                  } else {
                    continue$val <- TRUE
                  }
                  
                })
+  
+  
+  
+  
+  observeEvent(input$continueTransfer, 
+               ignoreInit = TRUE, {
+                 removeModal()
+                 continue$val <- TRUE   
+                 
+               })
+  
+  
+  
+  
+  
+  observeEvent(input$stopTransfer, 
+               ignoreInit = TRUE, {
+                 continue$val <- FALSE    
+                 removeModal()
+                 
+               })
+  
+  
+  
   
   
   
@@ -120,7 +153,7 @@ transferToNewDB_server <- function(input,
                  newCheckedPool <- IDBacApp::createPool(newDBName, 
                                                         sqlDirectory$sqlDirectory)
                  
-               
+                 
                  IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
                                              newDBPool = newCheckedPool[[1]], 
                                              newdbName = newDBName,
