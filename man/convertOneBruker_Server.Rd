@@ -4,7 +4,8 @@
 \alias{convertOneBruker_Server}
 \title{convertOneBruker_Server}
 \usage{
-convertOneBruker_Server(input, output, session, tempMZDir, sqlDirectory)
+convertOneBruker_Server(input, output, session, tempMZDir, sqlDirectory,
+  availableExperiments)
 }
 \arguments{
 \item{input}{NS}
@@ -16,6 +17,8 @@ convertOneBruker_Server(input, output, session, tempMZDir, sqlDirectory)
 \item{tempMZDir}{tempMZDir}
 
 \item{sqlDirectory}{sqlDirectory}
+
+\item{availableExperiments}{availableExperiments}
 }
 \value{
 NA

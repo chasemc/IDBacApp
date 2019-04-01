@@ -82,38 +82,35 @@ convertDataTab_Server <- function(input,
                                   availableExperiments){
   
   
-  
-a <- shiny::callModule(convertMZ_Server,
+  shiny::callModule(convertMZ_Server,
                     "beginWithMZ",
-                    sqlDirectory = sqlDirectory)
+                    sqlDirectory = sqlDirectory,
+                    availableExperiments = availableExperiments)
   
   
   shiny::callModule(convertOneBruker_Server,
                     "convertOneBruker",
-                    tempMZDir,
-                    sqlDirectory)
+                    tempMZDir = tempMZDir,
+                    sqlDirectory = sqlDirectory,
+                    availableExperiments = availableExperiments)
   
   
   
   shiny::callModule(convertDelim_Server,
                     "convertDelim",
-                    tempMZDir,
-                    sqlDirectory)
+                    tempMZDir = tempMZDir,
+                    sqlDirectory = sqlDirectory,
+                    availableExperiments = availableExperiments)
   
   
   shiny::callModule(convertMicrotyper_Server,
                     "convertMicrotyper",
-                    tempMZDir,
-                    sqlDirectory)
+                    tempMZDir = tempMZDir,
+                    sqlDirectory = sqlDirectory,
+                    availableExperiments = availableExperiments)
   
-  observe(aa <<-a)
   
-  observeEvent(a()$val,{
-       
-          availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
-                                                                          pattern = ".sqlite",
-                                                                          full.names = FALSE))
-             })
+  
   
 }
 

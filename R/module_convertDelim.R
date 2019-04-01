@@ -63,6 +63,7 @@ convertDelim_UI <- function(id){
 #' @param session module
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
+#' @param availableExperiments availableExperiments
 #'
 #' @return .
 #' @export
@@ -72,7 +73,8 @@ convertDelim_Server <- function(input,
                                 output,
                                 session,
                                 tempMZDir,
-                                sqlDirectory){
+                                sqlDirectory,
+                                availableExperiments){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -161,8 +163,6 @@ convertDelim_Server <- function(input,
   
   
   
-  success <- reactiveValues(val = FALSE)
-  
   # Run raw data processing on delimited-type input files
   #----
   observeEvent(input$runDelim, 
@@ -170,7 +170,7 @@ convertDelim_Server <- function(input,
                  req(!is.null(sanity()))
                  req(sanity() != "")
                  
-              
+                 
                  req(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0)
                  req(length(proteinFiles()) + length(smallMolFiles()) > 0)
                  
@@ -215,9 +215,12 @@ convertDelim_Server <- function(input,
                  
                  IDBacApp::popup4()
                  
-                 success$val <- TRUE
-                 
+                 # Update available experiments
+                 availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                                 pattern = ".sqlite",
+                                                                                 full.names = FALSE))
                })
+  
   
   
   

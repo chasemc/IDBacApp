@@ -2,12 +2,12 @@
 % Please edit documentation in R/binnR.r
 \name{peakBinner}
 \alias{peakBinner}
-\title{peakBinner}
+\title{Bin MALDI peaks}
 \usage{
 peakBinner(peakList, ppm = 300, massStart = 3000, massEnd = 15000)
 }
 \arguments{
-\item{peakList}{should be MALDIquant}
+\item{peakList}{list of MALDIquant peak objects}
 
 \item{ppm}{ppm}
 
@@ -19,5 +19,5 @@ peakBinner(peakList, ppm = 300, massStart = 3000, massEnd = 15000)
 list of bin vectors
 }
 \description{
-peakBinner
+Bin MALDI peaks
 }

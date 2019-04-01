@@ -142,13 +142,9 @@ app_server <- function(input, output, session) {
                  removeTab(inputId = "mainIDBacNav",
                            target = "Protein Data Analysis"
                  )
-                 
-                 
                  removeTab(inputId = "mainIDBacNav",
                            target = "Small Molecule Data Analysis"
-                           
                  )
-                 
                  pool <- pool::poolCheckout(workingDB$pool())
                  p <- DBI::dbGetQuery(pool, glue::glue("SELECT COUNT(*) 
                                             FROM IndividualSpectra 
@@ -173,20 +169,7 @@ app_server <- function(input, output, session) {
                  }
                })
   
-  observeEvent(workingDB$move$selectExperiment,
-               ignoreInit = TRUE, {
-                 
-                 
-               })
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   
   
   # Mirror Plots ------------------------------------------------------------
@@ -199,8 +182,6 @@ app_server <- function(input, output, session) {
              "protMirror",
              workingDB,
              proteinOrSmall = '>')
-  
-  
   
   
   smallPeakSettings <- callModule(IDBacApp::peakRetentionSettings_Server,
