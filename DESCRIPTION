@@ -43,7 +43,8 @@ Imports:
     shinycssloaders,
     jsonlite,
     fst,
-    remotes
+    remotes,
+    ggplot2
 Suggests: testthat
 RoxygenNote: 6.1.1
 Depends: 
