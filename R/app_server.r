@@ -236,20 +236,11 @@ app_server <- function(input, output, session) {
                                                   tolerance = 0.002,
                                                   protein = TRUE)
                    })
-    temp <- lapply(chosenProteinSampleIDs$chosen,
-                   function(ids){
-                     IDBacApp::collapseReplicates(checkedPool = conn,
-                                                  sampleIDs = ids,
-                                                  peakPercentPresence = proteinPeakSettings$percentPresence,
-                                                  lowerMassCutoff = proteinPeakSettings$lowerMass,
-                                                  upperMassCutoff = proteinPeakSettings$upperMass, 
-                                                  minSNR = 6, 
-                                                  tolerance = 0.002,
-                                                  protein = TRUE)
-                   })
+
     
     pool::poolReturn(conn)
     
+    # Inject samples into dendrogram
     if (length(proteinSamplesToInject$chosen$chosen) > 0) {
       
       conn <- pool::poolCheckout(proteinSamplesToInject$db())
@@ -261,7 +252,7 @@ app_server <- function(input, output, session) {
                                                             peakPercentPresence = proteinPeakSettings$percentPresence,
                                                             lowerMassCutoff = proteinPeakSettings$lowerMass,
                                                             upperMassCutoff = proteinPeakSettings$upperMass, 
-                                                            minSNR = 6, 
+                                                            minSNR = proteinPeakSettings$SNR, 
                                                             tolerance = 0.002,
                                                             protein = TRUE)
                              })
@@ -275,8 +266,6 @@ app_server <- function(input, output, session) {
       names(temp) <- chosenProteinSampleIDs$chosen
       
     }
-    
-    
     
     return(temp)
     
