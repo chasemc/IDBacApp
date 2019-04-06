@@ -415,9 +415,6 @@ app_server <- function(input, output, session) {
     
   })
   
-  
-  observe(print(input$proteinPeakSettingsDropDown))
-  
   # Paragraph to relay info for reporting protein ---------------------------
   
   

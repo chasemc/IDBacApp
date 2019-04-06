@@ -138,8 +138,7 @@ transferToNewDB_server <- function(input,
   
   observeEvent(continue$val, 
                ignoreInit = TRUE, {
-                 
-                 print(continue$val)
+
                  req(continue$val == TRUE)
                  
                  IDBacApp::copyingDbPopup()
