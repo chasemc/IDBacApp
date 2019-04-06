@@ -59,10 +59,13 @@ processProteinSpectra <- function(input){
                                        halfWindowSize = 20) 
   peaks <- MALDIquant::removeBaseline(peaks,
                                       method = "TopHat") 
-  peaks <- MALDIquant::calibrateIntensity(peaks,
-                                          method = "TIC")  
-  MALDIquant::detectPeaks(peaks, 
+  peaks <- MALDIquant::detectPeaks(peaks, 
                           method = "MAD", 
                           halfWindowSize = 20, 
                           SNR = 3)
+  lapply(peaks, 
+         function(x){
+           x@intensity <- x@intensity * (100/max(x@intensity))
+           x
+         })
 }
