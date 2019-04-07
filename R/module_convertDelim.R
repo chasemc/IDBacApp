@@ -85,7 +85,6 @@ convertDelim_Server <- function(input,
     }
   })
   
-  
   # Reactive variable returning the user-chosen location of the raw delim files as string
   #----
   delimitedLocationSM <- reactive({
@@ -93,8 +92,6 @@ convertDelim_Server <- function(input,
       IDBacApp::choose_dir()
     }
   })
-  
-  
   
   output$newExperimentNameText <- renderText({
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
@@ -113,7 +110,7 @@ convertDelim_Server <- function(input,
   output$delimitedLocationSMo <- renderText({
     req(smallMolFiles())
     names <- tools::file_path_sans_ext(base::basename(smallMolFiles()))
-    names <- paste0(names, collapse = " \n ")
+     paste0(names, collapse = " \n ")
   })
   
   
@@ -122,7 +119,7 @@ convertDelim_Server <- function(input,
   output$delimitedLocationPo <- renderText({
     req(proteinFiles())
     names <- tools::file_path_sans_ext(base::basename(proteinFiles()))
-    names <- paste0(names, collapse = " \n ")
+    paste0(names, collapse = " \n ")
     
   })
   
@@ -153,29 +150,24 @@ convertDelim_Server <- function(input,
     }
   })
   
-  
-  
-  
   sanity <- reactive({
     a <- IDBacApp::path_sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   
-  
-  
   # Run raw data processing on delimited-type input files
   #----
   observeEvent(input$runDelim, 
                ignoreInit = TRUE, {
+                 
+                 
+                 awq<<-sanity()
+                 awq2<<-proteinFiles()
+                 awq3<<-smallMolFiles()
+                 
                  req(!is.null(sanity()))
                  req(sanity() != "")
-                 
-                 
-                 req(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0)
-                 req(length(proteinFiles()) + length(smallMolFiles()) > 0)
-                 
-                 
-                 
+                 req(!is.null(proteinFiles()) + !is.null(smallMolFiles()) > 0)
                  
                  if (is.null(smallMolFiles())) {
                    smallPaths <- NULL
@@ -186,7 +178,7 @@ convertDelim_Server <- function(input,
                    sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-")[[1]][[1]]))
                    
                  }
-                 
+                 print("h1")
                  if (is.null(proteinFiles())) {
                    proteinPaths <- NULL
                    sampleNameP <- NULL
@@ -196,7 +188,7 @@ convertDelim_Server <- function(input,
                    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
                  }
                  
-                 
+                 print("h2")
                  
                  
                  keys <- IDBacApp::parseDelimitedMS(proteinPaths = proteinPaths,
@@ -211,7 +203,7 @@ convertDelim_Server <- function(input,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = input$newExperimentName)
                  
-                 
+                 print("h3")
                  
                  IDBacApp::popup4()
                  
