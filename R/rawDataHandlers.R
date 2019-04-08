@@ -37,19 +37,15 @@ startingFromBrukerFlex <- function(chosenDir,
                                    msconvertPath = "",
                                    sampleMap,
                                    convertWhere){
-  chosenDir <<-  chosenDir
-  sampleMap <<- sampleMap
-  convertWhere <<- convertWhere
-  
+
   convertFrom <- base::split(labels(sampleMap),as.character(sampleMap))
   
   convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
                               tmpdir = convertWhere,
                               fileext = ".mzMl")
-  convertTo <- base::shQuote(base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE))
+  convertTo <- base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE)
   
 
-  
   convertWhere <- base::shQuote(convertWhere)
   
   msconvertLocation <- IDBacApp::findMSconvert(msconvertPath)
@@ -57,7 +53,6 @@ startingFromBrukerFlex <- function(chosenDir,
                                            winslash = "\\",
                                            mustWork = FALSE)
   msconvertLocation <- base::shQuote(msconvertLocation)
-  
   
   
   
@@ -72,7 +67,7 @@ startingFromBrukerFlex <- function(chosenDir,
                                                            " --mzML --merge -z  --32 -v",
                                                            " --outdir ", convertWhere,
                                                            
-                                                           " --outfile ", convertTo[[x]]))
+                                                           " --outfile ", base::shQuote(convertTo[[x]])))
                                              
                                            })
   
@@ -97,14 +92,11 @@ startingFromBrukerFlex <- function(chosenDir,
                       msconvertCmdLineCommands,
                       functionTOrunMSCONVERTonCMDline)
   parallel::stopCluster(cl)
+   validate(need(all(file.exists(convertTo)), 
+                 cbind(convertTo, exists(convertTo))
+   ))
   
-  
-  validate(need(all(file.exists(convertTo)), 
-                cbind(convertTo, exists(convertTo))
-  ))
-  
-  
-  
+ 
   return(list(mzFile = convertTo,
               sampleID = names(convertFrom)))
   

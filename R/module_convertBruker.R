@@ -272,17 +272,17 @@ convertOneBruker_Server <- function(input,
                                                          sampleMap = sampleMap,
                                                          convertWhere = tempMZDir)
                  IDBacApp::popup3()
-                 
                  IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
                                        sampleIds = forProcessing$sampleID,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = input$newExperimentName)
 
-                 IDBacApp::popup4()
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE))
+                 IDBacApp::popup4()
+                 
                  
                })
   
