@@ -270,7 +270,7 @@ convertOneBruker_Server <- function(input,
                  forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
                                                          msconvertPath = "",
                                                          sampleMap = sampleMap,
-                                                         tempDir = tempMZDir)
+                                                         convertWhere = tempMZDir)
                  IDBacApp::popup3()
                  
                  IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,

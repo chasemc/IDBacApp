@@ -28,7 +28,7 @@ startingFromMZ <- function(chosenDir){
 #'
 #' @param msconvertPath path to MSconvert, if none provided, it will search in Programs folder
 #' @param sampleMap excel file used for re-naming samples
-#' @param tempDir directory to temp mzML files are written to
+#' @param convertWhere directory where temp mzML files are written to
 #' @param chosenDir user-chosen directory containing bruker raw data files
 #'
 #' @return NA
@@ -36,17 +36,20 @@ startingFromMZ <- function(chosenDir){
 startingFromBrukerFlex <- function(chosenDir, 
                                    msconvertPath = "",
                                    sampleMap,
-                                   tempDir){
- 
+                                   convertWhere){
+  chosenDir <<-  chosenDir
+  sampleMap <<- sampleMap
+  convertWhere <<- convertWhere
+  
   convertFrom <- base::split(labels(sampleMap),as.character(sampleMap))
   
   convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
-                              tmpdir = tempDir,
+                              tmpdir = convertWhere,
                               fileext = ".mzMl")
   convertTo <- base::shQuote(base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE))
   
-  convertWhere <- base::dirname(convertTo)[[1]]
-  convertWhere <- base::normalizePath(convertWhere, winslash = "\\", mustWork = FALSE)
+
+  
   convertWhere <- base::shQuote(convertWhere)
   
   msconvertLocation <- IDBacApp::findMSconvert(msconvertPath)
