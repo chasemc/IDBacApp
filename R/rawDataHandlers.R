@@ -43,7 +43,7 @@ startingFromBrukerFlex <- function(chosenDir,
   convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
                               tmpdir = tempDir,
                               fileext = ".mzMl")
-  convertTo <- base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE)
+  convertTo <- base::shQuote(base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE))
   
   convertWhere <- base::dirname(convertTo)[[1]]
   convertWhere <- base::normalizePath(convertWhere, winslash = "\\", mustWork = FALSE)
