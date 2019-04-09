@@ -90,8 +90,8 @@ manPageProtDend_Server <- function(input,
 manPageProtDend_UI <- function(id) {
   ns <- shiny::NS(id)
   
-    plotOutput(ns("hierOut"),
-               brush = ns("plot_brush"))
+  plotOutput(ns("hierOut"),
+             brush = ns("plot_brush"))
   
   
 }
@@ -114,9 +114,9 @@ smMANPlot_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shinycssloaders::withSpinner(
-    networkD3::simpleNetworkOutput(ns("metaboliteAssociationNetwork"),
-                                   width = "100%")
-  )
+      sigmajs::sigmajsOutput(ns("metaboliteAssociationNetwork"),
+                             width = "100%")
+    )
   )
 }
 
@@ -178,8 +178,8 @@ MAN_Server <- function(input,
     },
     content = function(file){
       utils::write.csv(as.matrix(smallMolNetworkDataFrame()),
-                file,
-                row.names = FALSE)
+                       file,
+                       row.names = FALSE)
     }
   )
   
@@ -187,55 +187,39 @@ MAN_Server <- function(input,
   #This creates the network plot and calculations needed for such.
   #----
   calcNetwork <- reactive({
-    manEnvironment <- new.env(parent = parent.frame())
-    manEnvironment$sampleNodes <- subtractedMatrixBlank$sampleIDs
+    zz1 <<- smallMolNetworkDataFrame()
+    z1 <- igraph::graph_from_data_frame(smallMolNetworkDataFrame())
+    z <- igraph::as.undirected(z1)
+    clusters <- igraph::fastgreedy.community(z)
     
+    igraph::V(z)$color <- as.vector(IDBacApp::colorBlindPalette()[1:100])[clusters$membership]
+   igraph::V(z)$label <- igraph::V(z)$name
     
-    a <- igraph::as.undirected(igraph::graph_from_data_frame(smallMolNetworkDataFrame()))
-    a <- igraph::simplify(a)
-    manEnvironment$wc <- igraph::fastgreedy.community(a)
-    
-    b <- networkD3::igraph_to_networkD3(a, group = (manEnvironment$wc$membership)) # zero indexed
-    
-    
-    manEnvironment$z <- b$links
-    manEnvironment$zz <- b$nodes
-    manEnvironment$zz <- cbind(manEnvironment$zz, biggerSampleNodes = rep(1,times = length(manEnvironment$zz[,1])))
-    manEnvironment$zz$biggerSampleNodes[which(manEnvironment$zz[,1] %in% manEnvironment$sampleNodes)] <- 50
-    
-    manEnvironment
-    
+   igraph::E(z)$Weight <- igraph::E(z1)$Weight
+    return(z)
   })
   
   
-  output$metaboliteAssociationNetwork <- networkD3::renderForceNetwork({
-    cbp <- as.vector(IDBacApp::colorBlindPalette()[1:100])
-    
-    YourColors <- paste0('d3.scaleOrdinal()
-                         .domain([',paste0(shQuote(1:100), collapse = ", "),'])
-                         .range([', paste0(shQuote(cbp), collapse = ", "),' ])')
-    
-   
+  output$metaboliteAssociationNetwork <- sigmajs::renderSigmajs({
     
     
+    sigmajs::sigmajs() %>%
+      sigmajs::sg_from_igraph(calcNetwork()) %>% 
+      sigmajs::sg_settings(drawLabels = TRUE, drawEdgeLabels = FALSE) %>% 
+      sigmajs::sg_force(edgeWeightInfluence = igraph::E(calcNetwork())$Weight*10) %>% 
+      sigmajs::sg_force_start() %>% # start
+      sigmajs::sg_force_stop(500) %>% # stop after 5 seconds
+      sigmajs::sg_drag_nodes() 
     
-    networkD3::forceNetwork(Links = calcNetwork()$z, 
-                            Nodes = calcNetwork()$zz, 
-                            Source = "source",
-                            Value = smallMolNetworkDataFrame()$Weight,
-                            Nodesize = "biggerSampleNodes",
-                            Target = "target",
-                            NodeID = "name",
-                            Group = "group",
-                            opacity = 1,
-                            opacityNoHover = 0.8, 
-                            zoom = TRUE,
-                            colourScale = networkD3::JS(YourColors),
-                            charge=-50, 
-                            linkWidth = networkD3::JS("function(d) { return 1; }"),
-                            linkDistance = networkD3::JS("function(d){return d.value * 10}"))
-    
-    
+    # sg_export_svg() %>% 
+    # sg_button("force_start", "force", tag = htmltools::tags$button, position = "bottom")  
+    # sg_button(
+    #   "export_svg", # event to trigger
+    #   class = "btn btn-default",
+    #   "asdfsda",
+    #   tag = htmltools::tags$button,
+    #   tags$i(class = "fa fa-download")
+    # )
     
     
     
