@@ -573,6 +573,7 @@ app_server <- function(input, output, session) {
     
     validate(need(smallPeakSettings$lowerMass < smallPeakSettings$upperMass, "Upper mass cutoff must be greater than lower mass cutoff."))
     
+    
     samples <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
                                             sampleIDs = NULL,
                                             dendrogram = proteinDendrogram$dendrogram,
@@ -636,7 +637,8 @@ app_server <- function(input, output, session) {
   
   callModule(IDBacApp::MAN_Server,
              "smMAN",
-             subtractedMatrixBlank = subtractedMatrixBlank)
+             subtractedMatrixBlank = subtractedMatrixBlank,
+             proteinDend = proteinDendrogram)
   
   
   

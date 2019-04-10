@@ -126,9 +126,9 @@ smMANPlot_UI <- function(id) {
 
 #' downloadSmNet_UI
 #'
-#' @param id .
+#' @param id shiny id
 #'
-#' @return .
+#' @return shiny module ui
 #' @export
 #'
 
@@ -142,22 +142,39 @@ downloadSmNet_UI <- function(id) {
 }
 
 
+#' Color MAN settings
+#'
+#' @param id shiny id
+#'
+#' @return shiny module ui
+#' @export
+#'
+colorMANBy_UI <- function(id) {
+  ns <- shiny::NS(id)
+  selectInput(ns("colorMANBy"), 
+              label = h3("Color MAN by:"), 
+              choices = list("Color by Modularity" = "by_modularity",
+                             "Color by Dendrogram Labels" = "by_dendLabels"), 
+              selected = "by_modularity")
+}
+
 #' MAN_Server
 #'
-#' @param input mod
-#' @param output mod
-#' @param session mod
+#' @param input shiny input
+#' @param output shiny output
+#' @param session shiny session
 #' @param subtractedMatrixBlank subtractedMatrixBlank 
 #' @param sampleIDs sampleIDs
+#' @param proteinDend$dendrogram protein dendrogram
 #'
 #' @return NA
 #' @export
-#'
 MAN_Server <- function(input,
                        output,
                        session,
                        subtractedMatrixBlank,
-                       sampleIDs){
+                       sampleIDs,
+                       proteinDend){
   
   
   
@@ -184,32 +201,81 @@ MAN_Server <- function(input,
   )
   
   
+  networkIgraph <- reactiveValues(graph = NULL)
+  
   #This creates the network plot and calculations needed for such.
   #----
-  calcNetwork <- reactive({
-    zz1 <<- smallMolNetworkDataFrame()
-    z1 <- igraph::graph_from_data_frame(smallMolNetworkDataFrame())
-    z <- igraph::as.undirected(z1)
-    clusters <- igraph::fastgreedy.community(z)
-    
-    igraph::V(z)$color <- as.vector(IDBacApp::colorBlindPalette()[1:100])[clusters$membership]
-   igraph::V(z)$label <- igraph::V(z)$name
-    
-   igraph::E(z)$Weight <- igraph::E(z1)$Weight
-    return(z)
+  observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy),{
+    networkIgraph$graph <- IDBacApp::networkFromDF(smallMolNetworkDataFrame())
+  
+    req(igraph::is.igraph(networkIgraph$graph))
+    len <- length(attributes(igraph::V(networkIgraph$graph))$names)
+    req(len > 0)
+
+awqq<<-networkIgraph$graph
+
+proteinDend$dendrogramy<<-proteinDend$dendrogram
+
+print(input$colorMANBy)
+    if (input$colorMANBy == "by_modularity") {
+      networkIgraph$graph <- IDBacApp::modularityClustering(networkIgraph$graph)
+
+    } else if (input$colorMANBy == "by_dendLabels") {
+
+
+      dendColors <- cbind(id = labels(proteinDend$dendrogram),
+                          color = dendextend::labels_col(proteinDend$dendrogram))
+
+      igraph::V(networkIgraph$graph)$color <- rep("#000000FF", len)
+
+      for (i in 1:len) {
+        temp <- attributes(igraph::V(networkIgraph$graph))$names[i]
+        col <- dendColors[,2][dendColors[,1] %in% temp]
+        if (length(col) > 0) {
+          igraph::V(networkIgraph$graph)$color[i] <- col
+        }
+      }
+    }
+
+igraph::V(networkIgraph$graph)$label <- igraph::V(networkIgraph$graph)$name
+
   })
+  # 
+  # observeEvent({
+  # 
+  # })
+  # 
+  # #  
+  # z <- igraph::as.undirected(z1)
+  # clusters <- igraph::fastgreedy.community(z)
+  # 
+  # igraph::V(z)$color <- as.vector(IDBacApp::colorBlindPalette()[1:100])[clusters$membership]
+  # igraph::V(z)$label <- igraph::V(z)$name
+  # 
+  # 
+  
+  
+  # igraph::V(z)$color <- as.vector(IDBacApp::colorBlindPalette()[1:100])[clusters$membership]
+  # igraph::V(z)$label <- igraph::V(z)$name
   
   
   output$metaboliteAssociationNetwork <- sigmajs::renderSigmajs({
-    
+    req(igraph::is.igraph(networkIgraph$graph))
+    len <- length(attributes(igraph::V(networkIgraph$graph))$names)
+    req(len > 0)
     
     sigmajs::sigmajs() %>%
-      sigmajs::sg_from_igraph(calcNetwork()) %>% 
+      sigmajs::sg_from_igraph(networkIgraph$graph) %>% 
       sigmajs::sg_settings(drawLabels = TRUE, drawEdgeLabels = FALSE) %>% 
-      sigmajs::sg_force(edgeWeightInfluence = igraph::E(calcNetwork())$Weight*10) %>% 
+      sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight*10) %>% 
       sigmajs::sg_force_start() %>% # start
       sigmajs::sg_force_stop(500) %>% # stop after 5 seconds
-      sigmajs::sg_drag_nodes() 
+      sigmajs::sg_drag_nodes() %>% 
+      sigmajs::sg_export_svg() %>% 
+      sigmajs::sg_button(
+        "export_svg", # event to trigger
+        "sad"
+      )
     
     # sg_export_svg() %>% 
     # sg_button("force_start", "force", tag = htmltools::tags$button, position = "bottom")  
@@ -230,9 +296,6 @@ MAN_Server <- function(input,
   
   
 }
-
-
-
 
 
 
