@@ -296,12 +296,22 @@ app_server <- function(input, output, session) {
     validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass,
                   "Lower mass cutoff should be higher than upper mass cutoff."))
 
-    IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[!emptyProtein()],
-                         massStart = proteinPeakSettings$lowerMass,
-                         massEnd = proteinPeakSettings$upperMass
-                         #ppm = proteinPeakSettings$ppm
-    )
+    IDBacApp::peakBinner(massStart = proteinPeakSettings$lowerMass,
+                         massEnd = proteinPeakSettings$upperMass,
+                         ppm = proteinPeakSettings$ppm,
+                         massList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@mass),
+                         intensityList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@intensity))
+      
+      
+      
+      
+      
+      
+    
   })
+  
+  
+  
   
   
   emptyProtein <- reactive({

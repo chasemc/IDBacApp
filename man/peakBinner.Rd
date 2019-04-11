@@ -2,22 +2,33 @@
 % Please edit documentation in R/binnR.r
 \name{peakBinner}
 \alias{peakBinner}
-\title{Bin MALDI peaks}
+\title{Peak List Binner}
 \usage{
-peakBinner(peakList, ppm = 300, massStart = 3000, massEnd = 15000)
+peakBinner(massStart, massEnd, ppm, massList, intensityList)
 }
 \arguments{
-\item{peakList}{list of MALDIquant peak objects}
+\item{massStart}{beginning of mass range (as of now, must be smaller than smallest mass)}
 
-\item{ppm}{ppm}
+\item{massEnd}{end of mass range (as of now, must be smaller than smallest mass)}
 
-\item{massStart}{massStart}
+\item{ppm}{ppm tolerance}
 
-\item{massEnd}{massEnd}
+\item{massList}{list of mass vectors (eg list(1:10, 1:10))}
+
+\item{intensityList}{list of intesity vectors (eg list(1:10, 1:10))}
 }
 \value{
-list of bin vectors
+matrix where rows are samples and columns are variables (m/z preojections)
 }
 \description{
-Bin MALDI peaks
+Peak List Binner
+}
+\examples{
+masses <- list(Sample_A = c(5000,6000,7000), Sample_B = c(5000,6010,7005), Sample_C = c(5000,6010,7005))  
+intensities <- list(Sample_A = rep(1, 3), Sample_B = rep(1, 3), Sample_C = rep(1, 3))
+zx <- binnR(massStart = 3000,
+            massEnd = 15000,
+            ppm = 500,
+            massList = masses,
+            intensityList = intensities)
 }
