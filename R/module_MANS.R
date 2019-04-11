@@ -18,6 +18,27 @@ smallMolDendrogram_UI <- function(id){
 }
 
 
+
+
+
+
+#' Title
+#'
+#' @param id shiny id
+#'
+#' @return shiny module ui
+#' @export
+#'
+saveNetSVG <- function(id){
+  ns <- shiny::NS(id)
+
+  actionButton(ns("saveNetworkSvg"),
+               label = "Save MAN as SVG", 
+               icon = shiny::icon("download"))
+  
+}
+
+
 # Brushable dend (protein) on small molecule page ---------------------------------------
 
 
@@ -207,27 +228,22 @@ MAN_Server <- function(input,
   #----
   observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy),{
     networkIgraph$graph <- IDBacApp::networkFromDF(smallMolNetworkDataFrame())
-  
+    
     req(igraph::is.igraph(networkIgraph$graph))
     len <- length(attributes(igraph::V(networkIgraph$graph))$names)
     req(len > 0)
-
-awqq<<-networkIgraph$graph
-
-proteinDend$dendrogramy<<-proteinDend$dendrogram
-
-print(input$colorMANBy)
+    
     if (input$colorMANBy == "by_modularity") {
       networkIgraph$graph <- IDBacApp::modularityClustering(networkIgraph$graph)
-
+      
     } else if (input$colorMANBy == "by_dendLabels") {
-
-
+      
+      
       dendColors <- cbind(id = labels(proteinDend$dendrogram),
                           color = dendextend::labels_col(proteinDend$dendrogram))
-
+      
       igraph::V(networkIgraph$graph)$color <- rep("#000000FF", len)
-
+      
       for (i in 1:len) {
         temp <- attributes(igraph::V(networkIgraph$graph))$names[i]
         col <- dendColors[,2][dendColors[,1] %in% temp]
@@ -236,9 +252,9 @@ print(input$colorMANBy)
         }
       }
     }
-
-igraph::V(networkIgraph$graph)$label <- igraph::V(networkIgraph$graph)$name
-
+    
+    igraph::V(networkIgraph$graph)$label <- igraph::V(networkIgraph$graph)$name
+    
   })
   # 
   # observeEvent({
@@ -270,29 +286,21 @@ igraph::V(networkIgraph$graph)$label <- igraph::V(networkIgraph$graph)$name
       sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight*10) %>% 
       sigmajs::sg_force_start() %>% # start
       sigmajs::sg_force_stop(500) %>% # stop after 5 seconds
-      sigmajs::sg_drag_nodes() %>% 
-      sigmajs::sg_export_svg() %>% 
-      sigmajs::sg_button(
-        "export_svg", # event to trigger
-        "sad"
-      )
+      sigmajs::sg_drag_nodes()
+     
+  })
+  
+
+  observeEvent(input$saveNetworkSvg, {
     
-    # sg_export_svg() %>% 
-    # sg_button("force_start", "force", tag = htmltools::tags$button, position = "bottom")  
-    # sg_button(
-    #   "export_svg", # event to trigger
-    #   class = "btn btn-default",
-    #   "asdfsda",
-    #   tag = htmltools::tags$button,
-    #   tags$i(class = "fa fa-download")
-    # )
-    
-    
-    
-    
+    sigmajs::sigmajsProxy(session$ns("metaboliteAssociationNetwork")) %>% 
+      sigmajs::sg_export_svg_p(file = "MAN.svg", 
+                               size="100%", 
+                               labels = TRUE) 
   })
   
   
+    
   
   
 }

@@ -29,7 +29,8 @@ ui_smallMolMan <-  function(){
                                         open = "Panel 1",
                                         IDBacApp::bsCollapsePanel(p("Adjust MAN", 
                                                                     align = "center"),
-                                                                  IDBacApp::colorMANBy_UI("smMAN")
+                                                                  IDBacApp::colorMANBy_UI("smMAN"),
+                                                                  IDBacApp::saveNetSVG("smMAN")
                                         )),
                    IDBacApp::bsCollapse(id = "collapseManSettings",
                                         open = "Panel 1",
