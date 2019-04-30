@@ -610,6 +610,8 @@ app_server <- function(input, output, session) {
     ids <- samples$sampleIDs
     samples <- samples$maldiQuantPeaks
     
+    # if no samples are selected, stop
+    req(length(ids) > 0)
     
     
     if ( (input$selectMatrix != "None") ) {
