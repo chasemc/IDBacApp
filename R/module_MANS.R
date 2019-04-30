@@ -186,7 +186,7 @@ colorMANBy_UI <- function(id) {
 #' @param session shiny session
 #' @param subtractedMatrixBlank subtractedMatrixBlank 
 #' @param sampleIDs sampleIDs
-#' @param proteinDend$dendrogram protein dendrogram
+#' @param proteinDend protein dendrogram
 #'
 #' @return NA
 #' @export

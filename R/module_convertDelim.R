@@ -159,12 +159,7 @@ convertDelim_Server <- function(input,
   #----
   observeEvent(input$runDelim, 
                ignoreInit = TRUE, {
-                 
-                 
-                 awq<<-sanity()
-                 awq2<<-proteinFiles()
-                 awq3<<-smallMolFiles()
-                 
+
                  req(!is.null(sanity()))
                  req(sanity() != "")
                  req(!is.null(proteinFiles()) + !is.null(smallMolFiles()) > 0)
@@ -178,7 +173,6 @@ convertDelim_Server <- function(input,
                    sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-")[[1]][[1]]))
                    
                  }
-                 print("h1")
                  if (is.null(proteinFiles())) {
                    proteinPaths <- NULL
                    sampleNameP <- NULL
@@ -187,9 +181,6 @@ convertDelim_Server <- function(input,
                    sampleNameP <- tools::file_path_sans_ext(basename(proteinPaths))
                    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
                  }
-                 
-                 print("h2")
-                 
                  
                  keys <- IDBacApp::parseDelimitedMS(proteinPaths = proteinPaths,
                                                     proteinNames = sampleNameP,
@@ -203,8 +194,7 @@ convertDelim_Server <- function(input,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = input$newExperimentName)
                  
-                 print("h3")
-                 
+
                  IDBacApp::popup4()
                  
                  # Update available experiments

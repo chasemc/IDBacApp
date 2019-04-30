@@ -71,6 +71,7 @@ mQuantToMassVec <- function(peakList){
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' masses <- list(Sample_A = c(5000,6000,7000), Sample_B = c(5000,6010,7005), Sample_C = c(5000,6010,7005))  
 #' intensities <- list(Sample_A = rep(1, 3), Sample_B = rep(1, 3), Sample_C = rep(1, 3))
 #' zx <- binnR(massStart = 3000,
@@ -78,6 +79,7 @@ mQuantToMassVec <- function(peakList){
 #'             ppm = 500,
 #'             massList = masses,
 #'             intensityList = intensities)
+#'             }
 peakBinner <- function(massStart,
                        massEnd,
                        ppm,
@@ -92,6 +94,7 @@ peakBinner <- function(massStart,
     1L / ((ppm / 1000000L) * mass)
   }
   
+  
   binner_xShift <- function(massStart,
                             scaler){
     round((massStart*scaler) - 2) 
@@ -104,56 +107,65 @@ peakBinner <- function(massStart,
   
   vecLength <- round((massEnd * scaler) + 2 ) 
   
-  if (length(massList) * vecLength < 4e6) {
-    builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
-  } else {
-    builtM <- Matrix::Matrix(0, nrow = length(massList), ncol = vecLength, sparse = TRUE) 
-  }
+  
+  #  if (length(massList) * vecLength < 4e6) {
+  builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
+  #  } else {
+  #    builtM <- Matrix::Matrix(0, nrow = length(massList), ncol = vecLength, sparse = TRUE) 
+  #  }
   
   # mm returns a list of lists. each list element contains a list of length 3:
-  # centroids are scaled to integer
   # 1- centroid - ppm 
   # 2- centroid
   # 3- centroid + ppm
-  scaledMass <- lapply(massList, function(x){
-    integerizedMass <- as.integer(round((x * scaler)))
-    integerizedPpm <- as.integer(round((x * ppm) / 1000000L))
-    list(integerizedMass - integerizedPpm,
-         integerizedMass,
-         integerizedMass + integerizedPpm)
+  mm <- lapply(massList, function(x){
+    # scale and shift to begin at 1
+    #z1 <- as.integer(round((x * scaler) - toSub))
+    z1 <- as.integer(round((x * scaler)))
+    z2 <- as.integer(round((x * ppm) / 1000000L))
+    
+    list(z1 - z2,
+         z1,
+         z1 + z2)
+    
   })
+  
   
   # Create a distribution of "intensity" across each ppm range of each peak
   # loop across all samples (spectra) 
-  for (i in seq_along(scaledMass)) {
+  for (i in seq_along(mm)) {
     
     # For each centroid, create a sequence of integers from
     # (centroid mass - ppm) to (centroid mass + ppm)
-    newprofile <- mapply(function(x, y) {x:y},
-                         scaledMass[[i]][[1]],
-                         scaledMass[[i]][[3]], 
-                         SIMPLIFY = F)
+    z <- mapply(function(x, y) {x:y},
+                mm[[i]][[1]],
+                mm[[i]][[3]], SIMPLIFY = F)
     
     # For each centroid we now have a sequence of integers representing uncertainty of the centroid
     # model normal distribution density across each centroid's uncertainty integer vector
-    newIntensity <- mapply(
-      function(x, y, z){
+    z2 <- mapply(
+      function(x,y,z){
         round(dnorm(x,
                     y,
                     (z - y) / 4),
               digits = 4)
       },
-      newprofile,
-      scaledMass[[i]][[2]],
-      scaledMass[[i]][[3]])
+      z,
+      mm[[i]][[2]],
+      mm[[i]][[3]])
     
     # Multiple each centroid's intensity against its above calculated distribution
-    z3 <-  mapply(function(x, y) x * y, z2, intensityList[[i]])
+    #z3 <-  mapply(function(x, y) x * y, z2, intensityList[[i]])
+    z3 <-  mapply(function(x, y) x * y, z2, 1000)
+    
+    
     z <- unlist(z)
     z3 <- unlist(z3)
     
     builtM[i, z] <- builtM[i, z] + (z3)
   } 
+  
+  
   
   rownames(builtM) <- names(massList)
   

@@ -18,7 +18,7 @@ MAN_Server(input, output, session, subtractedMatrixBlank, sampleIDs,
 
 \item{sampleIDs}{sampleIDs}
 
-\item{proteinDend$dendrogram}{protein dendrogram}
+\item{proteinDend}{protein dendrogram}
 }
 \value{
 NA
