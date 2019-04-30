@@ -347,13 +347,19 @@ app_server <- function(input, output, session) {
     input$hclustHeight
   })
   
+  dendparmarReactive <- reactive({
+    validate(need(input$dendparmar > 0, 
+                  '"Adjust right margin of dendrogram" must be >1')
+    )
+    input$dendparmar
+  })
   
   
   proteinDendColored <- shiny::callModule(IDBacApp::dendDotsServer,
                                           "proth",
                                           dendrogram = proteinDendrogram,
                                           pool = workingDB$pool,
-                                          plotWidth = reactive(input$dendparmar),
+                                          plotWidth = reactive(dendparmarReactive()),
                                           plotHeight = reactive(hclustHeightReactive()),
                                           boots = dendMaker,
                                           dendOrPhylo = reactive(input$dendOrPhylo),
