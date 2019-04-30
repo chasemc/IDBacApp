@@ -340,13 +340,21 @@ app_server <- function(input, output, session) {
   })
   
   
+  hclustHeightReactive <- reactive({
+    validate(need(input$hclustHeight > 20, 
+                  '"Exapand Dendrogram" must be >20')
+             )
+    input$hclustHeight
+  })
+  
+  
   
   proteinDendColored <- shiny::callModule(IDBacApp::dendDotsServer,
                                           "proth",
                                           dendrogram = proteinDendrogram,
                                           pool = workingDB$pool,
                                           plotWidth = reactive(input$dendparmar),
-                                          plotHeight = reactive(input$hclustHeight),
+                                          plotHeight = reactive(hclustHeightReactive()),
                                           boots = dendMaker,
                                           dendOrPhylo = reactive(input$dendOrPhylo),
                                           emptyProtein = emptyProtein)
