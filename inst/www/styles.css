@@ -175,7 +175,7 @@ font-family: 'Arial';
 
   /* Center numeric input text in inputnumeric */
 
-.form-control, .shiny-bound-input, .shinyjs-resettable { 
+.form-control { 
          display: table-cell; 
          text-align: center; 
          vertical-align: middle; 
@@ -213,6 +213,35 @@ font-family: 'Arial';
 
 
 
-.mirror_select .selectize-input {
-   width:175%;
+
+/* Interactive sample chooser */
+
+.left {
+  white-space: nowrap;
+    overflow: scroll;
+    text-overflow: ellipsis;
+    max-width: 150px;
 }
+
+.right {
+  white-space: nowrap;
+    overflow: scroll;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+
+
+
+#protMirror-Spectra1-selectized {
+   white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+}
+
+
+.mirror_select .selectize-input {
+   width:200px;
+}
+

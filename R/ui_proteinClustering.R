@@ -54,7 +54,7 @@ ui_proteinClustering <- function() {
                                         IDBacApp::bsCollapsePanel(p("Adjust the Dendrogram", 
                                                                     align = "center"),
                                                                   value = "adjustProteinDendDropDown",
-                                                                  numericInput("hclustHeight",
+                                                                  shiny::numericInput("hclustHeight",
                                                                                label = h5(strong("Expand dendrogram")),
                                                                                value = 750,
                                                                                step = 50,
@@ -62,11 +62,13 @@ ui_proteinClustering <- function() {
                                                                   numericInput("dendparmar",
                                                                                label = h5(strong("Adjust right margin of dendrogram")),
                                                                                value = 20),
+                                                                  div(align = "left",
                                                                   radioButtons("dendOrPhylo", 
                                                                                label = p("Label Positions:"),
                                                                                choices = list("Plot all labels at x = 0" = "Dendrogram", 
                                                                                               "Hang labels" = "Phylogram"),
-                                                                               selected = "Dendrogram"),
+                                                                               selected = "Dendrogram")
+                                                                  ),
                                                                   fluidRow(IDBacApp::colordendLabelsUI("proth")),
                                                                   fluidRow(IDBacApp::colordendLinesUI("proth")),
                                                                   fluidRow(IDBacApp::addDotsActionUI("proth"))
