@@ -68,7 +68,6 @@ tsneCalculation <- function(dataMatrix,
   
   validate(need(nrow(dataMatrix) > 1, "Need more samples for t-SNE"))
   validate(need(ncol(dataMatrix) > 5, "Only 1-peak found between all samples"))
-  dd<<-dataMatrix
   names <- rownames(dataMatrix)
   dataMatrix[is.na(dataMatrix)] <- 0
   

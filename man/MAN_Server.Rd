@@ -4,18 +4,21 @@
 \alias{MAN_Server}
 \title{MAN_Server}
 \usage{
-MAN_Server(input, output, session, subtractedMatrixBlank, sampleIDs)
+MAN_Server(input, output, session, subtractedMatrixBlank, sampleIDs,
+  proteinDend)
 }
 \arguments{
-\item{input}{mod}
+\item{input}{shiny input}
 
-\item{output}{mod}
+\item{output}{shiny output}
 
-\item{session}{mod}
+\item{session}{shiny session}
 
 \item{subtractedMatrixBlank}{subtractedMatrixBlank}
 
 \item{sampleIDs}{sampleIDs}
+
+\item{proteinDend}{protein dendrogram}
 }
 \value{
 NA

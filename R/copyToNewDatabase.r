@@ -225,8 +225,8 @@ copyDB_setupMeta <- function(newDBconn,
   
   IDBacApp::sql_CreatemetaData(sqlConnection = newDBconn)
   
-  a <<- DBI::dbListFields(existingDBconn, "metaData") 
-  b <<- DBI::dbListFields(newDBconn, "metaData") 
+  a <- DBI::dbListFields(existingDBconn, "metaData") 
+  b <- DBI::dbListFields(newDBconn, "metaData") 
   colToAppend <- a[which(!a %in% b)]            
   
   if (length(colToAppend) > 0) {

@@ -15,12 +15,12 @@ NULL
 #' @export
 #'
 app_server <- function(input, output, session) {
-
+  
   set.seed(42)
-   
+  
   
   # Development Functions ---------------------------------------------------
-
+  
   options(shiny.reactlog = TRUE)
   
   sqlDirectory <- reactiveValues(sqlDirectory = getwd())
@@ -59,19 +59,19 @@ app_server <- function(input, output, session) {
                          full.names = TRUE))
   
   availableDatabases <- reactiveValues(db = NULL)
- 
-
-# Set constants -----------------------------------------------------------
-
-# m/z to separate small molecule and protein spectra:
-# If max mass is > than this, will be classified as protein spectrum 
-smallProteinMass <- 6000  
   
-    
+  
+  # Set constants -----------------------------------------------------------
+  
+  # m/z to separate small molecule and protein spectra:
+  # If max mass is > than this, will be classified as protein spectrum 
+  smallProteinMass <- 6000  
+  
+  
   # Conversions Tab ---------------------------------------------------------
   
   
-   callModule(IDBacApp::convertDataTab_Server,
+  callModule(IDBacApp::convertDataTab_Server,
              "convertDataTab",
              tempMZDir = tempMZDir,
              sqlDirectory = sqlDirectory,
@@ -87,7 +87,7 @@ smallProteinMass <- 6000
   
   # SQL Tab -----------------------------------------------------------------
   
-
+  
   # Find the available databases, and make reactive so can be updated if more are created
   
   
@@ -142,13 +142,9 @@ smallProteinMass <- 6000
                  removeTab(inputId = "mainIDBacNav",
                            target = "Protein Data Analysis"
                  )
-                 
-                 
                  removeTab(inputId = "mainIDBacNav",
                            target = "Small Molecule Data Analysis"
-                           
                  )
-                 
                  pool <- pool::poolCheckout(workingDB$pool())
                  p <- DBI::dbGetQuery(pool, glue::glue("SELECT COUNT(*) 
                                             FROM IndividualSpectra 
@@ -173,20 +169,7 @@ smallProteinMass <- 6000
                  }
                })
   
-  observeEvent(workingDB$move$selectExperiment,
-               ignoreInit = TRUE, {
-                 
-                 
-               })
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   
   
   # Mirror Plots ------------------------------------------------------------
@@ -199,8 +182,6 @@ smallProteinMass <- 6000
              "protMirror",
              workingDB,
              proteinOrSmall = '>')
-  
-  
   
   
   smallPeakSettings <- callModule(IDBacApp::peakRetentionSettings_Server,
@@ -255,20 +236,11 @@ smallProteinMass <- 6000
                                                   tolerance = 0.002,
                                                   protein = TRUE)
                    })
-    temp <- lapply(chosenProteinSampleIDs$chosen,
-                   function(ids){
-                     IDBacApp::collapseReplicates(checkedPool = conn,
-                                                  sampleIDs = ids,
-                                                  peakPercentPresence = proteinPeakSettings$percentPresence,
-                                                  lowerMassCutoff = proteinPeakSettings$lowerMass,
-                                                  upperMassCutoff = proteinPeakSettings$upperMass, 
-                                                  minSNR = 6, 
-                                                  tolerance = 0.002,
-                                                  protein = TRUE)
-                   })
+
     
     pool::poolReturn(conn)
     
+    # Inject samples into dendrogram
     if (length(proteinSamplesToInject$chosen$chosen) > 0) {
       
       conn <- pool::poolCheckout(proteinSamplesToInject$db())
@@ -280,7 +252,7 @@ smallProteinMass <- 6000
                                                             peakPercentPresence = proteinPeakSettings$percentPresence,
                                                             lowerMassCutoff = proteinPeakSettings$lowerMass,
                                                             upperMassCutoff = proteinPeakSettings$upperMass, 
-                                                            minSNR = 6, 
+                                                            minSNR = proteinPeakSettings$SNR, 
                                                             tolerance = 0.002,
                                                             protein = TRUE)
                              })
@@ -294,8 +266,6 @@ smallProteinMass <- 6000
       names(temp) <- chosenProteinSampleIDs$chosen
       
     }
-    
-    
     
     return(temp)
     
@@ -315,30 +285,39 @@ smallProteinMass <- 6000
   
   proteinMatrix <- reactive({
     
-    
-
     req(!is.null(collapsedPeaksForDend()))
-    validate(need(proteinPeakSettings$lowerMass >= 2000, "Lower mass cutoff must be greater than 2,000"))
-    validate(need(proteinPeakSettings$upperMass <= 20000, "Lower mass cutoff must be less than 20,000"))
-    req(proteinPeakSettings$ppm > 200)
-    validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass, "Lower mass cutoff should be higher than upper mass cutoff."))
     req(any(!emptyProtein()))
     req(length(!emptyProtein() > 3))
     
-    IDBacApp::peakBinner(peakList = collapsedPeaksForDend()[!emptyProtein()],
-                         massStart = proteinPeakSettings$lowerMass,
+    validate(need(proteinPeakSettings$lowerMass >= 2000,
+                  "Lower mass cutoff must be greater than 2,000"))
+    validate(need(proteinPeakSettings$upperMass <= 20000,
+                  "Lower mass cutoff must be less than 20,000"))
+    validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass,
+                  "Lower mass cutoff should be higher than upper mass cutoff."))
+
+    IDBacApp::peakBinner(massStart = proteinPeakSettings$lowerMass,
                          massEnd = proteinPeakSettings$upperMass,
-                         ppm = proteinPeakSettings$ppm)
+                         ppm = proteinPeakSettings$ppm,
+                         massList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@mass),
+                         intensityList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@intensity))
+      
+      
+      
+      
+      
+      
+    
   })
+  
+  
   
   
   
   emptyProtein <- reactive({
     unlist(lapply(collapsedPeaksForDend(),
-                   MALDIquant::isEmpty))
+                  MALDIquant::isEmpty))
   })
-  
-  
   
   
   proteinDendrogram <- reactiveValues(dendrogram  = NULL)
@@ -354,26 +333,34 @@ smallProteinMass <- 6000
                                  proteinMatrix = proteinMatrix)
   
   observe({ 
-    #  observeEvent(dendMaker()$dend,{
     
-    # if (length(chosenProteinSampleIDs$chosen) < 3) {
-    #   proteinDendrogram$dendrogram <- NULL
-    # } else {
     req(nrow(proteinMatrix()) > 2)
-    
     proteinDendrogram$dendrogram <- dendMaker()$dend
     
-    # }
   })
   
+  
+  hclustHeightReactive <- reactive({
+    validate(need(input$hclustHeight > 20, 
+                  '"Exapand Dendrogram" must be >20')
+             )
+    input$hclustHeight
+  })
+  
+  dendparmarReactive <- reactive({
+    validate(need(input$dendparmar > 0, 
+                  '"Adjust right margin of dendrogram" must be >1')
+    )
+    input$dendparmar
+  })
   
   
   proteinDendColored <- shiny::callModule(IDBacApp::dendDotsServer,
                                           "proth",
                                           dendrogram = proteinDendrogram,
                                           pool = workingDB$pool,
-                                          plotWidth = reactive(input$dendparmar),
-                                          plotHeight = reactive(input$hclustHeight),
+                                          plotWidth = reactive(dendparmarReactive()),
+                                          plotHeight = reactive(hclustHeightReactive()),
                                           boots = dendMaker,
                                           dendOrPhylo = reactive(input$dendOrPhylo),
                                           emptyProtein = emptyProtein)
@@ -452,9 +439,6 @@ smallProteinMass <- 6000
     
   })
   
-  
-  observe(print(input$proteinPeakSettingsDropDown))
-  
   # Paragraph to relay info for reporting protein ---------------------------
   
   
@@ -530,8 +514,8 @@ smallProteinMass <- 6000
   
   
   output$smallMolPcaPlot <- plotly::renderPlotly({
-
-        req(nrow(smallMolDataFrame()) > 2,
+    
+    req(nrow(smallMolDataFrame()) > 2,
         ncol(smallMolDataFrame()) > 2)
     
     princ <- IDBacApp::pcaCalculation(smallMolDataFrame())
@@ -571,10 +555,10 @@ smallProteinMass <- 6000
                                                      align = "center"),
                                                    tags$div(id='selectMatrixBlank',
                                                             class='mirror_select',
-                                                   selectizeInput("selectMatrix",
-                                                               label = "",
-                                                               options= list(maxOptions = 2000),
-                                                               choices = c("None", smallMolIDs()))
+                                                            selectizeInput("selectMatrix",
+                                                                           label = "",
+                                                                           options= list(maxOptions = 2000),
+                                                                           choices = c("None", smallMolIDs()))
                                                    )
                                                    
                          )
@@ -586,7 +570,7 @@ smallProteinMass <- 6000
   smallMolIDs <- reactive({
     checkedPool <- pool::poolCheckout(workingDB$pool())
     # retrieve all Strain_IDs in db that have small molecule spectra
-
+    
     sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT Strain_ID
                                                           FROM IndividualSpectra 
                                                           WHERE maxMass < {smallProteinMass}"))
@@ -603,7 +587,7 @@ smallProteinMass <- 6000
   
   subtractedMatrixBlank <- reactiveValues(maldiQuantPeaks = NULL,
                                           sampleIDs = NULL)
-    observe({
+  observe({
     req(workingDB$pool(),
         smallPeakSettings$percentPresence,
         smallPeakSettings$lowerMass,
@@ -612,6 +596,7 @@ smallProteinMass <- 6000
         input$selectMatrix)
     
     validate(need(smallPeakSettings$lowerMass < smallPeakSettings$upperMass, "Upper mass cutoff must be greater than lower mass cutoff."))
+    
     
     samples <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
                                             sampleIDs = NULL,
@@ -639,7 +624,7 @@ smallProteinMass <- 6000
                                                    upperMassCutoff = smallPeakSettings$upperMass,
                                                    minSNR = smallPeakSettings$SNR)
       
-  
+      
       samples <- MALDIquant::binPeaks(c(matrixSample$maldiQuantPeaks, samples),
                                       tolerance = .002)
       
@@ -676,7 +661,8 @@ smallProteinMass <- 6000
   
   callModule(IDBacApp::MAN_Server,
              "smMAN",
-             subtractedMatrixBlank = subtractedMatrixBlank)
+             subtractedMatrixBlank = subtractedMatrixBlank,
+             proteinDend = proteinDendrogram)
   
   
   
@@ -837,10 +823,10 @@ smallProteinMass <- 6000
                      # For more info on version comparison see: https://community.rstudio.com/t/comparing-string-version-numbers/6057/6
                      downFunc <- function() {
                        remotes::install_github(paste0("chasemc/IDBacApp@",
-                                                       latestStableVersion),
-                                                force = TRUE,
-                                                quiet = F, 
-                                                quick = T)
+                                                      latestStableVersion),
+                                               force = TRUE,
+                                               quiet = F, 
+                                               quick = T)
                        message(
                          tags$span(
                            style = "color:red;font-size:36px;", "Finished. Please Exit and Restart IDBac."))
@@ -944,9 +930,9 @@ smallProteinMass <- 6000
   #    stopApp()
   #    q("no")
   #  })
-
-
-    
+  
+  
+  
   
   
 }

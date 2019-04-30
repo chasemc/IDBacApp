@@ -26,7 +26,7 @@ app_ui <- function(){
                        tags$head(tags$link(href = "www/styles.css", rel = "stylesheet")),
                        tags$head(tags$link(href = "www/collapse/shinyBS.js")),
                        tags$head(tags$link(href = "www/collapse/shinyBS.css")),
-                       shinyjs::useShinyjs(),
+                    #   shinyjs::useShinyjs(),
                                 wellPanel(class = "intro_WellPanel",
                                           h1("Welcome to IDBac",
                                              align = "center"),

@@ -4,7 +4,8 @@
 \alias{startingFromBrukerFlex}
 \title{When user is starting with Bruker Flex file(s)}
 \usage{
-startingFromBrukerFlex(chosenDir, msconvertPath = "", sampleMap, tempDir)
+startingFromBrukerFlex(chosenDir, msconvertPath = "", sampleMap,
+  convertWhere)
 }
 \arguments{
 \item{chosenDir}{user-chosen directory containing bruker raw data files}
@@ -13,7 +14,7 @@ startingFromBrukerFlex(chosenDir, msconvertPath = "", sampleMap, tempDir)
 
 \item{sampleMap}{excel file used for re-naming samples}
 
-\item{tempDir}{directory to temp mzML files are written to}
+\item{convertWhere}{directory where temp mzML files are written to}
 }
 \value{
 NA

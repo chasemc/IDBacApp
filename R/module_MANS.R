@@ -18,6 +18,27 @@ smallMolDendrogram_UI <- function(id){
 }
 
 
+
+
+
+
+#' Title
+#'
+#' @param id shiny id
+#'
+#' @return shiny module ui
+#' @export
+#'
+saveNetSVG <- function(id){
+  ns <- shiny::NS(id)
+
+  actionButton(ns("saveNetworkSvg"),
+               label = "Save MAN as SVG", 
+               icon = shiny::icon("download"))
+  
+}
+
+
 # Brushable dend (protein) on small molecule page ---------------------------------------
 
 
@@ -90,8 +111,8 @@ manPageProtDend_Server <- function(input,
 manPageProtDend_UI <- function(id) {
   ns <- shiny::NS(id)
   
-    plotOutput(ns("hierOut"),
-               brush = ns("plot_brush"))
+  plotOutput(ns("hierOut"),
+             brush = ns("plot_brush"))
   
   
 }
@@ -114,9 +135,9 @@ smMANPlot_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shinycssloaders::withSpinner(
-    networkD3::simpleNetworkOutput(ns("metaboliteAssociationNetwork"),
-                                   width = "100%")
-  )
+      sigmajs::sigmajsOutput(ns("metaboliteAssociationNetwork"),
+                             width = "100%")
+    )
   )
 }
 
@@ -126,9 +147,9 @@ smMANPlot_UI <- function(id) {
 
 #' downloadSmNet_UI
 #'
-#' @param id .
+#' @param id shiny id
 #'
-#' @return .
+#' @return shiny module ui
 #' @export
 #'
 
@@ -142,22 +163,39 @@ downloadSmNet_UI <- function(id) {
 }
 
 
+#' Color MAN settings
+#'
+#' @param id shiny id
+#'
+#' @return shiny module ui
+#' @export
+#'
+colorMANBy_UI <- function(id) {
+  ns <- shiny::NS(id)
+  selectInput(ns("colorMANBy"), 
+              label = h3("Color MAN by:"), 
+              choices = list("Color by Modularity" = "by_modularity",
+                             "Color by Dendrogram Labels" = "by_dendLabels"), 
+              selected = "by_modularity")
+}
+
 #' MAN_Server
 #'
-#' @param input mod
-#' @param output mod
-#' @param session mod
+#' @param input shiny input
+#' @param output shiny output
+#' @param session shiny session
 #' @param subtractedMatrixBlank subtractedMatrixBlank 
 #' @param sampleIDs sampleIDs
+#' @param proteinDend protein dendrogram
 #'
 #' @return NA
 #' @export
-#'
 MAN_Server <- function(input,
                        output,
                        session,
                        subtractedMatrixBlank,
-                       sampleIDs){
+                       sampleIDs,
+                       proteinDend){
   
   
   
@@ -178,77 +216,94 @@ MAN_Server <- function(input,
     },
     content = function(file){
       utils::write.csv(as.matrix(smallMolNetworkDataFrame()),
-                file,
-                row.names = FALSE)
+                       file,
+                       row.names = FALSE)
     }
   )
   
   
+  networkIgraph <- reactiveValues(graph = NULL)
+  
   #This creates the network plot and calculations needed for such.
   #----
-  calcNetwork <- reactive({
-    manEnvironment <- new.env(parent = parent.frame())
-    manEnvironment$sampleNodes <- subtractedMatrixBlank$sampleIDs
+  observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy),{
+    networkIgraph$graph <- IDBacApp::networkFromDF(smallMolNetworkDataFrame())
     
+    req(igraph::is.igraph(networkIgraph$graph))
+    len <- length(attributes(igraph::V(networkIgraph$graph))$names)
+    req(len > 0)
     
-    a <- igraph::as.undirected(igraph::graph_from_data_frame(smallMolNetworkDataFrame()))
-    a <- igraph::simplify(a)
-    manEnvironment$wc <- igraph::fastgreedy.community(a)
+    if (input$colorMANBy == "by_modularity") {
+      networkIgraph$graph <- IDBacApp::modularityClustering(networkIgraph$graph)
+      
+    } else if (input$colorMANBy == "by_dendLabels") {
+      
+      
+      dendColors <- cbind(id = labels(proteinDend$dendrogram),
+                          color = dendextend::labels_col(proteinDend$dendrogram))
+      
+      igraph::V(networkIgraph$graph)$color <- rep("#000000FF", len)
+      
+      for (i in 1:len) {
+        temp <- attributes(igraph::V(networkIgraph$graph))$names[i]
+        col <- dendColors[,2][dendColors[,1] %in% temp]
+        if (length(col) > 0) {
+          igraph::V(networkIgraph$graph)$color[i] <- col
+        }
+      }
+    }
     
-    b <- networkD3::igraph_to_networkD3(a, group = (manEnvironment$wc$membership)) # zero indexed
+    igraph::V(networkIgraph$graph)$label <- igraph::V(networkIgraph$graph)$name
     
+  })
+  # 
+  # observeEvent({
+  # 
+  # })
+  # 
+  # #  
+  # z <- igraph::as.undirected(z1)
+  # clusters <- igraph::fastgreedy.community(z)
+  # 
+  # igraph::V(z)$color <- as.vector(IDBacApp::colorBlindPalette()[1:100])[clusters$membership]
+  # igraph::V(z)$label <- igraph::V(z)$name
+  # 
+  # 
+  
+  
+  # igraph::V(z)$color <- as.vector(IDBacApp::colorBlindPalette()[1:100])[clusters$membership]
+  # igraph::V(z)$label <- igraph::V(z)$name
+  
+  
+  output$metaboliteAssociationNetwork <- sigmajs::renderSigmajs({
+    req(igraph::is.igraph(networkIgraph$graph))
+    len <- length(attributes(igraph::V(networkIgraph$graph))$names)
+    req(len > 0)
     
-    manEnvironment$z <- b$links
-    manEnvironment$zz <- b$nodes
-    manEnvironment$zz <- cbind(manEnvironment$zz, biggerSampleNodes = rep(1,times = length(manEnvironment$zz[,1])))
-    manEnvironment$zz$biggerSampleNodes[which(manEnvironment$zz[,1] %in% manEnvironment$sampleNodes)] <- 50
+    sigmajs::sigmajs() %>%
+      sigmajs::sg_from_igraph(networkIgraph$graph) %>% 
+      sigmajs::sg_settings(drawLabels = TRUE, drawEdgeLabels = FALSE) %>% 
+      sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight*10) %>% 
+      sigmajs::sg_force_start() %>% # start
+      sigmajs::sg_force_stop(500) %>% # stop after 5 seconds
+      sigmajs::sg_drag_nodes()
+     
+  })
+  
+
+  observeEvent(input$saveNetworkSvg, {
     
-    manEnvironment
-    
+    sigmajs::sigmajsProxy(session$ns("metaboliteAssociationNetwork")) %>% 
+      sigmajs::sg_export_svg_p(file = "MAN.svg", 
+                               size="100%", 
+                               labels = TRUE) 
   })
   
   
-  output$metaboliteAssociationNetwork <- networkD3::renderForceNetwork({
-    cbp <- as.vector(IDBacApp::colorBlindPalette()[1:100])
     
-    YourColors <- paste0('d3.scaleOrdinal()
-                         .domain([',paste0(shQuote(1:100), collapse = ", "),'])
-                         .range([', paste0(shQuote(cbp), collapse = ", "),' ])')
-    
-   
-    
-    
-    
-    networkD3::forceNetwork(Links = calcNetwork()$z, 
-                            Nodes = calcNetwork()$zz, 
-                            Source = "source",
-                            Value = smallMolNetworkDataFrame()$Weight,
-                            Nodesize = "biggerSampleNodes",
-                            Target = "target",
-                            NodeID = "name",
-                            Group = "group",
-                            opacity = 1,
-                            opacityNoHover = 0.8, 
-                            zoom = TRUE,
-                            colourScale = networkD3::JS(YourColors),
-                            charge=-50, 
-                            linkWidth = networkD3::JS("function(d) { return 1; }"),
-                            linkDistance = networkD3::JS("function(d){return d.value * 10}"))
-    
-    
-    
-    
-    
-    
-  })
-  
-  
   
   
 }
-
-
-
 
 
 

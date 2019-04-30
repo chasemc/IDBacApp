@@ -46,6 +46,7 @@ convertMZ_UI <- function(id){
 #' @param output module
 #' @param session module
 #' @param sqlDirectory sqlDirectory 
+#' @param availableExperiments availableExperiments
 #'
 #' @return .
 #' @export
@@ -54,7 +55,8 @@ convertMZ_UI <- function(id){
 convertMZ_Server <-  function(input,
                               output,
                               session,
-                              sqlDirectory){
+                              sqlDirectory,
+                              availableExperiments){
   
   
   
@@ -91,10 +93,7 @@ convertMZ_Server <-  function(input,
     } else {
       folders <- NULL
       
-      
-      
-      
-      # Get the folders contained within the chosen folder.
+      # Get the folders contained within the chosen folder. Timer was taken out.
       foldersInFolder <- tryCatch(IDBacApp::findmz(mzmlRawFilesLocation(),
                                                    recursive = TRUE,
                                                    full = FALSE),
@@ -118,14 +117,12 @@ convertMZ_Server <-  function(input,
     
   })
   
-  
+  #make sure the name is ok as a file name
   sanity <- reactive({
     a <- IDBacApp::path_sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   
-  
-  success <- reactiveValues(val = FALSE)
   
   observeEvent(input$runMsconvert, {
     
@@ -148,10 +145,13 @@ convertMZ_Server <-  function(input,
     
     IDBacApp::popup4() 
     
-    success$val <- TRUE
+    
+    # Update available experiments
+    availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                    pattern = ".sqlite",
+                                                                    full.names = FALSE))
     
   })
  
-  return(reactive(success))
-   
+
 }

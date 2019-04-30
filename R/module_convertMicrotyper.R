@@ -61,6 +61,7 @@ convertMicrotyper_UI <- function(id){
 #' @param session module
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
+#' @param availableExperiments availableExperiments
 #'
 #' @return .
 #' @export
@@ -70,7 +71,8 @@ convertMicrotyper_Server <- function(input,
                                      output,
                                      session,
                                      tempMZDir,
-                                     sqlDirectory){
+                                     sqlDirectory,
+                                     availableExperiments){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -158,8 +160,6 @@ convertMicrotyper_Server <- function(input,
   })
   
   
-  success <- reactiveValues(val = FALSE)
-  
   
   # Run raw data processing on delimited-type input files
   #----
@@ -180,7 +180,7 @@ convertMicrotyper_Server <- function(input,
                  } else {
                    smallPaths <- smallMolFiles()
                    sampleNameSM <- tools::file_path_sans_ext(basename(smallPaths))
-                #   sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-rep-")[[1]][[1]]))
+                   #   sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-rep-")[[1]][[1]]))
                    
                  }
                  
@@ -190,7 +190,7 @@ convertMicrotyper_Server <- function(input,
                  } else {
                    proteinPaths <- proteinFiles()
                    sampleNameP <- tools::file_path_sans_ext(basename(proteinPaths))
-               #    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
+                   #    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
                  }
                  
                  
@@ -211,9 +211,13 @@ convertMicrotyper_Server <- function(input,
                  
                  
                  IDBacApp::popup4()
-                 success$val <- TRUE
-                 
+                 # Update available experiments
+                 availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                                 pattern = ".sqlite",
+                                                                                 full.names = FALSE))
                })
+  
+  
   
   
   

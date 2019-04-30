@@ -4,7 +4,8 @@
 \alias{convertDelim_Server}
 \title{convertDelim_Server}
 \usage{
-convertDelim_Server(input, output, session, tempMZDir, sqlDirectory)
+convertDelim_Server(input, output, session, tempMZDir, sqlDirectory,
+  availableExperiments)
 }
 \arguments{
 \item{input}{module}
@@ -16,6 +17,8 @@ convertDelim_Server(input, output, session, tempMZDir, sqlDirectory)
 \item{tempMZDir}{tempMZDir}
 
 \item{sqlDirectory}{sqlDirectory}
+
+\item{availableExperiments}{availableExperiments}
 }
 \value{
 .

@@ -378,7 +378,6 @@ dendDotsServer <- function(input,
         graphics::abline(v = input$cutHeightLabels, lty = 2)
       }
     }
-    print(boots()$bootstraps[1] )
     if (boots()$bootstraps[1] != "") {
       
       IDBacApp::bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram), 

@@ -28,7 +28,7 @@ startingFromMZ <- function(chosenDir){
 #'
 #' @param msconvertPath path to MSconvert, if none provided, it will search in Programs folder
 #' @param sampleMap excel file used for re-naming samples
-#' @param tempDir directory to temp mzML files are written to
+#' @param convertWhere directory where temp mzML files are written to
 #' @param chosenDir user-chosen directory containing bruker raw data files
 #'
 #' @return NA
@@ -36,17 +36,16 @@ startingFromMZ <- function(chosenDir){
 startingFromBrukerFlex <- function(chosenDir, 
                                    msconvertPath = "",
                                    sampleMap,
-                                   tempDir){
- 
+                                   convertWhere){
+
   convertFrom <- base::split(labels(sampleMap),as.character(sampleMap))
   
   convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
-                              tmpdir = tempDir,
+                              tmpdir = convertWhere,
                               fileext = ".mzMl")
   convertTo <- base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE)
   
-  convertWhere <- base::dirname(convertTo)[[1]]
-  convertWhere <- base::normalizePath(convertWhere, winslash = "\\", mustWork = FALSE)
+
   convertWhere <- base::shQuote(convertWhere)
   
   msconvertLocation <- IDBacApp::findMSconvert(msconvertPath)
@@ -54,7 +53,6 @@ startingFromBrukerFlex <- function(chosenDir,
                                            winslash = "\\",
                                            mustWork = FALSE)
   msconvertLocation <- base::shQuote(msconvertLocation)
-  
   
   
   
@@ -69,7 +67,7 @@ startingFromBrukerFlex <- function(chosenDir,
                                                            " --mzML --merge -z  --32 -v",
                                                            " --outdir ", convertWhere,
                                                            
-                                                           " --outfile ", convertTo[[x]]))
+                                                           " --outfile ", base::shQuote(convertTo[[x]])))
                                              
                                            })
   
@@ -94,14 +92,11 @@ startingFromBrukerFlex <- function(chosenDir,
                       msconvertCmdLineCommands,
                       functionTOrunMSCONVERTonCMDline)
   parallel::stopCluster(cl)
+   validate(need(all(file.exists(convertTo)), 
+                 cbind(convertTo, exists(convertTo))
+   ))
   
-  
-  validate(need(all(file.exists(convertTo)), 
-                cbind(convertTo, exists(convertTo))
-  ))
-  
-  
-  
+ 
   return(list(mzFile = convertTo,
               sampleID = names(convertFrom)))
   

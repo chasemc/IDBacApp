@@ -63,6 +63,7 @@ convertDelim_UI <- function(id){
 #' @param session module
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
+#' @param availableExperiments availableExperiments
 #'
 #' @return .
 #' @export
@@ -72,7 +73,8 @@ convertDelim_Server <- function(input,
                                 output,
                                 session,
                                 tempMZDir,
-                                sqlDirectory){
+                                sqlDirectory,
+                                availableExperiments){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -83,7 +85,6 @@ convertDelim_Server <- function(input,
     }
   })
   
-  
   # Reactive variable returning the user-chosen location of the raw delim files as string
   #----
   delimitedLocationSM <- reactive({
@@ -91,8 +92,6 @@ convertDelim_Server <- function(input,
       IDBacApp::choose_dir()
     }
   })
-  
-  
   
   output$newExperimentNameText <- renderText({
     a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
@@ -111,7 +110,7 @@ convertDelim_Server <- function(input,
   output$delimitedLocationSMo <- renderText({
     req(smallMolFiles())
     names <- tools::file_path_sans_ext(base::basename(smallMolFiles()))
-    names <- paste0(names, collapse = " \n ")
+     paste0(names, collapse = " \n ")
   })
   
   
@@ -120,7 +119,7 @@ convertDelim_Server <- function(input,
   output$delimitedLocationPo <- renderText({
     req(proteinFiles())
     names <- tools::file_path_sans_ext(base::basename(proteinFiles()))
-    names <- paste0(names, collapse = " \n ")
+    paste0(names, collapse = " \n ")
     
   })
   
@@ -151,31 +150,19 @@ convertDelim_Server <- function(input,
     }
   })
   
-  
-  
-  
   sanity <- reactive({
     a <- IDBacApp::path_sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   
-  
-  
-  success <- reactiveValues(val = FALSE)
-  
   # Run raw data processing on delimited-type input files
   #----
   observeEvent(input$runDelim, 
                ignoreInit = TRUE, {
+
                  req(!is.null(sanity()))
                  req(sanity() != "")
-                 
-              
-                 req(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0)
-                 req(length(proteinFiles()) + length(smallMolFiles()) > 0)
-                 
-                 
-                 
+                 req(!is.null(proteinFiles()) + !is.null(smallMolFiles()) > 0)
                  
                  if (is.null(smallMolFiles())) {
                    smallPaths <- NULL
@@ -186,7 +173,6 @@ convertDelim_Server <- function(input,
                    sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-")[[1]][[1]]))
                    
                  }
-                 
                  if (is.null(proteinFiles())) {
                    proteinPaths <- NULL
                    sampleNameP <- NULL
@@ -195,9 +181,6 @@ convertDelim_Server <- function(input,
                    sampleNameP <- tools::file_path_sans_ext(basename(proteinPaths))
                    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
                  }
-                 
-                 
-                 
                  
                  keys <- IDBacApp::parseDelimitedMS(proteinPaths = proteinPaths,
                                                     proteinNames = sampleNameP,
@@ -211,13 +194,15 @@ convertDelim_Server <- function(input,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = input$newExperimentName)
                  
-                 
-                 
+
                  IDBacApp::popup4()
                  
-                 success$val <- TRUE
-                 
+                 # Update available experiments
+                 availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                                 pattern = ".sqlite",
+                                                                                 full.names = FALSE))
                })
+  
   
   
   
