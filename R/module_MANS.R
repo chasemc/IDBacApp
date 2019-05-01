@@ -285,7 +285,7 @@ MAN_Server <- function(input,
       sigmajs::sg_settings(drawLabels = TRUE, drawEdgeLabels = FALSE) %>% 
       sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight*10) %>% 
       sigmajs::sg_force_start() %>% # start
-      sigmajs::sg_force_stop(500) %>% # stop after 5 seconds
+      sigmajs::sg_force_stop(3000) %>% # stop after 5 seconds
       sigmajs::sg_drag_nodes()
      
   })
