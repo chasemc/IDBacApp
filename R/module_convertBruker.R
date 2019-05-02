@@ -33,7 +33,7 @@ convertOneBruker_UI <- function(id){
     tags$hr(size = 20),
     p(strong("You must label all spots that contain data."), br(),
       strong("IDBac found data for the following spots that aren't labelled in the spreadsheet:")
-      ),
+    ),
     shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
     p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
     actionButton(ns("convertSingleBruker"),
@@ -148,14 +148,12 @@ convertOneBruker_Server <- function(input,
     req(rawFilesLocation())
     req(sampleMapReactive$rt)
     
-    aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
-    aa <- matrix(aa, nrow = 16, ncol = 24)
     
+    #######TODO TURN rawFilesLocation() INTO SPOTS
+    por <<- sampleMapReactive$rt
+    findMissingSampleMapIds(spots = , 
+                            sampleMap = sampleMapReactive$rt)
     
-    spots <- IDBacApp::brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
-    s1 <- base::as.matrix(sampleMapReactive$rt)
-    b <- sapply(spots, function(x) s1[which(aa %in% x)])
-    as.character(spots[which(is.na(b))])
   })
   
   
@@ -258,25 +256,44 @@ convertOneBruker_Server <- function(input,
                  
                  validate(need(any(!is.na(sampleMapReactive$rt)), 
                                "No samples entered into sample map, please try entering them again"))
-                 aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
-                 aa <- matrix(aa, nrow = 16, ncol = 24)
                  
-                 spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
-                 s1 <- base::as.matrix(sampleMapReactive$rt)
-                 sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
+                 
+                 rawFilesLocation <<- rawFilesLocation()
+                 inputIds <<- sampleMapReactive$rt
+                 
+                 # 
+                 # function(rawFilesLocation,
+                 #          inputIds){
+                 #   
+                 #   
+                 #   aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
+                 #   aa <- matrix(aa, nrow = 16, ncol = 24)
+                 #   
+                 #   spots <<-  IDBacApp::brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
+                 #   s1 <- base::as.matrix(sampleMapReactive$rt)
+                 #   sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
+                 #   
+                 #    
+                 # }
+                 # 
+                 # 
+                 # 
+                 # 
+                 # 
+                 
                  
                  IDBacApp::brukerToMzml_popup()
                  
-                 forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
-                                                         msconvertPath = "",
-                                                         sampleMap = sampleMap,
-                                                         convertWhere = tempMZDir)
+                 forProcessing <- IDBacApp::startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
+                                                                   msconvertPath = "",
+                                                                   sampleMap = sampleMap,
+                                                                   convertWhere = tempMZDir)
                  IDBacApp::popup3()
                  IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
                                        sampleIds = forProcessing$sampleID,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = input$newExperimentName)
-
+                 
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",
@@ -293,4 +310,52 @@ convertOneBruker_Server <- function(input,
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+#' Find which MALDI-target spots have data but an ID wasn't assigned 
+#'
+#' @param spots spot locations that have data 
+#' @param sampleMap 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+findMissingSampleMapIds <- function(spots, 
+                                    sampleMap){
+  
+  if (is.character(spots)) {
+    
+    if (is.data.frame(sampleMap)) {
+      # create sample map
+      aa <- IDBacApp::map384Well()
+      s1 <- base::as.matrix(sampleMap)
+      # Which sample locations have data but weren't assigned an ID?
+      b <- sapply(spots, function(x) s1[which(aa %in% x)])
+      # Return as character vector of spot locations
+      as.character(spots[which(is.na(b))])
+      
+    } else {
+      warning("'findMissingSampleMapIds(sampleMap = )' expected data.frame input \n \n",
+              "'provided input:' \n",
+              sampleMap, 
+              "\n \n")
+    }
+  } else {
+    warning("'findMissingSampleMapIds(sampleMap = )' expected character input \n \n",
+            "'provided input:' \n",
+            spots, 
+            "\n \n")
+  }
+}
 

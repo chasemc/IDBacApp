@@ -1,19 +1,24 @@
-
+#   from: https://qa.nmrwiki.org/question/143/what-is-the-purpose-of-acqu-and-acqus-files-in-bruker-setup
+#    The s at the end of a parameter file name specifies this file as a status parameterfile. Status parameters are written at the end of an acquisition or also when a FID in a multidimensional experiment is written.
+#    The files without the s are the current parameters. If you change a parameter it will be changed in the files without the s.
+#    Let's assume a dataset where an acquisition has already been done, acqus and acqu contain the same information. You now decide to restart the acquisition but with more scans. You enter a new number for NS. acqu will show this new value and acqus will still show the number that was used to collect the FID that is on disk. Once the new acquisition is finished acqus now also contains the new value. In multidimensional acquisition the value of TD will be updated when a new FID is written to disk. The contents of acqus are printed in parameter listings.
+#    The acqu files with numbers contain the parameters for the indirect dimensions. "acqu2" and acqu2s are for the F1 dimension in a 2D. A 3D will have acqu, acqu2 and acqu3, in a 4D you will also find acqu4 etc.
+# 
 
 # Functions taken from MALDIquant source code : https://github.com/sgibb/readBrukerFlexData
 # function that should be called is readAcquFile
 # input is fid file path
 
 
-#' Title
+#' Read Bruker Acqus File
 #'
-#' @param fidFile a
-#' @param verbose a
+#' @param fidFile filepath of Bruker Acqus file
+#' @param verbose should the function be verbose?
 #'
 #' @return a
 #' @export
 #'
-readAcquFile <- function(fidFile, verbose=FALSE) {
+readAcqusFile <- function(fidFile, verbose = FALSE) {
   acquFile <- sub(pattern="fid$", x=fidFile, replacement="acqu")
 
   if (verbose) {

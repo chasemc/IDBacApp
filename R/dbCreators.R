@@ -86,10 +86,12 @@ createXMLSQL <- function(rawDataFilePath,
   # Get instrument Info
   instInfo <- mzR::instrumentInfo(mzML_con)
   
+  
+  rawDataFilePath <<-rawDataFilePath
   # # Find acquisitonInfo from mzML file
-  # acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
-  #                                                 instInfo$manufacturer)
-  # 
+   acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
+                                                   instInfo$manufacturer)
+   
   # if ("Instrument_MetaFile" %in% ls(acquisitonInfo)) { 
   #   sqlDataFrame$XML$Instrument_MetaFile <- IDBacApp::serial(acquisitonInfo$Instrument_MetaFile)
   # }

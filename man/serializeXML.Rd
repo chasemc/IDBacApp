@@ -7,10 +7,10 @@
 serializeXML(path)
 }
 \arguments{
-\item{path}{xml2 connection}
+\item{path}{filepath of mzML or mzXML}
 }
 \value{
-raw
+compressed, raw, character
 }
 \description{
 Read mzXML, XML and transform to raw character for storing in SQLite
