@@ -1,0 +1,51 @@
+---
+title: "IDBac Database Information"
+author: "Chase Clark"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+### SQLite
+
+IDBac experiments are built upon SQLite, as included withing the RSQLite package.  This provides a lightweight but powerful RDMS for handling all the data stored by IDBac. 
+
+
+### What R packages does IDBac use to work with SQLite?
+
+- RSQLite contains the actual RSQLite drivers and should be referenced for current information about SQLite version
+- Pool "Enables the creation of object pools, which make it less computationally expensive to fetch a new object."
+- DBI handles the communication with the database
+- glue (handles quoting)
+- not used within IDBac, but dplyr is also convenient to use for querying IDBac databases
+
+
+
+### What IDBac functions create the database?
+
+The answer is pretty complicated, but some places to start looking are:
+
+`sqlTableArchitecture.R` (Layouts the database structure)
+
+and 
+
+`dbCreators.R` (creates a database)
+
+
+
+
+#### How does IDBac handle adding new replicates to an existing experiment/database?
+
+Let's say you have an experiment that contains a sample named "sample_1", and then later want to add a new replicate of "sample1" and merge this into the earlier experiment. This works because...
+
+The mzML/mzXML file is stored and indexed by its hash, not by sample ID. 
+
+This hash is linked to sampleIDs in the "IndividualSpectra" table and so spectrum and peak data is always attributable to the originating mzML/mzXML.
+
+
+
+
