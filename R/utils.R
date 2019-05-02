@@ -80,7 +80,7 @@ decompress <- function(input){
 
 
 
-#' Take character, turn to raw, then compress (note: base::charToRaw is not vectorized)
+#' Take character, turn to raw, then compress 
 #'
 #' @param input character 
 #' @param compression compression level 0-100
@@ -89,6 +89,7 @@ decompress <- function(input){
 #' @export
 #'
 chartoRawtoCompressed <- function(input, compression){
+  input <- base::enc2utf8(input)
   input <- base::charToRaw(input)
   IDBacApp::compress(input = input,
                      compression = compression)
@@ -148,9 +149,9 @@ findmz <- function(inputPath,
 
 #' Read mzXML, XML and transform to raw character for storing in SQLite
 #'
-#' @param path xml2 connection
+#' @param path filepath of mzML or mzXML
 #'
-#' @return raw 
+#' @return compressed, raw, character 
 #' @export
 #'
 serializeXML <- function(path) {
