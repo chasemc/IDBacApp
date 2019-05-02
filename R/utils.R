@@ -180,3 +180,19 @@ cleanWSpace <- function(input){
   return(input)
 }
 
+
+
+
+
+
+
+#' Create 384-well matrix map
+#'
+#' @return
+#' @export
+#'
+#' @examples
+map384Well <- function(){
+  aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
+  matrix(aa, nrow = 16, ncol = 24)
+}
