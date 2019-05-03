@@ -1,26 +1,24 @@
-
 #' Find which MALDI-target spots have data but an ID wasn't assigned 
 #'
 #' @param spots spot locations that have data 
-#' @param sampleMap 
+#' @param sampleMap user-input sample names mapped to 384-well plate
 #'
-#' @return
+#' @return character vector of missing sample IDs or character(0)
 #' @export
 #'
-#' @examples
 findMissingSampleMapIds <- function(spots, 
                                     sampleMap){
   
   if (is.character(spots)) {
     
+    # sampleMap has to be df for display in shiny, but will need to be
+    # converted to matrix for the functions below
     if (is.data.frame(sampleMap)) {
       # create sample map
-      aa <- IDBacApp::map384Well()
-      s1 <- base::as.matrix(sampleMap)
+      plateMap <- IDBacApp::map384Well()
       # Which sample locations have data but weren't assigned an ID?
-      b <- sapply(spots, function(x) s1[which(aa %in% x)])
-      # Return as character vector of spot locations
-      as.character(spots[which(is.na(b))])
+      sampleMap <- base::as.matrix(sampleMap)
+      b <- sapply(spots, function(x) sampleMap[which(plateMap %in% x)])
       
     } else {
       warning("'findMissingSampleMapIds(sampleMap = )' expected data.frame input \n \n",
@@ -34,4 +32,5 @@ findMissingSampleMapIds <- function(spots,
             spots, 
             "\n \n")
   }
+  names(which(is.na(b)))
 }

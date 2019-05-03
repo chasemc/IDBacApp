@@ -6,6 +6,9 @@
 \usage{
 map384Well()
 }
+\value{
+384 well-like matrix, each element in matrix contains its position (eg col 1, row 3 contains "C4")
+}
 \description{
 Create 384-well matrix map
 }

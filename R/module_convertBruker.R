@@ -80,21 +80,35 @@ convertOneBruker_Server <- function(input,
   })
   
   
-  output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+  sanitizedNewExperimentName <- reactive({
     
-    if (a == "") {
-      "The filename-friendly version of your entry will appear here."
+    IDBacApp::path_sanitize(input$newExperimentName)
+    
+  })
+  
+  
+  output$newExperimentNameText <- renderText({
+    
+    sanitized <- sanitizedNewExperimentName()
+    
+    if (sanitized == "") {
+      return("The filename-friendly version of your entry will appear here.")
     } else {
-      a
+      return(sanitized)
     }
   })
+  
+  
   # Creates text showing the user which directory they chose for raw files
   #----
   output$rawFileDirectoryText <- renderText({
+    
     if (is.null(rawFilesLocation())) {
+      
       return("No Folder Selected")
+      
     } else {
+      
       folders <- NULL
       # Get the folders contained within the chosen folder.
       foldersInFolder <- list.dirs(rawFilesLocation(),
@@ -142,16 +156,29 @@ convertOneBruker_Server <- function(input,
   })
   
   
+  # list of acqus info
+  acquisitonInformation <- reactive({
+    
+    IDBacApp::findBrukerTargetSpots(rawFilesLocation())
+    
+  })
+  
+  
+  
   # Sample Map --------------------------------------------------------------
   
   anyMissing <- reactive({
+    
     req(rawFilesLocation())
     req(sampleMapReactive$rt)
     
+    spots <- unlist(lapply(acquisitonInformation(), function(x) x$spot))
     
-    #######TODO TURN rawFilesLocation() INTO SPOTS
-    findMissingSampleMapIds(spots = , 
-                            sampleMap = sampleMapReactive$rt)
+    
+    w1<<-spots
+    w2 <<- sampleMapReactive$rt
+    IDBacApp::findMissingSampleMapIds(spots = spots , 
+                                      sampleMap = sampleMapReactive$rt)
     
   })
   
@@ -166,10 +193,7 @@ convertOneBruker_Server <- function(input,
     }
   })
   
-  sampleMapReactive <- reactiveValues(rt = as.data.frame(base::matrix(NA,
-                                                                      nrow = 16,
-                                                                      ncol = 24,
-                                                                      dimnames = list(LETTERS[1:16],1:24))))
+  sampleMapReactive <- reactiveValues(rt = IDBacApp::nulledMap384Well())
   
   observeEvent(input$showSampleMap, 
                ignoreInit = TRUE, {  
@@ -238,10 +262,7 @@ convertOneBruker_Server <- function(input,
   
   
   
-  sanity <- reactive({
-    a <- IDBacApp::path_sanitize(input$newExperimentName)
-    gsub(" ","",a)
-  })
+  
   
   
   success <- reactiveValues(val = FALSE)
@@ -251,9 +272,9 @@ convertOneBruker_Server <- function(input,
   observeEvent(input$convertSingleBruker,
                ignoreInit = TRUE,  {
                  
-               #  req(length(anyMissing()) == 0)
-                 req(!is.null(sanity()))
-                 req(sanity() != "")
+                 #  req(length(anyMissing()) == 0)
+                 req(!is.null(sanitizedNewExperimentName()))
+                 req(sanitizedNewExperimentName() != "")
                  
                  validate(need(any(!is.na(sampleMapReactive$rt)), 
                                "No samples entered into sample map, please try entering them again"))
@@ -293,7 +314,13 @@ convertOneBruker_Server <- function(input,
                  IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
                                        sampleIds = forProcessing$sampleID,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = input$newExperimentName)
+                                       newExperimentName = sanitizedNewExperimentName())
+                 
+                 
+                 
+                 
+                 
+                 
                  
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
@@ -304,5 +331,5 @@ convertOneBruker_Server <- function(input,
                  
                })
   
-  }
+}
 

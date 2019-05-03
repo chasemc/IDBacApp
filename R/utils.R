@@ -188,11 +188,27 @@ cleanWSpace <- function(input){
 
 #' Create 384-well matrix map
 #'
-#' @return
+#' @return 384 well-like matrix, each element in matrix contains its position (eg col 1, row 3 contains "C4")
 #' @export
 #'
 #' @examples
 map384Well <- function(){
   aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
-  matrix(aa, nrow = 16, ncol = 24)
+  matrix(aa, nrow = 16, ncol = 24,
+         dimnames = list(LETTERS[1:16],
+                         1:24)
+  )
+}
+
+
+#' Create a 384-well matrix that is NA-filled
+#'
+#' @return
+#' @export
+#'
+#' @examples
+nulledMap384Well <- function() {
+  a <- IDBacApp::map384Well()
+  a[] <- NA
+  as.data.frame(a)
 }

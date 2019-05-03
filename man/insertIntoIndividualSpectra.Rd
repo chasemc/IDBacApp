@@ -4,8 +4,8 @@
 \alias{insertIntoIndividualSpectra}
 \title{Write individual spectra to SQLite}
 \usage{
-insertIntoIndividualSpectra(env, XMLinfo, userDBCon, acquisitonInfo,
-  sampleID)
+insertIntoIndividualSpectra(env, XMLinfo, userDBCon,
+  acquisitonInfo = NULL, sampleID)
 }
 \arguments{
 \item{env}{environment}
