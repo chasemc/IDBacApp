@@ -1,0 +1,158 @@
+---
+title: "Working with IDBac Databases"
+author: "Chase Clark"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+IDBac SQLite files were designed to be accessible outside of IDBac through R or even other programming languages. This vignette will reveal what is inside an IDBac database and some examples of how to work with the data it contains (using R). 
+
+
+Firstly, IDBac handles databases using the R `pool` package and for that reason that is what is used here, this is simply a style choice. 
+
+Let's make a pool to an IDBac database using the IDBac function `createPool()`
+
+```{r}
+# Get the name and the directory of the IDBac SQLite file
+
+dbPath <- system.file("extdata/sqlite/sample.sqlite", package = "IDBacApp")
+dbPath <-"C:\\Users\\CMC\\Documents\\GitHub\\IDBac_App\\example.sqlite"
+dbname <- tools::file_path_sans_ext(basename(dbPath))
+dbPath <- dirname(dbPath)
+
+# Make the connection
+connection <- IDBacApp::createPool(fileName = dbname,
+                                   filePath = dbPath)
+
+```
+
+IDBac's function `createPool()` returns a list of pools (connections)
+
+```{r}
+class(connection)
+```
+
+In this case we only made one pool so we will just take the first list element. 
+
+```{r}
+connection <- connection[[1]]
+
+class(connection)
+```
+And checkout the database pool
+```{r}
+con <- pool::poolCheckout(connection)
+```
+
+
+So, that only made the connection to the database, we still haven't read anything. Let's first take a look at what SQL tables are contained within an IDBac database.
+
+```{r}
+DBI::dbListTables(connection)
+```
+
+The `version` table contains an semantic version number of the version of IDBAc database used.
+
+```{r}
+result <- DBI::dbSendQuery("SELECT * 
+                    FROM version",
+                    con = con)
+
+DBI::dbFetch(result)
+DBI::dbClearResult(result)
+```
+
+
+The `metaData` table contains user-input information about the samples
+```{r}
+result <- DBI::dbSendQuery("SELECT * 
+                    FROM metaData",
+                    con = con)
+
+DBI::dbFetch(result)
+DBI::dbClearResult(result)
+
+```
+
+
+The `xml` table contains a compressed mzML or mzXML (if mzXML was provided as input to IDBac) file for each sample.
+
+```{r}
+result <- DBI::dbSendQuery("SELECT * 
+                    FROM XML",
+                    con = con)
+
+DBI::dbFetch(result)
+DBI::dbClearResult(result)
+```
+
+
+The XML table contains a number of columns:
+
+```{r}
+DBI::dbListFields(con, "XML")
+```
+
+`mzMLSHA`: The SHA of the mzML file is just a short string that uniquely identifies an XML file.
+
+The XML file is read into R and compressed using "ZSTD":
+```{r eval = FALSE, include = TRUE}
+serializeXML <- function(path) {
+  
+  path <- readChar(path, nchars = file.info(path)$size, useBytes = T)
+  IDBacApp::chartoRawtoCompressed(input = path,
+                                  compression = 0)
+  
+}
+```
+
+And then the hash is created using `xxhash64`
+```{r}
+hashR <- function(input){
+  digest::digest(input, 
+                 algo = "xxhash64",
+                 serialize = FALSE,
+                 seed = 42)
+}
+```
+
+
+
+`XML`: the character result of `serializeXML()` mentioned above
+`manufacturer`: instrument manufacturer
+`model`: instrument model
+`ionisation`: instrument ioinization
+`analyzer`: instrument analyzer
+`detector`: instrument detector
+`Instrument_MetaFile`: instrument information file (eg. Bruker's `acqu` file)
+
+
+
+
+
+
+
+
+```{r}
+result <- DBI::dbSendQuery("SELECT * 
+                    FROM massTable",
+                    con = con)
+
+DBI::dbFetch(result)
+DBI::dbClearResult(result)
+
+```
+
+
