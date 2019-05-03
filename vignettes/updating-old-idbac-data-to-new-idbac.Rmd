@@ -12,4 +12,10 @@ vignette: >
 
 The new IDBac system has been updated so that the converted and processed data within each experiment is now saved in a single file in a SQLite database (per experiment).
 
-Older versions of IDBac (the PNAS version) within an folder named "IDBac" which in turn contained multiple folders with all of the data files.
+Older versions of IDBac (the PNAS version) would create a folder named "IDBac" which, in turn, contained multiple folders with all of the data files.
+
+Within this "IDBac" folder created with the old IDBac version, there should be a folder "Converted_To_mzXML". 
+
+In the new version of IDBac navigate to the "Starting with Raw Data" tab and choose "Click here to convert mzML/mzXML files". When asked to select the location of your mzML/mzXMl files, select the "Converted_To_mzXML" from your old IDBac analysis. After selecting "Process Data" your data will be converted to the new format and ready to use with the new version IDBac. 
+
+
