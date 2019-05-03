@@ -150,7 +150,6 @@ convertOneBruker_Server <- function(input,
     
     
     #######TODO TURN rawFilesLocation() INTO SPOTS
-    por <<- sampleMapReactive$rt
     findMissingSampleMapIds(spots = , 
                             sampleMap = sampleMapReactive$rt)
     
@@ -250,7 +249,7 @@ convertOneBruker_Server <- function(input,
   observeEvent(input$convertSingleBruker,
                ignoreInit = TRUE,  {
                  
-                 req(length(anyMissing()) == 0)
+               #  req(length(anyMissing()) == 0)
                  req(!is.null(sanity()))
                  req(sanity() != "")
                  

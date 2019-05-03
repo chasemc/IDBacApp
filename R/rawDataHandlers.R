@@ -38,6 +38,9 @@ startingFromBrukerFlex <- function(chosenDir,
                                    sampleMap,
                                    convertWhere){
 
+  chosenDir <<- chosenDir
+  sampleMap <<- sampleMap
+  
   convertFrom <- base::split(labels(sampleMap),as.character(sampleMap))
   
   convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
