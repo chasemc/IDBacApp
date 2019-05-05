@@ -4,7 +4,8 @@
 \alias{processMZML}
 \title{processMZML}
 \usage{
-processMZML(mzFilePaths, sampleIds, sqlDirectory, newExperimentName)
+processMZML(mzFilePaths, sampleIds, sqlDirectory, newExperimentName,
+  acquisitionInfo)
 }
 \arguments{
 \item{mzFilePaths}{file paths of the mzml files}
@@ -14,6 +15,8 @@ processMZML(mzFilePaths, sampleIds, sqlDirectory, newExperimentName)
 \item{sqlDirectory}{sqlDirectory}
 
 \item{newExperimentName}{newExperimentName}
+
+\item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 }
 \value{
 Nothing direct, creates a sqlite database

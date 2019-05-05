@@ -27,25 +27,21 @@ startingFromMZ <- function(chosenDir){
 #' When user is starting with Bruker Flex file(s)
 #'
 #' @param msconvertPath path to MSconvert, if none provided, it will search in Programs folder
-#' @param sampleMap excel file used for re-naming samples
 #' @param convertWhere directory where temp mzML files are written to
-#' @param chosenDir user-chosen directory containing bruker raw data files
+#' @param samplePathList list where names are sample ids, and list elements are raw file paths
 #'
-#' @return NA
+#' @return list(mzFile = convertTo, sampleID = names(convertFrom)))
 #'
-startingFromBrukerFlex <- function(chosenDir, 
-                                   msconvertPath = "",
-                                   sampleMap,
-                                   convertWhere){
-
-  chosenDir <<- chosenDir
-  sampleMap <<- sampleMap
+proteoWizConvert <- function(msconvertPath = "",
+                             samplePathList,
+                             convertWhere){
   
-  convertFrom <- base::split(labels(sampleMap),as.character(sampleMap))
   
-  convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
+  
+  convertTo <- base::tempfile(pattern = rep("", length(samplePathList)), 
                               tmpdir = convertWhere,
-                              fileext = ".mzMl")
+                              fileext = ".mzML")
+  
   convertTo <- base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE)
   
 
@@ -60,11 +56,12 @@ startingFromBrukerFlex <- function(chosenDir,
   
   
   #Command-line MSConvert, converts from proprietary vendor data to mzML
-  msconvertCmdLineCommands <- base::lapply(base::seq_along(convertFrom), 
+  # Nope to vectorized, loop through because mult files can be attributed to one sample id
+  msconvertCmdLineCommands <- base::lapply(base::seq_along(samplePathList), 
                                            function(x){
                                              (base::paste0(msconvertLocation,
                                                            " ",
-                                                           base::paste0(shQuote(convertFrom[[x]]),
+                                                           base::paste0(shQuote(samplePathList[[x]]),
                                                                         collapse = "",
                                                                         sep = " "),
                                                            " --mzML --merge -z  --32 -v",
@@ -95,13 +92,16 @@ startingFromBrukerFlex <- function(chosenDir,
                       msconvertCmdLineCommands,
                       functionTOrunMSCONVERTonCMDline)
   parallel::stopCluster(cl)
+  
+  
+  
    validate(need(all(file.exists(convertTo)), 
                  cbind(convertTo, exists(convertTo))
    ))
   
  
   return(list(mzFile = convertTo,
-              sampleID = names(convertFrom)))
+              sampleID = names(samplePathList)))
   
   
   

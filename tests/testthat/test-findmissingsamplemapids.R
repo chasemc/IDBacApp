@@ -83,14 +83,21 @@ test_that("findMissingSampleMapIds() works", {
                    character(0)
   )
   
-  
-  
-  expect_warning(findMissingSampleMapIds(spots = 1L, 
-                                         sampleMap = b))
-  
-  
-  
-  
+
 })
+
+
+
+
+
+
+a <- list()
+a$rt <- IDBacApp::nulledMap384Well()
+
+b <- IDBacApp::sampleMapViewer(b)
+
+
+ IDBacApp::sampleMapSaver(sampleData = b,
+                         sampleMapReactive = a)
 
 

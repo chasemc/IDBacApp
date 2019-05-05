@@ -32,5 +32,7 @@ findMissingSampleMapIds <- function(spots,
             spots, 
             "\n \n")
   }
-  names(which(is.na(b)))
+  return(list(missing = names(which(is.na(b))),
+              matching = b)
+  )
 }

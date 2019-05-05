@@ -6,7 +6,7 @@
 #' @return list of acqus info
 #' @export
 #'
-findBrukerTargetSpots <- function(brukerDataPath){
+readBrukerAcqus <- function(brukerDataPath){
   
   files <- list.files(brukerDataPath,
                       pattern = "fid", 

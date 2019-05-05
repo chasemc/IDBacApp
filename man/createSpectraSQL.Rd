@@ -5,7 +5,7 @@
 \title{createSpectraSQL}
 \usage{
 createSpectraSQL(mzML_con, scanNumber, userDBCon, sampleID, XMLinfo,
-  rawDataFilePath, smallRangeEnd = 6000)
+  smallRangeEnd = 6000, acquisitionInfo)
 }
 \arguments{
 \item{mzML_con}{NA}
@@ -18,9 +18,9 @@ createSpectraSQL(mzML_con, scanNumber, userDBCon, sampleID, XMLinfo,
 
 \item{XMLinfo}{NA}
 
-\item{rawDataFilePath}{NA}
-
 \item{smallRangeEnd}{end of mass region for small mol, if m/z above this- will be classified as "protein" spectrum}
+
+\item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 }
 \value{
 NA

@@ -6,6 +6,9 @@
 \usage{
 nulledMap384Well()
 }
+\value{
+384-well matrix that is NA-filled
+}
 \description{
 Create a 384-well matrix that is NA-filled
 }

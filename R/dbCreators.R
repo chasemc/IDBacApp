@@ -87,13 +87,13 @@ createXMLSQL <- function(rawDataFilePath,
   instInfo <- mzR::instrumentInfo(mzML_con)
   
   
-  rawDataFilePath <<-rawDataFilePath
-  # # Find acquisitonInfo from mzML file
-  acquisitonInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
-                                                  instInfo$manufacturer)
+  rawDataFilePath <<- rawDataFilePath
+  # # Find acquisitionInfo from mzML file
+  #acquisitionInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
+   #                                               instInfo$manufacturer)
   
-  # if ("Instrument_MetaFile" %in% ls(acquisitonInfo)) { 
-  #   sqlDataFrame$XML$Instrument_MetaFile <- IDBacApp::serial(acquisitonInfo$Instrument_MetaFile)
+  # if ("Instrument_MetaFile" %in% ls(acquisitionInfo)) { 
+  #   sqlDataFrame$XML$Instrument_MetaFile <- IDBacApp::serial(acquisitionInfo$Instrument_MetaFile)
   # }
   
   
@@ -142,20 +142,19 @@ createXMLSQL <- function(rawDataFilePath,
 #' @param userDBCon NA
 #' @param sampleID NA
 #' @param XMLinfo NA
-#' @param rawDataFilePath NA
 #' @param smallRangeEnd end of mass region for small mol, if m/z above this- will be classified as "protein" spectrum
+#' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return NA
 #' @export
 #'
-
 createSpectraSQL <- function(mzML_con, 
                              scanNumber,
                              userDBCon,
                              sampleID,
                              XMLinfo,
-                             rawDataFilePath,
-                             smallRangeEnd = 6000){
+                             smallRangeEnd = 6000,
+                             acquisitionInfo){
   
   spectraImport <- mzR::peaks(mzML_con)
   
@@ -184,10 +183,11 @@ createSpectraSQL <- function(mzML_con,
     env <- IDBacApp::processXMLIndSpectra(spectraImport = spectraImport,
                                           smallOrProtein = "small",
                                           index = smallIndex)
+    
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
                                           userDBCon = userDBCon,
-                                          acquisitonInfo = NULL,
+                                          acquisitionInfo = acquisitionInfo[!smallIndex],
                                           sampleID = sampleID)
     IDBacApp::insertIntoMassTable(env = env,
                                   userDBCon = userDBCon)
@@ -202,7 +202,7 @@ createSpectraSQL <- function(mzML_con,
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
                                           userDBCon = userDBCon,
-                                          acquisitonInfo = NULL,
+                                          acquisitionInfo = acquisitionInfo[!smallIndex],
                                           sampleID = sampleID)
     IDBacApp::insertIntoMassTable(env = env,
                                   userDBCon = userDBCon)
@@ -257,7 +257,7 @@ insertIntoMassTable <- function(env,
 #' @param env environment 
 #' @param XMLinfo xmlinfo
 #' @param userDBCon checked database connection
-#' @param acquisitonInfo acquisitonInfo
+#' @param acquisitionInfo acquisitionInfo
 #' @param sampleID sampleID
 #'
 #' @return nothing, writes to database
@@ -266,8 +266,18 @@ insertIntoMassTable <- function(env,
 insertIntoIndividualSpectra <- function(env,
                                         XMLinfo,
                                         userDBCon,
-                                        acquisitonInfo = NULL,
+                                        acquisitionInfo = NULL,
                                         sampleID){
+  
+  
+  env <<- env
+  XMLinfo <<- XMLinfo
+  userDBCon <<- userDBCon
+  acquisitionInfo2 <<- acquisitionInfo
+  sampleID <<- sampleID
+  
+  
+  
   
   temp <- base::lengths(base::mget(base::ls(env),
                                    envir = as.environment(env))) 
@@ -283,14 +293,11 @@ insertIntoIndividualSpectra <- function(env,
                                   'spectrumIntensityHash',
                                   'XMLHash',
                                   'Strain_ID',
-                                  'MassError',
-                                  'AcquisitionDate',
                                   'peakMatrix',
                                   'spectrumIntensity',
                                   'maxMass',
                                   'minMass',
                                   'ignore',
-                                  'byteOrder',
                                   'number',
                                   'timeDelay',
                                   'timeDelta',
@@ -328,14 +335,11 @@ insertIntoIndividualSpectra <- function(env,
                                   $spectrumIntensityHash,
                                   $XMLHash,
                                   $Strain_ID,
-                                  $MassError,
-                                  $AcquisitionDate,
                                   $peakMatrix,
                                   $spectrumIntensity,
                                   $maxMass,
                                   $minMass,
                                   $ignore,
-                                  $byteOrder,
                                   $number,
                                   $timeDelay,
                                   $timeDelta,
@@ -373,82 +377,106 @@ insertIntoIndividualSpectra <- function(env,
     )
     
     
-    if (is.null(XMLinfo$mzMLInfo$AcquisitionDate)) {
-      XMLinfo$mzMLInfo$AcquisitionDate <- NA
-    }  
-    # if (is.null(acquisitonInfo$MassError)) {
-    #   acquisitonInfo$MassError <- NA
-    # } 
-    
-    mzMLHash <- rep(XMLinfo$mzMLHash, times = temp[[1]])
-    acquisitionDate <- rep(XMLinfo$mzMLInfo$AcquisitionDate, times = temp[[1]])
-    MassError <- rep(NA, times = temp[[1]])
+   
+
     ignore <- rep(0, times = temp[[1]])
     sampleID <- rep(sampleID[[1]], times = temp[[1]])
-    if (is.null(acquisitonInfo)) {
-      DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
-                              spectrumIntensityHash = env$spectrumIntensityHash,
-                              XMLHash = mzMLHash,
-                              Strain_ID = sampleID,
-                              MassError = MassError,
-                              AcquisitionDate = acquisitionDate,
-                              peakMatrix = env$peakMatrix,
-                              spectrumIntensity = env$spectrumIntensity,
-                              minMass = env$minMass,
-                              maxMass = env$maxMass,
-                              ignore = ignore
-      ))
+    mzMLHash <- rep(XMLinfo$mzMLHash, times = temp[[1]])
+    
+    
       
+    a <- c('number',
+           'timeDelay',
+           'timeDelta',
+           'calibrationConstants',
+           'v1tofCalibration',
+           'dataType',
+           'dataSystem',
+           'spectrometerType',
+           'inlet',
+           'ionizationMode',
+           'acquisitionMethod',
+           'acquisitionDate',
+           'acquisitionMode',
+           'tofMode',
+           'acquisitionOperatorMode',
+           'laserAttenuation',
+           'digitizerType',
+           'flexControlVersion',
+           'id',
+           'instrument',
+           'instrumentId',
+           'instrumentType',
+           'massError',
+           'laserShots',
+           'patch',
+           'path',
+           'laserRepetition',
+           'spot',
+           'spectrumType',
+           'targetCount',
+           'targetIdString',
+           'targetSerialNumber',
+           'targetTypeNumber')
+      
+    
+    if (!is.null(acquisitionInfo) || !is.list(acquisitionInfo)) {
+     
+      acquisitionInfo <- list()
+       
     } else {
+    
+      # Account for missing fields
+    acquisitionInfo <- lapply(acquisitionInfo, function(acquisitionInfo){
       
-      DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
-                              spectrumIntensityHash = env$spectrumIntensityHash,
-                              XMLHash = mzMLHash,
-                              Strain_ID = sampleID,
-                              MassError = MassError,
-                              AcquisitionDate = acquisitionDate,
-                              peakMatrix = env$peakMatrix,
-                              spectrumIntensity = env$spectrumIntensity,
-                              minMass = env$minMass,
-                              maxMass = env$maxMass,
-                              ignore = ignore,
-                              byteOrder = ,
-                              number = ,
-                              timeDelay = ,
-                              timeDelta = ,
-                              calibrationConstants = ,
-                              v1tofCalibration = ,
-                              dataType = ,
-                              dataSystem = ,
-                              spectrometerType = ,
-                              inlet = ,
-                              ionizationMode = ,
-                              acquisitionMethod = ,
-                              acquisitionDate = ,
-                              acquisitionMode = ,
-                              tofMode = ,
-                              acquisitionOperatorMode = ,
-                              laserAttenuation = ,
-                              digitizerType = ,
-                              flexControlVersion = ,
-                              id = ,
-                              instrument = ,
-                              instrumentId = ,
-                              instrumentType = ,
-                              massError = ,
-                              laserShots = ,
-                              patch = ,
-                              path = ,
-                              laserRepetition = ,
-                              spot = ,
-                              spectrumType = ,
-                              targetCount = ,
-                              targetIdString = ,
-                              targetSerialNumber = ,
-                              targetTypeNumber = ,
-                              file = 
-      ))
+      acquisitionInfo[which(lengths(acquisitionInfo) == 0)] <- NA
+      
+      # if length > 1, serialize to json
+      acquisitionInfo[which(lengths(acquisitionInfo) > 1)] <- lapply(acquisitionInfo[which(lengths(acquisitionInfo) > 1)], 
+                                                                     jsonlite::serializeJSON)
+      
+      
+      w <- a[!a %in% names(acquisitionInfo)]
+      ww <- as.list(w)
+      names(ww) <- w
+      ww[] <- NA
+      
+      acquisitionInfo <- c(acquisitionInfo,
+                           ww)
+        do.call(rbind.data.frame,
+                   list(acquisitionInfo,
+                        stringsAsFactors = FALSE)
+        )
+      
+    })
+    
+    
+    
+    acquisitionInfo <- do.call(rbind, acquisitionInfo)
+    
+    acquisitionInfo <- acquisitionInfo[ ,names(acquisitionInfo) %in% a]
+      
     }
+    
+    
+    
+      DBI::dbBind(query, 
+                  c(
+                    list(spectrumMassHash = env$spectrumMassHash,
+                         spectrumIntensityHash = env$spectrumIntensityHash,
+                         XMLHash = mzMLHash,
+                         Strain_ID = sampleID,
+                         peakMatrix = env$peakMatrix,
+                         spectrumIntensity = env$spectrumIntensity,
+                         minMass = env$minMass,
+                         maxMass = env$maxMass,
+                         ignore = ignore
+                    ),
+                    acquisitionInfo
+                    
+                         
+                    ))
+    
     
     
     DBI::dbClearResult(query)

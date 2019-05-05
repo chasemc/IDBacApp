@@ -180,7 +180,7 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
 
   metaData$laserShots <- as.double(.grepAcquValue("##\\$NoSHOTS=", acquLines))
 
-  if (metaData$laserShots == 0L) {
+  if (length(metaData$laserShots) == 0L) {
     warning("File ", sQuote(fidFile), " seems to be empty because ",
             "no laser shots applied to this sample.")
   }
