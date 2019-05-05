@@ -420,11 +420,10 @@ insertIntoIndividualSpectra <- function(env,
            'targetTypeNumber')
       
     
-    if (!is.null(acquisitionInfo) || !is.list(acquisitionInfo)) {
-     
-      acquisitionInfo <- list()
+    if (is.null(acquisitionInfo) || length(acquisitionInfo) == 0L ) {
+      acquisitionInfo <- data.frame(NA)
        
-    } else {
+    } 
     
       # Account for missing fields
     acquisitionInfo <- lapply(acquisitionInfo, function(acquisitionInfo){
@@ -443,6 +442,7 @@ insertIntoIndividualSpectra <- function(env,
       
       acquisitionInfo <- c(acquisitionInfo,
                            ww)
+      
         do.call(rbind.data.frame,
                    list(acquisitionInfo,
                         stringsAsFactors = FALSE)
@@ -456,7 +456,7 @@ insertIntoIndividualSpectra <- function(env,
     
     acquisitionInfo <- acquisitionInfo[ ,names(acquisitionInfo) %in% a]
       
-    }
+    
     
     
     

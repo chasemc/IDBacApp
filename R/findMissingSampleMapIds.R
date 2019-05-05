@@ -11,6 +11,7 @@ findMissingSampleMapIds <- function(spots,
   
   if (is.character(spots)) {
     
+    
     # sampleMap has to be df for display in shiny, but will need to be
     # converted to matrix for the functions below
     if (is.data.frame(sampleMap)) {
