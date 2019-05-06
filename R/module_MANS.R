@@ -227,6 +227,10 @@ MAN_Server <- function(input,
   #This creates the network plot and calculations needed for such.
   #----
   observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy),{
+    
+    aq <<- smallMolNetworkDataFrame()
+    unique(aq$Source)
+    
     networkIgraph$graph <- IDBacApp::networkFromDF(smallMolNetworkDataFrame())
     
     req(igraph::is.igraph(networkIgraph$graph))
@@ -255,6 +259,15 @@ MAN_Server <- function(input,
     
     igraph::V(networkIgraph$graph)$label <- igraph::V(networkIgraph$graph)$name
     
+    
+    # Make sample nodes big
+    sampleIndex <- which(igraph::V(networkIgraph$graph)$label %in% unique(aq$Source))
+    
+    igraph::V(networkIgraph$graph)$size[sampleIndex] <- 10
+    
+    # make m/z nodes smaller
+    
+    #igraph::V(networkIgraph$graph)$size[-sampleIndex] <- 5
   })
  
   
