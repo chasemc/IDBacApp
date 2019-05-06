@@ -28,7 +28,7 @@ Let's make a pool to an IDBac database using the IDBac function `createPool()`
 # Get the name and the directory of the IDBac SQLite file
 
 dbPath <- system.file("extdata/sqlite/sample.sqlite", package = "IDBacApp")
-dbPath <-"C:\\Users\\CMC\\Documents\\GitHub\\IDBac_App\\example.sqlite"
+#dbPath <-"C:\\Users\\CMC\\Documents\\GitHub\\IDBac_App\\example.sqlite"
 dbname <- tools::file_path_sans_ext(basename(dbPath))
 dbPath <- dirname(dbPath)
 
@@ -142,17 +142,5 @@ hashR <- function(input){
 
 
 
-
-
-
-```{r}
-result <- DBI::dbSendQuery("SELECT * 
-                    FROM massTable",
-                    con = con)
-
-DBI::dbFetch(result)
-DBI::dbClearResult(result)
-
-```
 
 

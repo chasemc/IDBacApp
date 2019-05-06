@@ -66,38 +66,38 @@ b["D","7"] <- "hello2"
 test_that("findMissingSampleMapIds() works", {
   
   expect_identical(findMissingSampleMapIds(spots = c("D7"), 
-                                           sampleMap = b),
+                                           sampleMap = b)$missing,
                    character(0)
   )
+  
+  expect_identical(findMissingSampleMapIds(spots = c("D7"), 
+                                           sampleMap = b)$matching[[1]],
+                   "hello2"
+  )
+  
+  expect_identical(names(findMissingSampleMapIds(spots = c("D7"), 
+                                                 sampleMap = b)$matching),
+                   "D7"
+  )
+  
+  
+  
   expect_identical(findMissingSampleMapIds(spots = c("D10"), 
-                                           sampleMap = b),
+                                           sampleMap = b)$missing,
                    "D10"
   )
   expect_identical(findMissingSampleMapIds(spots = c("D10", "D11"), 
-                                           sampleMap = b),
+                                           sampleMap = b)$missing,
                    c("D10", "D11")
   )
   
   expect_identical(findMissingSampleMapIds(spots = c("D7", "A1"), 
-                                           sampleMap = b),
+                                           sampleMap = b)$missing,
                    character(0)
   )
   
 
 })
 
-
-
-
-
-
-a <- list()
-a$rt <- IDBacApp::nulledMap384Well()
-
-b <- IDBacApp::sampleMapViewer(b)
-
-
- IDBacApp::sampleMapSaver(sampleData = b,
-                         sampleMapReactive = a)
 
 
