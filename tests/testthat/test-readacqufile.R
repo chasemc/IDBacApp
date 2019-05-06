@@ -2,7 +2,7 @@ context("test-readacqufile")
 
 
 a <- system.file("extdata", file.path("RawData","0_C1","1","1SLin","fid")  , package = "IDBacApp")
-a <- IDBacApp::readAcquFile(a)
+a <- IDBacApp::readAcqusFile(a)
 a <- a[names(a) != "file"]
 
 test_that("Parse Bruker acqu", {

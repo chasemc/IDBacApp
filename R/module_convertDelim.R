@@ -192,7 +192,8 @@ convertDelim_Server <- function(input,
                  IDBacApp::processMZML(mzFilePaths = keys$mzFilePaths,
                                        sampleIds = keys$sampleIds,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = input$newExperimentName)
+                                       newExperimentName = input$newExperimentName,
+                                       acquisitionInfo = NULL)
                  
 
                  IDBacApp::popup4()

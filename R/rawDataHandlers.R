@@ -27,22 +27,21 @@ startingFromMZ <- function(chosenDir){
 #' When user is starting with Bruker Flex file(s)
 #'
 #' @param msconvertPath path to MSconvert, if none provided, it will search in Programs folder
-#' @param sampleMap excel file used for re-naming samples
 #' @param convertWhere directory where temp mzML files are written to
-#' @param chosenDir user-chosen directory containing bruker raw data files
+#' @param samplePathList list where names are sample ids, and list elements are raw file paths
 #'
-#' @return NA
+#' @return list(mzFile = convertTo, sampleID = names(convertFrom)))
 #'
-startingFromBrukerFlex <- function(chosenDir, 
-                                   msconvertPath = "",
-                                   sampleMap,
-                                   convertWhere){
-
-  convertFrom <- base::split(labels(sampleMap),as.character(sampleMap))
+proteoWizConvert <- function(msconvertPath = "",
+                             samplePathList,
+                             convertWhere){
   
-  convertTo <- base::tempfile(pattern = rep("", length(convertFrom)), 
+  
+  
+  convertTo <- base::tempfile(pattern = rep("", length(samplePathList)), 
                               tmpdir = convertWhere,
-                              fileext = ".mzMl")
+                              fileext = ".mzML")
+  
   convertTo <- base::normalizePath(convertTo, winslash = "\\", mustWork = FALSE)
   
 
@@ -57,11 +56,12 @@ startingFromBrukerFlex <- function(chosenDir,
   
   
   #Command-line MSConvert, converts from proprietary vendor data to mzML
-  msconvertCmdLineCommands <- base::lapply(base::seq_along(convertFrom), 
+  # Nope to vectorized, loop through because mult files can be attributed to one sample id
+  msconvertCmdLineCommands <- base::lapply(base::seq_along(samplePathList), 
                                            function(x){
                                              (base::paste0(msconvertLocation,
                                                            " ",
-                                                           base::paste0(shQuote(convertFrom[[x]]),
+                                                           base::paste0(shQuote(samplePathList[[x]]),
                                                                         collapse = "",
                                                                         sep = " "),
                                                            " --mzML --merge -z  --32 -v",
@@ -92,13 +92,16 @@ startingFromBrukerFlex <- function(chosenDir,
                       msconvertCmdLineCommands,
                       functionTOrunMSCONVERTonCMDline)
   parallel::stopCluster(cl)
+  
+  
+  
    validate(need(all(file.exists(convertTo)), 
                  cbind(convertTo, exists(convertTo))
    ))
   
  
   return(list(mzFile = convertTo,
-              sampleID = names(convertFrom)))
+              sampleID = names(samplePathList)))
   
   
   
@@ -106,41 +109,6 @@ startingFromBrukerFlex <- function(chosenDir,
 }
 
 
-
-
-#' 
-#'  Using an excel spreadsheet, get the filepath for msconvert and the user-supplied name
-#'
-#'   from: https://qa.nmrwiki.org/question/143/what-is-the-purpose-of-acqu-and-acqus-files-in-bruker-setup
-#'    The s at the end of a parameter file name specifies this file as a status parameterfile. Status parameters are written at the end of an acquisition or also when a FID in a multidimensional experiment is written.
-#'    The files without the s are the current parameters. If you change a parameter it will be changed in the files without the s.
-#'    Let's assume a dataset where an acquisition has already been done, acqus and acqu contain the same information. You now decide to restart the acquisition but with more scans. You enter a new number for NS. acqu will show this new value and acqus will still show the number that was used to collect the FID that is on disk. Once the new acquisition is finished acqus now also contains the new value. In multidimensional acquisition the value of TD will be updated when a new FID is written to disk. The contents of acqus are printed in parameter listings.
-#'    The acqu files with numbers contain the parameters for the indirect dimensions. "acqu2" and acqu2s are for the F1 dimension in a 2D. A 3D will have acqu, acqu2 and acqu3, in a 4D you will also find acqu4 etc.
-#' 
-#' @param brukerDataPath path to directory containg bruker files
-#'
-#' @return named list, names are sample IDs, values are paths
-#' @export
-#'
-brukerDataSpotsandPaths <- function(brukerDataPath){
-  
-  files <- list.files(brukerDataPath, pattern = "acqus", recursive = TRUE, full.names = TRUE)
-  
-  instrument_MetaFile  <- lapply(files, function(x)  read.delim(x, sep = "\n"))
-  
-  # Find Acqu file
-  spots <- try(lapply(instrument_MetaFile , function(x) as.character(x[grep("SPOTNO=", x[,1]),])),
-               silent = TRUE)
-  
-  validate(need(length(spots) > 0, "Something happened when trying to get the spot position from the acqus file."))
-  names(spots) <- dirname(files)
-  
-  #Parse the Acqu file for the mass error row
-  spots <- sapply(spots, function(x) strsplit(x, "##$SPOTNO= ", fixed = TRUE)[[1]][[2]])
-  spots <- base::gsub("[[:punct:]]|", "" ,spots)
-  spots <- base::trimws(spots)
-  return(spots)
-}
 
 
 

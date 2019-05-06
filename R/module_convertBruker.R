@@ -33,7 +33,7 @@ convertOneBruker_UI <- function(id){
     tags$hr(size = 20),
     p(strong("You must label all spots that contain data."), br(),
       strong("IDBac found data for the following spots that aren't labelled in the spreadsheet:")
-      ),
+    ),
     shiny::verbatimTextOutput(ns("missingSampleNames"), placeholder = TRUE),
     p(strong("4:","Click \"Process Data\" to begin spectra conversion.")),
     actionButton(ns("convertSingleBruker"),
@@ -73,28 +73,42 @@ convertOneBruker_Server <- function(input,
     if (input$rawFileDirectory > 0) {
       loc <- IDBacApp::choose_dir()
       
-      if(!is.na(loc)){
+      if (!is.na(loc)) {
         return(loc)
       }
     }
   })
   
   
-  output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+  sanitizedNewExperimentName <- reactive({
     
-    if (a == "") {
-      "The filename-friendly version of your entry will appear here."
+    IDBacApp::path_sanitize(input$newExperimentName)
+    
+  })
+  
+  
+  output$newExperimentNameText <- renderText({
+    
+    sanitized <- sanitizedNewExperimentName()
+    
+    if (sanitized == "") {
+      return("The filename-friendly version of your entry will appear here.")
     } else {
-      a
+      return(sanitized)
     }
   })
+  
+  
   # Creates text showing the user which directory they chose for raw files
   #----
   output$rawFileDirectoryText <- renderText({
+    
     if (is.null(rawFilesLocation())) {
+      
       return("No Folder Selected")
+      
     } else {
+      
       folders <- NULL
       # Get the folders contained within the chosen folder.
       foldersInFolder <- list.dirs(rawFilesLocation(),
@@ -142,37 +156,40 @@ convertOneBruker_Server <- function(input,
   })
   
   
+  # list of acqus info
+  acquisitonInformation <- reactive({
+    
+    IDBacApp::readBrukerAcqus(rawFilesLocation())
+    
+  })
+  
+  
+  
   # Sample Map --------------------------------------------------------------
   
   anyMissing <- reactive({
+    
     req(rawFilesLocation())
     req(sampleMapReactive$rt)
     
-    aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
-    aa <- matrix(aa, nrow = 16, ncol = 24)
+  
+    spots <- unlist(lapply(acquisitonInformation(), function(x) x$spot))
     
-    
-    spots <- IDBacApp::brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
-    s1 <- base::as.matrix(sampleMapReactive$rt)
-    b <- sapply(spots, function(x) s1[which(aa %in% x)])
-    as.character(spots[which(is.na(b))])
+    IDBacApp::findMissingSampleMapIds(spots = spots, 
+                                      sampleMap = sampleMapReactive$rt)
   })
   
   
   output$missingSampleNames <- shiny::renderText({
     
-    
-    if (length(anyMissing()) == 0) {
+    if (length(anyMissing()$missing) == 0) {
       paste0("No missing IDs")
     } else {
-      paste0(paste0(anyMissing(), collapse = " \n ", sep = ","))
+      paste0(paste0(anyMissing()$missing, collapse = " \n ", sep = ","))
     }
   })
   
-  sampleMapReactive <- reactiveValues(rt = as.data.frame(base::matrix(NA,
-                                                                      nrow = 16,
-                                                                      ncol = 24,
-                                                                      dimnames = list(LETTERS[1:16],1:24))))
+  sampleMapReactive <- reactiveValues(rt = IDBacApp::nulledMap384Well())
   
   observeEvent(input$showSampleMap, 
                ignoreInit = TRUE, {  
@@ -190,59 +207,28 @@ convertOneBruker_Server <- function(input,
                  
                  
                })
-  observeEvent(input$saveSampleMap, 
-               ignoreInit = TRUE, {  
-                 
-                 shiny::removeModal()
-                 
-               })
-  
   
   
   output$plateDefault <- rhandsontable::renderRHandsontable({
     
-    rhandsontable::rhandsontable(sampleMapReactive$rt,
-                                 useTypes = FALSE,
-                                 contextMenu = TRUE,
-                                 maxRows = 16,
-                                 maxRows = 24) %>%
-      rhandsontable::hot_context_menu(allowRowEdit = FALSE,
-                                      allowColEdit = FALSE) %>%
-      rhandsontable::hot_cols(colWidths = 100) %>%
-      rhandsontable::hot_rows(rowHeights = 25)
+    IDBacApp::sampleMapViewer(sampleMapReactive$rt)
+    
   })
-  
-  
-  
-  
   
   
   observeEvent(input$saveSampleMap, 
                ignoreInit = TRUE, {
-                 z <- unlist(input$plateDefault$data, recursive = FALSE) 
-                 zz <- as.character(z)
-                 zz[zz == "NULL"] <- NA 
+                 sampleMapSaver(sampleData = input$plateDefault,
+                                sampleMapReactive = sampleMapReactive)
                  
-                 # for some reason rhandsontable hot_to_r not working, implementing own:
-                 changed <- base::matrix(zz,
-                                         nrow = nrow(sampleMapReactive$rt),
-                                         ncol = ncol(sampleMapReactive$rt),
-                                         dimnames = list(LETTERS[1:16],1:24),
-                                         byrow = T)
-                 
-                 sampleMapReactive$rt <- as.data.frame(changed, stringsAsFactors = FALSE)
-                 
-                 
+                 shiny::removeModal()
                })
   
   
   
   
   
-  sanity <- reactive({
-    a <- IDBacApp::path_sanitize(input$newExperimentName)
-    gsub(" ","",a)
-  })
+  
   
   
   success <- reactiveValues(val = FALSE)
@@ -252,45 +238,119 @@ convertOneBruker_Server <- function(input,
   observeEvent(input$convertSingleBruker,
                ignoreInit = TRUE,  {
                  
-                 req(length(anyMissing()) == 0)
-                 req(!is.null(sanity()))
-                 req(sanity() != "")
-                 
+                 req(length(anyMissing()$missing) == 0)
+                 req(!is.null(sanitizedNewExperimentName()))
+                 req(sanitizedNewExperimentName() != "")
                  validate(need(any(!is.na(sampleMapReactive$rt)), 
                                "No samples entered into sample map, please try entering them again"))
-                 aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
-                 aa <- matrix(aa, nrow = 16, ncol = 24)
-                 
-                 spots <-  brukerDataSpotsandPaths(brukerDataPath = rawFilesLocation())
-                 s1 <- base::as.matrix(sampleMapReactive$rt)
-                 sampleMap <- sapply(spots, function(x) s1[which(aa %in% x)])
-                 
-                 IDBacApp::brukerToMzml_popup()
-                 
-                 forProcessing <- startingFromBrukerFlex(chosenDir = rawFilesLocation(), 
-                                                         msconvertPath = "",
-                                                         sampleMap = sampleMap,
-                                                         convertWhere = tempMZDir)
-                 IDBacApp::popup3()
-                 IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
-                                       sampleIds = forProcessing$sampleID,
-                                       sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = input$newExperimentName)
-
-                 # Update available experiments
-                 availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
-                                                                                 pattern = ".sqlite",
-                                                                                 full.names = FALSE))
-                 IDBacApp::popup4()
                  
                  
+                 rawFilesLocation2 <<- rawFilesLocation()
+                 inputIds <<- sampleMapReactive$rt
+                 
+                 
+                 
+                 # get target positions in order of acqus list
+                 spots <- unlist(lapply(acquisitonInformation(), function(x){
+                   x$spot
+                 }))
+                 
+                 
+            
+                 wq <<- acquisitonInformation()
+                 wq2<<-anyMissing()$matching
+                 
+                 # should be the same because both come from acquisitonInformation()
+                 validate(need(identical(names(anyMissing()$matching), 
+                                         spots),
+                               list("Something happend when associating Bruker acqu spots", "\n",
+                                    "names:", names(anyMissing()$matching), "\n",
+                                    "spots:", spots)
+                 ))
+                
+                  validate(need(identical(length(anyMissing()$matching),
+                                         length(acquisitonInformation())),
+                               list("Something happend when associating Bruker acqu spots", "\n",
+                                    "length(anyMissing()$matching):", length(anyMissing()$matching), "\n",
+                                    "length(acquisitonInformation()):", length(acquisitonInformation())
+                 )))
+                 
+                  
+                  acquisitionInfo <- split(acquisitonInformation(), anyMissing()$matching) 
+                  wwq<<-acquisitionInfo
+                
+                  files <- lapply(acquisitionInfo, function(x){
+                    lapply(x, function(y) y$file)
+                  })
+                  
+                  
+                  
+                  IDBacApp::brukerToMzml_popup()
+                  
+                  
+                  
+                  forProcessing <- IDBacApp::proteoWizConvert(msconvertPath = "",
+                                                              samplePathList = files,
+                                                              convertWhere = tempMZDir)
+                  
+                  IDBacApp::popup3()
+                  
+                  IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
+                                        sampleIds = forProcessing$sampleID,
+                                        sqlDirectory = sqlDirectory$sqlDirectory,
+                                        newExperimentName = sanitizedNewExperimentName(),
+                                        acquisitionInfo = acquisitionInfo )
+                  
+                  # Update available experiments
+                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                                  pattern = ".sqlite",
+                                                                                  full.names = FALSE))
+                  IDBacApp::popup4()
+                  
                })
-  
-  
-  
-  
   
 }
 
 
 
+
+
+
+
+
+#' Editable Sample Map 
+#'
+#' @param df reactiveValues data frame input IDBacApp::nulledMap384Well()
+#'
+#' @return rhandsontable
+#' @export
+#'
+sampleMapViewer <- function(df){
+  rhandsontable::rhandsontable(df,
+                               useTypes = FALSE,
+                               contextMenu = TRUE,
+                               maxRows = 16,
+                               maxRows = 24) %>%
+    rhandsontable::hot_context_menu(allowRowEdit = FALSE,
+                                    allowColEdit = FALSE) %>%
+    rhandsontable::hot_cols(colWidths = 100) %>%
+    rhandsontable::hot_rows(rowHeights = 25) 
+}
+
+
+
+#' Update sample map reactive value
+#'
+#' @param sampleData sample map rhandsontable
+#' @param sampleMapReactive sample map reactive value to save to
+#'
+#' @return none, side effect
+#' @export
+#'
+sampleMapSaver <- function(sampleData,
+                           sampleMapReactive){
+  temp <- rhandsontable::hot_to_r(sampleData)
+  sampleMapReactive$rt <- as.data.frame(temp, 
+                                        stringsAsFactors = FALSE)
+  
+}

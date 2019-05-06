@@ -21,7 +21,7 @@ a <-  DBI::dbGetQuery(con, "SELECT * FROM version")
 
 test_that("Version database table creation", {
   expect_true(DBI::dbExistsTable(con, "version"))
-  expect_identical(ncol(a), 1L)
+  expect_identical(ncol(a), 2L)
   expect_identical(nrow(a), 1L)
 })
 

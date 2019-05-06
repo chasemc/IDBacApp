@@ -5,6 +5,7 @@
 #' @param sampleIds sampleIds that are in the same order as the paths
 #' @param sqlDirectory sqlDirectory 
 #' @param newExperimentName newExperimentName 
+#' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return Nothing direct, creates a sqlite database
 #' @export
@@ -12,8 +13,8 @@
 processMZML <- function(mzFilePaths,
                         sampleIds,
                         sqlDirectory,
-                        newExperimentName){
-  
+                        newExperimentName,
+                        acquisitionInfo){
   
   # validate(need(length(mzFilePaths) == length(sampleIds), 
   #               "Temp mzML files and sample ID lengths don't match."
@@ -39,7 +40,8 @@ processMZML <- function(mzFilePaths,
                    
                    IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                                        sampleID = sampleIds[[i]],
-                                                       userDBCon = userDB) # pool connection
+                                                       userDBCon = userDB,
+                                                       acquisitionInfo = acquisitionInfo[[i]]) # pool connection
                  }
                 
                  

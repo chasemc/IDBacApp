@@ -112,13 +112,44 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
   spectrumIntensityHash                TEXT,
   XMLHash                              TEXT,
   Strain_ID                            TEXT,
-  MassError                            REAL,
-  AcquisitionDate                      TEXT,
   peakMatrix                           BLOB,
   spectrumIntensity                    BLOB,
   maxMass                              INTEGER,
   minMass                              INTEGER,
   ignore                               INTEGER,
+  number                               INTEGER,
+  timeDelay                            INTEGER,
+  timeDelta                            NUMERIC,
+  calibrationConstants                 TEXT,
+  v1tofCalibration                     TEXT,
+  dataType                             TEXT,
+  dataSystem                           TEXT,
+  spectrometerType                     TEXT,
+  inlet                                TEXT,
+  ionizationMode                       TEXT,
+  acquisitionMethod                    TEXT,
+  acquisitionDate                      TEXT,
+  acquisitionMode                      TEXT,
+  tofMode                              TEXT,
+  acquisitionOperatorMode              TEXT,
+  laserAttenuation                     INTEGER,
+  digitizerType                        TEXT,
+  flexControlVersion                   TEXT,
+  id                                   TEXT,
+  instrument                           TEXT,
+  instrumentId                         TEXT,
+  instrumentType                       TEXT,
+  massError                            NUMERIC,
+  laserShots                           INTEGER,
+  patch                                TEXT,
+  path                                 TEXT,
+  laserRepetition                      TEXT,
+  spot                                 TEXT,
+  spectrumType                         TEXT,
+  targetCount                          TEXT,
+  targetIdString                       TEXT,
+  targetSerialNumber                   TEXT,
+  targetTypeNumber                     TEXT,
   
   UNIQUE(Strain_ID, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
   );"
@@ -277,6 +308,35 @@ sql_CreateVersionTable <- function(sqlConnection){
     warning("version table already exists")
   }
 }
+
+
+
+#' SQL code to create the SQLite locale table
+#'
+#' @param sqlConnection sqlConnection
+#'
+#' @return SQL code as character
+#' @export
+#'
+sql_CreatelLocaleTable <- function(sqlConnection){
+  
+  if (!DBI::dbExistsTable(sqlConnection, "locale")) {
+    
+    a <- DBI::dbSendStatement(sqlConnection,
+                              "CREATE TABLE locale (
+  locale         TEXT,
+  UNIQUE(locale) ON CONFLICT IGNORE
+    );"
+    )
+    
+    
+    DBI::dbClearResult(a)
+  } else {
+    warning("locale table already exists")
+  }
+}
+
+
 
 
 

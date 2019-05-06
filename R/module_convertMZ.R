@@ -139,7 +139,8 @@ convertMZ_Server <-  function(input,
     IDBacApp::processMZML(mzFilePaths = mzFilePaths,
                           sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
                           sqlDirectory = sqlDirectory$sqlDirectory,
-                          newExperimentName = sanity())
+                          newExperimentName = sanity(),
+                          acquisitionInfo = NULL)
     
     
     

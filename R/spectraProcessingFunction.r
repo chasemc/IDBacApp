@@ -5,14 +5,14 @@
 #' @param rawDataFilePath filepath of the data
 #' @param sampleID the sample ID to be read and added to the database
 #' @param userDBCon database connection (checked out pool)
+#' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return the peak list modifed by binning then subtractng the matrix sample,
 #' @export
 spectraProcessingFunction <- function(rawDataFilePath,
                                       sampleID,
-                                      userDBCon){
-  
-  
+                                      userDBCon, 
+                                      acquisitionInfo){
   
   
   sampleID <- IDBacApp::cleanWSpace(sampleID)
@@ -21,9 +21,13 @@ spectraProcessingFunction <- function(rawDataFilePath,
 # Create version and metadata SQL tables ----------------------------------
 
   
-  #Doesn't do anything currently, but put here to help future-proof
+  # Isn't currently used, but here to help future-proof
   IDBacApp::sqlCreate_version(userDBCon = userDBCon)
   #----
+  
+  # Isn't currently used, but here to help future-proof
+  # Inserts current locale info 
+  IDBacApp::insertLocale(userDBCon = userDBCon)
   
   # If sample ID doesn't exist, create it in table
   # TODO: userprompt with option to change ID
@@ -48,14 +52,22 @@ spectraProcessingFunction <- function(rawDataFilePath,
   # Get number of spectra contained in mzML
   scanNumber <- nrow(mzR::header(mzML_con))
   
-  # Loop over each spectrum inside an mzmL file
   
+   # mzML_con <<- mzML_con
+   # scanNumber <<- scanNumber
+   # userDBCon <<- userDBCon
+   # sampleID <<- sampleID
+   # XMLinfo <<- XMLinfo
+   # rawDataFilePath <<- rawDataFilePath
+   # acquisitionInfo <<- acquisitionInfo
+   #stop()
+
   IDBacApp::createSpectraSQL(mzML_con = mzML_con,
                              scanNumber = scanNumber,
                              userDBCon = userDBCon,
                              sampleID = sampleID,
                              XMLinfo = XMLinfo, 
-                             rawDataFilePath = rawDataFilePath)
+                             acquisitionInfo = acquisitionInfo)
 }
 
 
