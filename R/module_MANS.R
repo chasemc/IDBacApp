@@ -256,23 +256,7 @@ MAN_Server <- function(input,
     igraph::V(networkIgraph$graph)$label <- igraph::V(networkIgraph$graph)$name
     
   })
-  # 
-  # observeEvent({
-  # 
-  # })
-  # 
-  # #  
-  # z <- igraph::as.undirected(z1)
-  # clusters <- igraph::fastgreedy.community(z)
-  # 
-  # igraph::V(z)$color <- as.vector(IDBacApp::colorBlindPalette()[1:100])[clusters$membership]
-  # igraph::V(z)$label <- igraph::V(z)$name
-  # 
-  # 
-  
-  
-  # igraph::V(z)$color <- as.vector(IDBacApp::colorBlindPalette()[1:100])[clusters$membership]
-  # igraph::V(z)$label <- igraph::V(z)$name
+ 
   
   
   output$metaboliteAssociationNetwork <- sigmajs::renderSigmajs({
@@ -285,7 +269,7 @@ MAN_Server <- function(input,
       sigmajs::sg_settings(drawLabels = TRUE, drawEdgeLabels = FALSE) %>% 
       sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight*10) %>% 
       sigmajs::sg_force_start() %>% # start
-      sigmajs::sg_force_stop(3000) %>% # stop after 5 seconds
+      sigmajs::sg_force_stop(5000) %>% # stop after 5 seconds
       sigmajs::sg_drag_nodes()
      
   })
