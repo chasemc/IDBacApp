@@ -13,14 +13,48 @@
 sqlCreate_version <- function(userDBCon) {
   if (!DBI::dbExistsTable(userDBCon, "version")) {
     
+    ver <- cbind.data.frame(IDBacVersion = as.character(packageVersion("IDBacApp")), 
+                 rVersion = as.character(IDBacApp::serial(sessionInfo()$R.version)))
     # Add version table
     DBI::dbWriteTable(conn = userDBCon,
                       name = "version", # SQLite table to insert into
-                      IDBacApp::sqlTableArchitecture(numberScans = 1)$version, # Insert single row into DB
+                      ver, # Insert single row into DB
                       append = TRUE, # Append to existing table
                       overwrite = FALSE) # Do not overwrite
   }
 }
+
+
+
+# locale table ------------------------------------------------------------
+
+
+#' Insert current locale info into sql table 
+#'
+#' @param userDBCon  database connection
+#'
+#' @return side effect
+#' @export
+#'
+insertLocale <- function(userDBCon) {
+  if (!DBI::dbExistsTable(userDBCon, "locale")) {
+    
+    locale <- Sys.getlocale(category = "LC_ALL")
+    locale <- as.character(locale)[[1]]
+    locale <- as.data.frame(locale)
+    
+    # Add version table
+    DBI::dbWriteTable(conn = userDBCon,
+                      name = "locale", # SQLite table to insert into
+                      locale, # Insert single row into DB
+                      append = TRUE, # Append to existing table
+                      overwrite = FALSE) # Do not overwrite
+  }
+}
+
+
+
+
 
 
 
@@ -421,8 +455,7 @@ insertIntoIndividualSpectra <- function(env,
       
     
     if (is.null(acquisitionInfo) || length(acquisitionInfo) == 0L ) {
-      acquisitionInfo <- data.frame(NA)
-       
+      acquisitionInfo <- rbind(rep(NA, temp[[1]]))       
     } 
     
       # Account for missing fields
@@ -483,3 +516,5 @@ insertIntoIndividualSpectra <- function(env,
     
   }
 }
+
+

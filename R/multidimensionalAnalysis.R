@@ -13,11 +13,10 @@
 
 
 pcaCalculation <- function(dataMatrix,
-                           logged = TRUE,
+                           logged = FALSE,
                            scaled = TRUE,
                            centered = TRUE,
-                           missing = .00001){
-  
+                           missing = 0){
   validate(need(nrow(dataMatrix) > 3, "Select more samples for PCA"))
   validate(need(ncol(dataMatrix) > 1, "Only 1 peak found between all samples"))
   
@@ -27,16 +26,16 @@ pcaCalculation <- function(dataMatrix,
     dataMatrix <- log10(dataMatrix)
   }
   
+  dataMatrix <- scale(dataMatrix, scale = scaled, center = centered)
+  
+  
   # Check for infinite
   dataMatrix[is.infinite(dataMatrix)] <- missing
   # Check for NAs
   dataMatrix[is.na(dataMatrix)] <- missing
   
   dataMatrix <- irlba::prcomp_irlba(dataMatrix,
-                                    n = 3,
-                                    retx = TRUE,
-                                    scale = TRUE,
-                                    centered = TRUE)
+                                    n = 3)
 
   dataMatrix <- dataMatrix$x[, 1:3]
   dataMatrix <- as.data.frame(dataMatrix)
@@ -72,16 +71,26 @@ tsneCalculation <- function(dataMatrix,
   dataMatrix[is.na(dataMatrix)] <- 0
   
   if (nrow(dataMatrix) > 50) {
-    dataMatrix <- irlba::prcomp_irlba(dataMatrix,
-                                      n = 50,
-                                      retx = TRUE,
-                                      scale = TRUE,
-                                      centered = TRUE)
+    
+    dataMatrix <- scale(dataMatrix, 
+                        scale = TRUE, 
+                        center = TRUE)
+    
+    # # Check for infinite
+    # dataMatrix[is.infinite(dataMatrix)] <- missing
+    # # Check for NAs
+    # dataMatrix[is.na(dataMatrix)] <- missing
+    # 
+    # 
+    # dataMatrix <- irlba::prcomp_irlba(dataMatrix,
+    #                                   n = 50)
+    dataMatrix <- dataMatrix[ , -which(colSums(dataMatrix) == 0)]
+    
     dataMatrix <- Rtsne::Rtsne(dataMatrix,
-                               pca = F,
-                               pca_center = F,
+                               pca = T,
+                               pca_center = T,
                                pca_scale = F,
-                               partial_pca = F,
+                               partial_pca = T,
                                normalize = TRUE,                           
                                dims = 3,
                                perplexity = perplexity,
@@ -91,7 +100,7 @@ tsneCalculation <- function(dataMatrix,
     dataMatrix <- Rtsne::Rtsne(dataMatrix,
                                pca = TRUE,
                                pca_center = TRUE,
-                               pca_scale = TRUE,
+                               pca_scale = F,
                                partial_pca = FALSE,
                                normalize = TRUE,                           
                                dims = 3,

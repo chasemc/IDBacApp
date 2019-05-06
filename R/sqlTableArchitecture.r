@@ -311,3 +311,32 @@ sql_CreateVersionTable <- function(sqlConnection){
 
 
 
+#' SQL code to create the SQLite locale table
+#'
+#' @param sqlConnection sqlConnection
+#'
+#' @return SQL code as character
+#' @export
+#'
+sql_CreatelLocaleTable <- function(sqlConnection){
+  
+  if (!DBI::dbExistsTable(sqlConnection, "locale")) {
+    
+    a <- DBI::dbSendStatement(sqlConnection,
+                              "CREATE TABLE locale (
+  locale         TEXT,
+  UNIQUE(locale) ON CONFLICT IGNORE
+    );"
+    )
+    
+    
+    DBI::dbClearResult(a)
+  } else {
+    warning("locale table already exists")
+  }
+}
+
+
+
+
+
