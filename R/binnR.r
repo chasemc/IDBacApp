@@ -105,7 +105,10 @@ peakBinner <- function(massStart,
   toSub <- binner_xShift(massStart = massStart,
                          scaler = scaler) 
   
-  vecLength <- round((massEnd * scaler) + 2 ) 
+  
+  z1 <- as.integer(round((massEnd * scaler)))
+  z2 <- as.integer(round((massEnd * ppm) / 1000000L))
+  vecLength <- z1 + z2 + 2
   
   
   #  if (length(massList) * vecLength < 4e6) {
