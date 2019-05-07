@@ -20,7 +20,7 @@ ui_proteinClustering <- function() {
                    IDBacApp::bsCollapse(id = "proteinPeakSettingsDropDown",
                                         open = "Panel 1",
                                         
-                                        IDBacApp::bsCollapsePanel(title = div(p("Choose how Peaks are Retained for Analyses", align = "center"),
+                                        IDBacApp::bsCollapsePanel(title = div(p("Choose How Peaks Are Retained For Analyses", align = "center"),
                                                                               p("(Effects all protein analysis)",
                                                                                 style = "font-size: 0.75em",
                                                                                 align = "center")), 
@@ -51,7 +51,7 @@ ui_proteinClustering <- function() {
                    div(p("Optional Settings", style = "text-decoration: underline; font-weight: bold; font-size: 1.2em;"), align = "center" ),
                    IDBacApp::bsCollapse(id = "optionalProteinPeakSettingsDropDown",
                                         
-                                        IDBacApp::bsCollapsePanel(p("Adjust the Dendrogram", 
+                                        IDBacApp::bsCollapsePanel(p("Adjust The Dendrogram", 
                                                                     align = "center"),
                                                                   value = "adjustProteinDendDropDown",
                                                                   shiny::numericInput("hclustHeight",
@@ -75,7 +75,7 @@ ui_proteinClustering <- function() {
                                                                   fluidRow(IDBacApp::addDotsActionUI("proth"))
                                                                   
                                         ),
-                                        IDBacApp::bsCollapsePanel(p("Insert Samples from Another Experiment", 
+                                        IDBacApp::bsCollapsePanel(p("Insert Samples From Another Experiment", 
                                                                     align = "center"),     
                                                                   value = "proteinInjectDropDown",
                                                                   IDBacApp::selectInjections_UI("proteinInject")
