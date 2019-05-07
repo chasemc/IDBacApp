@@ -4,7 +4,10 @@
 \alias{run_app}
 \title{run_app}
 \usage{
-run_app()
+run_app(port = 9191)
+}
+\arguments{
+\item{port}{The TCP port that the application should listen on}
 }
 \value{
 NA
