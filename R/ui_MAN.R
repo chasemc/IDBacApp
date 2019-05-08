@@ -34,17 +34,17 @@ ui_smallMolMan <-  function(){
                                         )),
                    IDBacApp::bsCollapse(id = "collapseManSettings",
                                         open = "Panel 1",
-                   IDBacApp::bsCollapsePanel(p("Adjust Protein Dendrogram", 
-                                              align = "center"),
-                                            numericInput("hclustHeightNetwork",
-                                                         label = h5(strong("Expand Tree")),
-                                                         value = 750,
-                                                         step = 50,
-                                                         min = 100),
-                                            numericInput("dendparmar2",
-                                                         label = h5(strong("Adjust right margin of dendrogram")),
-                                                         value = 5)
-                   )
+                                        IDBacApp::bsCollapsePanel(p("Adjust Protein Dendrogram", 
+                                                                    align = "center"),
+                                                                  numericInput("hclustHeightNetwork",
+                                                                               label = h5(strong("Expand Tree")),
+                                                                               value = 750,
+                                                                               step = 50,
+                                                                               min = 100),
+                                                                  numericInput("dendparmar2",
+                                                                               label = h5(strong("Adjust right margin of dendrogram")),
+                                                                               value = 5)
+                                        )
                    ),
                    div(align = "center",
                        IDBacApp::downloadSmNet_UI("smMAN")
@@ -65,45 +65,41 @@ ui_smallMolMan <-  function(){
                    
                    
       ),
-      mainPanel(
-        column(width = 5,
-               
-               
-               tabsetPanel(type = "tabs",           
-                           tabPanel(value = "protd","Protein Dendrogram",
-                                    
-                                    manPageProtDend_UI("manProtDend")
-                                    
-                                    
-                           ))),
-        column(width = 7,
-               
-               tabsetPanel(type = "tabs",           
-                           tabPanel(value = "smallMolMANUI","Small Molecule MAN",
-                                    p("Nodes in the MAN are colored by modularity score, not the same colors as the protein dendrogram.",
-                                      style = "font-size: 0.75em"),
-                                    IDBacApp::smMANPlot_UI("smMAN")),
-                           tabPanel(value = "smallMolPCAUi","Small Molecule PCA",
-                                    
-                                    plotly::plotlyOutput("smallMolPcaPlot")
-                           ),
-                           tabPanel(value = "smallMirror", "Small Molecule Mirror Plot",
-                                    IDBacApp::smallmirrorPlotsSampleSelect_UI("smallMirror"),
-                                    IDBacApp::smallmirrorPlots_UI("smallMirror"))
-                           
-                           
-                           
-               ))
+      mainPanel(width = 9,
+                
+                absolutePanel(width = "25%",
+                              fixed = FALSE,
+                              tabsetPanel(type = "tabs",           
+                                          tabPanel(value = "protd","Protein Dendrogram",
+                                                   
+                                                   manPageProtDend_UI("manProtDend")
+                                          )      
+                              )
+                ),
+                absolutePanel(
+                  top = 70,
+                  bottom = 0,
+                  fixed = TRUE,
+                  left = "50%",
+                  right = 0,
+                  tabsetPanel(type = "tabs",   
+                              tabPanel(value = "smallMolMANUI","Small Molecule MAN",
+                                       p("Nodes in the MAN are colored by modularity score, not the same colors as the protein dendrogram.",
+                                         style = "font-size: 0.75em"),
+                                       IDBacApp::smMANPlot_UI("smMAN")),
+                              tabPanel(value = "smallMolPCAUi","Small Molecule PCA",
+                                       
+                                       plotly::plotlyOutput("smallMolPcaPlot")
+                              ),
+                              tabPanel(value = "smallMirror", "Small Molecule Mirror Plot",
+                                       IDBacApp::smallmirrorPlotsSampleSelect_UI("smallMirror"),
+                                       IDBacApp::smallmirrorPlots_UI("smallMirror"))
+                  )
+                )
       )
-    ))
-  
-  
+    )
+  )
 }
-
-mirrorPlots_UI
-
-
-
 
 
 

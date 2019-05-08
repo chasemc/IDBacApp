@@ -136,7 +136,8 @@ smMANPlot_UI <- function(id) {
   shiny::tagList(
     shinycssloaders::withSpinner(
       sigmajs::sigmajsOutput(ns("metaboliteAssociationNetwork"),
-                             width = "100%")
+                             width = "100%",
+                             height = "500px")
     )
   )
 }
