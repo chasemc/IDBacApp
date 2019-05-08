@@ -6,7 +6,6 @@ init:
         $ErrorActionPreference = "Stop"
         Invoke-WebRequest http://raw.github.com/krlmlr/r-appveyor/master/scripts/appveyor-tool.ps1 -OutFile "..\appveyor-tool.ps1"
         Import-Module '..\appveyor-tool.ps1'
-
 install:
   ps: Bootstrap
 
@@ -14,7 +13,7 @@ install:
 
 environment:
   global:
-    WARNINGS_ARE_ERRORS: 1
+    WARNINGS_ARE_ERRORS: 0
     PKGTYPE: win.binary 
   
   matrix:
@@ -30,6 +29,20 @@ build_script:
 
 test_script:
   - travis-tool.sh run_tests
+
+
+after_test:
+  - Rscript -e "remotes::install_github('chasemc/electricShine')"
+  - Rscript -e "electricShine::buildElectricApp(appName = 'IDBac',
+                 productName = 'IDBac',
+                 semanticVersion = '1.0.0',
+                 installTo = getwd(),
+                 MRANdate = '2019-05-05',
+                 functionName = 'run_app',
+                 githubRepo = 'chasemc/IDBacApp',
+                 localPath  = NULL,
+                 only64 = FALSE,
+                 packageName = 'IDBacApp')"
 
 on_failure:
   - 7z a failure.zip *.Rcheck\*
@@ -53,3 +66,18 @@ artifacts:
 
   - path: '\*_*.zip'
     name: Bits
+
+  - path: 'IDBacApp\dist\*.exe'
+    name: app
+
+
+deploy:
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  description: 'Release description'
+  provider: GitHub
+  auth_token:
+    secure: 'Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O' # your encrypted token from GitHub
+  artifact: app           
+  draft: false
+  prerelease: false
+  
