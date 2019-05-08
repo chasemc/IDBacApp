@@ -68,7 +68,7 @@ artifacts:
   - path: '\*_*.zip'
     name: Bits
 
-  - path: 'IDBacApp\dist\*.exe'
+  - path: 'IDBac\dist\*.exe'
     name: app
 
 
