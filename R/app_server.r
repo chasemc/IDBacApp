@@ -824,8 +824,7 @@ app_server <- function(input, output, session) {
                      # Check current version # and the latest github version. If github v is higher, download and install
                      # For more info on version comparison see: https://community.rstudio.com/t/comparing-string-version-numbers/6057/6
                      downFunc <- function() {
-                       remotes::install_github(paste0("chasemc/IDBacApp@",
-                                                      latestStableVersion),
+                       remotes::install_github("chasemc/IDBacApp",
                                                force = TRUE,
                                                quiet = F, 
                                                quick = T)
@@ -928,10 +927,10 @@ app_server <- function(input, output, session) {
   
   
   #  The following code is necessary to stop the R backend when the user closes the browser window
-  # session$onSessionEnded(function() {
-  #    stopApp()
-  #    q("no")
-  #  })
+   session$onSessionEnded(function() {
+      stopApp()
+      q("no")
+    })
   
   
   
