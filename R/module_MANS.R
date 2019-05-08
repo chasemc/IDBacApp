@@ -228,8 +228,6 @@ MAN_Server <- function(input,
   #----
   observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy),{
     
-    aq <<- smallMolNetworkDataFrame()
-    unique(aq$Source)
     
     networkIgraph$graph <- IDBacApp::networkFromDF(smallMolNetworkDataFrame())
     
@@ -277,7 +275,6 @@ MAN_Server <- function(input,
     req(igraph::is.igraph(networkIgraph$graph))
     len <- length(attributes(igraph::V(networkIgraph$graph))$names)
     req(len > 0)
-    awqq<<-networkIgraph$graph
     
     igraph::E(networkIgraph$graph)$color <- "rgba(192, 192, 192, .8)"
     
