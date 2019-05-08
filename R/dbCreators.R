@@ -121,7 +121,6 @@ createXMLSQL <- function(rawDataFilePath,
   instInfo <- mzR::instrumentInfo(mzML_con)
   
   
-  rawDataFilePath <<- rawDataFilePath
   # # Find acquisitionInfo from mzML file
   #acquisitionInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
    #                                               instInfo$manufacturer)
@@ -302,16 +301,6 @@ insertIntoIndividualSpectra <- function(env,
                                         userDBCon,
                                         acquisitionInfo = NULL,
                                         sampleID){
-  
-  
-  env <<- env
-  XMLinfo <<- XMLinfo
-  userDBCon <<- userDBCon
-  acquisitionInfo2 <<- acquisitionInfo
-  sampleID <<- sampleID
-  
-  
-  
   
   temp <- base::lengths(base::mget(base::ls(env),
                                    envir = as.environment(env))) 

@@ -228,8 +228,6 @@ MAN_Server <- function(input,
   #----
   observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy),{
     
-    aq <<- smallMolNetworkDataFrame()
-    unique(aq$Source)
     
     networkIgraph$graph <- IDBacApp::networkFromDF(smallMolNetworkDataFrame())
     
@@ -265,11 +263,10 @@ MAN_Server <- function(input,
     
     igraph::V(networkIgraph$graph)$size <- rep(5, length(igraph::V(networkIgraph$graph)))
     
-    igraph::V(networkIgraph$graph)$size[sampleIndex] <- 10
+    igraph::V(networkIgraph$graph)$size[sampleIndex] <- 8
     
     # make m/z nodes smaller
     
-    #igraph::V(networkIgraph$graph)$size[-sampleIndex] <- 5
   })
  
   
@@ -278,13 +275,16 @@ MAN_Server <- function(input,
     req(igraph::is.igraph(networkIgraph$graph))
     len <- length(attributes(igraph::V(networkIgraph$graph))$names)
     req(len > 0)
-    awqq<<-networkIgraph$graph
+    
+    igraph::E(networkIgraph$graph)$color <- "rgba(192, 192, 192, .8)"
+    
+    
+    
     sigmajs::sigmajs() %>%
       sigmajs::sg_from_igraph(networkIgraph$graph) %>% 
       sigmajs::sg_settings(drawLabels = TRUE,
-                           drawEdgeLabels = FALSE,
-                           scaling = "inside") %>% 
-      sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight) %>% 
+                           drawEdgeLabels = FALSE) %>% 
+      #sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight) %>% 
       sigmajs::sg_force_start() %>% # start
       sigmajs::sg_force_stop(5000) %>% # stop after 5 seconds
       sigmajs::sg_drag_nodes()

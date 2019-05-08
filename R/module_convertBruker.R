@@ -244,21 +244,10 @@ convertOneBruker_Server <- function(input,
                  validate(need(any(!is.na(sampleMapReactive$rt)), 
                                "No samples entered into sample map, please try entering them again"))
                  
-                 
-                 rawFilesLocation2 <<- rawFilesLocation()
-                 inputIds <<- sampleMapReactive$rt
-                 
-                 
-                 
                  # get target positions in order of acqus list
                  spots <- unlist(lapply(acquisitonInformation(), function(x){
                    x$spot
                  }))
-                 
-                 
-            
-                 wq <<- acquisitonInformation()
-                 wq2<<-anyMissing()$matching
                  
                  # should be the same because both come from acquisitonInformation()
                  validate(need(identical(names(anyMissing()$matching), 
@@ -277,7 +266,6 @@ convertOneBruker_Server <- function(input,
                  
                   
                   acquisitionInfo <- split(acquisitonInformation(), anyMissing()$matching) 
-                  wwq<<-acquisitionInfo
                 
                   files <- lapply(acquisitionInfo, function(x){
                     lapply(x, function(y) y$file)
