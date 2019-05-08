@@ -43,7 +43,7 @@ after_test:
                  localPath  = NULL,
                  only64 = FALSE,
                  packageName = 'IDBacApp')"
-   - ls -R
+  - ls -R
 
 on_failure:
   - 7z a failure.zip *.Rcheck\*
