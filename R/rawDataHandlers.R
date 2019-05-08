@@ -31,7 +31,7 @@ startingFromMZ <- function(chosenDir){
 #' @param samplePathList list where names are sample ids, and list elements are raw file paths
 #'
 #' @return list(mzFile = convertTo, sampleID = names(convertFrom)))
-#'
+#' @export
 proteoWizConvert <- function(msconvertPath = "",
                              samplePathList,
                              convertWhere){

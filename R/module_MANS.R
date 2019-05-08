@@ -259,7 +259,7 @@ MAN_Server <- function(input,
     
     
     # Make sample nodes big
-    sampleIndex <- which(igraph::V(networkIgraph$graph)$label %in% unique(aq$Source))
+    sampleIndex <- which(igraph::V(networkIgraph$graph)$label %in% unique(smallMolNetworkDataFrame()$Source))
     
     igraph::V(networkIgraph$graph)$size <- rep(5, length(igraph::V(networkIgraph$graph)))
     
