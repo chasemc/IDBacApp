@@ -15,8 +15,8 @@ Issues/Errors may be reported here (https://github.com/chasemc/IDBacApp/issues)
 If you would rather run IDBac directly from R:
 
 ```{r}
-# install.packages("devtools") # Run this if you don't have the devtools package
-devtools::install_github("chasemc/IDBacApp")
+install.packages("remotes") # Run this if you don't have the devtools package
+remotes::install_github("chasemc/IDBacApp")
 
 # And, to run the app:
 IDBacApp::run_app()
