@@ -96,11 +96,7 @@ app_ui <- function(){
                                             tags$ul(
                                               tags$li(
                                                 p("For reproducibility, cite this specific version of IDBac as version:",
-                                                  a(href = paste0("http://doi.org/10.5281/zenodo.",
-                                                                  "zenodoId"),
-                                                    target = "_blank",
-                                                    shiny::HTML('<a href="https://doi.org/10.5281/zenodo.1410518" target="_blank"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.1410518.svg" alt="DOI"></a>')
-                                                  )
+                                                  as.character(packageVersion("IDBacApp"))
                                                 )
                                               )
                                             )
