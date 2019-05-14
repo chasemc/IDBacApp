@@ -217,7 +217,7 @@ MAN_Server <- function(input,
     },
     content = function(file){
       utils::write.csv(as.matrix(smallMolNetworkDataFrame()),
-                       file,
+                       paste0(file, ".csv"),
                        row.names = FALSE)
     }
   )
