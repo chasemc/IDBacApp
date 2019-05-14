@@ -1,15 +1,6 @@
 context("findMSconvert")
 
 
-a <- IDBacApp::findMSconvert()
-
-
-
-test_that("findMSconvert returns 'error' when msconvert.exe not found", {
-  expect_equal(a, "error")
-})
-
-
 a <- tempdir()
 a <- file.path(a , "msconvert.exe")
 file.create(a)
