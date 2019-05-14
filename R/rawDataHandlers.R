@@ -147,6 +147,14 @@ findMSconvert <- function(proteoWizardLocation = ""){
   }
   
   
+  a <- system.file(package = "IDBacApp")
+  a <- file.path(a, "pwiz")
+
+  
+  if (file.exists(file.path(a, "msconvert.exe"))) {
+    proteoWizardLocation <- file.path(a, "msconvert.exe")
+  }
+  
   
   # Msconvert only works on Windows so abort function if not on Windows
   os <- IDBacApp::getOS()
