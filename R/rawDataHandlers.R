@@ -61,7 +61,7 @@ proteoWizConvert <- function(msconvertPath = "",
     )
     Sys.sleep(5000)
   } else {
-
+    
     msconvertLocation <- base::shQuote(msconvertLocation)
     
     
@@ -195,20 +195,15 @@ findMSconvert <- function(proteoWizardLocation = ""){
       if (length(foundMSconvert) > 0) {
         
         proteoWizardLocation <- proteoWizardLocation[[1]]
+        proteoWizardLocation <- normalizePath(proteoWizardLocation,
+                                              winslash = "\\",
+                                              mustWork = NA)
         message(paste0("msconvert location: ", proteoWizardLocation))
       } else {
         proteoWizardLocation <- "error"
         
       } 
-      
-      
-      
-      
     }
-    
   }
-  proteoWizardLocation <- normalizePath(proteoWizardLocation,
-                                        winslash = "\\",
-                                        mustWork = NA)
   return(proteoWizardLocation)
 }
