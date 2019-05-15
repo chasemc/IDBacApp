@@ -7,53 +7,45 @@
 #'
 convertDataTab_UI <- function(id) {
   ns <- shiny::NS(id)
-
+  
   navlistPanel(
     widths = c(3, 8),
     id = ns("ConversionsNav"),
     "Create an IDBac experiment",
     tabPanel(
       tags$ul(
-        tags$li("Click here to convert Bruker files", align = "left")),
-             value = ns("convert_bruker_nav"),
-             
-             wellPanel(class = "intro_WellPanel",
-                       align = "center",
-                       #       tabsetPanel(
-                       #          tabPanel(title = "Data from single MALDI plate",
-                       IDBacApp::convertOneBruker_UI(ns("convertOneBruker"))
-                       #           ) 
-                       #                                        )
-                       
-                       
-             )
+        tags$li("Click here to convert Bruker files",
+                align = "left")),
+      value = ns("convert_bruker_nav"),
+      uiOutput(ns("brukerConversionUi"))
+      
     ),
     tabPanel(
       tags$ul(
         tags$li("Click here to convert mzML/mzXML files", align="left")),
-             value = ns("convert_mzml_nav"),
-             wellPanel(class = "intro_WellPanel",
-                       align = "center",
-                       IDBacApp::convertMZ_UI(ns("beginWithMZ"))
-             )
+      value = ns("convert_mzml_nav"),
+      wellPanel(class = "intro_WellPanel",
+                align = "center",
+                IDBacApp::convertMZ_UI(ns("beginWithMZ"))
+      )
     ),
     tabPanel(
       tags$ul(
         tags$li("Click here to convert txt files", align = "left")),
-             value = ns("convert_txt_nav"),
-             wellPanel(class = "intro_WellPanel",
-                       align = "center",
-                       IDBacApp::convertDelim_UI(ns("convertDelim"))
-             )
+      value = ns("convert_txt_nav"),
+      wellPanel(class = "intro_WellPanel",
+                align = "center",
+                IDBacApp::convertDelim_UI(ns("convertDelim"))
+      )
     ),
     tabPanel(
       tags$ul(
         tags$li("Click here to convert Microtyper files", align = "left")),
-             value = ns("convert_microtyper_nav"),
-             wellPanel(class = "intro_WellPanel",
-                       align = "center",
-                       IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
-             )
+      value = ns("convert_microtyper_nav"),
+      wellPanel(class = "intro_WellPanel",
+                align = "center",
+                IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
+      )
     )
   )
 }
@@ -69,6 +61,7 @@ convertDataTab_UI <- function(id) {
 #' @param tempMZDir  directory to create temp mzML if needed
 #' @param sqlDirectory  where to write new SQLite file
 #' @param availableExperiments update availableExperiments
+#' @param pwizAvailable whether msconvert was found, logical
 #'
 #' @return none, updates availableExperiments reactive value though
 #' @export
@@ -79,8 +72,14 @@ convertDataTab_Server <- function(input,
                                   session,
                                   tempMZDir,
                                   sqlDirectory, 
-                                  availableExperiments){
+                                  availableExperiments,
+                                  pwizAvailable){
   
+  
+  output$brukerConversionUi <- renderUI({
+    IDBacApp::controlBrukerDisplay(session,
+                                   pwizAvailable)
+  })
   
   shiny::callModule(convertMZ_Server,
                     "beginWithMZ",
@@ -196,5 +195,38 @@ multipleMaldiPlates <- function(id){
 
 
 
-
-
+#' Controls display of Bruker conversion page
+#'
+#' @param pwizAvailable whether msconvert was found
+#' @param session shiny session
+#' @param ostest for testing function
+#'
+#' @return html
+#' @export
+#'
+controlBrukerDisplay <- function(session, 
+                                 pwizAvailable, 
+                                 ostest = NULL){
+  if (IDBacApp::getOS(test = ostest) != "windows") {
+    wellPanel(class = "intro_WellPanel",
+              align = "center",
+              wellPanel(class = "intro_WellPanel",
+                        align = "center",
+                        p("Converting Bruker raw data requires msconvert.exe, which is only available for windows-computers. However, you can begin with any of the other input options.")
+              )
+    )
+  } else if (pwizAvailable != "error") {
+    wellPanel(class = "intro_WellPanel",
+              align = "center",
+              IDBacApp::convertOneBruker_UI(session$ns("convertOneBruker"))
+    )
+  } else {
+    wellPanel(class = "intro_WellPanel",
+              align = "center",
+              wellPanel(class = "intro_WellPanel",
+                        align = "center",
+                        p("Msconvert.exe not found, please install proteowizard (http://proteowizard.sourceforge.net/download.html#Installation) or select another input option")
+              )
+    )
+  }
+}

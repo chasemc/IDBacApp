@@ -59,7 +59,7 @@ proteoWizConvert <- function(msconvertPath = "",
                   size = c("m"), easyClose = TRUE, fade = TRUE)
       
     )
-    Sys.sleep(5000)
+    Sys.sleep(5)
   } else {
     
     msconvertLocation <- base::shQuote(msconvertLocation)

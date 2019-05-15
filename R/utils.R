@@ -101,11 +101,14 @@ chartoRawtoCompressed <- function(input, compression){
 
 #' Get OS
 #'
+#' @param test for testing only
+#'
 #' @return text representing the user's os
 #' @export
 #'
 
-getOS <- function(){
+getOS <- function(test = NULL){
+  if (is.null(test)) {
   sysinf <- Sys.info()
   if (!is.null(sysinf)) {
     os <- sysinf['sysname']
@@ -120,6 +123,9 @@ getOS <- function(){
       os <- "linux"
   }
   return(as.character(tolower(os)))
+  } else {
+    return(test)
+  }
 }
 
 

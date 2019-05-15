@@ -70,12 +70,16 @@ app_server <- function(input, output, session) {
   
   # Conversions Tab ---------------------------------------------------------
   
+    pwizAvailable <- IDBacApp::findMSconvert()
+
+  
   
   callModule(IDBacApp::convertDataTab_Server,
              "convertDataTab",
              tempMZDir = tempMZDir,
              sqlDirectory = sqlDirectory,
-             availableExperiments = availableDatabases)
+             availableExperiments = availableDatabases,
+             pwizAvailable = pwizAvailable)
   
   
   observeEvent(input$processToAnalysis,  

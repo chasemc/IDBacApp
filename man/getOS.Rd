@@ -4,7 +4,10 @@
 \alias{getOS}
 \title{Get OS}
 \usage{
-getOS()
+getOS(test = NULL)
+}
+\arguments{
+\item{test}{for testing only}
 }
 \value{
 text representing the user's os

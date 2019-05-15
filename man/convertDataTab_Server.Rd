@@ -5,7 +5,7 @@
 \title{convertDataTab_Server}
 \usage{
 convertDataTab_Server(input, output, session, tempMZDir, sqlDirectory,
-  availableExperiments)
+  availableExperiments, pwizAvailable)
 }
 \arguments{
 \item{input}{shiny}
@@ -19,6 +19,8 @@ convertDataTab_Server(input, output, session, tempMZDir, sqlDirectory,
 \item{sqlDirectory}{where to write new SQLite file}
 
 \item{availableExperiments}{update availableExperiments}
+
+\item{pwizAvailable}{whether msconvert was found, logical}
 }
 \value{
 none, updates availableExperiments reactive value though
