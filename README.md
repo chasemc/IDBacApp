@@ -19,7 +19,7 @@ install.packages("remotes") # Run this if you don't have the devtools package
 remotes::install_github("chasemc/IDBacApp")
 
 # And, to run the app:
-IDBacApp::run_app()
+IDBacApp::run_app()@*release
 
 ```
 
