@@ -35,7 +35,7 @@ after_test:
   - Rscript -e "remotes::install_github('chasemc/electricShine')"
   - Rscript -e "electricShine::buildElectricApp(appName = 'IDBac',
                  productName = 'IDBac',
-                 semanticVersion = '1.0.51',
+                 semanticVersion = '1.0.100',
                  installTo = getwd(),
                  MRANdate = '2019-05-05',
                  functionName = 'run_app',
