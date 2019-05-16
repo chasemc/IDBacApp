@@ -35,7 +35,7 @@ after_test:
   - Rscript -e "remotes::install_github('chasemc/electricShine')"
   - Rscript -e "electricShine::buildElectricApp(appName = 'IDBac',
                  productName = 'IDBac',
-                 semanticVersion = '1.0.0',
+                 semanticVersion = '1.0.1',
                  installTo = getwd(),
                  MRANdate = '2019-05-05',
                  functionName = 'run_app',
@@ -73,8 +73,6 @@ artifacts:
 
 
 deploy:
-  tag: $(APPVEYOR_REPO_TAG_NAME)
-  description: 'Release description'
   provider: GitHub
   auth_token:
     secure: 'Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O' # your encrypted token from GitHub
