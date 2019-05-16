@@ -16,10 +16,10 @@ If you would rather run IDBac directly from R:
 
 ```{r}
 install.packages("remotes") # Run this if you don't have the devtools package
-remotes::install_github("chasemc/IDBacApp")
+remotes::install_github("chasemc/IDBacApp@*release")
 
 # And, to run the app:
-IDBacApp::run_app()@*release
+IDBacApp::run_app()
 
 ```
 
