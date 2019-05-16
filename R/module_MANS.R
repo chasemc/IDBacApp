@@ -158,8 +158,7 @@ downloadSmNet_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     downloadButton(ns("downloadSmallMolNetworkData"),
-                   label = "Download Current Network Data",
-                   value = FALSE)
+                   label = "Download Current Network Data")
   )
 }
 
@@ -217,7 +216,7 @@ MAN_Server <- function(input,
     },
     content = function(file){
       utils::write.csv(as.matrix(smallMolNetworkDataFrame()),
-                       paste0(file, ".csv"),
+                       paste0(file),
                        row.names = FALSE)
     }
   )
