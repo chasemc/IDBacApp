@@ -220,7 +220,7 @@ createSpectraSQL <- function(mzML_con,
     IDBacApp::insertIntoIndividualSpectra(env = env,
                                           XMLinfo = XMLinfo,
                                           userDBCon = userDBCon,
-                                          acquisitionInfo = acquisitionInfo[!smallIndex],
+                                          acquisitionInfo = acquisitionInfo[smallIndex],
                                           sampleID = sampleID)
     IDBacApp::insertIntoMassTable(env = env,
                                   userDBCon = userDBCon)
