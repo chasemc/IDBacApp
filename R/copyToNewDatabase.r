@@ -1,17 +1,15 @@
 #' Copy from one database to another, selecting by Sample ID
 #'
-#' @param existingDBPool un-checked pool that samples are being pulled from 
-#' @param newDBPool  new unchecked pool
-#' @param sampleIDs  smaples to transfer
-#' @param newdbName new db name
+#' @param existingDBPool is a single (not list) pool object referencing the database to transfer from 
+#' @param newDBPool  is a single (not list) pool object referencing the database to transfer to
+#' @param sampleIDs  sample IDs to transfer 
 #'
-#' @return NA
+#' @return Nothing, side effect of creating a new sqlite databse
 #' @export
 #'
 
 copyToNewDatabase <- function(existingDBPool,
                               newDBPool,
-                              newdbName,
                               sampleIDs){
   
   # Run everything with a Shiny progress bar  
