@@ -152,7 +152,7 @@ transferToNewDB_server <- function(input,
                  newCheckedPool <- IDBacApp::createPool(newDBName, 
                                                         sqlDirectory$sqlDirectory)
                  
-                 shiny::withProgress(message = 'Copying datferfera to new database',
+                 shiny::withProgress(message = 'Copying data to new database',
                                      detail = 'Connecting experiments...',
                                      value = 0, {
                                        IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
