@@ -4,19 +4,17 @@
 \alias{copyToNewDatabase}
 \title{Copy from one database to another, selecting by Sample ID}
 \usage{
-copyToNewDatabase(existingDBPool, newDBPool, newdbName, sampleIDs)
+copyToNewDatabase(existingDBPool, newDBPool, sampleIDs)
 }
 \arguments{
-\item{existingDBPool}{un-checked pool that samples are being pulled from}
+\item{existingDBPool}{is a single (not list) pool object referencing the database to transfer from}
 
-\item{newDBPool}{new unchecked pool}
+\item{newDBPool}{is a single (not list) pool object referencing the database to transfer to}
 
-\item{newdbName}{new db name}
-
-\item{sampleIDs}{smaples to transfer}
+\item{sampleIDs}{sample IDs to transfer}
 }
 \value{
-NA
+Nothing, side effect of creating a new sqlite databse
 }
 \description{
 Copy from one database to another, selecting by Sample ID
