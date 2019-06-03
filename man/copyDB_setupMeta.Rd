@@ -4,14 +4,12 @@
 \alias{copyDB_setupMeta}
 \title{Setup metadata DB table}
 \usage{
-copyDB_setupMeta(newDBconn, existingDBconn, arch)
+copyDB_setupMeta(newDBconn, existingDBconn)
 }
 \arguments{
 \item{newDBconn}{newDBconn}
 
 \item{existingDBconn}{existingDBconn}
-
-\item{arch}{DB architecture}
 }
 \value{
 NA
