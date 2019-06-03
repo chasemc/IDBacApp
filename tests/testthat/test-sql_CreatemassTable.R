@@ -17,22 +17,20 @@ z2 <- pool::poolCheckout(z2)
 DBI::dbListTables(z2)
 
 
-
 test_that("new DB is empty", {
   expect_equal(character(0), 
                DBI::dbListTables(z2))
 })
 
 
-IDBacApp::copyDB_setupMeta(z2, z1)
+IDBacApp::sql_CreatemassTable(z2)
+a <- DBI::dbListFields(z2, "massTable")
 
-
-a <- DBI::dbListFields(z2, "metaData")
-test_that("new DB has meta table", {
-  expect_equal("metaData", 
+test_that("new DB has Mass table", {
+  expect_equal("massTable", 
                DBI::dbListTables(z2))
   
- expect_identical("Strain_IDGenbank_AccessionNCBI_TaxIDKingdomPhylumClassOrderFamilyGenusSpeciesMALDI_MatrixDSM_Agar_MediaCultivation_Temp_CelsiusCultivation_Time_DaysCultivation_OtherUserUser_ORCIDPI_FirstName_LastNamePI_ORCIDdna_16S",
+  expect_identical("spectrumMassHashmassVector",
                    paste0(a, collapse = ""))
   
 })
