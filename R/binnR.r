@@ -110,7 +110,6 @@ peakBinner <- function(massStart,
   z2 <- as.integer(round((massEnd * ppm) / 1000000L))
   vecLength <- z1 + z2 + 2
   
-  
   #  if (length(massList) * vecLength < 4e6) {
   builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
   #  } else {
