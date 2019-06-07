@@ -138,7 +138,7 @@ transferToNewDB_server <- function(input,
   
   observeEvent(continue$val, 
                ignoreInit = TRUE, {
-
+                 
                  req(continue$val == TRUE)
                  
                  IDBacApp::copyingDbPopup()
@@ -152,11 +152,13 @@ transferToNewDB_server <- function(input,
                  newCheckedPool <- IDBacApp::createPool(newDBName, 
                                                         sqlDirectory$sqlDirectory)
                  
-                 
-                 IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
-                                             newDBPool = newCheckedPool[[1]], 
-                                             newdbName = newDBName,
-                                             sampleIDs = chosenSamples$chosen)
+                 shiny::withProgress(message = 'Copying data to new database',
+                                     detail = 'Connecting experiments...',
+                                     value = 0, {
+                                       IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
+                                                                   newDBPool = newCheckedPool[[1]], 
+                                                                   sampleIDs = chosenSamples$chosen)
+                                     })
                  
                  
                  removeModal()

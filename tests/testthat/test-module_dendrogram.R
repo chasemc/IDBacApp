@@ -53,8 +53,10 @@ test_that("downloadHier", {
 
 a <- IDBacApp::downloadSvg("hi")
 test_that("downloadSvg", {
-  expect_identical(class(a),"shiny.tag")
-  expect_known_hash(a, "38f14650a4")
+  expect_identical(class(a[[1]]),"shiny.tag")
+  expect_identical(class(a[[2]]),"shiny.tag")
+  expect_identical(class(a[[2]]),"shiny.tag")
+  expect_known_hash(a, "addf5fc4a8")
 })
 
 

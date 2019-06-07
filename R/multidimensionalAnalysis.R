@@ -19,6 +19,7 @@ pcaCalculation <- function(dataMatrix,
                            missing = 0){
   validate(need(nrow(dataMatrix) > 3, "Select more samples for PCA"))
   validate(need(ncol(dataMatrix) > 1, "Only 1 peak found between all samples"))
+  dd<<-dataMatrix
   
   names <- rownames(dataMatrix)
   # log10 if chosen
@@ -26,16 +27,16 @@ pcaCalculation <- function(dataMatrix,
     dataMatrix <- log10(dataMatrix)
   }
   
-  dataMatrix <- scale(dataMatrix, scale = scaled, center = centered)
+#  dataMatrix <- scale(dataMatrix, scale = scaled, center = centered)
   
   
   # Check for infinite
   dataMatrix[is.infinite(dataMatrix)] <- missing
   # Check for NAs
   dataMatrix[is.na(dataMatrix)] <- missing
-  
   dataMatrix <- irlba::prcomp_irlba(dataMatrix,
-                                    n = 3)
+                                    n = 3,
+                                    fastpath=FALSE)
 
   dataMatrix <- dataMatrix$x[, 1:3]
   dataMatrix <- as.data.frame(dataMatrix)
@@ -72,10 +73,10 @@ tsneCalculation <- function(dataMatrix,
   
   if (nrow(dataMatrix) > 50) {
     
-    dataMatrix <- scale(dataMatrix, 
-                        scale = TRUE, 
-                        center = TRUE)
-    
+    # dataMatrix <- scale(dataMatrix, 
+    #                     scale = TRUE, 
+    #                     center = TRUE)
+    # 
     # # Check for infinite
     # dataMatrix[is.infinite(dataMatrix)] <- missing
     # # Check for NAs

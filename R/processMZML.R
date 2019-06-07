@@ -16,12 +16,8 @@ processMZML <- function(mzFilePaths,
                         newExperimentName,
                         acquisitionInfo){
   
-  # validate(need(length(mzFilePaths) == length(sampleIds), 
-  #               "Temp mzML files and sample ID lengths don't match."
-  # ))
-  # 
-  lengthProgress <- length(mzFilePaths)
-  
+
+
   userDB <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
                                         sqlDirectory = sqlDirectory)[[1]]
   userDB <- pool::poolCheckout(userDB)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/module_convertBruker.R
 \name{sampleMapViewer}
 \alias{sampleMapViewer}
-\title{Editable Sample Map}
+\title{Rhandsontable Sample Map}
 \usage{
 sampleMapViewer(df)
 }
@@ -13,5 +13,5 @@ sampleMapViewer(df)
 rhandsontable
 }
 \description{
-Editable Sample Map
+Rhandsontable
 }

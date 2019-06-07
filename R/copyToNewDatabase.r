@@ -1,24 +1,18 @@
 #' Copy from one database to another, selecting by Sample ID
 #'
-#' @param existingDBPool un-checked pool that samples are being pulled from 
-#' @param newDBPool  new unchecked pool
-#' @param sampleIDs  smaples to transfer
-#' @param newdbName new db name
+#' @param existingDBPool is a single (not list) pool object referencing the database to transfer from 
+#' @param newDBPool  is a single (not list) pool object referencing the database to transfer to
+#' @param sampleIDs  sample IDs to transfer 
 #'
-#' @return NA
+#' @return Nothing, side effect of creating a new sqlite databse
 #' @export
 #'
 
 copyToNewDatabase <- function(existingDBPool,
                               newDBPool,
-                              newdbName,
                               sampleIDs){
-  
-  # Run everything with a Shiny progress bar  
-  shiny::withProgress(message = 'Copying data to new database',
-                      detail = 'Connecting experiments...',
-                      value = 0, {
-                        
+
+
                         Sys.sleep(1) 
                         
                         # Connect to both databases (create pool and checkout)
@@ -30,29 +24,22 @@ copyToNewDatabase <- function(existingDBPool,
                                        existingDBconn@dbname,
                                        " to \n", newDBconn@dbname))
                         
-                      
+                        if (!exists("session")) {
                         setProgress(value = 0.2, 
                                     message = 'Copying data to new database',
                                     detail = 'Setting up new experiment...',
                                     session = getDefaultReactiveDomain())
-                        
+                        }
                         # Create sqlite tables in new database
                         #-----
                     
                         
-                        
-                        # Account for modifications to DB structure -------------------------------
-                        
-                        
-                        # Below, when setting up the new tables, we need to add the existing columns which may not be present in 
-                        # the current architecture, and also have the current architecture (ie we can't just copy/paste from the old DB)
-                        
-                        
+                    
+                    
                         # Setup New metaData ------------------------------------------------------
                         
                         IDBacApp::copyDB_setupMeta(newDBconn = newDBconn,
-                                                   existingDBconn = existingDBconn,
-                                                   arch = arch)
+                                                   existingDBconn = existingDBconn)
                         
                         # Setup New XML -----------------------------------------------------------
                         
@@ -83,13 +70,13 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         Sys.sleep(1) 
                         
-                        
+                        if (!exists("session")) {
                         
                         setProgress(value = 0.5, 
                                     message = 'Copying data to new database',
                                     detail = 'Copying metadata...',
                                     session = getDefaultReactiveDomain())
-                        
+                      }
                         
                         
                         state <- DBI::dbSendStatement(existingDBconn, 
@@ -102,14 +89,14 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(state) 
                         
                         
-                        
+                        if (!exists("session")) {
                         
                         setProgress(value = 0.7, 
                                     message = 'Copying data to new database',
                                     detail = 'Copying individual spectra...',
                                     session = getDefaultReactiveDomain())
                         
-                        
+                        }
                         
                         state <- DBI::dbSendStatement(existingDBconn, 
                                                       "INSERT INTO newDB.IndividualSpectra
@@ -121,11 +108,12 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(state) 
                         
                         # Copy XML table ----------------------------------------------------------
-                        setProgress(value = 0.8, 
+                        if (!exists("session")) {
+                           setProgress(value = 0.8, 
                                     message = 'Copying data to new database',
                                     detail = 'Copying mzML files...',
                                     session = getDefaultReactiveDomain())
-                        
+                        }
                         state <- DBI::dbSendQuery(existingDBconn, 
                                                   "SELECT DISTINCT XMLHash
                                                       FROM main.IndividualSpectra
@@ -170,12 +158,12 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(state) 
                         
                       
-                        
+                        if (!exists("session")) {
                         shiny::setProgress(value = 1, 
                                            message = 'Copying data to new database',
                                            detail = 'Finishing...',
                                            session = getDefaultReactiveDomain())
-                        
+                        }
                         pool::poolReturn(existingDBconn)
                         pool::poolReturn(newDBconn)
                         pool::poolClose(newDBPool)
@@ -185,7 +173,7 @@ copyToNewDatabase <- function(existingDBPool,
                                        existingDBconn@dbname,
                                        " to \n", newDBconn@dbname))
                         
-                      })
+                       
   
 }
 
@@ -214,14 +202,14 @@ copyDB_dbAttach <- function(newdbPath,
 #'
 #' @param newDBconn newDBconn 
 #' @param existingDBconn  existingDBconn
-#' @param arch DB architecture 
 #'
 #' @return NA
 #' @export
 #'
 copyDB_setupMeta <- function(newDBconn,
-                             existingDBconn,
-                             arch){
+                             existingDBconn){
+  # Below, when setting up the new tables, we need to add the existing columns which may not be present in 
+  # the current architecture, and also have the current architecture (ie we can't just copy/paste from the old DB)
   
   IDBacApp::sql_CreatemetaData(sqlConnection = newDBconn)
   

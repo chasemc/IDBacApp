@@ -86,8 +86,7 @@ peakBinner <- function(massStart,
                        massList,
                        intensityList){
   
-  validate(need(ppm > 300, "Select a ppm > 300"))
-  
+  shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
   
   scale_ppm <- function(mass,
                         ppm){
@@ -110,7 +109,6 @@ peakBinner <- function(massStart,
   z2 <- as.integer(round((massEnd * ppm) / 1000000L))
   vecLength <- z1 + z2 + 2
   
-  
   #  if (length(massList) * vecLength < 4e6) {
   builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
   #  } else {
@@ -132,7 +130,6 @@ peakBinner <- function(massStart,
          z1 + z2)
     
   })
-  
   
   # Create a distribution of "intensity" across each ppm range of each peak
   # loop across all samples (spectra) 
@@ -161,14 +158,12 @@ peakBinner <- function(massStart,
     #z3 <-  mapply(function(x, y) x * y, z2, intensityList[[i]])
     z3 <-  mapply(function(x, y) x * y, z2, 1000)
     
-    
-    z <- unlist(z)
-    z3 <- unlist(z3)
-    
-    builtM[i, z] <- builtM[i, z] + (z3)
+    for (ii  in seq_along(z)){
+      
+      builtM[i, z[[ii]]] <- builtM[i, z[[ii]]] + (z3[[ii]])
+      
+    }
   } 
-  
-  
   
   rownames(builtM) <- names(massList)
   
