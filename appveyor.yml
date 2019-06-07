@@ -49,7 +49,7 @@ for:
     - git commit -m "AppVeyor version bump; [skip appveyor]" 
     - git push origin master
 
-  ...
+  
 
 
 
@@ -87,7 +87,7 @@ artifacts:
 
   - path: 'IDBac\dist\*.exe'
     name: app
-  ...
+  
 
 
 for:
@@ -121,5 +121,5 @@ for:
     artifact: app           
     draft: false
     prerelease: false
-  ...
+  
 
