@@ -15,6 +15,9 @@ environment:
   global:
     WARNINGS_ARE_ERRORS: 0
     PKGTYPE: win.binary 
+    version: '1.0.{build}'
+  access_token:
+    secure: Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O  
   
   matrix:
   - R_VERSION: 3.6.0
@@ -27,15 +30,34 @@ matrix:
 build_script:
   - travis-tool.sh install_deps
 
+
+before_test:
+  - Rscript -e "install.packages('desc', repos = 'http://cran.rstudio.com')"
+  - git checkout master
+  - Rscript -e "list.files(pattern = 'DESCRIPTION', ignore.case = T, recursive = F, full.names = T)"
+  - Rscript -e "desc::desc_set_version('%APPVEYOR_BUILD_VERSION%', list.files(pattern = 'DESCRIPTION', ignore.case = T, recursive = F))"
+  - git config --global credential.helper store
+  - ps: Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+  - git config --global user.email "cclark42@uic.edu"
+  - git config --global user.name "Chase Clark"
+  - git add DESCRIPTION
+  - git commit -m "AppVeyor version bump; [skip appveyor]" 
+  - git push origin master
+
+
+
+
+
 test_script:
   - travis-tool.sh run_tests
 
 
+
 after_test:
-  - Rscript -e "remotes::install_github('chasemc/electricShine')"
+  - Rscript -e "remotes::install_github('chasemc/electricShine@886ddff')"
   - Rscript -e "electricShine::buildElectricApp(appName = 'IDBac',
                  productName = 'IDBac',
-                 semanticVersion = '1.0.100',
+                 semanticVersion = '%APPVEYOR_BUILD_VERSION%',
                  installTo = getwd(),
                  MRANdate = '2019-05-05',
                  functionName = 'run_app',
@@ -43,7 +65,10 @@ after_test:
                  localPath  = NULL,
                  only64 = FALSE,
                  packageName = 'IDBacApp')"
-  - ls -R
+
+
+
+
 
 on_failure:
   - 7z a failure.zip *.Rcheck\*
@@ -71,11 +96,16 @@ artifacts:
   - path: 'IDBac\dist\*.exe'
     name: app
 
-
 deploy:
+  on:
+    branch: master        
+  skip_tags: true
+  tag: $(appveyor_build_version)
+  description: 'Release description'
   provider: GitHub
+  force_update: false
   auth_token:
-    secure: 'Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O' # your encrypted token from GitHub
+    secure: 'Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O'
   artifact: app           
   draft: false
   prerelease: false
