@@ -90,7 +90,7 @@ artifacts:
   
 
 
-for:
+for: 
 -
   branches:
     only:
