@@ -172,7 +172,11 @@ convertOneBruker_Server <- function(input,
     req(rawFilesLocation())
     req(sampleMapReactive$rt)
     
-  
+    
+    
+    acquisitonInformation1 <<- acquisitonInformation
+    sampleMapReactive1 <<- sampleMapReactive
+    
     spots <- unlist(lapply(acquisitonInformation(), function(x) x$spot))
     
     IDBacApp::findMissingSampleMapIds(spots = spots, 
@@ -218,17 +222,14 @@ convertOneBruker_Server <- function(input,
   
   observeEvent(input$saveSampleMap, 
                ignoreInit = TRUE, {
-                 sampleMapSaver(sampleData = input$plateDefault,
-                                sampleMapReactive = sampleMapReactive)
+                 sampleMapReactive$rt <- IDBacApp::sampleMaptoDF(sampleData = input$plateDefault)
                  
                  shiny::removeModal()
                })
   
   
   
-  
-  
-  
+
   
   
   success <- reactiveValues(val = FALSE)
@@ -256,45 +257,45 @@ convertOneBruker_Server <- function(input,
                                     "names:", names(anyMissing()$matching), "\n",
                                     "spots:", spots)
                  ))
-                
-                  validate(need(identical(length(anyMissing()$matching),
+                 
+                 validate(need(identical(length(anyMissing()$matching),
                                          length(acquisitonInformation())),
                                list("Something happend when associating Bruker acqu spots", "\n",
                                     "length(anyMissing()$matching):", length(anyMissing()$matching), "\n",
                                     "length(acquisitonInformation()):", length(acquisitonInformation())
-                 )))
+                               )))
                  
-                  
-                  acquisitionInfo <- split(acquisitonInformation(), anyMissing()$matching) 
-                
-                  files <- lapply(acquisitionInfo, function(x){
-                    lapply(x, function(y) y$file)
-                  })
-                  
-                  
-                  
-                  IDBacApp::brukerToMzml_popup()
-                  
-                  
-                  
-                  forProcessing <- IDBacApp::proteoWizConvert(msconvertPath = "",
-                                                              samplePathList = files,
-                                                              convertWhere = tempMZDir)
-                  
-                  IDBacApp::popup3()
-                  
-                  IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
-                                        sampleIds = forProcessing$sampleID,
-                                        sqlDirectory = sqlDirectory$sqlDirectory,
-                                        newExperimentName = sanitizedNewExperimentName(),
-                                        acquisitionInfo = acquisitionInfo )
-                  
-                  # Update available experiments
-                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
-                                                                                  pattern = ".sqlite",
-                                                                                  full.names = FALSE))
-                  IDBacApp::popup4()
-                  
+                 
+                 acquisitionInfo <- split(acquisitonInformation(), anyMissing()$matching) 
+                 
+                 files <- lapply(acquisitionInfo, function(x){
+                   lapply(x, function(y) y$file)
+                 })
+                 
+                 
+                 
+                 IDBacApp::brukerToMzml_popup()
+                 
+                 
+                 
+                 forProcessing <- IDBacApp::proteoWizConvert(msconvertPath = "",
+                                                             samplePathList = files,
+                                                             convertWhere = tempMZDir)
+                 
+                 IDBacApp::popup3()
+                 
+                 IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
+                                       sampleIds = forProcessing$sampleID,
+                                       sqlDirectory = sqlDirectory$sqlDirectory,
+                                       newExperimentName = sanitizedNewExperimentName(),
+                                       acquisitionInfo = acquisitionInfo )
+                 
+                 # Update available experiments
+                 availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
+                                                                                 pattern = ".sqlite",
+                                                                                 full.names = FALSE))
+                 IDBacApp::popup4()
+                 
                })
   
 }
@@ -303,11 +304,10 @@ convertOneBruker_Server <- function(input,
 
 
 
-
-
-
-#' Editable Sample Map 
+#'  Rhandsontable Sample Map 
 #'
+#'  Rhandsontable 
+#'  
 #' @param df reactiveValues data frame input IDBacApp::nulledMap384Well()
 #'
 #' @return rhandsontable
@@ -330,15 +330,11 @@ sampleMapViewer <- function(df){
 #' Update sample map reactive value
 #'
 #' @param sampleData sample map rhandsontable
-#' @param sampleMapReactive sample map reactive value to save to
 #'
 #' @return none, side effect
 #' @export
 #'
-sampleMapSaver <- function(sampleData,
-                           sampleMapReactive){
-  temp <- rhandsontable::hot_to_r(sampleData)
-  sampleMapReactive$rt <- as.data.frame(temp, 
-                                        stringsAsFactors = FALSE)
-  
+sampleMaptoDF <- function(sampleData){
+  as.data.frame(rhandsontable::hot_to_r(sampleData), 
+                stringsAsFactors = FALSE)
 }
