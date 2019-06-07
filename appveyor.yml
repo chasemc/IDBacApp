@@ -15,7 +15,7 @@ environment:
   global:
     WARNINGS_ARE_ERRORS: 0
     PKGTYPE: win.binary 
-    version: '1.0.{build}'
+    version: '1.1.{build}'
   access_token:
     secure: Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O  
   
