@@ -105,8 +105,23 @@ downloadHier <- function(id) {
 downloadSvg <- function(id) {
   ns <- shiny::NS(id)
   
-  downloadButton(ns("downloadSVG"),
-                 "Save dendrogram as SVG image")
+  tagList(
+    downloadButton(ns("downloadSVG"),
+                   "Save dendrogram as SVG image"),
+    numericInput(ns("svgHeight"),
+                 label = "SVG Height",
+                 value = 15,
+                 step	= 0.1),
+    numericInput(ns("svgWidth"),
+                 label = "SVG Width",
+                 value = 10,
+                 step	= 0.1),
+    numericInput(ns("svgPointSize"),
+                 label = "SVG Text Size",
+                 value = 1,
+                 step	= 0.1)
+  )
+  
   
 }
 
@@ -121,8 +136,8 @@ downloadSvg <- function(id) {
 #'
 displayMissingProteinUI <- function(id, sampleIds) {
   ns <- shiny::NS(id)
-   uiOutput(ns("missingSamples"))
- 
+  uiOutput(ns("missingSamples"))
+  
 }
 
 
@@ -277,7 +292,7 @@ dendDotsServer <- function(input,
   
   observeEvent(input$openLineMod, ignoreInit = T ,ignoreNULL = T, {
     output$absPanelDendLines <- renderUI(
-     IDBacApp::modDendLines_WellPanel(session$ns)
+      IDBacApp::modDendLines_WellPanel(session$ns)
     )
   })
   
@@ -336,55 +351,17 @@ dendDotsServer <- function(input,
                 plotWidth()))
     
     
-    if (dendOrPhylo() == "Dendrogram") {
-      plot(dendrogram$dendrogram, horiz = T)
-    } else if (dendOrPhylo() == "Phylogram") {
-      plot(dendextend::hang.dendrogram(dendrogram$dendrogram,
-                                       hang = 0),
-           horiz = T)
-    }
-    
-    
-    
-    if (!is.null(input$selectMetaColumn[[1]])) {
-      
-      if (input$closeDendDots == 1) {
-        
-      } else {
-        
-        trimdLabsDend <- dendrogram$dendrogram
-        
-        dendextend::set_labels(trimdLabsDend,
-                               strtrim(labels(trimdLabsDend), 20))
-        IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
-                              trimdLabsDend = trimdLabsDend,
-                              pool = pool(),
-                              columnID = input$selectMetaColumn,
-                              colors = colorsChosen(),
-                              text_shift = 1)
-      }
-    }
-    
-    
-    if (!is.null(input$colorByLines)) {
-      if (input$colorByLines == "height") {
-        graphics::abline(v = input$cutHeightLines, lty = 2)
-        
-      }
-    }
-    
-    if (!is.null(input$colorByLabels)) {
-      if (input$colorByLabels == "height") {
-        graphics::abline(v = input$cutHeightLabels, lty = 2)
-      }
-    }
-    if (boots()$bootstraps[1] != "") {
-      
-      IDBacApp::bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram), 
-                                  boots()$bootstraps,
-                                  horiz = TRUE,
-                                  col = "blue")
-    }
+    IDBacApp::plotDendrogram(dendrogram = dendrogram,
+                             dendOrPhylo = dendOrPhylo(),
+                             selectMetaColumn = input$selectMetaColumn,
+                             colorsChosen = colorsChosen(),
+                             cutHeightLines = input$cutHeightLines,
+                             colorByLines = input$colorByLines,
+                             colorByLabels = input$colorByLabels,
+                             closeDendDots = input$closeDendDots,
+                             cutHeightLabels = input$cutHeightLabels,
+                             boots = boots()$bootstraps,
+                             pool = pool())
     
   }, height = plotHeight)
   
@@ -422,59 +399,31 @@ dendDotsServer <- function(input,
       
       
       svglite::svglite(file1,
-                       width = 10,
-                       height = 8, 
+                       width = input$svgWidth,
+                       height = input$svgHeight, 
                        bg = "white",
-                       pointsize = 12,
+                       pointsize = input$svgPointSize,
                        standalone = TRUE)
       
-      par(mar = c(5, 5, 5, plotWidth()))
-      plot(dendrogram$dendrogram, horiz = T)
-      if (!is.null(input$selectMetaColumn[[1]])) {
-        
-        if (input$closeDendDots == 1) {
-          
-        } else {
-          
-          trimdLabsDend <- dendrogram$dendrogram
-          
-          dendextend::set_labels(trimdLabsDend,
-                                 strtrim(labels(trimdLabsDend), 20))
-          IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
-                                trimdLabsDend = trimdLabsDend,
-                                pool = pool(),
-                                columnID = input$selectMetaColumn,
-                                colors = colorsChosen(),
-                                text_shift = 1)
-        }
-      }
+      par(mar = c(1, 1, 1, plotWidth()))
       
-      
-      if (!is.null(input$colorByLines)) {
-        if (input$colorByLines == "height") {
-          graphics::abline(v = input$cutHeightLines, lty = 2)
-          
-        }
-      }
-      
-      if (!is.null(input$colorByLabels)) {
-        if (input$colorByLabels == "height") {
-          graphics::abline(v = input$cutHeightLines, lty = 2)
-        }
-      }
-      if (boots()$bootstraps[1] != "") {
-        
-        IDBacApp::bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram), 
-                                    boots()$bootstraps,
-                                    horiz = TRUE,
-                                    col = "blue")
-      }
-      
-      
+      IDBacApp::plotDendrogram(dendrogram = dendrogram,
+                               dendOrPhylo = dendOrPhylo(),
+                               selectMetaColumn = input$selectMetaColumn,
+                               colorsChosen = colorsChosen(),
+                               cutHeightLines = input$cutHeightLines,
+                               colorByLines = input$colorByLines,
+                               colorByLabels = input$colorByLabels,
+                               closeDendDots = input$closeDendDots,
+                               cutHeightLabels = input$cutHeightLabels,
+                               boots = boots()$bootstraps,
+                               pool = pool())
       
       grDevices::dev.off()
+      
       if (file.exists(paste0(file1, ".svg")))
         file.rename(paste0(file1, ".svg"), file1)
+      
     })
   
   
@@ -573,57 +522,57 @@ modDendLabels_WellPanel <- function(ns) {
 #' @export
 #'
 modDendLines_WellPanel <- function(ns){
-shiny::absolutePanel(
-  class = "dendMod_WellPanel",
-  bottom = "50%",
-  right =  "0%",
-  width = "20%",
-  fixed = TRUE,
-  draggable = TRUE,
-  style = "z-index:1002;",
-  shiny::wellPanel(
-    shiny::h4("Adjust Dendrogram Lines"),
-    shiny::selectInput(ns("colorByLines"),
-                       "Color By:",
-                       c("None" = "none",
-                         "Choose Number of Groups" = "groups",
-                         "Color by cutting at height" = "height"
-                       ),
-                       selected = "groups"
-    ),
-    shiny::conditionalPanel(
-      condition = "input.colorByLines == 'height'", ns = ns,
-      shiny::numericInput(ns("cutHeightLines"),
-                          label = shiny::h5(shiny::strong("Cut Tree at Height")),
-                          value = 0,
-                          step = 0.1,
-                          min = 0)
+  shiny::absolutePanel(
+    class = "dendMod_WellPanel",
+    bottom = "50%",
+    right =  "0%",
+    width = "20%",
+    fixed = TRUE,
+    draggable = TRUE,
+    style = "z-index:1002;",
+    shiny::wellPanel(
+      shiny::h4("Adjust Dendrogram Lines"),
+      shiny::selectInput(ns("colorByLines"),
+                         "Color By:",
+                         c("None" = "none",
+                           "Choose Number of Groups" = "groups",
+                           "Color by cutting at height" = "height"
+                         ),
+                         selected = "groups"
+      ),
+      shiny::conditionalPanel(
+        condition = "input.colorByLines == 'height'", ns = ns,
+        shiny::numericInput(ns("cutHeightLines"),
+                            label = shiny::h5(shiny::strong("Cut Tree at Height")),
+                            value = 0,
+                            step = 0.1,
+                            min = 0)
+        
+        
+      ),
+      shiny::conditionalPanel(
+        condition = "input.colorByLines == 'groups'", ns = ns,
+        shiny::numericInput(ns("chosenKLines"),
+                            label = shiny::h5(shiny::strong("Choose the number of groups")),
+                            value = 1,
+                            step = 1,
+                            min = 1)
+      ),
       
-      
-    ),
-    shiny::conditionalPanel(
-      condition = "input.colorByLines == 'groups'", ns = ns,
-      shiny::numericInput(ns("chosenKLines"),
-                          label = shiny::h5(shiny::strong("Choose the number of groups")),
+      shiny::numericInput(ns("dendLineWidth"),
+                          "Line Width",
                           value = 1,
-                          step = 1,
-                          min = 1)
-    ),
-    
-    shiny::numericInput(ns("dendLineWidth"),
-                        "Line Width",
-                        value = 1,
-                        min = 1,
-                        max = 10,
-                        step = 1
-    ),
-    
-    shiny::actionButton(ns("closeDendLines"),
-                        "Close")
-    
+                          min = 1,
+                          max = 10,
+                          step = 1
+      ),
+      
+      shiny::actionButton(ns("closeDendLines"),
+                          "Close")
+      
+    )
   )
-)
-
+  
 }
 
 
