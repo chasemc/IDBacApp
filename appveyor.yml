@@ -29,21 +29,28 @@ matrix:
 
 build_script:
   - travis-tool.sh install_deps
+  ...
 
+for:
+-
+  branches:
+    only:
+      - master
 
-before_test:
-  - Rscript -e "install.packages('desc', repos = 'http://cran.rstudio.com')"
-  - git checkout master
-  - Rscript -e "list.files(pattern = 'DESCRIPTION', ignore.case = T, recursive = F, full.names = T)"
-  - Rscript -e "desc::desc_set_version('%APPVEYOR_BUILD_VERSION%', list.files(pattern = 'DESCRIPTION', ignore.case = T, recursive = F))"
-  - git config --global credential.helper store
-  - ps: Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
-  - git config --global user.email "cclark42@uic.edu"
-  - git config --global user.name "Chase Clark"
-  - git add DESCRIPTION
-  - git commit -m "AppVeyor version bump; [skip appveyor]" 
-  - git push origin master
+  before_test:
+    - Rscript -e "install.packages('desc', repos = 'http://cran.rstudio.com')"
+    - git checkout master
+    - Rscript -e "list.files(pattern = 'DESCRIPTION', ignore.case = T, recursive = F, full.names = T)"
+    - Rscript -e "desc::desc_set_version('%APPVEYOR_BUILD_VERSION%', list.files(pattern = 'DESCRIPTION', ignore.case = T, recursive = F))"
+    - git config --global credential.helper store
+    - ps: Add-Content "$HOME\.git-credentials" "https://$($env:access_token):x-oauth-basic@github.com`n"
+    - git config --global user.email "cclark42@uic.edu"
+    - git config --global user.name "Chase Clark"
+    - git add DESCRIPTION
+    - git commit -m "AppVeyor version bump; [skip appveyor]" 
+    - git push origin master
 
+  ...
 
 
 
@@ -51,20 +58,6 @@ before_test:
 test_script:
   - travis-tool.sh run_tests
 
-
-
-after_test:
-  - Rscript -e "remotes::install_github('chasemc/electricShine@886ddff')"
-  - Rscript -e "electricShine::buildElectricApp(appName = 'IDBac',
-                 productName = 'IDBac',
-                 semanticVersion = '%APPVEYOR_BUILD_VERSION%',
-                 installTo = getwd(),
-                 MRANdate = '2019-05-05',
-                 functionName = 'run_app',
-                 githubRepo = 'chasemc/IDBacApp',
-                 localPath  = NULL,
-                 only64 = FALSE,
-                 packageName = 'IDBacApp')"
 
 
 
@@ -95,18 +88,39 @@ artifacts:
 
   - path: 'IDBac\dist\*.exe'
     name: app
+  ...
 
-deploy:
-  on:
-    branch: master        
-  skip_tags: true
-  tag: $(appveyor_build_version)
-  description: 'Release description'
-  provider: GitHub
-  force_update: false
-  auth_token:
-    secure: 'Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O'
-  artifact: app           
-  draft: false
-  prerelease: false
+
+for:
+-
+  branches:
+    only:
+      - master
   
+  after_test:
+    - Rscript -e "remotes::install_github('chasemc/electricShine@886ddff')"
+    - Rscript -e "electricShine::buildElectricApp(appName = 'IDBac',
+                   productName = 'IDBac',
+                   semanticVersion = '%APPVEYOR_BUILD_VERSION%',
+                   installTo = getwd(),
+                   MRANdate = '2019-05-05',
+                   functionName = 'run_app',
+                   githubRepo = 'chasemc/IDBacApp',
+                   localPath  = NULL,
+                   only64 = FALSE,
+                   packageName = 'IDBacApp')"
+  deploy:
+    on:
+      branch: master        
+    skip_tags: true
+    tag: $(appveyor_build_version)
+    description: 'Release description'
+    provider: GitHub
+    force_update: false
+    auth_token:
+      secure: 'Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O'
+    artifact: app           
+    draft: false
+    prerelease: false
+  ...
+
