@@ -131,7 +131,6 @@ peakBinner <- function(massStart,
     
   })
   
-  
   # Create a distribution of "intensity" across each ppm range of each peak
   # loop across all samples (spectra) 
   for (i in seq_along(mm)) {
