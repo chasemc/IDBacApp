@@ -10,6 +10,7 @@
 #' @param cutHeightLabels cutHeightLabels
 #' @param boots plot bootstraps
 #' @param colorByLabels colorByLabels 
+#' @param pool pool reactive
 #'
 #' @return plot
 #' @export
