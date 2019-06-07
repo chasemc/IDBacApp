@@ -86,8 +86,7 @@ peakBinner <- function(massStart,
                        massList,
                        intensityList){
   
-  validate(need(ppm > 300, "Select a ppm > 300"))
-  
+  shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
   
   scale_ppm <- function(mass,
                         ppm){
