@@ -29,7 +29,6 @@ matrix:
 
 build_script:
   - travis-tool.sh install_deps
-  ...
 
 for:
 -
