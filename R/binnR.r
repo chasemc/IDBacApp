@@ -158,14 +158,12 @@ peakBinner <- function(massStart,
     #z3 <-  mapply(function(x, y) x * y, z2, intensityList[[i]])
     z3 <-  mapply(function(x, y) x * y, z2, 1000)
     
-    
-    z <- unlist(z)
-    z3 <- unlist(z3)
-    
-    builtM[i, z] <- builtM[i, z] + (z3)
+    for (ii  in seq_along(z)){
+      
+      builtM[i, z[[ii]]] <- builtM[i, z[[ii]]] + (z3[[ii]])
+      
+    }
   } 
-  
-  
   
   rownames(builtM) <- names(massList)
   
