@@ -86,7 +86,11 @@ peakBinner <- function(massStart,
                        massList,
                        intensityList){
   
+  
+  
+ 
   shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
+  shiny::validate(shiny::need(all(lengths(massList) > 0 ), "Mass list contained list with no masses"))
   
   scale_ppm <- function(mass,
                         ppm){
@@ -157,6 +161,10 @@ peakBinner <- function(massStart,
     # Multiple each centroid's intensity against its above calculated distribution
     #z3 <-  mapply(function(x, y) x * y, z2, intensityList[[i]])
     z3 <-  mapply(function(x, y) x * y, z2, 1000)
+    
+    if(!class(z3) == "list") {
+      z3 <- list(z3)
+      }
     
     for (ii  in seq_along(z)){
       
