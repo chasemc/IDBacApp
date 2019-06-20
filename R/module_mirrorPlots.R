@@ -102,94 +102,15 @@ mirrorPlots_Server <- function(input,
   
   dataForInversePeakComparisonPlot <- reactive({
     
-    mirrorPlotEnv <- new.env(parent = parent.frame())
+
+    IDBacApp::assembleMirrorPlots(sampleID1 = input$Spectra1,
+                                  sampleID2 = input$Spectra2,
+                                  peakPercentPresence = input$percentPresence,
+                                  lowerMassCutoff = input$lowerMass,
+                                  upperMassCutoff = input$upperMass,
+                                  minSNR = input$SNR,
+                                  pool = workingDB$pool())
     
-    # connect to sql
-    conn <- pool::poolCheckout(workingDB$pool())
-    
-    # get protein peak data for the 1st mirror plot selection
-    
-    
-    
-    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
-                                                                 sampleIDs = input$Spectra1,
-                                                                 peakPercentPresence = input$percentPresence,
-                                                                 lowerMassCutoff = input$lowerMass,
-                                                                 upperMassCutoff = input$upperMass,
-                                                                 minSNR = input$SNR,
-                                                                 tolerance = 0.002,
-                                                                 protein = TRUE) 
-    
-    
-    
-    
-    mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
-                                                                 sampleIDs = input$Spectra2,
-                                                                 peakPercentPresence = input$percentPresence,
-                                                                 lowerMassCutoff = input$lowerMass,
-                                                                 upperMassCutoff = input$upperMass,
-                                                                 minSNR = input$SNR,
-                                                                 tolerance = 0.002,
-                                                                 protein = TRUE)
-    
-    
-    
-    
-    # pSNR= the User-Selected Signal to Noise Ratio for protein
-    
-    # Remove peaks from the two peak lists that are less than the chosen SNR cutoff
-    mirrorPlotEnv$SampleOneSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleOne) >= input$SNR)
-    mirrorPlotEnv$SampleTwoSNR <-  which(MALDIquant::snr(mirrorPlotEnv$peaksSampleTwo) >= input$SNR)
-    
-    
-    mirrorPlotEnv$peaksSampleOne@mass <- mirrorPlotEnv$peaksSampleOne@mass[mirrorPlotEnv$SampleOneSNR]
-    mirrorPlotEnv$peaksSampleOne@snr <- mirrorPlotEnv$peaksSampleOne@snr[mirrorPlotEnv$SampleOneSNR]
-    mirrorPlotEnv$peaksSampleOne@intensity <- mirrorPlotEnv$peaksSampleOne@intensity[mirrorPlotEnv$SampleOneSNR]
-    
-    mirrorPlotEnv$peaksSampleTwo@mass <- mirrorPlotEnv$peaksSampleTwo@mass[mirrorPlotEnv$SampleTwoSNR]
-    mirrorPlotEnv$peaksSampleTwo@snr <- mirrorPlotEnv$peaksSampleTwo@snr[mirrorPlotEnv$SampleTwoSNR]
-    mirrorPlotEnv$peaksSampleTwo@intensity <- mirrorPlotEnv$peaksSampleTwo@intensity[mirrorPlotEnv$SampleTwoSNR]
-    
-    # Binpeaks for the two samples so we can color code similar peaks within the plot
-    
-    validate(
-      need(sum(length(mirrorPlotEnv$peaksSampleOne@mass),
-               length(mirrorPlotEnv$peaksSampleTwo@mass)) > 0,
-           "No peaks found in either sample, double-check the settings or your raw data.")
-    )
-    temp <- MALDIquant::binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .002)
-    
-    
-    
-    mirrorPlotEnv$peaksSampleOne <- temp[[1]]
-    mirrorPlotEnv$peaksSampleTwo <- temp[[2]]
-    
-    
-    # Set all peak colors for positive spectrum as red
-    mirrorPlotEnv$SampleOneColors <- rep("red", length(mirrorPlotEnv$peaksSampleOne@mass))
-    # Which peaks top samaple one are also in the bottom sample:
-    temp <- mirrorPlotEnv$peaksSampleOne@mass %in% mirrorPlotEnv$peaksSampleTwo@mass
-    # Color matching peaks in positive spectrum blue
-    mirrorPlotEnv$SampleOneColors[temp] <- "blue"
-    remove(temp)
-    
-    
-    
-    mirrorPlotEnv$spectrumSampleOne <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
-                                                                   sampleID = input$Spectra1, 
-                                                                   proteinOrSmall = '>')
-    
-    
-    
-    
-    mirrorPlotEnv$spectrumSampleTwo <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
-                                                                   sampleID = input$Spectra2, 
-                                                                   proteinOrSmall = '>')
-    
-    
-    pool::poolReturn(conn)
-    # Return the entire saved environment
-    mirrorPlotEnv
     
   })
   
@@ -203,7 +124,7 @@ mirrorPlots_Server <- function(input,
   # Output for the non-zoomed mirror plot
   output$inversePeakComparisonPlot <- plotly::renderPlotly({
     
-    mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
+    IDBacApp::mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
     
     
   })
