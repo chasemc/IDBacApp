@@ -1,0 +1,29 @@
+---
+title: "Microtyper"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Microtyper}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+```{r setup}
+library(IDBacApp)
+```
+
+
+```{r}
+a <- getMicrotyperFiles("C:/Users/chase/Downloads/hi")
+
+
+
+```
+

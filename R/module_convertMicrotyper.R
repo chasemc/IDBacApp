@@ -120,35 +120,22 @@ convertMicrotyper_Server <- function(input,
   output$delimitedLocationPo <- renderText({
     req(proteinFiles())
     names <- tools::file_path_sans_ext(base::basename(proteinFiles()))
-    names <- paste0(names, collapse = " \n ")
+    paste0(names, collapse = " \n ")
     
   })
   
   proteinFiles <- reactive({
-    
-    if (is.null(delimitedLocationP())) {
-      NULL
-    } else {
-      
-      foldersInFolder <- list.files(delimitedLocationP(), 
-                                    recursive = FALSE, 
-                                    full.names = TRUE,
-                                    pattern = "(.txt)$") # Get the folders contained directly within the chosen folder.
-    }
+    shiny::validate(shiny::need(!is.null(delimitedLocationP())),
+                    "No protein directory selected.") 
+    IDBacApp::getMicrotyperFiles(delimitedLocationP())
   })
   
   
   
   smallMolFiles <- reactive({
-    
-    if (is.null(delimitedLocationSM())) {
-      NULL
-    } else {    
-      foldersInFolder <- list.files(delimitedLocationSM(), 
-                                    recursive = FALSE, 
-                                    full.names = TRUE,
-                                    pattern = "(.txt)$") # Get the folders contained directly within the chosen folder.
-    }
+    shiny::validate(shiny::need(!is.null(delimitedLocationSM())),
+                    "No small molecule directory selected.")
+    IDBacApp::getMicrotyperFiles(delimitedLocationSM())
   })
   
   
@@ -156,7 +143,9 @@ convertMicrotyper_Server <- function(input,
   
   sanity <- reactive({
     a <- IDBacApp::path_sanitize(input$newExperimentName)
-    gsub(" ","",a)
+    gsub(" ",
+         "",
+         a)
   })
   
   
@@ -165,43 +154,28 @@ convertMicrotyper_Server <- function(input,
   #----
   observeEvent(input$runDelim, 
                ignoreInit = TRUE, {
-                 req(!is.null(sanity()))
-                 req(sanity() != "")
                  
-                 req(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0)
-                 req(length(proteinFiles()) + length(smallMolFiles()) > 0)
+                 shiny::validate(shiny::need(!is.null(sanity()), 
+                                             "Filename must not be empty"))
                  
+                 shiny::validate(shiny::need(sanity() != "",
+                                             "Filename must not be empty"))
                  
+                 shiny::validate(shiny::need(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0,
+                                             "No samples selected to process"))
                  
-                 
-                 if (is.null(smallMolFiles())) {
-                   smallPaths <- NULL
-                   sampleNameSM <- NULL
-                 } else {
-                   smallPaths <- smallMolFiles()
-                   sampleNameSM <- tools::file_path_sans_ext(basename(smallPaths))
-                   #   sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-rep-")[[1]][[1]]))
-                   
-                 }
-                 
-                 if (is.null(proteinFiles())) {
-                   proteinPaths <- NULL
-                   sampleNameP <- NULL
-                 } else {
-                   proteinPaths <- proteinFiles()
-                   sampleNameP <- tools::file_path_sans_ext(basename(proteinPaths))
-                   #    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
-                 }
+                 shiny::validate(shiny::need(length(proteinFiles()) + length(smallMolFiles()) > 0,
+                                             "No samples selected to process"))
                  
                  
+                 IDBacApp::popup3()
                  
                  
                  keys <- IDBacApp::microtyperTomzML(proteinPaths = proteinPaths,
                                                     proteinNames = sampleNameP,
                                                     smallMolPaths = smallPaths,
                                                     smallMolNames = sampleNameSM,
-                                                    exportDirectory = tempMZDir,
-                                                    centroid = input$centroid)
+                                                    exportDirectory = tempMZDir)
                  
                  IDBacApp::processMZML(mzFilePaths = keys$mzFilePaths,
                                        sampleIds = keys$sampleIds,
