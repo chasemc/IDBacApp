@@ -109,7 +109,8 @@ convertMicrotyper_Server <- function(input,
   # Creates text showing the user which directory they chose for raw files
   #----
   output$delimitedLocationSMo <- renderText({
-    req(smallMolFiles())
+    shiny::validate(shiny::need(!is.null(delimitedLocationSM()),
+                                "No small molecule directory selected."))
     names <- tools::file_path_sans_ext(base::basename(smallMolFiles()))
     names <- paste0(names, collapse = " \n ")
   })
@@ -118,23 +119,18 @@ convertMicrotyper_Server <- function(input,
   # Creates text showing the user which directory they chose for raw files
   #----
   output$delimitedLocationPo <- renderText({
-    req(proteinFiles())
+    shiny::validate(shiny::need(!is.null(delimitedLocationP()),
+                                "No protein directory selected."))
     names <- tools::file_path_sans_ext(base::basename(proteinFiles()))
     paste0(names, collapse = " \n ")
     
   })
   
   proteinFiles <- reactive({
-    shiny::validate(shiny::need(!is.null(delimitedLocationP())),
-                    "No protein directory selected.") 
     IDBacApp::getMicrotyperFiles(delimitedLocationP())
   })
   
-  
-  
   smallMolFiles <- reactive({
-    shiny::validate(shiny::need(!is.null(delimitedLocationSM())),
-                    "No small molecule directory selected.")
     IDBacApp::getMicrotyperFiles(delimitedLocationSM())
   })
   
@@ -155,28 +151,27 @@ convertMicrotyper_Server <- function(input,
   observeEvent(input$runDelim, 
                ignoreInit = TRUE, {
                  
-                 shiny::validate(shiny::need(!is.null(sanity()), 
-                                             "Filename must not be empty"))
+                 # shiny::validate(shiny::need(!is.null(sanity()), 
+                 #                             "Filename must not be empty"))
+                 # 
+                 # shiny::validate(shiny::need(sanity() != "",
+                 #                             "Filename must not be empty"))
+                 # 
+                 # shiny::validate(shiny::need(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0,
+                 #                             "No samples selected to process"))
+                 # 
+                 # shiny::validate(shiny::need(length(proteinFiles()) + length(smallMolFiles()) > 0,
+                 #                             "No samples selected to process"))
                  
-                 shiny::validate(shiny::need(sanity() != "",
-                                             "Filename must not be empty"))
-                 
-                 shiny::validate(shiny::need(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0,
-                                             "No samples selected to process"))
-                 
-                 shiny::validate(shiny::need(length(proteinFiles()) + length(smallMolFiles()) > 0,
-                                             "No samples selected to process"))
-                 
-                 
+                 print("3")
                  IDBacApp::popup3()
                  
+                 print("4")
                  
-                 keys <- IDBacApp::microtyperTomzML(proteinPaths = proteinPaths,
-                                                    proteinNames = sampleNameP,
-                                                    smallMolPaths = smallPaths,
-                                                    smallMolNames = sampleNameSM,
-                                                    exportDirectory = tempMZDir)
-                 
+                 keys <- IDBacApp::run_microtyperTomzML(proteinPaths = proteinFiles(),
+                                                        smallMolPaths = smallMolFiles(),
+                                                        exportDirectory = tempMZDir)
+                 print("5")
                  IDBacApp::processMZML(mzFilePaths = keys$mzFilePaths,
                                        sampleIds = keys$sampleIds,
                                        sqlDirectory = sqlDirectory$sqlDirectory,

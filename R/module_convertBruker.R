@@ -70,13 +70,13 @@ convertOneBruker_Server <- function(input,
   # Reactive variable returning the user-chosen location of the raw MALDI files as string
   #----
   rawFilesLocation <- reactive({
-    if (input$rawFileDirectory > 0) {
+    
+    req(input$rawFileDirectory > 0)
       loc <- IDBacApp::choose_dir()
-      
       if (!is.na(loc)) {
         return(loc)
       }
-    }
+    
   })
   
   
@@ -128,9 +128,8 @@ convertOneBruker_Server <- function(input,
   # Reactive variable returning the user-chosen location of the raw MALDI files as string
   #----
   multipleMaldiRawFileLocation <- reactive({
-    if (input$multipleMaldiRawFileDirectory > 0) {
+    req(input$multipleMaldiRawFileDirectory > 0)
       IDBacApp::choose_dir()
-    }
   })
   
   
@@ -171,14 +170,7 @@ convertOneBruker_Server <- function(input,
     
     req(rawFilesLocation())
     req(sampleMapReactive$rt)
-    
-    
-    
-    acquisitonInformation1 <<- acquisitonInformation
-    sampleMapReactive1 <<- sampleMapReactive
-    
     spots <- unlist(lapply(acquisitonInformation(), function(x) x$spot))
-    
     IDBacApp::findMissingSampleMapIds(spots = spots, 
                                       sampleMap = sampleMapReactive$rt)
   })

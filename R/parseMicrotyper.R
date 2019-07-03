@@ -3,32 +3,41 @@
 #'
 #' @param proteinPaths proteinPaths 
 #' @param smallMolPaths smallMolPaths 
-#' @param exportDirectory exportDirectory
+#' @param tempMZDir tempMZDir
 #'
 #' @return NA
 #' @export
 #'
-run_microtyperTomzML <- function(proteinPaths,
-                                 smallMolPaths,
-                                 exportDirectory){
+run_microtyperTomzML <- function(proteinPaths = NULL,
+                                 smallMolPaths = NULL,
+                                 exportDirectory = tempdir()){
+
+  if (is.null(proteinPaths)) {
+    message("run_microtyperTomzML(): No microtyper protein data provided.")
+    # so basename() won't freak
+    proteinPaths <- character(0)
+  }
   
   
-  
-  
+  if (is.null(smallMolPaths)) {
+    message("run_microtyperTomzML(): No microtyper small molecule data provided.")
+    # so basename() won't freak
+    smallMolPaths <- character(0)
+  }
+  shiny::validate(shiny::need(length(c(proteinPaths, smallMolPaths)) != 0L, "run_microtyperTomzML(): No microtyper data found."))
+
   key <- base::split(c(proteinPaths, 
                        smallMolPaths),
                      tools::file_path_sans_ext(c(base::basename(proteinPaths), 
                                                  base::basename(smallMolPaths))))
   
   
-  mzFilePaths <- file.path(exportDirectory,
-                           paste0(names(key),
-                                  ".mzML"))
   
-  mzFilePaths <- normalizePath(mzFilePaths, 
-                               mustWork = FALSE)
+  mzFilePaths <- base::tempfile(pattern = rep("", length(key)), 
+                              tmpdir = exportDirectory,
+                              fileext = ".mzML")
   
-  
+  mzFilePaths <- base::normalizePath(mzFilePaths, winslash = "\\", mustWork = FALSE)
   
   lengthProgress <- length(key)
   
@@ -37,17 +46,16 @@ run_microtyperTomzML <- function(proteinPaths,
   shiny::withProgress(message = 'Conversion in progress',
                       detail = 'This may take a while...', value = 0, {
                         
-                        
                         for (i in seq_along(key)) {
                           incProgress(1/lengthProgress)
-                          
-                        IDBacApp::readMicrotyperFiles(key = key,
-                                    mzFilePaths = mzFilePaths,
-                                    iteration = i) 
-                          
+                          IDBacApp::microtyperTomzML(key = key[[i]],
+                                                     mzFilePaths = mzFilePaths[[i]]) 
                         }
-                        
                       })
+  
+  validate(need(all(file.exists(mzFilePaths)), 
+                "Microtyper mzml file not found."))
+  
   return(list(mzFilePaths = mzFilePaths,
               sampleIds = names(key)))
 }
@@ -60,18 +68,16 @@ run_microtyperTomzML <- function(proteinPaths,
 #'
 #' @param key see microtyperTomzML()  list where filepaths are split() by filename
 #' @param mzFilePaths mzFilePaths mzml file paths
-#' @param iteration loop iteration
 #'
 #' @return NA
 #' @export
 #'
 microtyperTomzML <- function(key,
-                      mzFilePaths,
-                      iteration){
+                             mzFilePaths){
   
   
   
-  specs <- lapply(key[[iteration]],
+  specs <- lapply(key,
                   function(x) {     
                     
                     z <- utils::read.table(x, 
@@ -87,14 +93,14 @@ microtyperTomzML <- function(key,
                   })
   
   MALDIquantForeign::exportMzMl(x = specs, 
-                                path = mzFilePaths[[iteration]],
+                                path = mzFilePaths,
                                 force = TRUE)
 }
 
 
 
-  
-  
+
+
 
 
 

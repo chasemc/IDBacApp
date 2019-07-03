@@ -2,25 +2,18 @@
 % Please edit documentation in R/parseMicrotyper.R
 \name{microtyperTomzML}
 \alias{microtyperTomzML}
-\title{Parse Microtyper files}
+\title{readMicrotyperFiles}
 \usage{
-microtyperTomzML(proteinPaths, proteinNames, smallMolPaths, smallMolNames,
-  exportDirectory)
+microtyperTomzML(key, mzFilePaths)
 }
 \arguments{
-\item{proteinPaths}{proteinPaths}
+\item{key}{see microtyperTomzML()  list where filepaths are split() by filename}
 
-\item{proteinNames}{proteinNames}
-
-\item{smallMolPaths}{smallMolPaths}
-
-\item{smallMolNames}{smallMolNames}
-
-\item{exportDirectory}{NA}
+\item{mzFilePaths}{mzFilePaths mzml file paths}
 }
 \value{
 NA
 }
 \description{
-Parse Microtyper files
+readMicrotyperFiles
 }
