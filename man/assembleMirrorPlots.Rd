@@ -8,7 +8,8 @@ assembleMirrorPlots(sampleID1 = input$Spectra1,
   sampleID2 = input$Spectra2,
   peakPercentPresence = input$percentPresence,
   lowerMassCutoff = input$lowerMass, upperMassCutoff = input$upperMass,
-  minSNR = input$SNR, pool = workingDB$pool())
+  minSNR = input$SNR, tolerance = 0.002, pool1 = workingDB$pool(),
+  pool2 = workingDB$pool())
 }
 \arguments{
 \item{sampleID1}{sample ID to search in IDBac sqlite database (will be positive spectrum)}
@@ -23,7 +24,11 @@ assembleMirrorPlots(sampleID1 = input$Spectra1,
 
 \item{minSNR}{numeric, peaks with a SNR below this number will be removed}
 
-\item{pool}{IDBac database pool}
+\item{tolerance}{MALDIquant binning tolerance for intra-sample binning}
+
+\item{pool1}{pool that contains sample 1 (positive spectrum)}
+
+\item{pool2}{pool that contains sample 2 (negative spectrum)}
 }
 \value{
 environment containing mirror plot data

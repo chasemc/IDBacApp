@@ -6,7 +6,9 @@
 #' @param lowerMassCutoff lowerMassCutoff
 #' @param upperMassCutoff upperMassCutoff
 #' @param minSNR numeric, peaks with a SNR below this number will be removed
-#' @param pool IDBac database pool
+#' @param tolerance MALDIquant binning tolerance for intra-sample binning
+#' @param pool1 pool that contains sample 1 (positive spectrum)
+#' @param pool2 pool that contains sample 2 (negative spectrum)
 #'
 #' @return environment containing mirror plot data
 #' @export
@@ -17,15 +19,16 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
                                 lowerMassCutoff = input$lowerMass,
                                 upperMassCutoff = input$upperMass,
                                 minSNR = input$SNR,
-                                pool = workingDB$pool()){
+                                tolerance = 0.002,
+                                pool1 = workingDB$pool(),
+                                pool2 = workingDB$pool()){
   
   mirrorPlotEnv <- new.env(parent = parent.frame())
   
-  # connect to sql
-  conn <- pool::poolCheckout(pool)
   
   # get protein peak data for the 1st mirror plot selection
   
+  conn <- pool::poolCheckout(pool1)
   
   mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                sampleIDs = sampleID1,
@@ -33,8 +36,12 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
                                                                lowerMassCutoff = lowerMassCutoff,
                                                                upperMassCutoff = upperMassCutoff,
                                                                minSNR = minSNR,
-                                                               tolerance = 0.002,
+                                                               tolerance = tolerance,
                                                                protein = TRUE) 
+  pool::poolReturn(conn)
+  
+  conn <- pool::poolCheckout(pool2)
+  
   
   mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
                                                                sampleIDs = sampleID2,
@@ -42,8 +49,9 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
                                                                lowerMassCutoff = lowerMassCutoff,
                                                                upperMassCutoff = upperMassCutoff,
                                                                minSNR = minSNR,
-                                                               tolerance = 0.002,
+                                                               tolerance = tolerance,
                                                                protein = TRUE)
+  pool::poolReturn(conn)
   
   
   shiny::validate(
@@ -53,7 +61,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   )
   # Binpeaks for the two samples so we can color code similar peaks within the plot
   # Note: different binning algorithm than used for hierarchical clustering
-  temp <- MALDIquant::binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = .002)
+  temp <- MALDIquant::binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = tolerance)
   
   mirrorPlotEnv$peaksSampleOne <- temp[[1]]
   mirrorPlotEnv$peaksSampleTwo <- temp[[2]]
@@ -66,20 +74,22 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   mirrorPlotEnv$SampleOneColors[temp] <- "blue"
   remove(temp)
   
+  conn <- pool::poolCheckout(pool1)
   
   
   mirrorPlotEnv$spectrumSampleOne <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
                                                                  sampleID = sampleID1, 
                                                                  proteinOrSmall = '>')
   
-  
+  pool::poolReturn(conn)
+  conn <- pool::poolCheckout(pool2)
   
   
   mirrorPlotEnv$spectrumSampleTwo <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
                                                                  sampleID = sampleID2, 
                                                                  proteinOrSmall = '>')
-  
   pool::poolReturn(conn)
+  
   
   return(mirrorPlotEnv)
 }

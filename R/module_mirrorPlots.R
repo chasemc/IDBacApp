@@ -102,17 +102,17 @@ mirrorPlots_Server <- function(input,
   
   dataForInversePeakComparisonPlot <- reactive({
     
-
+    
     IDBacApp::assembleMirrorPlots(sampleID1 = input$Spectra1,
                                   sampleID2 = input$Spectra2,
                                   peakPercentPresence = input$percentPresence,
                                   lowerMassCutoff = input$lowerMass,
                                   upperMassCutoff = input$upperMass,
                                   minSNR = input$SNR,
-                                  pool = workingDB$pool())
-    
-    
-  })
+                                  tolerance = 0.002,
+                                  pool1 = workingDB$pool(),
+                                  pool2 = workingDB$pool())
+    })
   
   # Used in the the inverse-peak plot for zooming ---------------------------
   
