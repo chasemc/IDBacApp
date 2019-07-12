@@ -150,12 +150,19 @@ app_server <- function(input, output, session) {
                            target = "Small Molecule Data Analysis"
                  )
                  pool <- pool::poolCheckout(workingDB$pool())
-                 p <- DBI::dbGetQuery(pool, glue::glue("SELECT COUNT(*) 
-                                            FROM IndividualSpectra 
-                                            WHERE maxMass > {smallProteinMass}"))[,1]
-                 s <- DBI::dbGetQuery(pool, glue::glue("SELECT COUNT(*) 
-                                            FROM IndividualSpectra 
-                                            WHERE maxMass < {smallProteinMass}"))[,1]
+               
+                 p <- DBI::dbGetQuery(pool, glue::glue("SELECT 1 
+                                                       FROM IndividualSpectra 
+                                                       WHERE maxMass > {smallProteinMass}
+                                                       LIMIT 1;"))
+                 s <- DBI::dbGetQuery(pool, glue::glue("SELECT 1 
+                                                       FROM IndividualSpectra 
+                                                       WHERE maxMass > {smallProteinMass}
+                                                       LIMIT 1;"))
+                 
+                 p <- nrow(p)
+                 s <- nrow(s)
+                 
                  pool::poolReturn(pool)
                  if (p > 0) {
                    appendTab(inputId = "mainIDBacNav",
