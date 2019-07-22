@@ -116,7 +116,6 @@ microtyperTomzML <- function(key,
 #' @return List of files
 #' @export
 #'
-#' @examples
 getMicrotyperFiles <- function(dataDirectory = delimitedLocationP()){
   
   files <- NULL
