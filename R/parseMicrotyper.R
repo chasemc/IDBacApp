@@ -80,14 +80,10 @@ microtyperTomzML <- function(key,
   specs <- lapply(key,
                   function(x) {     
                     
-                    z <- utils::read.table(x, 
-                                           skip = 8,
-                                           sep = ";", 
-                                           row.names = NULL,
-                                           colClasses = "numeric",
-                                           fileEncoding = "UTF-16LE")
-                    MALDIquant::createMassSpectrum(mass = z[ , 1], 
-                                                   intensity = z[ , 2],
+                    z <- data.table::fread(x, 
+                                           skip = 8)
+                    MALDIquant::createMassSpectrum(mass = z[[1]], 
+                                                   intensity = z[[2]],
                                                    metaData = list(file = x))
                     
                   })
