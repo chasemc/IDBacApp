@@ -21,7 +21,7 @@ app_server <- function(input, output, session) {
   
   # Development Functions ---------------------------------------------------
   
-  options(shiny.reactlog = TRUE)
+  
   
   sqlDirectory <- reactiveValues(sqlDirectory = getwd())
   
