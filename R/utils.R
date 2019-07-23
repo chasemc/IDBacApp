@@ -109,20 +109,20 @@ chartoRawtoCompressed <- function(input, compression){
 
 getOS <- function(test = NULL){
   if (is.null(test)) {
-  sysinf <- Sys.info()
-  if (!is.null(sysinf)) {
-    os <- sysinf['sysname']
-    if (os == 'Darwin')
-      os <- "osx"
-  } else { 
-    ## mystery machine
-    os <- .Platform$OS.type
-    if (grepl("^darwin", R.version$os))
-      os <- "osx"
-    if (grepl("linux-gnu", R.version$os))
-      os <- "linux"
-  }
-  return(as.character(tolower(os)))
+    sysinf <- Sys.info()
+    if (!is.null(sysinf)) {
+      os <- sysinf['sysname']
+      if (os == 'Darwin')
+        os <- "osx"
+    } else { 
+      ## mystery machine
+      os <- .Platform$OS.type
+      if (grepl("^darwin", R.version$os))
+        os <- "osx"
+      if (grepl("linux-gnu", R.version$os))
+        os <- "linux"
+    }
+    return(as.character(tolower(os)))
   } else {
     return(test)
   }
@@ -235,7 +235,7 @@ findIdbacHome <- function(){
   
   if (is.null(temp) || nchar(temp) < 2) {
     temp <- as.list(Sys.getenv())$LOCALAPPDATA
-    if (is.null(temp) || nchar(temp) < 2) {
+    if (is.null(temp) || nchar(temp) < 2 || length(temp) > 1) {
       temp <- getwd()
     }
   }
@@ -250,4 +250,4 @@ findIdbacHome <- function(){
   return(temp)
   
   
-  }
+}
