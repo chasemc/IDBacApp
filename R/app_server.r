@@ -23,7 +23,8 @@ app_server <- function(input, output, session) {
   
   
   
-  sqlDirectory <- reactiveValues(sqlDirectory = getwd())
+  
+  sqlDirectory <- reactiveValues(sqlDirectory = IDBacApp::findIdbacHome())
   
   # module changes sqlDirectory reactiveValue
   callModule(IDBacApp::selectDirectory_Server,

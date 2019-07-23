@@ -216,3 +216,38 @@ nulledMap384Well <- function() {
   a[] <- NA
   as.data.frame(a)
 }
+
+
+
+
+
+
+
+
+#' Get default path for IDBac to save experiments to
+#'
+#' @return character path
+#' @export 
+#'
+findIdbacHome <- function(){
+  
+  temp <- as.list(Sys.getenv())$HOME
+  
+  if (is.null(temp) || nchar(temp) < 2) {
+    temp <- as.list(Sys.getenv())$LOCALAPPDATA
+    if (is.null(temp) || nchar(temp) < 2) {
+      temp <- getwd()
+    }
+  }
+  
+  temp <- file.path(temp, "IDBac_experiments")
+  
+  if(!dir.exists(temp)) {
+    message(paste0("Creating directory 'IDBac_experiments' in ", dirname(temp)))
+    dir.create(temp)
+  }
+  
+  return(temp)
+  
+  
+  }
