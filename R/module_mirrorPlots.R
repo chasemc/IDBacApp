@@ -112,7 +112,7 @@ mirrorPlots_Server <- function(input,
                                   tolerance = 0.002,
                                   pool1 = workingDB$pool(),
                                   pool2 = workingDB$pool())
-    })
+  })
   
   # Used in the the inverse-peak plot for zooming ---------------------------
   
@@ -191,15 +191,13 @@ mquantSpecFromSQL <- function(checkedPool,
                    })
   
   
-  result <- lapply(result,
-                   function(x){
-                     MALDIquant::createMassSpectrum(mass = x[ , 1],
-                                                    intensity = x[ , 2])
-                   }
+  lapply(result,
+         function(x){
+           MALDIquant::createMassSpectrum(mass = x[ , 1],
+                                          intensity = x[ , 2])
+         }
   )
   
-  MALDIquant::averageMassSpectra(result,
-                                 method = "mean") 
 }
 
 
