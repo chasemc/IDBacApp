@@ -71,8 +71,8 @@ app_server <- function(input, output, session) {
   
   # Conversions Tab ---------------------------------------------------------
   
-    pwizAvailable <- IDBacApp::findMSconvert()
-
+  pwizAvailable <- IDBacApp::findMSconvert()
+  
   
   
   callModule(IDBacApp::convertDataTab_Server,
@@ -151,7 +151,7 @@ app_server <- function(input, output, session) {
                            target = "Small Molecule Data Analysis"
                  )
                  pool <- pool::poolCheckout(workingDB$pool())
-               
+                 
                  p <- DBI::dbGetQuery(pool, glue::glue("SELECT 1 
                                                        FROM IndividualSpectra 
                                                        WHERE maxMass > {smallProteinMass}
@@ -181,7 +181,7 @@ app_server <- function(input, output, session) {
                  }
                })
   
-
+  
   
   
   # Mirror Plots ------------------------------------------------------------
@@ -530,6 +530,8 @@ app_server <- function(input, output, session) {
     req(nrow(smallMolDataFrame()) > 2,
         ncol(smallMolDataFrame()) > 2)
     
+    hello <<- smallMolDataFrame()
+    print("1")
     princ <- IDBacApp::pcaCalculation(smallMolDataFrame())
     namedColors <- NULL
     

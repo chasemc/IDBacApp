@@ -78,20 +78,16 @@ updateMeta_server <- function(input,
                })
   
   
+
   
   observeEvent(input$saven, 
                ignoreInit = TRUE, {
-                 
                  
                  showModal(modalDialog(
                    size = "s",
                    title = "Saving...",
                    easyClose = FALSE, 
                    footer = ""))   
-               })
-  
-  observeEvent(input$saven, 
-               ignoreInit = TRUE, {
                  #make sure not to use the wrong metadata table
                  query <- glue::glue_sql("SELECT  `Strain_ID`
                                           FROM `metaData`",

@@ -233,21 +233,20 @@ findIdbacHome <- function(){
   
   temp <- as.list(Sys.getenv())$HOME
   
-  if (is.null(temp) || nchar(temp) < 2) {
+  if (!dir.exists(temp)) {
     temp <- as.list(Sys.getenv())$LOCALAPPDATA
-    if (is.null(temp) || nchar(temp) < 2 || length(temp) > 1) {
+    if (!dir.exists(temp) || length(temp) > 1) {
       temp <- getwd()
     }
   }
   
-  temp <- file.path(temp, "IDBac_experiments")
+  temp <- file.path(temp, "IDBac_experiments", fsep = "/")
   
   if(!dir.exists(temp)) {
     message(paste0("Creating directory 'IDBac_experiments' in ", dirname(temp)))
     dir.create(temp)
   }
   
-  return(temp)
-  
+  normalizePath(temp, winslash = "/")  
   
 }

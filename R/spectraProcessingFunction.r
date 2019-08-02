@@ -17,9 +17,9 @@ spectraProcessingFunction <- function(rawDataFilePath,
   
   sampleID <- IDBacApp::cleanWSpace(sampleID)
   
-
-# Create version and metadata SQL tables ----------------------------------
-
+  
+  # Create version and metadata SQL tables ----------------------------------
+  
   
   # Isn't currently used, but here to help future-proof
   IDBacApp::sqlCreate_version(userDBCon = userDBCon)
@@ -35,9 +35,9 @@ spectraProcessingFunction <- function(rawDataFilePath,
                           userDBCon = userDBCon)
   
   
-
-# Create XML table --------------------------------------------------------
-
+  
+  # Create XML table --------------------------------------------------------
+  
   
   
   # Make connection to mzML file
@@ -53,15 +53,15 @@ spectraProcessingFunction <- function(rawDataFilePath,
   scanNumber <- nrow(mzR::header(mzML_con))
   
   
-   # mzML_con <<- mzML_con
-   # scanNumber <<- scanNumber
-   # userDBCon <<- userDBCon
-   # sampleID <<- sampleID
-   # XMLinfo <<- XMLinfo
-   # rawDataFilePath <<- rawDataFilePath
-   # acquisitionInfo <<- acquisitionInfo
-   #stop()
-
+  # mzML_con <<- mzML_con
+  # scanNumber <<- scanNumber
+  # userDBCon <<- userDBCon
+  # sampleID <<- sampleID
+  # XMLinfo <<- XMLinfo
+  # rawDataFilePath <<- rawDataFilePath
+  # acquisitionInfo <<- acquisitionInfo
+  #stop()
+  
   IDBacApp::createSpectraSQL(mzML_con = mzML_con,
                              scanNumber = scanNumber,
                              userDBCon = userDBCon,

@@ -16,8 +16,8 @@ processMZML <- function(mzFilePaths,
                         newExperimentName,
                         acquisitionInfo){
   
-
-
+  
+  
   userDB <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
                                         sqlDirectory = sqlDirectory)[[1]]
   userDB <- pool::poolCheckout(userDB)
@@ -39,7 +39,7 @@ processMZML <- function(mzFilePaths,
                                                        userDBCon = userDB,
                                                        acquisitionInfo = acquisitionInfo[[i]]) # pool connection
                  }
-                
+                 
                  
                })
   pool::poolReturn(userDB)

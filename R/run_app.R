@@ -7,7 +7,9 @@
 #' @export
 #'
 
-run_app <- function(port = NULL) {
+run_app <- function(port = NULL, ...) {
+  
+  options(...)
   
   if (is.null(port)) {
     shiny::shinyApp(ui = IDBacApp::app_ui(),

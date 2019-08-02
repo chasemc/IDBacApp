@@ -29,19 +29,19 @@ parseDelimitedMS <- function(proteinPaths,
   
   #lapply in case someone provides different file types at same time -_-
   importedFiles <- unlist(lapply(combPaths, 
-                             function(x) 
-                               MALDIquantForeign::import(x,
-                                                         centroided = as.logical(centroid))))
-
+                                 function(x) 
+                                   MALDIquantForeign::import(x,
+                                                             centroided = as.logical(centroid))))
+  
   combNames <- c(proteinNames, 
                  smallMolNames)
   
   mzFilePaths <- file.path(exportDirectory,
-                          paste0(combNames,
-                                 ".mzML"))
+                           paste0(combNames,
+                                  ".mzML"))
   
   mzFilePaths <- normalizePath(mzFilePaths, 
-                             mustWork = FALSE)
+                               mustWork = FALSE)
   
   key <- base::split(importedFiles, mzFilePaths)
   

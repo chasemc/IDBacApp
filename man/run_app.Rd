@@ -4,7 +4,7 @@
 \alias{run_app}
 \title{run_app}
 \usage{
-run_app(port = NULL)
+run_app(port = NULL, ...)
 }
 \arguments{
 \item{port}{The TCP port that the application should listen on
