@@ -16,7 +16,7 @@ assembleMirrorPlots(sampleID1 = input$Spectra1,
 
 \item{sampleID2}{sample ID to search in IDBac sqlite database (will be negative spectrum)}
 
-\item{peakPercentPresence}{numeric between 0% and 100%, peakPercentPresence}
+\item{peakPercentPresence}{numeric between 0 and 100, peakPercentPresence}
 
 \item{lowerMassCutoff}{lowerMassCutoff}
 

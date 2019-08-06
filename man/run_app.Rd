@@ -9,6 +9,8 @@ run_app(port = NULL, ...)
 \arguments{
 \item{port}{The TCP port that the application should listen on
 if NULL, a random one is assigned}
+
+\item{...}{dots!}
 }
 \value{
 NA

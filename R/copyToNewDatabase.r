@@ -24,7 +24,7 @@ copyToNewDatabase <- function(existingDBPool,
                                        existingDBconn@dbname,
                                        " to \n", newDBconn@dbname))
                         
-                        if (!exists("session")) {
+                        if (exists("session")) {
                         setProgress(value = 0.2, 
                                     message = 'Copying data to new database',
                                     detail = 'Setting up new experiment...',
@@ -70,7 +70,7 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         Sys.sleep(1) 
                         
-                        if (!exists("session")) {
+                        if (exists("session")) {
                         
                         setProgress(value = 0.5, 
                                     message = 'Copying data to new database',
@@ -89,7 +89,7 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(state) 
                         
                         
-                        if (!exists("session")) {
+                        if (exists("session")) {
                         
                         setProgress(value = 0.7, 
                                     message = 'Copying data to new database',
@@ -108,7 +108,7 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(state) 
                         
                         # Copy XML table ----------------------------------------------------------
-                        if (!exists("session")) {
+                        if (exists("session")) {
                            setProgress(value = 0.8, 
                                     message = 'Copying data to new database',
                                     detail = 'Copying mzML files...',
@@ -158,7 +158,7 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(state) 
                         
                       
-                        if (!exists("session")) {
+                        if (exists("session")) {
                         shiny::setProgress(value = 1, 
                                            message = 'Copying data to new database',
                                            detail = 'Finishing...',

@@ -2,8 +2,8 @@
 #' run_microtyperTomzML setup and loop
 #'
 #' @param proteinPaths proteinPaths 
+#' @param exportDirectory path where temporary mzml are stored
 #' @param smallMolPaths smallMolPaths 
-#' @param tempMZDir tempMZDir
 #'
 #' @return NA
 #' @export

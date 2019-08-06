@@ -2,7 +2,7 @@
 #'
 #' @param sampleID1 sample ID to search in IDBac sqlite database (will be positive spectrum)
 #' @param sampleID2 sample ID to search in IDBac sqlite database (will be negative spectrum)
-#' @param peakPercentPresence numeric between 0% and 100%, peakPercentPresence
+#' @param peakPercentPresence numeric between 0 and 100, peakPercentPresence
 #' @param lowerMassCutoff lowerMassCutoff
 #' @param upperMassCutoff upperMassCutoff
 #' @param minSNR numeric, peaks with a SNR below this number will be removed
