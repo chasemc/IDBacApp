@@ -12,7 +12,7 @@ run_microtyperTomzML(proteinPaths = NULL, smallMolPaths = NULL,
 
 \item{smallMolPaths}{smallMolPaths}
 
-\item{tempMZDir}{tempMZDir}
+\item{exportDirectory}{path where temporary mzml are stored}
 }
 \value{
 NA
