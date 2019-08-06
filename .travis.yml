@@ -1,22 +1,39 @@
-# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
-
-language: R
+language: r
 cache: packages
+warnings_are_errors: true
+use_bioc: true
+bioc_required: true
+cran: http://cran.rstudio.com
+dist: trusty
+
+
 os:
   - linux
   - osx
 
-r: bioc-release
+r:
+- 3.6.1
+- release
+- devel
 
-repos:
-  CRAN: https://cran.r-project.org/
-  
+matrix:
+  allow_failures:
+    - r: 
+      - devel
+      - release
+
 addons:
   apt:
     packages:
       - libnetcdf-dev
       - netcdf-bin # libnetcdf-dev doesn't contain nc-config in ubuntu 12.04 (in 16.04 it is part of libnetcdf-dev)
       - libhdf5-dev
+
+
+
+repos:
+  CRAN: https://cran.r-project.org/
+
 
 r_packages:
   - covr
