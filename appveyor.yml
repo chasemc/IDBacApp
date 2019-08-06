@@ -20,7 +20,7 @@ environment:
     secure: Vzu5ovt/88zxAaYQTBuGnP/Bj6jMB8glFakz3PMKBZktZ0ii6+TDVAks1aWHzz9O  
   
   matrix:
-  - R_VERSION: 3.6.0
+  - R_VERSION: 3.6.1
     R_ARCH: x64
     GCC_PATH: mingw_64
 
