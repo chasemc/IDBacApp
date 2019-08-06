@@ -9,49 +9,49 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 biocViews:
-Imports: 
-    MALDIquant,
-    MALDIquantForeign,
-    pool,
-    RSQLite,
-    DBI,
-    magrittr,
-    reshape2,
-    Rtsne,
-    igraph,
-    networkD3,
-    rhandsontable,
-    shinyjs,
-    plotly,
-    colourpicker,
-    ape,
-    svglite,
-    IRanges,
-    coop,
-    digest,
-    glue,
-    xml2,
-    irlba,
-    mzR,
-    S4Vectors,
-    httr,
-    utils,
-    stats,
+Depends:
+    dendextend (>= 1.12.0),
+    shiny (>= 1.3.2)
+Imports:
+    ape (>= 5.3),
+    colourpicker (>= 1.0),
+    coop (>= 0.6-2),
+    data.table (>= 1.12.2),
+    DBI (>= 1.0.0),
+    digest (>= 0.6.20),
+    fst (>= 0.9.0),
+    ggplot2 (>= 3.2.0),
+    glue (>= 1.3.1),
     graphics,
     grDevices,
-    rmarkdown,
-    shinycssloaders,
-    jsonlite,
-    fst,
-    remotes,
-    ggplot2,
-    sigmajs,
-    data.table
-Suggests: 
-    testthat (>= 2.1.0),
-    knitr
+    httr (>= 1.4.1),
+    igraph (>= 1.2.4.1),
+    IRanges,
+    irlba (>= 2.3.3),
+    jsonlite (>= 1.6),
+    magrittr (>= 1.5),
+    MALDIquant (>= 1.19.3),
+    MALDIquantForeign (>= 0.12),
+    mzR,
+    networkD3 (>= 0.4),
+    plotly (>= 4.9.0),
+    pool (>= 0.1.4.2),
+    remotes (>= 2.1.0),
+    reshape2 (>= 1.4.3),
+    rhandsontable (>= 0.3.7),
+    rmarkdown (>= 1.14),
+    RSQLite (>= 2.1.2),
+    Rtsne (>= 0.15),
+    S4Vectors,
+    shinycssloaders (>= 0.2.0),
+    shinyjs (>= 1.0),
+    sigmajs (>= 0.1.3),
+    stats,
+    svglite (>= 1.2.2),
+    utils,
+    xml2 (>= 1.2.1)
+Suggests:
+    knitr (>= 1.23),
+    testthat (>= 2.2.1)
 RoxygenNote: 6.1.1
-Depends: 
-    shiny,
-    dendextend
 VignetteBuilder: knitr
