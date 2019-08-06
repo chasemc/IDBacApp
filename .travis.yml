@@ -12,9 +12,9 @@ os:
   - osx
 
 r:
-- 3.6.1
-- release
-- devel
+  - 3.6.1
+  - release
+  - devel
 
 matrix:
   allow_failures:
