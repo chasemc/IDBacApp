@@ -21,7 +21,7 @@ app_server <- function(input, output, session) {
   
   # Development Functions ---------------------------------------------------
   
-  
+  IDBacApp::newUpdate()
   
   
   sqlDirectory <- reactiveValues(sqlDirectory = IDBacApp::findIdbacHome())
