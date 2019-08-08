@@ -51,6 +51,21 @@ deserial <- function(input){
 }
 
 
+#' Read a vector represented as JSON
+#'    Is faster than jsonlite::fromJSON() for eg: [1.23,10.23,20]
+#' @param input JSON
+#'
+#' @return Numeric vector
+#' @export
+#'
+fastJsonVectorParse <- function(input) {
+ 
+  base::scan(base::textConnection(gsub("\\[|\\]", "", input)), sep = ",") 
+  
+}
+
+
+
 #' compress
 #'   Settings for compressing raw vectors
 #'
