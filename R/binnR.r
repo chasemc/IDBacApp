@@ -156,11 +156,15 @@ peakBinner <- function(massStart,
       },
       z,
       mm[[i]][[2]],
-      mm[[i]][[3]])
+      mm[[i]][[3]],
+      SIMPLIFY = FALSE)
     
     # Multiple each centroid's intensity against its above calculated distribution
     #z3 <-  mapply(function(x, y) x * y, z2, intensityList[[i]])
-    z3 <-  mapply(function(x, y) x * y, z2, 1000)
+    z3 <-  mapply(function(x, y) x * y,
+                  z2,
+                  1000,
+                  SIMPLIFY = FALSE)
     
     if(!class(z3) == "list") {
       z3 <- list(z3)
