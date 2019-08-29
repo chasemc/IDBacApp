@@ -9,7 +9,7 @@ plotDendrogram(dendrogram = dendrogram, dendOrPhylo = dendOrPhylo(),
   colorsChosen = colorsChosen(), cutHeightLines = input$cutHeightLines,
   colorByLines = input$colorByLines,
   colorByLabels = input$colorByLabels,
-  closeDendDots = input$closeDendDots,
+  removeDendDots = input$removeDendDots,
   cutHeightLabels = input$cutHeightLabels, boots = boots()$bootstraps,
   pool = pool())
 }
@@ -28,7 +28,7 @@ plotDendrogram(dendrogram = dendrogram, dendOrPhylo = dendOrPhylo(),
 
 \item{colorByLabels}{colorByLabels}
 
-\item{closeDendDots}{closeDendDots}
+\item{removeDendDots}{removeDendDots}
 
 \item{cutHeightLabels}{cutHeightLabels}
 
