@@ -3,9 +3,28 @@ title: "NEWS"
 author: "Chase Clark"
 ---
 
+Updates are ordered newest to oldest.
 
 
-# IDBac VERSION 1.0
+## 1.1.10
+
+- BugFix:
+  -  When updating IDBac software, experiments saved into the default directory would sometimes be deleted by the installer. 
+          This has been changed so that IDBac will try to make the default save directory '~Documents/IDBac_experiments'.
+- Improvement:
+  - Improved support for importing data from Microtyper instruments. Incluiding 
+- Improvement:
+  - Changed how IDBac first connects to an experiment database, for faster connect time, especially with large experiments (1000's of samples).
+- Improvement:
+  - Mirror plot code was improved and placed into a standalone function for coding with IDBac outside of the Shiny app.
+- BugFix:
+  - 'Binning' algorithm checks for empty peak lists and added check for list output from `mapply()`.
+- Improvement:  
+  - Continuous integration fixed for Mac and Linux builds.
+
+
+
+## 1.0.0
 
 This release is more or less an entire re-write of IDBac, so... many, many changes. Only some are listed below.
 
@@ -33,10 +52,11 @@ Prior to this release IDBac relied on the filesystem for storing and retrieving 
 ### Algorithm changes (AKA Breaking results changes)...not comprehensive
 
 ##### Peak Binning
-The largest change here was that of how protein spectra are compared. The algorithm contained in MALDIquant and used by the old version of IDBac [binPeaks()](https://github.com/sgibb/MALDIquant/blob/master/R/binPeaks-functions.R) has some drwabacks:
- binPeaks() outline is [here](https://github.com/sgibb/MALDIquant/blob/master/man/binPeaks-functions.Rd)
-  1. The "bins" will change depending on which samples are provided.
-    - Given peak lists A, B, C.  You bin peaks from A and B and then, separately, bin peaks from A and C. The two resulting peak lists are not comparable.
+The largest change here was that of how protein spectra are compared. The algorithm contained in MALDIquant and used by the old version of IDBac [binPeaks()](https://github.com/sgibb/MALDIquant/blob/master/R/binPeaks-functions.R) has some drawbacks:
+The `binPeaks()` outline is [here](https://github.com/sgibb/MALDIquant/blob/master/man/binPeaks-functions.Rd).
+From version 1.0.0 and forward, IDBac uses a high dimensional boolean representation of peaks in a mass spectrum. It distributes each peak's intensity onto this vector by creating a normal distribution (see: https://doi.org/10.1021/acs.analchem.6b02446) according to a mass-scaled deviation (ppm error). Simialar approaches can be found: https://doi.org/10.1186/1477-5956-5-3 and https://doi.org/10.1093/bioinformatics/btl645
+
+
 
 ##### PCA
 
