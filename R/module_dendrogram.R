@@ -241,7 +241,8 @@ dendDotsServer <- function(input,
     
     selectInput(ns("selectMetaColumn"),
                 "Select Category",
-                as.vector(a))
+                as.vector(a),
+                width="100%")
     
   })
   
@@ -586,18 +587,18 @@ modDendLines_WellPanel <- function(ns){
 modDendDotsMod_WellPanel <- function(ns) {
   shiny::absolutePanel(
     class = "dendMod_WellPanel",
-    top = "10%",
+    top = "30%",
     right =  "0%",
     width = "30%",
     fixed = F,
-    draggable = F,
+    draggable = T,
     style = "z-index:1002;",
     shiny::wellPanel(class = "dendDots_WellPanel",
                      fluidRow(
                        fluidRow(shiny::actionButton(ns("closeDendDots"),
                                                     "Close"),
                                 shiny::actionButton(ns("removeDendDots"),
-                                                    "Clear info"),
+                                                    "Clear"),
                          uiOutput(ns("proteDendDots")),
                          uiOutput(ns("sampleFactorMapColors")))
                      )
