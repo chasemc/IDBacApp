@@ -6,7 +6,7 @@
 #' @param colorsChosen chosen colors for dend and dots 
 #' @param cutHeightLines cutHeightLines
 #' @param colorByLines colorByLines
-#' @param closeDendDots closeDendDots
+#' @param removeDendDots removeDendDots
 #' @param cutHeightLabels cutHeightLabels
 #' @param boots plot bootstraps
 #' @param colorByLabels colorByLabels 
@@ -22,7 +22,7 @@ plotDendrogram <- function(dendrogram = dendrogram,
                             cutHeightLines = input$cutHeightLines,
                             colorByLines = input$colorByLines,
                             colorByLabels = input$colorByLabels,
-                            closeDendDots = input$closeDendDots,
+                            removeDendDots = input$removeDendDots,
                             cutHeightLabels = input$cutHeightLabels,
                             boots = boots()$bootstraps,
                             pool = pool()){
@@ -39,7 +39,7 @@ plotDendrogram <- function(dendrogram = dendrogram,
   
   if (!is.null(selectMetaColumn[[1]])) {
     
-    if (closeDendDots == 1) {
+    if (removeDendDots == 1) {
       
     } else {
       

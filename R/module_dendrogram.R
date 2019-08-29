@@ -190,9 +190,8 @@ dendDotsServer <- function(input,
     output$absPaneldendDots <- renderUI({
       # Intentionally Blank
     })
-    
-    
   })  
+  
   
   
   observeEvent(input$openDendots, ignoreInit = T ,ignoreNULL = T, {
@@ -358,7 +357,7 @@ dendDotsServer <- function(input,
                              cutHeightLines = input$cutHeightLines,
                              colorByLines = input$colorByLines,
                              colorByLabels = input$colorByLabels,
-                             closeDendDots = input$closeDendDots,
+                             removeDendDots = input$removeDendDots,
                              cutHeightLabels = input$cutHeightLabels,
                              boots = boots()$bootstraps,
                              pool = pool())
@@ -414,7 +413,7 @@ dendDotsServer <- function(input,
                                cutHeightLines = input$cutHeightLines,
                                colorByLines = input$colorByLines,
                                colorByLabels = input$colorByLabels,
-                               closeDendDots = input$closeDendDots,
+                               removeDendDots = input$removeDendDots,
                                cutHeightLabels = input$cutHeightLabels,
                                boots = boots()$bootstraps,
                                pool = pool())
@@ -587,19 +586,20 @@ modDendLines_WellPanel <- function(ns){
 modDendDotsMod_WellPanel <- function(ns) {
   shiny::absolutePanel(
     class = "dendMod_WellPanel",
-    bottom = "50%",
+    top = "10%",
     right =  "0%",
-    width = "20%",
-    fixed = T,
-    draggable = TRUE,
+    width = "30%",
+    fixed = F,
+    draggable = F,
     style = "z-index:1002;",
     shiny::wellPanel(class = "dendDots_WellPanel",
                      fluidRow(
-                       fluidRow(
+                       fluidRow(shiny::actionButton(ns("closeDendDots"),
+                                                    "Close"),
+                                shiny::actionButton(ns("removeDendDots"),
+                                                    "Clear info"),
                          uiOutput(ns("proteDendDots")),
-                         uiOutput(ns("sampleFactorMapColors"))),
-                       shiny::actionButton(ns("closeDendDots"),
-                                           "Close")
+                         uiOutput(ns("sampleFactorMapColors")))
                      )
     ))
 }
