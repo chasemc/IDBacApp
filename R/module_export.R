@@ -67,18 +67,6 @@ exportSamples_server <- function(input,
                                       pool = selectedDB$userDBCon,
                                       allSamples = TRUE,
                                       whetherProtein = FALSE)
-
-  
-  copyingDbPopup <- reactive({
-    showModal(modalDialog(
-      title = "Important message",
-      glue::glue("When file-export is complete you can find the files at: /n",
-                 {chosenDirectory$value}),
-      br(),
-      easyClose = FALSE, 
-      size = "l",
-      footer = ""))
-  })
   
   
   chosenDirectory <- reactiveValues(value = NULL)
@@ -95,15 +83,15 @@ exportSamples_server <- function(input,
   
   
   observeEvent(input$exportSpectra, {
-  
+    
     req(class(selectedDB$userDBCon())[[1]] == "Pool")
     req(length(chosenSamples$chosen) > 0)
     req(dir.exists(chosenDirectory$value))
     
-   IDBacApp::exportmzML(userDBCon = selectedDB$userDBCon(),
-             sampleIDs = chosenSamples$chosen,
-             saveToDir = chosenDirectory$value)
-  
+    IDBacApp::exportmzML(userDBCon = selectedDB$userDBCon(),
+                         sampleIDs = chosenSamples$chosen,
+                         saveToDir = chosenDirectory$value)
+    
   })
   
 }

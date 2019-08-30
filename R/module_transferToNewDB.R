@@ -140,7 +140,6 @@ transferToNewDB_server <- function(input,
                ignoreInit = TRUE, {
                  
                  req(continue$val == TRUE)
-                 
                  IDBacApp::copyingDbPopup()
                  
                  newDBName <- gsub(" ",
@@ -160,13 +159,13 @@ transferToNewDB_server <- function(input,
                                                                    sampleIDs = chosenSamples$chosen)
                                      })
                  
-                 
                  removeModal()
                  
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE))
-                 
+                 continue$val <- FALSE
+                 selectedDB <- NULL
                })
   
   
