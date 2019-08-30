@@ -164,9 +164,14 @@ copyToNewDatabase <- function(existingDBPool,
                                            detail = 'Finishing...',
                                            session = getDefaultReactiveDomain())
                         }
+                        
+                        IDBacApp::copyDB_dbDetach(newdbPath = newdbPath, 
+                                                  existingDBconn = existingDBconn)
+                        
                         pool::poolReturn(existingDBconn)
                         pool::poolReturn(newDBconn)
                         pool::poolClose(newDBPool)
+                        
                         
                         Sys.sleep(1)
                         warning(paste0("End migration of \n",
@@ -197,6 +202,25 @@ copyDB_dbAttach <- function(newdbPath,
   
 }
 
+
+#' Detach new database to existing database
+#'
+#' @param newdbPath newdbPath
+#' @param existingDBconn existingDBconn
+#'
+#' @return NA
+#' @export
+#'
+copyDB_dbDetach <- function(newdbPath, 
+                            existingDBconn){
+  
+  sqlQ <- glue::glue_sql("DETACH DATABASE newDB;",
+                         .con = existingDBconn) 
+  temp <- DBI::dbSendStatement(existingDBconn, sqlQ)
+  warning(temp@sql)
+  DBI::dbClearResult(temp)
+  
+}
 
 #' Setup metadata DB table
 #'

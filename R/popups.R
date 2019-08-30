@@ -66,9 +66,7 @@ copyingDbPopup <- function(){
   showModal(
     modalDialog(
       title = "Important message",
-      "When file-conversions are complete this pop-up will be replaced by a summary of the conversion.",
-      br(),
-      "To check what has been converted, you can navigate to:",
+      "Copying files to IDBac experiment/datatabase",
       easyClose = FALSE, 
       size = "l",
       footer = "")
