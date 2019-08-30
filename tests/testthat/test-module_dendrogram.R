@@ -86,7 +86,7 @@ test_that("modDendLines_WellPanel", {
 a <- IDBacApp::modDendDotsMod_WellPanel(function(x)x)
 test_that("modDendDotsMod_WellPanel", {
   expect_identical(class(a),c("shiny.tag.list", "list" ))
-  expect_known_hash(a, "0e473e9144")
+  expect_known_hash(a, "da265f2a5d")
 })
 
 
