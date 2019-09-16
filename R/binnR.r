@@ -177,7 +177,7 @@ peakBinner <- function(massStart,
     }
   } 
   
-  rownames(builtM) <- names(massList)
+  colnames(builtM) <- names(massList)
   
   return(builtM)
   
