@@ -12,7 +12,7 @@
 #' @return list of bin vectors
 #' @export
 #'
-peakBinner <- function(peakList,
+createFuzzyVector <- function(peakList,
                        ppm = 300,
                        massStart = 3000,
                        massEnd = 15000){
@@ -46,7 +46,7 @@ list of mass vectors
 #' @return list of bin vectors
 #' @export
 #'
-peakBinner <- function(peakList,
+createFuzzyVector <- function(peakList,
                        ppm = 300,
                        massStart = 3000,
                        massEnd = 15000){

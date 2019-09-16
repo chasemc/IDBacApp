@@ -10,7 +10,7 @@
 #                                    intensity = rep(1, 2, 3)))
 # 
 # 
-# binned <- IDBacApp::peakBinner(peakList = p,
+# binned <- IDBacApp::createFuzzyVector(peakList = p,
 #                                ppm = 300,
 #                                massStart = 1000,
 #                                massEnd = 15000)
@@ -22,9 +22,9 @@
 # 
 # test_that("multiplication works", {
 #   expect_known_hash(binned, "f5d2c83a3f")
-#   expect_warning(IDBacApp::peakBinner(peakList = list("A"),
+#   expect_warning(IDBacApp::createFuzzyVector(peakList = list("A"),
 #                                       ppm = 100000))
-#   expect_identical(suppressWarnings(IDBacApp::peakBinner(peakList = list("A"),
+#   expect_identical(suppressWarnings(IDBacApp::createFuzzyVector(peakList = list("A"),
 #                                       ppm = 100000)),
 #                    list())
 # })

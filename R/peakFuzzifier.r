@@ -9,7 +9,7 @@
 #' #' @return list of bin vectors
 #' #' @export
 #' #'
-#' peakBinner <- function(peakList,
+#' createFuzzyVector <- function(peakList,
 #'                        ppm = 300,
 #'                        massStart = 3000,
 #'                        massEnd = 15000){
@@ -59,7 +59,7 @@ mQuantToMassVec <- function(peakList){
 
 
 
-#' Peak List Binner
+#' High-dimensional representation of mass peaks
 #'
 #' @param massStart beginning of mass range (as of now, must be smaller than smallest mass)
 #' @param massEnd end of mass range (as of now, must be smaller than smallest mass)
@@ -80,16 +80,13 @@ mQuantToMassVec <- function(peakList){
 #'             massList = masses,
 #'             intensityList = intensities)
 #'             }
-peakBinner <- function(massStart,
+createFuzzyVector <- function(massStart,
                        massEnd,
                        ppm,
                        massList,
                        intensityList){
   
-  
-  
- 
-  shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
+    shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
   shiny::validate(shiny::need(all(lengths(massList) > 0 ), "Mass list contained list with no masses"))
   
   scale_ppm <- function(mass,
