@@ -5,14 +5,17 @@
 #' @export
 #'
 popup3 <- function(){
-  showModal(modalDialog(
-    size = "m",
-    title = "Important message",
-    "When spectra processing is complete you will be able to begin with the data analysis",
-    br(),
-    "To check the progress, observe the progress bar at bottom right.",
-    easyClose = FALSE, 
-    footer = ""))
+  if (is.null(shiny::getDefaultReactiveDomain())) {
+  } else {
+    showModal(modalDialog(
+      size = "m",
+      title = "Important message",
+      "When spectra processing is complete you will be able to begin with the data analysis",
+      br(),
+      "To check the progress, observe the progress bar at bottom right.",
+      easyClose = FALSE, 
+      footer = ""))
+  }
 }
 
 
@@ -24,16 +27,18 @@ popup3 <- function(){
 #' @export
 #'
 popup4 <- function(){
-  showModal(modalDialog(
-    size = "m",
-    title = "Spectra Processing is Now Complete",
-    br(),
-    easyClose = FALSE,
-    tagList(actionButton("processToAnalysis", 
-                         "Click to continue")),
-    footer = NULL
-  ))
-  
+  if (is.null(shiny::getDefaultReactiveDomain())) {
+  } else {
+    showModal(modalDialog(
+      size = "m",
+      title = "Spectra Processing is Now Complete",
+      br(),
+      easyClose = FALSE,
+      tagList(actionButton("processToAnalysis", 
+                           "Click to continue")),
+      footer = NULL
+    ))
+  }
 }
 
 
@@ -45,15 +50,20 @@ popup4 <- function(){
 #' @export
 #'
 brukerToMzml_popup <- function(){
-  showModal(modalDialog(
-    size = "m",
-    title = "Important message",
-    p("IDBac is converting your Bruker files to open-source mzML, 
-    during this step there is no progress bar."),
-    p("After this step IDBac will begin to convert your files into an
+  if (is.null(shiny::getDefaultReactiveDomain())) {
+    message("IDBac is converting your Bruker files to open-source mzML,
+during this step there is no progress bar. After this step IDBac
+will begin to convert your files into an IDBac experiment.")
+  } else {
+    showModal(modalDialog(
+      size = "m",
+      title = "Important message",
+      p("IDBac is converting your Bruker files to open-source mzML, during this step there is no progress bar."),
+      p("After this step IDBac will begin to convert your files into an
       IDBac experiment."),
-    easyClose = FALSE, 
-    footer = ""))
+      easyClose = FALSE, 
+      footer = ""))
+  }
 }
 
 
@@ -63,13 +73,16 @@ brukerToMzml_popup <- function(){
 #' @export
 #'
 copyingDbPopup <- function(){
-  showModal(
-    modalDialog(
-      title = "Important message",
-      "Copying files to IDBac experiment/datatabase",
-      easyClose = FALSE, 
-      size = "l",
-      footer = "")
-  )
+  if (is.null(shiny::getDefaultReactiveDomain())) {
+  } else {
+    showModal(
+      modalDialog(
+        title = "Important message",
+        "Copying files to IDBac experiment/datatabase",
+        easyClose = FALSE, 
+        size = "l",
+        footer = "")
+    )
+  }
 }
 
