@@ -23,25 +23,40 @@ processMZML <- function(mzFilePaths,
   userDB <- pool::poolCheckout(userDB)
   
   progLength <- base::length(mzFilePaths)
-  withProgress(message = 'Processing in progress',
-               value = 0,
-               max = progLength, {
-                 
-                 for (i in base::seq_along(mzFilePaths)) {
-                   setProgress(value = i,
-                               message = 'Processing in progress',
-                               detail = glue::glue(" \n Sample: {sampleIds[[i]]},
-                                                   {i} of {progLength}"),
-                               session = getDefaultReactiveDomain())
+  
+  # withProgress doesn't currently work outside shiny
+  if (!is.null(shiny::getDefaultReactiveDomain())) { 
+    withProgress(message = 'Processing in progress',
+                 value = 0,
+                 max = progLength, {
                    
-                   IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
-                                                       sampleID = sampleIds[[i]],
-                                                       userDBCon = userDB,
-                                                       acquisitionInfo = acquisitionInfo[[i]]) # pool connection
-                 }
-                 
-                 
-               })
+                   for (i in base::seq_along(mzFilePaths)) {
+                     setProgress(value = i,
+                                 message = 'Processing in progress',
+                                 detail = glue::glue(" \n Sample: {sampleIds[[i]]},
+                                                   {i} of {progLength}"),
+                                 session = getDefaultReactiveDomain())
+                     
+                     IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
+                                                         sampleID = sampleIds[[i]],
+                                                         userDBCon = userDB,
+                                                         acquisitionInfo = acquisitionInfo[[i]]) # pool connection
+                   }
+                 })
+    
+  } else {
+    for (i in base::seq_along(mzFilePaths)) {
+      
+      base::message('Processing in progress...')
+      base::message(glue::glue('Sample: {sampleIds[[i]]}; {i} of {progLength}'))
+      
+      IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
+                                          sampleID = sampleIds[[i]],
+                                          userDBCon = userDB,
+                                          acquisitionInfo = acquisitionInfo[[i]]) # pool connection
+    }
+  }
+  
   pool::poolReturn(userDB)
   
   
