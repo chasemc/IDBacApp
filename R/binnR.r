@@ -114,9 +114,9 @@ peakBinner <- function(massStart,
   vecLength <- z1 + z2 + 2
   
   #  if (length(massList) * vecLength < 4e6) {
-  builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
+  #builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
   #  } else {
-  #    builtM <- Matrix::Matrix(0, nrow = length(massList), ncol = vecLength, sparse = TRUE) 
+      builtM <- Matrix::Matrix(0, ncol = length(massList), nrow = vecLength, sparse = TRUE) 
   #  }
   
   # mm returns a list of lists. each list element contains a list of length 3:
@@ -166,13 +166,13 @@ peakBinner <- function(massStart,
                   1000,
                   SIMPLIFY = FALSE)
     
-    if(!class(z3) == "list") {
+    if (!class(z3) == "list") {
       z3 <- list(z3)
       }
     
-    for (ii  in seq_along(z)){
+    for (ii  in seq_along(z)) {
       
-      builtM[i, z[[ii]]] <- builtM[i, z[[ii]]] + (z3[[ii]])
+      builtM[z[[ii]], i] <- builtM[z[[ii]], i] + (z3[[ii]])
       
     }
   } 
