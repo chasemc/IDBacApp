@@ -2,7 +2,7 @@
 % Please edit documentation in R/findBrukerAcquiredSpots.R
 \name{findBrukerInfo}
 \alias{findBrukerInfo}
-\title{Find spots from Bruker Acqus}
+\title{Find a certain Bruker Acqus info}
 \usage{
 findBrukerInfo(acquisitonInformation, name)
 }
@@ -15,5 +15,5 @@ findBrukerInfo(acquisitonInformation, name)
 spot position vector
 }
 \description{
-Find spots from Bruker Acqus
+Find a certain Bruker Acqus info
 }

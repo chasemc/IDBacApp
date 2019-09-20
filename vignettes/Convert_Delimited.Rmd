@@ -42,7 +42,7 @@ set.seed(42)
 random_spec <- lapply(1:10,
                       function(x){
                         rs <- list(sample(2000:30000, 20, replace = F))
-                        IDBacApp::peakBinner(massStart = 2000, 
+                        IDBacApp::createFuzzyVector(massStart = 2000, 
                                              massEnd = 30000,
                                              ppm = 3000,
                                              massList = rs,
