@@ -93,11 +93,6 @@ mirrorPlot <- function(mirrorPlotEnv){
                    yaxis = list(
                      title = "Intensity")) 
                    
-  
-  
-  
-  
-  
 }
 
 

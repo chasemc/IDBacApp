@@ -9,7 +9,7 @@ assembleMirrorPlots(sampleID1 = input$Spectra1,
   peakPercentPresence = input$percentPresence,
   lowerMassCutoff = input$lowerMass, upperMassCutoff = input$upperMass,
   minSNR = input$SNR, tolerance = 0.002, pool1 = workingDB$pool(),
-  pool2 = workingDB$pool())
+  pool2 = workingDB$pool(), normalizeSpectra = FALSE)
 }
 \arguments{
 \item{sampleID1}{sample ID to search in IDBac sqlite database (will be positive spectrum)}
@@ -29,6 +29,8 @@ assembleMirrorPlots(sampleID1 = input$Spectra1,
 \item{pool1}{pool that contains sample 1 (positive spectrum)}
 
 \item{pool2}{pool that contains sample 2 (negative spectrum)}
+
+\item{normalizeSpectra}{should spectra be normalized? TRUE/FALSE}
 }
 \value{
 environment containing mirror plot data

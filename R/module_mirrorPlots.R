@@ -22,7 +22,8 @@ mirrorPlotDownload_UI <- function(id){
   ns <- NS(id)
   tagList(
     downloadButton(ns("downloadInverse"), 
-                   label = "Download SVG")
+                   label = "Download SVG"),
+uiOutput(ns("normSpecUi"))
     
   )
   
@@ -64,6 +65,31 @@ mirrorPlots_Server <- function(input,
                                proteinOrSmall){
   
   
+  
+  normText <- reactiveValues(normText = "Show normalized spectra")
+  
+  output$normSpecUi <- renderUI({
+    actionButton(session$ns("normSpec"),
+                 normText$normText)
+ 
+  })
+  
+  observeEvent(input$normSpec, ignoreInit = TRUE, {
+    if (input$normSpec %% 2 == 0) {
+      normText$normText <- "Show normalized spectra"
+    } else {
+      normText$normText <- "Show raw spectra"
+      
+    }
+  })
+  
+  
+  
+  
+  
+  
+  
+  
   inverseComparisonNames <- reactive({
     conn <- pool::poolCheckout(workingDB$pool())
     
@@ -100,8 +126,17 @@ mirrorPlots_Server <- function(input,
     
   })
   
+  
+  
+  
+  
   dataForInversePeakComparisonPlot <- reactive({
     
+    if (input$normSpec %% 2 == 0) {
+      normalizeSpectra <- TRUE
+    } else {
+      normalizeSpectra <- FALSE
+      }
     
     IDBacApp::assembleMirrorPlots(sampleID1 = input$Spectra1,
                                   sampleID2 = input$Spectra2,
@@ -111,7 +146,8 @@ mirrorPlots_Server <- function(input,
                                   minSNR = input$SNR,
                                   tolerance = 0.002,
                                   pool1 = workingDB$pool(),
-                                  pool2 = workingDB$pool())
+                                  pool2 = workingDB$pool(),
+                                  normalizeSpectra = normalizeSpectra)
   })
   
   # Used in the the inverse-peak plot for zooming ---------------------------

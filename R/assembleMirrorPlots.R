@@ -9,6 +9,7 @@
 #' @param tolerance MALDIquant binning tolerance for intra-sample binning
 #' @param pool1 pool that contains sample 1 (positive spectrum)
 #' @param pool2 pool that contains sample 2 (negative spectrum)
+#' @param normalizeSpectra should spectra be normalized? TRUE/FALSE
 #'
 #' @return environment containing mirror plot data
 #' @export
@@ -21,7 +22,8 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
                                 minSNR = input$SNR,
                                 tolerance = 0.002,
                                 pool1 = workingDB$pool(),
-                                pool2 = workingDB$pool()){
+                                pool2 = workingDB$pool(),
+                                normalizeSpectra = FALSE){
   
   mirrorPlotEnv <- new.env(parent = parent.frame())
   
@@ -81,6 +83,13 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
                                                                                                 sampleID = sampleID1, 
                                                                                                 proteinOrSmall = '>'))
   
+  
+  if (normalizeSpectra) {
+    mirrorPlotEnv$spectrumSampleOne <- IDBacApp::normalizeSpectrumIntensity(mirrorPlotEnv$spectrumSampleOne)
+
+  }
+  
+  
   pool::poolReturn(conn)
   conn <- pool::poolCheckout(pool2)
   
@@ -88,6 +97,14 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(IDBacApp::mquantSpecFromSQL(checkedPool = conn,
                                                                                                 sampleID = sampleID2, 
                                                                                                 proteinOrSmall = '>'))
+  
+  
+  if (normalizeSpectra) {
+    mirrorPlotEnv$spectrumSampleTwo <- IDBacApp::normalizeSpectrumIntensity(mirrorPlotEnv$spectrumSampleTwo)
+    
+
+  }
+  
   pool::poolReturn(conn)
   
   
