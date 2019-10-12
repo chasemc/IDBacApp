@@ -13,7 +13,6 @@ normalizeSpectrumIntensity  <- function(spectrum){
   spectrum <- MALDIquant::calibrateIntensity(spectrum, 
                                              method = "median")   
   
-  spp<<-spectrum
   spectrum@intensity <- (spectrum@intensity / max(spectrum@intensity)) * 100
   
   return(spectrum)
