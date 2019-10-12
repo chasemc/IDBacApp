@@ -1,57 +1,9 @@
-
-#' Retrieve MALDIquant peak objects from an IDBac sqlite database
-#' 
-#' @param checkedPool checked out pool
-#' @param sampleIDs sample IDs of samples to process
-#' @param protein whether to search SQL for protein or small mol spectra
-#'
-#' @return unlisted MALDIquant peak objects correspoding to the provided fileshas
-#' @export
-
-
-getPeakData <-  function(checkedPool, sampleIDs, protein){
-  
-  if (!is.logical(protein)) {stop("In getPeakData, provided value for 'protein' wasn't logical-type.")}
-  
-  if (protein == TRUE) {
-    sym <- '>'
-  } else {
-    sym <- '<'
-  }  
-  
-  query <- DBI::dbSendStatement(glue::glue("SELECT peakMatrix
-                              FROM IndividualSpectra
-                                  WHERE maxMass {sym} 6000
-                                  AND (Strain_ID = ?)"),
-                                con = checkedPool)
-  
-  DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
-  results <- DBI::dbFetch(query)
-  DBI::dbClearResult(query)
-  
-  results <- lapply(results[,1], jsonlite::fromJSON)
-  
-  results <- lapply(results,
-                    function(x){
-                      MALDIquant::createMassPeaks(mass = x$mass,
-                                                  intensity = x$intensity ,
-                                                  snr = as.numeric(x$snr))
-                    }
-  )
-  
-  
-}
-
-
-
-
-
 #' Collapse a sample's MALDIquant peak objects into a single peak object
 #' 
 #' @param lowerMassCutoff masses below this will be removed from analyses
 #' @param minSNR minimum SNR a a peak must have to be retained
 #' @param upperMassCutoff masses above this will be removed from analyses
-#' @param checkedPool checked-out pool
+#' @param pool sqlite pool
 #' @param sampleIDs sample IDs of samples to process
 #' @param peakPercentPresence peaks in replciates that occurr less frequently than this will be removed
 #' @param tolerance binning tolerance ppm / 10e6
@@ -62,7 +14,7 @@ getPeakData <-  function(checkedPool, sampleIDs, protein){
 #' @return a single trimmed and binned MALDIquant peak object
 
 
-collapseReplicates <- function(checkedPool,
+collapseReplicates <- function(pool,
                                sampleIDs,
                                peakPercentPresence,
                                lowerMassCutoff,
@@ -80,12 +32,15 @@ collapseReplicates <- function(checkedPool,
   
   
   
-  temp <- IDBacApp::getPeakData(checkedPool = checkedPool,
+  temp <- IDBacApp::getPeakData(pool = pool,
                                 sampleIDs = sampleIDs,
-                                protein = protein) 
+                                protein = protein)[[1]] 
   req(length(temp) > 0)
   # Binning peaks lists belonging to a single sample so we can filter 
   # peaks outside the given threshold of presence 
+  
+  
+  tt<<-temp
   
   for (i in 1:length(temp)) {
     snr1 <-  which(MALDIquant::snr(temp[[i]]) >= minSNR)

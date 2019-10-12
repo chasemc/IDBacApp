@@ -32,8 +32,6 @@ getSmallMolSpectra <- function(pool,
   
   
 
-  checkedPool <- pool::poolCheckout(pool)
-  
   
   if (is.null(sampleIDs)) {
   
@@ -60,10 +58,14 @@ getSmallMolSpectra <- function(pool,
     }
   } else {
     
+    checkedPool <- pool::poolCheckout(pool)
+    
     # retrieve all Strain_IDs in db that have small molecule spectra
     sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT Strain_ID
                                       FROM IndividualSpectra 
                                       WHERE maxMass < 6000"))
+    # Return pool
+    pool::poolReturn(checkedPool)
     sampleIDs <- as.vector(sampleIDs)[,1]
   }
   
@@ -71,7 +73,7 @@ getSmallMolSpectra <- function(pool,
   
   samples <- lapply(sampleIDs, 
                     function(sampleIDs){ 
-                      IDBacApp::collapseReplicates(checkedPool = checkedPool,
+                      IDBacApp::collapseReplicates(pool = pool,
                                                    sampleIDs = sampleIDs,
                                                    peakPercentPresence = peakPercentPresence,
                                                    lowerMassCutoff = lowerMassCutoff,
@@ -81,17 +83,7 @@ getSmallMolSpectra <- function(pool,
                                                    protein = FALSE)
                       
                     })
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  # Return pool
-  pool::poolReturn(checkedPool)
+
   
   return(list(maldiQuantPeaks = samples,
               sampleIDs = sampleIDs))
