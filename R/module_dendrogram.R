@@ -351,6 +351,18 @@ dendDotsServer <- function(input,
                 plotWidth()))
     
     
+    dendrogram <<- dendrogram
+    dendOrPhylo <<- dendOrPhylo()
+    selectMetaColumn <<- input$selectMetaColumn
+    colorsChosen <<- colorsChosen()
+    cutHeightLines <<- input$cutHeightLines
+    colorByLines <<- input$colorByLines
+    colorByLabels <<- input$colorByLabels
+    removeDendDots <<- input$removeDendDots
+    cutHeightLabels <<- input$cutHeightLabels
+    boots <<- boots()$bootstraps
+    pool <<- pool()
+    
     IDBacApp::plotDendrogram(dendrogram = dendrogram,
                              dendOrPhylo = dendOrPhylo(),
                              selectMetaColumn = input$selectMetaColumn,
