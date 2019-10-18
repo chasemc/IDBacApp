@@ -24,7 +24,7 @@ getPeakData <-  function(pool, sampleIDs, protein){
   
   shiny::validate({
     need(is.character(sampleIDs), 
-         glue::glue("Expected sampleIDs to be a chatacter object, received: {class(sampleIDs)}"))
+         glue::glue("Expected sampleIDs to be a character object, received: {class(sampleIDs)}"))
   })
   
   conn <- pool::poolCheckout(pool = pool)
@@ -44,26 +44,24 @@ getPeakData <-  function(pool, sampleIDs, protein){
   
   samps <- unique(results$Strain_ID)
   results <- lapply(samps,
-                     function(x){
-                       
-                       
-                       lapply(which(results$Strain_ID == x), function(y){
-                         
-                         z <- jsonlite::fromJSON(results$peakMatrix[[y]])
-                         
-                         MALDIquant::createMassPeaks(mass = z$mass,
-                                                     intensity = z$intensity ,
-                                                     snr = as.numeric(z$snr))
-                       })
-                       
-                     }
+                    function(x){
+                      unname(lapply(which(results$Strain_ID == x), function(y){
+                        
+                        z <- jsonlite::fromJSON(results$peakMatrix[[y]])
+                        
+                        MALDIquant::createMassPeaks(mass = z$mass,
+                                                    intensity = z$intensity ,
+                                                    snr = as.numeric(z$snr))
+                      }))
+                      
+                    }
   )
   
   names(results) <- samps
-
   
-    
+  
+  
   return(results)
   
   
-}``
+}

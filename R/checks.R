@@ -2,10 +2,9 @@
 #'
 #' @param pool variable to check
 #'
-#' @return
 #' @export
 #'
-#' @examples
+
 checkSinglePool <- function(pool){
   
   shiny::validate({

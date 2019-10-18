@@ -126,7 +126,7 @@ smallmirrorPlots_Server <- function(input,
                                                                  upperMassCutoff = input$upperMass,
                                                                  minSNR = input$SNR,
                                                                  tolerance = 0.002,
-                                                                 protein = FALSE) 
+                                                                 protein = FALSE)[[1]] 
     
     
     
@@ -137,7 +137,7 @@ smallmirrorPlots_Server <- function(input,
                                                                  upperMassCutoff = input$upperMass,
                                                                  minSNR = input$SNR,
                                                                  tolerance = 0.002,
-                                                                 protein = FALSE)
+                                                                 protein = FALSE)[[1]]
     
     
     

@@ -244,7 +244,7 @@ app_server <- function(input, output, session) {
                                                   upperMassCutoff = proteinPeakSettings$upperMass, 
                                                   minSNR = proteinPeakSettings$SNR, 
                                                   tolerance = 0.002,
-                                                  protein = TRUE)
+                                                  protein = TRUE)[[1]]
                    })
 
     
@@ -262,7 +262,7 @@ app_server <- function(input, output, session) {
                                                             upperMassCutoff = proteinPeakSettings$upperMass, 
                                                             minSNR = proteinPeakSettings$SNR, 
                                                             tolerance = 0.002,
-                                                            protein = TRUE)
+                                                            protein = TRUE)[[1]]
                              })
       )
       

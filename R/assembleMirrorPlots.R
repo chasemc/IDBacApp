@@ -30,16 +30,11 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   
   # get protein peak data for the 1st mirror plot selection
   
-  
-  pool <<- pool1
-  sampleIDs <<- sampleID1
-  peakPercentPresence <<- peakPercentPresence
-  lowerMassCutoff <<- lowerMassCutoff
-  upperMassCutoff <<- upperMassCutoff
-  minSNR <<- minSNR
-  tolerance <<- tolerance
-  protein <<- TRUE
-  
+
+  # need(IDBacApp::checkSinglePool(pool1))
+  # need(IDBacApp::checkSinglePool(pool2))
+  # need(!is.null(sampleID1))
+  # need(!is.null(sampleID2))
   
   mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(pool = pool1,
                                                                sampleIDs = sampleID1,
@@ -48,7 +43,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
                                                                upperMassCutoff = upperMassCutoff,
                                                                minSNR = minSNR,
                                                                tolerance = tolerance,
-                                                               protein = TRUE) 
+                                                               protein = TRUE)[[1]] 
   
   
   mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(pool = pool2,
@@ -58,7 +53,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
                                                                upperMassCutoff = upperMassCutoff,
                                                                minSNR = minSNR,
                                                                tolerance = tolerance,
-                                                               protein = TRUE)
+                                                               protein = TRUE)[[1]]
  
   
   shiny::validate(

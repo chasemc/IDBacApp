@@ -80,7 +80,7 @@ getSmallMolSpectra <- function(pool,
                                                    upperMassCutoff = upperMassCutoff,  
                                                    minSNR = minSNR, 
                                                    tolerance = 0.002,
-                                                   protein = FALSE)
+                                                   protein = FALSE)[[1]]
                       
                     })
 
