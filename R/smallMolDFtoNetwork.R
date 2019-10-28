@@ -12,16 +12,17 @@ smallMolDFtoNetwork <- function(peakList,
   smallNetwork <- MALDIquant::intensityMatrix(peakList)
   temp <- NULL
   
-  
-  
-  
+
   rownames(smallNetwork) <- sampleIDs
   smallNetwork[is.na(smallNetwork)] <- 0
   smallNetwork <- ifelse(smallNetwork > 0,1,0)
   smallNetwork <- as.data.frame(smallNetwork)
   #The network is weighted by the inverse of percentage of presence of the peak, this de-emphasizes commonly occuring peaks and "pulls" rarer peaks closer to their associated sample
-  smallNetwork[ , colnames(smallNetwork)] <- sapply(smallNetwork[ , colnames(smallNetwork)],
-                                                  function(x) ifelse(x == 1, 1 / sum(x), x))
+ 
+
+  smallNetwork <- smallNetwork / colSums(smallNetwork)[col(smallNetwork)]
+  
+
   #Create a matrix readable by Gephi as an edges file
   smallNetwork <- cbind(rownames(smallNetwork),smallNetwork)
   smallNetwork <- reshape2::melt(smallNetwork)
