@@ -86,6 +86,7 @@ ui_smallMolMan <-  function(){
                               tabPanel(value = "smallMolMANUI","Small Molecule MAN",
                                        p("Nodes in the MAN are colored by modularity score, not the same colors as the protein dendrogram.",
                                          style = "font-size: 0.75em"),
+                                       verbatimTextOutput("noSmallPeaksText"),
                                        IDBacApp::smMANPlot_UI("smMAN")),
                               tabPanel(value = "smallMolPCAUi","Small Molecule PCA",
                                        

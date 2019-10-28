@@ -627,48 +627,74 @@ app_server <- function(input, output, session) {
     # if no samples are selected, stop
     req(length(ids) > 0)
     
+    aq<-sum(sapply(samples, function(x) length(x@mass))) > 1
     
-    if ( (input$selectMatrix != "None") ) {
-      
-      matrixSample <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
-                                                   sampleIDs = input$selectMatrix,
-                                                   dendrogram = proteinDendrogram$dendrogram,
-                                                   brushInputs = smallProtDend,
-                                                   matrixIDs = NULL,
-                                                   peakPercentPresence = smallPeakSettings$percentPresence,
-                                                   lowerMassCutoff = smallPeakSettings$lowerMass,
-                                                   upperMassCutoff = smallPeakSettings$upperMass,
-                                                   minSNR = smallPeakSettings$SNR)
-      
-      
-      samples <- MALDIquant::binPeaks(c(matrixSample$maldiQuantPeaks, samples),
-                                      tolerance = .002)
-      
-      
-      for (i in 2:(length(samples))) {
-        
-        toKeep <- !samples[[i]]@mass %in% samples[[1]]@mass 
-        
-        samples[[i]]@mass <- samples[[i]]@mass[toKeep]
-        samples[[i]]@intensity <- samples[[i]]@intensity[toKeep]
-        samples[[i]]@snr <- samples[[i]]@snr[toKeep]
-        
-      }
-      
-      samples <- samples[-1]
-      
-      
-      
+    if(!aq){
+      subtractedMatrixBlank$maldiQuantPeaks <- NULL
+      subtractedMatrixBlank$sampleIDs <- NULL
     } else {
       
       
-      samples <- MALDIquant::binPeaks(samples, tolerance = .002)
+      if ((input$selectMatrix != "None")) {
+        
+        matrixSample <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
+                                                     sampleIDs = input$selectMatrix,
+                                                     dendrogram = proteinDendrogram$dendrogram,
+                                                     brushInputs = smallProtDend,
+                                                     matrixIDs = NULL,
+                                                     peakPercentPresence = smallPeakSettings$percentPresence,
+                                                     lowerMassCutoff = smallPeakSettings$lowerMass,
+                                                     upperMassCutoff = smallPeakSettings$upperMass,
+                                                     minSNR = smallPeakSettings$SNR)
+        
+        
+        samples <- MALDIquant::binPeaks(c(matrixSample$maldiQuantPeaks, samples),
+                                        tolerance = .002)
+        
+        
+        for (i in 2:(length(samples))) {
+          
+          toKeep <- !samples[[i]]@mass %in% samples[[1]]@mass 
+          
+          samples[[i]]@mass <- samples[[i]]@mass[toKeep]
+          samples[[i]]@intensity <- samples[[i]]@intensity[toKeep]
+          samples[[i]]@snr <- samples[[i]]@snr[toKeep]
+          
+        }
+        
+        samples <- samples[-1]
+        
+        subtractedMatrixBlank$maldiQuantPeaks <- samples
+        subtractedMatrixBlank$sampleIDs <- ids
+        
+      } else {
+        
+        samples <- MALDIquant::binPeaks(samples, tolerance = .002)
+        subtractedMatrixBlank$maldiQuantPeaks <- samples
+        subtractedMatrixBlank$sampleIDs <- ids
+      }
     }
     
-    subtractedMatrixBlank$maldiQuantPeaks <- samples
-    subtractedMatrixBlank$sampleIDs <- ids
-    
+
   })
+  
+  
+  
+  noSmallPeaks <- reactive({
+    
+    ind <- which(sapply(subtractedMatrixBlank$maldiQuantPeaks, function(x) length(x@mass)) == 0)
+    
+    subtractedMatrixBlank$sampleIDs[ind]
+    
+    })
+  
+  output$noSmallPeaksText <- renderText({
+    
+    paste0("Samples which contain no peaks: ",
+           paste0(noSmallPeaks(), collapse=",\n"))
+           
+    })
+  
   
   
   
