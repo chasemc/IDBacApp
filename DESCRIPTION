@@ -26,7 +26,6 @@ Imports:
     grDevices,
     httr (>= 1.4.1),
     igraph (>= 1.2.4.1),
-    IRanges,
     irlba (>= 2.3.3),
     jsonlite (>= 1.6),
     magrittr (>= 1.5),

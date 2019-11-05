@@ -113,31 +113,31 @@ smallmirrorPlots_Server <- function(input,
     mirrorPlotEnv <- new.env(parent = parent.frame())
     
     # connect to sql
-    conn <- pool::poolCheckout(workingDB$pool())
+    
     
     # get protein peak data for the 1st mirror plot selection
     
     
     
-    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
+    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(pool = workingDB$pool(),
                                                                  sampleIDs = input$Spectra1,
                                                                  peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
                                                                  upperMassCutoff = input$upperMass,
                                                                  minSNR = input$SNR,
                                                                  tolerance = 0.002,
-                                                                 protein = FALSE) 
+                                                                 protein = FALSE)[[1]] 
     
     
     
-    mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
+    mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(pool = workingDB$pool(),
                                                                  sampleIDs = input$Spectra2,
                                                                  peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
                                                                  upperMassCutoff = input$upperMass,
                                                                  minSNR = input$SNR,
                                                                  tolerance = 0.002,
-                                                                 protein = FALSE)
+                                                                 protein = FALSE)[[1]]
     
     
     

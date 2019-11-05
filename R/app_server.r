@@ -234,42 +234,37 @@ app_server <- function(input, output, session) {
     # merge into a single peak list per sample
     # trim m/z based on user input
     # connect to sql
-    isolate(
-      conn <- pool::poolCheckout(workingDB$pool())
-    )
+
     temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
-                     IDBacApp::collapseReplicates(checkedPool = conn,
+                     IDBacApp::collapseReplicates(pool = isolate(workingDB$pool()),
                                                   sampleIDs = ids,
                                                   peakPercentPresence = proteinPeakSettings$percentPresence,
                                                   lowerMassCutoff = proteinPeakSettings$lowerMass,
                                                   upperMassCutoff = proteinPeakSettings$upperMass, 
                                                   minSNR = proteinPeakSettings$SNR, 
                                                   tolerance = 0.002,
-                                                  protein = TRUE)
+                                                  protein = TRUE)[[1]]
                    })
 
     
-    pool::poolReturn(conn)
     
     # Inject samples into dendrogram
     if (length(proteinSamplesToInject$chosen$chosen) > 0) {
       
-      conn <- pool::poolCheckout(proteinSamplesToInject$db())
-      
+
       temp <- c(temp, lapply(proteinSamplesToInject$chosen$chosen,
                              function(ids){
-                               IDBacApp::collapseReplicates(checkedPool = conn,
+                               IDBacApp::collapseReplicates(pool = proteinSamplesToInject$db(),
                                                             sampleIDs = ids,
                                                             peakPercentPresence = proteinPeakSettings$percentPresence,
                                                             lowerMassCutoff = proteinPeakSettings$lowerMass,
                                                             upperMassCutoff = proteinPeakSettings$upperMass, 
                                                             minSNR = proteinPeakSettings$SNR, 
                                                             tolerance = 0.002,
-                                                            protein = TRUE)
+                                                            protein = TRUE)[[1]]
                              })
       )
-      pool::poolReturn(conn)
       
       
       names(temp) <- c(chosenProteinSampleIDs$chosen, proteinSamplesToInject$chosen$chosen)

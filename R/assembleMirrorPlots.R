@@ -30,31 +30,31 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   
   # get protein peak data for the 1st mirror plot selection
   
-  conn <- pool::poolCheckout(pool1)
+
+  # need(IDBacApp::checkSinglePool(pool1))
+  # need(IDBacApp::checkSinglePool(pool2))
+  # need(!is.null(sampleID1))
+  # need(!is.null(sampleID2))
   
-  mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
+  mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(pool = pool1,
                                                                sampleIDs = sampleID1,
                                                                peakPercentPresence = peakPercentPresence,
                                                                lowerMassCutoff = lowerMassCutoff,
                                                                upperMassCutoff = upperMassCutoff,
                                                                minSNR = minSNR,
                                                                tolerance = tolerance,
-                                                               protein = TRUE) 
-  pool::poolReturn(conn)
-  
-  conn <- pool::poolCheckout(pool2)
+                                                               protein = TRUE)[[1]] 
   
   
-  mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
+  mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(pool = pool2,
                                                                sampleIDs = sampleID2,
                                                                peakPercentPresence = peakPercentPresence,
                                                                lowerMassCutoff = lowerMassCutoff,
                                                                upperMassCutoff = upperMassCutoff,
                                                                minSNR = minSNR,
                                                                tolerance = tolerance,
-                                                               protein = TRUE)
-  pool::poolReturn(conn)
-  
+                                                               protein = TRUE)[[1]]
+ 
   
   shiny::validate(
     shiny::need(sum(length(mirrorPlotEnv$peaksSampleOne@mass),

@@ -350,6 +350,7 @@ dendDotsServer <- function(input,
                 5,
                 plotWidth()))
     
+  
     
     IDBacApp::plotDendrogram(dendrogram = dendrogram,
                              dendOrPhylo = dendOrPhylo(),
