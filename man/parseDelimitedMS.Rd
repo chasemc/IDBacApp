@@ -14,11 +14,12 @@ parseDelimitedMS(proteinPaths, proteinNames, smallMolPaths, smallMolNames,
 
 \item{smallMolPaths}{smallMolPaths}
 
-\item{smallMolNames}{smallMolNames}
+\item{smallMolNames}{smallMolNames names of the}
 
 \item{exportDirectory}{NA}
 
-\item{centroid}{centroid}
+\item{centroid}{Do the files contain profile or centroid data (currently implemented as just
+one TRUE/FALSE, but could mappply)}
 }
 \value{
 NA

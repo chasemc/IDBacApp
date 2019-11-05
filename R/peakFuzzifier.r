@@ -9,7 +9,7 @@
 #' #' @return list of bin vectors
 #' #' @export
 #' #'
-#' peakBinner <- function(peakList,
+#' createFuzzyVector <- function(peakList,
 #'                        ppm = 300,
 #'                        massStart = 3000,
 #'                        massEnd = 15000){
@@ -59,7 +59,7 @@ mQuantToMassVec <- function(peakList){
 
 
 
-#' Peak List Binner
+#' High-dimensional representation of mass peaks
 #'
 #' @param massStart beginning of mass range (as of now, must be smaller than smallest mass)
 #' @param massEnd end of mass range (as of now, must be smaller than smallest mass)
@@ -80,16 +80,13 @@ mQuantToMassVec <- function(peakList){
 #'             massList = masses,
 #'             intensityList = intensities)
 #'             }
-peakBinner <- function(massStart,
+createFuzzyVector <- function(massStart,
                        massEnd,
                        ppm,
                        massList,
                        intensityList){
   
-  
-  
- 
-  shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
+    shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
   shiny::validate(shiny::need(all(lengths(massList) > 0 ), "Mass list contained list with no masses"))
   
   scale_ppm <- function(mass,
@@ -114,9 +111,9 @@ peakBinner <- function(massStart,
   vecLength <- z1 + z2 + 2
   
   #  if (length(massList) * vecLength < 4e6) {
-  builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
+  #builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
   #  } else {
-  #    builtM <- Matrix::Matrix(0, nrow = length(massList), ncol = vecLength, sparse = TRUE) 
+      builtM <- Matrix::Matrix(0, ncol = length(massList), nrow = vecLength, sparse = TRUE) 
   #  }
   
   # mm returns a list of lists. each list element contains a list of length 3:
@@ -166,18 +163,18 @@ peakBinner <- function(massStart,
                   1000,
                   SIMPLIFY = FALSE)
     
-    if(!class(z3) == "list") {
+    if (!class(z3) == "list") {
       z3 <- list(z3)
       }
     
-    for (ii  in seq_along(z)){
+    for (ii  in seq_along(z)) {
       
-      builtM[i, z[[ii]]] <- builtM[i, z[[ii]]] + (z3[[ii]])
+      builtM[z[[ii]], i] <- builtM[z[[ii]], i] + (z3[[ii]])
       
     }
   } 
   
-  rownames(builtM) <- names(massList)
+  colnames(builtM) <- names(massList)
   
   return(builtM)
   

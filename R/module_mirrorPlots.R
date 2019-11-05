@@ -22,7 +22,8 @@ mirrorPlotDownload_UI <- function(id){
   ns <- NS(id)
   tagList(
     downloadButton(ns("downloadInverse"), 
-                   label = "Download SVG")
+                   label = "Download SVG"),
+uiOutput(ns("normSpecUi"))
     
   )
   
@@ -64,6 +65,19 @@ mirrorPlots_Server <- function(input,
                                proteinOrSmall){
   
   
+  
+  output$normSpecUi <- renderUI({
+    
+    radioButtons(session$ns("normSpec"),
+                 label = ("Normalize Spectra?"),
+                 choices = list("Raw Spectra" = 1L, 
+                                "Normalized" = 2L), 
+                 selected = 1L)
+    
+  })
+  
+ 
+  
   inverseComparisonNames <- reactive({
     conn <- pool::poolCheckout(workingDB$pool())
     
@@ -81,12 +95,12 @@ mirrorPlots_Server <- function(input,
   output$mirrorSpectraSelector <- renderUI({
     
     tagList(
-      tags$div(id='proteinMirror',
-               class='mirror_select',
+      tags$div(id = 'proteinMirror',
+               class = 'mirror_select',
                column(width = 5, offset = 1,
                       selectizeInput(session$ns("Spectra1"), 
                                      label = strong("Spectrum 1 (positive y-axis)"),
-                                     options= list(maxOptions = 10000),
+                                     options = list(maxOptions = 10000),
                                      choices = c("Choose one" = "", inverseComparisonNames()))
                ),
                column(width = 6,
@@ -100,8 +114,17 @@ mirrorPlots_Server <- function(input,
     
   })
   
+  
+  
+  
+  
   dataForInversePeakComparisonPlot <- reactive({
     
+    if (input$normSpec == 1L) {
+      normalizeSpectra <- FALSE
+    } else if (input$normSpec == 2L) {
+      normalizeSpectra <- TRUE
+      }
     
     IDBacApp::assembleMirrorPlots(sampleID1 = input$Spectra1,
                                   sampleID2 = input$Spectra2,
@@ -111,7 +134,8 @@ mirrorPlots_Server <- function(input,
                                   minSNR = input$SNR,
                                   tolerance = 0.002,
                                   pool1 = workingDB$pool(),
-                                  pool2 = workingDB$pool())
+                                  pool2 = workingDB$pool(),
+                                  normalizeSpectra = normalizeSpectra)
   })
   
   # Used in the the inverse-peak plot for zooming ---------------------------

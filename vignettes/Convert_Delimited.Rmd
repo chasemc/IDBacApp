@@ -1,0 +1,178 @@
+---
+title: "Convert_Delimited"
+output: rmarkdown::html_vignette
+vignette: >
+%\VignetteIndexEntry{Convert_Delimited}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+  ---
+  
+  ```{r, include = FALSE}
+knitr::opts_chunk$set(
+collapse = TRUE,
+comment = "#>"
+)
+```
+
+```{r setup}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(IDBacApp)
+library(DBI) # This is a dependency of IDBacApp as well
+```
+
+Make some temporary directories to write to:
+```{r message=FALSE, warning=FALSE}
+make_temp <- function(x){
+  loc <- file.path(tempdir(), x)
+  dir.create(loc)
+  loc <- normalizePath(loc, "/")
+  return(loc)
+}  
+
+csv_loc <- make_temp("csv_loc")
+mzml_loc <- make_temp("mzml_loc")
+sql_loc <- make_temp("sql_loc")
+
+```
+
+
+Make some synthetic spectra data and write to csv:
+```{r}
+set.seed(42)
+random_spec <- lapply(1:10,
+                      function(x){
+                        rs <- list(sample(2000:30000, 20, replace = F))
+                        IDBacApp::createFuzzyVector(massStart = 2000, 
+                                             massEnd = 30000,
+                                             ppm = 3000,
+                                             massList = rs,
+                                             intensityList = list(rep(100,
+                                                                      length(rs))
+                                             )
+                        )
+                      })
+
+for (i in seq_along(random_spec)) {
+  write.table(cbind(4000:9091,
+                    random_spec[[i]][,1]),  
+              file = file.path(csv_loc,
+                               paste0(LETTERS[[i]], ".csv")),
+              row.names = FALSE,
+              col.names = FALSE,
+              sep = ",")
+}
+
+list.files(csv_loc)
+```
+
+The format must ultimately be readable by https://github.com/sgibb/MALDIquantForeign
+which takes multiple input types (csv, txt, tab, etc.)
+
+Take a peek at one of the example csv files created above. It contains two columns, the first column represents masses, the second column intensities. The two columns are of equal length and currently IDBac only accepts profile data not centroided (peak) data.
+```{r}
+protein_paths <- list.files(csv_loc, full.names = T)
+read.delim(protein_paths[[1]],
+           sep = ",", 
+           nrows=5,
+           header = F,
+           col.names = c("mass", "intensity"))
+
+```
+
+
+In this case we will make the sample names the same as the csv file names. This is currently what the shiny app does.
+```{r}
+sample_names <- tools::file_path_sans_ext(basename(protein_paths))
+```
+
+We don't have small molecule data here so will pass NULL values for those variables. Centroid should currently be set to FALSE.
+```{r}
+
+keys <- IDBacApp::parseDelimitedMS(proteinPaths = protein_paths,
+                                   proteinNames = sample_names,
+                                   smallMolPaths = NULL,
+                                   smallMolNames = NULL,
+                                   exportDirectory = mzml_loc,
+                                   centroid = FALSE)
+
+```
+
+
+```{r message=TRUE, warning=TRUE}
+IDBacApp::processMZML(mzFilePaths = keys$mzFilePaths,
+                      sampleIds = keys$sampleIds,
+                      sqlDirectory = sql_loc,
+                      newExperimentName = "delim_example",
+                      acquisitionInfo = NULL)
+```
+
+Check if IDBac experiment file (SQLite database) was created:
+```{r}
+list.files(sql_loc)
+```
+
+
+Connect to IDBac experiment file (database file):
+```{r}
+sql_db <- IDBacApp::createPool("delim_example",
+                               sql_loc)
+# createPool() returns a list of pools, here we only provided one
+# experiment so we only need the first pool
+sql_db <- sql_db[[1]]
+
+```
+
+Check that there are tables in the database:
+```{r}
+DBI::dbListTables(sql_db)
+
+```
+
+
+```{r}
+con <- pool::poolCheckout(sql_db)
+peak_data <- IDBacApp::getPeakData(con, c("A", "D"), protein = TRUE)
+peak_data
+```
+
+Check that IDBac database has the same values for spectra:
+```{r}
+spec <- mquantSpecFromSQL(checkedPool = con,
+                          sampleID = c("A", "D"), 
+                          proteinOrSmall = ">")
+
+# Check sample "A"
+all.equal(spec[[1]]@mass,
+          4000:9091)
+all.equal(spec[[1]]@intensity, 
+          random_spec[[1]][ , 1])
+
+# Check sample "B"
+all.equal(spec[[2]]@mass,
+          4000:9091)
+all.equal(spec[[2]]@intensity, 
+          random_spec[[4]][ , 1])
+
+```
+
+
+Create a mirror plot for samples "A" and "D". `SNR` and `peakPercentPresence` settings don't matter in this example because there isn't SNR info or replicate data. 
+```{r}
+mirror_env <- IDBacApp::assembleMirrorPlots(sampleID1 = "A",
+                                            sampleID2 = "D",
+                                            peakPercentPresence = 100,
+                                            lowerMassCutoff = 3000,
+                                            upperMassCutoff = 10000,
+                                            minSNR = 0,
+                                            tolerance = 0.002,
+                                            pool1 = sql_db,
+                                            pool2 = sql_db)
+
+ls(mirror_env)
+```
+
+Display a mirror plot using plotly.js:
+```{r}
+IDBacApp::mirrorPlot(mirror_env)
+```
+

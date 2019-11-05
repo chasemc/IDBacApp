@@ -52,15 +52,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
   # Get number of spectra contained in mzML
   scanNumber <- nrow(mzR::header(mzML_con))
   
-  
-  # mzML_con <<- mzML_con
-  # scanNumber <<- scanNumber
-  # userDBCon <<- userDBCon
-  # sampleID <<- sampleID
-  # XMLinfo <<- XMLinfo
-  # rawDataFilePath <<- rawDataFilePath
-  # acquisitionInfo <<- acquisitionInfo
-  #stop()
+
   
   IDBacApp::createSpectraSQL(mzML_con = mzML_con,
                              scanNumber = scanNumber,
