@@ -35,6 +35,6 @@ test_that("new DB has Mass table", {
   
 })
 
-
+suppressWarnings(gc())
 
 

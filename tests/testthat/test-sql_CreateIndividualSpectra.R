@@ -38,3 +38,4 @@ test_that("new DB has IndividualSpectra table", {
 
 
 
+suppressWarnings(gc())
