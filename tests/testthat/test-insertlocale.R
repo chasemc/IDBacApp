@@ -1,7 +1,7 @@
 context("test-insertlocale")
 
 
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- pool::dbPool(drv = RSQLite::SQLite(), dbname = ":memory:")
 
 IDBacApp::insertLocale(con)
 

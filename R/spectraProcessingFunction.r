@@ -14,6 +14,9 @@ spectraProcessingFunction <- function(rawDataFilePath,
                                       userDBCon, 
                                       acquisitionInfo){
   
+  IDBacApp::poolToCon(userDBCon)
+  
+  
   
   sampleID <- IDBacApp::cleanWSpace(sampleID)
   

@@ -51,21 +51,6 @@ deserial <- function(input){
 }
 
 
-#' Read a vector represented as JSON
-#'    Is faster than jsonlite::fromJSON() for eg: [1.23,10.23,20]
-#' @param input JSON
-#'
-#' @return Numeric vector
-#' @export
-#'
-fastJsonVectorParse <- function(input) {
- 
-  base::scan(base::textConnection(gsub("\\[|\\]", "", input)), sep = ",") 
-  
-}
-
-
-
 #' compress
 #'   Settings for compressing raw vectors
 #'
@@ -263,5 +248,37 @@ findIdbacHome <- function(){
   }
   
   normalizePath(temp, winslash = "/")  
+  
+}
+
+
+
+
+
+#' Checkout pool if it isn't
+#'
+#' @param con db pool/connection
+#'
+#' @return checked out pool
+#' @export
+#'
+poolToCon <- function(con) {
+  
+  type <- class(con)
+  
+  if ("Pool" %in% type) {
+    
+    return(pool::poolCheckout(con))
+    
+  } else  if ("SQLiteConnection" %in% type) {
+   
+    return(con)
+     
+  } else {
+    
+    stop("Expected either a pool or SQLite object.")
+    
+  }
+  
   
 }

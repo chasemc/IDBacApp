@@ -11,19 +11,24 @@
 #' @export
 #'
 sqlCreate_version <- function(userDBCon) {
-  if (!DBI::dbExistsTable(userDBCon, "version")) {
-    
-    ver <- cbind.data.frame(IDBacVersion = as.character(packageVersion("IDBacApp")), 
-                 rVersion = as.character(IDBacApp::serial(sessionInfo()$R.version)))
-    # Add version table
-    DBI::dbWriteTable(conn = userDBCon,
-                      name = "version", # SQLite table to insert into
-                      ver, # Insert single row into DB
-                      append = TRUE, # Append to existing table
-                      overwrite = FALSE) # Do not overwrite
-  }
+  
+  pool::poolWithTransaction(
+    pool = userDBCon,
+    func = function(conn){
+      
+      if (!DBI::dbExistsTable(conn, "version")) {
+        
+        ver <- cbind.data.frame(IDBacVersion = as.character(packageVersion("IDBacApp")), 
+                                rVersion = as.character(IDBacApp::serial(sessionInfo()$R.version)))
+        # Add version table
+        DBI::dbWriteTable(conn = conn,
+                          name = "version", # SQLite table to insert into
+                          ver, # Insert single row into DB
+                          append = TRUE, # Append to existing table
+                          overwrite = FALSE) # Do not overwrite
+      }
+    })
 }
-
 
 
 # locale table ------------------------------------------------------------
@@ -37,22 +42,27 @@ sqlCreate_version <- function(userDBCon) {
 #' @export
 #'
 insertLocale <- function(userDBCon) {
-  if (!DBI::dbExistsTable(userDBCon, "locale")) {
-    
-    locale <- Sys.getlocale(category = "LC_ALL")
-    locale <- as.character(locale)[[1]]
-    locale <- as.data.frame(locale)
-    
-    # Add version table
-    DBI::dbWriteTable(conn = userDBCon,
-                      name = "locale", # SQLite table to insert into
-                      locale, # Insert single row into DB
-                      append = TRUE, # Append to existing table
-                      overwrite = FALSE) # Do not overwrite
-  }
-}
-
-
+  
+  pool::poolWithTransaction(
+    pool = userDBCon,
+    func = function(conn){
+      
+      if (!DBI::dbExistsTable(conn, "locale")) {
+        
+        locale <- Sys.getlocale(category = "LC_ALL")
+        locale <- as.character(locale)[[1]]
+        locale <- as.data.frame(locale)
+        
+        # Add version table
+        DBI::dbWriteTable(conn = conn,
+                          name = "locale", # SQLite table to insert into
+                          locale, # Insert single row into DB
+                          append = TRUE, # Append to existing table
+                          overwrite = FALSE) # Do not overwrite
+      }
+      
+    })
+}  
 
 
 
@@ -74,21 +84,26 @@ insertLocale <- function(userDBCon) {
 createMetaSQL <- function(sampleID,
                           userDBCon){
   
-  if (!DBI::dbExistsTable(userDBCon, "metaData")) {
-    IDBacApp::sql_CreatemetaData(userDBCon)
-  }  
   
-  query <- DBI::dbSendStatement(userDBCon, 
-                                "INSERT INTO 'metaData' (
+  pool::poolWithTransaction(
+    pool = userDBCon,
+    func = function(conn){
+      
+      if (!DBI::dbExistsTable(conn, "metaData")) {
+        IDBacApp::sql_CreatemetaData(conn)
+      }  
+      
+      query <- DBI::dbSendStatement(conn, 
+                                    "INSERT INTO 'metaData' (
                                 'Strain_ID')
                                  VALUES (?)")
-  
-  DBI::dbBind(query, list(sampleID))
-  
-  DBI::dbClearResult(query)
-  
-}
-
+      
+      DBI::dbBind(query, list(sampleID))
+      
+      DBI::dbClearResult(query)
+      
+    })
+}  
 
 
 # XML table ---------------------------------------------------------------
@@ -108,30 +123,35 @@ createXMLSQL <- function(rawDataFilePath,
                          userDBCon,
                          mzML_con){
   
-  xmlFile <- IDBacApp::serializeXML(rawDataFilePath)
   
-  mzMLHash <- IDBacApp::hashR(xmlFile)
-  
-  if (!DBI::dbExistsTable(userDBCon, "XML")) {
-    IDBacApp::sql_CreatexmlTable(userDBCon)
-  }
-  
-  
-  # Get instrument Info
-  instInfo <- mzR::instrumentInfo(mzML_con)
-  
-  
-  # # Find acquisitionInfo from mzML file
-  #acquisitionInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
-   #                                               instInfo$manufacturer)
-  
-  # if ("Instrument_MetaFile" %in% ls(acquisitionInfo)) { 
-  #   sqlDataFrame$XML$Instrument_MetaFile <- IDBacApp::serial(acquisitionInfo$Instrument_MetaFile)
-  # }
-  
-  
-  query <- DBI::dbSendStatement(userDBCon, 
-                                "INSERT INTO 'XML'(
+  pool::poolWithTransaction(
+    pool = userDBCon,
+    func = function(conn){
+      
+      xmlFile <- IDBacApp::serializeXML(rawDataFilePath)
+      
+      mzMLHash <- IDBacApp::hashR(xmlFile)
+      
+      if (!DBI::dbExistsTable(conn, "XML")) {
+        IDBacApp::sql_CreatexmlTable(conn)
+      }
+      
+      
+      # Get instrument Info
+      instInfo <- mzR::instrumentInfo(mzML_con)
+      
+      
+      # # Find acquisitionInfo from mzML file
+      #acquisitionInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
+      #                                               instInfo$manufacturer)
+      
+      # if ("Instrument_MetaFile" %in% ls(acquisitionInfo)) { 
+      #   sqlDataFrame$XML$Instrument_MetaFile <- IDBacApp::serial(acquisitionInfo$Instrument_MetaFile)
+      # }
+      
+      
+      query <- DBI::dbSendStatement(conn, 
+                                    "INSERT INTO 'XML'(
                                 'XMLHash',
                                 'XML',
                                 'manufacturer',
@@ -148,22 +168,22 @@ createXMLSQL <- function(rawDataFilePath,
                                 $analyzer,
                                 $detector,
                                 $Instrument_MetaFile);")
+      
+      DBI::dbBind(query, list(XMLHash = mzMLHash,
+                              XML = list(xmlFile),
+                              manufacturer = instInfo$manufacturer[[1]],
+                              model = instInfo$model[[1]],
+                              ionization = instInfo$ionisation[[1]],
+                              analyzer = instInfo$analyzer[[1]],
+                              detector = instInfo$detector[[1]],
+                              Instrument_MetaFile = "Unkown"))
+      
+      DBI::dbClearResult(query)
+      return(list(mzMLHash = mzMLHash,
+                  mzMLInfo = instInfo))
+    })
   
-  DBI::dbBind(query, list(XMLHash = mzMLHash,
-                          XML = list(xmlFile),
-                          manufacturer = instInfo$manufacturer[[1]],
-                          model = instInfo$model[[1]],
-                          ionization = instInfo$ionisation[[1]],
-                          analyzer = instInfo$analyzer[[1]],
-                          detector = instInfo$detector[[1]],
-                          Instrument_MetaFile = "Unkown"))
   
-  DBI::dbClearResult(query)
-  
-  
-  
-  return(list(mzMLHash = mzMLHash,
-              mzMLInfo = instInfo))
 }
 
 
@@ -189,6 +209,8 @@ createSpectraSQL <- function(mzML_con,
                              smallRangeEnd = 6000,
                              acquisitionInfo){
   
+  
+  
   spectraImport <- mzR::peaks(mzML_con)
   
   spectraImport <- IDBacApp::spectrumMatrixToMALDIqaunt(spectraImport)
@@ -203,11 +225,19 @@ createSpectraSQL <- function(mzML_con,
   
   # Create tables in DB if they don't exist ---------------------------------
   
-  if (!DBI::dbExistsTable(userDBCon, "IndividualSpectra")) {
-    IDBacApp::sql_CreateIndividualSpectra(userDBCon)
+  if (!pool::dbExistsTable(userDBCon, "IndividualSpectra")) {
+    pool::poolWithTransaction(
+      pool = userDBCon,
+      func = function(conn){
+        IDBacApp::sql_CreateIndividualSpectra(conn)
+      })
   }  
-  if (!DBI::dbExistsTable(userDBCon, "massTable")) {
-    IDBacApp::sql_CreatemassTable(userDBCon)
+  if (!pool::dbExistsTable(userDBCon, "massTable")) {
+    pool::poolWithTransaction(
+      pool = userDBCon,
+      func = function(conn){
+        IDBacApp::sql_CreatemassTable(conn)
+      })
   }
   
   # Small mol spectra -------------------------------------------------------
@@ -260,25 +290,30 @@ createSpectraSQL <- function(mzML_con,
 insertIntoMassTable <- function(env,
                                 userDBCon){
   
-  if (length(env$spectrumMassHash) != length(env$massVector)) {
-    stop("Error in IDBacApp::insertIntoMassTable(): IDBacApp::processXMLIndSpectra() provided
+  pool::poolWithTransaction(
+    pool = userDBCon,
+    func = function(conn){
+      
+      if (length(env$spectrumMassHash) != length(env$massVector)) {
+        stop("Error in IDBacApp::insertIntoMassTable(): IDBacApp::processXMLIndSpectra() provided
                     spectrumMassHash and massVector variables with different lengths")
-  } else { 
-    query <- DBI::dbSendStatement(userDBCon, 
-                                  "INSERT INTO 'massTable'(
+      } else { 
+        query <- DBI::dbSendStatement(conn, 
+                                      "INSERT INTO 'massTable'(
                               'spectrumMassHash',
                               'massVector')
                               VALUES (
                               $spectrumMassHash,
                               $massVector);")
-    
-    DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
-                            massVector = env$massVector)
-    )
-    
-    DBI::dbClearResult(query)
-    
-  }
+        
+        DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
+                                massVector = env$massVector)
+        )
+        
+        DBI::dbClearResult(query)
+        
+      }
+    })
 }
 
 
@@ -301,17 +336,20 @@ insertIntoIndividualSpectra <- function(env,
                                         userDBCon,
                                         acquisitionInfo = NULL,
                                         sampleID){
-  
-  temp <- base::lengths(base::mget(base::ls(env),
-                                   envir = as.environment(env))) 
-  
-  # ensure equal lengths
-  if ((sum(temp)/temp[[1]]) != length(temp)) {
-    stop(glue::glue("Error in IDBacApp::insertIntoIndividualSpectra(): IDBacApp::processXMLIndSpectra() provided variables of differing lengths: \n ",  
-                    paste0(names(temp),"=",temp, collapse = ", ")))
-  } else { 
-    query <- DBI::dbSendStatement(userDBCon, 
-                                  "INSERT INTO 'IndividualSpectra'(
+  pool::poolWithTransaction(
+    pool = userDBCon,
+    func = function(conn){
+      
+      temp <- base::lengths(base::mget(base::ls(env),
+                                       envir = as.environment(env))) 
+      
+      # ensure equal lengths
+      if ((sum(temp)/temp[[1]]) != length(temp)) {
+        stop(glue::glue("Error in IDBacApp::insertIntoIndividualSpectra(): IDBacApp::processXMLIndSpectra() provided variables of differing lengths: \n ",  
+                        paste0(names(temp),"=",temp, collapse = ", ")))
+      } else { 
+        query <- DBI::dbSendStatement(conn, 
+                                      "INSERT INTO 'IndividualSpectra'(
                                   'spectrumMassHash',
                                   'spectrumIntensityHash',
                                   'XMLHash',
@@ -397,113 +435,114 @@ insertIntoIndividualSpectra <- function(env,
                                   $targetSerialNumber,
                                   $targetTypeNumber
                                   );"
-    )
-    
-    
-   
-
-    ignore <- rep(0, times = temp[[1]])
-    sampleID <- rep(sampleID[[1]], times = temp[[1]])
-    mzMLHash <- rep(XMLinfo$mzMLHash, times = temp[[1]])
-    
-    
-      
-    a <- c('number',
-           'timeDelay',
-           'timeDelta',
-           'calibrationConstants',
-           'v1tofCalibration',
-           'dataType',
-           'dataSystem',
-           'spectrometerType',
-           'inlet',
-           'ionizationMode',
-           'acquisitionMethod',
-           'acquisitionDate',
-           'acquisitionMode',
-           'tofMode',
-           'acquisitionOperatorMode',
-           'laserAttenuation',
-           'digitizerType',
-           'flexControlVersion',
-           'id',
-           'instrument',
-           'instrumentId',
-           'instrumentType',
-           'massError',
-           'laserShots',
-           'patch',
-           'path',
-           'laserRepetition',
-           'spot',
-           'spectrumType',
-           'targetCount',
-           'targetIdString',
-           'targetSerialNumber',
-           'targetTypeNumber')
-      
-    
-    if (is.null(acquisitionInfo) || length(acquisitionInfo) == 0L ) {
-      acquisitionInfo <- rbind(rep(NA, temp[[1]]))       
-    } 
-    
-      # Account for missing fields
-    acquisitionInfo <- lapply(acquisitionInfo, function(acquisitionInfo){
-      
-      acquisitionInfo[which(lengths(acquisitionInfo) == 0)] <- NA
-      
-      # if length > 1, serialize to json
-      acquisitionInfo[which(lengths(acquisitionInfo) > 1)] <- lapply(acquisitionInfo[which(lengths(acquisitionInfo) > 1)], 
-                                                                     jsonlite::serializeJSON)
-      
-      
-      w <- a[!a %in% names(acquisitionInfo)]
-      ww <- as.list(w)
-      names(ww) <- w
-      ww[] <- NA
-      
-      acquisitionInfo <- c(acquisitionInfo,
-                           ww)
-      
-        do.call(rbind.data.frame,
-                   list(acquisitionInfo,
-                        stringsAsFactors = FALSE)
         )
-      
-    })
-    
-    
-    
-    acquisitionInfo <- do.call(rbind, acquisitionInfo)
-    
-    acquisitionInfo <- acquisitionInfo[ ,names(acquisitionInfo) %in% a]
-      
-    
-    
-    
-    
-      DBI::dbBind(query, 
-                  c(
-                    list(spectrumMassHash = env$spectrumMassHash,
-                         spectrumIntensityHash = env$spectrumIntensityHash,
-                         XMLHash = mzMLHash,
-                         Strain_ID = sampleID,
-                         peakMatrix = env$peakMatrix,
-                         spectrumIntensity = env$spectrumIntensity,
-                         minMass = env$minMass,
-                         maxMass = env$maxMass,
-                         ignore = ignore
-                    ),
-                    acquisitionInfo
-                    
-                         
+        
+        
+        
+        
+        ignore <- rep(0, times = temp[[1]])
+        sampleID <- rep(sampleID[[1]], times = temp[[1]])
+        mzMLHash <- rep(XMLinfo$mzMLHash, times = temp[[1]])
+        
+        
+        
+        a <- c('number',
+               'timeDelay',
+               'timeDelta',
+               'calibrationConstants',
+               'v1tofCalibration',
+               'dataType',
+               'dataSystem',
+               'spectrometerType',
+               'inlet',
+               'ionizationMode',
+               'acquisitionMethod',
+               'acquisitionDate',
+               'acquisitionMode',
+               'tofMode',
+               'acquisitionOperatorMode',
+               'laserAttenuation',
+               'digitizerType',
+               'flexControlVersion',
+               'id',
+               'instrument',
+               'instrumentId',
+               'instrumentType',
+               'massError',
+               'laserShots',
+               'patch',
+               'path',
+               'laserRepetition',
+               'spot',
+               'spectrumType',
+               'targetCount',
+               'targetIdString',
+               'targetSerialNumber',
+               'targetTypeNumber')
+        
+        
+        if (is.null(acquisitionInfo) || length(acquisitionInfo) == 0L ) {
+          acquisitionInfo <- rbind(rep(NA, temp[[1]]))       
+        } 
+        
+        # Account for missing fields
+        acquisitionInfo <- lapply(acquisitionInfo, function(acquisitionInfo){
+          
+          acquisitionInfo[which(lengths(acquisitionInfo) == 0)] <- NA
+          
+          # if length > 1, serialize to json
+          acquisitionInfo[which(lengths(acquisitionInfo) > 1)] <- lapply(acquisitionInfo[which(lengths(acquisitionInfo) > 1)], 
+                                                                         jsonlite::serializeJSON)
+          
+          
+          w <- a[!a %in% names(acquisitionInfo)]
+          ww <- as.list(w)
+          names(ww) <- w
+          ww[] <- NA
+          
+          acquisitionInfo <- c(acquisitionInfo,
+                               ww)
+          
+          do.call(rbind.data.frame,
+                  list(acquisitionInfo,
+                       stringsAsFactors = FALSE)
+          )
+          
+        })
+        
+        
+        
+        acquisitionInfo <- do.call(rbind, acquisitionInfo)
+        
+        acquisitionInfo <- acquisitionInfo[ ,names(acquisitionInfo) %in% a]
+        
+        
+        
+        
+        
+        DBI::dbBind(query, 
+                    c(
+                      list(spectrumMassHash = env$spectrumMassHash,
+                           spectrumIntensityHash = env$spectrumIntensityHash,
+                           XMLHash = mzMLHash,
+                           Strain_ID = sampleID,
+                           peakMatrix = env$peakMatrix,
+                           spectrumIntensity = env$spectrumIntensity,
+                           minMass = env$minMass,
+                           maxMass = env$maxMass,
+                           ignore = ignore
+                      ),
+                      acquisitionInfo
+                      
+                      
                     ))
-    
-    
-    
-    DBI::dbClearResult(query)
-    
-  }
+        
+        
+        
+        DBI::dbClearResult(query)
+        
+      }
+    })
 }
 
 

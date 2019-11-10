@@ -22,7 +22,7 @@ b <- lapply(c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkow
 
 
 test_that("distMatrix hasn't changed", {
-  expect_known_hash(a, "9d198765f0")
-  expect_known_hash(b, "eb6b1ba6e7")
+  expect_known_hash(a, "0348388d46")
+  expect_known_hash(b, "320fefcd92")
   
 })
