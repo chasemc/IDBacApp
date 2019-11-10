@@ -1,5 +1,7 @@
 #' Smooth, remove baseline, and normalize intensity of a spectrum
 #'
+#' @param spectrum spectrum
+#'
 #' @return normalized MALDIquant massSpectrum
 #' @export
 #'

@@ -48,7 +48,8 @@ Imports:
     stats,
     svglite (>= 1.2.2),
     utils,
-    xml2 (>= 1.2.1)
+    xml2 (>= 1.2.1),
+    Matrix
 Suggests:
     knitr (>= 1.23),
     testthat (>= 2.2.1)

@@ -19,7 +19,6 @@ pcaCalculation <- function(dataMatrix,
                            missing = 0){
   validate(need(nrow(dataMatrix) > 3, "Select more samples for PCA"))
   validate(need(ncol(dataMatrix) > 1, "Only 1 peak found between all samples"))
-  dd<<-dataMatrix
   
   names <- rownames(dataMatrix)
   # log10 if chosen
@@ -146,23 +145,4 @@ pcoaCalculation <- function(distanceMatrix){
   colnames(distanceMatrix) <- c("nam", "Dim1", "Dim2", "Dim3")
   return(distanceMatrix)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

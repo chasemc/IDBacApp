@@ -6,6 +6,9 @@
 \usage{
 normalizeSpectrumIntensity(spectrum)
 }
+\arguments{
+\item{spectrum}{spectrum}
+}
 \value{
 normalized MALDIquant massSpectrum
 }

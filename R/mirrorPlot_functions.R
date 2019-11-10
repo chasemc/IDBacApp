@@ -117,7 +117,7 @@ baserMirrorPlot <- function(mirrorPlotEnv){
                  ylim = c(-max(mirrorPlotEnv$spectrumSampleTwo@intensity),
                           max(mirrorPlotEnv$spectrumSampleOne@intensity)),
                  type = "l",
-                 col = adjustcolor("Black", alpha.f = 0.3),
+                 col = grDevices::adjustcolor("Black", alpha.f = 0.3),
                  xlab = "m/z",
                  ylab = "Intensity")
   graphics::lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,

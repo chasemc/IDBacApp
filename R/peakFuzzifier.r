@@ -81,12 +81,12 @@ mQuantToMassVec <- function(peakList){
 #'             intensityList = intensities)
 #'             }
 createFuzzyVector <- function(massStart,
-                       massEnd,
-                       ppm,
-                       massList,
-                       intensityList){
+                              massEnd,
+                              ppm,
+                              massList,
+                              intensityList){
   
-    shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
+  shiny::validate(shiny::need(ppm > 300, "Select a ppm > 300"))
   shiny::validate(shiny::need(all(lengths(massList) > 0 ), "Mass list contained list with no masses"))
   
   scale_ppm <- function(mass,
@@ -113,7 +113,7 @@ createFuzzyVector <- function(massStart,
   #  if (length(massList) * vecLength < 4e6) {
   #builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
   #  } else {
-      builtM <- Matrix::Matrix(0, ncol = length(massList), nrow = vecLength, sparse = TRUE) 
+  builtM <- Matrix::Matrix(0, ncol = length(massList), nrow = vecLength, sparse = TRUE) 
   #  }
   
   # mm returns a list of lists. each list element contains a list of length 3:
@@ -146,9 +146,9 @@ createFuzzyVector <- function(massStart,
     # model normal distribution density across each centroid's uncertainty integer vector
     z2 <- mapply(
       function(x,y,z){
-        round(dnorm(x,
-                    y,
-                    (z - y) / 4),
+        round(stats::dnorm(x,
+                           y,
+                           (z - y) / 4),
               digits = 4)
       },
       z,
@@ -165,7 +165,7 @@ createFuzzyVector <- function(massStart,
     
     if (!class(z3) == "list") {
       z3 <- list(z3)
-      }
+    }
     
     for (ii  in seq_along(z)) {
       

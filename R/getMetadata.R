@@ -23,8 +23,8 @@ metadata_from_id <- function(id,
                                   WHERE `Strain_ID` = $ids")
   
   
-  query <- DBI::dbSendStatement(b,
-                                con=conn)
+  query <- DBI::dbSendStatement(a,
+                                con = conn)
   
   DBI::dbBind(query, list(ids = id))
   selectedMeta <- DBI::dbFetch(query)
