@@ -17,7 +17,9 @@ NULL
 app_server <- function(input, output, session) {
   
   set.seed(42)
-  
+  if (isTRUE(getOption("shiny.testmode"))) {
+    options(idbac_testing = TRUE)
+  }
   
   # Development Functions ---------------------------------------------------
   
@@ -50,7 +52,7 @@ app_server <- function(input, output, session) {
   # Setup working directories -----------------------------------------------
   # This  doesn't go in modules, so that temp folder cleanup is sure to happen more often
   # Create a directory for temporary mzml files
-  tempMZDir <- file.path(getwd(), "temp_mzML")
+  tempMZDir <- file.path(tempdir(), "temp_mzML")
   dir.create(tempMZDir)
   
   # Cleanup mzML temp folder on initialization of app

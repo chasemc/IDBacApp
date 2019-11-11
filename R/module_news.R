@@ -4,7 +4,7 @@
 #' @export
 #'
 newUpdate <- function(){
-  
+  if (isTRUE(.Options$idbac_testing)) {
   showModal(
     modalDialog(
       size = "m",
@@ -12,7 +12,7 @@ newUpdate <- function(){
                      utils::packageVersion("IDBacApp")),
       shiny::includeMarkdown(system.file("NEWS.md", package = "IDBacApp")),
       easyClose = TRUE, 
-      footer = "")
+      footer = modalButton("Dismiss"))
   )
-  
+  }
 }

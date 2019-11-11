@@ -44,7 +44,8 @@ parseDelimitedMS <- function(proteinPaths,
                                   ".mzML"))
   
   mzFilePaths <- normalizePath(mzFilePaths, 
-                               mustWork = FALSE)
+                               mustWork = FALSE,
+                               winslash = "/")
   
   key <- base::split(importedFiles, mzFilePaths)
   

@@ -220,41 +220,6 @@ nulledMap384Well <- function() {
 
 
 
-
-
-
-
-#' Get default path for IDBac to save experiments to
-#'
-#' @return character path
-#' @export 
-#'
-findIdbacHome <- function(){
-  
-  temp <- as.list(Sys.getenv())$HOME
-  
-  if (!dir.exists(temp)) {
-    temp <- as.list(Sys.getenv())$LOCALAPPDATA
-    if (!dir.exists(temp) || length(temp) > 1) {
-      temp <- getwd()
-    }
-  }
-  
-  temp <- file.path(temp, "IDBac_experiments", fsep = "/")
-  
-  if(!dir.exists(temp)) {
-    message(paste0("Creating directory 'IDBac_experiments' in ", dirname(temp)))
-    dir.create(temp)
-  }
-  
-  normalizePath(temp, winslash = "/")  
-  
-}
-
-
-
-
-
 #' Checkout pool if it isn't
 #'
 #' @param con db pool/connection
