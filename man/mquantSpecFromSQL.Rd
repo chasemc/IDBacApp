@@ -4,14 +4,16 @@
 \alias{mquantSpecFromSQL}
 \title{mquantSpecFromSQL}
 \usage{
-mquantSpecFromSQL(checkedPool, sampleID, proteinOrSmall)
+mquantSpecFromSQL(pool, sampleID, protein = FALSE, smallmol = FALSE)
 }
 \arguments{
-\item{checkedPool}{checkedPool}
+\item{pool}{pool}
 
 \item{sampleID}{sampleID}
 
-\item{proteinOrSmall}{'>' for protein '<' for small mol}
+\item{protein}{TRUE/FALSE to retrieve protein spectra}
+
+\item{smallmol}{TRUE/FALSE to retrieve small molecule spectra}
 }
 \value{
 single, averaged MALDIquant spectrum

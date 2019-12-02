@@ -18,10 +18,9 @@ processMZML <- function(mzFilePaths,
   
   
   
-  userDB <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
+  userDBPool <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
                                         sqlDirectory = sqlDirectory)[[1]]
-  userDB <- pool::poolCheckout(userDB)
-  
+
   progLength <- base::length(mzFilePaths)
   
   # withProgress doesn't currently work outside shiny
@@ -39,7 +38,7 @@ processMZML <- function(mzFilePaths,
                      
                      IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                                          sampleID = sampleIds[[i]],
-                                                         userDBCon = userDB,
+                                                         userDBCon = userDBPool,
                                                          acquisitionInfo = acquisitionInfo[[i]]) # pool connection
                    }
                  })
@@ -52,13 +51,12 @@ processMZML <- function(mzFilePaths,
       
       IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                           sampleID = sampleIds[[i]],
-                                          userDBCon = userDB,
+                                          userDBCon = userDBPool,
                                           acquisitionInfo = acquisitionInfo[[i]]) # pool connection
     }
   }
   
-  pool::poolReturn(userDB)
-  
+  pool::poolClose(userDBPool)
   
 }
 

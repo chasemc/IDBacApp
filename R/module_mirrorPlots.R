@@ -23,7 +23,7 @@ mirrorPlotDownload_UI <- function(id){
   tagList(
     downloadButton(ns("downloadInverse"), 
                    label = "Download SVG"),
-uiOutput(ns("normSpecUi"))
+    uiOutput(ns("normSpecUi"))
     
   )
   
@@ -76,7 +76,7 @@ mirrorPlots_Server <- function(input,
     
   })
   
- 
+  
   
   inverseComparisonNames <- reactive({
     conn <- pool::poolCheckout(workingDB$pool())
@@ -124,7 +124,7 @@ mirrorPlots_Server <- function(input,
       normalizeSpectra <- FALSE
     } else if (input$normSpec == 2L) {
       normalizeSpectra <- TRUE
-      }
+    }
     
     IDBacApp::assembleMirrorPlots(sampleID1 = input$Spectra1,
                                   sampleID2 = input$Spectra2,
@@ -184,43 +184,75 @@ mirrorPlots_Server <- function(input,
 
 #' mquantSpecFromSQL
 #'
-#' @param checkedPool checkedPool
+#' @param pool pool
 #' @param sampleID sampleID 
-#' @param proteinOrSmall '>' for protein '<' for small mol
+#' @param protein TRUE/FALSE to retrieve protein spectra
+#' @param smallmol TRUE/FALSE to retrieve small molecule spectra
 #'
 #' @return single, averaged MALDIquant spectrum
 #' @export
 #'
-mquantSpecFromSQL <- function(checkedPool,
+mquantSpecFromSQL <- function(pool,
                               sampleID, 
-                              proteinOrSmall){
+                              protein = FALSE,
+                              smallmol = FALSE){
   
-  query <-  DBI::dbSendStatement(glue::glue("SELECT massTable.massVector, IndividualSpectra.spectrumIntensity
+  sampleID <- list(as.character(as.vector(sampleID)))
+  
+  
+  if (!any(is.logical(protein), is.logical(smallmol))) {
+    stop("mquantSpecFromSQL() protein and smallmol must be TRUE or FALSE")
+  }
+  if (length(unlist(list(protein, smallmol), recursive = TRUE)) != 2) {
+    stop("mquantSpecFromSQL() protein and smallmol must be logical vectors of length 1")
+  }
+  proteinOrSmall <- NULL
+  if (protein == TRUE) {
+    proteinOrSmall <- ">"
+  }
+  if (smallmol == TRUE) {
+    proteinOrSmall <- "<"
+  }
+  if(is.null(proteinOrSmall) || (sum(protein, smallmol) != 1)){
+    stop("One of protein or smallmol must be TRUE and one must be FALSE")
+  }
+  
+  
+  result <-  pool::poolWithTransaction(pool, 
+                                       function(conn){
+                                         query <-  DBI::dbSendStatement(glue::glue("SELECT massTable.massVector, IndividualSpectra.spectrumIntensity
                                    FROM massTable
                                    LEFT JOIN IndividualSpectra
                                    ON massTable.spectrumMassHash = IndividualSpectra.spectrumMassHash
                                    WHERE Strain_ID == ?
                                    AND maxMass {proteinOrSmall} 6000"),
-                                 con = checkedPool)
+                                                                        con = conn)
+                                         
+                                         
+                                         DBI::dbBind(query, sampleID)
+                                         result <- DBI::dbFetch(query)
+                                         DBI::dbClearResult(query)
+                                         
+                                         return(result)
+                                       })
+  if (nrow(result) > 0) {
+    result <- lapply(1:nrow(result),
+                     function(x){
+                       cbind(IDBacApp::deserial(rawToChar(fst::decompress_fst(result[x, 1][[1]]))),
+                             IDBacApp::deserial(rawToChar(fst::decompress_fst(result[x, 2][[1]]))))
+                     })
+    
+    
+    result <- lapply(result,
+                     function(x){
+                       MALDIquant::createMassSpectrum(mass = x[ , 1],
+                                                      intensity = x[ , 2])
+                     })
+  } else {
+    result <- list()
+  }
   
-  
-  DBI::dbBind(query, list(as.character(as.vector(sampleID))))
-  result <- DBI::dbFetch(query)
-  DBI::dbClearResult(query)
-  
-  result <- lapply(1:nrow(result),
-                   function(x){
-                     cbind(IDBacApp::deserial(rawToChar(fst::decompress_fst(result[x, 1][[1]]))),
-                           IDBacApp::deserial(rawToChar(fst::decompress_fst(result[x, 2][[1]]))))
-                   })
-  
-  
-  lapply(result,
-         function(x){
-           MALDIquant::createMassSpectrum(mass = x[ , 1],
-                                          intensity = x[ , 2])
-         }
-  )
+  return(result)
   
 }
 

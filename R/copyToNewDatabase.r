@@ -167,10 +167,10 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         IDBacApp::copyDB_dbDetach(newdbPath = newdbPath, 
                                                   existingDBconn = existingDBconn)
+                  
                         
                         pool::poolReturn(existingDBconn)
                         pool::poolReturn(newDBconn)
-                        pool::poolClose(newDBPool)
                         
                         
                         Sys.sleep(1)
