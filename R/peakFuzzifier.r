@@ -113,8 +113,13 @@ createFuzzyVector <- function(massStart,
   #  if (length(massList) * vecLength < 4e6) {
   #builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
   #  } else {
-  builtM <- Matrix::Matrix(0, ncol = length(massList), nrow = vecLength, sparse = TRUE) 
+  
+  
+  
+  
   #  }
+  
+  
   
   # mm returns a list of lists. each list element contains a list of length 3:
   # 1- centroid - ppm 
@@ -134,7 +139,7 @@ createFuzzyVector <- function(massStart,
   
   # Create a distribution of "intensity" across each ppm range of each peak
   # loop across all samples (spectra) 
-  for (i in seq_along(mm)) {
+  w<-lapply(seq_along(mm), function(i){
     
     # For each centroid, create a sequence of integers from
     # (centroid mass - ppm) to (centroid mass + ppm)
@@ -167,15 +172,23 @@ createFuzzyVector <- function(massStart,
       z3 <- list(z3)
     }
     
-    for (ii  in seq_along(z)) {
-      
-      builtM[z[[ii]], i] <- builtM[z[[ii]], i] + (z3[[ii]])
-      
-    }
-  } 
+    z <- unlist(z)
+    
+    cbind(index = unique(z),
+          intensity = as.numeric(tapply(unlist(z3), z, sum)),
+          spectrum = i)
+    
+    
+  })
   
-  colnames(builtM) <- names(massList)
+  w <- do.call(rbind, w)
   
-  return(builtM)
+  
+  Matrix::sparseMatrix(i = w[,1], 
+                       j = w[,3],
+                       x = w[,2],
+                       dim = c(vecLength, 
+                               length(massList)), 
+                       dimnames = list(1:vecLength,names(massList)))
   
 }
