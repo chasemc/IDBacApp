@@ -3,6 +3,7 @@
 #' @param dendrogram dendrogram
 #' @param dendOrPhylo whether to plot leaves as hanging or not
 #' @param selectMetaColumn plotting dend and dots
+#' @param appendDendLabels column in metadata sqlite table to append to dend labels
 #' @param colorsChosen chosen colors for dend and dots 
 #' @param cutHeightLines cutHeightLines
 #' @param colorByLines colorByLines
@@ -16,21 +17,40 @@
 #' @export
 #'
 plotDendrogram <- function(dendrogram = dendrogram,
-                            dendOrPhylo = dendOrPhylo(),
-                            selectMetaColumn = input$selectMetaColumn,
-                            colorsChosen = colorsChosen(),
-                            cutHeightLines = input$cutHeightLines,
-                            colorByLines = input$colorByLines,
-                            colorByLabels = input$colorByLabels,
-                            removeDendDots = input$removeDendDots,
-                            cutHeightLabels = input$cutHeightLabels,
-                            boots = boots()$bootstraps,
-                            pool = pool()){
+                           dendOrPhylo = dendOrPhylo(),
+                           selectMetaColumn = input$selectMetaColumn,
+                           appendDendLabels = input$appendDendLabels,
+                           colorsChosen = colorsChosen(),
+                           cutHeightLines = input$cutHeightLines,
+                           colorByLines = input$colorByLines,
+                           colorByLabels = input$colorByLabels,
+                           removeDendDots = input$removeDendDots,
+                           cutHeightLabels = input$cutHeightLabels,
+                           boots = boots()$bootstraps,
+                           pool = pool()){
+  
+  
+  dendrogram_labels <- labels(dendrogram$dendrogram)
+
+  print(appendDendLabels)
+  
+  if (!is.null(appendDendLabels)) {
+
+    new_labels <- metadata_from_id(strainID = dendrogram_labels,
+                                   metadataColumn = appendDendLabels,
+                                   pool = pool)[,2]
+
+    dendrogram_labels <- paste0(dendrogram_labels, " ", new_labels)
+    remove(new_labels)
+  }
+
+  
   
   if (dendOrPhylo == "Dendrogram") {
-    plot(dendrogram$dendrogram, horiz = T)
+    plot(dendextend::set_labels(dendrogram$dendrogram, dendrogram_labels),
+         horiz = T)
   } else if (dendOrPhylo == "Phylogram") {
-    plot(dendextend::hang.dendrogram(dendrogram$dendrogram,
+    plot(dendextend::hang.dendrogram(dendextend::set_labels(dendrogram$dendrogram, dendrogram_labels),
                                      hang = 0),
          horiz = T)
   }
@@ -46,7 +66,8 @@ plotDendrogram <- function(dendrogram = dendrogram,
       trimdLabsDend <- dendrogram$dendrogram
       
       dendextend::set_labels(trimdLabsDend,
-                             strtrim(labels(trimdLabsDend), 20))
+                             strtrim(labels(dendrogram_labels), 20))
+      
       IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
                             trimdLabsDend = trimdLabsDend,
                             pool = pool,

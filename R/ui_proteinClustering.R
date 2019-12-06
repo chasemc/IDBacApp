@@ -72,7 +72,7 @@ ui_proteinClustering <- function() {
                                                                   ),
                                                                   fluidRow(IDBacApp::colordendLabelsUI("proth")),
                                                                   fluidRow(IDBacApp::colordendLinesUI("proth")),
-                                                                  fluidRow(IDBacApp::addDotsActionUI("proth"))
+                                                                  fluidRow(IDBacApp::dendrogramActionsUI("proth"))
                                                                   
                                         ),
                                         IDBacApp::bsCollapsePanel(p("Insert Samples From Another Experiment", 
@@ -132,7 +132,9 @@ ui_proteinClustering <- function() {
                   tabPanel(value = "proteinDendrogram","Dendrogram",
                            IDBacApp::displayMissingProteinUI("proth"),
                            IDBacApp::plotHier("proth"),
-                           IDBacApp::dendDotsUI("proth")
+                           IDBacApp::dendDotsUI("proth"),
+                           IDBacApp::appendDendLabsUI("proth")
+                           
                   )
       )
     )

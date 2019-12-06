@@ -4,17 +4,17 @@
 \alias{metadata_from_id}
 \title{Extract a metadata column}
 \usage{
-metadata_from_id(id, metadataColumn, pool)
+metadata_from_id(strainID, metadataColumn, pool)
 }
 \arguments{
-\item{id}{Strain_ID}
+\item{strainID}{Strain_ID}
 
 \item{metadataColumn}{metadata column name ('Species')}
 
 \item{pool}{pool connection}
 }
 \value{
-data.frame with two columns 'Strain_ID' and  whatever metadataColumn is
+data.frame with two columns 'Strain_ID' and  whatever metadataColumn is requested; rows filtered by ID
 }
 \description{
 Extract a metadata column

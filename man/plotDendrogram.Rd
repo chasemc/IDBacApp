@@ -6,6 +6,7 @@
 \usage{
 plotDendrogram(dendrogram = dendrogram, dendOrPhylo = dendOrPhylo(),
   selectMetaColumn = input$selectMetaColumn,
+  appendDendLabels = input$appendDendLabels,
   colorsChosen = colorsChosen(), cutHeightLines = input$cutHeightLines,
   colorByLines = input$colorByLines,
   colorByLabels = input$colorByLabels,
@@ -19,6 +20,8 @@ plotDendrogram(dendrogram = dendrogram, dendOrPhylo = dendOrPhylo(),
 \item{dendOrPhylo}{whether to plot leaves as hanging or not}
 
 \item{selectMetaColumn}{plotting dend and dots}
+
+\item{appendDendLabels}{column in metadata sqlite table to append to dend labels}
 
 \item{colorsChosen}{chosen colors for dend and dots}
 

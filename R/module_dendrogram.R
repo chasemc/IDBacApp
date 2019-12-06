@@ -1,63 +1,23 @@
 
-#' Modify (color/size) dendrogram lines
-#'
-#' @param id  namespace id
-#'
-#' @return shiny UImodule
-#' @export
-#'
-
-dendDotsUI <- function(id) {
-  ns <- shiny::NS(id)
-  uiOutput(ns("absPaneldendDots"))
-  
-}
-
-#' Modify (color/size) dendrogram Labels
-#'
-#' @param id namespace id
-#'
-#' @return ui for coloring dendrogram labels
-#' @export
-#'
-
-colordendLabelsUI <- function(id) {
-  ns <- shiny::NS(id)
-  uiOutput(ns("absPanelDendLabels"))
-}
-
-
-
-#' colordendLinesUI
-#'
-#' @param id  namespace id
-#'
-#' @return shiny UImodule
-#' @export
-#'
-
-colordendLinesUI <- function(id) {
-  ns <- shiny::NS(id)
-  uiOutput(ns("absPanelDendLines"))
-  
-}
 
 
 
 
-#' addDotsActionUI
+
+#' dendrogramActionsUI
 #'
 #' @param id namespace id
 #'
 #' @return shiny UImodule
 #' @export
 #'
-addDotsActionUI <- function(id) {
+dendrogramActionsUI <- function(id) {
   ns <- shiny::NS(id)
   tagList(
     actionButton(ns("openDendots"), "Incorporate info about samples"),
     actionButton(ns("openLineMod"), "Click to modify lines"),
-    actionButton(ns("openLabelMod"), "Click to modify labels")
+    actionButton(ns("openLabelMod"), "Click to modify labels"),
+    actionButton(ns("openAppendDendLabels"), "Click to append to  labels")
   )
 }
 
@@ -186,23 +146,12 @@ dendDotsServer <- function(input,
   
   
   
-  observeEvent(input$closeDendDots, {
-    output$absPaneldendDots <- renderUI({
-      # Intentionally Blank
-    })
-  })  
   
   
   
-  observeEvent(input$openDendots, ignoreInit = T ,ignoreNULL = T, {
-    ns <- session$ns
-    
-    output$absPaneldendDots <- renderUI(
-      
-      IDBacApp::modDendDotsMod_WellPanel(session$ns)
-      
-    )
-  })
+  
+  
+  
   
   
   output$sampleFactorMapColors <- renderUI({
@@ -234,12 +183,24 @@ dendDotsServer <- function(input,
   })
   
   
-  output$proteDendDots <- renderUI({
+  output$metaColumns <- renderUI({
     ns <- session$ns 
     a <- DBI::dbListFields(pool(), "metaData")
     a <- a[-which(a == "Strain_ID")]
     
     selectInput(ns("selectMetaColumn"),
+                "Select Category",
+                as.vector(a),
+                width="100%")
+    
+  })
+  
+  output$appendmetaColumns <- renderUI({
+    ns <- session$ns 
+    a <- DBI::dbListFields(pool(), "metaData")
+    a <- a[-which(a == "Strain_ID")]
+    
+    selectInput(ns("appendselectMetaColumn"),
                 "Select Category",
                 as.vector(a),
                 width="100%")
@@ -258,6 +219,28 @@ dendDotsServer <- function(input,
     
   })
   
+  # -------------------------------------------------------------------------
+  
+  observeEvent(input$closeDendDots, {
+    output$absPaneldendDots <- renderUI({
+      # Intentionally Blank
+    })
+  })  
+  
+  
+  
+  
+  observeEvent(input$openDendots, ignoreInit = T ,ignoreNULL = T, {
+    ns <- session$ns
+    
+    output$absPaneldendDots <- renderUI(
+      
+      IDBacApp::modDendDotsMod_WellPanel(session$ns)
+      
+    )
+  })
+  
+  # -------------------------------------------------------------------------
   
   observeEvent(input$closeDendLabels, {
     output$absPanelDendLabels <- renderUI({
@@ -268,17 +251,14 @@ dendDotsServer <- function(input,
   
   
   observeEvent(input$openLabelMod, ignoreInit = T ,ignoreNULL = T, {
-    
-    
     output$absPanelDendLabels <- renderUI(
-      
       IDBacApp::modDendLabels_WellPanel(session$ns)
-      
     )
-  }
+  })
   
-  )
   
+  
+  # -------------------------------------------------------------------------
   
   
   
@@ -297,8 +277,31 @@ dendDotsServer <- function(input,
   })
   
   
+  # -------------------------------------------------------------------------
+  
+  
+  
+  observeEvent(input$closeModAppendDendLabels, {
+    output$absPanelmodAppendDendLabels <- renderUI({
+      # Intentionally Blank
+    })
+  })  
+  
+  
+  observeEvent(input$openAppendDendLabels, ignoreInit = T ,ignoreNULL = T, {
+    output$absPanelmodAppendDendLabels <- renderUI(
+      IDBacApp::modAppendDendLabels_WellPanel(session$ns)
+    )
+  })
+  
+  
+  
+  # -------------------------------------------------------------------------
+  
+  
   
   observeEvent(c(input$colorByLabels,input$cutHeightLabels,input$chosenKLabels), {
+    
     
     dendrogram$dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram$dendrogram,
                                                            colorBy = input$colorByLabels,
@@ -350,11 +353,12 @@ dendDotsServer <- function(input,
                 5,
                 plotWidth()))
     
-  
+    
     
     IDBacApp::plotDendrogram(dendrogram = dendrogram,
                              dendOrPhylo = dendOrPhylo(),
                              selectMetaColumn = input$selectMetaColumn,
+                             appendDendLabels = input$appendselectMetaColumn,
                              colorsChosen = colorsChosen(),
                              cutHeightLines = input$cutHeightLines,
                              colorByLines = input$colorByLines,
@@ -411,6 +415,7 @@ dendDotsServer <- function(input,
       IDBacApp::plotDendrogram(dendrogram = dendrogram,
                                dendOrPhylo = dendOrPhylo(),
                                selectMetaColumn = input$selectMetaColumn,
+                               appendDendLabels = input$appendselectMetaColumn,
                                colorsChosen = colorsChosen(),
                                cutHeightLines = input$cutHeightLines,
                                colorByLines = input$colorByLines,
@@ -429,12 +434,6 @@ dendDotsServer <- function(input,
   
   
   
-  
-  
-  
-  
-  
-  
   return(list(colorByLines = reactive(input$colorByLines),
               cutHeightLines = reactive(input$cutHeightLines),
               colorByLabels = reactive(input$colorByLabels),
@@ -448,191 +447,8 @@ dendDotsServer <- function(input,
 
 
 
-#   -----------------------------------------------------------------------
-
-
-#' modDendLabels_WellPanel UI
-#'
-#' @param ns shiny namespace
-#'
-#' @return shiny ui
-#' @export
-#'
-modDendLabels_WellPanel <- function(ns) {
-  shiny::absolutePanel(
-    class = "dendMod_WellPanel",
-    bottom = "0%",
-    right = "0%",
-    width = "20%",
-    fixed = TRUE,
-    draggable = TRUE,
-    style = "z-index:1002;",
-    shiny::wellPanel(
-      shiny::h4("Adjust Dendrogram Labels"),
-      shiny::selectInput(ns("colorByLabels"),
-                         "Color By:",
-                         c("None" = "none",
-                           "Choose Number of Groups" = "groups",
-                           "Color by cutting at height" = "height"
-                         ),
-                         selected = "groups"
-      ),
-      shiny::conditionalPanel(
-        condition = "input.colorByLabels == 'height'", ns = ns,
-        shiny::numericInput(ns("cutHeightLabels"),
-                            label = shiny::h5(shiny::strong("Cut Tree at Height")),
-                            value = 0,
-                            step = 0.1,
-                            min = 0)
-        
-        
-      ),
-      shiny::conditionalPanel(
-        condition = "input.colorByLabels == 'groups'", ns = ns,
-        shiny::numericInput(ns("chosenKLabels"),
-                            label = shiny::h5(shiny::strong("Choose the number of groups")),
-                            value = 1,
-                            step = 1,
-                            min = 1)
-      ),
-      
-      shiny::numericInput(ns("dendLabelSize"),
-                          "Label Size",
-                          value = 1,
-                          min = 0,
-                          max = 5,
-                          step = .1
-      ),
-      
-      shiny::actionButton(ns("closeDendLabels"),
-                          "Close")
-      
-    )
-  )
-}
 
 
 
 
 
-#' modDendLines_WellPanel UI
-#'
-#' @param ns shiny namespace
-#'
-#' @return shiny ui
-#' @export
-#'
-modDendLines_WellPanel <- function(ns){
-  shiny::absolutePanel(
-    class = "dendMod_WellPanel",
-    bottom = "50%",
-    right =  "0%",
-    width = "20%",
-    fixed = TRUE,
-    draggable = TRUE,
-    style = "z-index:1002;",
-    shiny::wellPanel(
-      shiny::h4("Adjust Dendrogram Lines"),
-      shiny::selectInput(ns("colorByLines"),
-                         "Color By:",
-                         c("None" = "none",
-                           "Choose Number of Groups" = "groups",
-                           "Color by cutting at height" = "height"
-                         ),
-                         selected = "groups"
-      ),
-      shiny::conditionalPanel(
-        condition = "input.colorByLines == 'height'", ns = ns,
-        shiny::numericInput(ns("cutHeightLines"),
-                            label = shiny::h5(shiny::strong("Cut Tree at Height")),
-                            value = 0,
-                            step = 0.1,
-                            min = 0)
-        
-        
-      ),
-      shiny::conditionalPanel(
-        condition = "input.colorByLines == 'groups'", ns = ns,
-        shiny::numericInput(ns("chosenKLines"),
-                            label = shiny::h5(shiny::strong("Choose the number of groups")),
-                            value = 1,
-                            step = 1,
-                            min = 1)
-      ),
-      
-      shiny::numericInput(ns("dendLineWidth"),
-                          "Line Width",
-                          value = 1,
-                          min = 1,
-                          max = 10,
-                          step = 1
-      ),
-      
-      shiny::actionButton(ns("closeDendLines"),
-                          "Close")
-      
-    )
-  )
-  
-}
-
-
-
-#' modDendDotsMod_WellPanel UI
-#'
-#' @param ns shiny namespace
-#'
-#' @return shiny ui
-#' @export
-#'
-modDendDotsMod_WellPanel <- function(ns) {
-  shiny::absolutePanel(
-    class = "dendMod_WellPanel",
-    top = "30%",
-    right =  "0%",
-    width = "30%",
-    fixed = F,
-    draggable = T,
-    style = "z-index:1002;",
-    shiny::wellPanel(class = "dendDots_WellPanel",
-                     fluidRow(
-                       fluidRow(shiny::actionButton(ns("closeDendDots"),
-                                                    "Close"),
-                                shiny::actionButton(ns("removeDendDots"),
-                                                    "Clear"),
-                         uiOutput(ns("proteDendDots")),
-                         uiOutput(ns("sampleFactorMapColors")))
-                     )
-    ))
-}
-
-
-
-
-
-
-
-
-
-
-#' colorPicker for dend and dots
-#'
-#' @param levs levels (reactiveValue)
-#' @param ns shiny namespace
-#'
-#' @return list of html for each level with colors chosen
-#' @export
-#'
-colorPicker <-  function(levs, 
-                         ns){
-  lapply(seq_along(levs()),
-         function(x){
-           do.call((colourpicker::colourInput),
-                   list(inputId = ns(paste0("factor-",
-                                            make.unique(rep("dendDotsColors", length(levs())))[[x]])),
-                        label = levs()[[x]],
-                        value = "blue",
-                        allowTransparent = T)
-           )})
-  
-}
