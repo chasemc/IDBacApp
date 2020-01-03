@@ -220,7 +220,7 @@ mquantSpecFromSQL <- function(pool,
   
   result <-  pool::poolWithTransaction(pool, 
                                        function(conn){
-                                         query <-  DBI::dbSendStatement(glue::glue("SELECT massTable.massVector, individual_spectra.spectrum_intensity
+                                         query <-  DBI::dbSendStatement(glue::glue("SELECT massTable.mass_vector, individual_spectra.spectrum_intensity
                                    FROM massTable
                                    LEFT JOIN individual_spectra
                                    ON massTable.spectrum_mass_hash = individual_spectra.spectrum_mass_hash

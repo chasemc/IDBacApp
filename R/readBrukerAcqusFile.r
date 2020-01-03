@@ -42,9 +42,9 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
 
   ## obligate
   metaData$number <- as.double(.grepAcquValue("##\\$TD=", acquLines))
-  metaData$timeDelay <- .grepAcquDoubleValue("##\\$DELAY=", acquLines)
-  metaData$timeDelta <- .grepAcquDoubleValue("##\\$DW=", acquLines)
-  metaData$calibrationConstants <-
+  metaData$time_delay <- .grepAcquDoubleValue("##\\$DELAY=", acquLines)
+  metaData$time_delta <- .grepAcquDoubleValue("##\\$DW=", acquLines)
+  metaData$calibration_constants <-
     c(c1=.grepAcquDoubleValue("##\\$ML1=", acquLines),
       c2=.grepAcquDoubleValue("##\\$ML2=", acquLines),
       c3=.grepAcquDoubleValue("##\\$ML3=", acquLines))
@@ -72,7 +72,7 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
   }
 
   # https://github.com/sgibb/MALDIquantForeign/issues/19
-  metaData$v1tofCalibration <-
+  metaData$v1_tof_calibration <-
     grepl("V1.0CTOF2CalibrationConstants",
           .grepAcquValue("##\\$NTBCal=", acquLines))
 
@@ -82,20 +82,20 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
   metaData$tlift <- .grepAcquDoubleValue("##\\$TLift=", acquLines)
 
   ## optional
-  metaData$dataType <- .grepAcquValue("##DATATYPE=", acquLines)
-  metaData$dataSystem <- .grepAcquValue("##SPECTROMETER/DATASYSTEM=", acquLines)
-  metaData$spectrometerType <-
+  metaData$data_type <- .grepAcquValue("##DATATYPE=", acquLines)
+  metaData$data_system <- .grepAcquValue("##SPECTROMETER/DATASYSTEM=", acquLines)
+  metaData$spectrometer_type <-
     .grepAcquValue("##.SPECTROMETER TYPE=", acquLines)
   metaData$inlet <- .grepAcquValue("##.INLET=", acquLines)
-  metaData$ionizationMode <- .grepAcquValue("##.IONIZATION MODE=", acquLines)
+  metaData$ionization_mode <- .grepAcquValue("##.IONIZATION MODE=", acquLines)
   metaData$date <- .grepAcquValue("##\\$DATE=", acquLines)
 
 
-  metaData$acquisitionMethod <- .grepAcquValue("##\\$ACQMETH=", acquLines)
-  metaData$acquisitionDate <- .grepAcquValue("##\\$AQ_DATE=", acquLines)
+  metaData$acquisition_method <- .grepAcquValue("##\\$ACQMETH=", acquLines)
+  metaData$acquisition_date <- .grepAcquValue("##\\$AQ_DATE=", acquLines)
   aq_mod <- .grepAcquValue("##\\$AQ_mod=", acquLines)
   if (length(aq_mod)) {
-    metaData$acquisitionMode <- switch(aq_mod,
+    metaData$acquisition_mode <- switch(aq_mod,
                                        "0" = { "qf" },
                                        "1" = { "qsim" },
                                        "2" = { "qseq" },
@@ -105,16 +105,16 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
 
   aqop <- .grepAcquValue("##\\$AQOP_m=", acquLines)
   if (length(aqop)) {
-    metaData$tofMode  <- switch(aqop,
+    metaData$tof_mode  <- switch(aqop,
                                 "0" = { "LINEAR" },
                                 "1" = { "REFLECTOR" },
                                 { aqop }
     )
   }
 
-  metaData$acquisitionOperatorMode <- metaData$tofMode
+  metaData$acquisition_operator_mode <- metaData$tof_mode
 
-  metaData$laserAttenuation <- .grepAcquDoubleValue("##\\$ATTEN=", acquLines)
+  metaData$laser_attenuation <- .grepAcquDoubleValue("##\\$ATTEN=", acquLines)
 
   metaData$comments <- .grepAcquValue("##\\$CMT.*=", acquLines)
 
@@ -123,7 +123,7 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
 
   digtyp  <- .grepAcquValue("##\\$DIGTYP=", acquLines)
   if (length(digtyp)) {
-    metaData$digitizerType <- switch(digtyp,
+    metaData$digitizer_type <- switch(digtyp,
                                      "0" = { "unknown" },
                                      "1" = { "Lecroy LSA1000" },
                                      "2" = { "Acqiris DP105" },
@@ -152,15 +152,15 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
     .grepAcquDoubleValue("##\\$DPCAL1=", acquLines)
   metaData$deflectionPulserMass <-
     .grepAcquDoubleValue("##\\$DPMASS=", acquLines)
-  metaData$flexControlVersion <- .grepAcquValue("##\\$FCVer=", acquLines)
+  metaData$flex_control_version <- .grepAcquValue("##\\$FCVer=", acquLines)
   metaData$id <- .grepAcquValue("##\\$ID_raw=", acquLines)
 
   metaData$instrument <- .grepAcquValue("##\\$INSTRUM=", acquLines)
-  metaData$instrumentId <- .grepAcquValue("##\\$InstrID=", acquLines)
+  metaData$instrument_id <- .grepAcquValue("##\\$InstrID=", acquLines)
 
-  instrumentType <- .grepAcquValue("##\\$InstTyp=", acquLines)
-  if (length(instrumentType)) {
-    metaData$instrumentType <- switch(instrumentType,
+  instrument_type <- .grepAcquValue("##\\$InstTyp=", acquLines)
+  if (length(instrument_type)) {
+    metaData$instrument_type <- switch(instrument_type,
                                       "0" = { "autoflex" },
                                       "1" = { "ultraflex" },
                                       "2" = { "ultraflexTOF/TOF" },
@@ -172,15 +172,15 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
                                       "8" = { "autoflexTOF/TOF" },
                                       "9" = { "microflex" },
                                       "10" = { "MT10" },
-                                      { instrumentType }
+                                      { instrument_type }
     )
   }
 
-  metaData$massError <- .grepAcquDoubleValue("##\\$Masserr=", acquLines)
+  metaData$mass_error <- .grepAcquDoubleValue("##\\$Masserr=", acquLines)
 
-  metaData$laserShots <- as.double(.grepAcquValue("##\\$NoSHOTS=", acquLines))
+  metaData$laser_shots <- as.double(.grepAcquValue("##\\$NoSHOTS=", acquLines))
 
-  if (length(metaData$laserShots) == 0L) {
+  if (length(metaData$laser_shots) == 0L) {
     warning("File ", sQuote(fidFile), " seems to be empty because ",
             "no laser shots applied to this sample.")
   }
@@ -201,12 +201,12 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
   }
 
   metaData$path <- .grepAcquValue("##\\$PATH=", acquLines)
-  metaData$laserRepetition <- .grepAcquDoubleValue("##\\$REPHZ=", acquLines)
+  metaData$laser_repetition <- .grepAcquDoubleValue("##\\$REPHZ=", acquLines)
   metaData$spot <- .grepAcquValue("##\\$SPOTNO=", acquLines)
 
   sptype <- .grepAcquValue("##\\$SPType=", acquLines)
   if (length(sptype)) {
-    metaData$spectrumType <- switch(sptype,
+    metaData$spectrum_type <- switch(sptype,
                                     "0" = { "TOF" },
                                     "1" = { "PSD" },
                                     "2" = { "LIFT" },
@@ -215,10 +215,10 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
     )
   }
 
-  metaData$targetCount <- as.double(.grepAcquValue("##\\$TgCount", acquLines))
-  metaData$targetIdString <- .grepAcquValue("##\\$TgIDS", acquLines)
-  metaData$targetSerialNumber <- .grepAcquValue("##\\$TgSer", acquLines)
-  metaData$targetTypeNumber <- .grepAcquValue("##\\$TgTyp", acquLines)
+  metaData$target_count <- as.double(.grepAcquValue("##\\$TgCount", acquLines))
+  metaData$target_id_string <- .grepAcquValue("##\\$TgIDS", acquLines)
+  metaData$target_serial_number <- .grepAcquValue("##\\$TgSer", acquLines)
+  metaData$target_type_number <- .grepAcquValue("##\\$TgTyp", acquLines)
 
   metaData$file <- fidFile
 

@@ -14,7 +14,7 @@ processXMLIndSpectra <- function(spectraImport,
   
   env <- new.env()
   
-  env$massVector <- lapply(spectraImport[index], 
+  env$mass_vector <- lapply(spectraImport[index], 
                            function(x){
                              x <- IDBacApp::serial(x@mass)
                              IDBacApp::chartoRawtoCompressed(x,
@@ -32,7 +32,7 @@ processXMLIndSpectra <- function(spectraImport,
                     }))
   
   # List of whole-spectrum hashes
-  env$spectrum_mass_hash <- unlist(lapply(env$massVector, 
+  env$spectrum_mass_hash <- unlist(lapply(env$mass_vector, 
                                  function(x){
                                    IDBacApp::hashR(x)
                                  }))

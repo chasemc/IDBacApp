@@ -79,7 +79,7 @@ sqlTableArchitecture <- function(numberScans){
   
   
   sqlDataFrame$massTable <- c("spectrum_mass_hash",
-                              "massVector")
+                              "mass_vector")
   
   temp <- as.data.frame(matrix(nrow = numberScans,
                                ncol = length(sqlDataFrame$massTable)))
@@ -118,38 +118,38 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
   min_mass                              INTEGER,
   ignore                               INTEGER,
   number                               INTEGER,
-  timeDelay                            INTEGER,
-  timeDelta                            NUMERIC,
-  calibrationConstants                 TEXT,
-  v1tofCalibration                     TEXT,
-  dataType                             TEXT,
-  dataSystem                           TEXT,
-  spectrometerType                     TEXT,
+  time_delay                            INTEGER,
+  time_delta                            NUMERIC,
+  calibration_constants                 TEXT,
+  v1_tof_calibration                     TEXT,
+  data_type                             TEXT,
+  data_system                           TEXT,
+  spectrometer_type                     TEXT,
   inlet                                TEXT,
-  ionizationMode                       TEXT,
-  acquisitionMethod                    TEXT,
-  acquisitionDate                      TEXT,
-  acquisitionMode                      TEXT,
-  tofMode                              TEXT,
-  acquisitionOperatorMode              TEXT,
-  laserAttenuation                     INTEGER,
-  digitizerType                        TEXT,
-  flexControlVersion                   TEXT,
+  ionization_mode                       TEXT,
+  acquisition_method                    TEXT,
+  acquisition_date                      TEXT,
+  acquisition_mode                      TEXT,
+  tof_mode                              TEXT,
+  acquisition_operator_mode              TEXT,
+  laser_attenuation                     INTEGER,
+  digitizer_type                        TEXT,
+  flex_control_version                   TEXT,
   id                                   TEXT,
   instrument                           TEXT,
-  instrumentId                         TEXT,
-  instrumentType                       TEXT,
-  massError                            NUMERIC,
-  laserShots                           INTEGER,
+  instrument_id                         TEXT,
+  instrument_type                       TEXT,
+  mass_error                            NUMERIC,
+  laser_shots                           INTEGER,
   patch                                TEXT,
   path                                 TEXT,
-  laserRepetition                      TEXT,
+  laser_repetition                      TEXT,
   spot                                 TEXT,
-  spectrumType                         TEXT,
-  targetCount                          TEXT,
-  targetIdString                       TEXT,
-  targetSerialNumber                   TEXT,
-  targetTypeNumber                     TEXT,
+  spectrum_type                         TEXT,
+  target_count                          TEXT,
+  target_id_string                       TEXT,
+  target_serial_number                   TEXT,
+  target_type_number                     TEXT,
   
   UNIQUE(strain_id, spectrum_mass_hash, spectrum_intensity_hash) ON CONFLICT IGNORE
   );"
@@ -180,7 +180,7 @@ sql_CreatemassTable <- function(sqlConnection){
     a <- DBI::dbSendStatement(sqlConnection,
                               "CREATE TABLE `massTable` (
   spectrum_mass_hash    TEXT,
-  massVector          BLOB,
+  mass_vector          BLOB,
  
   UNIQUE(spectrum_mass_hash) ON CONFLICT IGNORE
   );"
