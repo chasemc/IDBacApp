@@ -18,8 +18,8 @@ sqlCreate_version <- function(userDBCon) {
       
       if (!DBI::dbExistsTable(conn, "version")) {
         
-        ver <- cbind.data.frame(IDBacVersion = as.character(packageVersion("IDBacApp")), 
-                                rVersion = as.character(IDBacApp::serial(sessionInfo()$R.version)))
+        ver <- cbind.data.frame(idbac_version = as.character(packageVersion("IDBacApp")), 
+                                r_version = as.character(IDBacApp::serial(sessionInfo()$R.version)))
         # Add version table
         DBI::dbWriteTable(conn = conn,
                           name = "version", # SQLite table to insert into
