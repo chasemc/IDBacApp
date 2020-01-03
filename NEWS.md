@@ -6,13 +6,104 @@ author: "Chase Clark"
 Updates are ordered newest to oldest.
 
 
+### Updated SQLite database table and field names
+
+- This was done for consistency, especially to make it easier for others to program with IDBac databases
+
+- Table Names:
+  - "IndividualSpectra is now spectra"
+    - "spectrumMassHash is now spectrum_mass_hash"
+    - "spectrumIntensityHash is now spectrum_intensity_hash"
+    - "XMLHash is now xml_hash"
+    - "Strain_ID is now strain_id"
+    - "peakMatrix is now peak_matrix"
+    - "spectrumIntensity is now spectrum_intensity"
+    - "maxMass is now max_mass"
+    - "minMass is now min_mass"
+    - "ignore is now ignore"
+    - "number is now number"
+    - "timeDelay is now time_delay"
+    - "timeDelta is now time_delta"
+    - "calibrationConstants is now calibration_constants"
+    - "v1tofCalibration is now v1_tof_calibration"
+    - "dataType is now data_type"
+    - "dataSystem is now data_system"
+    - "spectrometerType is now spectrometer_type"
+    - "inlet is now inlet"
+    - "ionizationMode is now ionization_mode"
+    - "acquisitionMethod is now acquisition_method"
+    - "acquisitionDate is now acquisition_date"
+    - "acquisitionMode is now acquisition_mode"
+    - "tofMode is now tof_mode"
+    - "acquisitionOperatorMode is now acquisition_operator_mode"
+    - "laserAttenuation is now laser_attenuation"
+    - "digitizerType is now digitizer_type"
+    - "flexControlVersion is now flex_control_version"
+    - "id is now id"
+    - "instrument is now instrument"
+    - "instrumentId is now instrument_id"
+    - "instrumentType is now instrument_type"
+    - "massError is now mass_error"
+    - "laserShots is now laser_shots"
+    - "patch is now patch"
+    - "path is now path"
+    - "laserRepetition is now laser_repetition"
+    - "spot is now spot"
+    - "spectrumType is now spectrum_type"
+    - "targetCount is now target_count"
+    - "targetIdString is now target_id_string"
+    - "targetSerialNumber is now target_serial_number"
+    - "targetTypeNumber is now target_type_number"    
+  - "XML is now xml"
+    - "XMLHash is now xml_hash"
+    - "XML is now xml"
+    - "manufacturer is now manufacturer"
+    - "model is now model"
+    - "ionization is now ionization"
+    - "analyzer is now analyzer"
+    - "detector is now detector"
+    - "Instrument_MetaFile is now instrument_metafile"
+  - "locale is now locale"
+    - "locale is now locale"
+  - "massTable is now mass_index"
+    - "spectrumMassHash is now spectrum_mass_hash"
+    - "massVector is now mass_vector"
+  - "metaData is now metadata"
+    - "Strain_ID is now strain_id"
+    - "Genbank_Accession is now genbank_accession"
+    - "NCBI_TaxID is now ncbi_taxid"
+    - "Kingdom is now kingdom"
+    - "Phylum is now phylum"
+    - "Class is now class"
+    - "Order is now order"
+    - "Family is now family"
+    - "Genus is now genus"
+    - "Species is now species"
+    - "MALDI_Matrix is now maldi_matrix"
+    - "DSM_Agar_Media is now dsm_cultivation_media"
+    - "Cultivation_Temp_Celsius is now cultivation_temp_celsius"
+    - "Cultivation_Time_Days is now cultivation_time_days"
+    - "Cultivation_Other is now cultivation_other"
+    - "User is now user_firstname_lastname"
+    - "User_ORCID is now user_orcid"
+    - "PI_FirstName_LastName is now pi_firstname_lastname"
+    - "PI_ORCID is now pi_orcid"
+    - "dna_16S is now dna_16s"  
+  - "version is now version"
+    - "IDBacVersion is now idbac_version"
+    - "rVersion is now r_version"
+
+
+
+
+
 ## 1.1.10
 
 - BugFix:
   -  When updating IDBac software, experiments saved into the default directory would sometimes be deleted by the installer. 
           This has been changed so that IDBac will try to make the default save directory '~Documents/IDBac_experiments'.
 - Improvement:
-  - Improved support for importing data from Microtyper instruments. Incluiding 
+  - Improved support for importing data from Microtyper instruments. Including 
 - Improvement:
   - Changed how IDBac first connects to an experiment database, for faster connect time, especially with large experiments (1000's of samples).
 - Improvement:
