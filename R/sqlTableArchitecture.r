@@ -40,21 +40,21 @@ sqlTableArchitecture <- function(numberScans){
   sqlDataFrame$metaData <- temp
   
   
-  sqlDataFrame$XML <- c("xml_hash",
-                        "XML", 
+  sqlDataFrame$xml <- c("xml_hash",
+                        "xml", 
                         "manufacturer",
                         "model",
                         "ionization",
                         "analyzer",
                         "detector",
-                        "Instrument_MetaFile")
+                        "instrument_metafile")
   
   
   temp <- as.data.frame(matrix(nrow = numberScans,
-                               ncol = length(sqlDataFrame$XML)))
+                               ncol = length(sqlDataFrame$xml)))
   
-  dimnames(temp)[[2]] <- sqlDataFrame$XML
-  sqlDataFrame$XML <- temp
+  dimnames(temp)[[2]] <- sqlDataFrame$xml
+  sqlDataFrame$xml <- temp
   
   
   sqlDataFrame$IndividualSpectra <- c("spectrumMassHash",
@@ -255,18 +255,18 @@ sql_CreatemetaData <- function(sqlConnection){
 #'
 sql_CreatexmlTable <- function(sqlConnection){
   
-  if (!DBI::dbExistsTable(sqlConnection, "XML")) {
+  if (!DBI::dbExistsTable(sqlConnection, "xml")) {
     
     a <- DBI::dbSendStatement(sqlConnection,
-                              "CREATE TABLE `XML` (
+                              "CREATE TABLE `xml` (
   xml_hash         TEXT,
-  XML             BLOB,
+  xml             BLOB,
   manufacturer    TEXT,
   model           TEXT,
   ionization      TEXT,
   analyzer        TEXT,
   detector        TEXT,
-  Instrument_MetaFile BLOB,
+  instrument_metafile BLOB,
 
   UNIQUE(xml_hash) ON CONFLICT IGNORE
     );"
@@ -275,7 +275,7 @@ sql_CreatexmlTable <- function(sqlConnection){
     
     DBI::dbClearResult(a)
   } else {
-    warning("XML table already exists")
+    warning("xml table already exists")
   }
 }
 

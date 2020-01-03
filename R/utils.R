@@ -153,7 +153,7 @@ findmz <- function(inputPath,
 
 
 
-#' Read mzXML, XML and transform to raw character for storing in SQLite
+#' Read mzXML, xml and transform to raw character for storing in SQLite
 #'
 #' @param path filepath of mzML or mzXML
 #'

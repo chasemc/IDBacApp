@@ -41,7 +41,7 @@ copyToNewDatabase <- function(existingDBPool,
                         IDBacApp::copyDB_setupMeta(newDBconn = newDBconn,
                                                    existingDBconn = existingDBconn)
                         
-                        # Setup New XML -----------------------------------------------------------
+                        # Setup New xml -----------------------------------------------------------
                         
                         IDBacApp::sql_CreatexmlTable(sqlConnection = newDBconn)
                         
@@ -107,7 +107,7 @@ copyToNewDatabase <- function(existingDBPool,
                         warning(state@sql)
                         DBI::dbClearResult(state) 
                         
-                        # Copy XML table ----------------------------------------------------------
+                        # Copy xml table ----------------------------------------------------------
                         if (!is.null(shiny::getDefaultReactiveDomain())) {
                            setProgress(value = 0.8, 
                                     message = 'Copying data to new database',
@@ -123,9 +123,9 @@ copyToNewDatabase <- function(existingDBPool,
                         DBI::dbClearResult(state)
                         
                         state <- DBI::dbSendStatement(existingDBconn, 
-                                                      "INSERT INTO newDB.XML
+                                                      "INSERT INTO newDB.xml
                                                       SELECT *
-                                                      FROM main.XML
+                                                      FROM main.xml
                                                       WHERE (xml_hash = ?)")
                         DBI::dbBind(state, list(res[ , 1]))
                         warning(state@sql)

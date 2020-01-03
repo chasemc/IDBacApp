@@ -13,10 +13,10 @@ exportmzML <- function(userDBCon,
  
   conn <- pool::poolCheckout(userDBCon)
   
-  query <-  DBI::dbSendStatement("SELECT XML.XML,IndividualSpectra.strain_id
-FROM `XML`
+  query <-  DBI::dbSendStatement("SELECT xml.xml,IndividualSpectra.strain_id
+FROM `xml`
 LEFT JOIN `IndividualSpectra`
-ON XML.xml_hash = IndividualSpectra.xml_hash
+ON xml.xml_hash = IndividualSpectra.xml_hash
 WHERE strain_id == ?
 GROUP BY strain_id;
 ", con = conn)
@@ -55,7 +55,7 @@ GROUP BY strain_id;
                           
                           
                           
-                          chunk <- lapply(chunk$XML, 
+                          chunk <- lapply(chunk$xml, 
                                           function(x){
                                             x <- IDBacApp::decompress(unlist(x))
                                             rawToChar(x)

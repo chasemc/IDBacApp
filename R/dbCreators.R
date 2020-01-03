@@ -106,7 +106,7 @@ createMetaSQL <- function(sampleID,
 }  
 
 
-# XML table ---------------------------------------------------------------
+# xml table ---------------------------------------------------------------
 
 
 #' createXMLSQL
@@ -132,7 +132,7 @@ createXMLSQL <- function(rawDataFilePath,
       
       mzMLHash <- IDBacApp::hashR(xmlFile)
       
-      if (!DBI::dbExistsTable(conn, "XML")) {
+      if (!DBI::dbExistsTable(conn, "xml")) {
         IDBacApp::sql_CreatexmlTable(conn)
       }
       
@@ -145,38 +145,38 @@ createXMLSQL <- function(rawDataFilePath,
       #acquisitionInfo <- IDBacApp::findAcquisitionInfo(rawDataFilePath,
       #                                               instInfo$manufacturer)
       
-      # if ("Instrument_MetaFile" %in% ls(acquisitionInfo)) { 
-      #   sqlDataFrame$XML$Instrument_MetaFile <- IDBacApp::serial(acquisitionInfo$Instrument_MetaFile)
+      # if ("instrument_metafile" %in% ls(acquisitionInfo)) { 
+      #   sqlDataFrame$xml$instrument_metafile <- IDBacApp::serial(acquisitionInfo$instrument_metafile)
       # }
       
       
       query <- DBI::dbSendStatement(conn, 
-                                    "INSERT INTO 'XML'(
+                                    "INSERT INTO 'xml'(
                                 'xml_hash',
-                                'XML',
+                                'xml',
                                 'manufacturer',
                                 'model',
                                 'ionization',
                                 'analyzer',
                                 'detector',
-                                'Instrument_MetaFile')
+                                'instrument_metafile')
                                 VALUES ($xml_hash,
-                                $XML,
+                                $xml,
                                 $manufacturer,
                                 $model,
                                 $ionization,
                                 $analyzer,
                                 $detector,
-                                $Instrument_MetaFile);")
+                                $instrument_metafile);")
       
       DBI::dbBind(query, list(xml_hash = mzMLHash,
-                              XML = list(xmlFile),
+                              xml = list(xmlFile),
                               manufacturer = instInfo$manufacturer[[1]],
                               model = instInfo$model[[1]],
                               ionization = instInfo$ionisation[[1]],
                               analyzer = instInfo$analyzer[[1]],
                               detector = instInfo$detector[[1]],
-                              Instrument_MetaFile = "Unkown"))
+                              instrument_metafile = "Unkown"))
       
       DBI::dbClearResult(query)
       return(list(mzMLHash = mzMLHash,

@@ -78,7 +78,7 @@ databaseSelector_server <- function(input,
     
     
     q <- c("IndividualSpectra",
-           "XML",
+           "xml",
            "metaData",
            "version" )
     

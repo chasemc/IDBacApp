@@ -34,7 +34,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
   
   
   
-  # Create XML table --------------------------------------------------------
+  # Create xml table --------------------------------------------------------
   
   
   
