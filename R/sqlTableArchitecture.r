@@ -9,9 +9,9 @@ sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame <- new.env(parent = parent.frame())
   
-  sqlDataFrame$version <- data.frame(version = "2")
+  sqlDataFrame$version <- data.frame(version = "1")
   
-  sqlDataFrame$metaData <- c("strain_id",
+  sqlDataFrame$metadata <- c("strain_id",
                              "genbank_accession",
                              "ncbi_taxid",
                              "kingdom",
@@ -34,10 +34,10 @@ sqlTableArchitecture <- function(numberScans){
   
   
   temp <- as.data.frame(matrix(nrow = numberScans,
-                               ncol = length(sqlDataFrame$metaData)))
+                               ncol = length(sqlDataFrame$metadata)))
   
-  dimnames(temp)[[2]] <- sqlDataFrame$metaData
-  sqlDataFrame$metaData <- temp
+  dimnames(temp)[[2]] <- sqlDataFrame$metadata
+  sqlDataFrame$metadata <- temp
   
   
   sqlDataFrame$xml <- c("xml_hash",
@@ -57,7 +57,7 @@ sqlTableArchitecture <- function(numberScans){
   sqlDataFrame$xml <- temp
   
   
-  sqlDataFrame$individual_spectra <- c("spectrum_mass_hash",
+  sqlDataFrame$spectra <- c("spectrum_mass_hash",
                                       "spectrum_intensity_hash",
                                       "xml_hash",
                                       "strain_id",
@@ -71,21 +71,21 @@ sqlTableArchitecture <- function(numberScans){
   
   
   temp <- as.data.frame(matrix(nrow = numberScans,
-                               ncol = length(sqlDataFrame$individual_spectra)))
+                               ncol = length(sqlDataFrame$spectra)))
   
-  dimnames(temp)[[2]] <- sqlDataFrame$individual_spectra
-  sqlDataFrame$individual_spectra <- temp
+  dimnames(temp)[[2]] <- sqlDataFrame$spectra
+  sqlDataFrame$spectra <- temp
   
   
   
-  sqlDataFrame$massTable <- c("spectrum_mass_hash",
+  sqlDataFrame$mass_index <- c("spectrum_mass_hash",
                               "mass_vector")
   
   temp <- as.data.frame(matrix(nrow = numberScans,
-                               ncol = length(sqlDataFrame$massTable)))
+                               ncol = length(sqlDataFrame$mass_index)))
   
-  dimnames(temp)[[2]] <- sqlDataFrame$massTable
-  sqlDataFrame$massTable <- temp
+  dimnames(temp)[[2]] <- sqlDataFrame$mass_index
+  sqlDataFrame$mass_index <- temp
   
   
   return(sqlDataFrame)
@@ -96,7 +96,7 @@ sqlTableArchitecture <- function(numberScans){
 
 
 
-#' SQL code to create the SQLite individual_spectra table
+#' SQL code to create the SQLite spectra table
 #'
 #' @param sqlConnection sqlConnection
 #'
@@ -104,10 +104,10 @@ sqlTableArchitecture <- function(numberScans){
 #' @export
 #'
 sql_CreateIndividualSpectra <- function(sqlConnection){
-  if (!DBI::dbExistsTable(sqlConnection, "individual_spectra")) {
+  if (!DBI::dbExistsTable(sqlConnection, "spectra")) {
     
     a <- DBI::dbSendStatement(sqlConnection, 
-                              "CREATE TABLE `individual_spectra` (
+                              "CREATE TABLE `spectra` (
   spectrum_mass_hash                     TEXT,
   spectrum_intensity_hash                TEXT,
   xml_hash                              TEXT,
@@ -158,7 +158,7 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
     
     DBI::dbClearResult(a)
   } else {
-    warning("individual_spectra table already exists")
+    warning("spectra table already exists")
   }
 }
 
@@ -166,7 +166,7 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
 
 
 
-#' SQL code to create the SQLite massTable table
+#' SQL code to create the SQLite mass_index table
 #'
 #' @param sqlConnection sqlConnection
 #'
@@ -175,10 +175,10 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
 #'
 sql_CreatemassTable <- function(sqlConnection){
   
-  if (!DBI::dbExistsTable(sqlConnection, "massTable")) {
+  if (!DBI::dbExistsTable(sqlConnection, "mass_index")) {
     
     a <- DBI::dbSendStatement(sqlConnection,
-                              "CREATE TABLE `massTable` (
+                              "CREATE TABLE `mass_index` (
   spectrum_mass_hash    TEXT,
   mass_vector          BLOB,
  
@@ -187,14 +187,14 @@ sql_CreatemassTable <- function(sqlConnection){
     )
     DBI::dbClearResult(a)
   } else {
-    warning("massTable table already exists")
+    warning("mass_index table already exists")
   }
 }
 
 
 
 
-#' SQL code to create the SQLite metaData table
+#' SQL code to create the SQLite metadata table
 #'
 #' @param sqlConnection sqlConnection
 #'
@@ -203,10 +203,10 @@ sql_CreatemassTable <- function(sqlConnection){
 #'
 sql_CreatemetaData <- function(sqlConnection){
   
-  if (!DBI::dbExistsTable(sqlConnection, "metaData")) {
+  if (!DBI::dbExistsTable(sqlConnection, "metadata")) {
     
     a <- DBI::dbSendStatement(sqlConnection,
-                              "CREATE TABLE `metaData` (
+                              "CREATE TABLE `metadata` (
 'strain_id'                  TEXT,     
 'genbank_accession'          TEXT,             
 'ncbi_taxid'                 TEXT,       
@@ -235,7 +235,7 @@ sql_CreatemetaData <- function(sqlConnection){
     
     DBI::dbClearResult(a)
   } else {
-    warning("metaData table already exists")
+    warning("metadata table already exists")
   }
   
 }

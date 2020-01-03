@@ -62,7 +62,7 @@ getSmallMolSpectra <- function(pool,
     
     # retrieve all strain_ids in db that have small molecule spectra
     sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT strain_id
-                                      FROM individual_spectra 
+                                      FROM spectra 
                                       WHERE max_mass < 6000"))
     # Return pool
     pool::poolReturn(checkedPool)

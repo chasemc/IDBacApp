@@ -28,7 +28,7 @@
 # 
 # folder <- "C:/Users/CMC/Documents/binnr/inst/extdata/New folder/a"
 # 
-# sapply(d, function(x) x[[1]]@metaData$file)
+# sapply(d, function(x) x[[1]]@metadata$file)
 # 
 # 
 # 

@@ -20,7 +20,7 @@ metadata_from_id <- function(strainID,
   metadataColumn <- paste("strain_id", metadataColumn, sep = ", ")
   
   a <- glue::glue("SELECT {metadataColumn}
-                   FROM metaData
+                   FROM metadata
                    WHERE `strain_id` = $ids")
   
   

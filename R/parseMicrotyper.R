@@ -84,7 +84,7 @@ microtyperTomzML <- function(key,
                                            skip = 8)
                     MALDIquant::createMassSpectrum(mass = z[[1]], 
                                                    intensity = z[[2]],
-                                                   metaData = list(file = x))
+                                                   metadata = list(file = x))
                     
                   })
   

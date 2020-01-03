@@ -15,7 +15,7 @@ insertMetadataColumns <- function(pool,
   quotedColumnNames <- DBI::dbQuoteIdentifier(conn = conn,
                                               columnNames)
   
-  samples <- glue::glue_sql("ALTER TABLE `metaData`
+  samples <- glue::glue_sql("ALTER TABLE `metadata`
                               ADD {vars*} TEXT",
                             vars = quotedColumnNames, 
                             .con = conn)
@@ -26,11 +26,11 @@ insertMetadataColumns <- function(pool,
                                              " column to ",
                                              strsplit(basename(conn@dbname),
                                                       ".sqlite")[[1]],
-                                             " metaData, it might already be present.")),
+                                             " metadata, it might already be present.")),
            finally = function(x) warning(as.character(x@sql)))
   
   checkMetaColumns <- base::colnames(DBI::dbGetQuery(conn = conn,
-                                                     "SELECT * FROM metaData", 
+                                                     "SELECT * FROM metadata", 
                                                      n = 1))
   checker <- columnNames %in% checkMetaColumns
  

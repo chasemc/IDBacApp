@@ -30,7 +30,7 @@ getPeakData <-  function(pool, sampleIDs, protein){
   conn <- pool::poolCheckout(pool = pool)
   
   query <- DBI::dbSendStatement(glue::glue("SELECT strain_id, peak_matrix
-                              FROM individual_spectra
+                              FROM spectra
                                   WHERE max_mass {sym} 6000
                                   AND (strain_id = ?)"),
                                 con = conn)

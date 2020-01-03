@@ -54,7 +54,7 @@ smallmirrorPlots_Server <- function(input,
     conn <- pool::poolCheckout(workingDB$pool())
     
     a <- DBI::dbGetQuery(conn, glue::glue("SELECT DISTINCT strain_id
-                                           FROM individual_spectra 
+                                           FROM spectra 
                                            WHERE max_mass < 6000"))
     pool::poolReturn(conn)
     

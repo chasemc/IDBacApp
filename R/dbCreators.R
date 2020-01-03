@@ -89,12 +89,12 @@ createMetaSQL <- function(sampleID,
     pool = userDBCon,
     func = function(conn){
       
-      if (!DBI::dbExistsTable(conn, "metaData")) {
+      if (!DBI::dbExistsTable(conn, "metadata")) {
         IDBacApp::sql_CreatemetaData(conn)
       }  
       
       query <- DBI::dbSendStatement(conn, 
-                                    "INSERT INTO 'metaData' (
+                                    "INSERT INTO 'metadata' (
                                 'strain_id')
                                  VALUES (?)")
       
@@ -225,14 +225,14 @@ createSpectraSQL <- function(mzML_con,
   
   # Create tables in DB if they don't exist ---------------------------------
   
-  if (!pool::dbExistsTable(userDBCon, "individual_spectra")) {
+  if (!pool::dbExistsTable(userDBCon, "spectra")) {
     pool::poolWithTransaction(
       pool = userDBCon,
       func = function(conn){
         IDBacApp::sql_CreateIndividualSpectra(conn)
       })
   }  
-  if (!pool::dbExistsTable(userDBCon, "massTable")) {
+  if (!pool::dbExistsTable(userDBCon, "mass_index")) {
     pool::poolWithTransaction(
       pool = userDBCon,
       func = function(conn){
@@ -279,7 +279,7 @@ createSpectraSQL <- function(mzML_con,
 
 
 
-#' Write massTable data to SQLite
+#' Write mass_index data to SQLite
 #'
 #' @param env environment 
 #' @param userDBCon checked database connection
@@ -299,7 +299,7 @@ insertIntoMassTable <- function(env,
                     spectrum_mass_hash and mass_vector variables with different lengths")
       } else { 
         query <- DBI::dbSendStatement(conn, 
-                                      "INSERT INTO 'massTable'(
+                                      "INSERT INTO 'mass_index'(
                               'spectrum_mass_hash',
                               'mass_vector')
                               VALUES (
@@ -349,7 +349,7 @@ insertIntoIndividualSpectra <- function(env,
                         paste0(names(temp),"=",temp, collapse = ", ")))
       } else { 
         query <- DBI::dbSendStatement(conn, 
-                                      "INSERT INTO 'individual_spectra'(
+                                      "INSERT INTO 'spectra'(
                                   'spectrum_mass_hash',
                                   'spectrum_intensity_hash',
                                   'xml_hash',

@@ -92,7 +92,7 @@ updateMeta_server <- function(input,
                  #----
                  #make sure not to use the wrong metadata table
                  query <- glue::glue_sql("SELECT  `strain_id`
-                                          FROM `metaData`",
+                                          FROM `metadata`",
                                          .con =  pool())
                  query <- DBI::dbGetQuery(pool(), query)[ ,1]
                  
@@ -105,7 +105,7 @@ updateMeta_server <- function(input,
                  #----
                  
                  DBI::dbWriteTable(conn = pool(),
-                                   name = "metaData",
+                                   name = "metadata",
                                    value = rhandsontable::hot_to_r(input$metaTable)[-1, ], # remove example row 
                                    overwrite = TRUE)  
                  
@@ -127,7 +127,7 @@ updateMeta_server <- function(input,
       if (!is.null(pool())) {
         conn <- pool::poolCheckout(pool())
         
-        if (!"metaData" %in% DBI::dbListTables(conn)) {
+        if (!"metadata" %in% DBI::dbListTables(conn)) {
           
           warning("It appears the experiment file may be corrupt, please create again.")
           rhand$rtab <- data.frame(strain_id = "It appears the experiment file may be corrupt, please create the experiment again.")
@@ -136,7 +136,7 @@ updateMeta_server <- function(input,
           
           dbQuery <- glue::glue_sql("SELECT *
                                              FROM ({tab*})",
-                                    tab = "metaData",
+                                    tab = "metadata",
                                     .con = conn)
           
           dbQuery <- DBI::dbGetQuery(conn, dbQuery)

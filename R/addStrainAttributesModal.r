@@ -45,7 +45,7 @@ sampMeta <- function(input, output, session, databaseConnection) {
   dbqueryReactive <- reactive({
     dbQuery <- glue::glue_sql("SELECT *
                             FROM ({tab*})",
-                              tab = "metaData",
+                              tab = "metadata",
                               .con = databaseConnection)
     
     conn <- pool::poolCheckout(databaseConnection)

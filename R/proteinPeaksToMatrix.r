@@ -13,7 +13,7 @@ proteinPeaksToMatrix <- function(bool, proteinPeaks){
   
   temp <- NULL
   for (i in 1:length(proteinPeaks)) {
-    temp <- c(temp, proteinPeaks[[i]]@metaData$Strain)
+    temp <- c(temp, proteinPeaks[[i]]@metadata$Strain)
   }
   proteinSamples <- factor(temp)
   proteinMatrixInnard <- MALDIquant::intensityMatrix(proteinPeaks)

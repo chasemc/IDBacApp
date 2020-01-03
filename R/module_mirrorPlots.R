@@ -82,7 +82,7 @@ mirrorPlots_Server <- function(input,
     conn <- pool::poolCheckout(workingDB$pool())
     
     a <- DBI::dbGetQuery(conn, glue::glue("SELECT DISTINCT strain_id
-                                            FROM individual_spectra
+                                            FROM spectra
                                             WHERE max_mass {proteinOrSmall} 6000"))
     pool::poolReturn(conn)
     
@@ -220,10 +220,10 @@ mquantSpecFromSQL <- function(pool,
   
   result <-  pool::poolWithTransaction(pool, 
                                        function(conn){
-                                         query <-  DBI::dbSendStatement(glue::glue("SELECT massTable.mass_vector, individual_spectra.spectrum_intensity
-                                   FROM massTable
-                                   LEFT JOIN individual_spectra
-                                   ON massTable.spectrum_mass_hash = individual_spectra.spectrum_mass_hash
+                                         query <-  DBI::dbSendStatement(glue::glue("SELECT mass_index.mass_vector, spectra.spectrum_intensity
+                                   FROM mass_index
+                                   LEFT JOIN spectra
+                                   ON mass_index.spectrum_mass_hash = spectra.spectrum_mass_hash
                                    WHERE strain_id == ?
                                    AND max_mass {proteinOrSmall} 6000"),
                                                                         con = conn)

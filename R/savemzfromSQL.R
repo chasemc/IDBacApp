@@ -13,10 +13,10 @@ exportmzML <- function(userDBCon,
  
   conn <- pool::poolCheckout(userDBCon)
   
-  query <-  DBI::dbSendStatement("SELECT xml.xml,individual_spectra.strain_id
+  query <-  DBI::dbSendStatement("SELECT xml.xml,spectra.strain_id
 FROM `xml`
-LEFT JOIN `individual_spectra`
-ON xml.xml_hash = individual_spectra.xml_hash
+LEFT JOIN `spectra`
+ON xml.xml_hash = spectra.xml_hash
 WHERE strain_id == ?
 GROUP BY strain_id;
 ", con = conn)

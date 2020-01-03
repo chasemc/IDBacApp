@@ -77,9 +77,9 @@ databaseSelector_server <- function(input,
                          filePath = sqlDirectory$sqlDirectory)[[1]]
     
     
-    q <- c("individual_spectra",
+    q <- c("spectra",
            "xml",
-           "metaData",
+           "metadata",
            "version" )
     
     req(all(q %in%  DBI::dbListTables(z)))
