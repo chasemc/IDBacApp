@@ -40,7 +40,7 @@ sqlTableArchitecture <- function(numberScans){
   sqlDataFrame$metaData <- temp
   
   
-  sqlDataFrame$XML <- c("XMLHash",
+  sqlDataFrame$XML <- c("xml_hash",
                         "XML", 
                         "manufacturer",
                         "model",
@@ -59,7 +59,7 @@ sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame$IndividualSpectra <- c("spectrumMassHash",
                                       "spectrumIntensityHash",
-                                      "XMLHash",
+                                      "xml_hash",
                                       "strain_id",
                                       "MassError",
                                       "AcquisitionDate",
@@ -110,7 +110,7 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
                               "CREATE TABLE `IndividualSpectra` (
   spectrumMassHash                     TEXT,
   spectrumIntensityHash                TEXT,
-  XMLHash                              TEXT,
+  xml_hash                              TEXT,
   strain_id                            TEXT,
   peakMatrix                           BLOB,
   spectrumIntensity                    BLOB,
@@ -259,7 +259,7 @@ sql_CreatexmlTable <- function(sqlConnection){
     
     a <- DBI::dbSendStatement(sqlConnection,
                               "CREATE TABLE `XML` (
-  XMLHash         TEXT,
+  xml_hash         TEXT,
   XML             BLOB,
   manufacturer    TEXT,
   model           TEXT,
@@ -268,7 +268,7 @@ sql_CreatexmlTable <- function(sqlConnection){
   detector        TEXT,
   Instrument_MetaFile BLOB,
 
-  UNIQUE(XMLHash) ON CONFLICT IGNORE
+  UNIQUE(xml_hash) ON CONFLICT IGNORE
     );"
     )
     

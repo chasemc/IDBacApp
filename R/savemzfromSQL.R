@@ -16,7 +16,7 @@ exportmzML <- function(userDBCon,
   query <-  DBI::dbSendStatement("SELECT XML.XML,IndividualSpectra.strain_id
 FROM `XML`
 LEFT JOIN `IndividualSpectra`
-ON XML.XMLHash = IndividualSpectra.XMLHash
+ON XML.xml_hash = IndividualSpectra.xml_hash
 WHERE strain_id == ?
 GROUP BY strain_id;
 ", con = conn)

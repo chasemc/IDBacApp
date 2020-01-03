@@ -115,7 +115,7 @@ copyToNewDatabase <- function(existingDBPool,
                                     session = getDefaultReactiveDomain())
                         }
                         state <- DBI::dbSendQuery(existingDBconn, 
-                                                  "SELECT DISTINCT XMLHash
+                                                  "SELECT DISTINCT xml_hash
                                                       FROM main.IndividualSpectra
                                                       WHERE (strain_id = ?)")
                         DBI::dbBind(state, list(sampleIDs))
@@ -126,7 +126,7 @@ copyToNewDatabase <- function(existingDBPool,
                                                       "INSERT INTO newDB.XML
                                                       SELECT *
                                                       FROM main.XML
-                                                      WHERE (XMLHash = ?)")
+                                                      WHERE (xml_hash = ?)")
                         DBI::dbBind(state, list(res[ , 1]))
                         warning(state@sql)
                         DBI::dbClearResult(state) 
