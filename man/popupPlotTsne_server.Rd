@@ -4,8 +4,14 @@
 \alias{popupPlotTsne_server}
 \title{popupPlot_server}
 \usage{
-popupPlotTsne_server(input, output, session, data, namedColors,
-  plotTitle = "t-SNE")
+popupPlotTsne_server(
+  input,
+  output,
+  session,
+  data,
+  namedColors,
+  plotTitle = "t-SNE"
+)
 }
 \arguments{
 \item{input}{shiny nput}

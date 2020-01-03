@@ -4,8 +4,15 @@
 \alias{createSpectraSQL}
 \title{createSpectraSQL}
 \usage{
-createSpectraSQL(mzML_con, scanNumber, userDBCon, sampleID, XMLinfo,
-  smallRangeEnd = 6000, acquisitionInfo)
+createSpectraSQL(
+  mzML_con,
+  scanNumber,
+  userDBCon,
+  sampleID,
+  XMLinfo,
+  smallRangeEnd = 6000,
+  acquisitionInfo
+)
 }
 \arguments{
 \item{mzML_con}{NA}

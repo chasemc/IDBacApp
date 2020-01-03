@@ -4,8 +4,13 @@
 \alias{exportSamples_server}
 \title{exportSamples_server}
 \usage{
-exportSamples_server(input, output, session, sqlDirectory,
-  availableExperiments)
+exportSamples_server(
+  input,
+  output,
+  session,
+  sqlDirectory,
+  availableExperiments
+)
 }
 \arguments{
 \item{input}{shiny}

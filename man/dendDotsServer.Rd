@@ -4,8 +4,18 @@
 \alias{dendDotsServer}
 \title{Title}
 \usage{
-dendDotsServer(input, output, session, dendrogram, pool, plotWidth,
-  plotHeight, boots, dendOrPhylo = "Dendrogram", emptyProtein)
+dendDotsServer(
+  input,
+  output,
+  session,
+  dendrogram,
+  pool,
+  plotWidth,
+  plotHeight,
+  boots,
+  dendOrPhylo = "Dendrogram",
+  emptyProtein
+)
 }
 \arguments{
 \item{input}{NA}

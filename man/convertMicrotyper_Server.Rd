@@ -4,8 +4,14 @@
 \alias{convertMicrotyper_Server}
 \title{convertDelim_Server}
 \usage{
-convertMicrotyper_Server(input, output, session, tempMZDir, sqlDirectory,
-  availableExperiments)
+convertMicrotyper_Server(
+  input,
+  output,
+  session,
+  tempMZDir,
+  sqlDirectory,
+  availableExperiments
+)
 }
 \arguments{
 \item{input}{module}

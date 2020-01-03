@@ -4,12 +4,18 @@
 \alias{assembleMirrorPlots}
 \title{Assemble mirror plot Data}
 \usage{
-assembleMirrorPlots(sampleID1 = input$Spectra1,
+assembleMirrorPlots(
+  sampleID1 = input$Spectra1,
   sampleID2 = input$Spectra2,
   peakPercentPresence = input$percentPresence,
-  lowerMassCutoff = input$lowerMass, upperMassCutoff = input$upperMass,
-  minSNR = input$SNR, tolerance = 0.002, pool1 = workingDB$pool(),
-  pool2 = workingDB$pool(), normalizeSpectra = FALSE)
+  lowerMassCutoff = input$lowerMass,
+  upperMassCutoff = input$upperMass,
+  minSNR = input$SNR,
+  tolerance = 0.002,
+  pool1 = workingDB$pool(),
+  pool2 = workingDB$pool(),
+  normalizeSpectra = FALSE
+)
 }
 \arguments{
 \item{sampleID1}{sample ID to search in IDBac sqlite database (will be positive spectrum)}

@@ -4,8 +4,13 @@
 \alias{transferToNewDB_server}
 \title{transferToNewDB_server}
 \usage{
-transferToNewDB_server(input, output, session, sqlDirectory,
-  availableExperiments)
+transferToNewDB_server(
+  input,
+  output,
+  session,
+  sqlDirectory,
+  availableExperiments
+)
 }
 \arguments{
 \item{input}{.}

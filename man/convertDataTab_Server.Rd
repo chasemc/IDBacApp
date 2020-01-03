@@ -4,8 +4,15 @@
 \alias{convertDataTab_Server}
 \title{convertDataTab_Server}
 \usage{
-convertDataTab_Server(input, output, session, tempMZDir, sqlDirectory,
-  availableExperiments, pwizAvailable)
+convertDataTab_Server(
+  input,
+  output,
+  session,
+  tempMZDir,
+  sqlDirectory,
+  availableExperiments,
+  pwizAvailable
+)
 }
 \arguments{
 \item{input}{shiny}

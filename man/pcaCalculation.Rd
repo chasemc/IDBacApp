@@ -5,8 +5,13 @@
 \title{Principle Components Analysis 
 Given a data frame whose columns are variables and rows are samples, run Principle Components Analysis (PCA)}
 \usage{
-pcaCalculation(dataMatrix, logged = FALSE, scaled = TRUE,
-  centered = TRUE, missing = 0)
+pcaCalculation(
+  dataMatrix,
+  logged = FALSE,
+  scaled = TRUE,
+  centered = TRUE,
+  missing = 0
+)
 }
 \arguments{
 \item{dataMatrix}{NA}

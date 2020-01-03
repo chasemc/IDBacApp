@@ -4,8 +4,11 @@
 \alias{run_microtyperTomzML}
 \title{run_microtyperTomzML setup and loop}
 \usage{
-run_microtyperTomzML(proteinPaths = NULL, smallMolPaths = NULL,
-  exportDirectory = tempdir())
+run_microtyperTomzML(
+  proteinPaths = NULL,
+  smallMolPaths = NULL,
+  exportDirectory = tempdir()
+)
 }
 \arguments{
 \item{proteinPaths}{proteinPaths}

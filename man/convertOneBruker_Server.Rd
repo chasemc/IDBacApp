@@ -4,8 +4,14 @@
 \alias{convertOneBruker_Server}
 \title{convertOneBruker_Server}
 \usage{
-convertOneBruker_Server(input, output, session, tempMZDir, sqlDirectory,
-  availableExperiments)
+convertOneBruker_Server(
+  input,
+  output,
+  session,
+  tempMZDir,
+  sqlDirectory,
+  availableExperiments
+)
 }
 \arguments{
 \item{input}{NS}

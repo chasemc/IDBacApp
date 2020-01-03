@@ -4,8 +4,15 @@
 \alias{chooserInput}
 \title{chooserInput}
 \usage{
-chooserInput(inputId, leftLabel, rightLabel, leftChoices, rightChoices,
-  size = 5, multiple = FALSE)
+chooserInput(
+  inputId,
+  leftLabel,
+  rightLabel,
+  leftChoices,
+  rightChoices,
+  size = 5,
+  multiple = FALSE
+)
 }
 \arguments{
 \item{inputId}{NA}

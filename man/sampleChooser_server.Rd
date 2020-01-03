@@ -4,8 +4,14 @@
 \alias{sampleChooser_server}
 \title{Server for choosing all samples fromm an IDBac DB}
 \usage{
-sampleChooser_server(input, output, session, pool,
-  whetherProtein = FALSE, allSamples = FALSE)
+sampleChooser_server(
+  input,
+  output,
+  session,
+  pool,
+  whetherProtein = FALSE,
+  allSamples = FALSE
+)
 }
 \arguments{
 \item{input}{shiny module}

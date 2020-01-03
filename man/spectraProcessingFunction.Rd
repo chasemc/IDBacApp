@@ -5,8 +5,12 @@
 \title{Create IDBac SQLite database 
 Should work for mzML, mzXML, mgf, and txt data input}
 \usage{
-spectraProcessingFunction(rawDataFilePath, sampleID, userDBCon,
-  acquisitionInfo)
+spectraProcessingFunction(
+  rawDataFilePath,
+  sampleID,
+  userDBCon,
+  acquisitionInfo
+)
 }
 \arguments{
 \item{rawDataFilePath}{filepath of the data}

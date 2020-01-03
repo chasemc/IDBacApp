@@ -4,15 +4,20 @@
 \alias{plotDendrogram}
 \title{Function for plotting dendrogram}
 \usage{
-plotDendrogram(dendrogram = dendrogram, dendOrPhylo = dendOrPhylo(),
+plotDendrogram(
+  dendrogram = dendrogram,
+  dendOrPhylo = dendOrPhylo(),
   selectMetaColumn = input$selectMetaColumn,
   appendDendLabels = input$appendDendLabels,
-  colorsChosen = colorsChosen(), cutHeightLines = input$cutHeightLines,
+  colorsChosen = colorsChosen(),
+  cutHeightLines = input$cutHeightLines,
   colorByLines = input$colorByLines,
   colorByLabels = input$colorByLabels,
   removeDendDots = input$removeDendDots,
-  cutHeightLabels = input$cutHeightLabels, boots = boots()$bootstraps,
-  pool = pool())
+  cutHeightLabels = input$cutHeightLabels,
+  boots = boots()$bootstraps,
+  pool = pool()
+)
 }
 \arguments{
 \item{dendrogram}{dendrogram}

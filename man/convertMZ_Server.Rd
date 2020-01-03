@@ -4,8 +4,7 @@
 \alias{convertMZ_Server}
 \title{convertMZ_Server}
 \usage{
-convertMZ_Server(input, output, session, sqlDirectory,
-  availableExperiments)
+convertMZ_Server(input, output, session, sqlDirectory, availableExperiments)
 }
 \arguments{
 \item{input}{module}

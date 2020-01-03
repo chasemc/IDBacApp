@@ -5,10 +5,21 @@
 \title{colored_dots
 I submitted this and it was pulled into dendextend but is left here for less dependency/more control}
 \usage{
-colored_dots(colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
-  add = TRUE, y_scale, y_shift, text_shift = 1,
-  sort_by_labels_order = TRUE, horiz = FALSE, alf = 1,
-  circ = FALSE, ...)
+colored_dots(
+  colors,
+  dend,
+  rowLabels = NULL,
+  cex.rowLabels = 0.9,
+  add = TRUE,
+  y_scale,
+  y_shift,
+  text_shift = 1,
+  sort_by_labels_order = TRUE,
+  horiz = FALSE,
+  alf = 1,
+  circ = FALSE,
+  ...
+)
 }
 \arguments{
 \item{colors}{NA}

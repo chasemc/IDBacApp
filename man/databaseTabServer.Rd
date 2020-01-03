@@ -4,8 +4,7 @@
 \alias{databaseTabServer}
 \title{databaseTabServer}
 \usage{
-databaseTabServer(input, output, session, sqlDirectory,
-  availableExperiments)
+databaseTabServer(input, output, session, sqlDirectory, availableExperiments)
 }
 \arguments{
 \item{input}{module}

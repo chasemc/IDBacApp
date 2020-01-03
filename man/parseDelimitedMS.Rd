@@ -4,8 +4,14 @@
 \alias{parseDelimitedMS}
 \title{parseDelimitedMS}
 \usage{
-parseDelimitedMS(proteinPaths, proteinNames, smallMolPaths, smallMolNames,
-  exportDirectory, centroid)
+parseDelimitedMS(
+  proteinPaths,
+  proteinNames,
+  smallMolPaths,
+  smallMolNames,
+  exportDirectory,
+  centroid
+)
 }
 \arguments{
 \item{proteinPaths}{proteinPaths}

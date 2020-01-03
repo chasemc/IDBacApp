@@ -4,8 +4,7 @@
 \alias{runDendDots}
 \title{Run Dend and dots}
 \usage{
-runDendDots(rawDendrogram, trimdLabsDend, pool, columnID, colors,
-  text_shift)
+runDendDots(rawDendrogram, trimdLabsDend, pool, columnID, colors, text_shift)
 }
 \arguments{
 \item{rawDendrogram}{NA}

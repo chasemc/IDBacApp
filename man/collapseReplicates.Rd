@@ -4,8 +4,16 @@
 \alias{collapseReplicates}
 \title{Collapse a sample's MALDIquant peak objects into a single peak object}
 \usage{
-collapseReplicates(pool, sampleIDs, peakPercentPresence, lowerMassCutoff,
-  upperMassCutoff, minSNR, tolerance = 0.002, protein)
+collapseReplicates(
+  pool,
+  sampleIDs,
+  peakPercentPresence,
+  lowerMassCutoff,
+  upperMassCutoff,
+  minSNR,
+  tolerance = 0.002,
+  protein
+)
 }
 \arguments{
 \item{pool}{sqlite pool}

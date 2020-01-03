@@ -4,9 +4,17 @@
 \alias{getSmallMolSpectra}
 \title{Retrieve small molecule and matrix peak lists and make consensus peak lists}
 \usage{
-getSmallMolSpectra(pool, sampleIDs = NULL, dendrogram, brushInputs,
-  matrixIDs = NULL, peakPercentPresence, lowerMassCutoff,
-  upperMassCutoff, minSNR)
+getSmallMolSpectra(
+  pool,
+  sampleIDs = NULL,
+  dendrogram,
+  brushInputs,
+  matrixIDs = NULL,
+  peakPercentPresence,
+  lowerMassCutoff,
+  upperMassCutoff,
+  minSNR
+)
 }
 \arguments{
 \item{pool}{pool}

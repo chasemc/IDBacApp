@@ -2,7 +2,7 @@
 % Please edit documentation in R/sqlTableArchitecture.r
 \name{sql_CreateIndividualSpectra}
 \alias{sql_CreateIndividualSpectra}
-\title{SQL code to create the SQLite IndividualSpectra table}
+\title{SQL code to create the SQLite individual_spectra table}
 \usage{
 sql_CreateIndividualSpectra(sqlConnection)
 }
@@ -13,5 +13,5 @@ sql_CreateIndividualSpectra(sqlConnection)
 SQL code as character
 }
 \description{
-SQL code to create the SQLite IndividualSpectra table
+SQL code to create the SQLite individual_spectra table
 }

@@ -24,7 +24,7 @@ The resulting string is then truncated to [255 bytes in length](https://en.wikip
 }
 \examples{
 # potentially unsafe string
-str <- "~/.\\u0001ssh/authorized_keys"
+str <- "~/.\u0001ssh/authorized_keys"
 path_sanitize(str)
 
 path_sanitize("..")

@@ -4,8 +4,14 @@
 \alias{changeDendPartColor}
 \title{changeDendPartColor}
 \usage{
-changeDendPartColor(dendrogram, colorBy, colorBlindPalette,
-  cutHeight = 0, chosenK = 1, part)
+changeDendPartColor(
+  dendrogram,
+  colorBy,
+  colorBlindPalette,
+  cutHeight = 0,
+  chosenK = 1,
+  part
+)
 }
 \arguments{
 \item{dendrogram}{dendrogram to modify}

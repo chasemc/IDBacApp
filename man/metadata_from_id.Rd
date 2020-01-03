@@ -7,14 +7,14 @@
 metadata_from_id(strainID, metadataColumn, pool)
 }
 \arguments{
-\item{strainID}{Strain_ID}
+\item{strainID}{strain_id}
 
-\item{metadataColumn}{metadata column name ('Species')}
+\item{metadataColumn}{metadata column name ('species')}
 
 \item{pool}{pool connection}
 }
 \value{
-data.frame with two columns 'Strain_ID' and  whatever metadataColumn is requested; rows filtered by ID
+data.frame with two columns 'strain_id' and  whatever metadataColumn is requested; rows filtered by ID
 }
 \description{
 Extract a metadata column

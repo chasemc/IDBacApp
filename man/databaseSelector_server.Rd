@@ -4,9 +4,14 @@
 \alias{databaseSelector_server}
 \title{databaseSelector_server}
 \usage{
-databaseSelector_server(input, output, session,
-  h3Label = h3("First, select an experiment:"), availableExperiments,
-  sqlDirectory)
+databaseSelector_server(
+  input,
+  output,
+  session,
+  h3Label = h3("First, select an experiment:"),
+  availableExperiments,
+  sqlDirectory
+)
 }
 \arguments{
 \item{input}{input}

@@ -4,8 +4,13 @@
 \alias{processMZML}
 \title{processMZML}
 \usage{
-processMZML(mzFilePaths, sampleIds, sqlDirectory, newExperimentName,
-  acquisitionInfo)
+processMZML(
+  mzFilePaths,
+  sampleIds,
+  sqlDirectory,
+  newExperimentName,
+  acquisitionInfo
+)
 }
 \arguments{
 \item{mzFilePaths}{file paths of the mzml files}
