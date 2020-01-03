@@ -2,7 +2,7 @@
 % Please edit documentation in R/sqlTableArchitecture.r
 \name{sql_CreatemassTable}
 \alias{sql_CreatemassTable}
-\title{SQL code to create the SQLite massTable table}
+\title{SQL code to create the SQLite mass_index table}
 \usage{
 sql_CreatemassTable(sqlConnection)
 }
@@ -13,5 +13,5 @@ sql_CreatemassTable(sqlConnection)
 SQL code as character
 }
 \description{
-SQL code to create the SQLite massTable table
+SQL code to create the SQLite mass_index table
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/sqlTableArchitecture.r
 \name{sql_CreatemetaData}
 \alias{sql_CreatemetaData}
-\title{SQL code to create the SQLite metaData table}
+\title{SQL code to create the SQLite metadata table}
 \usage{
 sql_CreatemetaData(sqlConnection)
 }
@@ -13,5 +13,5 @@ sql_CreatemetaData(sqlConnection)
 SQL code as character
 }
 \description{
-SQL code to create the SQLite metaData table
+SQL code to create the SQLite metadata table
 }

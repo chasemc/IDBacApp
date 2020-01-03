@@ -2,7 +2,7 @@
 % Please edit documentation in R/dbCreators.R
 \name{insertIntoMassTable}
 \alias{insertIntoMassTable}
-\title{Write massTable data to SQLite}
+\title{Write mass_index data to SQLite}
 \usage{
 insertIntoMassTable(env, userDBCon)
 }
@@ -15,5 +15,5 @@ insertIntoMassTable(env, userDBCon)
 nothing, writes to database
 }
 \description{
-Write massTable data to SQLite
+Write mass_index data to SQLite
 }
