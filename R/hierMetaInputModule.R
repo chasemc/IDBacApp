@@ -21,7 +21,7 @@ runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, te
   
     query <- DBI::dbSendStatement("SELECT *
                                   FROM metaData
-                                  WHERE `Strain_ID` = ?",
+                                  WHERE `strain_id` = ?",
                                   con=conn)
     
     DBI::dbBind(query, list(dendLabs))

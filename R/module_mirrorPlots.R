@@ -81,7 +81,7 @@ mirrorPlots_Server <- function(input,
   inverseComparisonNames <- reactive({
     conn <- pool::poolCheckout(workingDB$pool())
     
-    a <- DBI::dbGetQuery(conn, glue::glue("SELECT DISTINCT Strain_ID
+    a <- DBI::dbGetQuery(conn, glue::glue("SELECT DISTINCT strain_id
                                             FROM IndividualSpectra
                                             WHERE maxMass {proteinOrSmall} 6000"))
     pool::poolReturn(conn)
@@ -224,7 +224,7 @@ mquantSpecFromSQL <- function(pool,
                                    FROM massTable
                                    LEFT JOIN IndividualSpectra
                                    ON massTable.spectrumMassHash = IndividualSpectra.spectrumMassHash
-                                   WHERE Strain_ID == ?
+                                   WHERE strain_id == ?
                                    AND maxMass {proteinOrSmall} 6000"),
                                                                         con = conn)
                                          

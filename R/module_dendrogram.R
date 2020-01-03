@@ -169,7 +169,7 @@ dendDotsServer <- function(input,
     dendLabs <- labels(dendrogram$dendrogram)
     query <- DBI::dbSendStatement("SELECT *
                                   FROM metaData
-                                  WHERE `Strain_ID` = ?",
+                                  WHERE `strain_id` = ?",
                                   con=conn)
     DBI::dbBind(query, list(dendLabs))
     selectedMeta <- DBI::dbFetch(query)
@@ -186,7 +186,7 @@ dendDotsServer <- function(input,
   output$metaColumns <- renderUI({
     ns <- session$ns 
     a <- DBI::dbListFields(pool(), "metaData")
-    a <- a[-which(a == "Strain_ID")]
+    a <- a[-which(a == "strain_id")]
     
     selectInput(ns("selectMetaColumn"),
                 "Select Category",
@@ -198,7 +198,7 @@ dendDotsServer <- function(input,
   output$appendmetaColumns <- renderUI({
     ns <- session$ns 
     a <- DBI::dbListFields(pool(), "metaData")
-    a <- a[-which(a == "Strain_ID")]
+    a <- a[-which(a == "strain_id")]
     
     selectInput(ns("appendselectMetaColumn"),
                 "Select Category",

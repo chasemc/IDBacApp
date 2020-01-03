@@ -580,9 +580,9 @@ app_server <- function(input, output, session) {
   
   smallMolIDs <- reactive({
     checkedPool <- pool::poolCheckout(workingDB$pool())
-    # retrieve all Strain_IDs in db that have small molecule spectra
+    # retrieve all strain_ids in db that have small molecule spectra
     
-    sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT Strain_ID
+    sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT strain_id
                                                           FROM IndividualSpectra 
                                                           WHERE maxMass < {smallProteinMass}"))
     

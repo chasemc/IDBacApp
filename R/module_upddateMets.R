@@ -48,7 +48,7 @@ updateMeta_server <- function(input,
                               selectedDB){
   
   #----
-  rhand <- reactiveValues(rtab = data.frame("Strain_ID" = "Placeholder"))
+  rhand <- reactiveValues(rtab = data.frame("strain_id" = "Placeholder"))
   
   #----
   output$metaTable <- rhandsontable::renderRHandsontable({
@@ -57,7 +57,7 @@ updateMeta_server <- function(input,
     rhandsontable::rhandsontable(rhand$rtab,
                                  useTypes = FALSE,
                                  contextMenu = TRUE ) %>%
-      rhandsontable::hot_col("Strain_ID",
+      rhandsontable::hot_col("strain_id",
                              readOnly = TRUE) %>%
       rhandsontable::hot_row(1,
                              readOnly = TRUE) %>%
@@ -91,7 +91,7 @@ updateMeta_server <- function(input,
                 
                  #----
                  #make sure not to use the wrong metadata table
-                 query <- glue::glue_sql("SELECT  `Strain_ID`
+                 query <- glue::glue_sql("SELECT  `strain_id`
                                           FROM `metaData`",
                                          .con =  pool())
                  query <- DBI::dbGetQuery(pool(), query)[ ,1]
@@ -101,7 +101,7 @@ updateMeta_server <- function(input,
                  
                  tes <- identical(sort(userTab),
                                   sort(query))
-                 validate(need(tes, "Metadata rhandsontable Strain_IDs didn't match database Strain_IDs"))
+                 validate(need(tes, "Metadata rhandsontable strain_ids didn't match database strain_ids"))
                  #----
                  
                  DBI::dbWriteTable(conn = pool(),
@@ -120,7 +120,7 @@ updateMeta_server <- function(input,
   observeEvent(c(selectedDB$selectExperiment, input$insertNewMetaColumn),{
     
     if (identical(selectedDB$selectExperiment, "None")) {
-      rhand$rtab <- data.frame("Strain_ID" = "Placeholder")
+      rhand$rtab <- data.frame("strain_id" = "Placeholder")
     } else {
       
       
@@ -130,7 +130,7 @@ updateMeta_server <- function(input,
         if (!"metaData" %in% DBI::dbListTables(conn)) {
           
           warning("It appears the experiment file may be corrupt, please create again.")
-          rhand$rtab <- data.frame(Strain_ID = "It appears the experiment file may be corrupt, please create the experiment again.")
+          rhand$rtab <- data.frame(strain_id = "It appears the experiment file may be corrupt, please create the experiment again.")
           
         } else{
           
@@ -141,12 +141,12 @@ updateMeta_server <- function(input,
           
           dbQuery <- DBI::dbGetQuery(conn, dbQuery)
           
-          exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
-                                              "Genbank_Accession"            = "KY858228",
-                                              "NCBI_TaxID"                   = "446370",
-                                              "Kingdom"                      = "Bacteria",
-                                              "Phylum"                       = "Firmicutes",
-                                              "Class"                        = "Bacilli",
+          exampleMetaData <- data.frame(      "strain_id"                    = "Example_Strain",
+                                              "genbank_accession"            = "KY858228",
+                                              "ncbi_taxid"                   = "446370",
+                                              "kingdom"                      = "Bacteria",
+                                              "phylum"                       = "Firmicutes",
+                                              "class"                        = "Bacilli",
                                               "Order"                        = "Bacillales",
                                               "Family"                       = "Paenibacillaceae",
                                               "Genus"                        = "Paenibacillus",

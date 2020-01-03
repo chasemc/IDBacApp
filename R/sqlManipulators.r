@@ -3,7 +3,7 @@
 
 
 
-#' getAllStrain_IDsfromSQL
+#' getAllstrain_idsfromSQL
 #'
 #' @param databaseConnection NA
 #' @param table NA
@@ -12,10 +12,10 @@
 #' @export
 #'
 
-getAllStrain_IDsfromSQL <- function(databaseConnection, table){
-  # Gets unique Strain_IDs given a RSQLite database connecction and table name
+getAllstrain_idsfromSQL <- function(databaseConnection, table){
+  # Gets unique strain_ids given a RSQLite database connecction and table name
   
-  dbQuery <- glue::glue_sql("SELECT DISTINCT `Strain_ID`
+  dbQuery <- glue::glue_sql("SELECT DISTINCT `strain_id`
                             FROM ({tab*})",
                             tab = table,
                             .con = databaseConnection)

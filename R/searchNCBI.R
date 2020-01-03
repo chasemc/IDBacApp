@@ -11,9 +11,9 @@
 #     aqw[ ,i] <- as.character(aqw[ ,i])
 #   }
 #   
-#   ind <- is.na(aqw[-1,]$Genbank_Accession)
+#   ind <- is.na(aqw[-1,]$genbank_accession)
 #   
-#   providedAccessions <- as.character(aqw[-1,]$Genbank_Accession[!ind])
+#   providedAccessions <- as.character(aqw[-1,]$genbank_accession[!ind])
 #   
 #   ncbiResults <- lapply(as.list(providedAccessions), function(x){
 #     try(traits::ncbi_byid(x),
@@ -59,9 +59,9 @@
 #   # get rhandsontable minus the example row
 #   awe <-  aqw[-1, ]
 #   # ind is a logical vector of rows with input accessions
-#   awe$Kingdom[!ind] <- taxo$superkingdom
-#   awe$Phylum[!ind] <- taxo$phylum
-#   awe$Class[!ind] <- taxo$class
+#   awe$kingdom[!ind] <- taxo$superkingdom
+#   awe$phylum[!ind] <- taxo$phylum
+#   awe$class[!ind] <- taxo$class
 #   awe$Order[!ind] <- taxo$order
 #   awe$Family[!ind] <- taxo$family
 #   awe$Genus[!ind] <- taxo$genus

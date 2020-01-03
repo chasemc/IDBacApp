@@ -36,11 +36,11 @@ experimentSummary_Server <- function(input,
   summarized <- reactive({
     checkedPool <- pool::poolCheckout(pool())
     
-    smallReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (Strain_ID) 
+    smallReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (strain_id) 
                                        FROM IndividualSpectra
                                        WHERE maxMass < 6000")
     
-    proteinReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (Strain_ID) 
+    proteinReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (strain_id) 
                                        FROM IndividualSpectra
                                        WHERE maxMass > 6000")
     pool::poolReturn(checkedPool)

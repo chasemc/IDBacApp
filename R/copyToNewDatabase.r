@@ -83,7 +83,7 @@ copyToNewDatabase <- function(existingDBPool,
                                                       "INSERT INTO newDB.metaData
                                                       SELECT *
                                                       FROM main.metaData
-                                                      WHERE (Strain_ID = ?)")
+                                                      WHERE (strain_id = ?)")
                         DBI::dbBind(state, list(sampleIDs))
                         warning(state@sql)
                         DBI::dbClearResult(state) 
@@ -102,7 +102,7 @@ copyToNewDatabase <- function(existingDBPool,
                                                       "INSERT INTO newDB.IndividualSpectra
                                                       SELECT *
                                                       FROM main.IndividualSpectra
-                                                      WHERE (Strain_ID = ?)")
+                                                      WHERE (strain_id = ?)")
                         DBI::dbBind(state, list(sampleIDs))
                         warning(state@sql)
                         DBI::dbClearResult(state) 
@@ -117,7 +117,7 @@ copyToNewDatabase <- function(existingDBPool,
                         state <- DBI::dbSendQuery(existingDBconn, 
                                                   "SELECT DISTINCT XMLHash
                                                       FROM main.IndividualSpectra
-                                                      WHERE (Strain_ID = ?)")
+                                                      WHERE (strain_id = ?)")
                         DBI::dbBind(state, list(sampleIDs))
                         res <- DBI::fetch(state)
                         DBI::dbClearResult(state)
@@ -142,7 +142,7 @@ copyToNewDatabase <- function(existingDBPool,
                         state <- DBI::dbSendQuery(existingDBconn, 
                                                   "SELECT DISTINCT spectrumMassHash
                                                       FROM main.IndividualSpectra
-                                                      WHERE (Strain_ID = ?)")
+                                                      WHERE (strain_id = ?)")
                         DBI::dbBind(state, list(sampleIDs))
                         res <- DBI::fetch(state)
                         DBI::dbClearResult(state)

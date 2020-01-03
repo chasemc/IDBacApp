@@ -95,7 +95,7 @@ createMetaSQL <- function(sampleID,
       
       query <- DBI::dbSendStatement(conn, 
                                     "INSERT INTO 'metaData' (
-                                'Strain_ID')
+                                'strain_id')
                                  VALUES (?)")
       
       DBI::dbBind(query, list(sampleID))
@@ -353,7 +353,7 @@ insertIntoIndividualSpectra <- function(env,
                                   'spectrumMassHash',
                                   'spectrumIntensityHash',
                                   'XMLHash',
-                                  'Strain_ID',
+                                  'strain_id',
                                   'peakMatrix',
                                   'spectrumIntensity',
                                   'maxMass',
@@ -395,7 +395,7 @@ insertIntoIndividualSpectra <- function(env,
                                   VALUES ($spectrumMassHash,
                                   $spectrumIntensityHash,
                                   $XMLHash,
-                                  $Strain_ID,
+                                  $strain_id,
                                   $peakMatrix,
                                   $spectrumIntensity,
                                   $maxMass,
@@ -525,7 +525,7 @@ insertIntoIndividualSpectra <- function(env,
                       list(spectrumMassHash = env$spectrumMassHash,
                            spectrumIntensityHash = env$spectrumIntensityHash,
                            XMLHash = mzMLHash,
-                           Strain_ID = sampleID,
+                           strain_id = sampleID,
                            peakMatrix = env$peakMatrix,
                            spectrumIntensity = env$spectrumIntensity,
                            minMass = env$minMass,

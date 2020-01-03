@@ -53,12 +53,12 @@ sampMeta <- function(input, output, session, databaseConnection) {
     dbQuery <- DBI::dbFetch(dbQuery)
     
     
-    exampleMetaData <- data.frame(      "Strain_ID"                    = "Example_Strain",
-                                        "Genbank_Accession"            = "KY858228",
-                                        "NCBI_TaxID"                   = "446370",
-                                        "Kingdom"                      = "Bacteria",
-                                        "Phylum"                       = "Firmicutes",
-                                        "Class"                        = "Bacilli",
+    exampleMetaData <- data.frame(      "strain_id"                    = "Example_Strain",
+                                        "genbank_accession"            = "KY858228",
+                                        "ncbi_taxid"                   = "446370",
+                                        "kingdom"                      = "Bacteria",
+                                        "phylum"                       = "Firmicutes",
+                                        "class"                        = "Bacilli",
                                         "Order"                        = "Bacillales",
                                         "Family"                       = "Paenibacillaceae",
                                         "Genus"                        = "Paenibacillus",
@@ -80,7 +80,7 @@ sampMeta <- function(input, output, session, databaseConnection) {
     rhandsontable::rhandsontable(dbQuery,
                                  useTypes = FALSE,
                                  contextMenu = TRUE ) %>%
-      hot_col("Strain_ID", readOnly = TRUE) %>%
+      hot_col("strain_id", readOnly = TRUE) %>%
       rhandsontable::hot_row(1,  readOnly = TRUE) %>%
       hot_context_menu(allowRowEdit = FALSE,
                        allowColEdit = TRUE) %>%

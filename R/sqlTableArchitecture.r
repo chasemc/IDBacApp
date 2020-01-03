@@ -11,12 +11,12 @@ sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame$version <- data.frame(version = "1")
   
-  sqlDataFrame$metaData <- c("Strain_ID",
-                             "Genbank_Accession",
-                             "NCBI_TaxID",
-                             "Kingdom",
-                             "Phylum",
-                             "Class",
+  sqlDataFrame$metaData <- c("strain_id",
+                             "genbank_accession",
+                             "ncbi_taxid",
+                             "kingdom",
+                             "phylum",
+                             "class",
                              "Order",
                              "Family",
                              "Genus",
@@ -60,7 +60,7 @@ sqlTableArchitecture <- function(numberScans){
   sqlDataFrame$IndividualSpectra <- c("spectrumMassHash",
                                       "spectrumIntensityHash",
                                       "XMLHash",
-                                      "Strain_ID",
+                                      "strain_id",
                                       "MassError",
                                       "AcquisitionDate",
                                       "peakMatrix",
@@ -111,7 +111,7 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
   spectrumMassHash                     TEXT,
   spectrumIntensityHash                TEXT,
   XMLHash                              TEXT,
-  Strain_ID                            TEXT,
+  strain_id                            TEXT,
   peakMatrix                           BLOB,
   spectrumIntensity                    BLOB,
   maxMass                              INTEGER,
@@ -151,7 +151,7 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
   targetSerialNumber                   TEXT,
   targetTypeNumber                     TEXT,
   
-  UNIQUE(Strain_ID, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
+  UNIQUE(strain_id, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
   );"
     )
     
@@ -207,12 +207,12 @@ sql_CreatemetaData <- function(sqlConnection){
     
     a <- DBI::dbSendStatement(sqlConnection,
                               "CREATE TABLE `metaData` (
-'Strain_ID'                  TEXT,     
-'Genbank_Accession'          TEXT,             
-'NCBI_TaxID'                 TEXT,       
-'Kingdom'                    TEXT,   
-'Phylum'                     TEXT,   
-'Class'                      TEXT, 
+'strain_id'                  TEXT,     
+'genbank_accession'          TEXT,             
+'ncbi_taxid'                 TEXT,       
+'kingdom'                    TEXT,   
+'phylum'                     TEXT,   
+'class'                      TEXT, 
 'Order'                      TEXT, 
 'Family'                     TEXT,   
 'Genus'                      TEXT, 
@@ -228,7 +228,7 @@ sql_CreatemetaData <- function(sqlConnection){
 'PI_ORCID'                   TEXT,     
 'dna_16S'                    TEXT,   
  
-  UNIQUE(Strain_ID) ON CONFLICT IGNORE
+  UNIQUE(strain_id) ON CONFLICT IGNORE
   );"
     )
     

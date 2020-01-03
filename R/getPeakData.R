@@ -29,10 +29,10 @@ getPeakData <-  function(pool, sampleIDs, protein){
   
   conn <- pool::poolCheckout(pool = pool)
   
-  query <- DBI::dbSendStatement(glue::glue("SELECT Strain_ID, peakMatrix
+  query <- DBI::dbSendStatement(glue::glue("SELECT strain_id, peakMatrix
                               FROM IndividualSpectra
                                   WHERE maxMass {sym} 6000
-                                  AND (Strain_ID = ?)"),
+                                  AND (strain_id = ?)"),
                                 con = conn)
   
   DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
@@ -42,10 +42,10 @@ getPeakData <-  function(pool, sampleIDs, protein){
   DBI::dbClearResult(query)
   pool::poolReturn(conn)
   
-  samps <- unique(results$Strain_ID)
+  samps <- unique(results$strain_id)
   results <- lapply(samps,
                     function(x){
-                      unname(lapply(which(results$Strain_ID == x), function(y){
+                      unname(lapply(which(results$strain_id == x), function(y){
                         
                         z <- jsonlite::fromJSON(results$peakMatrix[[y]])
                         

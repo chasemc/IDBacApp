@@ -3,11 +3,11 @@
 
 #' Extract a metadata column 
 #'
-#' @param strainID Strain_ID
+#' @param strainID strain_id
 #' @param metadataColumn metadata column name ('Species')
 #' @param pool pool connection
 #'
-#' @return data.frame with two columns 'Strain_ID' and  whatever metadataColumn is requested; rows filtered by ID
+#' @return data.frame with two columns 'strain_id' and  whatever metadataColumn is requested; rows filtered by ID
 #' @export
 #'
 metadata_from_id <- function(strainID,
@@ -17,11 +17,11 @@ metadata_from_id <- function(strainID,
   
   conn <- pool::poolCheckout(pool)
   
-  metadataColumn <- paste("Strain_ID", metadataColumn, sep = ", ")
+  metadataColumn <- paste("strain_id", metadataColumn, sep = ", ")
   
   a <- glue::glue("SELECT {metadataColumn}
                    FROM metaData
-                   WHERE `Strain_ID` = $ids")
+                   WHERE `strain_id` = $ids")
   
   
   query <- DBI::dbSendStatement(a,

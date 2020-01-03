@@ -13,12 +13,12 @@ exportmzML <- function(userDBCon,
  
   conn <- pool::poolCheckout(userDBCon)
   
-  query <-  DBI::dbSendStatement("SELECT XML.XML,IndividualSpectra.Strain_ID
+  query <-  DBI::dbSendStatement("SELECT XML.XML,IndividualSpectra.strain_id
 FROM `XML`
 LEFT JOIN `IndividualSpectra`
 ON XML.XMLHash = IndividualSpectra.XMLHash
-WHERE Strain_ID == ?
-GROUP BY Strain_ID;
+WHERE strain_id == ?
+GROUP BY strain_id;
 ", con = conn)
   
   
@@ -44,7 +44,7 @@ GROUP BY Strain_ID;
                           chunk <- DBI::dbFetch(query, 5)
                           
                           counter <- counter - inc
-                          ids <- chunk$Strain_ID
+                          ids <- chunk$strain_id
                           ids <- base::make.unique(path_sanitize(ids))
                           ids <- gsub("\\.",
                                       "_",
