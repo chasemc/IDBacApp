@@ -66,7 +66,7 @@
 #   awe$family[!ind] <- taxo$family
 #   awe$genus[!ind] <- taxo$genus
 #   awe$species[!ind] <- taxo$species
-#   awe$dna_16S[!ind] <- unlist(dna_16s)
+#   awe$dna_16s[!ind] <- unlist(dna_16s)
 #   
 #   # Update reactive value
 #   qwerty$rtab <- rbind(rhandsontable::hot_to_r(input$metaTable)[1, ], awe)

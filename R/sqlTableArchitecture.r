@@ -26,11 +26,11 @@ sqlTableArchitecture <- function(numberScans){
                              "cultivation_temp_celsius",
                              "cultivation_time_days",
                              "cultivation_other",
-                             "User",
-                             "User_ORCID",
-                             "PI_FirstName_LastName",
-                             "PI_ORCID",
-                             "dna_16S")
+                             "user_firstname_lastname",
+                             "user_orcid",
+                             "pi_firstname_lastname",
+                             "pi_orcid",
+                             "dna_16s")
   
   
   temp <- as.data.frame(matrix(nrow = numberScans,
@@ -222,11 +222,11 @@ sql_CreatemetaData <- function(sqlConnection){
 'cultivation_temp_celsius'   TEXT,                     
 'cultivation_time_days'      TEXT,                 
 'cultivation_other'          TEXT,             
-'User'                       TEXT, 
-'User_ORCID'                 TEXT,       
-'PI_FirstName_LastName'      TEXT,                 
-'PI_ORCID'                   TEXT,     
-'dna_16S'                    TEXT,   
+'user_firstname_lastname'    TEXT, 
+'user_orcid'                 TEXT,       
+'pi_firstname_lastname'      TEXT,                 
+'pi_orcid'                   TEXT,     
+'dna_16s'                    TEXT,   
  
   UNIQUE(strain_id) ON CONFLICT IGNORE
   );"
