@@ -29,9 +29,9 @@ getPeakData <-  function(pool, sampleIDs, protein){
   
   conn <- pool::poolCheckout(pool = pool)
   
-  query <- DBI::dbSendStatement(glue::glue("SELECT strain_id, peakMatrix
-                              FROM IndividualSpectra
-                                  WHERE maxMass {sym} 6000
+  query <- DBI::dbSendStatement(glue::glue("SELECT strain_id, peak_matrix
+                              FROM individual_spectra
+                                  WHERE max_mass {sym} 6000
                                   AND (strain_id = ?)"),
                                 con = conn)
   
@@ -47,7 +47,7 @@ getPeakData <-  function(pool, sampleIDs, protein){
                     function(x){
                       unname(lapply(which(results$strain_id == x), function(y){
                         
-                        z <- jsonlite::fromJSON(results$peakMatrix[[y]])
+                        z <- jsonlite::fromJSON(results$peak_matrix[[y]])
                         
                         MALDIquant::createMassPeaks(mass = z$mass,
                                                     intensity = z$intensity ,

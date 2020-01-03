@@ -19,22 +19,22 @@ availableSampleNames <- function(checkedPool,
   
     query <- glue::glue_sql("
                           SELECT DISTINCT `strain_id`
-                            FROM `IndividualSpectra`",
+                            FROM `individual_spectra`",
                             .con = checkedPool)
   } else {
   if (whetherProtein == TRUE) {
     query <- glue::glue_sql("
                           SELECT DISTINCT `strain_id`
-                          FROM `IndividualSpectra`
-                          WHERE maxMass > 6000",
+                          FROM `individual_spectra`
+                          WHERE max_mass > 6000",
                             .con = checkedPool)
     
   } else {
     
     query <- glue::glue_sql("
                          SELECT DISTINCT `strain_id`
-                         FROM `IndividualSpectra`
-                         WHERE maxMass < 6000",
+                         FROM `individual_spectra`
+                         WHERE max_mass < 6000",
                             .con = checkedPool)
     
   }

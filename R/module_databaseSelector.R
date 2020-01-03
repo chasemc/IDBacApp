@@ -77,7 +77,7 @@ databaseSelector_server <- function(input,
                          filePath = sqlDirectory$sqlDirectory)[[1]]
     
     
-    q <- c("IndividualSpectra",
+    q <- c("individual_spectra",
            "xml",
            "metaData",
            "version" )

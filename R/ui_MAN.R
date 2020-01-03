@@ -20,8 +20,8 @@ ui_smallMolMan <-  function(){
                                                                     align = "center"),
                                                                   div(align = "center",
                                                                       IDBacApp::peakRetentionSettings_UI("smallMirror",
-                                                                                                         minMass = 200, 
-                                                                                                         maxMass = 2000)
+                                                                                                         min_mass = 200, 
+                                                                                                         max_mass = 2000)
                                                                   )
                                         )),
                    uiOutput("matrixSelector"),

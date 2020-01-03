@@ -51,16 +51,16 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
 
   ## obligate HPC
   metaData$hpcLimits <-
-    c(minMass=.grepAcquDoubleValue("##\\$HPClBLo=", acquLines),
-      maxMass=.grepAcquDoubleValue("##\\$HPClBHi=", acquLines))
+    c(min_mass=.grepAcquDoubleValue("##\\$HPClBLo=", acquLines),
+      max_mass=.grepAcquDoubleValue("##\\$HPClBHi=", acquLines))
   metaData$hpcOrder <- as.double(.grepAcquValue("##\\$HPClOrd=", acquLines))
   metaData$hpcUse <-
     as.logical(.grepAcquValue("##\\$HPClUse=", acquLines) == "yes")
 
   ## was HPC involved?  metaData$hpcUse seems to be always true
   isHPCused <- isTRUE(metaData$hpcUse &&
-                        metaData$hpcLimits["maxMass"] > 0L &&
-                        metaData$hpcLimits["minMass"] > 0L &&
+                        metaData$hpcLimits["max_mass"] > 0L &&
+                        metaData$hpcLimits["min_mass"] > 0L &&
                         metaData$hpcOrder > 0L)
 
   if (isHPCused) {

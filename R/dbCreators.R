@@ -225,7 +225,7 @@ createSpectraSQL <- function(mzML_con,
   
   # Create tables in DB if they don't exist ---------------------------------
   
-  if (!pool::dbExistsTable(userDBCon, "IndividualSpectra")) {
+  if (!pool::dbExistsTable(userDBCon, "individual_spectra")) {
     pool::poolWithTransaction(
       pool = userDBCon,
       func = function(conn){
@@ -294,19 +294,19 @@ insertIntoMassTable <- function(env,
     pool = userDBCon,
     func = function(conn){
       
-      if (length(env$spectrumMassHash) != length(env$massVector)) {
+      if (length(env$spectrum_mass_hash) != length(env$massVector)) {
         stop("Error in IDBacApp::insertIntoMassTable(): IDBacApp::processXMLIndSpectra() provided
-                    spectrumMassHash and massVector variables with different lengths")
+                    spectrum_mass_hash and massVector variables with different lengths")
       } else { 
         query <- DBI::dbSendStatement(conn, 
                                       "INSERT INTO 'massTable'(
-                              'spectrumMassHash',
+                              'spectrum_mass_hash',
                               'massVector')
                               VALUES (
-                              $spectrumMassHash,
+                              $spectrum_mass_hash,
                               $massVector);")
         
-        DBI::dbBind(query, list(spectrumMassHash = env$spectrumMassHash,
+        DBI::dbBind(query, list(spectrum_mass_hash = env$spectrum_mass_hash,
                                 massVector = env$massVector)
         )
         
@@ -349,15 +349,15 @@ insertIntoIndividualSpectra <- function(env,
                         paste0(names(temp),"=",temp, collapse = ", ")))
       } else { 
         query <- DBI::dbSendStatement(conn, 
-                                      "INSERT INTO 'IndividualSpectra'(
-                                  'spectrumMassHash',
-                                  'spectrumIntensityHash',
+                                      "INSERT INTO 'individual_spectra'(
+                                  'spectrum_mass_hash',
+                                  'spectrum_intensity_hash',
                                   'xml_hash',
                                   'strain_id',
-                                  'peakMatrix',
-                                  'spectrumIntensity',
-                                  'maxMass',
-                                  'minMass',
+                                  'peak_matrix',
+                                  'spectrum_intensity',
+                                  'max_mass',
+                                  'min_mass',
                                   'ignore',
                                   'number',
                                   'timeDelay',
@@ -392,14 +392,14 @@ insertIntoIndividualSpectra <- function(env,
                                   'targetIdString',
                                   'targetSerialNumber',
                                   'targetTypeNumber')
-                                  VALUES ($spectrumMassHash,
-                                  $spectrumIntensityHash,
+                                  VALUES ($spectrum_mass_hash,
+                                  $spectrum_intensity_hash,
                                   $xml_hash,
                                   $strain_id,
-                                  $peakMatrix,
-                                  $spectrumIntensity,
-                                  $maxMass,
-                                  $minMass,
+                                  $peak_matrix,
+                                  $spectrum_intensity,
+                                  $max_mass,
+                                  $min_mass,
                                   $ignore,
                                   $number,
                                   $timeDelay,
@@ -522,14 +522,14 @@ insertIntoIndividualSpectra <- function(env,
         
         DBI::dbBind(query, 
                     c(
-                      list(spectrumMassHash = env$spectrumMassHash,
-                           spectrumIntensityHash = env$spectrumIntensityHash,
+                      list(spectrum_mass_hash = env$spectrum_mass_hash,
+                           spectrum_intensity_hash = env$spectrum_intensity_hash,
                            xml_hash = mzMLHash,
                            strain_id = sampleID,
-                           peakMatrix = env$peakMatrix,
-                           spectrumIntensity = env$spectrumIntensity,
-                           minMass = env$minMass,
-                           maxMass = env$maxMass,
+                           peak_matrix = env$peak_matrix,
+                           spectrum_intensity = env$spectrum_intensity,
+                           min_mass = env$min_mass,
+                           max_mass = env$max_mass,
                            ignore = ignore
                       ),
                       acquisitionInfo

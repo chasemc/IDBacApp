@@ -155,12 +155,12 @@ app_server <- function(input, output, session) {
                  pool <- pool::poolCheckout(workingDB$pool())
                  
                  p <- DBI::dbGetQuery(pool, glue::glue("SELECT 1 
-                                                       FROM IndividualSpectra 
-                                                       WHERE maxMass > {smallProteinMass}
+                                                       FROM individual_spectra 
+                                                       WHERE max_mass > {smallProteinMass}
                                                        LIMIT 1;"))
                  s <- DBI::dbGetQuery(pool, glue::glue("SELECT 1 
-                                                       FROM IndividualSpectra 
-                                                       WHERE maxMass > {smallProteinMass}
+                                                       FROM individual_spectra 
+                                                       WHERE max_mass > {smallProteinMass}
                                                        LIMIT 1;"))
                  
                  p <- nrow(p)
@@ -583,8 +583,8 @@ app_server <- function(input, output, session) {
     # retrieve all strain_ids in db that have small molecule spectra
     
     sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT strain_id
-                                                          FROM IndividualSpectra 
-                                                          WHERE maxMass < {smallProteinMass}"))
+                                                          FROM individual_spectra 
+                                                          WHERE max_mass < {smallProteinMass}"))
     
     pool::poolReturn(checkedPool)
     

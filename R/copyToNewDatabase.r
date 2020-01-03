@@ -52,7 +52,7 @@ copyToNewDatabase <- function(existingDBPool,
                         IDBacApp::sql_CreatemassTable(sqlConnection = newDBconn)
                         
                         
-                        # Setup New IndividualSpectra ---------------------------------------------
+                        # Setup New individual_spectra ---------------------------------------------
 
                         IDBacApp::sql_CreateIndividualSpectra(sqlConnection = newDBconn)
                         
@@ -99,9 +99,9 @@ copyToNewDatabase <- function(existingDBPool,
                         }
                         
                         state <- DBI::dbSendStatement(existingDBconn, 
-                                                      "INSERT INTO newDB.IndividualSpectra
+                                                      "INSERT INTO newDB.individual_spectra
                                                       SELECT *
-                                                      FROM main.IndividualSpectra
+                                                      FROM main.individual_spectra
                                                       WHERE (strain_id = ?)")
                         DBI::dbBind(state, list(sampleIDs))
                         warning(state@sql)
@@ -116,7 +116,7 @@ copyToNewDatabase <- function(existingDBPool,
                         }
                         state <- DBI::dbSendQuery(existingDBconn, 
                                                   "SELECT DISTINCT xml_hash
-                                                      FROM main.IndividualSpectra
+                                                      FROM main.individual_spectra
                                                       WHERE (strain_id = ?)")
                         DBI::dbBind(state, list(sampleIDs))
                         res <- DBI::fetch(state)
@@ -140,8 +140,8 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         
                         state <- DBI::dbSendQuery(existingDBconn, 
-                                                  "SELECT DISTINCT spectrumMassHash
-                                                      FROM main.IndividualSpectra
+                                                  "SELECT DISTINCT spectrum_mass_hash
+                                                      FROM main.individual_spectra
                                                       WHERE (strain_id = ?)")
                         DBI::dbBind(state, list(sampleIDs))
                         res <- DBI::fetch(state)
@@ -151,7 +151,7 @@ copyToNewDatabase <- function(existingDBPool,
                                                       "INSERT INTO newDB.massTable
                                                       SELECT *
                                                       FROM main.massTable
-                                                      WHERE (spectrumMassHash = ?)")
+                                                      WHERE (spectrum_mass_hash = ?)")
                         
                         DBI::dbBind(state, list(res[ , 1]))
                         warning(state@sql)

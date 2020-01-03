@@ -57,28 +57,28 @@ sqlTableArchitecture <- function(numberScans){
   sqlDataFrame$xml <- temp
   
   
-  sqlDataFrame$IndividualSpectra <- c("spectrumMassHash",
-                                      "spectrumIntensityHash",
+  sqlDataFrame$individual_spectra <- c("spectrum_mass_hash",
+                                      "spectrum_intensity_hash",
                                       "xml_hash",
                                       "strain_id",
-                                      "MassError",
-                                      "AcquisitionDate",
-                                      "peakMatrix",
-                                      "spectrumIntensity",
-                                      "maxMass",
-                                      "minMass",
+                                      "ppm_error",
+                                      "acquisition_date",
+                                      "peak_matrix",
+                                      "spectrum_intensity",
+                                      "max_mass",
+                                      "min_mass",
                                       "ignore")
   
   
   temp <- as.data.frame(matrix(nrow = numberScans,
-                               ncol = length(sqlDataFrame$IndividualSpectra)))
+                               ncol = length(sqlDataFrame$individual_spectra)))
   
-  dimnames(temp)[[2]] <- sqlDataFrame$IndividualSpectra
-  sqlDataFrame$IndividualSpectra <- temp
+  dimnames(temp)[[2]] <- sqlDataFrame$individual_spectra
+  sqlDataFrame$individual_spectra <- temp
   
   
   
-  sqlDataFrame$massTable <- c("spectrumMassHash",
+  sqlDataFrame$massTable <- c("spectrum_mass_hash",
                               "massVector")
   
   temp <- as.data.frame(matrix(nrow = numberScans,
@@ -96,7 +96,7 @@ sqlTableArchitecture <- function(numberScans){
 
 
 
-#' SQL code to create the SQLite IndividualSpectra table
+#' SQL code to create the SQLite individual_spectra table
 #'
 #' @param sqlConnection sqlConnection
 #'
@@ -104,18 +104,18 @@ sqlTableArchitecture <- function(numberScans){
 #' @export
 #'
 sql_CreateIndividualSpectra <- function(sqlConnection){
-  if (!DBI::dbExistsTable(sqlConnection, "IndividualSpectra")) {
+  if (!DBI::dbExistsTable(sqlConnection, "individual_spectra")) {
     
     a <- DBI::dbSendStatement(sqlConnection, 
-                              "CREATE TABLE `IndividualSpectra` (
-  spectrumMassHash                     TEXT,
-  spectrumIntensityHash                TEXT,
+                              "CREATE TABLE `individual_spectra` (
+  spectrum_mass_hash                     TEXT,
+  spectrum_intensity_hash                TEXT,
   xml_hash                              TEXT,
   strain_id                            TEXT,
-  peakMatrix                           BLOB,
-  spectrumIntensity                    BLOB,
-  maxMass                              INTEGER,
-  minMass                              INTEGER,
+  peak_matrix                           BLOB,
+  spectrum_intensity                    BLOB,
+  max_mass                              INTEGER,
+  min_mass                              INTEGER,
   ignore                               INTEGER,
   number                               INTEGER,
   timeDelay                            INTEGER,
@@ -151,14 +151,14 @@ sql_CreateIndividualSpectra <- function(sqlConnection){
   targetSerialNumber                   TEXT,
   targetTypeNumber                     TEXT,
   
-  UNIQUE(strain_id, spectrumMassHash, spectrumIntensityHash) ON CONFLICT IGNORE
+  UNIQUE(strain_id, spectrum_mass_hash, spectrum_intensity_hash) ON CONFLICT IGNORE
   );"
     )
     
     
     DBI::dbClearResult(a)
   } else {
-    warning("IndividualSpectra table already exists")
+    warning("individual_spectra table already exists")
   }
 }
 
@@ -179,10 +179,10 @@ sql_CreatemassTable <- function(sqlConnection){
     
     a <- DBI::dbSendStatement(sqlConnection,
                               "CREATE TABLE `massTable` (
-  spectrumMassHash    TEXT,
+  spectrum_mass_hash    TEXT,
   massVector          BLOB,
  
-  UNIQUE(spectrumMassHash) ON CONFLICT IGNORE
+  UNIQUE(spectrum_mass_hash) ON CONFLICT IGNORE
   );"
     )
     DBI::dbClearResult(a)

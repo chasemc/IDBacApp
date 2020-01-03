@@ -21,46 +21,46 @@ processXMLIndSpectra <- function(spectraImport,
                                                              compression = 0)
                            })
   
-  env$maxMass <- unlist(lapply(spectraImport[index], 
+  env$max_mass <- unlist(lapply(spectraImport[index], 
                     function(x){
                       as.integer(max(x@mass))
                     }))
   
-  env$minMass <- unlist(lapply(spectraImport[index], 
+  env$min_mass <- unlist(lapply(spectraImport[index], 
                     function(x){
                       as.integer(min(x@mass))
                     }))
   
   # List of whole-spectrum hashes
-  env$spectrumMassHash <- unlist(lapply(env$massVector, 
+  env$spectrum_mass_hash <- unlist(lapply(env$massVector, 
                                  function(x){
                                    IDBacApp::hashR(x)
                                  }))
   
-  env$spectrumIntensity <- lapply(spectraImport[index], 
+  env$spectrum_intensity <- lapply(spectraImport[index], 
                                   function(x){
                                     x <- IDBacApp::serial(x@intensity)
                                     IDBacApp::chartoRawtoCompressed(x,
                                                                     compression = 0)
                                   })
   
-  env$spectrumIntensityHash <- unlist(lapply(env$spectrumIntensity, 
+  env$spectrum_intensity_hash <- unlist(lapply(env$spectrum_intensity, 
                                       function(x){
                                         IDBacApp::hashR(x)
                                       }))
   
   
   if (smallOrProtein == "small") {
-    env$peakMatrix <- IDBacApp::processSmallMolSpectra(spectraImport[index])
+    env$peak_matrix <- IDBacApp::processSmallMolSpectra(spectraImport[index])
   } else if (smallOrProtein == "protein") {
-    env$peakMatrix <- IDBacApp::processProteinSpectra(spectraImport[index])
+    env$peak_matrix <- IDBacApp::processProteinSpectra(spectraImport[index])
   }
   
-  if (!MALDIquant::isMassPeaksList(env$peakMatrix)) {
-    env$peakMatrix <- list(env$peakMatrix)
+  if (!MALDIquant::isMassPeaksList(env$peak_matrix)) {
+    env$peak_matrix <- list(env$peak_matrix)
   }
   
-  env$peakMatrix <- lapply(env$peakMatrix, function(x){
+  env$peak_matrix <- lapply(env$peak_matrix, function(x){
     # note: names aren't transferred to JSON
     list(mass = x@mass, 
           intensity = x@intensity, 
@@ -68,7 +68,7 @@ processXMLIndSpectra <- function(spectraImport,
     
   })
   
-  env$peakMatrix <- unlist(lapply(env$peakMatrix, 
+  env$peak_matrix <- unlist(lapply(env$peak_matrix, 
                            function(x)
                              as.character(IDBacApp::serial(x))))
   
