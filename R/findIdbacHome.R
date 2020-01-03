@@ -10,7 +10,7 @@ findIdbacHome <- function(){
     suppressWarnings(dir.create(temp))
     
     temp <- file.path(temp,
-                      "IDBac_experiments")
+                      "idbac_experiments")
     
     suppressWarnings(dir.create(temp))
     
@@ -22,7 +22,8 @@ findIdbacHome <- function(){
     return(temp)
   } else {
     temp <- as.list(Sys.getenv())$HOME
-    
+    temp <- file.path(temp,
+                      "Documents")
     if (!dir.exists(temp)) {
       temp <- as.list(Sys.getenv())$LOCALAPPDATA
       if (!dir.exists(temp) || length(temp) > 1) {
@@ -30,10 +31,10 @@ findIdbacHome <- function(){
       }
     }
     
-    temp <- file.path(temp, "IDBac_experiments", fsep = "/")
+    temp <- file.path(temp, "idbac_experiments", fsep = "/")
     
     if (!dir.exists(temp)) {
-      message(paste0("Creating directory 'IDBac_experiments' in ", dirname(temp)))
+      message(paste0("Creating directory 'idbac_experiments' in ", dirname(temp)))
       dir.create(temp)
     }
     
