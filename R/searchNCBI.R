@@ -62,10 +62,10 @@
 #   awe$kingdom[!ind] <- taxo$superkingdom
 #   awe$phylum[!ind] <- taxo$phylum
 #   awe$class[!ind] <- taxo$class
-#   awe$Order[!ind] <- taxo$order
-#   awe$Family[!ind] <- taxo$family
-#   awe$Genus[!ind] <- taxo$genus
-#   awe$Species[!ind] <- taxo$species
+#   awe$order[!ind] <- taxo$order
+#   awe$family[!ind] <- taxo$family
+#   awe$genus[!ind] <- taxo$genus
+#   awe$species[!ind] <- taxo$species
 #   awe$dna_16S[!ind] <- unlist(dna_16s)
 #   
 #   # Update reactive value

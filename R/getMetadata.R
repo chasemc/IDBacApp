@@ -4,7 +4,7 @@
 #' Extract a metadata column 
 #'
 #' @param strainID strain_id
-#' @param metadataColumn metadata column name ('Species')
+#' @param metadataColumn metadata column name ('species')
 #' @param pool pool connection
 #'
 #' @return data.frame with two columns 'strain_id' and  whatever metadataColumn is requested; rows filtered by ID
