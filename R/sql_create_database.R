@@ -30,30 +30,24 @@ idbac_create <- function(fileName,
   names(filePaths) <- tools::file_path_sans_ext(fileName)
   
   
-  con <- pool::dbPool(drv = RSQLite::SQLite(),
+  conn <- pool::dbPool(drv = RSQLite::SQLite(),
                       dbname = base::file.path(filePath, fileName))
   
   
   
+  # Add tables
+  sql_create_spectra_table(conn)
+  sql_create_massindex_table(conn)
+  sql_create_metadata_table(conn)
+  sql_create_xml_table(conn)
+  sql_create_version_table(conn)
+  sql_create_locale_table(conn)
+  # Fill IDBac version 
+  sqlCreate_version(conn)
+  # Fill locale 
+  insertLocale(conn)
   
-  
-  
-  
-  
-  
-  
-  
-  tried <- try(DBI::dbListTables(con),
-               silent = TRUE)
-  
-  
-  
-  
-  
-  
-  
-  req(class(tried) != "try-error")
-  
+  #TODO: add check
   
 }
 
