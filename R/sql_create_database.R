@@ -62,6 +62,8 @@ idbac_create <- function(fileName,
   
   #TODO: add check
   
-  return(base::file.path(filePath, fileName))
+  return(normalizePath(base::file.path(filePath, fileName), 
+                       winslash = "/",
+                       mustWork = F))
 }
 

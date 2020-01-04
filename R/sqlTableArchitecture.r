@@ -295,8 +295,8 @@ sql_create_version_table <- function(sqlConnection){
     
     a <- DBI::dbSendStatement(sqlConnection,
                               "CREATE TABLE version (
-  version         INTEGER,
-  UNIQUE(version) ON CONFLICT IGNORE
+  idbac_version     TEXT,
+  r_version         TEXT
     );"
     )
     
@@ -322,8 +322,7 @@ sql_create_locale_table <- function(sqlConnection){
     
     a <- DBI::dbSendStatement(sqlConnection,
                               "CREATE TABLE locale (
-  locale         TEXT,
-  UNIQUE(locale) ON CONFLICT IGNORE
+  locale         TEXT
     );"
     )
     

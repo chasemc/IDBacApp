@@ -16,17 +16,15 @@ sql_fill_version_table <- function(userDBCon) {
     pool = userDBCon,
     func = function(conn){
       
-      if (!DBI::dbExistsTable(conn, "version")) {
-        
-        ver <- cbind.data.frame(idbac_version = as.character(packageVersion("IDBacApp")), 
-                                r_version = as.character(IDBacApp::serial(sessionInfo()$R.version)))
-        # Add version table
-        DBI::dbWriteTable(conn = conn,
-                          name = "version", # SQLite table to insert into
-                          ver, # Insert single row into DB
-                          append = TRUE, # Append to existing table
-                          overwrite = FALSE) # Do not overwrite
-      }
+      ver <- cbind.data.frame(idbac_version = as.character(packageVersion("IDBacApp")), 
+                              r_version = as.character(IDBacApp::serial(sessionInfo()$R.version)))
+      # Add version table
+      DBI::dbWriteTable(conn = conn,
+                        name = "version", # SQLite table to insert into
+                        ver, # Insert single row into DB
+                        append = TRUE, # Append to existing table
+                        overwrite = FALSE) # Do not overwrite
+      
     })
 }
 
@@ -47,19 +45,16 @@ sql_fill_locale_table <- function(userDBCon) {
     pool = userDBCon,
     func = function(conn){
       
-      if (!DBI::dbExistsTable(conn, "locale")) {
-        
-        locale <- Sys.getlocale(category = "LC_ALL")
-        locale <- as.character(locale)[[1]]
-        locale <- as.data.frame(locale)
-        
-        # Add version table
-        DBI::dbWriteTable(conn = conn,
-                          name = "locale", # SQLite table to insert into
-                          locale, # Insert single row into DB
-                          append = TRUE, # Append to existing table
-                          overwrite = FALSE) # Do not overwrite
-      }
+      locale <- Sys.getlocale(category = "LC_ALL")
+      locale <- as.character(locale)[[1]]
+      locale <- as.data.frame(locale)
+      
+      # Add version table
+      DBI::dbWriteTable(conn = conn,
+                        name = "locale", # SQLite table to insert into
+                        locale, # Insert single row into DB
+                        append = TRUE, # Append to existing table
+                        overwrite = FALSE) # Do not overwrite
       
     })
 }  
