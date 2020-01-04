@@ -83,7 +83,7 @@ transferToNewDB_server <- function(input,
                  
                  newDBName <- gsub(" ",
                                    "",
-                                   IDBacApp::path_sanitize(input$newDBPath))
+                                   IDBacApp::sanitize(input$newDBPath))
                  
                  req(newDBName != "")
                  
@@ -144,11 +144,11 @@ transferToNewDB_server <- function(input,
                  
                  newDBName <- gsub(" ",
                                    "",
-                                   IDBacApp::path_sanitize(input$newDBPath))
+                                   IDBacApp::sanitize(input$newDBPath))
                  
                  req(newDBName != "")
                  
-                 newCheckedPool <- IDBacApp::createPool(newDBName, 
+                 newCheckedPool <- IDBacApp::idbac_connect(newDBName, 
                                                         sqlDirectory$sqlDirectory)
                  
                  shiny::withProgress(message = 'Copying data to new database',

@@ -82,7 +82,7 @@ convertOneBruker_Server <- function(input,
   
   sanitizedNewExperimentName <- reactive({
     
-    IDBacApp::path_sanitize(input$newExperimentName)
+    IDBacApp::sanitize(input$newExperimentName)
     
   })
   

@@ -60,36 +60,38 @@ databaseSelector_server <- function(input,
     filePaths[which(fileNames == input$selectExperiment)]
     
   })
- 
-   userDBCon <- reactive({
+  
+  userDBCon <- reactive({
     
     req(!is.null(input$selectExperiment))
     req(nchar(input$selectExperiment) > 0)
     req(input$selectExperiment != "None")
     validate(need(length(input$selectExperiment) == length(sqlDirectory$sqlDirectory), 
-                  "databaseTabServer: userDBCon, createPool inputs are different lengths."))
+                  "databaseTabServer: userDBCon, idbac_connect inputs are different lengths."))
     
     # pool will create a new sqlite if one doesn't exist, so let's stop that from happening here:
     req(file.exists(file.path(sqlDirectory$sqlDirectory, 
                               paste0(input$selectExperiment, ".sqlite"))))
     
-    z <- IDBacApp::createPool(fileName = input$selectExperiment,
-                         filePath = sqlDirectory$sqlDirectory)[[1]]
+    z <- IDBacApp::idbac_connect(fileName = input$selectExperiment,
+                              filePath = sqlDirectory$sqlDirectory)[[1]]
     
     
-    q <- c("spectra",
-           "xml",
+    q <- c("xml",
+           "locale",
+           "mass_index",
            "metadata",
-           "version" )
+           "spectra",
+           "version")
     
-    req(all(q %in%  DBI::dbListTables(z)))
+    req(all(q %in% tolower(DBI::dbListTables(z))))
     
     return(z)
     
     
     
-   })  
-   
-   return(list(userDBCon = userDBCon,
-               inputs = input))
+  })  
+  
+  return(list(userDBCon = userDBCon,
+              inputs = input))
 }

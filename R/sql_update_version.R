@@ -1,6 +1,6 @@
 # 
 # 
-# old_db_con <- IDBacApp::createPool("hiya",
+# old_db_con <- IDBacApp::idbac_connect("hiya",
 #                                    "C:/Users/CMC/IDBac_experiments")[[1]]
 # 
 # new_db_con <- IDBacApp::createNewSQLITEdb("hiya_new",

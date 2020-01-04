@@ -9,7 +9,7 @@ sqlTableArchitecture <- function(numberScans){
   
   sqlDataFrame <- new.env(parent = parent.frame())
   
-  sqlDataFrame$version <- data.frame(version = "1")
+  sqlDataFrame$version <- data.frame(version = "2")
   
   sqlDataFrame$metadata <- c("strain_id",
                              "genbank_accession",
@@ -58,16 +58,16 @@ sqlTableArchitecture <- function(numberScans){
   
   
   sqlDataFrame$spectra <- c("spectrum_mass_hash",
-                                      "spectrum_intensity_hash",
-                                      "xml_hash",
-                                      "strain_id",
-                                      "ppm_error",
-                                      "acquisition_date",
-                                      "peak_matrix",
-                                      "spectrum_intensity",
-                                      "max_mass",
-                                      "min_mass",
-                                      "ignore")
+                            "spectrum_intensity_hash",
+                            "xml_hash",
+                            "strain_id",
+                            "ppm_error",
+                            "acquisition_date",
+                            "peak_matrix",
+                            "spectrum_intensity",
+                            "max_mass",
+                            "min_mass",
+                            "ignore")
   
   
   temp <- as.data.frame(matrix(nrow = numberScans,
@@ -79,7 +79,7 @@ sqlTableArchitecture <- function(numberScans){
   
   
   sqlDataFrame$mass_index <- c("spectrum_mass_hash",
-                              "mass_vector")
+                               "mass_vector")
   
   temp <- as.data.frame(matrix(nrow = numberScans,
                                ncol = length(sqlDataFrame$mass_index)))

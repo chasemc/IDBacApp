@@ -45,7 +45,7 @@ GROUP BY strain_id;
                           
                           counter <- counter - inc
                           ids <- chunk$strain_id
-                          ids <- base::make.unique(path_sanitize(ids))
+                          ids <- base::make.unique(sanitize(ids))
                           ids <- gsub("\\.",
                                       "_",
                                       ids)

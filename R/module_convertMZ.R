@@ -74,7 +74,7 @@ convertMZ_Server <-  function(input,
   
   
   output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    a <- gsub(" ", "", IDBacApp::sanitize(input$newExperimentName))
     
     if (a == "") {
       "Once entered, the filename-friendly version of the entered name will appear here once. \n
@@ -119,7 +119,7 @@ convertMZ_Server <-  function(input,
   
   #make sure the name is ok as a file name
   sanity <- reactive({
-    a <- IDBacApp::path_sanitize(input$newExperimentName)
+    a <- IDBacApp::sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   

@@ -21,10 +21,10 @@
 #' @examples
 #' # potentially unsafe string
 #' str <- "~/.\u0001ssh/authorized_keys"
-#' path_sanitize(str)
+#' sanitize(str)
 #'
-#' path_sanitize("..")
-path_sanitize <- function(filename, replacement = "") {
+#' sanitize("..")
+sanitize <- function(filename, replacement = "") {
   illegal <- "[/\\?<>\\:*|\":]"
   control <- "[[:cntrl:]]"
   reserved <- "^[.]+$"
@@ -45,9 +45,9 @@ path_sanitize <- function(filename, replacement = "") {
   
   # TODO: this substr should really be unicode aware, so it doesn't chop a
   # multibyte code point in half.
-  filename <- substr(filename, 1, 255)
+  filename <- substr(filename, 1, 50)
   if (replacement == "") {
     return(filename)
   }
-  path_sanitize(filename, "")
+  sanitize(filename, "")
 }

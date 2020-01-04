@@ -3,7 +3,8 @@
 \name{createPool}
 \alias{createPool}
 \title{Create a pool connecton, given file names and a path
-If there is no existing database by that name, create one.}
+   If there is no existing database by that name, create one.
+   createPool was the old name, kept to not break scripts}
 \usage{
 createPool(fileName, filePath)
 }
