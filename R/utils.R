@@ -134,20 +134,20 @@ getOS <- function(test = NULL){
 #'
 #' @param recursive search directories recursively? T/F
 #' @param full full.names? T/F
-#' @param inputPath path to search
+#' @param path path to search
 #'
 #' @return file paths of found files
 #' @export
 #'
-findmz <- function(inputPath,
-                   recursive = FALSE,
-                   full = FALSE){
+find_mz_files <- function(path,
+                          recursive = FALSE,
+                          full = FALSE){
   # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
-  return(list.files(inputPath,
+  return(list.files(path,
                     recursive = recursive,
                     full.names = full,
                     pattern = "\\.mz"))
-  setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+  #setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
   
 }
 
@@ -236,9 +236,9 @@ poolToCon <- function(con) {
     return(pool::poolCheckout(con))
     
   } else  if ("SQLiteConnection" %in% type) {
-   
+    
     return(con)
-     
+    
   } else {
     
     stop("Expected either a pool or SQLite object.")

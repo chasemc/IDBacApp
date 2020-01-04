@@ -172,7 +172,7 @@ convertMicrotyper_Server <- function(input,
                                                         smallMolPaths = smallMolFiles(),
                                                         exportDirectory = tempMZDir)
                  print("5")
-                 IDBacApp::processMZML(mzFilePaths = keys$mzFilePaths,
+                 IDBacApp::process_mzml(mzFilePaths = keys$mzFilePaths,
                                        sampleIds = keys$sampleIds,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = input$newExperimentName,

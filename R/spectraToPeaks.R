@@ -51,21 +51,24 @@ processSmallMolSpectra <- function(input){
 #'
 processProteinSpectra <- function(input){
   
-  
-  peaks <- MALDIquant::transformIntensity(input, 
-                                          method = "sqrt") 
+  # No way to turn off warnings in MALDIquant:::.replaceNegativeIntensityValues()
+  suppressWarnings(
+    peaks <- MALDIquant::transformIntensity(input, 
+                                            method = "sqrt") 
+  )
   peaks <- MALDIquant::smoothIntensity(peaks,
                                        method = "SavitzkyGolay", 
                                        halfWindowSize = 20) 
   peaks <- MALDIquant::removeBaseline(peaks,
                                       method = "TopHat") 
   peaks <- MALDIquant::detectPeaks(peaks, 
-                          method = "MAD", 
-                          halfWindowSize = 20, 
-                          SNR = 3)
+                                   method = "MAD", 
+                                   halfWindowSize = 20, 
+                                   SNR = 3)
   lapply(peaks, 
          function(x){
-           x@intensity <- x@intensity * (100/max(x@intensity))
+           x@intensity <- x@intensity * (100 / max(x@intensity))
            x
          })
 }
+

@@ -94,7 +94,7 @@ convertMZ_Server <-  function(input,
       folders <- NULL
       
       # Get the folders contained within the chosen folder. Timer was taken out.
-      foldersInFolder <- tryCatch(IDBacApp::findmz(mzmlRawFilesLocation(),
+      foldersInFolder <- tryCatch(IDBacApp::find_mz_files(mzmlRawFilesLocation(),
                                                    recursive = TRUE,
                                                    full = FALSE),
                                   error = function(x) paste("Timed out"),
@@ -132,11 +132,11 @@ convertMZ_Server <-  function(input,
     
     IDBacApp::popup3()
     
-    mzFilePaths <- IDBacApp::findmz(mzmlRawFilesLocation(),
+    mzFilePaths <- IDBacApp::find_mz_files(mzmlRawFilesLocation(),
                                     recursive = TRUE,
                                     full = TRUE)
     
-    IDBacApp::processMZML(mzFilePaths = mzFilePaths,
+    IDBacApp::process_mzml(mzFilePaths = mzFilePaths,
                           sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
                           sqlDirectory = sqlDirectory$sqlDirectory,
                           newExperimentName = sanity(),

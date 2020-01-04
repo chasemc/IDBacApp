@@ -276,7 +276,7 @@ convertOneBruker_Server <- function(input,
                  
                  IDBacApp::popup3()
                  
-                 IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
+                 IDBacApp::process_mzml(mzFilePaths = forProcessing$mzFile,
                                        sampleIds = forProcessing$sampleID,
                                        sqlDirectory = sqlDirectory$sqlDirectory,
                                        newExperimentName = sanitizedNewExperimentName(),

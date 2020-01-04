@@ -1,26 +1,24 @@
 
-#' processMZML
+#' process_mzml
 #'
 #' @param mzFilePaths file paths of the mzml files
 #' @param sampleIds sampleIds that are in the same order as the paths
-#' @param sqlDirectory sqlDirectory 
-#' @param newExperimentName newExperimentName 
+#' @param idbac_pool idbac single pool, not a list of pools
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return Nothing direct, creates a sqlite database
 #' @export
 #'
-processMZML <- function(mzFilePaths,
-                        sampleIds,
-                        sqlDirectory,
-                        newExperimentName,
-                        acquisitionInfo){
+process_mzml <- function(mzFilePaths,
+                         sampleIds,
+                         idbac_pool,
+                         acquisitionInfo){
   
   
+#TODO: fix idbac by moving this outside   
+  #idbac_pool <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
+   #                                         sqlDirectory = sqlDirectory)[[1]]
   
-  userDBPool <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
-                                        sqlDirectory = sqlDirectory)[[1]]
-
   progLength <- base::length(mzFilePaths)
   
   # withProgress doesn't currently work outside shiny
@@ -38,7 +36,7 @@ processMZML <- function(mzFilePaths,
                      
                      IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                                          sampleID = sampleIds[[i]],
-                                                         userDBCon = userDBPool,
+                                                         userDBCon = idbac_pool,
                                                          acquisitionInfo = acquisitionInfo[[i]]) # pool connection
                    }
                  })
@@ -51,12 +49,9 @@ processMZML <- function(mzFilePaths,
       
       IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                           sampleID = sampleIds[[i]],
-                                          userDBCon = userDBPool,
+                                          userDBCon = idbac_pool,
                                           acquisitionInfo = acquisitionInfo[[i]]) # pool connection
     }
   }
-  
-  pool::poolClose(userDBPool)
-  
 }
 
