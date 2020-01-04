@@ -1,5 +1,13 @@
 
 
+#' Title
+#'
+#' @param fileName file name for new IDBac database
+#' @param filePath path where database will be created
+#'
+#' @return path to new database
+#' @export
+#'
 idbac_create <- function(fileName,
                       filePath){
   
@@ -30,10 +38,10 @@ idbac_create <- function(fileName,
   names(filePaths) <- tools::file_path_sans_ext(fileName)
   
   
-  conn <- pool::dbPool(drv = RSQLite::SQLite(),
+  pool <- pool::dbPool(drv = RSQLite::SQLite(),
                       dbname = base::file.path(filePath, fileName))
   
-  
+  conn <- pool::poolCheckout(pool)
   
   # Add tables
   sql_create_spectra_table(conn)
@@ -42,12 +50,18 @@ idbac_create <- function(fileName,
   sql_create_xml_table(conn)
   sql_create_version_table(conn)
   sql_create_locale_table(conn)
+  
+  pool::poolReturn(conn)
+  
   # Fill IDBac version 
-  sqlCreate_version(conn)
+  sql_fill_version_table(pool)
   # Fill locale 
-  insertLocale(conn)
+  sql_fill_locale_table(pool)
+  
+  pool::poolClose(pool)
   
   #TODO: add check
   
+  return(base::file.path(filePath, fileName))
 }
 

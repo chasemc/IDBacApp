@@ -10,7 +10,7 @@
 #' @return NA
 #' @export
 #'
-sqlCreate_version <- function(userDBCon) {
+sql_fill_version_table <- function(userDBCon) {
   
   pool::poolWithTransaction(
     pool = userDBCon,
@@ -41,7 +41,7 @@ sqlCreate_version <- function(userDBCon) {
 #' @return side effect
 #' @export
 #'
-insertLocale <- function(userDBCon) {
+sql_fill_locale_table <- function(userDBCon) {
   
   pool::poolWithTransaction(
     pool = userDBCon,

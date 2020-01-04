@@ -20,12 +20,12 @@ spectraProcessingFunction <- function(rawDataFilePath,
   
   
   # Isn't currently used, but here to help future-proof
-  IDBacApp::sqlCreate_version(userDBCon = userDBCon)
+  IDBacApp::sql_fill_version_table(userDBCon = userDBCon)
   #----
   
   # Isn't currently used, but here to help future-proof
   # Inserts current locale info 
-  IDBacApp::insertLocale(userDBCon = userDBCon)
+  IDBacApp::sql_fill_locale_table(userDBCon = userDBCon)
   
   # If sample ID doesn't exist, create it in table
   # TODO: userprompt with option to change ID
