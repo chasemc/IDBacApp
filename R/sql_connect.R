@@ -7,7 +7,7 @@
 #' @param filePath path of the location of sqlite database, sans filename
 #'
 #' @return a list of pool connections
-#' @export
+#' @export idbac_connect
 #' 
 createPool <- idbac_connect <- function(fileName,
                                         filePath){
