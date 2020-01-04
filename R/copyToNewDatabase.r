@@ -43,23 +43,23 @@ copyToNewDatabase <- function(existingDBPool,
                         
                         # Setup New xml -----------------------------------------------------------
                         
-                        IDBacApp::sql_CreatexmlTable(sqlConnection = newDBconn)
+                        IDBacApp::sql_create_xml_table(sqlConnection = newDBconn)
                         
                         
                         # Setup New mass_index ---------------------------------------------
                         
                         
-                        IDBacApp::sql_CreatemassTable(sqlConnection = newDBconn)
+                        IDBacApp::sql_create_massindex_table(sqlConnection = newDBconn)
                         
                         
                         # Setup New spectra ---------------------------------------------
 
-                        IDBacApp::sql_CreateIndividualSpectra(sqlConnection = newDBconn)
+                        IDBacApp::sql_create_spectra_table(sqlConnection = newDBconn)
                         
 
                         # Setup version table -----------------------------------------------------
 
-                        IDBacApp::sql_CreateVersionTable(sqlConnection = newDBconn)
+                        IDBacApp::sql_create_version_table(sqlConnection = newDBconn)
                         
 # Copy  -------------------------------------------------------------------
                         # Attach new database to existing database
@@ -235,7 +235,7 @@ copyDB_setupMeta <- function(newDBconn,
   # Below, when setting up the new tables, we need to add the existing columns which may not be present in 
   # the current architecture, and also have the current architecture (ie we can't just copy/paste from the old DB)
   
-  IDBacApp::sql_CreatemetaData(sqlConnection = newDBconn)
+  IDBacApp::sql_create_metadata_table(sqlConnection = newDBconn)
   
   a <- DBI::dbListFields(existingDBconn, "metadata") 
   b <- DBI::dbListFields(newDBconn, "metadata") 

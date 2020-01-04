@@ -90,7 +90,7 @@ createMetaSQL <- function(sampleID,
     func = function(conn){
       
       if (!DBI::dbExistsTable(conn, "metadata")) {
-        IDBacApp::sql_CreatemetaData(conn)
+        IDBacApp::sql_create_metadata_table(conn)
       }  
       
       query <- DBI::dbSendStatement(conn, 
@@ -133,7 +133,7 @@ createXMLSQL <- function(rawDataFilePath,
       mzMLHash <- IDBacApp::hashR(xmlFile)
       
       if (!DBI::dbExistsTable(conn, "xml")) {
-        IDBacApp::sql_CreatexmlTable(conn)
+        IDBacApp::sql_create_xml_table(conn)
       }
       
       
@@ -229,14 +229,14 @@ createSpectraSQL <- function(mzML_con,
     pool::poolWithTransaction(
       pool = userDBCon,
       func = function(conn){
-        IDBacApp::sql_CreateIndividualSpectra(conn)
+        IDBacApp::sql_create_spectra_table(conn)
       })
   }  
   if (!pool::dbExistsTable(userDBCon, "mass_index")) {
     pool::poolWithTransaction(
       pool = userDBCon,
       func = function(conn){
-        IDBacApp::sql_CreatemassTable(conn)
+        IDBacApp::sql_create_massindex_table(conn)
       })
   }
   
