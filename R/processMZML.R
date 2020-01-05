@@ -3,7 +3,7 @@
 #'
 #' @param mzFilePaths file paths of the mzml files
 #' @param sampleIds sampleIds that are in the same order as the paths
-#' @param idbac_pool idbac single pool, not a list of pools
+#' @param idbacPool idbac single pool, not a list of pools
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return Nothing direct, creates a sqlite database
@@ -11,12 +11,12 @@
 #'
 process_mzml <- function(mzFilePaths,
                          sampleIds,
-                         idbac_pool,
+                         idbacPool,
                          acquisitionInfo){
   
   
 #TODO: fix idbac by moving this outside   
-  #idbac_pool <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
+  #idbacPool <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
    #                                         sqlDirectory = sqlDirectory)[[1]]
   
   progLength <- base::length(mzFilePaths)
@@ -36,7 +36,7 @@ process_mzml <- function(mzFilePaths,
                      
                      IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                                          sampleID = sampleIds[[i]],
-                                                         userDBCon = idbac_pool,
+                                                         userDBCon = idbacPool,
                                                          acquisitionInfo = acquisitionInfo[[i]]) # pool connection
                    }
                  })
@@ -49,7 +49,7 @@ process_mzml <- function(mzFilePaths,
       
       IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                           sampleID = sampleIds[[i]],
-                                          userDBCon = idbac_pool,
+                                          userDBCon = idbacPool,
                                           acquisitionInfo = acquisitionInfo[[i]]) # pool connection
     }
   }
