@@ -36,6 +36,10 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   # need(!is.null(sampleID1))
   # need(!is.null(sampleID2))
   
+  mirrorPlotEnv$sampleIDOne <- sampleID1
+  mirrorPlotEnv$sampleIDTwo <- sampleID2
+  
+  
   mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(pool = pool1,
                                                                sampleIDs = sampleID1,
                                                                peakPercentPresence = peakPercentPresence,

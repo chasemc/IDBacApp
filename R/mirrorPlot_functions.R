@@ -72,19 +72,19 @@ mirrorPlot <- function(mirrorPlotEnv){
                   text  = paste("m/z:", round(top$x, 3),
                                 "<br> Intensity:", round(top$y, 1),
                                     "<br> Sample:",
-                                    mirrorPlotEnv$peaksSampleOne@metadata$Strain),
+                                mirrorPlotEnv$sampleIDOne),
                   hoverinfo = 'text',
                   line = list(color = "#000000"),
-                  name = mirrorPlotEnv$peaksSampleOne@metadata$Strain) %>% 
+                  name = mirrorPlotEnv$sampleIDOne) %>% 
     plotly::add_lines(data = bottom,
                       x = ~x,
                       y = ~-y,
                       line = list(color = "grey"),
-                      name = mirrorPlotEnv$peaksSampleTwo@metadata$Strain,
+                      name = mirrorPlotEnv$sampleIDTwo,
                       text  = paste("m/z:", round(bottom$x, 3),
                                     "<br> Intensity:", round(bottom$y, 1),
                                     "<br> Sample:",
-                                    mirrorPlotEnv$peaksSampleTwo@metadata$Strain),
+                                    mirrorPlotEnv$sampleIDTwo),
                       hoverinfo = 'text') %>% 
     plotly::layout(shapes = c(lp, lp2),
                    showlegend = FALSE,
