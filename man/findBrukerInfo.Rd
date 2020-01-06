@@ -4,12 +4,14 @@
 \alias{findBrukerInfo}
 \title{Find a certain Bruker Acqus info}
 \usage{
-findBrukerInfo(acquisitonInformation, name)
+findBrukerInfo(acquisitonInformation, name, type)
 }
 \arguments{
 \item{acquisitonInformation}{parsed acqus}
 
 \item{name}{acqus metadata name}
+
+\item{type}{FUN.VALUE for vapply}
 }
 \value{
 spot position vector

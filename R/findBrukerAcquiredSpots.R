@@ -4,16 +4,18 @@
 #'
 #' @param acquisitonInformation parsed acqus
 #' @param name acqus metadata name
+#' @param type FUN.VALUE for vapply
 #'
 #' @return spot position vector
 #' @export
 #'
 findBrukerInfo <- function(acquisitonInformation,
-                           name){
+                           name,
+                           type){
   
-  unlist(lapply(acquisitonInformation,
-                function(x){
-                  x[[name]]
-                })
-  )
+  vapply(acquisitonInformation,
+         function(x) x[[name, exact = TRUE]],
+         FUN.VALUE = type)
+  
 }
+

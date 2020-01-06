@@ -10,7 +10,7 @@ get_db_version(pool)
 \item{pool}{pool object}
 }
 \value{
-character version if present, or NULL if error
+numeric_version if present, or NULL if error
 }
 \description{
 Get the IDBac version that created the database

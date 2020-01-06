@@ -4,12 +4,14 @@
 \alias{findMissingSampleMapIds}
 \title{Find which MALDI-target spots have data but an ID wasn't assigned}
 \usage{
-findMissingSampleMapIds(spots, sampleMap)
+findMissingSampleMapIds(spots, sampleMap, ignoreMissing)
 }
 \arguments{
 \item{spots}{spot locations that have data}
 
 \item{sampleMap}{user-input sample names mapped to 384-well plate}
+
+\item{ignoreMissing}{TRUE/FALSE whether to ignore target spots missing ids}
 }
 \value{
 character vector of missing sample IDs or character(0)

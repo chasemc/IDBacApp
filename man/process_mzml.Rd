@@ -4,16 +4,14 @@
 \alias{process_mzml}
 \title{process_mzml}
 \usage{
-process_mzml(mzFilePaths, sampleIds, sqlDirectory, idbac_pool, acquisitionInfo)
+process_mzml(mzFilePaths, sampleIds, idbacPool, acquisitionInfo)
 }
 \arguments{
 \item{mzFilePaths}{file paths of the mzml files}
 
 \item{sampleIds}{sampleIds that are in the same order as the paths}
 
-\item{sqlDirectory}{sqlDirectory}
-
-\item{idbac_pool}{idbac single pool, not a list of pools}
+\item{idbacPool}{idbac single pool, not a list of pools}
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 }
