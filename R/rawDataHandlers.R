@@ -196,7 +196,7 @@ findMSconvert <- function(proteoWizardLocation = ""){
         
         proteoWizardLocation <- proteoWizardLocation[[1]]
         proteoWizardLocation <- normalizePath(proteoWizardLocation,
-                                              winslash = "\\",
+                                              winslash = "/",
                                               mustWork = NA)
         message(paste0("msconvert location: ", proteoWizardLocation))
       } else {

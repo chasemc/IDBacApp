@@ -83,7 +83,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   conn <- pool::poolCheckout(pool1)
   
   
-  mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(IDBacApp::mquantSpecFromSQL(pool = pool1,
+  mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(IDBacApp::idbac_get_spectra(pool = pool1,
                                                                                                 sampleID = sampleID1, 
                                                                                                 protein = TRUE,
                                                                                                 smallmol = FALSE))
@@ -99,7 +99,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   conn <- pool::poolCheckout(pool2)
   
   
-  mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(IDBacApp::mquantSpecFromSQL(pool = pool2,
+  mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(IDBacApp::idbac_get_spectra(pool = pool2,
                                                                                                 sampleID = sampleID2, 
                                                                                                 protein = TRUE,
                                                                                                 smallmol = FALSE))

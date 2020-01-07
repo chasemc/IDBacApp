@@ -18,9 +18,6 @@ process_bruker <- function(path,
   
   
   
-  path <- "C:/Users/CMC/Documents/GitHub/programming_idbac/data/bruker_autoflex"
-  
-  
   
   # Find spectra and get acquisiton info ------------------------------------
   
@@ -46,7 +43,7 @@ process_bruker <- function(path,
                  temp,
                  " samples in ",
                  names(temp),
-                 collapse = "\n"))  
+                 collapse = "\nand\n"))  
   remove(temp)
   
   # -------------------------------------------------------------------------
@@ -82,7 +79,7 @@ process_bruker <- function(path,
                               anyMissing$matching[match(acquiredSpots, names(anyMissing$matching))])
     
     
-    splitAcquisition <- split(acquisitionInfo, anyMissing$matching)
+   # splitAcquisition <- split(acquisitionInfo, anyMissing$matching)
   
     
 
@@ -101,7 +98,7 @@ process_bruker <- function(path,
     tempMZDir <- tempdir()
     
     forProcessing <- IDBacApp::proteoWizConvert(msconvertPath = "",
-                                                samplePathList = files,
+                                                samplePathList = fid_path,
                                                 convertWhere = tempMZDir)
     forProcessing
     
@@ -112,24 +109,15 @@ process_bruker <- function(path,
     
     
     
-    
-    
-    
-    
-    
-    userDBpool <- IDBacApp::createNewSQLITEdb(newExperimentName = params$experiment_name,
-                                              sqlDirectory = params$output_dir)[[1]]
-    userDB <- pool::poolCheckout(userDBpool)
-    
     for (i in base::seq_along(forProcessing$mzFile)) {
       IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
                                           sampleID = forProcessing$sampleID[[i]],
-                                          userDBCon = userDB,
+                                          userDBCon = pool,
                                           acquisitionInfo = splitAcquisition[[i]]) # pool connection
     }
     
     
-    pool::poolClose(userDBpool)
+    pool::poolClose(pool)
     
     
     
