@@ -9,9 +9,9 @@
 #' @export
 
 
-getPeakData <-  function(pool, sampleIDs, protein){
+idbac_get_peaks <-  function(pool, sampleIDs, protein){
   
-  if (!is.logical(protein)) {stop("In getPeakData, provided value for 'protein' wasn't logical-type.")}
+  if (!is.logical(protein)) {stop("In idbac_get_peaks, provided value for 'protein' wasn't logical-type.")}
   
   if (protein == TRUE) {
     sym <- '>'
