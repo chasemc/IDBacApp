@@ -60,6 +60,9 @@ copyToNewDatabase <- function(existingDBPool,
                         # Setup version table -----------------------------------------------------
 
                         IDBacApp::sql_create_version_table(sqlConnection = newDBconn)
+                        IDBacApp::sql_fill_version_table(userDBCon = newDBPool)
+                        IDBacApp::sql_create_locale_table(sqlConnection = newDBconn)
+                        IDBacApp::sql_fill_locale_table(userDBCon = newDBPool)
                         
 # Copy  -------------------------------------------------------------------
                         # Attach new database to existing database
