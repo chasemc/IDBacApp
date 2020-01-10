@@ -41,7 +41,7 @@ process_bruker <- function(path,
   temp <- table(temp)
   message(paste0("Processing ",
                  temp,
-                 " samples in ",
+                 " samples from ",
                  names(temp),
                  collapse = "\nand\n"))  
   remove(temp)
@@ -115,13 +115,6 @@ process_bruker <- function(path,
                                           userDBCon = pool,
                                           acquisitionInfo = splitAcquisition[[i]]) # pool connection
     }
-    
-    
-    pool::poolClose(pool)
-    
-    
-    
-    
     
     
   }
