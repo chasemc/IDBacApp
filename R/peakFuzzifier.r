@@ -90,7 +90,7 @@ createFuzzyVector <- function(massStart,
   
   scale_ppm <- function(mass,
                         ppm){
-    1L / ((ppm / 1000000L) * mass)
+    1L / ((ppm / 100000L) * mass)
   }
   
   
