@@ -14,46 +14,29 @@ spectraProcessingFunction <- function(rawDataFilePath,
                                       userDBCon, 
                                       acquisitionInfo){
   
-  sampleID <- IDBacApp::cleanWSpace(sampleID)
-  
-  # Create version and metadata SQL tables ----------------------------------
-  
-  
-  # Isn't currently used, but here to help future-proof
-  IDBacApp::sql_fill_version_table(userDBCon = userDBCon)
-  #----
-  
-  # Isn't currently used, but here to help future-proof
-  # Inserts current locale info 
-  IDBacApp::sql_fill_locale_table(userDBCon = userDBCon)
-  
+  sampleID <- trimws(sampleID, 
+                    which = c("both"))
+    
   # If sample ID doesn't exist, create it in table
   # TODO: userprompt with option to change ID
-  IDBacApp::createMetaSQL(sampleID = sampleID,
+  createMetaSQL(sampleID = sampleID,
                           userDBCon = userDBCon)
   
   
-  
-  # Create xml table --------------------------------------------------------
-  
-  
-  
+  # Create xml table -------------------------------------------------------
+
   # Make connection to mzML file
   mzML_con <- mzR::openMSfile(rawDataFilePath,
                               backend = "pwiz")
   
-  XMLinfo <- IDBacApp::createXMLSQL(rawDataFilePath = rawDataFilePath,
+  XMLinfo <- createXMLSQL(rawDataFilePath = rawDataFilePath,
                                     userDBCon = userDBCon,
                                     mzML_con = mzML_con)
   
   
-  # Get number of spectra contained in mzML
-  scanNumber <- nrow(mzR::header(mzML_con))
+ 
   
-
-  
-  IDBacApp::createSpectraSQL(mzML_con = mzML_con,
-                             scanNumber = scanNumber,
+  createSpectraSQL(mzML_con = mzML_con,
                              userDBCon = userDBCon,
                              sampleID = sampleID,
                              XMLinfo = XMLinfo, 

@@ -170,28 +170,6 @@ serializeXML <- function(path) {
 
 
 
-
-#' People have trouble with spaces
-#'
-#' @param input character vector 
-#'
-#' @return character vector
-#' @export
-#'
-cleanWSpace <- function(input){
-  
-  input <- trimws(input)
-  input <- gsub(" ", "_", input)
-  input <- gsub("__", "_", input)
-  return(input)
-}
-
-
-
-
-
-
-
 #' Create 384-well matrix map
 #'
 #' @return 384 well-like matrix, each element in matrix contains its position (eg col 1, row 3 contains "C4")

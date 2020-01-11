@@ -94,7 +94,7 @@ convertDelim_Server <- function(input,
   })
   
   output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    a <- gsub(" ", "", IDBacApp::sanitize(input$newExperimentName))
     
     if (a == "") {
       "Once entered, the filename-friendly version of the entered name will appear here once. \n
@@ -151,7 +151,7 @@ convertDelim_Server <- function(input,
   })
   
   sanity <- reactive({
-    a <- IDBacApp::path_sanitize(input$newExperimentName)
+    a <- IDBacApp::sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   

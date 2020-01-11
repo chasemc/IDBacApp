@@ -15,9 +15,14 @@ process_mzml <- function(mzFilePaths,
                          acquisitionInfo){
   
   
-#TODO: fix idbac by moving this outside   
+  #TODO: fix idbac by moving this outside   
   #idbacPool <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
-   #                                         sqlDirectory = sqlDirectory)[[1]]
+  #                                         sqlDirectory = sqlDirectory)[[1]]
+  #                                         
+  
+  
+  IDBacApp::sql_fill_version_table(userDBCon = idbacPool)
+  IDBacApp::sql_fill_locale_table(userDBCon = idbacPool)
   
   progLength <- base::length(mzFilePaths)
   
@@ -34,10 +39,10 @@ process_mzml <- function(mzFilePaths,
                                                    {i} of {progLength}"),
                                  session = getDefaultReactiveDomain())
                      
-                     IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
-                                                         sampleID = sampleIds[[i]],
-                                                         userDBCon = idbacPool,
-                                                         acquisitionInfo = acquisitionInfo[[i]]) # pool connection
+                     spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
+                                               sampleID = sampleIds[[i]],
+                                               userDBCon = idbacPool,
+                                               acquisitionInfo = acquisitionInfo[[i]]) # pool connection
                    }
                  })
     
@@ -47,10 +52,10 @@ process_mzml <- function(mzFilePaths,
       base::message('Processing in progress...')
       base::message(glue::glue('Sample: {sampleIds[[i]]}; {i} of {progLength}'))
       
-      IDBacApp::spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
-                                          sampleID = sampleIds[[i]],
-                                          userDBCon = idbacPool,
-                                          acquisitionInfo = acquisitionInfo[[i]]) # pool connection
+      spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
+                                sampleID = sampleIds[[i]],
+                                userDBCon = idbacPool,
+                                acquisitionInfo = acquisitionInfo[[i]]) # pool connection
     }
   }
 }

@@ -100,13 +100,11 @@ process_bruker <- function(path,
     forProcessing <- IDBacApp::proteoWizConvert(msconvertPath = "",
                                                 samplePathList = fid_path,
                                                 convertWhere = tempMZDir)
-    forProcessing
+
     
     
-    
-    
-    
-    
+    IDBacApp::sql_fill_version_table(userDBCon = userDBCon)
+    IDBacApp::sql_fill_locale_table(userDBCon = userDBCon)
     
     
     for (i in base::seq_along(forProcessing$mzFile)) {
