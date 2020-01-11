@@ -10,7 +10,7 @@
 #' @return data.frame with two columns 'strain_id' and  whatever metadataColumn is requested; rows filtered by ID
 #' @export
 #'
-metadata_from_id <- function(strainID,
+metadataFromId <- function(strainID,
                              metadataColumn,
                              pool) {
   

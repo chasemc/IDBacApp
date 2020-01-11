@@ -36,7 +36,7 @@ plotDendrogram <- function(dendrogram = dendrogram,
   
   if (!is.null(appendDendLabels)) {
 
-    new_labels <- metadata_from_id(strainID = dendrogram_labels,
+    new_labels <- metadataFromId(strainID = dendrogram_labels,
                                    metadataColumn = appendDendLabels,
                                    pool = pool)[,2]
 

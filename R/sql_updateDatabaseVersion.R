@@ -8,13 +8,7 @@
 #'
 update_database_version <- function(pool){
   
-  
-  
-  db_ver <- get_db_version(pool)
-  
-  idbac_ver <- utils::packageVersion("IDBacApp")
-  
-  if (db_ver < idbac_ver) {
+
     
     con <- pool::poolCheckout(pool)
     # Need to update:
@@ -102,10 +96,4 @@ update_database_version <- function(pool){
     message(paste0("Updated database... \n",
                    "Installed IDBac version: ",  as.character(idbac_ver), "\n", 
                    "Database version: ", as.character(db_ver)))      
-  } else {
-    message(paste0("Database not updated... \n",
-                   "Installed IDBac version: ",  as.character(idbac_ver), "\n", 
-                   "Database version: ", as.character(db_ver)))  
-  }
-  
 }

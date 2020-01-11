@@ -1,17 +1,10 @@
 
 
-
-
 # Why square root transformation and not log:
 #  Anal Bioanal Chem. 2011 Jul; 401(1): 167–181.
 # Published online 2011 Apr 12. doi:  10.1007/s00216-011-4929-z
 #"Especially for multivariate treatment of MALDI imaging data, the square root transformation can be considered for the data preparation
 #because for all three intensity groups in Table 1, the variance is approximately constant."
-
-
-
-
-
 
 
 

@@ -25,7 +25,7 @@ process_bruker <- function(path,
   
   # -------------------------------------------------------------------------
   
-  fid_paths <- IDBacApp::findBrukerInfo(acquisitonInformation = acquisitionInfo,
+  fid_paths <- IDBacApp::extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
                                         name =  "file",
                                         type = "")
   
@@ -35,7 +35,7 @@ process_bruker <- function(path,
   
   
   # Inform user the number of spectra processing ----------------------------
-  temp <- IDBacApp::findBrukerInfo(acquisitonInformation = acquisitionInfo,
+  temp <- IDBacApp::extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
                                    name =  "sampleName",
                                    type = "")
   temp <- table(temp)
@@ -49,7 +49,7 @@ process_bruker <- function(path,
   # -------------------------------------------------------------------------
   
   
-  acquiredSpots <- IDBacApp::findBrukerInfo(acquisitonInformation = acquisitionInfo,
+  acquiredSpots <- IDBacApp::extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
                                             name =  "spot",
                                             type = "")
   
@@ -84,7 +84,7 @@ process_bruker <- function(path,
     
 
     fid_path <- lapply(splitAcquisition, function(x){
-      IDBacApp::findBrukerInfo(acquisitonInformation = x,
+      IDBacApp::extractBrukerAcquistionInfo(acquisitonInformation = x,
                                                      name =  "file",
                                                      type = "")
     })

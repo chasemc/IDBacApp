@@ -9,9 +9,9 @@
 #' @return spot position vector
 #' @export
 #'
-findBrukerInfo <- function(acquisitonInformation,
-                           name,
-                           type){
+extractBrukerAcquistionInfo <- function(acquisitonInformation,
+                                        name,
+                                        type){
   
   vapply(acquisitonInformation,
          function(x) x[[name, exact = TRUE]],

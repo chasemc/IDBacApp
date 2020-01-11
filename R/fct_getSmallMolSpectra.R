@@ -1,10 +1,3 @@
-# IDBacApp::subtractMatrixBlank(sampleIds = labels(selectedSmallMolPeakList()), 
-#                               peakList = selectedSmallMolPeakList(),
-#                               binTolerance = 0.002)
-
-
-
-
 #' Retrieve small molecule and matrix peak lists and make consensus peak lists
 #'
 #' @param pool pool
