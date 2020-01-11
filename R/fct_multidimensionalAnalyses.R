@@ -1,11 +1,10 @@
-#' Principle Components Analysis 
-#' Given a data frame whose columns are variables and rows are samples, run Principle Components Analysis (PCA)
+#' Principle Components Analysis
 #' 
-#' @param dataMatrix NA
-#' @param logged  NA
-#' @param scaled  NA
+#' @param dataMatrix data as matrix, columns are variables and rows are samples
+#' @param logged  should the matrix by log10 normalized?
+#' @param scaled  NA 
 #' @param centered  NA
-#' @param missing  NA
+#' @param missing  Missing values should be replaced with...
 #'
 #' @return a single trimmed and binned MALDIquant peak object
 #' @export
@@ -14,9 +13,9 @@
 
 pcaCalculation <- function(dataMatrix,
                            logged = FALSE,
-                           scaled = TRUE,
-                           centered = TRUE,
-                           missing = 0){
+                           scaled = FALSE,
+                           centered = FALSE,
+                           missing = 0L){
   validate(need(nrow(dataMatrix) > 3, "Select more samples for PCA"))
   validate(need(ncol(dataMatrix) > 1, "Only 1 peak found between all samples"))
   
@@ -26,8 +25,11 @@ pcaCalculation <- function(dataMatrix,
     dataMatrix <- log10(dataMatrix)
   }
   
-#  dataMatrix <- scale(dataMatrix, scale = scaled, center = centered)
-  
+  if (scaled) {
+    dataMatrix <- scale(dataMatrix, 
+                        scale = scaled,
+                        center = centered)
+  }
   
   # Check for infinite
   dataMatrix[is.infinite(dataMatrix)] <- missing
@@ -49,9 +51,8 @@ pcaCalculation <- function(dataMatrix,
 
 
 #' t-SNE Analysis 
-#' Given a data frame whose columns are variables and rows are samples, run t-SNE
 #' 
-#' @param dataMatrix NA
+#' @param dataMatrix data as matrix, columns are variables and rows are samples
 #' @param perplexity NA
 #' @param theta NA
 #' @param iterations NA
@@ -124,11 +125,10 @@ tsneCalculation <- function(dataMatrix,
 
 
 #' Principle Coordinates Analysis 
-#' Given a data frame whose columns are variables and rows are samples, run Principle Coordinates Analysis (PCoA)
 #' 
-#' @param distanceMatrix NA
+#' @param distanceMatrix distance matrix 
 #'
-#' @return a single trimmed and binned MALDIquant peak object
+#' @return 3D pcoa data framw
 #' @export
 
 

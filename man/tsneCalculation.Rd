@@ -2,13 +2,12 @@
 % Please edit documentation in R/fct_multidimensionalAnalyses.R
 \name{tsneCalculation}
 \alias{tsneCalculation}
-\title{t-SNE Analysis 
-Given a data frame whose columns are variables and rows are samples, run t-SNE}
+\title{t-SNE Analysis}
 \usage{
 tsneCalculation(dataMatrix, perplexity, theta, iterations)
 }
 \arguments{
-\item{dataMatrix}{NA}
+\item{dataMatrix}{data as matrix, columns are variables and rows are samples}
 
 \item{perplexity}{NA}
 
@@ -20,6 +19,5 @@ tsneCalculation(dataMatrix, perplexity, theta, iterations)
 a single trimmed and binned MALDIquant peak object
 }
 \description{
-t-SNE Analysis 
-Given a data frame whose columns are variables and rows are samples, run t-SNE
+t-SNE Analysis
 }
