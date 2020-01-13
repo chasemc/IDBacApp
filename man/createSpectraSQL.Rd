@@ -6,7 +6,6 @@
 \usage{
 createSpectraSQL(
   mzML_con,
-  scanNumber,
   userDBCon,
   sampleID,
   XMLinfo,
@@ -16,8 +15,6 @@ createSpectraSQL(
 }
 \arguments{
 \item{mzML_con}{NA}
-
-\item{scanNumber}{NA}
 
 \item{userDBCon}{NA}
 

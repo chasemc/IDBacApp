@@ -89,7 +89,7 @@ plotDendrogram <- function(dendrogram = dendrogram,
       graphics::abline(v = cutHeightLabels, lty = 2)
     }
   }
-  if (boots[1] != "") {
+  if (is.numeric(boots) & sum(boots)>0L) {
     
     IDBacApp::bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram), 
                                 boots,
