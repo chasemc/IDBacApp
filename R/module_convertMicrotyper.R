@@ -163,21 +163,23 @@ convertMicrotyper_Server <- function(input,
                  # shiny::validate(shiny::need(length(proteinFiles()) + length(smallMolFiles()) > 0,
                  #                             "No samples selected to process"))
                  
-                 print("3")
                  IDBacApp::popup3()
-                 
-                 print("4")
                  
                  keys <- IDBacApp::run_microtyperTomzML(proteinPaths = proteinFiles(),
                                                         smallMolPaths = smallMolFiles(),
                                                         exportDirectory = tempMZDir)
-                 print("5")
-                 IDBacApp::process_mzml(mzFilePaths = keys$mzFilePaths,
-                                       sampleIds = keys$sampleIds,
-                                       sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = input$newExperimentName,
-                                       acquisitionInfo  = NULL)
                  
+                 idbac_create(fileName = input$newExperimentName,
+                              filePath = sqlDirectory$sqlDirectory)
+                 
+                 idbacPool <- idbac_connect(fileName = input$newExperimentName,
+                                            filePath = sqlDirectory$sqlDirectory)[[1]]
+                 
+                 IDBacApp::process_mzml(mzFilePaths = keys$mzFilePaths,
+                                        sampleIds = keys$sampleID,
+                                        idbacPool = idbacPool,
+                                        acquisitionInfo = NULL)
+                 pool::poolClose(idbacPool)
                  
                  
                  IDBacApp::popup4()

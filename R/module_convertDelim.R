@@ -189,12 +189,17 @@ convertDelim_Server <- function(input,
                                                     exportDirectory = tempMZDir,
                                                     centroid = input$centroid)
                  
-                 IDBacApp::process_mzml(mzFilePaths = keys$mzFilePaths,
-                                       sampleIds = keys$sampleIds,
-                                       sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = input$newExperimentName,
-                                       acquisitionInfo = NULL)
+                 idbac_create(fileName = input$newExperimentName,
+                              filePath = sqlDirectory$sqlDirectory)
                  
+                 idbacPool <- idbac_connect(fileName = input$newExperimentName,
+                                            filePath = sqlDirectory$sqlDirectory)[[1]]
+                 
+                 IDBacApp::process_mzml(mzFilePaths = keys$mzFilePaths,
+                                        sampleIds = keys$sampleID,
+                                        idbacPool = idbacPool,
+                                        acquisitionInfo = NULL)
+                 pool::poolClose(idbacPool)
                  
                  IDBacApp::popup4()
                  

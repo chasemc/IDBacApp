@@ -95,8 +95,8 @@ convertMZ_Server <-  function(input,
       
       # Get the folders contained within the chosen folder. Timer was taken out.
       foldersInFolder <- tryCatch(IDBacApp::find_mz_files(mzmlRawFilesLocation(),
-                                                   recursive = TRUE,
-                                                   full = FALSE),
+                                                          recursive = TRUE,
+                                                          full = FALSE),
                                   error = function(x) paste("Timed out"),
                                   finally = function(x) x)
       
@@ -133,15 +133,21 @@ convertMZ_Server <-  function(input,
     IDBacApp::popup3()
     
     mzFilePaths <- IDBacApp::find_mz_files(mzmlRawFilesLocation(),
-                                    recursive = TRUE,
-                                    full = TRUE)
+                                           recursive = TRUE,
+                                           full = TRUE)
     
+    
+    idbac_create(fileName = sanity(),
+                 filePath = sqlDirectory$sqlDirectory)
+    idbacPool <- idbac_connect(fileName = sanity(),
+                               filePath = sqlDirectory$sqlDirectory)[[1]]
+    
+  
     IDBacApp::process_mzml(mzFilePaths = mzFilePaths,
-                          sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
-                          sqlDirectory = sqlDirectory$sqlDirectory,
-                          newExperimentName = sanity(),
-                          acquisitionInfo = NULL)
-    
+                           sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
+                           idbacPool = idbacPool,
+                           acquisitionInfo = NULL)
+    pool::poolClose(idbacPool)
     
     
     IDBacApp::popup4() 
@@ -153,6 +159,6 @@ convertMZ_Server <-  function(input,
                                                                     full.names = FALSE))
     
   })
- 
-
+  
+  
 }

@@ -1,7 +1,10 @@
+download.file("ftp://massive.ucsd.edu/MSV000084291/raw/data/idbac_experiment_file.sqlite", temp, mode = "wb")
+z1 <- IDBacApp::idbac_connect(tools::file_path_sans_ext(basename(temp)), dirname(temp))
+z1=z1[[1]]
+DBI::dbListTables(z1)
+IDBacApp::update_database_version(z1)
 
-a <- system.file("extdata/sqlite", package = "IDBacApp")
-z1 <- IDBacApp::createPool("sample", 
-                           a)[[1]]
+
 z1 <- pool::poolCheckout(z1)
 
 
@@ -27,12 +30,12 @@ test_that("new DB is empty", {
 IDBacApp::copyDB_setupMeta(z2, z1)
 
 
-a <- DBI::dbListFields(z2, "metaData")
+a <- DBI::dbListFields(z2, "metadata")
 test_that("new DB has meta table", {
-  expect_equal("metaData", 
+  expect_equal("metadata", 
                DBI::dbListTables(z2))
   
- expect_identical("Strain_IDGenbank_AccessionNCBI_TaxIDKingdomPhylumClassOrderFamilyGenusSpeciesMALDI_MatrixDSM_Agar_MediaCultivation_Temp_CelsiusCultivation_Time_DaysCultivation_OtherUserUser_ORCIDPI_FirstName_LastNamePI_ORCIDdna_16S",
+ expect_identical("strain_idgenbank_accessionncbi_taxidkingdomphylumclassorderfamilygenusspeciesmaldi_matrixdsm_cultivation_mediacultivation_temp_celsiuscultivation_time_dayscultivation_otheruser_firstname_lastnameuser_orcidpi_firstname_lastnamepi_orciddna_16s",
                    paste0(a, collapse = ""))
   
 })

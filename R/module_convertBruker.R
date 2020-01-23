@@ -172,7 +172,8 @@ convertOneBruker_Server <- function(input,
     req(sampleMapReactive$rt)
     spots <- unlist(lapply(acquisitonInformation(), function(x) x$spot))
     IDBacApp::findMissingSampleMapIds(spots = spots, 
-                                      sampleMap = sampleMapReactive$rt)
+                                      sampleMap = sampleMapReactive$rt,
+                                      ignoreMissing = TRUE)
   })
   
   
@@ -276,11 +277,18 @@ convertOneBruker_Server <- function(input,
                  
                  IDBacApp::popup3()
                  
+                 idbac_create(fileName = sanitizedNewExperimentName(),
+                              filePath = sqlDirectory$sqlDirectory)
+                 
+                 idbacPool <- idbac_connect(fileName = sanitizedNewExperimentName(),
+                               filePath = sqlDirectory$sqlDirectory)[[1]]
+                 
                  IDBacApp::process_mzml(mzFilePaths = forProcessing$mzFile,
-                                       sampleIds = forProcessing$sampleID,
-                                       sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = sanitizedNewExperimentName(),
-                                       acquisitionInfo = acquisitionInfo )
+                                        sampleIds = forProcessing$sampleID,
+                                        idbacPool = idbacPool,
+                                        acquisitionInfo = acquisitionInfo)
+                 pool::poolClose(idbacPool)
+                 
                  
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,

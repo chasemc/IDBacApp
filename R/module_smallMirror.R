@@ -187,6 +187,8 @@ smallmirrorPlots_Server <- function(input,
                                                                                                   protein = FALSE,
                                                                                                   smallmol = TRUE))
     
+    # downsample so plotting is quicker
+    mirrorPlotEnv$spectrumSampleOne@intensity <- mirrorPlotEnv$spectrumSampleOne@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleOne@intensity), 4)]
     
     
     
@@ -195,7 +197,8 @@ smallmirrorPlots_Server <- function(input,
                                                                                                   protein = FALSE,
                                                                                                   smallmol = TRUE))
 
-    
+    # downsample so plotting is quicker
+    mirrorPlotEnv$spectrumSampleTwo@intensity <- mirrorPlotEnv$spectrumSampleTwo@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleTwo@intensity), 4)]
     
     
     

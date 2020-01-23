@@ -9,7 +9,7 @@
 #' @export
 #'
 idbac_create <- function(fileName,
-                      filePath){
+                         filePath){
   
   if (!is.character(fileName)) {
     stop("db_create(fileName) expected to be character")
@@ -39,7 +39,7 @@ idbac_create <- function(fileName,
   
   
   pool <- pool::dbPool(drv = RSQLite::SQLite(),
-                      dbname = base::file.path(filePath, fileName))
+                       dbname = base::file.path(filePath, fileName))
   
   conn <- pool::poolCheckout(pool)
   

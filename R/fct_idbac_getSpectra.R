@@ -54,8 +54,8 @@ idbac_get_spectra <- function(pool,
   if (nrow(result) > 0) {
     result <- lapply(1:nrow(result),
                      function(x){
-                       cbind(IDBacApp::deserial(rawToChar(fst::decompress_fst(result[x, 1][[1]]))),
-                             IDBacApp::deserial(rawToChar(fst::decompress_fst(result[x, 2][[1]]))))
+                       cbind(double_from_raw_compressed(result[x, 1][[1]]),
+                             double_from_raw_compressed(result[x, 2][[1]]))
                      })
     
     

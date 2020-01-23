@@ -47,7 +47,16 @@ serial <- function(input){
 #' @export
 
 deserial <- function(input){
-  jsonlite::fromJSON(input)
+  input <- gsub("\\[",
+                "",
+                input)
+  input <- gsub("]",
+                "",
+                input)
+    scan(text = input,
+         sep =",", 
+         what = double(),
+         quiet = T)
 }
 
 

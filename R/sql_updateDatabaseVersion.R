@@ -93,7 +93,9 @@ update_database_version <- function(pool){
     
     pool::poolReturn(con)
     
+    
+    
     message(paste0("Updated database... \n",
-                   "Installed IDBac version: ",  as.character(idbac_ver), "\n", 
-                   "Database version: ", as.character(db_ver)))      
+                   "Installed IDBac version: ",  as.character(packageVersion("IDBacApp")), "\n", 
+                   "Database version: ", as.character(packageVersion("IDBacApp"))))      
 }

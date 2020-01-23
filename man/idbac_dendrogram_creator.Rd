@@ -8,8 +8,7 @@ idbac_dendrogram_creator(
   bootstraps = 0L,
   distanceMethod,
   clusteringMethod,
-  proteinMatrix,
-  booled
+  proteinMatrix
 )
 }
 \arguments{
@@ -20,8 +19,6 @@ idbac_dendrogram_creator(
 \item{clusteringMethod}{clustering method to use}
 
 \item{proteinMatrix}{proteinMatrix , rows are samples, cols are peak intensities}
-
-\item{booled}{whether intensities are taken into acount}
 }
 \value{
 dendrogram

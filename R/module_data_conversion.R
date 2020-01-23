@@ -76,6 +76,7 @@ convertDataTab_Server <- function(input,
                                   pwizAvailable){
   
   
+  
   output$brukerConversionUi <- renderUI({
     IDBacApp::controlBrukerDisplay(session,
                                    pwizAvailable)

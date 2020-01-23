@@ -92,13 +92,12 @@ dendrogramCreator <- function(input,
   pMatrixReactive <- reactive({
   
     #require more than two samples
-    req(nrow(proteinMatrix() > 2))
+    req(ncol(proteinMatrix() > 2))
 
     idbac_dendrogram_creator(bootstraps = 0L,
                       distanceMethod = input$distanceMethod,
                       clusteringMethod = input$clustering,
-                      proteinMatrix = proteinMatrix(),
-                      booled = input$booled)
+                      proteinMatrix = proteinMatrix())
     
   })
   
