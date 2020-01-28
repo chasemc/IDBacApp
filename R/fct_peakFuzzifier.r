@@ -1,28 +1,3 @@
-#  
-#  #' Bin MALDI peaks
-#  #'
-#  #' @param peakList list of MALDIquant peak objects
-#  #' @param ppm ppm
-#  #' @param massStart massStart 
-#  #' @param massEnd massEnd 
-#  #'
-#  #' @return list of bin vectors
-#  #' @export
-#  #'
-#  createFuzzyVector <- function(peakList,
-#                         ppm = 300,
-#                         massStart = 3000,
-#                         massEnd = 15000){
-#    # new binning algo not ready
-#    #https://github.com/chasemc/IDBacApp/commit/d676e8329e08a149ca11913db663d636b51e6e68#diff-669488b95a9fc327f0603fbfddd4100c
-#    nams <- names(peakList)
-#    peakList <- MALDIquant::binPeaks(peakList, method = "relaxed", tolerance = .02)
-#    peakList <- MALDIquant::intensityMatrix(peakList)
-#    peakList[is.na(peakList)] <- 0
-#    rownames(peakList) <- nams
-#    peakList
-#  }
-
 
 
 
@@ -56,7 +31,10 @@ mQuantToMassVec <- function(peakList){
 
 
 
-
+.scale_ppm <- function(mass,
+                       ppm){
+  1L / ((ppm / 1e6) * mass)
+}
 
 
 #' High-dimensional representation of mass peaks
@@ -86,39 +64,16 @@ createFuzzyVector <- function(massStart,
                               massList,
                               intensityList){
   
-  shiny::validate(shiny::need(all(lengths(massList) > 0 ), "Mass list contained list with no masses"))
-  
-  scale_ppm <- function(mass,
-                        ppm){
-    1L / ((ppm / 100000L) * mass)
+  if (!all(lengths(massList) > 0)) {
+    stop(paste0(sum(!lengths(massList) > 0), "Empty massList found in createFuzzyVector()"))
   }
   
+  scaler <- .scale_ppm(ppm = ppm, 
+                       mass = massStart)
   
-  binner_xShift <- function(massStart,
-                            scaler){
-    round((massStart*scaler) - 2) 
-  }
-  scaler <- scale_ppm(ppm = ppm, 
-                      mass = massStart)
-  
-  toSub <- binner_xShift(massStart = massStart,
-                         scaler = scaler) 
-  
-  
-  z1 <- as.integer(round((massEnd * scaler)))
-  z2 <- as.integer(round(((massEnd * scaler) * ppm) / 100000L))    
-  vecLength <- z1 + z2 + 2
-  
-  #  if (length(massList) * vecLength < 4e6) {
-  #builtM <- base::matrix(0, nrow = length(massList), ncol = vecLength) 
-  #  } else {
-  
-  
-  
-  
-  #  }
-  
-  
+  # smallest start mass
+  z1 <- floor((massStart * scaler) - ((massStart * scaler) * ppm) / 1e6)
+  vecLength <-  ceiling((massEnd * scaler) + ((massEnd * scaler) * ppm) / 1e6)
   
   # mm returns a list of lists. each list element contains a list of length 3:
   # 1- centroid - ppm 
@@ -128,17 +83,15 @@ createFuzzyVector <- function(massStart,
     # scale and shift to begin at 1
     #z1 <- as.integer(round((x * scaler) - toSub))
     z1 <- as.integer(round((x * scaler)))
-    z2 <- as.integer(round(((x * scaler) * ppm) / 100000L))    
-    
+    z2 <- as.integer(round(((x * scaler) * ppm) / 1e6))    
     list(z1 - z2,
          z1,
          z1 + z2)
-    
   })
   
   # Create a distribution of "intensity" across each ppm range of each peak
   # loop across all samples (spectra) 
-  w<-lapply(seq_along(mm), function(i){
+  w <- lapply(seq_along(mm), function(i){
     
     # For each centroid, create a sequence of integers from
     # (centroid mass - ppm) to (centroid mass + ppm)
@@ -173,19 +126,24 @@ createFuzzyVector <- function(massStart,
     
     z <- unlist(z)
     
-    cbind(index = unique(z),
-          intensity = as.numeric(tapply(unlist(z3), z, sum)),
-          spectrum = i)
-    
-    
+    data.table::data.table(index = unique(z),
+                           intensity = as.numeric(tapply(unlist(z3), z, sum)),
+                           spectrum = i)
   })
-  
+  # Combine all peak data for all mass/int lists into one data.table
   w <- do.call(rbind, w)
   
+  # shift lowest min mass so the matrix is much smaller
+  xshift <- z1 - 5
+  w$index <- w$index - xshift
+  vecLength <- vecLength - xshift
   
-  Matrix::sparseMatrix(i = w[,1], 
-                       j = w[,3],
-                       x = w[,2],
+  # Create sparse matrix to hold the peak probability data
+  # Columns are samples, rows are m/z/intensity probabilities 
+  # transform back to actual m/z can be accessed via rownames()
+  Matrix::sparseMatrix(i = w$index, 
+                       j = w$spectrum,
+                       x = w$intensity,
                        dim = c(vecLength, 
                                length(massList)), 
                        dimnames = list(1:vecLength,names(massList)))
