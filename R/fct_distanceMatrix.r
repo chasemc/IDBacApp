@@ -9,7 +9,6 @@
 distMatrix <- function(data,
                        method){
    validate(need(nrow(data) > 2, "Need >2 samples to cluster")) 
-dat<<-data
   if (method == "cosine") {
     return(stats::as.dist(1 - coop::cosine(data)))
   }else{

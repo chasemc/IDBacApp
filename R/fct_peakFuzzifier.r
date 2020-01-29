@@ -31,6 +31,13 @@ mQuantToMassVec <- function(peakList){
 
 
 
+#' scaler so smallest mass differnce is 1
+#'
+#' @param mass numeric 
+#' @param ppm numeric
+#'
+#' @return numeric
+#'
 .scale_ppm <- function(mass,
                        ppm){
   1L / ((ppm / 1e6) * mass)

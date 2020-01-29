@@ -23,19 +23,15 @@ test_that("new DB is empty", {
 })
 
 
-IDBacApp::sql_CreateIndividualSpectra(z2)
-a <- DBI::dbListFields(z2, "IndividualSpectra")
+IDBacApp::sql_create_spectra_table(z2)
+a <- DBI::dbListFields(z2, "spectra")
 
 test_that("new DB has IndividualSpectra table", {
-  expect_equal("IndividualSpectra", 
+  expect_equal("spectra", 
                DBI::dbListTables(z2))
   
-  expect_identical("spectrumMassHashspectrumIntensityHashXMLHashStrain_IDpeakMatrixspectrumIntensitymaxMassminMassignorenumbertimeDelaytimeDeltacalibrationConstantsv1tofCalibrationdataTypedataSystemspectrometerTypeinletionizationModeacquisitionMethodacquisitionDateacquisitionModetofModeacquisitionOperatorModelaserAttenuationdigitizerTypeflexControlVersionidinstrumentinstrumentIdinstrumentTypemassErrorlaserShotspatchpathlaserRepetitionspotspectrumTypetargetCounttargetIdStringtargetSerialNumbertargetTypeNumber",
+  expect_identical("spectrum_mass_hashspectrum_intensity_hashxml_hashstrain_idpeak_matrixspectrum_intensitymax_massmin_massignorenumbertime_delaytime_deltacalibration_constantsv1_tof_calibrationdata_typedata_systemspectrometer_typeinletionization_modeacquisition_methodacquisition_dateacquisition_modetof_modeacquisition_operator_modelaser_attenuationdigitizer_typeflex_control_versionidinstrumentinstrument_idinstrument_typemass_errorlaser_shotspatchpathlaser_repetitionspotspectrum_typetarget_counttarget_id_stringtarget_serial_numbertarget_type_number",
                    paste0(a, collapse = ""))
   
 })
 
-
-
-
-suppressWarnings(gc())

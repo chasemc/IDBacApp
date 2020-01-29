@@ -1,103 +1,42 @@
+a <- tempdir()
+a <- IDBacApp::idbac_create("temp",
+                       a)
+a <- IDBacApp::idbac_connect("temp",
+                             dirname(a))[[1]]
 
+b <- DBI::dbListTables(a)
 
-one <- sqlTableArchitecture(1)
-
-five <- sqlTableArchitecture(5)
-
-
-
-one_nrow <- lapply(ls(one), function(x) nrow(one[[x]]))
-names(one_nrow) <- ls(one)
-five_nrow <- lapply(ls(five), function(x) nrow(five[[x]]))
-names(five_nrow) <- ls(five)
-
-test_that("sqlTableArchitecture creates correct number of rows", {
-  expect_equal(one_nrow$IndividualSpectra,
-               1L)
-  expect_equal(one_nrow$massTable,
-               1L)
-  expect_equal(one_nrow$metaData,
-               1L)
-  expect_equal(one_nrow$version,
-               1L)
-  expect_equal(one_nrow$XML,
-               1L)
-
-  
-  expect_equal(five_nrow$IndividualSpectra,
-               5L)
-  expect_equal(five_nrow$massTable,
-               5L)
-  expect_equal(five_nrow$metaData,
-               5L)
-  expect_equal(five_nrow$version,
-               1L)
-  expect_equal(five_nrow$XML,
-               5L)
+test_that("idbac_create() creates the correct tables", {
+  expect_true("locale" %in% b)
+  expect_true("mass_index" %in% b)
+  expect_true("metadata" %in% b)
+  expect_true("spectra" %in% b)
+  expect_true("version" %in% b)
+  expect_true("xml" %in% b)
 })
 
 
-cols <- lapply(ls(five), function(x) colnames(five[[x]]))
-names(cols) <- ls(five)
+z <- lapply(b, function(x) paste0(DBI::dbListFields(a, x), collapse = "|"))
+
+names(z) <- b
 
 
-
-test_that("sqlTableArchitecture creates correct table columns", {
-  
-expect_equal(cols$IndividualSpectra, 
-             c("spectrumMassHash",
-               "spectrumIntensityHash",
-               "XMLHash",
-               "Strain_ID",
-               "MassError",
-               "AcquisitionDate",
-               "peakMatrix",
-               "spectrumIntensity",
-               "maxMass",
-               "minMass",
-               "ignore"))
-
-  
-  expect_equal(cols$massTable, 
-               c("spectrumMassHash",
-                 "massVector"))
-
-  
-  expect_equal(cols$metaData, 
-               c("Strain_ID",
-                 "Genbank_Accession",
-                 "NCBI_TaxID",
-                 "Kingdom",
-                 "Phylum",
-                 "Class",
-                 "Order",
-                 "Family",
-                 "Genus",
-                 "Species",
-                 "MALDI_Matrix",
-                 "DSM_Agar_Media",
-                 "Cultivation_Temp_Celsius",
-                 "Cultivation_Time_Days",
-                 "Cultivation_Other",
-                 "User",
-                 "User_ORCID",
-                 "PI_FirstName_LastName",
-                 "PI_ORCID",
-                 "dna_16S"))
-  
-  
-  expect_equal(cols$version, 
-               c("version"))
-  
-  expect_equal(cols$XML, 
-               c("XMLHash",
-                 "XML",
-                 "manufacturer",
-                 "model",
-                 "ionization",
-                 "analyzer",
-                 "detector",
-                 "Instrument_MetaFile"))
+test_that("idbac_create() creates the correct fields", {
+  expect_equal(z$locale, 
+               "locale")
+  expect_equal(z$mass_index, 
+               "spectrum_mass_hash|mass_vector")
+  expect_equal(z$metadata, 
+               "strain_id|genbank_accession|ncbi_taxid|kingdom|phylum|class|order|family|genus|species|maldi_matrix|dsm_cultivation_media|cultivation_temp_celsius|cultivation_time_days|cultivation_other|user_firstname_lastname|user_orcid|pi_firstname_lastname|pi_orcid|dna_16s")
+  expect_equal(z$spectra, 
+               "spectrum_mass_hash|spectrum_intensity_hash|xml_hash|strain_id|peak_matrix|spectrum_intensity|max_mass|min_mass|ignore|number|time_delay|time_delta|calibration_constants|v1_tof_calibration|data_type|data_system|spectrometer_type|inlet|ionization_mode|acquisition_method|acquisition_date|acquisition_mode|tof_mode|acquisition_operator_mode|laser_attenuation|digitizer_type|flex_control_version|id|instrument|instrument_id|instrument_type|mass_error|laser_shots|patch|path|laser_repetition|spot|spectrum_type|target_count|target_id_string|target_serial_number|target_type_number")
+  expect_equal(z$version, 
+               "idbac_version|r_version")
+  expect_equal(z$xml, 
+               "xml_hash|xml|manufacturer|model|ionization|analyzer|detector|instrument_metafile")
 })
+
+
+
 
 

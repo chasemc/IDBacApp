@@ -9,10 +9,11 @@ ex_path <- normalizePath(file.path(working_directory,
                                    "idbac_experiment_file.sqlite"),
                          winslash = "/",
                          mustWork = FALSE)
-# Download example file ("wb" is important here)
+# Download example file ("wb" is important here)Z
 download.file(url = ex_url,
               destfile = ex_path,
-              mode = "wb")
+              mode = "wb",
+              quiet = T)
 
 example_pool <- IDBacApp::createPool(fileName = "idbac_experiment_file",
                                      filePath = working_directory)[[1]]

@@ -23,18 +23,17 @@ test_that("new DB is empty", {
 })
 
 
-IDBacApp::sql_CreatemassTable(z2)
-a <- DBI::dbListFields(z2, "massTable")
+IDBacApp::sql_create_massindex_table(z2)
+a <- DBI::dbListFields(z2, "mass_index")
 
 test_that("new DB has Mass table", {
-  expect_equal("massTable", 
+  expect_equal("mass_index", 
                DBI::dbListTables(z2))
   
-  expect_identical("spectrumMassHashmassVector",
+  expect_identical("spectrum_mass_hashmass_vector",
                    paste0(a, collapse = ""))
   
 })
 
-suppressWarnings(gc())
 
 

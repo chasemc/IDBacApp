@@ -1,4 +1,7 @@
-download.file("ftp://massive.ucsd.edu/MSV000084291/raw/data/idbac_experiment_file.sqlite", temp, mode = "wb")
+download.file("ftp://massive.ucsd.edu/MSV000084291/raw/data/idbac_experiment_file.sqlite", 
+              temp,
+              mode = "wb", 
+              quiet = T)
 z1 <- IDBacApp::idbac_connect(tools::file_path_sans_ext(basename(temp)), dirname(temp))
 z1=z1[[1]]
 DBI::dbListTables(z1)
