@@ -236,7 +236,7 @@ app_server <- function(input, output, session) {
     # merge into a single peak list per sample
     # trim m/z based on user input
     # connect to sql
-
+    
     temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
                      IDBacApp::collapseReplicates(pool = isolate(workingDB$pool()),
@@ -248,13 +248,13 @@ app_server <- function(input, output, session) {
                                                   tolerance = 0.002,
                                                   protein = TRUE)[[1]]
                    })
-
+    
     
     
     # Inject samples into dendrogram
     if (length(proteinSamplesToInject$chosen$chosen) > 0) {
       
-
+      
       temp <- c(temp, lapply(proteinSamplesToInject$chosen$chosen,
                              function(ids){
                                IDBacApp::collapseReplicates(pool = proteinSamplesToInject$db(),
@@ -304,18 +304,18 @@ app_server <- function(input, output, session) {
                   "Lower mass cutoff must be less than 20,000"))
     validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass,
                   "Lower mass cutoff should be higher than upper mass cutoff."))
-
+    
     IDBacApp::createFuzzyVector(massStart = proteinPeakSettings$lowerMass,
-                         massEnd = proteinPeakSettings$upperMass,
-                         ppm = proteinPeakSettings$ppm,
-                         massList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@mass),
-                         intensityList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@intensity))
-      
-      
-      
-      
-      
-      
+                                massEnd = proteinPeakSettings$upperMass,
+                                ppm = proteinPeakSettings$ppm,
+                                massList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@mass),
+                                intensityList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@intensity))
+    
+    
+    
+    
+    
+    
     
   })
   
@@ -352,7 +352,7 @@ app_server <- function(input, output, session) {
   hclustHeightReactive <- reactive({
     validate(need(input$hclustHeight > 20, 
                   '"Exapand Dendrogram" must be >20')
-             )
+    )
     input$hclustHeight
   })
   
@@ -609,15 +609,15 @@ app_server <- function(input, output, session) {
     validate(need(smallPeakSettings$lowerMass < smallPeakSettings$upperMass, "Upper mass cutoff must be greater than lower mass cutoff."))
     
     
-    samples <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
-                                            sampleIDs = NULL,
-                                            dendrogram = proteinDendrogram$dendrogram,
-                                            brushInputs = smallProtDend,
-                                            matrixIDs = NULL,
-                                            peakPercentPresence = smallPeakSettings$percentPresence,
-                                            lowerMassCutoff = smallPeakSettings$lowerMass,
-                                            upperMassCutoff = smallPeakSettings$upperMass,
-                                            minSNR = smallPeakSettings$SNR)
+    samples <- .getSmallPeaksFromBrush(pool = workingDB$pool(),
+                                       sampleIDs = NULL,
+                                       dendrogram = proteinDendrogram$dendrogram,
+                                       brushInputs = smallProtDend,
+                                       matrixIDs = NULL,
+                                       peakPercentPresence = smallPeakSettings$percentPresence,
+                                       lowerMassCutoff = smallPeakSettings$lowerMass,
+                                       upperMassCutoff = smallPeakSettings$upperMass,
+                                       minSNR = smallPeakSettings$SNR)
     ids <- samples$sampleIDs
     samples <- samples$maldiQuantPeaks
     
@@ -634,15 +634,15 @@ app_server <- function(input, output, session) {
       
       if ((input$selectMatrix != "None")) {
         
-        matrixSample <- IDBacApp::getSmallMolSpectra(pool = workingDB$pool(),
-                                                     sampleIDs = input$selectMatrix,
-                                                     dendrogram = proteinDendrogram$dendrogram,
-                                                     brushInputs = smallProtDend,
-                                                     matrixIDs = NULL,
-                                                     peakPercentPresence = smallPeakSettings$percentPresence,
-                                                     lowerMassCutoff = smallPeakSettings$lowerMass,
-                                                     upperMassCutoff = smallPeakSettings$upperMass,
-                                                     minSNR = smallPeakSettings$SNR)
+        matrixSample <- .getSmallPeaksFromBrush(pool = workingDB$pool(),
+                                                sampleIDs = input$selectMatrix,
+                                                dendrogram = proteinDendrogram$dendrogram,
+                                                brushInputs = smallProtDend,
+                                                matrixIDs = NULL,
+                                                peakPercentPresence = smallPeakSettings$percentPresence,
+                                                lowerMassCutoff = smallPeakSettings$lowerMass,
+                                                upperMassCutoff = smallPeakSettings$upperMass,
+                                                minSNR = smallPeakSettings$SNR)
         
         
         samples <- MALDIquant::binPeaks(c(matrixSample$maldiQuantPeaks, samples),
@@ -672,7 +672,7 @@ app_server <- function(input, output, session) {
       }
     }
     
-
+    
   })
   
   
@@ -683,14 +683,14 @@ app_server <- function(input, output, session) {
     
     subtractedMatrixBlank$sampleIDs[ind]
     
-    })
+  })
   
   output$noSmallPeaksText <- renderText({
     
     paste0("Samples which contain no peaks: ",
            paste0(noSmallPeaks(), collapse=",\n"))
-           
-    })
+    
+  })
   
   
   
@@ -966,7 +966,7 @@ app_server <- function(input, output, session) {
   #  The following code is necessary to stop the R backend when the user closes the browser window
   
   if (!base::interactive()) {
-   session$onSessionEnded(function() {
+    session$onSessionEnded(function() {
       stopApp()
       q("no")
     })
