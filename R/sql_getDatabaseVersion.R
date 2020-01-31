@@ -5,7 +5,7 @@
 #' @return numeric_version if present, or NULL if error
 #' @export
 #'
-get_db_version <- function(pool){
+idbac_db_version <- function(pool){
   
   res <- pool::dbGetQuery(pool,
                           'Select idbac_version

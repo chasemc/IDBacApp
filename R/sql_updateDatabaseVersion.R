@@ -6,7 +6,7 @@
 #' @return NA, side effect
 #' @export
 #'
-update_database_version <- function(pool){
+idbac_update_db <- function(pool){
   
 
     
