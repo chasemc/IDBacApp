@@ -82,8 +82,6 @@ dendrogramCreatorUI <- function(id) {
 #'
 #' @return sd
 #' @export
-#'
-#' @examples
 dendrogramCreator <- function(input,
                               output,
                               session,

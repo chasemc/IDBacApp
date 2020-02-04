@@ -30,11 +30,11 @@ collapseReplicates <- function(pool,
   validate(need(is.numeric(tolerance), "tolerance not numeric"))
   validate(need(is.logical(protein), "protein not logical"))
   validate(need(!is.null(sampleIDs), "sampleIDs must not be NULL"))
- 
+  
   
   temp <- IDBacApp::idbac_get_peaks(pool = pool,
-                                sampleIDs = sampleIDs,
-                                protein = protein)
+                                    sampleIDs = sampleIDs,
+                                    protein = protein)
   req(length(temp) > 0)
   # Binning peaks lists belonging to a single sample so we can filter 
   # peaks outside the given threshold of presence 

@@ -40,9 +40,10 @@ sampleChooser_server <- function(input,
   observe({
     chosenProteinSampleIDs$chosen <- NULL
     conn <- pool::poolCheckout(pool())
-    nams$av <- IDBacApp::availableSampleNames(checkedPool = conn,
-                                           whetherProtein = whetherProtein,
-                                           allSamples = allSamples)
+    nams$av <- IDBacApp::idbac_available_samples(pool = conn,
+                                                 whetherProtein = whetherProtein,
+                                                 allSamples = allSamples)
+    
     pool::poolReturn(conn)
     
   })
