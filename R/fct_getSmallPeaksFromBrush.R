@@ -11,9 +11,7 @@
 #' @param brushInputs brusked dendrogram outputs
 #'
 #' @return a list containg two lists of MALDIquant peak objects "samplePeaks" and "matrixPeaks"
-#' @export
-#'
-getSmallMolSpectra <- function(pool,
+.getSmallPeaksFromBrush <- function(pool,
                                sampleIDs = NULL,
                                dendrogram,
                                brushInputs,
@@ -24,7 +22,7 @@ getSmallMolSpectra <- function(pool,
                                minSNR){
   
   
-
+#TODO split the brush out into own function
   
   if (is.null(sampleIDs)) {
   
