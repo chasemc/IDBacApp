@@ -13,6 +13,8 @@ get_subtrees(
 )
 }
 \arguments{
+\item{dend}{dendrogram}
+
 \item{k}{numeric scalar (OR a vector) with the number of clusters
 the tree should be cut into.}
 
