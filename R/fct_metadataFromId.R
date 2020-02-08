@@ -10,29 +10,87 @@
 #' @return data.frame with two columns 'strain_id' and  whatever metadataColumn is requested; rows filtered by ID
 #' @export
 #'
-metadataFromId <- function(strainID,
-                             metadataColumn,
-                             pool) {
+idbac_get_metadata <- function(strainID = NULL,
+                               metadataColumn = NULL,
+                               pool){
   
+  .checkPool(pool = pool)
   
-  conn <- pool::poolCheckout(pool)
-  
-  metadataColumn <- paste("strain_id", metadataColumn, sep = ", ")
-  
-  a <- glue::glue("SELECT {metadataColumn}
-                   FROM metadata
-                   WHERE `strain_id` = $ids")
-  
-  
-  query <- DBI::dbSendStatement(a,
-                                con = conn)
-  
-  DBI::dbBind(query, list(ids = strainID))
-  selectedMeta <- DBI::dbFetch(query)
-  
-  DBI::dbClearResult(query)
-  
-  pool::poolReturn(conn)
-  return(selectedMeta)
-  
+  if (is.null(strainID) && is.null(metadataColumn)) {
+    
+    pool::poolWithTransaction(pool, 
+                              function(conn){
+                                statement <- glue::glue(
+                                  "SELECT *
+                                FROM metadata"
+                                )
+                                query <- DBI::dbSendStatement(statement = statement,
+                                                              con = conn)
+                                selectedMeta <- DBI::dbFetch(query)
+                                DBI::dbClearResult(query)
+                                pool::poolReturn(conn)
+                                return(selectedMeta)
+                                
+                              })
+  } else if (is.null(strainID)) {
+    
+    pool::poolWithTransaction(pool, 
+                              function(conn){
+                                glued <- c("strain_id", metadataColumn)
+                                
+                                statement  <- glue::glue_sql(
+                                  "SELECT {`glued`*}
+                                FROM metadata
+                                WHERE `strain_id` = $ids",
+                                  .con = conn)
+                                
+                                DBI::dbBind(query, list(ids = strainID))
+                                selectedMeta <- DBI::dbFetch(query)
+                                DBI::dbClearResult(query)
+                                pool::poolReturn(conn)
+                                return(selectedMeta)
+                                
+                              })
+    
+  } else if (is.null(metadataColumn)) {
+    
+    pool::poolWithTransaction(pool, 
+                              function(conn){
+                                statement <- glue::glue(
+                                  "SELECT *
+                                FROM metadata
+                                WHERE `strain_id` = $ids"
+                                )
+                                query <- DBI::dbSendStatement(statement = statement,
+                                                              con = conn)
+                                DBI::dbBind(query, list(ids = strainID))
+                                selectedMeta <- DBI::dbFetch(query)
+                                DBI::dbClearResult(query)
+                                pool::poolReturn(conn)
+                                return(selectedMeta)
+                                
+                              })
+    
+  } else {
+    
+    pool::poolWithTransaction(pool, 
+                              function(conn){
+                                
+                                glued <- c("strain_id", metadataColumn)
+                                
+                                statement  <- glue::glue_sql(
+                                  "SELECT {`glued`*}
+                                FROM metadata
+                                WHERE `strain_id` = $ids",
+                                  .con = conn)
+                                
+                                query <- DBI::dbSendStatement(statement = statement,
+                                                              con = conn)
+                                DBI::dbBind(query, list(ids = strainID))
+                                selectedMeta <- DBI::dbFetch(query)
+                                DBI::dbClearResult(query)
+                                return(selectedMeta)
+                              })
+    
+  }
 }
