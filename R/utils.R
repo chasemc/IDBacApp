@@ -238,19 +238,21 @@ poolToCon <- function(con) {
 
 
 
-#' Check for pool object
+#' Check if a pool object
 #'
 #' @param pool variable to check
-#'
-#' @export
-#'
-
-checkSinglePool <- function(pool){
+.checkPool <- function(pool){
   
-  shiny::validate({
-    need(class(pool)[[1]] == "Pool", 
-         glue::glue("Expected a pool object, received: {class(pool)}"))
-  })
-  
+  if (!inherits(pool, "Pool")) {
+    # paste0(deparse(sys.calls()[[sys.nframe()-1]]) gets the info of the calling function
+    stop(paste0(deparse(sys.calls()[[sys.nframe() - 1]]),
+                " expected a pool object"))
+  }
   
 }
+
+
+
+
+
+

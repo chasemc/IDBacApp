@@ -20,7 +20,7 @@ idbac_get_peaks <-  function(pool, sampleIDs, protein){
   }  
   
   
-  checkSinglePool(pool)
+  .checkPool(pool)
   
   shiny::validate({
     need(is.character(sampleIDs), 
