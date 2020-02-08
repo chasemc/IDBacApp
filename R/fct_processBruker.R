@@ -21,21 +21,21 @@ process_bruker <- function(path,
   
   # Find spectra and get acquisiton info ------------------------------------
   
-  acquisitionInfo <- IDBacApp::readBrukerAcqus(path)
+  acquisitionInfo <- readBrukerAcqus(path)
   
   # -------------------------------------------------------------------------
   
-  fid_paths <- IDBacApp::extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
+  fid_paths <- extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
                                         name =  "file",
                                         type = "")
   
   if (!all(file.exists(fid_paths))) {
-    stop("IDBacApp::readBrukerAcqus(path) gave file paths for file(s) that R can't find")
+    stop("readBrukerAcqus(path) gave file paths for file(s) that R can't find")
   }
   
   
   # Inform user the number of spectra processing ----------------------------
-  temp <- IDBacApp::extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
+  temp <- extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
                                    name =  "sampleName",
                                    type = "")
   temp <- table(temp)
@@ -49,20 +49,20 @@ process_bruker <- function(path,
   # -------------------------------------------------------------------------
   
   
-  acquiredSpots <- IDBacApp::extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
+  acquiredSpots <- extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
                                             name =  "spot",
                                             type = "")
   
   
   
-  anyMissing <- IDBacApp::findMissingSampleMapIds(spots = acquiredSpots,
+  anyMissing <- findMissingSampleMapIds(spots = acquiredSpots,
                                                   sampleMap = sampleMap,
                                                   ignoreMissing = ignoreMissing)
   
   
   if (isFALSE(ignoreMissing) && length(anyMissing$missing) > 0L) {
     
-    warning("Stopping IDBacApp::process_bruker()",
+    warning("Stopping process_bruker()",
             "\nData was found for sample spots ",
             paste0(names(anyMissing$missing), collapse = ", "),
             "\nbut missing in process_bruker(sampleMap = )\n",
@@ -84,7 +84,7 @@ process_bruker <- function(path,
     
 
     fid_path <- lapply(splitAcquisition, function(x){
-      IDBacApp::extractBrukerAcquistionInfo(acquisitonInformation = x,
+      extractBrukerAcquistionInfo(acquisitonInformation = x,
                                                      name =  "file",
                                                      type = "")
     })
@@ -97,18 +97,18 @@ process_bruker <- function(path,
     
     tempMZDir <- tempdir()
     
-    forProcessing <- IDBacApp::proteoWizConvert(msconvertPath = "",
+    forProcessing <- proteoWizConvert(msconvertPath = "",
                                                 samplePathList = fid_path,
                                                 convertWhere = tempMZDir)
 
     
     
-    IDBacApp::sql_fill_version_table(userDBCon = userDBCon)
-    IDBacApp::sql_fill_locale_table(userDBCon = userDBCon)
+    sql_fill_version_table(userDBCon = userDBCon)
+    sql_fill_locale_table(userDBCon = userDBCon)
     
     
     for (i in base::seq_along(forProcessing$mzFile)) {
-      IDBacApp::spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
+      spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
                                           sampleID = forProcessing$sampleID[[i]],
                                           userDBCon = pool,
                                           acquisitionInfo = splitAcquisition[[i]]) # pool connection

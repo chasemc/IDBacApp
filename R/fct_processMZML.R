@@ -16,13 +16,13 @@ process_mzml <- function(mzFilePaths,
   
   
   #TODO: fix idbac by moving this outside   
-  #idbacPool <- IDBacApp::createNewSQLITEdb(newExperimentName = newExperimentName,
+  #idbacPool <- createNewSQLITEdb(newExperimentName = newExperimentName,
   #                                         sqlDirectory = sqlDirectory)[[1]]
   #                                         
   
   
-  IDBacApp::sql_fill_version_table(userDBCon = idbacPool)
-  IDBacApp::sql_fill_locale_table(userDBCon = idbacPool)
+  sql_fill_version_table(userDBCon = idbacPool)
+  sql_fill_locale_table(userDBCon = idbacPool)
   
   progLength <- base::length(mzFilePaths)
   

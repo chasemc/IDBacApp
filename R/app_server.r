@@ -1,9 +1,3 @@
-#' @importFrom magrittr "%>%"
-#' @import shiny
-#' @import dendextend
-#' @import rhandsontable
-
-NULL
 
 #' Main UI of IDBac
 #'
@@ -13,7 +7,7 @@ NULL
 #'
 #' @return IDBac server
 #' @export
-#'
+#' @import shiny
 app_server <- function(input, output, session) {
   
   set.seed(42)
@@ -23,13 +17,13 @@ app_server <- function(input, output, session) {
   
   # Development Functions ---------------------------------------------------
   
-  IDBacApp::newUpdate()
+  newUpdate()
   
   
-  sqlDirectory <- reactiveValues(sqlDirectory = IDBacApp::findIdbacHome())
+  sqlDirectory <- reactiveValues(sqlDirectory = findIdbacHome())
   
   # module changes sqlDirectory reactiveValue
-  callModule(IDBacApp::selectDirectory_Server,
+  callModule(selectDirectory_Server,
              "userWorkingDirectory",
              sqlDirectory)
   
@@ -73,11 +67,11 @@ app_server <- function(input, output, session) {
   
   # Conversions Tab ---------------------------------------------------------
   
-  pwizAvailable <- IDBacApp::findMSconvert()
+  pwizAvailable <- findMSconvert()
   
   
   
-  callModule(IDBacApp::convertDataTab_Server,
+  callModule(convertDataTab_Server,
              "convertDataTab",
              tempMZDir = tempMZDir,
              sqlDirectory = sqlDirectory,
@@ -114,7 +108,7 @@ app_server <- function(input, output, session) {
   })
   
   
-  workingDB <- callModule(IDBacApp::databaseTabServer,
+  workingDB <- callModule(databaseTabServer,
                           "sqlUIcreator",
                           sqlDirectory = sqlDirectory,
                           availableExperiments = availableDatabases)
@@ -134,7 +128,7 @@ app_server <- function(input, output, session) {
                    appendTab(inputId = "mainIDBacNav",
                              tabPanel("Work with Previous Experiments",
                                       value = "sqlUiTab",
-                                      IDBacApp::databaseTabUI("sqlUIcreator")
+                                      databaseTabUI("sqlUIcreator")
                                       
                              )
                    )
@@ -177,7 +171,7 @@ app_server <- function(input, output, session) {
                  if (s > 0) {
                    appendTab(inputId = "mainIDBacNav",
                              tabPanel("Small Molecule Data Analysis",
-                                      IDBacApp::ui_smallMolMan()
+                                      ui_smallMolMan()
                              )
                    )
                  }
@@ -189,18 +183,18 @@ app_server <- function(input, output, session) {
   # Mirror Plots ------------------------------------------------------------
   
   
-  proteinPeakSettings <-  callModule(IDBacApp::peakRetentionSettings_Server,
+  proteinPeakSettings <-  callModule(peakRetentionSettings_Server,
                                      "protMirror")
   
-  callModule(IDBacApp::mirrorPlots_Server,
+  callModule(mirrorPlots_Server,
              "protMirror",
              workingDB,
              proteinOrSmall = '>')
   
   
-  smallPeakSettings <- callModule(IDBacApp::peakRetentionSettings_Server,
+  smallPeakSettings <- callModule(peakRetentionSettings_Server,
                                   "smallMirror")
-  callModule(IDBacApp::smallmirrorPlots_Server,
+  callModule(smallmirrorPlots_Server,
              "smallMirror",
              workingDB,
              proteinOrSmall = "smallMoleculePeaks")
@@ -215,7 +209,7 @@ app_server <- function(input, output, session) {
   # User chooses which samples to include -----------------------------------
   # chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   
-  chosenProteinSampleIDs <- shiny::callModule(IDBacApp::sampleChooser_server,
+  chosenProteinSampleIDs <- shiny::callModule(sampleChooser_server,
                                               "proteinSampleChooser",
                                               pool = workingDB$pool,
                                               allSamples = FALSE,
@@ -239,7 +233,7 @@ app_server <- function(input, output, session) {
     
     temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
-                     IDBacApp::collapseReplicates(pool = isolate(workingDB$pool()),
+                     collapseReplicates(pool = isolate(workingDB$pool()),
                                                   sampleIDs = ids,
                                                   peakPercentPresence = proteinPeakSettings$percentPresence,
                                                   lowerMassCutoff = proteinPeakSettings$lowerMass,
@@ -257,7 +251,7 @@ app_server <- function(input, output, session) {
       
       temp <- c(temp, lapply(proteinSamplesToInject$chosen$chosen,
                              function(ids){
-                               IDBacApp::collapseReplicates(pool = proteinSamplesToInject$db(),
+                               collapseReplicates(pool = proteinSamplesToInject$db(),
                                                             sampleIDs = ids,
                                                             peakPercentPresence = proteinPeakSettings$percentPresence,
                                                             lowerMassCutoff = proteinPeakSettings$lowerMass,
@@ -283,7 +277,7 @@ app_server <- function(input, output, session) {
   
   
   
-  proteinSamplesToInject <- callModule(IDBacApp::selectInjections_server,
+  proteinSamplesToInject <- callModule(selectInjections_server,
                                        "proteinInject",
                                        sqlDirectory = sqlDirectory,
                                        availableExperiments = availableDatabases,
@@ -305,7 +299,7 @@ app_server <- function(input, output, session) {
     validate(need(proteinPeakSettings$lowerMass < proteinPeakSettings$upperMass,
                   "Lower mass cutoff should be higher than upper mass cutoff."))
     
-    IDBacApp::createFuzzyVector(massStart = proteinPeakSettings$lowerMass,
+    createFuzzyVector(massStart = proteinPeakSettings$lowerMass,
                                 massEnd = proteinPeakSettings$upperMass,
                                 ppm = proteinPeakSettings$ppm,
                                 massList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@mass),
@@ -337,7 +331,7 @@ app_server <- function(input, output, session) {
     
   })
   
-  dendMaker <- shiny::callModule(IDBacApp::dendrogramCreator,
+  dendMaker <- shiny::callModule(dendrogramCreator,
                                  "proteinHierOptions",
                                  proteinMatrix = proteinMatrix)
   
@@ -364,7 +358,7 @@ app_server <- function(input, output, session) {
   })
   
   
-  proteinDendColored <- shiny::callModule(IDBacApp::dendDotsServer,
+  proteinDendColored <- shiny::callModule(dendDotsServer,
                                           "proth",
                                           dendrogram = proteinDendrogram,
                                           pool = workingDB$pool,
@@ -384,11 +378,11 @@ app_server <- function(input, output, session) {
   
   proteinPcoaCalculation <- reactive({
     
-    IDBacApp::pcoaCalculation(distanceMatrix = dendMaker()$distance)
+    pcoaCalculation(distanceMatrix = dendMaker()$distance)
     
   })
   
-  callModule(IDBacApp::popupPlot_server,
+  callModule(popupPlot_server,
              "proteinPCOA",
              dataFrame = proteinPcoaCalculation,
              namedColors = unifiedProteinColor,
@@ -401,7 +395,7 @@ app_server <- function(input, output, session) {
   
   proteinPcaCalculation <- reactive({
     
-    IDBacApp::pcaCalculation(dataMatrix = proteinMatrix(),
+    pcaCalculation(dataMatrix = proteinMatrix(),
                              logged = TRUE,
                              scaled = TRUE,
                              centered = TRUE,
@@ -411,7 +405,7 @@ app_server <- function(input, output, session) {
   
   
   
-  callModule(IDBacApp::popupPlot_server,
+  callModule(popupPlot_server,
              "proteinPCA",
              dataFrame = proteinPcaCalculation,
              namedColors = unifiedProteinColor,
@@ -425,7 +419,7 @@ app_server <- function(input, output, session) {
   # Calculate tSNE based on PCA calculation already performed ---------------
   
   
-  callModule(IDBacApp::popupPlotTsne_server,
+  callModule(popupPlotTsne_server,
              "tsnePanel",
              data = proteinMatrix,
              plotTitle = "t-SNE",
@@ -443,7 +437,7 @@ app_server <- function(input, output, session) {
   output$Heirarchicalui <-  renderUI({
     
     
-    IDBacApp::ui_proteinClustering()
+    ui_proteinClustering()
     
     
   })
@@ -506,7 +500,7 @@ app_server <- function(input, output, session) {
   
   # Display protien dend fro brushing for small mol -------------------------
   
-  smallProtDend <-  shiny::callModule(IDBacApp::manPageProtDend_Server,
+  smallProtDend <-  shiny::callModule(manPageProtDend_Server,
                                       "manProtDend",
                                       dendrogram = proteinDendrogram,
                                       colorByLines = proteinDendColored$colorByLines,
@@ -527,9 +521,7 @@ app_server <- function(input, output, session) {
     req(nrow(smallMolDataFrame()) > 2,
         ncol(smallMolDataFrame()) > 2)
     
-    hello <<- smallMolDataFrame()
-    print("1")
-    princ <- IDBacApp::pcaCalculation(smallMolDataFrame())
+    princ <- pcaCalculation(smallMolDataFrame())
     namedColors <- NULL
     
     if (is.null(namedColors)) {
@@ -560,9 +552,9 @@ app_server <- function(input, output, session) {
   # Small mol ---------------------------------------------------------------
   
   output$matrixSelector <- renderUI({
-    IDBacApp::bsCollapse(id = "collapseMatrixSelection",
+    bsCollapse(id = "collapseMatrixSelection",
                          open = "Panel 1",
-                         IDBacApp::bsCollapsePanel(p("Select a Sample to Subtract", 
+                         bsCollapsePanel(p("Select a Sample to Subtract", 
                                                      align = "center"),
                                                    tags$div(id='selectMatrixBlank',
                                                             class='mirror_select',
@@ -698,7 +690,7 @@ app_server <- function(input, output, session) {
   # Small mol MAN serve module ----------------------------------------------
   
   
-  callModule(IDBacApp::MAN_Server,
+  callModule(MAN_Server,
              "smMAN",
              subtractedMatrixBlank = subtractedMatrixBlank,
              proteinDend = proteinDendrogram)

@@ -14,6 +14,6 @@ readBrukerAcqus <- function(brukerDataPath){
                       full.names = TRUE)
   
   lapply(files, function(x){
-    IDBacApp::readAcqusFile(x)
+    readAcqusFile(x)
   })
 }

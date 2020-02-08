@@ -79,7 +79,7 @@ convertMicrotyper_Server <- function(input,
   #----
   delimitedLocationP <- reactive({
     if (input$delimitedDirectoryP > 0) {
-      IDBacApp::choose_dir()
+      choose_dir()
     }
   })
   
@@ -88,14 +88,14 @@ convertMicrotyper_Server <- function(input,
   #----
   delimitedLocationSM <- reactive({
     if (input$delimitedDirectorySM > 0) {
-      IDBacApp::choose_dir()
+      choose_dir()
     }
   })
   
   
   
   output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::sanitize(input$newExperimentName))
+    a <- gsub(" ", "", sanitize(input$newExperimentName))
     
     if (a == "") {
       "Once entered, the filename-friendly version of the entered name will appear here once. \n
@@ -127,18 +127,18 @@ convertMicrotyper_Server <- function(input,
   })
   
   proteinFiles <- reactive({
-    IDBacApp::getMicrotyperFiles(delimitedLocationP())
+    getMicrotyperFiles(delimitedLocationP())
   })
   
   smallMolFiles <- reactive({
-    IDBacApp::getMicrotyperFiles(delimitedLocationSM())
+    getMicrotyperFiles(delimitedLocationSM())
   })
   
   
   
   
   sanity <- reactive({
-    a <- IDBacApp::sanitize(input$newExperimentName)
+    a <- sanitize(input$newExperimentName)
     gsub(" ",
          "",
          a)
@@ -163,9 +163,9 @@ convertMicrotyper_Server <- function(input,
                  # shiny::validate(shiny::need(length(proteinFiles()) + length(smallMolFiles()) > 0,
                  #                             "No samples selected to process"))
                  
-                 IDBacApp::popup3()
+                 popup3()
                  
-                 keys <- IDBacApp::run_microtyperTomzML(proteinPaths = proteinFiles(),
+                 keys <- run_microtyperTomzML(proteinPaths = proteinFiles(),
                                                         smallMolPaths = smallMolFiles(),
                                                         exportDirectory = tempMZDir)
                  
@@ -175,14 +175,14 @@ convertMicrotyper_Server <- function(input,
                  idbacPool <- idbac_connect(fileName = input$newExperimentName,
                                             filePath = sqlDirectory$sqlDirectory)[[1]]
                  
-                 IDBacApp::process_mzml(mzFilePaths = keys$mzFilePaths,
+                 process_mzml(mzFilePaths = keys$mzFilePaths,
                                         sampleIds = keys$sampleID,
                                         idbacPool = idbacPool,
                                         acquisitionInfo = NULL)
                  pool::poolClose(idbacPool)
                  
                  
-                 IDBacApp::popup4()
+                 popup4()
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",

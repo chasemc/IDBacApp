@@ -126,7 +126,7 @@ mirrorPlots_Server <- function(input,
       normalizeSpectra <- TRUE
     }
     
-    IDBacApp::assembleMirrorPlots(sampleID1 = input$Spectra1,
+    assembleMirrorPlots(sampleID1 = input$Spectra1,
                                   sampleID2 = input$Spectra2,
                                   peakPercentPresence = input$percentPresence,
                                   lowerMassCutoff = input$lowerMass,
@@ -148,7 +148,7 @@ mirrorPlots_Server <- function(input,
   # Output for the non-zoomed mirror plot
   output$inversePeakComparisonPlot <- plotly::renderPlotly({
     
-    IDBacApp::mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
+    mirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
     
     
   })
@@ -167,7 +167,7 @@ mirrorPlots_Server <- function(input,
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
       
-      IDBacApp::baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
+      baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))

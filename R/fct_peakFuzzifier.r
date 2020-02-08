@@ -54,6 +54,7 @@ mQuantToMassVec <- function(peakList){
 #'
 #' @return matrix where rows are samples and columns are variables (m/z preojections)
 #' @export
+#' @importFrom stats dnorm
 #'
 #' @examples
 #' \dontrun{

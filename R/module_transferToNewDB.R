@@ -15,7 +15,7 @@ transferToNewDB_UI <- function(id) {
         h3("Transfer samples from previous experiments to new/other experiments."),
         tags$hr(size = 20),
         
-        IDBacApp::databaseSelector_UI(ns("dbselector")),   
+        databaseSelector_UI(ns("dbselector")),   
         tags$hr(size = 20),
         textInput(ns("newDBPath"),
                   label = "New experiment name:",
@@ -24,7 +24,7 @@ transferToNewDB_UI <- function(id) {
         tags$hr(size = 20),
         p("Move samples between boxes by clicking the strain's name
   and then an arrow. Samples in the right box will be used for analysis."),
-        IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
+        sampleChooser_UI(ns("chooseNewDBSamples")),
         tags$hr(size = 20),
         actionButton(ns("addtoNewDB"),
                      label = "Add to new Experiment")
@@ -55,7 +55,7 @@ transferToNewDB_server <- function(input,
                                    availableExperiments){
   
   
-  selectedDB <-  shiny::callModule(IDBacApp::databaseSelector_server,
+  selectedDB <-  shiny::callModule(databaseSelector_server,
                                    "dbselector",
                                    availableExperiments = availableExperiments,
                                    sqlDirectory = sqlDirectory,
@@ -63,7 +63,7 @@ transferToNewDB_server <- function(input,
   
   
   
-  chosenSamples <-  shiny::callModule(IDBacApp::sampleChooser_server,
+  chosenSamples <-  shiny::callModule(sampleChooser_server,
                                       "chooseNewDBSamples",
                                       pool = selectedDB$userDBCon,
                                       allSamples = TRUE,
@@ -83,7 +83,7 @@ transferToNewDB_server <- function(input,
                  
                  newDBName <- gsub(" ",
                                    "",
-                                   IDBacApp::sanitize(input$newDBPath))
+                                   sanitize(input$newDBPath))
                  
                  req(newDBName != "")
                  
@@ -140,21 +140,21 @@ transferToNewDB_server <- function(input,
                ignoreInit = TRUE, {
                  
                  req(continue$val == TRUE)
-                 IDBacApp::copyingDbPopup()
+                 copyingDbPopup()
                  
                  newDBName <- gsub(" ",
                                    "",
-                                   IDBacApp::sanitize(input$newDBPath))
+                                   sanitize(input$newDBPath))
                  
                  req(newDBName != "")
                  
-                 newCheckedPool <- IDBacApp::idbac_connect(newDBName, 
+                 newCheckedPool <- idbac_connect(newDBName, 
                                                         sqlDirectory$sqlDirectory)
                  
                  shiny::withProgress(message = 'Copying data to new database',
                                      detail = 'Connecting experiments...',
                                      value = 0, {
-                                       IDBacApp::copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
+                                       copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
                                                                    newDBPool = newCheckedPool[[1]], 
                                                                    sampleIDs = chosenSamples$chosen)
                                      })

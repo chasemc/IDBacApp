@@ -1,6 +1,3 @@
-
-
-
 #' Extract a metadata column 
 #'
 #' @param strainID strain_id
@@ -38,7 +35,7 @@ idbac_get_metadata <- function(strainID = NULL,
                               function(conn){
                                 glued <- c("strain_id", metadataColumn)
                                 
-                                statement  <- glue::glue_sql(
+                                query <- glue::glue_sql(
                                   "SELECT {`glued`*}
                                 FROM metadata
                                 WHERE `strain_id` = $ids",

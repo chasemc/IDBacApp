@@ -32,7 +32,7 @@ collapseReplicates <- function(pool,
   validate(need(!is.null(sampleIDs), "sampleIDs must not be NULL"))
   
   
-  temp <- IDBacApp::idbac_get_peaks(pool = pool,
+  temp <- idbac_get_peaks(pool = pool,
                                     sampleIDs = sampleIDs,
                                     protein = protein)
   req(length(temp) > 0)

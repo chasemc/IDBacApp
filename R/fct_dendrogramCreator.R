@@ -18,7 +18,7 @@ idbac_dendrogram_creator <- function(bootstraps = 0L,
   
   
   createHclustObject <- function(x){
-    x <- IDBacApp::distMatrix(data = x,
+    x <- distMatrix(data = x,
                               method = distanceMethod)
     
     stats::hclust(x,
@@ -28,7 +28,7 @@ idbac_dendrogram_creator <- function(bootstraps = 0L,
   if (is.numeric(bootstraps)) {
     if ((bootstraps > 1) & (bootstraps < 1000)) {
       
-      bootstraps <- IDBacApp::bootstrap(proteinMatrix,
+      bootstraps <- bootstrap(proteinMatrix,
                                         fun = createHclustObject,
                                         n = bootstraps)
       
@@ -36,7 +36,7 @@ idbac_dendrogram_creator <- function(bootstraps = 0L,
     }
   }
   
-  distance_matrix <- IDBacApp::distMatrix(data = proteinMatrix,
+  distance_matrix <- distMatrix(data = proteinMatrix,
                                           method = distanceMethod)
   
   dend <- stats::hclust(distance_matrix,

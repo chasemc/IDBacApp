@@ -72,7 +72,7 @@ convertOneBruker_Server <- function(input,
   rawFilesLocation <- reactive({
     
     req(input$rawFileDirectory > 0)
-      loc <- IDBacApp::choose_dir()
+      loc <- choose_dir()
       if (!is.na(loc)) {
         return(loc)
       }
@@ -82,7 +82,7 @@ convertOneBruker_Server <- function(input,
   
   sanitizedNewExperimentName <- reactive({
     
-    IDBacApp::sanitize(input$newExperimentName)
+    sanitize(input$newExperimentName)
     
   })
   
@@ -129,7 +129,7 @@ convertOneBruker_Server <- function(input,
   #----
   multipleMaldiRawFileLocation <- reactive({
     req(input$multipleMaldiRawFileDirectory > 0)
-      IDBacApp::choose_dir()
+      choose_dir()
   })
   
   
@@ -158,7 +158,7 @@ convertOneBruker_Server <- function(input,
   # list of acqus info
   acquisitonInformation <- reactive({
     
-    IDBacApp::readBrukerAcqus(rawFilesLocation())
+    readBrukerAcqus(rawFilesLocation())
     
   })
   
@@ -171,7 +171,7 @@ convertOneBruker_Server <- function(input,
     req(rawFilesLocation())
     req(sampleMapReactive$rt)
     spots <- unlist(lapply(acquisitonInformation(), function(x) x$spot))
-    IDBacApp::findMissingSampleMapIds(spots = spots, 
+    findMissingSampleMapIds(spots = spots, 
                                       sampleMap = sampleMapReactive$rt,
                                       ignoreMissing = TRUE)
   })
@@ -186,7 +186,7 @@ convertOneBruker_Server <- function(input,
     }
   })
   
-  sampleMapReactive <- reactiveValues(rt = IDBacApp::nulledMap384Well())
+  sampleMapReactive <- reactiveValues(rt = nulledMap384Well())
   
   observeEvent(input$showSampleMap, 
                ignoreInit = TRUE, {  
@@ -208,14 +208,14 @@ convertOneBruker_Server <- function(input,
   
   output$plateDefault <- rhandsontable::renderRHandsontable({
     
-    IDBacApp::sampleMapViewer(sampleMapReactive$rt)
+    sampleMapViewer(sampleMapReactive$rt)
     
   })
   
   
   observeEvent(input$saveSampleMap, 
                ignoreInit = TRUE, {
-                 sampleMapReactive$rt <- IDBacApp::sampleMaptoDF(sampleData = input$plateDefault)
+                 sampleMapReactive$rt <- sampleMaptoDF(sampleData = input$plateDefault)
                  
                  shiny::removeModal()
                })
@@ -267,15 +267,15 @@ convertOneBruker_Server <- function(input,
                  
                  
                  
-                 IDBacApp::brukerToMzml_popup()
+                 brukerToMzml_popup()
                  
                  
                  
-                 forProcessing <- IDBacApp::proteoWizConvert(msconvertPath = "",
+                 forProcessing <- proteoWizConvert(msconvertPath = "",
                                                              samplePathList = files,
                                                              convertWhere = tempMZDir)
                  
-                 IDBacApp::popup3()
+                 popup3()
                  
                  idbac_create(fileName = sanitizedNewExperimentName(),
                               filePath = sqlDirectory$sqlDirectory)
@@ -283,7 +283,7 @@ convertOneBruker_Server <- function(input,
                  idbacPool <- idbac_connect(fileName = sanitizedNewExperimentName(),
                                filePath = sqlDirectory$sqlDirectory)[[1]]
                  
-                 IDBacApp::process_mzml(mzFilePaths = forProcessing$mzFile,
+                 process_mzml(mzFilePaths = forProcessing$mzFile,
                                         sampleIds = forProcessing$sampleID,
                                         idbacPool = idbacPool,
                                         acquisitionInfo = acquisitionInfo)
@@ -294,7 +294,7 @@ convertOneBruker_Server <- function(input,
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE))
-                 IDBacApp::popup4()
+                 popup4()
                  
                })
   
@@ -308,7 +308,7 @@ convertOneBruker_Server <- function(input,
 #'
 #'  Rhandsontable 
 #'  
-#' @param df reactiveValues data frame input IDBacApp::nulledMap384Well()
+#' @param df reactiveValues data frame input nulledMap384Well()
 #'
 #' @return rhandsontable
 #' @export

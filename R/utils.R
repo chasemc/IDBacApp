@@ -100,7 +100,7 @@ decompress <- function(input){
 chartoRawtoCompressed <- function(input, compression){
   input <- base::enc2utf8(input)
   input <- base::charToRaw(input)
-  IDBacApp::compress(input = input,
+  compress(input = input,
                      compression = compression)
 }
 
@@ -172,7 +172,7 @@ find_mz_files <- function(path,
 serializeXML <- function(path) {
   
   path <- readChar(path, nchars = file.info(path)$size, useBytes = T)
-  IDBacApp::chartoRawtoCompressed(input = path,
+  chartoRawtoCompressed(input = path,
                                   compression = 0)
   
 }
@@ -199,7 +199,7 @@ map384Well <- function(){
 #' @export
 #'
 nulledMap384Well <- function() {
-  a <- IDBacApp::map384Well()
+  a <- map384Well()
   a[] <- NA
   as.data.frame(a)
 }

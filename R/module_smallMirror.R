@@ -119,7 +119,7 @@ smallmirrorPlots_Server <- function(input,
     
     
     
-    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(pool = workingDB$pool(),
+    mirrorPlotEnv$peaksSampleOne <- collapseReplicates(pool = workingDB$pool(),
                                                                  sampleIDs = input$Spectra1,
                                                                  peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
@@ -130,7 +130,7 @@ smallmirrorPlots_Server <- function(input,
     
     
     
-    mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(pool = workingDB$pool(),
+    mirrorPlotEnv$peaksSampleTwo <- collapseReplicates(pool = workingDB$pool(),
                                                                  sampleIDs = input$Spectra2,
                                                                  peakPercentPresence = input$percentPresence,
                                                                  lowerMassCutoff = input$lowerMass,
@@ -182,7 +182,7 @@ smallmirrorPlots_Server <- function(input,
     
     
     
-    mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(IDBacApp::idbac_get_spectra(pool = workingDB$pool(),
+    mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = workingDB$pool(),
                                                                                                   sampleID = input$Spectra1, 
                                                                                                   protein = FALSE,
                                                                                                   smallmol = TRUE))
@@ -192,7 +192,7 @@ smallmirrorPlots_Server <- function(input,
     
     
     
-    mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(IDBacApp::idbac_get_spectra(pool = workingDB$pool(),
+    mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = workingDB$pool(),
                                                                                                   sampleID = input$Spectra2, 
                                                                                                   protein = FALSE,
                                                                                                   smallmol = TRUE))
@@ -296,7 +296,7 @@ smallmirrorPlots_Server <- function(input,
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
       
-      IDBacApp::baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
+      baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
       
       dev.off()
       if (file.exists(paste0(file1, ".svg")))

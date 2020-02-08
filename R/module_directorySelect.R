@@ -35,7 +35,7 @@ selectDirectory_Server <- function(input,
   
   
   observeEvent(input$rawFileDirectory, {
-    loc <- IDBacApp::choose_dir()
+    loc <- choose_dir()
     
     if (!is.na(loc)) {
       sqlDirectory$sqlDirectory <- loc

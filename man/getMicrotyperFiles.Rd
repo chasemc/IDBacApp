@@ -4,7 +4,7 @@
 \alias{getMicrotyperFiles}
 \title{getMicrotyperFiles}
 \usage{
-getMicrotyperFiles(dataDirectory = delimitedLocationP())
+getMicrotyperFiles(dataDirectory)
 }
 \arguments{
 \item{dataDirectory}{User-chosen directory that contains microtyper-exported files directly inside (doesn't search recursively)}

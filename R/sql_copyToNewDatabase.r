@@ -38,37 +38,37 @@ copyToNewDatabase <- function(existingDBPool,
                     
                         # Setup New metadata ------------------------------------------------------
                         
-                        IDBacApp::copyDB_setupMeta(newDBconn = newDBconn,
+                        copyDB_setupMeta(newDBconn = newDBconn,
                                                    existingDBconn = existingDBconn)
                         
                         # Setup New xml -----------------------------------------------------------
                         
-                        IDBacApp::sql_create_xml_table(sqlConnection = newDBconn)
+                        sql_create_xml_table(sqlConnection = newDBconn)
                         
                         
                         # Setup New mass_index ---------------------------------------------
                         
                         
-                        IDBacApp::sql_create_massindex_table(sqlConnection = newDBconn)
+                        sql_create_massindex_table(sqlConnection = newDBconn)
                         
                         
                         # Setup New spectra ---------------------------------------------
 
-                        IDBacApp::sql_create_spectra_table(sqlConnection = newDBconn)
+                        sql_create_spectra_table(sqlConnection = newDBconn)
                         
 
                         # Setup version table -----------------------------------------------------
 
-                        IDBacApp::sql_create_version_table(sqlConnection = newDBconn)
-                        IDBacApp::sql_fill_version_table(userDBCon = newDBPool)
-                        IDBacApp::sql_create_locale_table(sqlConnection = newDBconn)
-                        IDBacApp::sql_fill_locale_table(userDBCon = newDBPool)
+                        sql_create_version_table(sqlConnection = newDBconn)
+                        sql_fill_version_table(userDBCon = newDBPool)
+                        sql_create_locale_table(sqlConnection = newDBconn)
+                        sql_fill_locale_table(userDBCon = newDBPool)
                         
 # Copy  -------------------------------------------------------------------
                         # Attach new database to existing database
                         #----
                         
-                          IDBacApp::copyDB_dbAttach(newdbPath = newdbPath, 
+                          copyDB_dbAttach(newdbPath = newdbPath, 
                                                   existingDBconn = existingDBconn)
                         
                         Sys.sleep(1) 
@@ -168,7 +168,7 @@ copyToNewDatabase <- function(existingDBPool,
                                            session = getDefaultReactiveDomain())
                         }
                         
-                        IDBacApp::copyDB_dbDetach(newdbPath = newdbPath, 
+                        copyDB_dbDetach(newdbPath = newdbPath, 
                                                   existingDBconn = existingDBconn)
                   
                         
@@ -238,7 +238,7 @@ copyDB_setupMeta <- function(newDBconn,
   # Below, when setting up the new tables, we need to add the existing columns which may not be present in 
   # the current architecture, and also have the current architecture (ie we can't just copy/paste from the old DB)
   
-  IDBacApp::sql_create_metadata_table(sqlConnection = newDBconn)
+  sql_create_metadata_table(sqlConnection = newDBconn)
   
   a <- DBI::dbListFields(existingDBconn, "metadata") 
   b <- DBI::dbListFields(newDBconn, "metadata") 

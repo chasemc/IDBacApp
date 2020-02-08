@@ -42,7 +42,7 @@
       }
     } else {
       # Get the labels of the brushed dendrogram
-      sampleIDs <- IDBacApp::labelsFromBrushedDendrogram(dendrogram = dendrogram,
+      sampleIDs <- labelsFromBrushedDendrogram(dendrogram = dendrogram,
                                                          #    dendrogramShortLabels = dendrogram,
                                                          brushYmin = brushInputs()$ymin,
                                                          brushYmax = brushInputs()$ymax)
@@ -64,7 +64,7 @@
   
   samples <- lapply(sampleIDs, 
                     function(sampleIDs){ 
-                      IDBacApp::collapseReplicates(pool = pool,
+                      collapseReplicates(pool = pool,
                                                    sampleIDs = sampleIDs,
                                                    peakPercentPresence = peakPercentPresence,
                                                    lowerMassCutoff = lowerMassCutoff,

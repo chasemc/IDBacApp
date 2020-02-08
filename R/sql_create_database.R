@@ -25,8 +25,8 @@ idbac_create <- function(fileName,
   
   # TODO: remove stop and make interactive
   
-  if (!identical(IDBacApp::sanitize(fileName), fileName)) {
-    stop("db_create(fileName) must be a valid file name, run IDBacApp::sanitize(fileName) first") 
+  if (!identical(sanitize(fileName), fileName)) {
+    stop("db_create(fileName) must be a valid file name, run sanitize(fileName) first") 
   }
   
   fileName <- paste0(fileName, 

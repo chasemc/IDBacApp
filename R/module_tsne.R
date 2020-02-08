@@ -51,8 +51,8 @@ popupPlotTsne_server <- function(input,
     validate(need(input$tsneIterations > 0, "Iterations must be greater than 0"))
     validate(need(input$tsneIterations < 10000, "Iterations must be less than 1000"))
     
-    #IDBacApp::tsneCalculation(dataMatrix = dataframe(),
-    IDBacApp::tsneCalculation(dataMatrix = data(),
+    #tsneCalculation(dataMatrix = dataframe(),
+    tsneCalculation(dataMatrix = data(),
                               perplexity = input$tsnePerplexity,
                               theta = input$tsneTheta,
                               iterations = input$tsneIterations)
@@ -81,7 +81,7 @@ popupPlotTsne_server <- function(input,
                            by = "nam")
     }
     
-    IDBacApp::plotly_3d_scatter(data = colorsToUse,
+    plotly_3d_scatter(data = colorsToUse,
                                 plotTitle = plotTitle)
     
   })
@@ -98,7 +98,7 @@ popupPlotTsne_server <- function(input,
                {
                  output$absPanel <- renderUI(
 
-                IDBacApp::tsneUiPop(session$ns, 
+                tsneUiPop(session$ns, 
                                     plotTitle = plotTitle)
                  )
                  

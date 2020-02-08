@@ -28,7 +28,7 @@ networkFromDF <- function(dataF){
 #' @return colored igraph
 #' @export
 modularityClustering <- function(igraphNetwork,
-                                 hexColors = IDBacApp::colorBlindPalette()[1:100]){
+                                 hexColors = colorBlindPalette()[1:100]){
   
   clusters <- igraph::as.undirected(igraphNetwork)
   clusters <- igraph::fastgreedy.community(clusters)

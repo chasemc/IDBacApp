@@ -40,14 +40,14 @@ sampleChooser_server <- function(input,
   observe({
     chosenProteinSampleIDs$chosen <- NULL
     conn <- pool::poolCheckout(pool())
-    nams$av <- IDBacApp::idbac_available_samples(pool = conn,
-                                                 whetherProtein = whetherProtein,
-                                                 allSamples = allSamples)
+    nams$av <- idbac_available_samples(pool = conn,
+                                       whetherProtein = whetherProtein,
+                                       allSamples = allSamples)
     
     pool::poolReturn(conn)
     
   })
-
+  
   observeEvent(input$addSampleChooser, ignoreInit = TRUE, {
     chosenProteinSampleIDs$chosen <- input$addSampleChooser$right 
   })
@@ -55,14 +55,14 @@ sampleChooser_server <- function(input,
   
   
   output$chooseSamples <- renderUI({
-
-    tagList(IDBacApp::chooserInput(inputId = session$ns("addSampleChooser"),
-                                   leftLabel = "Available samples",
-                                   rightLabel = "Selected samples",
-                                   leftChoices = nams$av,
-                                   rightChoices = c(),
-                                   size = 10,
-                                   multiple = TRUE)
+    
+    tagList(chooserInput(inputId = session$ns("addSampleChooser"),
+                         leftLabel = "Available samples",
+                         rightLabel = "Selected samples",
+                         leftChoices = nams$av,
+                         rightChoices = c(),
+                         size = 10,
+                         multiple = TRUE)
     )
     
   })

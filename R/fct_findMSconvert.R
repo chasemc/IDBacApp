@@ -26,7 +26,7 @@ findMSconvert <- function(proteoWizardLocation = ""){
   
   if (!file.exists(proteoWizardLocation)) {
     # Msconvert only works on Windows so abort function if not on Windows
-    os <- IDBacApp::getOS()
+    os <- getOS()
     if (os != "windows") {
       
       message("Unfortunately msconvert is not currently available on this operating system, try again on Windows or start with 

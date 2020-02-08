@@ -64,7 +64,7 @@ convertMZ_Server <-  function(input,
   #----
   mzmlRawFilesLocation <- reactive({
     if (input$mzmlRawFileDirectory > 0) {
-      loc <- IDBacApp::choose_dir()
+      loc <- choose_dir()
       
       if(!is.na(loc)){
         return(loc)
@@ -74,7 +74,7 @@ convertMZ_Server <-  function(input,
   
   
   output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::sanitize(input$newExperimentName))
+    a <- gsub(" ", "", sanitize(input$newExperimentName))
     
     if (a == "") {
       "Once entered, the filename-friendly version of the entered name will appear here once. \n
@@ -94,7 +94,7 @@ convertMZ_Server <-  function(input,
       folders <- NULL
       
       # Get the folders contained within the chosen folder. Timer was taken out.
-      foldersInFolder <- tryCatch(IDBacApp::find_mz_files(mzmlRawFilesLocation(),
+      foldersInFolder <- tryCatch(find_mz_files(mzmlRawFilesLocation(),
                                                           recursive = TRUE,
                                                           full = FALSE),
                                   error = function(x) paste("Timed out"),
@@ -119,7 +119,7 @@ convertMZ_Server <-  function(input,
   
   #make sure the name is ok as a file name
   sanity <- reactive({
-    a <- IDBacApp::sanitize(input$newExperimentName)
+    a <- sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   
@@ -130,9 +130,9 @@ convertMZ_Server <-  function(input,
     req(!is.null(sanity()))
     req(sanity() != "")
     
-    IDBacApp::popup3()
+    popup3()
     
-    mzFilePaths <- IDBacApp::find_mz_files(mzmlRawFilesLocation(),
+    mzFilePaths <- find_mz_files(mzmlRawFilesLocation(),
                                            recursive = TRUE,
                                            full = TRUE)
     
@@ -143,14 +143,14 @@ convertMZ_Server <-  function(input,
                                filePath = sqlDirectory$sqlDirectory)[[1]]
     
   
-    IDBacApp::process_mzml(mzFilePaths = mzFilePaths,
+    process_mzml(mzFilePaths = mzFilePaths,
                            sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
                            idbacPool = idbacPool,
                            acquisitionInfo = NULL)
     pool::poolClose(idbacPool)
     
     
-    IDBacApp::popup4() 
+    popup4() 
     
     
     # Update available experiments

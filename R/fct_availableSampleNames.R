@@ -4,7 +4,7 @@
 #' Search an IDBac database to see which sample IDs have protein or small molecule data
 #'
 #' @param whetherProtein T/F protein spectra (T), small mol (F)
-#' @param checkedPool single IDBac pool connection 
+#' @param pool single IDBac pool connection 
 #' @param allSamples both protein and small mol? Takes precedence over whetherProtein
 #'
 #' @return vector of sample names in database with protein or small mol spectra

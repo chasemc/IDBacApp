@@ -57,7 +57,7 @@ GROUP BY strain_id;
                           
                           chunk <- lapply(chunk$xml, 
                                           function(x){
-                                            x <- IDBacApp::decompress(unlist(x))
+                                            x <- decompress(unlist(x))
                                             rawToChar(x)
                                             })
 

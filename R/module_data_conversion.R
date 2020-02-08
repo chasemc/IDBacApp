@@ -26,7 +26,7 @@ convertDataTab_UI <- function(id) {
       value = ns("convert_mzml_nav"),
       wellPanel(class = "intro_WellPanel",
                 align = "center",
-                IDBacApp::convertMZ_UI(ns("beginWithMZ"))
+                convertMZ_UI(ns("beginWithMZ"))
       )
     ),
     tabPanel(
@@ -35,7 +35,7 @@ convertDataTab_UI <- function(id) {
       value = ns("convert_txt_nav"),
       wellPanel(class = "intro_WellPanel",
                 align = "center",
-                IDBacApp::convertDelim_UI(ns("convertDelim"))
+                convertDelim_UI(ns("convertDelim"))
       )
     ),
     tabPanel(
@@ -44,7 +44,7 @@ convertDataTab_UI <- function(id) {
       value = ns("convert_microtyper_nav"),
       wellPanel(class = "intro_WellPanel",
                 align = "center",
-                IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
+                convertMicrotyper_UI(ns("convertMicrotyper"))
       )
     )
   )
@@ -78,7 +78,7 @@ convertDataTab_Server <- function(input,
   
   
   output$brukerConversionUi <- renderUI({
-    IDBacApp::controlBrukerDisplay(session,
+    controlBrukerDisplay(session,
                                    pwizAvailable)
   })
   
@@ -208,7 +208,7 @@ multipleMaldiPlates <- function(id){
 controlBrukerDisplay <- function(session, 
                                  pwizAvailable, 
                                  ostest = NULL){
-  if (IDBacApp::getOS(test = ostest) != "windows") {
+  if (getOS(test = ostest) != "windows") {
     wellPanel(class = "intro_WellPanel",
               align = "center",
               wellPanel(class = "intro_WellPanel",
@@ -219,7 +219,7 @@ controlBrukerDisplay <- function(session,
   } else if (pwizAvailable != "error") {
     wellPanel(class = "intro_WellPanel",
               align = "center",
-              IDBacApp::convertOneBruker_UI(session$ns("convertOneBruker"))
+              convertOneBruker_UI(session$ns("convertOneBruker"))
     )
   } else {
     wellPanel(class = "intro_WellPanel",

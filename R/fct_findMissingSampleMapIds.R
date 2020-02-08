@@ -18,7 +18,7 @@ findMissingSampleMapIds <- function(spots,
     # converted to matrix for the functions below
     if (is.data.frame(sampleMap) || is.matrix(sampleMap)) {
       # create sample map
-      plateMap <- IDBacApp::map384Well()
+      plateMap <- map384Well()
       # Which sample locations have data but weren't assigned an ID?
       sampleMap <- base::as.matrix(sampleMap)
       b <- sapply(spots, function(x) sampleMap[which(plateMap %in% x)])

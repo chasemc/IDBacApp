@@ -96,7 +96,7 @@ app_ui <- function(){
                                             tags$ul(
                                               tags$li(
                                                 p("For reproducibility, cite this specific version of IDBac as version:",
-                                                  as.character(packageVersion("IDBacApp"))
+                                                  as.character(utils::packageVersion("IDBacApp"))
                                                 )
                                               )
                                             )
@@ -105,7 +105,7 @@ app_ui <- function(){
                                           h4("Use the navigation bar at the top of the page to begin", 
                                              align = "center"),
                                           div(align = "center",
-                                              IDBacApp::selectDirectory_UI("userWorkingDirectory",
+                                              selectDirectory_UI("userWorkingDirectory",
                                                                            label = "Select IDBac Data Storage Location"),
                                               verbatimTextOutput("userWorkingDirectoryText")
                                           )
@@ -118,7 +118,7 @@ app_ui <- function(){
              tabPanel(
                "Starting with Raw Data",
                value = "rawDataUiTab",
-               IDBacApp::convertDataTab_UI("convertDataTab"))
+               convertDataTab_UI("convertDataTab"))
              
   )
 }

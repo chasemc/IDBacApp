@@ -68,7 +68,7 @@ plotDendrogram <- function(dendrogram = dendrogram,
       dendextend::set_labels(trimdLabsDend,
                              strtrim(labels(dendrogram_labels), 20))
       
-      IDBacApp::runDendDots(rawDendrogram =  dendrogram$dendrogram,
+      runDendDots(rawDendrogram =  dendrogram$dendrogram,
                             trimdLabsDend = trimdLabsDend,
                             pool = pool,
                             columnID = selectMetaColumn,
@@ -91,7 +91,7 @@ plotDendrogram <- function(dendrogram = dendrogram,
   }
   if (is.numeric(boots) & sum(boots)>0L) {
     
-    IDBacApp::bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram), 
+    bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram), 
                                 boots,
                                 horiz = TRUE,
                                 col = "blue")

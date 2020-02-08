@@ -73,7 +73,7 @@ updateMeta_server <- function(input,
   
   observeEvent(input$insertNewMetaColumn, 
                ignoreInit = TRUE, {
-                 IDBacApp::insertMetadataColumns(pool = pool(),
+                 insertMetadataColumns(pool = pool(),
                                                  columnNames = input$addMetaColumnName)
                })
   

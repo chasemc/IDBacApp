@@ -14,11 +14,11 @@ exportSamples_ui <- function(id) {
     div(align = "center",  
         h3("Save/Export Samples"),
         tags$hr(size = 20),
-        IDBacApp::databaseSelector_UI(ns("dbselector")),   
+        databaseSelector_UI(ns("dbselector")),   
         tags$hr(size = 20),
         p("Move samples between boxes by clicking the sample's name
           and then an arrow. Samples in the right box will be exported."),
-        IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
+        sampleChooser_UI(ns("chooseNewDBSamples")),
         tags$hr(size = 20),
         actionButton(ns("selectOutDir"),
                      label = "Select where to save files to:"),
@@ -54,7 +54,7 @@ exportSamples_server <- function(input,
                                  sqlDirectory,
                                  availableExperiments){
   
-  selectedDB <-  shiny::callModule(IDBacApp::databaseSelector_server,
+  selectedDB <-  shiny::callModule(databaseSelector_server,
                                    "dbselector",
                                    availableExperiments = availableExperiments,
                                    sqlDirectory = sqlDirectory,
@@ -62,7 +62,7 @@ exportSamples_server <- function(input,
   
   
   
-  chosenSamples <-  shiny::callModule(IDBacApp::sampleChooser_server,
+  chosenSamples <-  shiny::callModule(sampleChooser_server,
                                       "chooseNewDBSamples",
                                       pool = selectedDB$userDBCon,
                                       allSamples = TRUE,
@@ -72,7 +72,7 @@ exportSamples_server <- function(input,
   chosenDirectory <- reactiveValues(value = NULL)
   
   observeEvent(input$selectOutDir, {
-    chosenDirectory$value <- IDBacApp::choose_dir()
+    chosenDirectory$value <- choose_dir()
     
   })
   output$selectedDir <- renderText({
@@ -88,7 +88,7 @@ exportSamples_server <- function(input,
     req(length(chosenSamples$chosen) > 0)
     req(dir.exists(chosenDirectory$value))
     
-    IDBacApp::exportmzML(userDBCon = selectedDB$userDBCon(),
+    exportmzML(userDBCon = selectedDB$userDBCon(),
                          sampleIDs = chosenSamples$chosen,
                          saveToDir = chosenDirectory$value)
     

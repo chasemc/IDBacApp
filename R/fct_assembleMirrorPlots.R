@@ -14,15 +14,15 @@
 #' @return environment containing mirror plot data
 #' @export
 #'
-assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
-                                sampleID2 = input$Spectra2,
-                                peakPercentPresence = input$percentPresence,
-                                lowerMassCutoff = input$lowerMass,
-                                upperMassCutoff = input$upperMass,
-                                minSNR = input$SNR,
+assembleMirrorPlots <- function(sampleID1,
+                                sampleID2,
+                                peakPercentPresence,
+                                lowerMassCutoff,
+                                upperMassCutoff,
+                                minSNR,
                                 tolerance = 0.002,
-                                pool1 = workingDB$pool(),
-                                pool2 = workingDB$pool(),
+                                pool1,
+                                pool2,
                                 normalizeSpectra = FALSE){
   
   mirrorPlotEnv <- new.env(parent = parent.frame())
@@ -31,8 +31,8 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   # get protein peak data for the 1st mirror plot selection
   
 
-  # need(IDBacApp::checkSinglePool(pool1))
-  # need(IDBacApp::checkSinglePool(pool2))
+  # need(checkSinglePool(pool1))
+  # need(checkSinglePool(pool2))
   # need(!is.null(sampleID1))
   # need(!is.null(sampleID2))
   
@@ -40,7 +40,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   mirrorPlotEnv$sampleIDTwo <- sampleID2
   
   
-  mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(pool = pool1,
+  mirrorPlotEnv$peaksSampleOne <- collapseReplicates(pool = pool1,
                                                                sampleIDs = sampleID1,
                                                                peakPercentPresence = peakPercentPresence,
                                                                lowerMassCutoff = lowerMassCutoff,
@@ -50,7 +50,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
                                                                protein = TRUE)[[1]] 
   
   
-  mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(pool = pool2,
+  mirrorPlotEnv$peaksSampleTwo <- collapseReplicates(pool = pool2,
                                                                sampleIDs = sampleID2,
                                                                peakPercentPresence = peakPercentPresence,
                                                                lowerMassCutoff = lowerMassCutoff,
@@ -83,14 +83,14 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   conn <- pool::poolCheckout(pool1)
   
   
-  mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(IDBacApp::idbac_get_spectra(pool = pool1,
+  mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = pool1,
                                                                                                 sampleID = sampleID1, 
                                                                                                 protein = TRUE,
                                                                                                 smallmol = FALSE))
   
   
   if (normalizeSpectra) {
-    mirrorPlotEnv$spectrumSampleOne <- IDBacApp::normalizeSpectrumIntensity(mirrorPlotEnv$spectrumSampleOne)
+    mirrorPlotEnv$spectrumSampleOne <- normalizeSpectrumIntensity(mirrorPlotEnv$spectrumSampleOne)
 
   }
   
@@ -99,7 +99,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   conn <- pool::poolCheckout(pool2)
   
   
-  mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(IDBacApp::idbac_get_spectra(pool = pool2,
+  mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = pool2,
                                                                                                 sampleID = sampleID2, 
                                                                                                 protein = TRUE,
                                                                                                 smallmol = FALSE))
@@ -107,7 +107,7 @@ assembleMirrorPlots <- function(sampleID1 = input$Spectra1,
   
   
   if (normalizeSpectra) {
-    mirrorPlotEnv$spectrumSampleTwo <- IDBacApp::normalizeSpectrumIntensity(mirrorPlotEnv$spectrumSampleTwo)
+    mirrorPlotEnv$spectrumSampleTwo <- normalizeSpectrumIntensity(mirrorPlotEnv$spectrumSampleTwo)
     
 
   }

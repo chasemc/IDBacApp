@@ -23,7 +23,7 @@ parseDelimitedMS <- function(proteinPaths,
   req(length(smallMolPaths) == length(smallMolNames))
   
   
-  IDBacApp::popup3()
+  popup3()
   
   combPaths <- c(proteinPaths,
                  smallMolPaths)

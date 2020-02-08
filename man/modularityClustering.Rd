@@ -4,10 +4,7 @@
 \alias{modularityClustering}
 \title{Color network based on fastgreedy.community}
 \usage{
-modularityClustering(
-  igraphNetwork,
-  hexColors = IDBacApp::colorBlindPalette()[1:100]
-)
+modularityClustering(igraphNetwork, hexColors = colorBlindPalette()[1:100])
 }
 \arguments{
 \item{igraphNetwork}{igraph network}

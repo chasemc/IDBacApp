@@ -48,7 +48,7 @@ run_microtyperTomzML <- function(proteinPaths = NULL,
                         
                         for (i in seq_along(key)) {
                           incProgress(1/lengthProgress)
-                          IDBacApp::microtyperTomzML(key = key[[i]],
+                          microtyperTomzML(key = key[[i]],
                                                      mzFilePaths = mzFilePaths[[i]]) 
                         }
                       })
@@ -112,7 +112,7 @@ microtyperTomzML <- function(key,
 #' @return List of files
 #' @export
 #'
-getMicrotyperFiles <- function(dataDirectory = delimitedLocationP()){
+getMicrotyperFiles <- function(dataDirectory){
   
   files <- NULL
   
@@ -120,18 +120,14 @@ getMicrotyperFiles <- function(dataDirectory = delimitedLocationP()){
     warning("getMicrotyperFiles(): Must select a directory.")
   } else if (length(dataDirectory) > 1) {
     warning("getMicrotyperFiles(): Select only one directory.")
-    
   } else if (!dir.exists(dataDirectory)) {
     warning("getMicrotyperFiles(): Selected directory not found.")
-    
   } else {
     # Get the folders contained directly within the chosen folder.
     files <- list.files(dataDirectory, 
                         recursive = FALSE, 
                         full.names = TRUE,
                         pattern = "(.txt)$") 
-    
-    
   }
   
   if (length(files) == 0L ){

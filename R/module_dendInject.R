@@ -61,8 +61,8 @@ selectInjections_server <- function(input,
         draggable = TRUE,
         style = "z-index:1002;",
         shiny::wellPanel(class = "dendDots_WellPanel",
-                         IDBacApp::databaseSelector_UI(ns("databaseSelector")),   
-                         IDBacApp::sampleChooser_UI(ns("chooseNewDBSamples")),
+                         databaseSelector_UI(ns("databaseSelector")),   
+                         sampleChooser_UI(ns("chooseNewDBSamples")),
                          shiny::actionButton(ns("closeInject"),
                                              "Close")
                          
@@ -84,13 +84,13 @@ selectInjections_server <- function(input,
   
   
   
-  selectedDB <- callModule(IDBacApp::databaseSelector_server,
+  selectedDB <- callModule(databaseSelector_server,
                            "databaseSelector",
                            h3Label = tags$h4("Select an experiment ", br(), "to work with:"),
                            availableExperiments = availableExperiments,
                            sqlDirectory = sqlDirectory)
   
-  chosen <-  shiny::callModule(IDBacApp::sampleChooser_server,
+  chosen <-  shiny::callModule(sampleChooser_server,
                                "chooseNewDBSamples",
                                pool = selectedDB$userDBCon,
                                allSamples = FALSE,

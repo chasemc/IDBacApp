@@ -204,7 +204,7 @@ MAN_Server <- function(input,
   #----
   smallMolNetworkDataFrame <- reactive({
     req(MALDIquant::isMassPeaksList(subtractedMatrixBlank$maldiQuantPeaks))
-    IDBacApp::smallMolDFtoNetwork(peakList = subtractedMatrixBlank$maldiQuantPeaks,
+    smallMolDFtoNetwork(peakList = subtractedMatrixBlank$maldiQuantPeaks,
                                   sampleIDs = subtractedMatrixBlank$sampleIDs)
     
   })
@@ -229,14 +229,14 @@ MAN_Server <- function(input,
   observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy),{
     
     
-    networkIgraph$graph <- IDBacApp::networkFromDF(smallMolNetworkDataFrame())
+    networkIgraph$graph <- networkFromDF(smallMolNetworkDataFrame())
     
     req(igraph::is.igraph(networkIgraph$graph))
     len <- length(attributes(igraph::V(networkIgraph$graph))$names)
     req(len > 0)
     
     if (input$colorMANBy == "by_modularity") {
-      networkIgraph$graph <- IDBacApp::modularityClustering(networkIgraph$graph)
+      networkIgraph$graph <- modularityClustering(networkIgraph$graph)
       
     } else if (input$colorMANBy == "by_dendLabels") {
       

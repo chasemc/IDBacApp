@@ -73,7 +73,7 @@ databaseSelector_server <- function(input,
     req(file.exists(file.path(sqlDirectory$sqlDirectory, 
                               paste0(input$selectExperiment, ".sqlite"))))
     
-    z <- IDBacApp::idbac_connect(fileName = input$selectExperiment,
+    z <- idbac_connect(fileName = input$selectExperiment,
                               filePath = sqlDirectory$sqlDirectory)[[1]]
     
     

@@ -156,7 +156,7 @@ dendDotsServer <- function(input,
   
   output$sampleFactorMapColors <- renderUI({
     column(7,
-           IDBacApp::colorPicker(levs,
+           colorPicker(levs,
                                  session$ns)
            
     )
@@ -235,7 +235,7 @@ dendDotsServer <- function(input,
     
     output$absPaneldendDots <- renderUI(
       
-      IDBacApp::modDendDotsMod_WellPanel(session$ns)
+      modDendDotsMod_WellPanel(session$ns)
       
     )
   })
@@ -252,7 +252,7 @@ dendDotsServer <- function(input,
   
   observeEvent(input$openLabelMod, ignoreInit = T ,ignoreNULL = T, {
     output$absPanelDendLabels <- renderUI(
-      IDBacApp::modDendLabels_WellPanel(session$ns)
+      modDendLabels_WellPanel(session$ns)
     )
   })
   
@@ -272,7 +272,7 @@ dendDotsServer <- function(input,
   
   observeEvent(input$openLineMod, ignoreInit = T ,ignoreNULL = T, {
     output$absPanelDendLines <- renderUI(
-      IDBacApp::modDendLines_WellPanel(session$ns)
+      modDendLines_WellPanel(session$ns)
     )
   })
   
@@ -290,7 +290,7 @@ dendDotsServer <- function(input,
   
   observeEvent(input$openAppendDendLabels, ignoreInit = T ,ignoreNULL = T, {
     output$absPanelmodAppendDendLabels <- renderUI(
-      IDBacApp::modAppendDendLabels_WellPanel(session$ns)
+      modAppendDendLabels_WellPanel(session$ns)
     )
   })
   
@@ -303,7 +303,7 @@ dendDotsServer <- function(input,
   observeEvent(c(input$colorByLabels,input$cutHeightLabels,input$chosenKLabels), {
     
     
-    dendrogram$dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram$dendrogram,
+    dendrogram$dendrogram <- changeDendPartColor(dendrogram = dendrogram$dendrogram,
                                                            colorBy = input$colorByLabels,
                                                            colorBlindPalette = colorBlindPalette(),
                                                            cutHeight = input$cutHeightLabels,
@@ -314,7 +314,7 @@ dendDotsServer <- function(input,
   
   observeEvent(c(input$colorByLines,input$cutHeightLines,input$chosenKLines), {
     
-    dendrogram$dendrogram <- IDBacApp::changeDendPartColor(dendrogram = dendrogram$dendrogram,
+    dendrogram$dendrogram <- changeDendPartColor(dendrogram = dendrogram$dendrogram,
                                                            colorBy = input$colorByLines,
                                                            colorBlindPalette = colorBlindPalette(),
                                                            cutHeight = input$cutHeightLines,
@@ -324,7 +324,7 @@ dendDotsServer <- function(input,
   
   observeEvent(input$dendLabelSize, {
     
-    dendrogram$dendrogram <- IDBacApp::changeDendPartSize(dendrogram = dendrogram$dendrogram,
+    dendrogram$dendrogram <- changeDendPartSize(dendrogram = dendrogram$dendrogram,
                                                           dendPartSize = input$dendLabelSize,
                                                           part = "labels")
   })
@@ -332,7 +332,7 @@ dendDotsServer <- function(input,
   
   observeEvent(input$dendLineWidth, {
     
-    dendrogram$dendrogram <- IDBacApp::changeDendPartSize(dendrogram =  dendrogram$dendrogram,
+    dendrogram$dendrogram <- changeDendPartSize(dendrogram =  dendrogram$dendrogram,
                                                           dendPartSize = input$dendLineWidth,
                                                           part = "branches")
     
@@ -355,7 +355,7 @@ dendDotsServer <- function(input,
     
     
     
-    IDBacApp::plotDendrogram(dendrogram = dendrogram,
+    plotDendrogram(dendrogram = dendrogram,
                              dendOrPhylo = dendOrPhylo(),
                              selectMetaColumn = input$selectMetaColumn,
                              appendDendLabels = input$appendselectMetaColumn,
@@ -412,7 +412,7 @@ dendDotsServer <- function(input,
       
       par(mar = c(1, 1, 1, plotWidth()))
       
-      IDBacApp::plotDendrogram(dendrogram = dendrogram,
+      plotDendrogram(dendrogram = dendrogram,
                                dendOrPhylo = dendOrPhylo(),
                                selectMetaColumn = input$selectMetaColumn,
                                appendDendLabels = input$appendselectMetaColumn,

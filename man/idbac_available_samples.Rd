@@ -7,11 +7,11 @@
 idbac_available_samples(pool, whetherProtein, allSamples)
 }
 \arguments{
+\item{pool}{single IDBac pool connection}
+
 \item{whetherProtein}{T/F protein spectra (T), small mol (F)}
 
 \item{allSamples}{both protein and small mol? Takes precedence over whetherProtein}
-
-\item{checkedPool}{single IDBac pool connection}
 }
 \value{
 vector of sample names in database with protein or small mol spectra

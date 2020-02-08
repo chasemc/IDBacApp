@@ -19,7 +19,7 @@ proteoWizConvert <- function(msconvertPath = "",
   
   convertWhere <- base::shQuote(convertWhere)
   
-  msconvertLocation <- IDBacApp::findMSconvert(msconvertPath)
+  msconvertLocation <- findMSconvert(msconvertPath)
   
   if (msconvertLocation == "error") {
     

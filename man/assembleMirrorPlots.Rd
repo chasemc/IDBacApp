@@ -5,15 +5,15 @@
 \title{Assemble mirror plot Data}
 \usage{
 assembleMirrorPlots(
-  sampleID1 = input$Spectra1,
-  sampleID2 = input$Spectra2,
-  peakPercentPresence = input$percentPresence,
-  lowerMassCutoff = input$lowerMass,
-  upperMassCutoff = input$upperMass,
-  minSNR = input$SNR,
+  sampleID1,
+  sampleID2,
+  peakPercentPresence,
+  lowerMassCutoff,
+  upperMassCutoff,
+  minSNR,
   tolerance = 0.002,
-  pool1 = workingDB$pool(),
-  pool2 = workingDB$pool(),
+  pool1,
+  pool2,
   normalizeSpectra = FALSE
 )
 }

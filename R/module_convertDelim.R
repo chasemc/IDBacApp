@@ -81,7 +81,7 @@ convertDelim_Server <- function(input,
   #----
   delimitedLocationP <- reactive({
     if (input$delimitedDirectoryP > 0) {
-      IDBacApp::choose_dir()
+      choose_dir()
     }
   })
   
@@ -89,12 +89,12 @@ convertDelim_Server <- function(input,
   #----
   delimitedLocationSM <- reactive({
     if (input$delimitedDirectorySM > 0) {
-      IDBacApp::choose_dir()
+      choose_dir()
     }
   })
   
   output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::sanitize(input$newExperimentName))
+    a <- gsub(" ", "", sanitize(input$newExperimentName))
     
     if (a == "") {
       "Once entered, the filename-friendly version of the entered name will appear here once. \n
@@ -151,7 +151,7 @@ convertDelim_Server <- function(input,
   })
   
   sanity <- reactive({
-    a <- IDBacApp::sanitize(input$newExperimentName)
+    a <- sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   
@@ -182,7 +182,7 @@ convertDelim_Server <- function(input,
                    # sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]])) #strsplit, but let user eventually
                  }
                  
-                 keys <- IDBacApp::parseDelimitedMS(proteinPaths = proteinPaths,
+                 keys <- parseDelimitedMS(proteinPaths = proteinPaths,
                                                     proteinNames = sampleNameP,
                                                     smallMolPaths = smallPaths,
                                                     smallMolNames = sampleNameSM,
@@ -195,13 +195,13 @@ convertDelim_Server <- function(input,
                  idbacPool <- idbac_connect(fileName = input$newExperimentName,
                                             filePath = sqlDirectory$sqlDirectory)[[1]]
                  
-                 IDBacApp::process_mzml(mzFilePaths = keys$mzFilePaths,
+                 process_mzml(mzFilePaths = keys$mzFilePaths,
                                         sampleIds = keys$sampleID,
                                         idbacPool = idbacPool,
                                         acquisitionInfo = NULL)
                  pool::poolClose(idbacPool)
                  
-                 IDBacApp::popup4()
+                 popup4()
                  
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,

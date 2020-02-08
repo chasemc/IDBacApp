@@ -65,7 +65,7 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
 
   if (isHPCused) {
     hpcStr <- .grepAcquValue("##\\$HPCStr=", acquLines)
-    hpcConstants <- IDBacApp::extractHPCConstants(hpcStr)
+    hpcConstants <- extractHPCConstants(hpcStr)
     metadata$hpcCoefficients <- hpcConstants$coefficients
     metadata$hpcCalibrationConstant0 <- hpcConstants$calibrationConstant0
     metadata$hpcCalibrationConstant2 <- hpcConstants$calibrationConstant2

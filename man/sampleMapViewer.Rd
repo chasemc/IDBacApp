@@ -7,7 +7,7 @@
 sampleMapViewer(df)
 }
 \arguments{
-\item{df}{reactiveValues data frame input IDBacApp::nulledMap384Well()}
+\item{df}{reactiveValues data frame input nulledMap384Well()}
 }
 \value{
 rhandsontable
