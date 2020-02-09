@@ -9,7 +9,7 @@
 #' @param id .
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 smallMolDendrogram_UI <- function(id){
@@ -27,7 +27,7 @@ smallMolDendrogram_UI <- function(id){
 #' @param id shiny id
 #'
 #' @return shiny module ui
-#' @export
+#' 
 #'
 saveNetSVG <- function(id){
   ns <- shiny::NS(id)
@@ -56,7 +56,7 @@ saveNetSVG <- function(id){
 #' @param plotWidth plotWidth 
 #'
 #' @return manPageProtDend_Server
-#' @export
+#' 
 #'
 
 manPageProtDend_Server <- function(input,
@@ -105,7 +105,7 @@ manPageProtDend_Server <- function(input,
 #' @param id namespace
 #'
 #' @return manPageProtDend_UI
-#' @export
+#' 
 #'
 
 manPageProtDend_UI <- function(id) {
@@ -128,7 +128,7 @@ manPageProtDend_UI <- function(id) {
 #' @param id .
 #'
 #' @return . 
-#' @export
+#' 
 #'
 
 smMANPlot_UI <- function(id) {
@@ -151,7 +151,7 @@ smMANPlot_UI <- function(id) {
 #' @param id shiny id
 #'
 #' @return shiny module ui
-#' @export
+#' 
 #'
 
 downloadSmNet_UI <- function(id) {
@@ -168,7 +168,7 @@ downloadSmNet_UI <- function(id) {
 #' @param id shiny id
 #'
 #' @return shiny module ui
-#' @export
+#' 
 #'
 colorMANBy_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -189,7 +189,7 @@ colorMANBy_UI <- function(id) {
 #' @param proteinDend protein dendrogram
 #'
 #' @return NA
-#' @export
+#' 
 MAN_Server <- function(input,
                        output,
                        session,

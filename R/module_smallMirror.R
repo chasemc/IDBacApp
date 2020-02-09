@@ -5,7 +5,7 @@
 #' @param id namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 smallmirrorPlotsSampleSelect_UI <- function(id){
   ns <- NS(id)
@@ -19,7 +19,7 @@ smallmirrorPlotsSampleSelect_UI <- function(id){
 #' @param id  namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 smallmirrorPlots_UI <- function(id){
   ns <- NS(id)
@@ -41,7 +41,7 @@ smallmirrorPlots_UI <- function(id){
 #' @param proteinOrSmall values = "proteinPeaks" or "smallMoleculePeaks" 
 #'
 #' @return NA
-#' @export
+#' 
 #'
 smallmirrorPlots_Server <- function(input,
                                     output,

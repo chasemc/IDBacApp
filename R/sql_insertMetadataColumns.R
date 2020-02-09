@@ -4,7 +4,7 @@
 #' @param columnNames character vector of column names to be added 
 #'
 #' @return a single trimmed and binned MALDIquant peak object
-#' @export
+#' 
 insertMetadataColumns <- function(pool,
                                   columnNames){
   conn <- pool::poolCheckout(pool)

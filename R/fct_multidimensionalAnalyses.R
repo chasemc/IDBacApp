@@ -7,7 +7,7 @@
 #' @param missing  Missing values should be replaced with...
 #'
 #' @return a single trimmed and binned MALDIquant peak object
-#' @export
+#' 
 
 
 
@@ -58,7 +58,7 @@ pcaCalculation <- function(dataMatrix,
 #' @param iterations NA
 #'
 #' @return a single trimmed and binned MALDIquant peak object
-#' @export
+#' 
 
 
 tsneCalculation <- function(dataMatrix,
@@ -129,7 +129,7 @@ tsneCalculation <- function(dataMatrix,
 #' @param distanceMatrix distance matrix 
 #'
 #' @return 3D pcoa data framw
-#' @export
+#' 
 
 
 

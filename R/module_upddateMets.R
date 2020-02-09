@@ -4,7 +4,7 @@
 #' @param id id
 #'
 #' @return ui
-#' @export
+#' 
 #'
 updateMeta_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -38,7 +38,7 @@ updateMeta_UI <- function(id) {
 #' @param selectedDB  .
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 updateMeta_server <- function(input,

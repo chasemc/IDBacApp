@@ -4,7 +4,7 @@
 #' @param id id
 #'
 #' @return ui
-#' @export
+#' 
 #'
 exportSamples_ui <- function(id) {
   ns <- shiny::NS(id)
@@ -45,7 +45,7 @@ exportSamples_ui <- function(id) {
 #' @param availableExperiments  availableExperiments$db
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 exportSamples_server <- function(input,

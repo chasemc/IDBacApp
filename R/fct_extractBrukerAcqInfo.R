@@ -7,7 +7,7 @@
 #' @param type FUN.VALUE for vapply
 #'
 #' @return spot position vector
-#' @export
+#' 
 #'
 extractBrukerAcquistionInfo <- function(acquisitonInformation,
                                         name,

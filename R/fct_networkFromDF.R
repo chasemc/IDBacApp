@@ -3,7 +3,7 @@
 #' @param dataF dataframe
 #'
 #' @return igraph network
-#' @export
+#' 
 #'
 networkFromDF <- function(dataF){
   
@@ -26,7 +26,7 @@ networkFromDF <- function(dataF){
 #' @param hexColors colors as hex
 #'
 #' @return colored igraph
-#' @export
+#' 
 modularityClustering <- function(igraphNetwork,
                                  hexColors = colorBlindPalette()[1:100]){
   

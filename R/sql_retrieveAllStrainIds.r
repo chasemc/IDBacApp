@@ -4,7 +4,7 @@
 #' @param table NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 retrieveAllStrainIds <- function(databaseConnection, table){

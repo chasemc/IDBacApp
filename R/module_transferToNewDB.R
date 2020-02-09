@@ -4,7 +4,7 @@
 #' @param id id
 #'
 #' @return mod ui
-#' @export
+#' 
 #'
 transferToNewDB_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -45,7 +45,7 @@ transferToNewDB_UI <- function(id) {
 #' @param availableExperiments .
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 transferToNewDB_server <- function(input,

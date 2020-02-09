@@ -3,7 +3,7 @@
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' @export
+#' 
 #'
 sql_create_spectra_table <- function(sqlConnection){
   if (!DBI::dbExistsTable(sqlConnection, "spectra")) {
@@ -73,7 +73,7 @@ sql_create_spectra_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' @export
+#' 
 #'
 sql_create_massindex_table <- function(sqlConnection){
   
@@ -101,7 +101,7 @@ sql_create_massindex_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' @export
+#' 
 #'
 sql_create_metadata_table <- function(sqlConnection){
   
@@ -153,7 +153,7 @@ sql_create_metadata_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' @export
+#' 
 #'
 sql_create_xml_table <- function(sqlConnection){
   
@@ -191,7 +191,7 @@ sql_create_xml_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' @export
+#' 
 #'
 sql_create_version_table <- function(sqlConnection){
   
@@ -218,7 +218,7 @@ sql_create_version_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' @export
+#' 
 #'
 sql_create_locale_table <- function(sqlConnection){
   

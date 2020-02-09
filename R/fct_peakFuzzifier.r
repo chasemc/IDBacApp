@@ -6,7 +6,7 @@
 #' @param peakList MALDIquant peak list
 #'
 #' @return list of mass vectors
-#' @export
+#' 
 #'
 mQuantToMassVec <- function(peakList){
   
@@ -53,7 +53,7 @@ mQuantToMassVec <- function(peakList){
 #' @param intensityList list of intesity vectors (eg list(1:10, 1:10))
 #'
 #' @return matrix where rows are samples and columns are variables (m/z preojections)
-#' @export
+#' 
 #' @importFrom stats dnorm
 #'
 #' @examples

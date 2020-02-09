@@ -3,7 +3,7 @@
 #' @param id namespace id
 #'
 #' @return ui for coloring dendrogram labels
-#' @export
+#' 
 #'
 
 colordendLabelsUI <- function(id) {
@@ -18,7 +18,7 @@ colordendLabelsUI <- function(id) {
 #' @param ns shiny namespace
 #'
 #' @return shiny ui
-#' @export
+#' 
 #'
 modDendLabels_WellPanel <- function(ns) {
   shiny::absolutePanel(

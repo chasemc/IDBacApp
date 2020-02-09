@@ -1,7 +1,7 @@
 #' searchNCBI
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 # searchNCBI <- function(){

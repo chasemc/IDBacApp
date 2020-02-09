@@ -8,7 +8,7 @@
 #' @param allSamples both protein and small mol? Takes precedence over whetherProtein
 #'
 #' @return vector of sample names in database with protein or small mol spectra
-#' @export
+#' @export 
 #'
 idbac_available_samples <- function(pool, 
                                     whetherProtein, 

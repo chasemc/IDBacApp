@@ -10,7 +10,7 @@
 #' @param multiple NA 
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 chooserInput <- function(inputId, 

@@ -4,7 +4,7 @@
 #' @param x raw compressed 
 #'
 #' @return
-#' @export
+#' 
 #' @importFrom fst decompress_fst
 
 double_from_raw_compressed <- function(x){

@@ -5,7 +5,7 @@
 #' @param brushYmax double, y-min of user-brush
 #'
 #' @return subset of labels that were brushed over in the dendrogram
-#' @export
+#' 
 #'
 
 labelsFromBrushedDendrogram <- function(dendrogram,

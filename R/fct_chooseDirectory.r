@@ -3,7 +3,7 @@
 #' @param caption NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 choose_dir <- function(caption = 'Select data directory') {

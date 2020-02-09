@@ -5,7 +5,7 @@
 #' @param filePath path of the location of sqlite database, sans filename
 #'
 #' @return a list of pool connections
-#' @export idbac_connect
+#' @export
 #' 
 idbac_connect <- function(fileName,
                           filePath){
@@ -62,7 +62,7 @@ idbac_connect <- function(fileName,
 #' @param sqlDirectory directory to which the sqlite DB will be written into
 #'
 #' @return pool connection
-#' @export
+#' 
 #'
 createNewSQLITEdb <- function(newExperimentName,
                               sqlDirectory){

@@ -8,7 +8,7 @@
 #' @param sampleMap base::matrix() representing MALDI target plate with sample ids
 #'
 #' @return NA
-#' @export
+#' 
 #'
 process_bruker <- function(path,
                            pool,

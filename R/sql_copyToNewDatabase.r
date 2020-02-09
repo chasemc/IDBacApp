@@ -5,7 +5,7 @@
 #' @param sampleIDs  sample IDs to transfer 
 #'
 #' @return Nothing, side effect of creating a new sqlite databse
-#' @export
+#' 
 #'
 
 copyToNewDatabase <- function(existingDBPool,
@@ -192,7 +192,7 @@ copyToNewDatabase <- function(existingDBPool,
 #' @param existingDBconn existingDBconn
 #'
 #' @return NA
-#' @export
+#' 
 #'
 copyDB_dbAttach <- function(newdbPath, 
                             existingDBconn){
@@ -212,7 +212,7 @@ copyDB_dbAttach <- function(newdbPath,
 #' @param existingDBconn existingDBconn
 #'
 #' @return NA
-#' @export
+#' 
 #'
 copyDB_dbDetach <- function(newdbPath, 
                             existingDBconn){
@@ -231,7 +231,7 @@ copyDB_dbDetach <- function(newdbPath,
 #' @param existingDBconn  existingDBconn
 #'
 #' @return NA
-#' @export
+#' 
 #'
 copyDB_setupMeta <- function(newDBconn,
                              existingDBconn){

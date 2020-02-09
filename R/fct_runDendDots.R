@@ -10,7 +10,7 @@
 #' @param text_shift NA 
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 runDendDots <- function(rawDendrogram, trimdLabsDend, pool, columnID, colors, text_shift) {

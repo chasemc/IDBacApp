@@ -8,7 +8,7 @@
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return the peak list modifed by binning then subtractng the matrix sample,
-#' @export
+#' 
 spectraProcessingFunction <- function(rawDataFilePath,
                                       sampleID,
                                       userDBCon, 

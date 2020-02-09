@@ -4,7 +4,7 @@
 #' @param ns shiny namespace
 #'
 #' @return list of html for each level with colors chosen
-#' @export
+#' 
 #'
 colorPicker <-  function(levs, 
                          ns){

@@ -33,7 +33,7 @@
 #' @inheritParams dendextend::cutree
 #'
 #' @return dendrogram
-#' @export
+#' 
 get_subtrees <- function(dend,
                          k = NULL,
                          h = NULL,

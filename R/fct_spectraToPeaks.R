@@ -14,7 +14,7 @@
 #' @param input MALDIquant mass spectrum list
 #'
 #' @return MALDIquant mass spectrum list
-#' @export
+#' 
 #'
 processSmallMolSpectra <- function(input){
   peaks <- MALDIquant::smoothIntensity(input,
@@ -40,7 +40,7 @@ processSmallMolSpectra <- function(input){
 #' @param input MALDIquant mass spectrum list
 #'
 #' @return MALDIquant mass spectrum list
-#' @export
+#' 
 #'
 processProteinSpectra <- function(input){
   

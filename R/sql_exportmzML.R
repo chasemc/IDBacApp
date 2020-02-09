@@ -5,7 +5,7 @@
 #' @param saveToDir directory files should be saved to
 #'
 #' @return NA, files written
-#' @export
+#' 
 #'
 exportmzML <- function(userDBCon,
                        sampleIDs,

@@ -1,7 +1,7 @@
 #' ui_proteinClustering
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 ui_proteinClustering <- function() {

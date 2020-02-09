@@ -2,7 +2,7 @@
 #' Main UI of IDBac
 #'
 #' @return Main UI of IDBac
-#' @export
+#' 
 #'
 app_ui <- function(){
   

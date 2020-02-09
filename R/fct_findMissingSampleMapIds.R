@@ -5,7 +5,7 @@
 #' @param ignoreMissing TRUE/FALSE whether to ignore target spots missing ids
 #'
 #' @return character vector of missing sample IDs or character(0)
-#' @export
+#' 
 #'
 findMissingSampleMapIds <- function(spots, 
                                     sampleMap,

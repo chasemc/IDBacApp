@@ -3,7 +3,7 @@
 #' @param input matrix/list of martrices , col 1 = masses, col 2 = intensities
 #'
 #' @return NA
-#' @export
+#' 
 #'
 spectrumMatrixToMALDIqaunt <- function(input){
   

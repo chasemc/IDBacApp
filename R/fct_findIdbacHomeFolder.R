@@ -1,7 +1,7 @@
 #' Get default path for IDBac to save experiments to
 #'
 #' @return character path
-#' @export 
+#'  
 #'
 findIdbacHome <- function(){
   if (isTRUE(.Options$idbac_testing)) {

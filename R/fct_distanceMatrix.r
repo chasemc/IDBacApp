@@ -4,7 +4,7 @@
 #' @param method distance metric to use
 #'
 #' @return distance matrix
-#' @export
+#' 
 
 distMatrix <- function(data,
                        method){

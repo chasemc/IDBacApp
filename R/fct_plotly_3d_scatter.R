@@ -5,7 +5,7 @@
 #' @param plotTitle plot title
 #'
 #' @return plotly plot
-#' @export
+#' 
 #'
 plotly_3d_scatter <- function(data,
                               plotTitle){

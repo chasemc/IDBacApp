@@ -4,7 +4,7 @@
 #' ui_smallMolMan
 #'
 #' @return UI
-#' @export
+#' 
 #'
 ui_smallMolMan <-  function(){
   

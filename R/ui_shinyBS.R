@@ -6,7 +6,7 @@
 #' @param class .
 #'
 #' @return .
-#' @export
+#' 
 #'
  
 addClass <- function(tag, class) {
@@ -24,7 +24,7 @@ addClass <- function(tag, class) {
 #' @param tag .
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 getAttribs <- function(tag) {
@@ -40,7 +40,7 @@ getAttribs <- function(tag) {
 #' @param open  .
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
@@ -77,7 +77,7 @@ bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
 #' @param style  .
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
@@ -112,7 +112,7 @@ bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
 #' @param ...  .
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 addAttribs <- function(tag, ...) {
@@ -134,7 +134,7 @@ addAttribs <- function(tag, ...) {
 #' @param style https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
 #'
 #' @return https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
-#' @export
+#' 
 #'
 updateCollapse <- function(session, id, open = NULL, close = NULL, style = NULL) {
   
@@ -148,7 +148,7 @@ updateCollapse <- function(session, id, open = NULL, close = NULL, style = NULL)
 #' @param x https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
 #'
 #' @return https://github.com/ebailey78/shinyBS/blob/c329f8ce43e44579cafbb16fc3109fb69d403e57/R/updateCollapse.R
-#' @export
+#' 
 #'
 dropNulls <- function(x) {
   x[!vapply(x, is.null, FUN.VALUE = logical(1))]

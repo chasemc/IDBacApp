@@ -8,7 +8,7 @@
 #' @param userDBCon sqlite connection
 #'
 #' @return NA
-#' @export
+#' 
 #'
 sql_fill_version_table <- function(userDBCon) {
   
@@ -37,7 +37,7 @@ sql_fill_version_table <- function(userDBCon) {
 #' @param userDBCon  database connection
 #'
 #' @return side effect
-#' @export
+#' 
 #'
 sql_fill_locale_table <- function(userDBCon) {
   
@@ -73,7 +73,7 @@ sql_fill_locale_table <- function(userDBCon) {
 #' @param userDBCon NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 createMetaSQL <- function(sampleID,
@@ -111,7 +111,7 @@ createMetaSQL <- function(sampleID,
 #' @param mzML_con NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 createXMLSQL <- function(rawDataFilePath,
@@ -193,7 +193,7 @@ createXMLSQL <- function(rawDataFilePath,
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return NA
-#' @export
+#' 
 #'
 createSpectraSQL <- function(mzML_con, 
                              userDBCon,
@@ -259,7 +259,7 @@ createSpectraSQL <- function(mzML_con,
 #' @param userDBCon checked database connection
 #'
 #' @return nothing, writes to database
-#' @export
+#' 
 #'
 insertIntoMassTable <- function(env,
                                 userDBCon){
@@ -303,7 +303,7 @@ insertIntoMassTable <- function(env,
 #' @param sampleID sampleID
 #'
 #' @return nothing, writes to database
-#' @export
+#' 
 #'
 insertIntoIndividualSpectra <- function(env,
                                         XMLinfo,

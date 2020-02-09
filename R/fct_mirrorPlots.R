@@ -4,7 +4,7 @@
 #' @param mirrorPlotEnv data for plot
 #'
 #' @return NA
-#' @export
+#' 
 #'
 mirrorPlot <- function(mirrorPlotEnv){
   
@@ -106,7 +106,7 @@ mirrorPlot <- function(mirrorPlotEnv){
 #' @param mirrorPlotEnv data for plot
 #'
 #' @return NA
-#' @export
+#' 
 #'
 baserMirrorPlot <- function(mirrorPlotEnv){
   

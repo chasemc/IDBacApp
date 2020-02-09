@@ -1,7 +1,7 @@
 #' colorBlindPalette
 #'
 #' @return colorblind palette and then rainbow x1000
-#' @export
+#' 
 
 colorBlindPalette <- function(){
   c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",
@@ -15,7 +15,7 @@ colorBlindPalette <- function(){
 #' @param input object to hash 
 #'
 #' @return sha1 hash
-#' @export
+#' 
 
 hashR <- function(input){
   digest::digest(input, 
@@ -32,7 +32,7 @@ hashR <- function(input){
 #' @param input matrix or vector
 #'
 #' @return JSON
-#' @export
+#' 
 
 serial <- function(input){
   jsonlite::toJSON(input, digits = 5)
@@ -44,7 +44,7 @@ serial <- function(input){
 #' @param input matrix or vector
 #'
 #' @return JSON
-#' @export
+#' 
 
 deserial <- function(input){
   input <- gsub("\\[",
@@ -67,7 +67,7 @@ deserial <- function(input){
 #' @param compression compression level 0-100
 #'
 #' @return Raw vector
-#' @export
+#' 
 compress <- function(input, compression = 0){
   fst::compress_fst(input, 
                     compressor = "ZSTD",
@@ -80,7 +80,7 @@ compress <- function(input, compression = 0){
 #' @param input compressed raw vector 
 #'
 #' @return raw vector 
-#' @export
+#' 
 
 decompress <- function(input){
   fst::decompress_fst(input)
@@ -95,7 +95,7 @@ decompress <- function(input){
 #' @param compression compression level 0-100
 #'
 #' @return NA
-#' @export
+#' 
 #'
 chartoRawtoCompressed <- function(input, compression){
   input <- base::enc2utf8(input)
@@ -113,7 +113,7 @@ chartoRawtoCompressed <- function(input, compression){
 #' @param test for testing only
 #'
 #' @return text representing the user's os
-#' @export
+#' 
 #'
 
 getOS <- function(test = NULL){
@@ -146,7 +146,7 @@ getOS <- function(test = NULL){
 #' @param path path to search
 #'
 #' @return file paths of found files
-#' @export
+#' 
 #'
 find_mz_files <- function(path,
                           recursive = FALSE,
@@ -167,7 +167,7 @@ find_mz_files <- function(path,
 #' @param path filepath of mzML or mzXML
 #'
 #' @return compressed, raw, character 
-#' @export
+#' 
 #'
 serializeXML <- function(path) {
   
@@ -182,7 +182,7 @@ serializeXML <- function(path) {
 #' Create 384-well matrix map
 #'
 #' @return 384 well-like matrix, each element in matrix contains its position (eg col 1, row 3 contains "C4")
-#' @export
+#' 
 #'
 map384Well <- function(){
   aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
@@ -196,7 +196,7 @@ map384Well <- function(){
 #' Create a 384-well matrix that is NA-filled
 #'
 #' @return 384-well matrix that is NA-filled
-#' @export
+#' 
 #'
 nulledMap384Well <- function() {
   a <- map384Well()
@@ -212,7 +212,7 @@ nulledMap384Well <- function() {
 #' @param con db pool/connection
 #'
 #' @return checked out pool
-#' @export
+#' 
 #'
 poolToCon <- function(con) {
   

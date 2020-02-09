@@ -5,7 +5,7 @@
 #' @param proteinPeaks NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 proteinPeaksToMatrix <- function(bool, proteinPeaks){

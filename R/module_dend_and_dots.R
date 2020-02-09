@@ -3,7 +3,7 @@
 #' @param id  namespace id
 #'
 #' @return shiny UImodule
-#' @export
+#' 
 #'
 
 dendDotsUI <- function(id) {
@@ -19,7 +19,7 @@ dendDotsUI <- function(id) {
 #' @param ns shiny namespace
 #'
 #' @return shiny ui
-#' @export
+#' 
 #'
 modDendDotsMod_WellPanel <- function(ns) {
   shiny::absolutePanel(

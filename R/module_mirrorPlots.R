@@ -4,7 +4,7 @@
 #' @param id namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 mirrorPlotsSettings_UI <- function(id){
   ns <- NS(id)
@@ -16,7 +16,7 @@ mirrorPlotsSettings_UI <- function(id){
 #' @param id namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 mirrorPlotDownload_UI <- function(id){
   ns <- NS(id)
@@ -34,7 +34,7 @@ mirrorPlotDownload_UI <- function(id){
 #' @param id  namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 mirrorPlots_UI <- function(id){
   ns <- NS(id)
@@ -56,7 +56,7 @@ mirrorPlots_UI <- function(id){
 #' @param proteinOrSmall  '>' for protein '<' for small mol
 #'
 #' @return NA
-#' @export
+#' 
 #'
 mirrorPlots_Server <- function(input,
                                output,

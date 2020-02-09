@@ -4,7 +4,7 @@
 #' @param brukerDataPath brukerDataPath 
 #'
 #' @return list of acqus info
-#' @export
+#' 
 #'
 readBrukerAcqus <- function(brukerDataPath){
   

@@ -2,7 +2,7 @@
 #' popup3
 #'
 #' @return NA
-#' @export
+#' 
 #'
 popup3 <- function(){
   if (is.null(shiny::getDefaultReactiveDomain())) {
@@ -24,7 +24,7 @@ popup3 <- function(){
 #' popup4
 #'
 #' @return NA
-#' @export
+#' 
 #'
 popup4 <- function(){
   if (is.null(shiny::getDefaultReactiveDomain())) {
@@ -47,7 +47,7 @@ popup4 <- function(){
 #' brukerToMzml_popup
 #'
 #' @return NA
-#' @export
+#' 
 #'
 brukerToMzml_popup <- function(){
   if (is.null(shiny::getDefaultReactiveDomain())) {
@@ -70,7 +70,7 @@ will begin to convert your files into an IDBac experiment.")
 #' While Database is copying, block user-interaction
 #'
 #' @return modal
-#' @export
+#' 
 #'
 copyingDbPopup <- function(){
   if (is.null(shiny::getDefaultReactiveDomain())) {

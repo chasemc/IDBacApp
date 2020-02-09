@@ -5,7 +5,7 @@
 #' @param ... dots!
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 run_app <- function(port = NULL, ...) {

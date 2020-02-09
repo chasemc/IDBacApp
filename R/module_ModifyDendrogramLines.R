@@ -3,7 +3,7 @@
 #' @param id  namespace id
 #'
 #' @return shiny UImodule
-#' @export
+#' 
 #'
 
 colordendLinesUI <- function(id) {
@@ -18,7 +18,7 @@ colordendLinesUI <- function(id) {
 #' @param ns shiny namespace
 #'
 #' @return shiny ui
-#' @export
+#' 
 #'
 modDendLines_WellPanel <- function(ns){
   shiny::absolutePanel(

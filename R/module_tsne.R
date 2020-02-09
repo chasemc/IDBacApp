@@ -7,7 +7,7 @@
 #' @param id shiny namespace
 #'
 #' @return PCA UI
-#' @export
+#' 
 #'
 popupPlotTsne_UI <- function(id){
   ns <- shiny::NS(id)
@@ -28,7 +28,7 @@ popupPlotTsne_UI <- function(id){
 #' @param plotTitle title of plot
 #'
 #' @return NA
-#' @export
+#' 
 #'
 popupPlotTsne_server <- function(input,
                                  output,
@@ -115,7 +115,7 @@ popupPlotTsne_server <- function(input,
 #' @param plotTitle plot title
 #'
 #' @return shiny ui
-#' @export
+#' 
 #'
 tsneUiPop <- function(ns, plotTitle){
   

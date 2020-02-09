@@ -4,7 +4,7 @@
 #' @param id namespace
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 experimentSummary_UI <- function(id) {
@@ -23,7 +23,7 @@ experimentSummary_UI <- function(id) {
 #' @param pool modules
 #'
 #' @return modules
-#' @export
+#' 
 #'
 
 experimentSummary_Server <- function(input,

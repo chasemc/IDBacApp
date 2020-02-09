@@ -4,7 +4,7 @@
 #' @param id namespace id
 #'
 #' @return ui to choose the algorithm for creating the dendrogram
-#' @export
+#' 
 #'
 
 dendrogramCreatorUI <- function(id) {
@@ -81,7 +81,7 @@ dendrogramCreatorUI <- function(id) {
 #' @param proteinMatrix sd
 #'
 #' @return sd
-#' @export
+#' 
 dendrogramCreator <- function(input,
                               output,
                               session,

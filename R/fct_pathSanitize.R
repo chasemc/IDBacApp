@@ -17,7 +17,7 @@
 #'
 #' @seealso <https://www.npmjs.com/package/sanitize-filename>, upon which this
 #'   function is based.
-#' @export
+#' 
 #' @examples
 #' # potentially unsafe string
 #' str <- "~/.\u0001ssh/authorized_keys"

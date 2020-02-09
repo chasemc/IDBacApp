@@ -3,7 +3,7 @@
 #' @param spectrum spectrum
 #'
 #' @return normalized MALDIquant massSpectrum
-#' @export
+#' 
 #'
 normalizeSpectrumIntensity  <- function(spectrum){
   

@@ -4,7 +4,7 @@
 #' @param id NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 convertOneBruker_UI <- function(id){
@@ -311,7 +311,7 @@ convertOneBruker_Server <- function(input,
 #' @param df reactiveValues data frame input nulledMap384Well()
 #'
 #' @return rhandsontable
-#' @export
+#' 
 #'
 sampleMapViewer <- function(df){
   rhandsontable::rhandsontable(df,
@@ -332,7 +332,7 @@ sampleMapViewer <- function(df){
 #' @param sampleData sample map rhandsontable
 #'
 #' @return none, side effect
-#' @export
+#' 
 #'
 sampleMaptoDF <- function(sampleData){
   as.data.frame(rhandsontable::hot_to_r(sampleData), 

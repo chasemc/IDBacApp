@@ -5,7 +5,7 @@
 #' @param id  namespace id
 #'
 #' @return shiny UImodule
-#' @export
+#' 
 #'
 appendDendLabsUI <- function(id) {
   ns <- shiny::NS(id)
@@ -20,7 +20,7 @@ appendDendLabsUI <- function(id) {
 #' @param ns shiny namespace
 #'
 #' @return shiny ui
-#' @export
+#' 
 #'
 modAppendDendLabels_WellPanel <- function(ns){
   shiny::absolutePanel(

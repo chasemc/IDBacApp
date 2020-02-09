@@ -9,7 +9,7 @@
 #' @param id namespace id
 #'
 #' @return shiny UImodule
-#' @export
+#' 
 #'
 dendrogramActionsUI <- function(id) {
   ns <- shiny::NS(id)
@@ -26,7 +26,7 @@ dendrogramActionsUI <- function(id) {
 #' @param id namespace id
 #'
 #' @return shiny UImodule
-#' @export
+#' 
 #'
 plotHier <- function(id) {
   ns <- shiny::NS(id)
@@ -44,7 +44,7 @@ plotHier <- function(id) {
 #'
 #' @return NA
 #'
-#' @export
+#' 
 downloadHier <- function(id) {
   ns <- shiny::NS(id)
   
@@ -60,7 +60,7 @@ downloadHier <- function(id) {
 #' @param id namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 downloadSvg <- function(id) {
   ns <- shiny::NS(id)
@@ -92,7 +92,7 @@ downloadSvg <- function(id) {
 #' @param sampleIds sampleIds
 #' 
 #' @return shiny ui
-#' @export
+#' 
 #'
 displayMissingProteinUI <- function(id, sampleIds) {
   ns <- shiny::NS(id)
@@ -123,7 +123,7 @@ displayMissingProteinUI <- function(id, sampleIds) {
 #' @param emptyProtein empty protein sample IDs
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 dendDotsServer <- function(input,

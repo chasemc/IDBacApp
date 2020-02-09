@@ -3,7 +3,7 @@
 #' @param id namespace
 #'
 #' @return ui for database UI
-#' @export
+#' 
 #'
 databaseTabUI <- function(id) {
   ns <- shiny::NS(id)
@@ -27,7 +27,7 @@ databaseTabUI <- function(id) {
 #' @param availableExperiments availableExperiments 
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 databaseTabServer <- function(input,
@@ -121,7 +121,7 @@ databaseTabServer <- function(input,
 #' @param ns shiny namespace
 #'
 #' @return ui
-#' @export
+#' 
 #'
 
 databaseTabUIFunc <- function(ns) {

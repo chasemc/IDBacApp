@@ -12,7 +12,7 @@
 #' @param normalizeSpectra should spectra be normalized? TRUE/FALSE
 #'
 #' @return environment containing mirror plot data
-#' @export
+#' 
 #'
 assembleMirrorPlots <- function(sampleID1,
                                 sampleID2,

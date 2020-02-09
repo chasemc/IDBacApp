@@ -6,7 +6,7 @@
 #' @param session session
 #'
 #' @return IDBac server
-#' @export
+#' 
 #' @import shiny
 app_server <- function(input, output, session) {
   

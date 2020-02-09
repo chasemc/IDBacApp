@@ -10,7 +10,7 @@
 #' @param protein whether to search SQL for protein or small mol spectra
 
 #'
-#' @export
+#' 
 #' @return a single trimmed and binned MALDIquant peak object
 
 

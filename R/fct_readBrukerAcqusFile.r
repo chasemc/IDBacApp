@@ -16,7 +16,7 @@
 #' @param verbose should the function be verbose?
 #'
 #' @return a
-#' @export
+#' 
 #'
 readAcqusFile <- function(fidFile, verbose = FALSE) {
   acquFile <- sub(pattern="fid$", x=fidFile, replacement="acqu")
@@ -312,7 +312,7 @@ readAcqusFile <- function(fidFile, verbose = FALSE) {
 #' @param hpcStr https://github.com/sgibb/readBrukerFlexData
 #'
 #' @return https://github.com/sgibb/readBrukerFlexData
-#' @export
+#' 
 #'
 extractHPCConstants <- function(hpcStr) {
   tmpLine <- strsplit(x=hpcStr, split=" ")[[1L]]

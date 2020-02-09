@@ -6,7 +6,7 @@
 #' @param index logical vector describing which spectraImport spectra to use
 #'
 #' @return environment 
-#' @export
+#' 
 #'
 processXMLIndSpectra <- function(spectraImport,
                                  smallOrProtein,

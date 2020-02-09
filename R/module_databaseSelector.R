@@ -4,7 +4,7 @@
 #' @param id namespace
 #'
 #' @return modal ui
-#' @export
+#' 
 #'
 databaseSelector_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -28,7 +28,7 @@ databaseSelector_UI <- function(id) {
 #' @param sqlDirectory sqlDirectory 
 #'
 #' @return filepath of selected database
-#' @export
+#' 
 #'
 databaseSelector_server <- function(input,
                                     output,

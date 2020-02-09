@@ -14,7 +14,7 @@
 #' @param pool pool reactive
 #'
 #' @return plot
-#' @export
+#' 
 #'
 plotDendrogram <- function(dendrogram = dendrogram,
                            dendOrPhylo = dendOrPhylo(),

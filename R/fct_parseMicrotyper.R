@@ -6,7 +6,7 @@
 #' @param smallMolPaths smallMolPaths 
 #'
 #' @return NA
-#' @export
+#' 
 #'
 run_microtyperTomzML <- function(proteinPaths = NULL,
                                  smallMolPaths = NULL,
@@ -70,7 +70,7 @@ run_microtyperTomzML <- function(proteinPaths = NULL,
 #' @param mzFilePaths mzFilePaths mzml file paths
 #'
 #' @return NA
-#' @export
+#' 
 #'
 microtyperTomzML <- function(key,
                              mzFilePaths){
@@ -110,7 +110,7 @@ microtyperTomzML <- function(key,
 #' @param dataDirectory User-chosen directory that contains microtyper-exported files directly inside (doesn't search recursively)
 #'
 #' @return List of files
-#' @export
+#' 
 #'
 getMicrotyperFiles <- function(dataDirectory){
   

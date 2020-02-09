@@ -3,7 +3,7 @@
 #' @param id NA
 #' 
 #' @return NA
-#' @export
+#' 
 #'
 
 convertMicrotyper_UI <- function(id){
@@ -64,7 +64,7 @@ convertMicrotyper_UI <- function(id){
 #' @param availableExperiments availableExperiments
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 convertMicrotyper_Server <- function(input,

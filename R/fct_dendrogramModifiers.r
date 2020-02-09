@@ -8,7 +8,7 @@
 #' @param part modify dendrogram's labels or lines
 #'
 #' @return modified dendrogram
-#' @export
+#' 
 #'
 
 changeDendPartColor <- function(dendrogram,
@@ -98,7 +98,7 @@ changeDendPartColor <- function(dendrogram,
 #' @param part change label size or edge widths
 #'
 #' @return modified dendrogram
-#' @export
+#' 
 #'
 
 changeDendPartSize <- function(dendrogram,

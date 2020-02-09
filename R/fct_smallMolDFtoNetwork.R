@@ -3,7 +3,7 @@
 #' @param sampleIDs sampleIDs 
 #' @param peakList  peakList
 #'
-#' @export
+#' 
 #' @return a single trimmed and binned MALDIquant peak object
 
 smallMolDFtoNetwork <- function(peakList,

@@ -10,7 +10,7 @@
 #' @param exportDirectory NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 parseDelimitedMS <- function(proteinPaths,
                              proteinNames,

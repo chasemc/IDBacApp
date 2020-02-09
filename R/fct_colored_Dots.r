@@ -15,7 +15,7 @@
 #' @param ...  NA
 #'
 #' @return NA
-#' @export
+#' 
 #' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
 #' @importFrom stats as.dendrogram as.hclust order.dendrogram 
 

@@ -4,7 +4,7 @@
 #' @param label label of the directory action button
 #'
 #' @return NA
-#' @export
+#' 
 #'
 selectDirectory_UI <- function(id, label){
   
@@ -25,7 +25,7 @@ selectDirectory_UI <- function(id, label){
 #' @param sqlDirectory sqlDirectory
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 selectDirectory_Server <- function(input,

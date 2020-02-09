@@ -1,7 +1,7 @@
 #' News/Update module
 #'
 #' @return NA
-#' @export
+#' 
 #'
 newUpdate <- function(){
   if (isTRUE(.Options$idbac_testing)) {

@@ -3,7 +3,7 @@
 #' @param proteoWizardLocation optional path to directory containing msconvert.exe
 #'
 #' @return user's os
-#' @export
+#' 
 #'
 findMSconvert <- function(proteoWizardLocation = ""){
   

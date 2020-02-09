@@ -5,7 +5,7 @@
 #' @param max_mass starting max mass
 #'
 #' @return NA
-#' @export
+#' 
 #'
 peakRetentionSettings_UI <- function(id,
                                      min_mass = 3000, 
@@ -74,7 +74,7 @@ peakRetentionSettings_UI <- function(id,
 #' @param session shiny
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 peakRetentionSettings_Server <- function(input,

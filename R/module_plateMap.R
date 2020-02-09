@@ -5,7 +5,7 @@
 #' @param id namespace
 #'
 #' @return UI
-#' @export
+#' 
 #'
 
 plateMapUI <- function(id) {
@@ -32,7 +32,7 @@ plateMapUI <- function(id) {
 #' @param session shiny module
 #'
 #' @return rhandsontable 
-#' @export
+#' 
 #'
 
 platemod <- function(input,

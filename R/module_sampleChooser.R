@@ -4,7 +4,7 @@
 #' @param id namespace
 #'
 #' @return UI
-#' @export
+#' 
 #'
 sampleChooser_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -25,7 +25,7 @@ sampleChooser_UI <- function(id) {
 #' @param allSamples T/F
 #'
 #' @return NA
-#' @export
+#' 
 #'
 sampleChooser_server <- function(input,
                                  output,

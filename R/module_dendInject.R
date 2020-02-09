@@ -3,7 +3,7 @@
 #' @param id namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 selectInjections_UI <- function(id){
   ns <- NS(id)
@@ -28,7 +28,7 @@ selectInjections_UI <- function(id){
 #' @param watchMainDb for reacttivity
 #'
 #' @return NA
-#' @export
+#' 
 #'
 selectInjections_server <- function(input,
                                     output,

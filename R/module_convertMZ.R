@@ -4,7 +4,7 @@
 #' @param id NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 convertMZ_UI <- function(id){
@@ -49,7 +49,7 @@ convertMZ_UI <- function(id){
 #' @param availableExperiments availableExperiments
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 convertMZ_Server <-  function(input,

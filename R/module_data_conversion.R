@@ -3,7 +3,7 @@
 #' @param id namespace
 #'
 #' @return ui
-#' @export
+#' 
 #'
 convertDataTab_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -64,7 +64,7 @@ convertDataTab_UI <- function(id) {
 #' @param pwizAvailable whether msconvert was found, logical
 #'
 #' @return none, updates availableExperiments reactive value though
-#' @export
+#' 
 #'
 
 convertDataTab_Server <- function(input,
@@ -125,7 +125,7 @@ convertDataTab_Server <- function(input,
 #' @param id NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 multipleMaldiPlates <- function(id){
@@ -203,7 +203,7 @@ multipleMaldiPlates <- function(id){
 #' @param ostest for testing function
 #'
 #' @return html
-#' @export
+#' 
 #'
 controlBrukerDisplay <- function(session, 
                                  pwizAvailable, 

@@ -23,7 +23,7 @@
 #' @param n see: https://github.com/sgibb/bootstrap
 #'
 #' @return see: https://github.com/sgibb/bootstrap
-#' @export
+#' 
 #'
 bootstrap <- function(x, fun, n=1000L) {
   fun <- match.fun(fun)
@@ -49,7 +49,7 @@ bootstrap <- function(x, fun, n=1000L) {
 #' @param x see: https://github.com/sgibb/bootstrap
 #'
 #' @return see: https://github.com/sgibb/bootstrap
-#' @export
+#' 
 #'
 as.binary.matrix.hclust <- function(x) {
   nr <- as.integer(nrow(x$merge))
@@ -88,7 +88,7 @@ as.binary.matrix.hclust <- function(x) {
 #' @param x  see: https://github.com/sgibb/bootstrap
 #'
 #' @return see: https://github.com/sgibb/bootstrap
-#' @export 
+#'  
 #'
 .text.coord.hclust <- function(x) {
   nr <- as.integer(nrow(x$merge))
@@ -136,7 +136,7 @@ as.binary.matrix.hclust <- function(x) {
 #'
 #' @seealso \code{\link{bootstrap}}
 #' @rdname bootlabels
-#' @export
+#' 
 bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
   p <- .text.coord.hclust(x)
   if (horiz) {
@@ -154,7 +154,7 @@ bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
 #' @param fun   see: https://github.com/sgibb/bootstrap
 #'
 #' @return  see: https://github.com/sgibb/bootstrap
-#' @export
+#' 
 #'
 .clust <- function(x, fun) {
   hc <- fun(x)
@@ -168,7 +168,7 @@ bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
 #' @param nc   see: https://github.com/sgibb/bootstrap
 #'
 #' @return  see: https://github.com/sgibb/bootstrap
-#' @export
+#' 
 #'
 .calculateMatches <- function(origin, current, nc=ncol(origin)) {
   ## both 1
@@ -186,7 +186,7 @@ bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
 #' @param size  see: https://github.com/sgibb/bootstrap
 #'
 #' @return see: https://github.com/sgibb/bootstrap
-#' @export
+#' 
 #'
 .resample <- function(x, size=ncol(x)) {
   sel <- sample.int(ncol(x), size=size, replace=TRUE)
