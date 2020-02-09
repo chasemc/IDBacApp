@@ -3,7 +3,7 @@ context("test-findmissingsamplemapids")
 
 
 
-a <- IDBacApp::map384Well()
+a <- map384Well()
 
 rn <- c("A",
         "B",

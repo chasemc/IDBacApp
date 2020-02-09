@@ -45,12 +45,16 @@ idbac_get_peaks <-  function(pool, sampleIDs, protein){
   results <- lapply(samps,
                     function(x){
                       unname(lapply(which(results$strain_id == x), function(y){
-                        
                         z <- jsonlite::fromJSON(results$peak_matrix[[y]])
-                        
-                        MALDIquant::createMassPeaks(mass = z$mass,
-                                                    intensity = z$intensity ,
-                                                    snr = as.numeric(z$snr))
+                        if (any(lengths(z) == 0)) {
+                          MALDIquant::createMassPeaks(mass = numeric(0),
+                                                      intensity = numeric(0) ,
+                                                      snr = numeric(0))
+                        } else {
+                          MALDIquant::createMassPeaks(mass = z$mass,
+                                                      intensity = z$intensity ,
+                                                      snr = as.numeric(z$snr))
+                        }
                       }))
                       
                     }

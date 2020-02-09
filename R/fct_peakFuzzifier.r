@@ -1,36 +1,4 @@
 
-
-
-#' MALDIquant to Mass Vectors
-#'
-#' @param peakList MALDIquant peak list
-#'
-#' @return list of mass vectors
-#' 
-#'
-mQuantToMassVec <- function(peakList){
-  
-  if (MALDIquant::isMassPeaksList(peakList)) {
-    
-    return(lapply(peakList, function(x) x@mass))
-    
-  } else {
-    
-    peakList <- list(unlist(peakList))
-    if (MALDIquant::isMassPeaksList(peakList)) {
-      
-      return(lapply(peakList, function(x) x@mass))
-      
-    } else {
-      warning("mQuantToMassVec: not a MALDIquant mass peaks list, unable to convert to MALDIquant mass peaks list")
-      return(NULL)
-    }
-    
-  }
-}
-
-
-
 #' scaler so smallest mass differnce is 1
 #'
 #' @param mass numeric 
@@ -157,6 +125,7 @@ createFuzzyVector <- function(massStart,
                        x = w$intensity,
                        dim = c(vecLength, 
                                length(massList)), 
-                       dimnames = list(1:vecLength,names(massList)))
+                       dimnames = list(((1:vecLength + xshift) / scaler),
+                                       names(massList)))
   
 }

@@ -1,7 +1,7 @@
 a <- tempdir()
-a <- IDBacApp::idbac_create("temp",
+a <- idbac_create("temp",
                        a)
-a <- IDBacApp::idbac_connect("temp",
+a <- idbac_connect("temp",
                              dirname(a))[[1]]
 
 b <- DBI::dbListTables(a)

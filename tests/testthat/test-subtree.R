@@ -1,7 +1,14 @@
-
+a <- tempdir()
+sql_path <- file.path(a,
+                      "idbac_tests",
+                      "sqlite", fsep = "/")
+sql_path <- normalizePath(sql_path,
+                          "/")
+pool <- idbac_connect("testdb",
+                      sql_path)
 dend1 <- as.dendrogram(hclust(dist(mtcars)))
 
-get_one_subtree
+
 
 subtrees <- get_subtrees(dend = dend1,
                          h = 200)

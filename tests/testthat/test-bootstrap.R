@@ -2,7 +2,7 @@ context("test-bootstrap")
 
 set.seed(42)
 a <- function(x) (hclust(dist(x)))
-a <- IDBacApp::bootstrap(mtcars,a)
+a <- bootstrap(mtcars,a)
 
 b <- c(1,
        0.879,

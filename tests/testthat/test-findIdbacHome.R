@@ -1,23 +1,23 @@
-# if ( IDBacApp::getOS() == "windows") {
+# if ( getOS() == "windows") {
 #   
 #   zz <- as.list(Sys.getenv())$HOME
 #   zz2 <- as.list(Sys.getenv())$LOCALAPPDATA
 #   
 #   
-#   res <- IDBacApp::findIdbacHome()
+#   res <- findIdbacHome()
 #   
 #   exp <- file.path(as.list(Sys.getenv())$HOME, "IDBac_experiments", fsep = "/")
 #   
 #   Sys.setenv(HOME = NA)
 #   
-#   res2 <- IDBacApp::findIdbacHome()
+#   res2 <- findIdbacHome()
 #   exp2 <- file.path(as.list(Sys.getenv())$LOCALAPPDATA, "IDBac_experiments", fsep = "/")
 #   
 #   
 #   Sys.setenv(LOCALAPPDATA = "as")
 #   
 #   
-#   res3 <- IDBacApp::findIdbacHome()
+#   res3 <- findIdbacHome()
 #   
 #   
 #   

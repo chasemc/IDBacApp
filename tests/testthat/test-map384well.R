@@ -1,7 +1,7 @@
 context("test-map384well")
 
 
-a <- IDBacApp::map384Well()
+a <- map384Well()
 
 
 test_that("map384Well() hasn't changed", {
@@ -15,7 +15,7 @@ test_that("map384Well() hasn't changed", {
 
 
 
-a <- IDBacApp::nulledMap384Well()
+a <- nulledMap384Well()
 
 test_that("nulledMap384Well() hasn't changed", {
   

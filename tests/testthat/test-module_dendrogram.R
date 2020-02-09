@@ -5,7 +5,7 @@
 # 
 # # colordendLabelsUI -------------------------------------------------------
 # 
-# a <- IDBacApp::colordendLabelsUI("hi")
+# a <- colordendLabelsUI("hi")
 # test_that("colordendLabelsUI", {
 #   expect_identical(class(a), "shiny.tag")
 #   expect_identical(a$name, "div")
@@ -18,7 +18,7 @@
 # 
 # # addDotsActionUI ---------------------------------------------------------
 # 
-# a <- IDBacApp::addDotsActionUI("hi")
+# a <- addDotsActionUI("hi")
 # test_that("addDotsActionUI", {
 #   expect_identical(class(a),c("shiny.tag.list", "list"))
 #   expect_known_hash(a, "d659acae6c")
@@ -27,7 +27,7 @@
 # 
 # # plotHier ----------------------------------------------------------------
 # 
-# a <- IDBacApp::plotHier("hi")
+# a <- plotHier("hi")
 # test_that("plotHier", {
 #   expect_identical(class(a),c("shiny.tag.list", "list"))
 #   expect_known_hash(a, "bffad66f2f")
@@ -36,7 +36,7 @@
 # 
 # # downloadHier ------------------------------------------------------------
 # 
-# a <- IDBacApp::downloadHier("hi")
+# a <- downloadHier("hi")
 # test_that("downloadHier", {
 #   expect_identical(class(a),"shiny.tag")
 #   expect_known_hash(a, "a181c75d70")
@@ -44,7 +44,7 @@
 # 
 # # downloadSvg -------------------------------------------------------------
 # 
-# a <- IDBacApp::downloadSvg("hi")
+# a <- downloadSvg("hi")
 # test_that("downloadSvg", {
 #   expect_identical(class(a[[1]]),"shiny.tag")
 #   expect_identical(class(a[[2]]),"shiny.tag")
@@ -60,7 +60,7 @@
 # 
 # # modDendLines_WellPanel --------------------------------------------------
 # 
-# a <- IDBacApp::modDendLines_WellPanel(function(x)x)
+# a <- modDendLines_WellPanel(function(x)x)
 # test_that("modDendLines_WellPanel", {
 #   expect_identical(class(a),c("shiny.tag.list", "list" ))
 #   expect_known_hash(a, "26f4ebdf4a")
@@ -69,7 +69,7 @@
 # 
 # # modDendDotsMod_WellPanel ------------------------------------------------
 # 
-# a <- IDBacApp::modDendDotsMod_WellPanel(function(x)x)
+# a <- modDendDotsMod_WellPanel(function(x)x)
 # test_that("modDendDotsMod_WellPanel", {
 #   expect_identical(class(a),c("shiny.tag.list", "list" ))
 #   expect_known_hash(a, "da265f2a5d")
@@ -79,7 +79,7 @@
 # # colorPicker -------------------------------------------------------------
 # 
 # 
-# a <- IDBacApp::colorPicker(function() 1:3,
+# a <- colorPicker(function() 1:3,
 #                            function(x)x)
 # 
 # test_that("colorPicker", {

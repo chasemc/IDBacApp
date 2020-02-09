@@ -9,9 +9,9 @@ session$ns <- function(id)
 }
 
 
-a <- IDBacApp::controlBrukerDisplay(session, "error")
-b <- IDBacApp::controlBrukerDisplay(session, "literallyAnythingButerror")
-d <- IDBacApp::controlBrukerDisplay(session, "error", ostest = "sjd")
+a <- controlBrukerDisplay(session, "error")
+b <- controlBrukerDisplay(session, "literallyAnythingButerror")
+d <- controlBrukerDisplay(session, "error", ostest = "sjd")
 
 
 test_that("controlBrukerDisplay works", {

@@ -19,7 +19,7 @@ sql_loc <- make_temp("sql_loc")
 random_spec <- lapply(1:10,
                       function(x){
                         rs <- list(sample(2000:30000, 20, replace = F))
-                        IDBacApp::createFuzzyVector(massStart = 2000, 
+                        createFuzzyVector(massStart = 2000, 
                                                     massEnd = 30000,
                                                     ppm = 3000,
                                                     massList = rs,
@@ -70,8 +70,11 @@ zz <- lapply(z$mzFilePaths,
                readLines(x)[-13]
              })
 
-test_that("parseDelimitedMS conversion", {
 
-  expect_known_hash(zz, "fdd36964b1")  
+# read mzml back in
+a <- lapply(z$mzFilePaths, mzR::openMSfile)
+a <- lapply(a, mzR::peaks)
 
+test_that("parseDelimitedMS conversion retuens correct spectra", {
+  expect_known_hash(a, "8bc06a3792")  
 })

@@ -25,7 +25,6 @@ idbac_get_metadata <- function(strainID = NULL,
                                                               con = conn)
                                 selectedMeta <- DBI::dbFetch(query)
                                 DBI::dbClearResult(query)
-                                pool::poolReturn(conn)
                                 return(selectedMeta)
                                 
                               })
@@ -44,7 +43,6 @@ idbac_get_metadata <- function(strainID = NULL,
                                 DBI::dbBind(query, list(ids = strainID))
                                 selectedMeta <- DBI::dbFetch(query)
                                 DBI::dbClearResult(query)
-                                pool::poolReturn(conn)
                                 return(selectedMeta)
                                 
                               })
@@ -63,7 +61,6 @@ idbac_get_metadata <- function(strainID = NULL,
                                 DBI::dbBind(query, list(ids = strainID))
                                 selectedMeta <- DBI::dbFetch(query)
                                 DBI::dbClearResult(query)
-                                pool::poolReturn(conn)
                                 return(selectedMeta)
                                 
                               })

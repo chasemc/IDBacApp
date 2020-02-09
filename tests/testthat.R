@@ -1,6 +1,8 @@
-#library(testthat)
-#library(IDBacApp)
+library(testthat)
+library(IDBacApp)
 
-#Sys.setenv("R_TESTS" = "")
+Sys.setenv("R_TESTS" = "")
 
-#test_check("IDBacApp")
+suppressWarnings({
+test_check("IDBacApp")
+})
