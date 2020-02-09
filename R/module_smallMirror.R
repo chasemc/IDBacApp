@@ -120,24 +120,24 @@ smallmirrorPlots_Server <- function(input,
     
     
     mirrorPlotEnv$peaksSampleOne <- collapseReplicates(pool = workingDB$pool(),
-                                                                 sampleIDs = input$Spectra1,
-                                                                 peakPercentPresence = input$percentPresence,
-                                                                 lowerMassCutoff = input$lowerMass,
-                                                                 upperMassCutoff = input$upperMass,
-                                                                 minSNR = input$SNR,
-                                                                 tolerance = 0.002,
-                                                                 protein = FALSE)[[1]] 
+                                                       sampleIDs = input$Spectra1,
+                                                       peakPercentPresence = input$percentPresence,
+                                                       lowerMassCutoff = input$lowerMass,
+                                                       upperMassCutoff = input$upperMass,
+                                                       minSNR = input$SNR,
+                                                       tolerance = 0.002,
+                                                       protein = FALSE)[[1]] 
     
     
     
     mirrorPlotEnv$peaksSampleTwo <- collapseReplicates(pool = workingDB$pool(),
-                                                                 sampleIDs = input$Spectra2,
-                                                                 peakPercentPresence = input$percentPresence,
-                                                                 lowerMassCutoff = input$lowerMass,
-                                                                 upperMassCutoff = input$upperMass,
-                                                                 minSNR = input$SNR,
-                                                                 tolerance = 0.002,
-                                                                 protein = FALSE)[[1]]
+                                                       sampleIDs = input$Spectra2,
+                                                       peakPercentPresence = input$percentPresence,
+                                                       lowerMassCutoff = input$lowerMass,
+                                                       upperMassCutoff = input$upperMass,
+                                                       minSNR = input$SNR,
+                                                       tolerance = 0.002,
+                                                       protein = FALSE)[[1]]
     
     
     
@@ -183,28 +183,25 @@ smallmirrorPlots_Server <- function(input,
     
     
     mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = workingDB$pool(),
-                                                                                                  sampleID = input$Spectra1, 
-                                                                                                  protein = FALSE,
-                                                                                                  smallmol = TRUE))
-    
-    # downsample so plotting is quicker
-    mirrorPlotEnv$spectrumSampleOne@intensity <- mirrorPlotEnv$spectrumSampleOne@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleOne@intensity), 4)]
-    
-    
-    
+                                                                                        sampleID = input$Spectra1, 
+                                                                                        protein = FALSE,
+                                                                                        smallmol = TRUE))
     mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = workingDB$pool(),
-                                                                                                  sampleID = input$Spectra2, 
-                                                                                                  protein = FALSE,
-                                                                                                  smallmol = TRUE))
-
-    # downsample so plotting is quicker
-    mirrorPlotEnv$spectrumSampleTwo@intensity <- mirrorPlotEnv$spectrumSampleTwo@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleTwo@intensity), 4)]
+                                                                                        sampleID = input$Spectra2, 
+                                                                                        protein = FALSE,
+                                                                                        smallmol = TRUE))
+    if (length(mirrorPlotEnv$spectrumSampleOne@intensity) > 50000 ) {
+      # downsample so plotting is quicker
+      mirrorPlotEnv$spectrumSampleOne@intensity <- mirrorPlotEnv$spectrumSampleOne@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleOne@intensity), 4)]
+      mirrorPlotEnv$spectrumSampleOne@mass <- mirrorPlotEnv$spectrumSampleOne@mass[seq(1, length(mirrorPlotEnv$spectrumSampleOne@mass), 4)]
+    }
     
+    if (length(mirrorPlotEnv$spectrumSampleTwo@intensity) > 50000 ) {
+      # downsample so plotting is quicker
+      mirrorPlotEnv$spectrumSampleTwo@intensity <- mirrorPlotEnv$spectrumSampleTwo@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleTwo@intensity), 4)]
+      mirrorPlotEnv$spectrumSampleTwo@mass <- mirrorPlotEnv$spectrumSampleTwo@mass[seq(1, length(mirrorPlotEnv$spectrumSampleTwo@mass), 4)]
+    }
     
-    
-    
-    
-    pool::poolReturn(conn)
     # Return the entire saved environment
     mirrorPlotEnv
     
