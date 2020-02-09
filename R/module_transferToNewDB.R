@@ -65,7 +65,7 @@ transferToNewDB_server <- function(input,
   
   chosenSamples <-  shiny::callModule(sampleChooser_server,
                                       "chooseNewDBSamples",
-                                      pool = selectedDB$userDBCon,
+                                      pool = selectedDB$pool,
                                       allSamples = TRUE,
                                       whetherProtein = FALSE)
   
@@ -154,7 +154,7 @@ transferToNewDB_server <- function(input,
                  shiny::withProgress(message = 'Copying data to new database',
                                      detail = 'Connecting experiments...',
                                      value = 0, {
-                                       copyToNewDatabase(existingDBPool = selectedDB$userDBCon(),
+                                       copyToNewDatabase(existingDBPool = selectedDB$pool(),
                                                                    newDBPool = newCheckedPool[[1]], 
                                                                    sampleIDs = chosenSamples$chosen)
                                      })

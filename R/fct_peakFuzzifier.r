@@ -58,8 +58,11 @@ mQuantToMassVec <- function(peakList){
 #'
 #' @examples
 #' \dontrun{
-#' masses <- list(Sample_A = c(5000,6000,7000), Sample_B = c(5000,6010,7005), Sample_C = c(5000,6010,7005))  
-#' intensities <- list(Sample_A = rep(1, 3), Sample_B = rep(1, 3), Sample_C = rep(1, 3))
+#' masses <- list(Sample_A = c(5000,6000,7000), 
+#' Sample_B = c(5000,6010,7005), Sample_C = c(5000,6010,7005))  
+#' intensities <- list(Sample_A = rep(1, 3), 
+#' Sample_B = rep(1, 3),
+#'  Sample_C = rep(1, 3))
 #' zx <- binnR(massStart = 3000,
 #'             massEnd = 15000,
 #'             ppm = 500,

@@ -3,7 +3,7 @@
 #'
 #' @param path directory containing Bruker data, shouldn't contain other things
 #'     as this searches recursively
-#' @param pool IDBac database pool... e.g. output of idbac_connect()[[1]]
+#' @param pool IDBac database pool... e.g. output of idbac_connect()
 #' @param ignoreMissing TRUE/FALSE whether to ignore target spots missing ids
 #' @param sampleMap base::matrix() representing MALDI target plate with sample ids
 #'
@@ -16,9 +16,6 @@ process_bruker <- function(path,
                            ignoreMissing){
   
   
-  
-  
-  
   # Find spectra and get acquisiton info ------------------------------------
   
   acquisitionInfo <- readBrukerAcqus(path)
@@ -26,8 +23,8 @@ process_bruker <- function(path,
   # -------------------------------------------------------------------------
   
   fid_paths <- extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
-                                        name =  "file",
-                                        type = "")
+                                           name =  "file",
+                                           type = "")
   
   if (!all(file.exists(fid_paths))) {
     stop("readBrukerAcqus(path) gave file paths for file(s) that R can't find")
@@ -36,8 +33,8 @@ process_bruker <- function(path,
   
   # Inform user the number of spectra processing ----------------------------
   temp <- extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
-                                   name =  "sampleName",
-                                   type = "")
+                                      name =  "sampleName",
+                                      type = "")
   temp <- table(temp)
   message(paste0("Processing ",
                  temp,
@@ -50,14 +47,14 @@ process_bruker <- function(path,
   
   
   acquiredSpots <- extractBrukerAcquistionInfo(acquisitonInformation = acquisitionInfo,
-                                            name =  "spot",
-                                            type = "")
+                                               name =  "spot",
+                                               type = "")
   
   
   
   anyMissing <- findMissingSampleMapIds(spots = acquiredSpots,
-                                                  sampleMap = sampleMap,
-                                                  ignoreMissing = ignoreMissing)
+                                        sampleMap = sampleMap,
+                                        ignoreMissing = ignoreMissing)
   
   
   if (isFALSE(ignoreMissing) && length(anyMissing$missing) > 0L) {
@@ -79,39 +76,39 @@ process_bruker <- function(path,
                               anyMissing$matching[match(acquiredSpots, names(anyMissing$matching))])
     
     
-   # splitAcquisition <- split(acquisitionInfo, anyMissing$matching)
-  
+    # splitAcquisition <- split(acquisitionInfo, anyMissing$matching)
     
-
+    
+    
     fid_path <- lapply(splitAcquisition, function(x){
       extractBrukerAcquistionInfo(acquisitonInformation = x,
-                                                     name =  "file",
-                                                     type = "")
+                                  name =  "file",
+                                  type = "")
     })
     
     
-
-# Convert with proteowizard -----------------------------------------------
-
+    
+    # Convert with proteowizard -----------------------------------------------
+    
     
     
     tempMZDir <- tempdir()
     
     forProcessing <- proteoWizConvert(msconvertPath = "",
-                                                samplePathList = fid_path,
-                                                convertWhere = tempMZDir)
-
+                                      samplePathList = fid_path,
+                                      convertWhere = tempMZDir)
     
     
-    sql_fill_version_table(userDBCon = userDBCon)
-    sql_fill_locale_table(userDBCon = userDBCon)
+    
+    sql_fill_version_table(pool = pool)
+    sql_fill_locale_table(pool = pool)
     
     
     for (i in base::seq_along(forProcessing$mzFile)) {
       spectraProcessingFunction(rawDataFilePath = forProcessing$mzFile[[i]],
-                                          sampleID = forProcessing$sampleID[[i]],
-                                          userDBCon = pool,
-                                          acquisitionInfo = splitAcquisition[[i]]) # pool connection
+                                sampleID = forProcessing$sampleID[[i]],
+                                pool = pool,
+                                acquisitionInfo = splitAcquisition[[i]]) # pool connection
     }
     
     

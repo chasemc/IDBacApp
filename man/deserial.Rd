@@ -11,7 +11,7 @@ deserial(input)
 \item{input}{matrix or vector}
 }
 \value{
-JSON
+dataframe
 }
 \description{
 deserial

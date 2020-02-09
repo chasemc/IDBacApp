@@ -22,13 +22,6 @@ sanitize(filename, replacement = "")
   `LPT3`, `LPT4`, `LPT5`, `LPT6`, LPT7, `LPT8`, and `LPT9`)
 The resulting string is then truncated to [255 bytes in length](https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits)
 }
-\examples{
-# potentially unsafe string
-str <- "~/.\u0001ssh/authorized_keys"
-sanitize(str)
-
-sanitize("..")
-}
 \seealso{
 <https://www.npmjs.com/package/sanitize-filename>, upon which this
   function is based.

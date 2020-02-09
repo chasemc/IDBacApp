@@ -6,7 +6,7 @@
 \usage{
 createSpectraSQL(
   mzML_con,
-  userDBCon,
+  pool,
   sampleID,
   XMLinfo,
   smallRangeEnd = 6000,
@@ -16,7 +16,7 @@ createSpectraSQL(
 \arguments{
 \item{mzML_con}{NA}
 
-\item{userDBCon}{NA}
+\item{pool}{sqlite pool}
 
 \item{sampleID}{NA}
 
@@ -27,7 +27,7 @@ createSpectraSQL(
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 }
 \value{
-NA
+writes to sqlite database
 }
 \description{
 createSpectraSQL

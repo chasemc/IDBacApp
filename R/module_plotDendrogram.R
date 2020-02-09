@@ -16,18 +16,18 @@
 #' @return plot
 #' 
 #'
-plotDendrogram <- function(dendrogram = dendrogram,
-                           dendOrPhylo = dendOrPhylo(),
-                           selectMetaColumn = input$selectMetaColumn,
-                           appendDendLabels = input$appendDendLabels,
-                           colorsChosen = colorsChosen(),
-                           cutHeightLines = input$cutHeightLines,
-                           colorByLines = input$colorByLines,
-                           colorByLabels = input$colorByLabels,
-                           removeDendDots = input$removeDendDots,
-                           cutHeightLabels = input$cutHeightLabels,
-                           boots = boots()$bootstraps,
-                           pool = pool()){
+plotDendrogram <- function(dendrogram,
+                           dendOrPhylo,
+                           selectMetaColumn,
+                           appendDendLabels,
+                           colorsChosen,
+                           cutHeightLines,
+                           colorByLines,
+                           colorByLabels,
+                           removeDendDots,
+                           cutHeightLabels,
+                           boots,
+                           pool){
   
   
   dendrogram_labels <- labels(dendrogram$dendrogram)
@@ -36,9 +36,9 @@ plotDendrogram <- function(dendrogram = dendrogram,
   
   if (!is.null(appendDendLabels)) {
 
-    new_labels <- metadataFromId(strainID = dendrogram_labels,
-                                   metadataColumn = appendDendLabels,
-                                   pool = pool)[,2]
+    new_labels <- idbac_get_metadata(strainID = dendrogram_labels,
+                                     metadataColumn = appendDendLabels,
+                                     pool = pool)[,2]
 
     dendrogram_labels <- paste0(dendrogram_labels, " ", new_labels)
     remove(new_labels)

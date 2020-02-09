@@ -37,7 +37,7 @@ idbac_dendrogram_creator <- function(bootstraps = 0L,
   }
   
   distance_matrix <- distMatrix(data = proteinMatrix,
-                                          method = distanceMethod)
+                                method = distanceMethod)
   
   dend <- stats::hclust(distance_matrix,
                         method = clusteringMethod)

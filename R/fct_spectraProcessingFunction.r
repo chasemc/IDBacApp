@@ -4,14 +4,14 @@
 #'  
 #' @param rawDataFilePath filepath of the data
 #' @param sampleID the sample ID to be read and added to the database
-#' @param userDBCon database connection (checked out pool)
+#' @param pool database connection (checked out pool)
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return the peak list modifed by binning then subtractng the matrix sample,
 #' 
 spectraProcessingFunction <- function(rawDataFilePath,
                                       sampleID,
-                                      userDBCon, 
+                                      pool, 
                                       acquisitionInfo){
   
   sampleID <- trimws(sampleID, 
@@ -20,7 +20,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
   # If sample ID doesn't exist, create it in table
   # TODO: userprompt with option to change ID
   createMetaSQL(sampleID = sampleID,
-                          userDBCon = userDBCon)
+                          pool = pool)
   
   
   # Create xml table -------------------------------------------------------
@@ -30,14 +30,14 @@ spectraProcessingFunction <- function(rawDataFilePath,
                               backend = "pwiz")
   
   XMLinfo <- createXMLSQL(rawDataFilePath = rawDataFilePath,
-                                    userDBCon = userDBCon,
+                                    pool = pool,
                                     mzML_con = mzML_con)
   
   
  
   
   createSpectraSQL(mzML_con = mzML_con,
-                             userDBCon = userDBCon,
+                             pool = pool,
                              sampleID = sampleID,
                              XMLinfo = XMLinfo, 
                              acquisitionInfo = acquisitionInfo)

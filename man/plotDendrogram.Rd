@@ -5,18 +5,18 @@
 \title{Function for plotting dendrogram}
 \usage{
 plotDendrogram(
-  dendrogram = dendrogram,
-  dendOrPhylo = dendOrPhylo(),
-  selectMetaColumn = input$selectMetaColumn,
-  appendDendLabels = input$appendDendLabels,
-  colorsChosen = colorsChosen(),
-  cutHeightLines = input$cutHeightLines,
-  colorByLines = input$colorByLines,
-  colorByLabels = input$colorByLabels,
-  removeDendDots = input$removeDendDots,
-  cutHeightLabels = input$cutHeightLabels,
-  boots = boots()$bootstraps,
-  pool = pool()
+  dendrogram,
+  dendOrPhylo,
+  selectMetaColumn,
+  appendDendLabels,
+  colorsChosen,
+  cutHeightLines,
+  colorByLines,
+  colorByLabels,
+  removeDendDots,
+  cutHeightLabels,
+  boots,
+  pool
 )
 }
 \arguments{

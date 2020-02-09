@@ -10,7 +10,7 @@ process_bruker(path, pool, sampleMap, ignoreMissing)
 \item{path}{directory containing Bruker data, shouldn't contain other things
 as this searches recursively}
 
-\item{pool}{IDBac database pool... e.g. output of idbac_connect()[[1]]}
+\item{pool}{IDBac database pool... e.g. output of idbac_connect()}
 
 \item{sampleMap}{base::matrix() representing MALDI target plate with sample ids}
 

@@ -4,15 +4,15 @@
 \alias{insertIntoMassTable}
 \title{Write mass_index data to SQLite}
 \usage{
-insertIntoMassTable(env, userDBCon)
+insertIntoMassTable(env, pool)
 }
 \arguments{
 \item{env}{environment}
 
-\item{userDBCon}{checked database connection}
+\item{pool}{sqlite pool}
 }
 \value{
-nothing, writes to database
+writes to sqlite database
 }
 \description{
 Write mass_index data to SQLite

@@ -4,10 +4,10 @@
 \alias{exportmzML}
 \title{Export mzML/mzXML from SQLite DB}
 \usage{
-exportmzML(userDBCon, sampleIDs, saveToDir)
+exportmzML(pool, sampleIDs, saveToDir)
 }
 \arguments{
-\item{userDBCon}{pool connection, not-checked-out}
+\item{pool}{pool connection, not-checked-out}
 
 \item{sampleIDs}{sample IDs}
 

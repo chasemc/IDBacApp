@@ -4,17 +4,17 @@
 \alias{createXMLSQL}
 \title{createXMLSQL}
 \usage{
-createXMLSQL(rawDataFilePath, userDBCon, mzML_con)
+createXMLSQL(rawDataFilePath, pool, mzML_con)
 }
 \arguments{
-\item{rawDataFilePath}{NA}
+\item{rawDataFilePath}{xml path}
 
-\item{userDBCon}{NA}
+\item{pool}{sqlite pool}
 
-\item{mzML_con}{NA}
+\item{mzML_con}{mzR connection}
 }
 \value{
-NA
+writes to sqlite database
 }
 \description{
 createXMLSQL

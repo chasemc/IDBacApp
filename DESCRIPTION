@@ -9,9 +9,6 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 biocViews:
-Depends:
-    dendextend (>= 1.12.0),
-    shiny (>= 1.3.2)
 Imports:
     ape (>= 5.3),
     colourpicker (>= 1.0),
@@ -49,7 +46,9 @@ Imports:
     svglite (>= 1.2.2),
     utils,
     xml2 (>= 1.2.1),
-    Matrix
+    Matrix,
+    dendextend (>= 1.12.0),
+    shiny (>= 1.3.2)
 Suggests:
     knitr (>= 1.23),
     testthat (>= 2.2.1)

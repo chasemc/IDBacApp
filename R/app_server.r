@@ -8,6 +8,7 @@
 #' @return IDBac server
 #' 
 #' @import shiny
+#' @import dendextend
 app_server <- function(input, output, session) {
   
   set.seed(42)

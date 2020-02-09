@@ -21,8 +21,8 @@ process_mzml <- function(mzFilePaths,
   #                                         
   
   
-  sql_fill_version_table(userDBCon = idbacPool)
-  sql_fill_locale_table(userDBCon = idbacPool)
+  sql_fill_version_table(pool = idbacPool)
+  sql_fill_locale_table(pool = idbacPool)
   
   progLength <- base::length(mzFilePaths)
   
@@ -41,7 +41,7 @@ process_mzml <- function(mzFilePaths,
                      
                      spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                                sampleID = sampleIds[[i]],
-                                               userDBCon = idbacPool,
+                                               pool = idbacPool,
                                                acquisitionInfo = acquisitionInfo[[i]]) # pool connection
                    }
                  })
@@ -54,7 +54,7 @@ process_mzml <- function(mzFilePaths,
       
       spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                 sampleID = sampleIds[[i]],
-                                userDBCon = idbacPool,
+                                pool = idbacPool,
                                 acquisitionInfo = acquisitionInfo[[i]]) # pool connection
     }
   }

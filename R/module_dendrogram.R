@@ -157,7 +157,7 @@ dendDotsServer <- function(input,
   output$sampleFactorMapColors <- renderUI({
     column(7,
            colorPicker(levs,
-                                 session$ns)
+                       session$ns)
            
     )
   })
@@ -304,37 +304,37 @@ dendDotsServer <- function(input,
     
     
     dendrogram$dendrogram <- changeDendPartColor(dendrogram = dendrogram$dendrogram,
-                                                           colorBy = input$colorByLabels,
-                                                           colorBlindPalette = colorBlindPalette(),
-                                                           cutHeight = input$cutHeightLabels,
-                                                           chosenK = input$chosenKLabels,
-                                                           part = "labels")
+                                                 colorBy = input$colorByLabels,
+                                                 colorBlindPalette = colorBlindPalette(),
+                                                 cutHeight = input$cutHeightLabels,
+                                                 chosenK = input$chosenKLabels,
+                                                 part = "labels")
     
   })
   
   observeEvent(c(input$colorByLines,input$cutHeightLines,input$chosenKLines), {
     
     dendrogram$dendrogram <- changeDendPartColor(dendrogram = dendrogram$dendrogram,
-                                                           colorBy = input$colorByLines,
-                                                           colorBlindPalette = colorBlindPalette(),
-                                                           cutHeight = input$cutHeightLines,
-                                                           chosenK = input$chosenKLines,
-                                                           part = "branches")
+                                                 colorBy = input$colorByLines,
+                                                 colorBlindPalette = colorBlindPalette(),
+                                                 cutHeight = input$cutHeightLines,
+                                                 chosenK = input$chosenKLines,
+                                                 part = "branches")
   })
   
   observeEvent(input$dendLabelSize, {
     
     dendrogram$dendrogram <- changeDendPartSize(dendrogram = dendrogram$dendrogram,
-                                                          dendPartSize = input$dendLabelSize,
-                                                          part = "labels")
+                                                dendPartSize = input$dendLabelSize,
+                                                part = "labels")
   })
   
   
   observeEvent(input$dendLineWidth, {
     
     dendrogram$dendrogram <- changeDendPartSize(dendrogram =  dendrogram$dendrogram,
-                                                          dendPartSize = input$dendLineWidth,
-                                                          part = "branches")
+                                                dendPartSize = input$dendLineWidth,
+                                                part = "branches")
     
   })
   
@@ -356,17 +356,17 @@ dendDotsServer <- function(input,
     
     
     plotDendrogram(dendrogram = dendrogram,
-                             dendOrPhylo = dendOrPhylo(),
-                             selectMetaColumn = input$selectMetaColumn,
-                             appendDendLabels = input$appendselectMetaColumn,
-                             colorsChosen = colorsChosen(),
-                             cutHeightLines = input$cutHeightLines,
-                             colorByLines = input$colorByLines,
-                             colorByLabels = input$colorByLabels,
-                             removeDendDots = input$removeDendDots,
-                             cutHeightLabels = input$cutHeightLabels,
-                             boots = boots()$bootstraps,
-                             pool = pool())
+                   dendOrPhylo = dendOrPhylo(),
+                   selectMetaColumn = input$selectMetaColumn,
+                   appendDendLabels = input$appendselectMetaColumn,
+                   colorsChosen = colorsChosen(),
+                   cutHeightLines = input$cutHeightLines,
+                   colorByLines = input$colorByLines,
+                   colorByLabels = input$colorByLabels,
+                   removeDendDots = input$removeDendDots,
+                   cutHeightLabels = input$cutHeightLabels,
+                   boots = boots()$bootstraps,
+                   pool = pool())
     
   }, height = plotHeight)
   
@@ -413,17 +413,17 @@ dendDotsServer <- function(input,
       par(mar = c(1, 1, 1, plotWidth()))
       
       plotDendrogram(dendrogram = dendrogram,
-                               dendOrPhylo = dendOrPhylo(),
-                               selectMetaColumn = input$selectMetaColumn,
-                               appendDendLabels = input$appendselectMetaColumn,
-                               colorsChosen = colorsChosen(),
-                               cutHeightLines = input$cutHeightLines,
-                               colorByLines = input$colorByLines,
-                               colorByLabels = input$colorByLabels,
-                               removeDendDots = input$removeDendDots,
-                               cutHeightLabels = input$cutHeightLabels,
-                               boots = boots()$bootstraps,
-                               pool = pool())
+                     dendOrPhylo = dendOrPhylo(),
+                     selectMetaColumn = input$selectMetaColumn,
+                     appendDendLabels = input$appendselectMetaColumn,
+                     colorsChosen = colorsChosen(),
+                     cutHeightLines = input$cutHeightLines,
+                     colorByLines = input$colorByLines,
+                     colorByLabels = input$colorByLabels,
+                     removeDendDots = input$removeDendDots,
+                     cutHeightLabels = input$cutHeightLabels,
+                     boots = boots()$bootstraps,
+                     pool = pool())
       
       grDevices::dev.off()
       

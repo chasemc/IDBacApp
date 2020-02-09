@@ -64,7 +64,7 @@ exportSamples_server <- function(input,
   
   chosenSamples <-  shiny::callModule(sampleChooser_server,
                                       "chooseNewDBSamples",
-                                      pool = selectedDB$userDBCon,
+                                      pool = selectedDB$pool,
                                       allSamples = TRUE,
                                       whetherProtein = FALSE)
   
@@ -84,11 +84,11 @@ exportSamples_server <- function(input,
   
   observeEvent(input$exportSpectra, {
     
-    req(class(selectedDB$userDBCon())[[1]] == "Pool")
+    req(class(selectedDB$pool())[[1]] == "Pool")
     req(length(chosenSamples$chosen) > 0)
     req(dir.exists(chosenDirectory$value))
     
-    exportmzML(userDBCon = selectedDB$userDBCon(),
+    exportmzML(pool = selectedDB$pool(),
                          sampleIDs = chosenSamples$chosen,
                          saveToDir = chosenDirectory$value)
     

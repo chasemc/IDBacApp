@@ -4,13 +4,13 @@
 \alias{sql_fill_locale_table}
 \title{Insert current locale info into sql table}
 \usage{
-sql_fill_locale_table(userDBCon)
+sql_fill_locale_table(pool)
 }
 \arguments{
-\item{userDBCon}{database connection}
+\item{pool}{sqlite pool}
 }
 \value{
-side effect
+writes to sqlite database
 }
 \description{
 Insert current locale info into sql table

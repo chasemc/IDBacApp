@@ -14,7 +14,6 @@ app_ui <- function(){
   # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
   #tags$body(background = "rotatingPCA.gif",
   navbarPage(collapsible = T,
-             # theme = "css.css",
              title = "IDBac",
              id = "mainIDBacNav",
              tabPanel(

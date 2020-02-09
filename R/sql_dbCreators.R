@@ -5,19 +5,19 @@
 
 #' Create version table 
 #'
-#' @param userDBCon sqlite connection
+#' @param pool sqlite pool 
 #'
-#' @return NA
+#' @return writes to sqlite database
 #' 
 #'
-sql_fill_version_table <- function(userDBCon) {
+sql_fill_version_table <- function(pool) {
   
   pool::poolWithTransaction(
-    pool = userDBCon,
+    pool = pool,
     func = function(conn){
       
-      ver <- cbind.data.frame(idbac_version = as.character(packageVersion("IDBacApp")), 
-                              r_version = as.character(serial(sessionInfo()$R.version)))
+      ver <- cbind.data.frame(idbac_version = as.character(utils::packageVersion("IDBacApp")), 
+                              r_version = as.character(serial(utils::sessionInfo()$R.version)))
       # Add version table
       DBI::dbWriteTable(conn = conn,
                         name = "version", # SQLite table to insert into
@@ -34,15 +34,15 @@ sql_fill_version_table <- function(userDBCon) {
 
 #' Insert current locale info into sql table 
 #'
-#' @param userDBCon  database connection
+#' @param pool sqlite pool 
 #'
-#' @return side effect
+#' @return writes to sqlite database
 #' 
 #'
-sql_fill_locale_table <- function(userDBCon) {
+sql_fill_locale_table <- function(pool) {
   
   pool::poolWithTransaction(
-    pool = userDBCon,
+    pool = pool,
     func = function(conn){
       
       locale <- Sys.getlocale(category = "LC_ALL")
@@ -70,18 +70,18 @@ sql_fill_locale_table <- function(userDBCon) {
 #' createMetaSQL
 #'
 #' @param sampleID NA
-#' @param userDBCon NA
+#' @param pool sqlite pool 
 #'
-#' @return NA
+#' @return writes to sqlite database
 #' 
 #'
 
 createMetaSQL <- function(sampleID,
-                          userDBCon){
+                          pool){
   
   
   pool::poolWithTransaction(
-    pool = userDBCon,
+    pool = pool,
     func = function(conn){
       
       if (!DBI::dbExistsTable(conn, "metadata")) {
@@ -106,21 +106,21 @@ createMetaSQL <- function(sampleID,
 
 #' createXMLSQL
 #'
-#' @param rawDataFilePath NA
-#' @param userDBCon NA
-#' @param mzML_con NA
+#' @param rawDataFilePath xml path
+#' @param pool sqlite pool 
+#' @param mzML_con mzR connection
 #'
-#' @return NA
+#' @return writes to sqlite database
 #' 
 #'
 
 createXMLSQL <- function(rawDataFilePath,
-                         userDBCon,
+                         pool,
                          mzML_con){
   
   
   pool::poolWithTransaction(
-    pool = userDBCon,
+    pool = pool,
     func = function(conn){
       
       xmlFile <- serializeXML(rawDataFilePath)
@@ -135,7 +135,7 @@ createXMLSQL <- function(rawDataFilePath,
       # Get instrument Info
       instInfo <- mzR::instrumentInfo(mzML_con)
       
-      
+      #TODO
       # # Find acquisitionInfo from mzML file
       #acquisitionInfo <- findAcquisitionInfo(rawDataFilePath,
       #                                               instInfo$manufacturer)
@@ -186,17 +186,17 @@ createXMLSQL <- function(rawDataFilePath,
 #' createSpectraSQL
 #'
 #' @param mzML_con NA
-#' @param userDBCon NA
+#' @param pool sqlite pool 
 #' @param sampleID NA
 #' @param XMLinfo NA
 #' @param smallRangeEnd end of mass region for small mol, if m/z above this- will be classified as "protein" spectrum
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
-#' @return NA
+#' @return writes to sqlite database
 #' 
 #'
 createSpectraSQL <- function(mzML_con, 
-                             userDBCon,
+                             pool,
                              sampleID,
                              XMLinfo,
                              smallRangeEnd = 6000,
@@ -223,11 +223,11 @@ createSpectraSQL <- function(mzML_con,
     
     insertIntoIndividualSpectra(env = env,
                                 XMLinfo = XMLinfo,
-                                userDBCon = userDBCon,
+                                pool = pool,
                                 acquisitionInfo = acquisitionInfo[smallIndex],
                                 sampleID = sampleID)
     insertIntoMassTable(env = env,
-                        userDBCon = userDBCon)
+                        pool = pool)
   }
   # Protein Spectra ---------------------------------------------------------
   
@@ -238,11 +238,11 @@ createSpectraSQL <- function(mzML_con,
                                 index = !smallIndex)
     insertIntoIndividualSpectra(env = env,
                                 XMLinfo = XMLinfo,
-                                userDBCon = userDBCon,
+                                pool = pool,
                                 acquisitionInfo = acquisitionInfo[!smallIndex],
                                 sampleID = sampleID)
     insertIntoMassTable(env = env,
-                        userDBCon = userDBCon)
+                        pool = pool)
   }
   
   
@@ -256,16 +256,16 @@ createSpectraSQL <- function(mzML_con,
 #' Write mass_index data to SQLite
 #'
 #' @param env environment 
-#' @param userDBCon checked database connection
+#' @param pool sqlite pool 
 #'
-#' @return nothing, writes to database
+#' @return writes to sqlite database
 #' 
 #'
 insertIntoMassTable <- function(env,
-                                userDBCon){
+                                pool){
   
   pool::poolWithTransaction(
-    pool = userDBCon,
+    pool = pool,
     func = function(conn){
       
       if (length(env$spectrum_mass_hash) != length(env$mass_vector)) {
@@ -298,20 +298,20 @@ insertIntoMassTable <- function(env,
 #'
 #' @param env environment 
 #' @param XMLinfo xmlinfo
-#' @param userDBCon checked database connection
+#' @param pool sqlite pool 
 #' @param acquisitionInfo acquisitionInfo
 #' @param sampleID sampleID
 #'
-#' @return nothing, writes to database
+#' @return writes to sqlite database
 #' 
 #'
 insertIntoIndividualSpectra <- function(env,
                                         XMLinfo,
-                                        userDBCon,
+                                        pool,
                                         acquisitionInfo = NULL,
                                         sampleID){
   pool::poolWithTransaction(
-    pool = userDBCon,
+    pool = pool,
     func = function(conn){
       
       temp <- base::lengths(base::mget(base::ls(env),

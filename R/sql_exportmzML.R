@@ -1,17 +1,17 @@
 #' Export mzML/mzXML from SQLite DB
 #'
-#' @param userDBCon pool connection, not-checked-out 
+#' @param pool pool connection, not-checked-out 
 #' @param sampleIDs sample IDs
 #' @param saveToDir directory files should be saved to
 #'
 #' @return NA, files written
 #' 
 #'
-exportmzML <- function(userDBCon,
+exportmzML <- function(pool,
                        sampleIDs,
                        saveToDir){
  
-  conn <- pool::poolCheckout(userDBCon)
+  conn <- pool::poolCheckout(pool)
   
   query <-  DBI::dbSendStatement("SELECT xml.xml,spectra.strain_id
 FROM `xml`
@@ -102,7 +102,7 @@ GROUP BY strain_id;
   DBI::dbClearResult(query)
   
   pool::poolReturn(conn)
-  # pool::poolClose(userDBCon)
+  # pool::poolClose(pool)
   
   
   

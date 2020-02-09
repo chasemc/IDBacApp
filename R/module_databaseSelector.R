@@ -61,13 +61,13 @@ databaseSelector_server <- function(input,
     
   })
   
-  userDBCon <- reactive({
+  pool <- reactive({
     
     req(!is.null(input$selectExperiment))
     req(nchar(input$selectExperiment) > 0)
     req(input$selectExperiment != "None")
     validate(need(length(input$selectExperiment) == length(sqlDirectory$sqlDirectory), 
-                  "databaseTabServer: userDBCon, idbac_connect inputs are different lengths."))
+                  "databaseTabServer: pool, idbac_connect inputs are different lengths."))
     
     # pool will create a new sqlite if one doesn't exist, so let's stop that from happening here:
     req(file.exists(file.path(sqlDirectory$sqlDirectory, 
@@ -92,6 +92,6 @@ databaseSelector_server <- function(input,
     
   })  
   
-  return(list(userDBCon = userDBCon,
+  return(list(pool = pool,
               inputs = input))
 }

@@ -46,7 +46,7 @@ databaseTabServer <- function(input,
   
   shiny::callModule(experimentSummary_Server,
                     "experimentSummary",
-                    pool = selectedDB$userDBCon)
+                    pool = selectedDB$pool)
   
   
   
@@ -56,7 +56,7 @@ databaseTabServer <- function(input,
   
   callModule(updateMeta_server,
              "updateMeta",
-             pool = selectedDB$userDBCon,
+             pool = selectedDB$pool,
              selectedDB = selectedDB$inputs)
   
   
@@ -103,7 +103,7 @@ databaseTabServer <- function(input,
   
   
   
-  return(list(pool = selectedDB$userDBCon,
+  return(list(pool = selectedDB$pool,
               move = selectedDB$inputs)
   )
   

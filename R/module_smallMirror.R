@@ -261,7 +261,7 @@ smallmirrorPlots_Server <- function(input,
          ylim = c(ranges2()$y1, ranges2()$y2),
          xlim = c(ranges2()$x1,ranges2()$x2),
          type = "l",
-         col = adjustcolor("Black", alpha = 0.3),
+         col = grDevices::adjustcolor("Black", alpha = 0.3),
          xlab = "m/z",
          ylab = "Intensity")
     lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
@@ -298,8 +298,9 @@ smallmirrorPlots_Server <- function(input,
       
       baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
       
-      dev.off()
+      grDevices::dev.off()
       if (file.exists(paste0(file1, ".svg")))
+        #TODO why
         file.rename(paste0(file1, ".svg"), file1)
       
     })

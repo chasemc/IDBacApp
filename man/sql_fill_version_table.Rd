@@ -4,13 +4,13 @@
 \alias{sql_fill_version_table}
 \title{Create version table}
 \usage{
-sql_fill_version_table(userDBCon)
+sql_fill_version_table(pool)
 }
 \arguments{
-\item{userDBCon}{sqlite connection}
+\item{pool}{sqlite pool}
 }
 \value{
-NA
+writes to sqlite database
 }
 \description{
 Create version table

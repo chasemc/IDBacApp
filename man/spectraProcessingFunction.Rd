@@ -5,19 +5,14 @@
 \title{Create IDBac SQLite database 
 Should work for mzML, mzXML, mgf, and txt data input}
 \usage{
-spectraProcessingFunction(
-  rawDataFilePath,
-  sampleID,
-  userDBCon,
-  acquisitionInfo
-)
+spectraProcessingFunction(rawDataFilePath, sampleID, pool, acquisitionInfo)
 }
 \arguments{
 \item{rawDataFilePath}{filepath of the data}
 
 \item{sampleID}{the sample ID to be read and added to the database}
 
-\item{userDBCon}{database connection (checked out pool)}
+\item{pool}{database connection (checked out pool)}
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 }

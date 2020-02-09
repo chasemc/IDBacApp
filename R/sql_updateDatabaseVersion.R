@@ -45,8 +45,8 @@ idbac_update_db <- function(pool){
   missing_tables <- version_1_1_10_tables[which(!version_1_1_10_tables %in% DBI::dbListTables(con))]
   
   
-  sql_fill_locale_table(userDBCon = pool)
-  sql_fill_version_table(userDBCon = pool)
+  sql_fill_locale_table(pool = pool)
+  sql_fill_version_table(pool = pool)
   
   
   new_t <- c( "spectra",

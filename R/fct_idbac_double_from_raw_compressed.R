@@ -3,7 +3,7 @@
 #'
 #' @param x raw compressed 
 #'
-#' @return
+#' @return dataframe
 #' 
 #' @importFrom fst decompress_fst
 

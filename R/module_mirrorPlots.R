@@ -169,9 +169,11 @@ mirrorPlots_Server <- function(input,
       
       baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
       
-      dev.off()
+      grDevices::dev.off()
+      
       if (file.exists(paste0(file1, ".svg")))
-        file.rename(paste0(file1, ".svg"), file1)
+      #TODO why
+          file.rename(paste0(file1, ".svg"), file1)
       
     })
   

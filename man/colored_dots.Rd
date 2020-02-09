@@ -16,37 +16,57 @@ colored_dots(
   text_shift = 1,
   sort_by_labels_order = TRUE,
   horiz = FALSE,
-  alf = 1,
   circ = FALSE,
   ...
 )
 }
 \arguments{
-\item{colors}{NA}
+\item{colors}{Coloring of the dots beside the dendrogram. Either a vector (one color per object)
+or a matrix (can also be an array or a data frame)
+with each column giving one group with color per object.
+Each column will be plotted as a colored point (when horiz = FALSE)
+under the dendrogram.
+As long as the sort_by_labels_order paramter is TRUE (default), the colors vector/matrix should
+be provided in the order of the original data order (and it will be re-ordered automatically to
+the order of the dendrogram)}
 
-\item{dend}{NA}
+\item{dend}{a dendrogram object. If missing, the colors are plotted without and re-ordering
+(this assumes that the colors are already ordered based on the dend's labels)
+This is also important in order to get the correct height/location of the colored dots
+(i.e.: adjusting the y_scale and y_shift)}
 
-\item{rowLabels}{NA}
+\item{rowLabels}{Labels for the colorings given in \code{colors}. The labels will be printed to the
+left of the color rows in the plot. If the argument is given, it must be a vector of length
+equal to the number of columns in \code{colors}. If not given, \code{names(colors)}
+will be used if available. If not, sequential numbers
+starting from 1 will be used.}
 
-\item{cex.rowLabels}{NA}
+\item{cex.rowLabels}{Font size scale factor for the row labels. See \code{\link[graphics]{par}}.}
 
-\item{add}{NA}
+\item{add}{logical(TRUE), should the colored dots be added to an existing
+dendrogram plot?}
 
-\item{y_scale}{NA}
+\item{y_scale}{how much should the dots be stretched on the y axis?
+If no dend is supplied - the default will be 1}
 
-\item{y_shift}{NA}
+\item{y_shift}{where should the dots be plotted underneath the x axis?
+By default it will try to locate the dots underneath the labels (it may miss,
+in which case you would need to enter a number manually)
+If no dend is supplied - the default will be 0}
 
-\item{text_shift}{NA}
+\item{text_shift}{a dendrogram object}
 
-\item{sort_by_labels_order}{NA}
+\item{sort_by_labels_order}{logical(TRUE) - if TRUE (default), then the order of the
+colored dots will be sorted based on the order needed to change the original
+order of the observations to the current order of the labels in the dendrogram.
+If FALSE the colored dots are plotted as-is, based on the order
+of the colors vector.}
 
-\item{horiz}{NA}
+\item{horiz}{logical (FALSE by default). Set to TRUE when using plot(dend, horiz = TRUE)}
 
-\item{alf}{NA}
+\item{circ}{circularize, T/F}
 
-\item{circ}{NA}
-
-\item{...}{NA}
+\item{...}{ignored at this point.}
 }
 \value{
 NA

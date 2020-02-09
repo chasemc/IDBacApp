@@ -4,15 +4,15 @@
 \alias{createMetaSQL}
 \title{createMetaSQL}
 \usage{
-createMetaSQL(sampleID, userDBCon)
+createMetaSQL(sampleID, pool)
 }
 \arguments{
 \item{sampleID}{NA}
 
-\item{userDBCon}{NA}
+\item{pool}{sqlite pool}
 }
 \value{
-NA
+writes to sqlite database
 }
 \description{
 createMetaSQL

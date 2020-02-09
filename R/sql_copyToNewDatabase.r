@@ -60,9 +60,9 @@ copyToNewDatabase <- function(existingDBPool,
                         # Setup version table -----------------------------------------------------
 
                         sql_create_version_table(sqlConnection = newDBconn)
-                        sql_fill_version_table(userDBCon = newDBPool)
+                        sql_fill_version_table(pool = newDBPool)
                         sql_create_locale_table(sqlConnection = newDBconn)
-                        sql_fill_locale_table(userDBCon = newDBPool)
+                        sql_fill_locale_table(pool = newDBPool)
                         
 # Copy  -------------------------------------------------------------------
                         # Attach new database to existing database

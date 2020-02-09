@@ -1,28 +1,18 @@
 #' colored_dots
 #' I submitted this and it was pulled into dendextend but is left here for less dependency/more control
-#' @param colors NA
-#' @param dend NA
-#' @param rowLabels NA
-#' @param cex.rowLabels NA
-#' @param add NA
-#' @param y_scale NA
-#' @param y_shift  NA
-#' @param text_shift  NA
-#' @param sort_by_labels_order  NA
-#' @param horiz  NA
-#' @param alf  NA
-#' @param circ  NA
-#' @param ...  NA
-#'
+#' 
+#' @param circ circularize, T/F
+#' 
 #' @return NA
 #' 
 #' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
 #' @importFrom stats as.dendrogram as.hclust order.dendrogram 
+#' @inheritParams dendextend::colored_dots
 
 
-colored_dots<-function (colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
+colored_dots <- function(colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
                         add = TRUE, y_scale, y_shift, text_shift = 1, sort_by_labels_order = TRUE,
-                        horiz = FALSE, alf=1,circ=FALSE,...)
+                        horiz = FALSE, circ = FALSE, ...)
 {
   
   # Same as colored_bars.R, except with circle representation for each point

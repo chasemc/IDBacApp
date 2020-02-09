@@ -43,7 +43,7 @@ serial <- function(input){
 #'    Settings for serializing in IDBac (convert to json)
 #' @param input matrix or vector
 #'
-#' @return JSON
+#' @return dataframe
 #' 
 
 deserial <- function(input){

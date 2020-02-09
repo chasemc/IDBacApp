@@ -18,12 +18,7 @@
 #' @seealso <https://www.npmjs.com/package/sanitize-filename>, upon which this
 #'   function is based.
 #' 
-#' @examples
-#' # potentially unsafe string
-#' str <- "~/.\u0001ssh/authorized_keys"
-#' sanitize(str)
-#'
-#' sanitize("..")
+#' 
 sanitize <- function(filename, replacement = "") {
   illegal <- "[/\\?<>\\:*|\":]"
   control <- "[[:cntrl:]]"

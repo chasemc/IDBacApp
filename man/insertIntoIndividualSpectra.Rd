@@ -7,7 +7,7 @@
 insertIntoIndividualSpectra(
   env,
   XMLinfo,
-  userDBCon,
+  pool,
   acquisitionInfo = NULL,
   sampleID
 )
@@ -17,14 +17,14 @@ insertIntoIndividualSpectra(
 
 \item{XMLinfo}{xmlinfo}
 
-\item{userDBCon}{checked database connection}
+\item{pool}{sqlite pool}
 
 \item{acquisitionInfo}{acquisitionInfo}
 
 \item{sampleID}{sampleID}
 }
 \value{
-nothing, writes to database
+writes to sqlite database
 }
 \description{
 Write individual spectra to SQLite

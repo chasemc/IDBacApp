@@ -10,7 +10,7 @@ double_from_raw_compressed(x)
 \item{x}{raw compressed}
 }
 \value{
-
+dataframe
 }
 \description{
 Convert raw compresed data from sqlite into R vector
