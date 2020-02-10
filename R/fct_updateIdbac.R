@@ -1,0 +1,87 @@
+.getLatestStableVersionPage <- function(base_url = "https://api.github.com/repos/chasemc/IDBacApp/releases/latest"){
+  
+  version <- tryCatch(httr::GET(base_url),
+                      error = function(x) paste("Error connecting with GitHub"))
+  
+  shiny::validate(shiny::need(version$status_code == 200, "Error getting info from GitHub"))
+  
+  parsed_response <- httr::content(version, 
+                                   "parsed",
+                                   encoding = "utf-8")
+  parsed_response
+}
+
+
+
+.download_idbac_exe <- function(latest_version_httr){
+  # Not currently used
+  # For this version, keeping it simple and just directing to go to website
+  # to use:
+  # exe_path <- .download_idbac_exe(latest_version_httr = latest_version_httr)
+  latest_version_httr <- latest_version_httr$assets[[1]]$browser_download_url
+  
+  temp_file_path <- tempfile()
+  
+  download.file(url = latest_version_httr,
+                destfile = temp_file_path,
+                mode = "wb")
+  
+  return(temp_file_path)
+}
+
+
+#' Check if there's a new stable version of IDBac
+#'
+#' @return character string to print to user
+#' @export
+#'
+#' @examples
+new_version_check <- function(){
+  
+  # Internet? ---------------------------------------------------------------
+  if (curl::has_internet()) { 
+    # Get the latest version url ----------------------------------------------
+    latest_version_httr <- .getLatestStableVersionPage()
+    # Compare versions --------------------------------------------------------
+    local_version <- utils::packageVersion("IDBacApp")
+    # comp_ver will equal -1 if the latest release version # is higher
+    comp_ver <- utils::compareVersion(as.character(local_version), 
+                                      as.character(latest_version_httr$tag_name))
+    if (comp_ver == -1) {
+      to_return <- latest_version_httr$html_url
+    } else {
+      to_return <- "Installed version is latest version"
+    }
+  } else {
+    to_return <- "No internet"
+  }
+  return(to_return)
+}
+
+
+
+#' Display update info
+#'
+#' @return html modal
+#' @importFrom shiny showModal modalDialog modalButton 
+
+update_idbac_modal <- function(){
+  
+  #TODO: Make this look better
+  update_result <- new_version_check()
+  
+  showModal(
+    modalDialog(
+      title = "Checking for updates",
+      h3("New version Available!"),
+      p('Install latest "exe" from: '),
+      p(update_result),
+      easyClose = TRUE, 
+      size = "l",
+      footer = modalButton("Close"),
+      fade = FALSE
+    ))
+  
+  
+}
+
