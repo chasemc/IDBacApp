@@ -48,7 +48,8 @@ Imports:
     xml2 (>= 1.2.1),
     Matrix,
     dendextend (>= 1.12.0),
-    shiny (>= 1.3.2)
+    shiny (>= 1.3.2),
+    curl
 Suggests:
     knitr (>= 1.23),
     testthat (>= 2.2.1)

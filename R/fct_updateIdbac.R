@@ -1,3 +1,8 @@
+#' GET api.github.com page for latest release
+#'
+#' @param base_url url to GET
+#'
+#' @return httr content 
 .getLatestStableVersionPage <- function(base_url = "https://api.github.com/repos/chasemc/IDBacApp/releases/latest"){
   
   version <- tryCatch(httr::GET(base_url),
@@ -13,11 +18,18 @@
 
 
 
+#' Download IDBac exe 
+#'
+#' @param latest_version_httr httr content
+#'
+#' @return none
+
 .download_idbac_exe <- function(latest_version_httr){
-  # Not currently used
-  # For this version, keeping it simple and just directing to go to website
+  # Not currently used b/c haven't test if 
+  # works properly while electron is open
   # to use:
   # exe_path <- .download_idbac_exe(latest_version_httr = latest_version_httr)
+  # and then system2() it
   latest_version_httr <- latest_version_httr$assets[[1]]$browser_download_url
   
   temp_file_path <- tempfile()
@@ -35,7 +47,6 @@
 #' @return character string to print to user
 #' @export
 #'
-#' @examples
 new_version_check <- function(){
   
   # Internet? ---------------------------------------------------------------
