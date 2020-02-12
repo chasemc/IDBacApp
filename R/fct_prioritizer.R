@@ -43,15 +43,15 @@ prioritizer <- function(pool,
     
   }
   
-  small_peaks <- IDBacApp::collapseReplicates(pool = pool,
-                                              #   sampleIDs = unlist(for_small_prioritization),
-                                              sampleIDs = labels(dendrogram),
-                                              peakPercentPresence = small_mol_peakPercentPresence,
-                                              lowerMassCutoff = small_mol_lowerMassCutoff,
-                                              upperMassCutoff = small_mol_upperMassCutoff,
-                                              minSNR = small_mol_SNR,
-                                              tolerance = small_mol_tolerance,
-                                              protein = FALSE)
+  small_peaks <- idbac_get_peaks(pool = pool,
+                                 sampleIDs = labels(dendrogram),
+                                 peakPercentPresence = small_mol_peakPercentPresence,
+                                 lowerMassCutoff = small_mol_lowerMassCutoff,
+                                 upperMassCutoff = small_mol_upperMassCutoff,
+                                 minSNR = small_mol_SNR,
+                                 tolerance = tolerance,
+                                 protein = FALSE,
+                                 mergeReplicates = TRUE)
   
   # Split/cut dendrogram
   dend_split <- get_subtrees(dend = dendrogram,
@@ -73,7 +73,7 @@ prioritizer <- function(pool,
                           if (length(x) > 1) {
                             a <- MALDIquant::intensityMatrix(MALDIquant::binPeaks(small_peaks[x], 
                                                                                   method = "relaxed",
-                                                                                  tolerance = small_mol_tolerance))
+                                                                                  tolerance = tolerance))
                             a[is.na(a)] <- 0L
                             a[a > 0] <- 1L
                             a <- t(a)

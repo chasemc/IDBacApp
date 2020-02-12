@@ -8,16 +8,15 @@
 #' @return unlisted MALDIquant peak objects correspoding to the provided fileshas
 #' @export
 #' 
-idbac_get_peaks <-  function(pool, sampleIDs, protein){
+.retrieve_peaks_from_pool <-  function(pool, sampleIDs, protein){
   
-  if (!is.logical(protein)) {stop("In idbac_get_peaks, provided value for 'protein' wasn't logical-type.")}
+  if (!is.logical(protein)) {stop("Provided value for 'protein' wasn't logical-type.")}
   
   if (protein == TRUE) {
     sym <- '>'
   } else {
     sym <- '<'
   }  
-  
   
   .checkPool(pool)
   

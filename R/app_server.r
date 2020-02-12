@@ -234,14 +234,15 @@ app_server <- function(input, output, session) {
     
     temp <- lapply(chosenProteinSampleIDs$chosen,
                    function(ids){
-                     collapseReplicates(pool = isolate(workingDB$pool()),
-                                                  sampleIDs = ids,
-                                                  peakPercentPresence = proteinPeakSettings$percentPresence,
-                                                  lowerMassCutoff = proteinPeakSettings$lowerMass,
-                                                  upperMassCutoff = proteinPeakSettings$upperMass, 
-                                                  minSNR = proteinPeakSettings$SNR, 
-                                                  tolerance = 0.002,
-                                                  protein = TRUE)[[1]]
+                     idbac_get_peaks(pool = isolate(workingDB$pool()),
+                                     sampleIDs = ids,
+                                     peakPercentPresence = proteinPeakSettings$percentPresence,
+                                     lowerMassCutoff = proteinPeakSettings$lowerMass,
+                                     upperMassCutoff = proteinPeakSettings$upperMass, 
+                                     minSNR = proteinPeakSettings$SNR, 
+                                     tolerance = 0.002,
+                                     protein = TRUE,   
+                                     mergeReplicates = TRUE)[[1]]
                    })
     
     
@@ -252,14 +253,15 @@ app_server <- function(input, output, session) {
       
       temp <- c(temp, lapply(proteinSamplesToInject$chosen$chosen,
                              function(ids){
-                               collapseReplicates(pool = proteinSamplesToInject$db(),
-                                                            sampleIDs = ids,
-                                                            peakPercentPresence = proteinPeakSettings$percentPresence,
-                                                            lowerMassCutoff = proteinPeakSettings$lowerMass,
-                                                            upperMassCutoff = proteinPeakSettings$upperMass, 
-                                                            minSNR = proteinPeakSettings$SNR, 
-                                                            tolerance = 0.002,
-                                                            protein = TRUE)[[1]]
+                               idbac_get_peaks(pool = proteinSamplesToInject$db(),
+                                               sampleIDs = ids,
+                                               peakPercentPresence = proteinPeakSettings$percentPresence,
+                                               lowerMassCutoff = proteinPeakSettings$lowerMass,
+                                               upperMassCutoff = proteinPeakSettings$upperMass, 
+                                               minSNR = proteinPeakSettings$SNR, 
+                                               tolerance = 0.002,
+                                               protein = TRUE,
+                                               mergeReplicates)[[1]]
                              })
       )
       
@@ -301,10 +303,10 @@ app_server <- function(input, output, session) {
                   "Lower mass cutoff should be higher than upper mass cutoff."))
     
     createFuzzyVector(massStart = proteinPeakSettings$lowerMass,
-                                massEnd = proteinPeakSettings$upperMass,
-                                ppm = proteinPeakSettings$ppm,
-                                massList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@mass),
-                                intensityList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@intensity))
+                      massEnd = proteinPeakSettings$upperMass,
+                      ppm = proteinPeakSettings$ppm,
+                      massList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@mass),
+                      intensityList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@intensity))
     
     
     
@@ -397,10 +399,10 @@ app_server <- function(input, output, session) {
   proteinPcaCalculation <- reactive({
     
     pcaCalculation(dataMatrix = proteinMatrix(),
-                             logged = TRUE,
-                             scaled = TRUE,
-                             centered = TRUE,
-                             missing = 0.00001)
+                   logged = TRUE,
+                   scaled = TRUE,
+                   centered = TRUE,
+                   missing = 0.00001)
   })
   
   
@@ -554,18 +556,18 @@ app_server <- function(input, output, session) {
   
   output$matrixSelector <- renderUI({
     bsCollapse(id = "collapseMatrixSelection",
-                         open = "Panel 1",
-                         bsCollapsePanel(p("Select a Sample to Subtract", 
-                                                     align = "center"),
-                                                   tags$div(id='selectMatrixBlank',
-                                                            class='mirror_select',
-                                                            selectizeInput("selectMatrix",
-                                                                           label = "",
-                                                                           options= list(maxOptions = 2000),
-                                                                           choices = c("None", smallMolIDs()))
-                                                   )
-                                                   
-                         )
+               open = "Panel 1",
+               bsCollapsePanel(p("Select a Sample to Subtract", 
+                                 align = "center"),
+                               tags$div(id='selectMatrixBlank',
+                                        class='mirror_select',
+                                        selectizeInput("selectMatrix",
+                                                       label = "",
+                                                       options= list(maxOptions = 2000),
+                                                       choices = c("None", smallMolIDs()))
+                               )
+                               
+               )
     )
   })
   

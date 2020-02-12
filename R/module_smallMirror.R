@@ -119,25 +119,27 @@ smallmirrorPlots_Server <- function(input,
     
     
     
-    mirrorPlotEnv$peaksSampleOne <- collapseReplicates(pool = workingDB$pool(),
-                                                       sampleIDs = input$Spectra1,
-                                                       peakPercentPresence = input$percentPresence,
-                                                       lowerMassCutoff = input$lowerMass,
-                                                       upperMassCutoff = input$upperMass,
-                                                       minSNR = input$SNR,
-                                                       tolerance = 0.002,
-                                                       protein = FALSE)[[1]] 
+    mirrorPlotEnv$peaksSampleOne <- idbac_get_peaks(pool = workingDB$pool(),
+                                                    sampleIDs = input$Spectra1,
+                                                    peakPercentPresence = input$percentPresence,
+                                                    lowerMassCutoff = input$lowerMass,
+                                                    upperMassCutoff = input$upperMass,
+                                                    minSNR = input$SNR,
+                                                    tolerance = 0.002,
+                                                    protein = FALSE,
+                                                    mergeReplicates = TRUE)[[1]] 
     
     
     
-    mirrorPlotEnv$peaksSampleTwo <- collapseReplicates(pool = workingDB$pool(),
-                                                       sampleIDs = input$Spectra2,
-                                                       peakPercentPresence = input$percentPresence,
-                                                       lowerMassCutoff = input$lowerMass,
-                                                       upperMassCutoff = input$upperMass,
-                                                       minSNR = input$SNR,
-                                                       tolerance = 0.002,
-                                                       protein = FALSE)[[1]]
+    mirrorPlotEnv$peaksSampleTwo <- idbac_get_peaks(pool = workingDB$pool(),
+                                                    sampleIDs = input$Spectra2,
+                                                    peakPercentPresence = input$percentPresence,
+                                                    lowerMassCutoff = input$lowerMass,
+                                                    upperMassCutoff = input$upperMass,
+                                                    minSNR = input$SNR,
+                                                    tolerance = 0.002,
+                                                    protein = FALSE,
+                                                    mergeReplicates = TRUE)[[1]]
     
     
     

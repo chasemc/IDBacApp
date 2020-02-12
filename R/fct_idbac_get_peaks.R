@@ -8,20 +8,21 @@
 #' @param peakPercentPresence peaks in replciates that occurr less frequently than this will be removed
 #' @param tolerance binning tolerance ppm / 10e6
 #' @param protein whether to search SQL for protein or small mol spectra
-
-#'
+#' @param mergeReplicates should replicates be merged? TRUE/FALSE
+#' @export
 #' 
 #' @return a single trimmed and binned MALDIquant peak object
 
 
-collapseReplicates <- function(pool,
-                               sampleIDs,
-                               peakPercentPresence,
-                               lowerMassCutoff,
-                               upperMassCutoff, 
-                               minSNR, 
-                               tolerance = 0.002,
-                               protein){
+idbac_get_peaks <- function(pool,
+                            sampleIDs,
+                            peakPercentPresence,
+                            lowerMassCutoff,
+                            upperMassCutoff, 
+                            minSNR, 
+                            tolerance = 0.002,
+                            protein,
+                            mergeReplicates = TRUE){
   
   validate(need(is.numeric(peakPercentPresence), "peakPercentPresence not numeric"))
   validate(need(is.numeric(lowerMassCutoff), "lowerMassCutoff not numeric"))
@@ -29,10 +30,11 @@ collapseReplicates <- function(pool,
   validate(need(is.numeric(minSNR), "minSNR not numeric"))
   validate(need(is.numeric(tolerance), "tolerance not numeric"))
   validate(need(is.logical(protein), "protein not logical"))
+  validate(need(is.logical(mergeReplicates), "mergeReplicates not logical"))
   validate(need(!is.null(sampleIDs), "sampleIDs must not be NULL"))
   
   
-  temp <- idbac_get_peaks(pool = pool,
+  temp <- .retrieve_peaks_from_pool(pool = pool,
                                     sampleIDs = sampleIDs,
                                     protein = protein)
   req(length(temp) > 0)
@@ -53,7 +55,8 @@ collapseReplicates <- function(pool,
     # Only binPeaks if spectra(um) has peaks.
     # see: https://github.com/sgibb/MALDIquant/issues/61 for more info 
     # note: MALDIquant::binPeaks does work if there is only one spectrum
-    if (any(specNotZero)) {
+    
+    if (any(specNotZero) & mergeReplicates) {
       
       temp <- temp[specNotZero]
       temp <- MALDIquant::binPeaks(temp,
@@ -69,10 +72,11 @@ collapseReplicates <- function(pool,
                                c(lowerMassCutoff,
                                  upperMassCutoff))
     } else {
-      temp <- MALDIquant::mergeMassPeaks(temp, 
-                                         method = "mean") 
+      
+      temp <- MALDIquant::trim(temp,
+                               c(lowerMassCutoff,
+                                 upperMassCutoff))
     }
-    
     
     return(temp)
   })

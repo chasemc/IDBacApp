@@ -61,10 +61,12 @@ new_version_check <- function(){
     if (comp_ver == -1) {
       to_return <- latest_version_httr$html_url
     } else {
-      to_return <- "Installed version is latest version"
+      to_return <- shiny::tagList("Installed version is latest version")
     }
   } else {
-    to_return <- "No internet"
+    to_return <- shiny::tagList(h3("New version Available!"),
+                                p('Install latest "exe" from: '))
+    
   }
   return(to_return)
 }
@@ -79,14 +81,10 @@ new_version_check <- function(){
 update_idbac_modal <- function(){
   
   #TODO: Make this look better
-  update_result <- new_version_check()
-  
   showModal(
     modalDialog(
       title = "Checking for updates",
-      h3("New version Available!"),
-      p('Install latest "exe" from: '),
-      p(update_result),
+      new_version_check(),
       easyClose = TRUE, 
       size = "l",
       footer = modalButton("Close"),
