@@ -23,7 +23,7 @@
 #' @return matrix where rows are samples and columns are variables (m/z preojections)
 #' 
 #' @importFrom stats dnorm
-#'
+#' @export
 #' @examples
 #' \dontrun{
 #' masses <- list(Sample_A = c(5000,6000,7000), 
