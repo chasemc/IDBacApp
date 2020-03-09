@@ -67,10 +67,11 @@ prioritizer <- function(pool,
   # Get IDs of samples in groups containing more than 1 sample
   for_small_prioritization <- unlist(lapply(dend_split[which(dend_split_lengths > 1)], labels))
   
-  
+  # Loop over all dendrogram groups 
   prioritized <- lapply(dend_split_labels, 
                         function(x){
                           if (length(x) > 1) {
+                            
                             a <- MALDIquant::intensityMatrix(MALDIquant::binPeaks(small_peaks[x], 
                                                                                   method = "relaxed",
                                                                                   tolerance = tolerance))

@@ -1,0 +1,72 @@
+---
+title: "Prioritization Report"
+author: "Chase Clark"
+date: "2/27/2020"
+output: html_document
+param:
+  pool,
+  dendrogram, 
+  p_cut,
+  s_perc_retain,
+  s_peak_perc
+  s_snr,
+  s_min_cut,
+  s_max_cut
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#Summary statistics
+
+```{r}
+if (!inherits(pool, "Pool")) {
+  stop("Must be pool")
+}
+if (length(pool > 1L)) {
+  stop("Pool must be length = 1")
+}
+```
+
+Plot of full dendrogram submitted for prioritization:
+```{r plot-full-dendrogram}
+plot(param$dendrogram,
+     horiz = T)
+```
+
+
+
+```{r}
+paste0("Number of samples in the full dendrogram: ", attributes(a)$members)
+```
+
+
+
+
+
+
+
+
+```{r run-prioritizer}
+
+prioritization_results <- IDBacApp::prioritizer(pool = param$pool,
+                                                dendrogram = param$dendrogram,
+                                                h = param$p_cut,
+                                                k = NULL,
+                                                percent_metabolite_peaks = param$s_perc_retain,
+                                                small_mol_peakPercentPresence = param$s_peak_perc,
+                                                small_mol_lowerMassCutoff = param$s_min_cut,
+                                                small_mol_upperMassCutoff = param$s_max_cut,
+                                                small_mol_SNR = param$s_snr,
+                                                tolerance = 0.002)
+
+```
+
+
+
+# Full Dendrogram
+  - Showing cut line
+
+
