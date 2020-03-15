@@ -42,7 +42,6 @@ Imports:
     Rtsne (>= 0.15),
     S4Vectors,
     shinycssloaders (>= 0.2.0),
-    shinyjs (>= 1.0),
     sigmajs (>= 0.1.3),
     stats,
     svglite (>= 1.2.2),
