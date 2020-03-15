@@ -11,9 +11,5 @@ idbac_db_version <- function(pool){
                           'Select idbac_version
                  FROM version')[[1]]
   
-  res <- pool::dbGetQuery(pool,
-                          'Select idbac_version
-                            FROM version')
-
   return(numeric_version(res))
   }
