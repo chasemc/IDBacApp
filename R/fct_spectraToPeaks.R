@@ -12,18 +12,21 @@
 #' processSmallMolSpectra
 #'
 #' @param input MALDIquant mass spectrum list
-#'
+#' @inheritParams MALDIquant::smoothIntensity
 #' @return MALDIquant mass spectrum list
 #' 
 #'
-processSmallMolSpectra <- function(input){
+processSmallMolSpectra <- function(input,
+                                   halfWindowSize = 20){
+  
   peaks <- MALDIquant::smoothIntensity(input,
                                        method = "SavitzkyGolay",
-                                       halfWindowSize = 20) 
+                                       halfWindowSize = halfWindowSize) 
   peaks <- MALDIquant::removeBaseline(peaks,
                                       method = "TopHat")
-  peaks <- MALDIquant::calibrateIntensity(peaks, 
-                                          method = "TIC") 
+  
+  peaks@intensity <- (peaks@intensity/ max(peaks@intensity)) * 100 
+  
   MALDIquant::detectPeaks(peaks, 
                           method = "SuperSmoother",
                           halfWindowSize = 20, 
@@ -38,11 +41,12 @@ processSmallMolSpectra <- function(input){
 #' processProteinSpectra
 #'
 #' @param input MALDIquant mass spectrum list
-#'
+#' @inheritParams MALDIquant::smoothIntensity
 #' @return MALDIquant mass spectrum list
 #' 
 #'
-processProteinSpectra <- function(input){
+processProteinSpectra <- function(input,
+                                  halfWindowSize = 20){
   
   # No way to turn off warnings in MALDIquant:::.replaceNegativeIntensityValues()
   suppressWarnings(
@@ -51,17 +55,17 @@ processProteinSpectra <- function(input){
   )
   peaks <- MALDIquant::smoothIntensity(peaks,
                                        method = "SavitzkyGolay", 
-                                       halfWindowSize = 20) 
+                                       halfWindowSize = halfWindowSize) 
   peaks <- MALDIquant::removeBaseline(peaks,
                                       method = "TopHat") 
+  
   peaks <- MALDIquant::detectPeaks(peaks, 
                                    method = "MAD", 
-                                   halfWindowSize = 20, 
+                                   halfWindowSize = halfWindowSize, 
                                    SNR = 3)
-  lapply(peaks, 
-         function(x){
-           x@intensity <- x@intensity * (100 / max(x@intensity))
-           x
-         })
+  lapply(peaks, function(peaks){
+    peaks@intensity <- (peaks@intensity/ max(peaks@intensity)) * 100 
+    peaks
+  })
 }
 
