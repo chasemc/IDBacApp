@@ -4,10 +4,16 @@
 \alias{processProteinSpectra}
 \title{processProteinSpectra}
 \usage{
-processProteinSpectra(input)
+processProteinSpectra(input, halfWindowSize = 20)
 }
 \arguments{
 \item{input}{MALDIquant mass spectrum list}
+
+\item{halfWindowSize}{half window size. The resulting
+    window reaches from \code{mass[currentIndex-halfWindowSize]} to
+    \code{mass[currentIndex+halfWindowSize]} (window size is
+    \code{2*halfWindowSize+1}).
+    The best size differs depending on the selected \code{method}.}
 }
 \value{
 MALDIquant mass spectrum list
