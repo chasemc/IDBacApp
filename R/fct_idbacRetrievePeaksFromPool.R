@@ -4,12 +4,11 @@
 #' @param pool sqlite pool
 #' @param sampleIDs sample IDs of samples to process
 #' @param protein whether to search SQL for protein or small mol spectra
-#'
+#' @param minSNR minimum SNR a a peak must have to be retained
 #' @return unlisted MALDIquant peak objects correspoding to the provided fileshas
 #' @export
 #' 
-.retrieve_peaks_from_pool <-  function(pool, sampleIDs, protein){
-  
+.retrieve_peaks_from_pool <-  function(pool, sampleIDs, protein, minSNR){
   if (!is.logical(protein)) {stop("Provided value for 'protein' wasn't logical-type.")}
   
   if (protein == TRUE) {
@@ -18,7 +17,7 @@
     sym <- '<'
   }  
   
-  .checkPool(pool)
+  IDBacApp:::.checkPool(pool)
   
   shiny::validate({
     need(is.character(sampleIDs), 
@@ -40,30 +39,54 @@
   DBI::dbClearResult(query)
   pool::poolReturn(conn)
   
-  samps <- unique(results$strain_id)
-  results <- lapply(samps,
-                    function(x){
-                      unname(lapply(which(results$strain_id == x), function(y){
-                        z <- jsonlite::fromJSON(results$peak_matrix[[y]])
-                        if (any(lengths(z) == 0)) {
-                          MALDIquant::createMassPeaks(mass = numeric(0),
-                                                      intensity = numeric(0) ,
-                                                      snr = numeric(0))
-                        } else {
-                          MALDIquant::createMassPeaks(mass = z$mass,
-                                                      intensity = z$intensity ,
-                                                      snr = as.numeric(z$snr))
-                        }
-                      }))
-                      
-                    }
-  )
-  
-  names(results) <- samps
-  
-  
-  
-  return(results)
+  .parse_json_peaks(results,
+                    minSNR)
   
   
 }
+
+
+
+
+
+
+
+#' Create maldiquant peaks from IDBac SQL peak JSON 
+#'
+#' @param input IDBac SQL strain_id ancd peak json
+#' @param minSNR minimum SNR a a peak must have to be retained
+#' 
+#' @return list of maldiquant peak objects
+.parse_json_peaks <- function(input,
+                              minSNR){
+  
+  len <- nrow(input)
+  collapsed <- paste0(input[,2], collapse = " ")
+  
+  subby <- strsplit(substring(collapsed,
+                              as.integer(gregexpr("\\[",
+                                                  collapsed)[[1]]) + 1,
+                              as.integer(gregexpr("\\]",
+                                                  collapsed)[[1]]) - 1),
+                    ",",
+                    fixed = T)
+  
+  
+  z <- lapply(seq(1L, len, 1L),
+              function(x){
+                
+                x <- lapply(subby[c(c(1, 2, 3) + (3 * (x - 1)))], as.numeric)
+                
+                ind <- x[[3]] >= minSNR
+                
+                MALDIquant::createMassPeaks(mass = x[[1]][ind],
+                                            intensity = x[[2]][ind],
+                                            snr = x[[3]][ind])
+                
+              })
+  names(z) <- input[ , 1]
+  split(z, names(z))
+  
+}
+
+
