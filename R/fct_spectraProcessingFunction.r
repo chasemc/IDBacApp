@@ -14,6 +14,11 @@ spectraProcessingFunction <- function(rawDataFilePath,
                                       pool, 
                                       acquisitionInfo){
   
+  
+  if (!length(sampleID) > 0) {
+    stop("sampleID lenghth must be > 0 ")
+  }
+  
   sampleID <- trimws(sampleID, 
                     which = c("both"))
     
