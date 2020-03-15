@@ -1,5 +1,5 @@
 
-#' process_mzml
+#' db_from_mzml
 #'
 #' @param mzFilePaths file paths of the mzml files
 #' @param sampleIds sampleIds that are in the same order as the paths
@@ -7,9 +7,9 @@
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
 #'
 #' @return Nothing direct, creates a sqlite database
-#' 
+#' @export
 #'
-process_mzml <- function(mzFilePaths,
+db_from_mzml <- function(mzFilePaths,
                          sampleIds,
                          idbacPool,
                          acquisitionInfo){

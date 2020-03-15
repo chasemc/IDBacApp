@@ -283,7 +283,7 @@ convertOneBruker_Server <- function(input,
                  idbacPool <- idbac_connect(fileName = sanitizedNewExperimentName(),
                                filePath = sqlDirectory$sqlDirectory)[[1]]
                  
-                 process_mzml(mzFilePaths = forProcessing$mzFile,
+                 db_from_mzml(mzFilePaths = forProcessing$mzFile,
                                         sampleIds = forProcessing$sampleID,
                                         idbacPool = idbacPool,
                                         acquisitionInfo = acquisitionInfo)

@@ -143,7 +143,7 @@ convertMZ_Server <-  function(input,
                                filePath = sqlDirectory$sqlDirectory)[[1]]
     
   
-    process_mzml(mzFilePaths = mzFilePaths,
+    db_from_mzml(mzFilePaths = mzFilePaths,
                            sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
                            idbacPool = idbacPool,
                            acquisitionInfo = NULL)

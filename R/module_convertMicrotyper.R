@@ -175,7 +175,7 @@ convertMicrotyper_Server <- function(input,
                  idbacPool <- idbac_connect(fileName = input$newExperimentName,
                                             filePath = sqlDirectory$sqlDirectory)[[1]]
                  
-                 process_mzml(mzFilePaths = keys$mzFilePaths,
+                 db_from_mzml(mzFilePaths = keys$mzFilePaths,
                                         sampleIds = keys$sampleID,
                                         idbacPool = idbacPool,
                                         acquisitionInfo = NULL)
