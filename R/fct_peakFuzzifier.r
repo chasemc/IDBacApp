@@ -129,3 +129,93 @@ createFuzzyVector <- function(massStart,
                                        names(massList)))
   
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' High-dimensional representation of mass peaks
+#'
+#' @param massStart beginning of mass range (as of now, must be smaller than smallest mass)
+#' @param massEnd end of mass range (as of now, must be smaller than smallest mass)
+#' @param massList list of mass vectors (eg list(1:10, 1:10))
+#'
+#' @return matrix where rows are samples and columns are variables (m/z preojections)
+#' 
+#' @importFrom stats dnorm
+#' @export
+#' @examples
+#' \dontrun{
+#' masses <- list(Sample_A = c(5000,6000,7000), 
+#' Sample_B = c(5000,6010,7005), Sample_C = c(5000,6010,7005))  
+#' intensities <- list(Sample_A = rep(1, 3), 
+#' Sample_B = rep(1, 3),
+#'  Sample_C = rep(1, 3))
+#' zx <- binnR(massStart = 3000,
+#'             massEnd = 15000,
+#'             ppm = 500,
+#'             massList = masses,
+#'             intensityList = intensities)
+#'             }
+createFuzzyVectorUnit <- function(massStart,
+                                  massEnd,
+                                  chunksize,
+                                  massList){
+  
+  breaks <- seq(from = massStart, 
+                to = massEnd,
+                by = chunksize)
+  
+  breaks2 <- seq(from = massStart - chunksize / 2, 
+                 to = massEnd - chunksize / 2,
+                 by = chunksize)
+  
+  
+  abba <- lapply(massList,
+                 function(x){
+                   
+                   a <- unique(c( .bincode(x, breaks, F),
+                                  .bincode(x, breaks2, F)))
+                   a <- a[!is.na(a)]
+                 })
+  
+  
+  
+  
+  if (!all(lengths(massList) > 0)) {
+    warning(paste0(sum(!lengths(massList) > 0), "Empty massList found in createFuzzyVector()"))
+  }
+  
+  # Create sparse matrix to hold the peak probability data
+  # Columns are samples, rows are m/z/intensity probabilities 
+  # transform back to actual m/z can be accessed via rownames()
+  Matrix::sparseMatrix(i = unlist(abba), 
+                       j = rep(seq_along(abba), lengths(abba)),
+                       x = 1L,
+                       dims=c(length(breaks), 
+                              length(massList)),
+                       dimnames = list(breaks,
+                                       names(massList)))
+  
+}
