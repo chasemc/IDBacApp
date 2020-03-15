@@ -12,69 +12,70 @@
 #'
 #' @return a list containg two lists of MALDIquant peak objects "samplePeaks" and "matrixPeaks"
 .getSmallPeaksFromBrush <- function(pool,
-                               sampleIDs = NULL,
-                               dendrogram,
-                               brushInputs,
-                               matrixIDs = NULL,
-                               peakPercentPresence,
-                               lowerMassCutoff,
-                               upperMassCutoff, 
-                               minSNR){
+                                    sampleIDs = NULL,
+                                    dendrogram,
+                                    brushInputs,
+                                    matrixIDs = NULL,
+                                    peakPercentPresence,
+                                    lowerMassCutoff,
+                                    upperMassCutoff, 
+                                    minSNR){
   
   
-#TODO split the brush out into own function
+  #TODO split the brush out into own function
   
   if (is.null(sampleIDs)) {
-  
     
-  if (!is.null(dendrogram)) {  
     
-    # If there is a protein dendrogram but a user hasn't brushed:
-    if (is.null(brushInputs()$ymin)) { 
+    if (!is.null(dendrogram)) {  
       
-      # Don't ovrwhelm the browser by displaying everthing when page loads
-      if (length(labels(dendrogram)) >= 25) {
-        # If more than 25 strains present, only display 10 to start, otherwise display all
-        # Get random 10 strain IDs from dendrogram
-        sampleIDs <- labels(dendrogram)[1:sample.int(10, 1)]
+      # If there is a protein dendrogram but a user hasn't brushed:
+      if (is.null(brushInputs()$ymin)) { 
+        
+        # Don't ovrwhelm the browser by displaying everthing when page loads
+        if (length(labels(dendrogram)) >= 25) {
+          # If more than 25 strains present, only display 10 to start, otherwise display all
+          # Get random 10 strain IDs from dendrogram
+          sampleIDs <- labels(dendrogram)[1:sample.int(10, 1)]
+        } else {
+          sampleIDs <- labels(dendrogram)
+        }
       } else {
-        sampleIDs <- labels(dendrogram)
+        # Get the labels of the brushed dendrogram
+        sampleIDs <- labelsFromBrushedDendrogram(dendrogram = dendrogram,
+                                                 brushYmin = brushInputs()$ymin,
+                                                 brushYmax = brushInputs()$ymax)
       }
     } else {
-      # Get the labels of the brushed dendrogram
-      sampleIDs <- labelsFromBrushedDendrogram(dendrogram = dendrogram,
-                                                         #    dendrogramShortLabels = dendrogram,
-                                                         brushYmin = brushInputs()$ymin,
-                                                         brushYmax = brushInputs()$ymax)
-    }
-  } else {
-    
-    checkedPool <- pool::poolCheckout(pool)
-    
-    # retrieve all strain_ids in db that have small molecule spectra
-    sampleIDs <- DBI::dbGetQuery(checkedPool, glue::glue("SELECT DISTINCT strain_id
+      
+      checkedPool <- pool::poolCheckout(pool)
+      
+      # retrieve all strain_ids in db that have small molecule spectra
+      sampleIDs <- DBI::dbGetQuery(checkedPool, 
+                                   glue::glue("SELECT DISTINCT strain_id
                                       FROM spectra 
                                       WHERE max_mass < 6000"))
-    # Return pool
-    pool::poolReturn(checkedPool)
-    sampleIDs <- as.vector(sampleIDs)[,1]
+      # Return pool
+      pool::poolReturn(checkedPool)
+      sampleIDs <- as.vector(sampleIDs)[,1]
+    }
+    
   }
-  
-}
   
   samples <- lapply(sampleIDs, 
                     function(sampleIDs){ 
-                      collapseReplicates(pool = pool,
-                                                   sampleIDs = sampleIDs,
-                                                   peakPercentPresence = peakPercentPresence,
-                                                   lowerMassCutoff = lowerMassCutoff,
-                                                   upperMassCutoff = upperMassCutoff,  
-                                                   minSNR = minSNR, 
-                                                   tolerance = 0.002,
-                                                   protein = FALSE)[[1]]
+                      idbac_get_peaks(pool = pool,
+                                      sampleIDs = sampleIDs,
+                                      peakPercentPresence = peakPercentPresence,
+                                      lowerMassCutoff = lowerMassCutoff,
+                                      upperMassCutoff = upperMassCutoff,  
+                                      minSNR = minSNR, 
+                                      tolerance = 0.002,
+                                      protein = FALSE,
+                                      mergeReplicates = TRUE)[[1]]
                       
                     })
-
+  
   
   return(list(maldiQuantPeaks = samples,
               sampleIDs = sampleIDs))
