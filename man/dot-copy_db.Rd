@@ -4,12 +4,10 @@
 \alias{.copy_db}
 \title{Copy an IDBac database, appending db version number}
 \usage{
-.copy_db(pool, latest_db_version)
+.copy_db(pool)
 }
 \arguments{
 \item{pool}{IDBac pool}
-
-\item{latest_db_version}{current database version}
 }
 \value{
 The path for the new database

@@ -45,27 +45,27 @@ idbac_update_db <- function(pool,
   
   # Check if update is needed -----------------------------------------------
   
-  current_db_version <- tryCatch(pool::poolWithTransaction(pool, 
+  provided_db_version <- tryCatch(pool::poolWithTransaction(pool, 
                                                            function(con){
                                                              DBI::dbGetQuery(con, 
                                                                              "SELECT db_version FROM version")
                                                            }),
                                  error = function(x) FALSE) 
   
-  current_db_version <- tail(current_db_version, 1)[[1]]
+  provided_db_version <- tail(provided_db_version, 1)[[1]]
   
   # Check if database is earlier than 'db_version' was implemented
-  if (isFALSE(current_db_version)) {
+  if (isFALSE(provided_db_version)) {
     # Wrapped in return() to break out of function
     message(basename(.db_path_from_pool(pool)), 
             " is less than version 2.0.0, updating to newest database version.")
-    current_db_version <- "0"
+    provided_db_version <- "0"
   } else {
     # Exit function if version is up to date
-    if (compareVersion(current_db_version, latest_db_version) > -1L) {
+    if (compareVersion(provided_db_version, current_db_version()) > -1L) {
       return(message(basename(.db_path_from_pool(pool)), 
                      " is IDBac database version: ",
-                     current_db_version,
+                     provided_db_version,
                      "\n",
                      "skipping update"))
     }
@@ -74,8 +74,7 @@ idbac_update_db <- function(pool,
   # Switch pool if in "copy" mode -------------------------------------------
   
   if (copy_overwrite) {
-    new_pool_path <- .copy_db(pool = pool,
-                              latest_db_version = latest_db_version)
+    new_pool_path <- .copy_db(pool = pool)
     
     suppressWarnings(pool::poolClose(pool))
     
@@ -85,7 +84,7 @@ idbac_update_db <- function(pool,
   }
   
   
-  if (compareVersion(current_db_version, "2.0.0") == -1L) {
+  if (compareVersion(provided_db_version, "2.0.0") == -1L) {
     
     old_tables <- c("IndividualSpectra",
                     "XML",
@@ -171,11 +170,9 @@ idbac_update_db <- function(pool,
 #' Copy an IDBac database, appending db version number
 #'
 #' @param pool IDBac pool
-#' @param latest_db_version current database version
 #'
 #' @return The path for the new database
-.copy_db <- function(pool,
-                     latest_db_version){
+.copy_db <- function(pool){
   
   .checkPool(pool)
   
@@ -186,7 +183,7 @@ idbac_update_db <- function(pool,
   new_path <- file.path(dirname(provided_db_path),
                         paste0(new_name, 
                                "_db-",
-                               sanitize(latest_db_version),
+                               sanitize(current_db_version()),
                                ".sqlite"))
   
   if (file.exists(new_path)) {
