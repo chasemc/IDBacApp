@@ -1,5 +1,5 @@
-options(local_testing = TRUE)
-options(local_test_files = "C:/Users/chase/Documents/idbac_test_data")
+# options(local_testing = TRUE)
+# options(local_test_files = "C:/Users/chase/Documents/idbac_test_data")
 
 
 if (isTRUE(.Options$local_testing)){
