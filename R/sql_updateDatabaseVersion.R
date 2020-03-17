@@ -35,7 +35,7 @@ idbac_update_db <- function(pool,
                             latest_db_version = "2.0.0"){
   
   
-  IDBacApp:::.checkPool(pool)
+  .checkPool(pool)
   
   copy_overwrite <- switch(as.character(copy_overwrite),
                            "copy" = TRUE,
@@ -45,9 +45,14 @@ idbac_update_db <- function(pool,
   
   # Check if update is needed -----------------------------------------------
   
-  current_db_version <- tryCatch(DBI::dbGetQuery(pool, "SELECT db_version FROM version"),
+  current_db_version <- tryCatch(pool::poolWithTransaction(pool, 
+                                                           function(con){
+                                                             DBI::dbGetQuery(con, 
+                                                                             "SELECT db_version FROM version")
+                                                           }),
                                  error = function(x) FALSE) 
-  current_db_version <- tail(FALSE, 1)[[1]]
+  
+  current_db_version <- tail(current_db_version, 1)[[1]]
   
   # Check if database is earlier than 'db_version' was implemented
   if (isFALSE(current_db_version)) {
@@ -56,11 +61,13 @@ idbac_update_db <- function(pool,
             " is less than version 2.0.0, updating to newest database version.")
     current_db_version <- "0"
   } else {
-    
     # Exit function if version is up to date
     if (compareVersion(current_db_version, latest_db_version) > -1L) {
       return(message(basename(.db_path_from_pool(pool)), 
-                     " is the latest version, skipping update."))
+                     " is IDBac database version: ",
+                     current_db_version,
+                     "\n",
+                     "skipping update"))
     }
   }
   
@@ -69,6 +76,8 @@ idbac_update_db <- function(pool,
   if (copy_overwrite) {
     new_pool_path <- .copy_db(pool = pool,
                               latest_db_version = latest_db_version)
+    
+    suppressWarnings(pool::poolClose(pool))
     
     pool <- idbac_connect(fileName = tools::file_path_sans_ext(basename(new_pool_path)),
                           filePath = dirname(new_pool_path))[[1]]
@@ -134,13 +143,13 @@ idbac_update_db <- function(pool,
     # Add db_version field if needed 
     delete_me <- tryCatch(DBI::dbGetQuery(pool, "SELECT db_version FROM version;"),
                           error = function(x){
-                            pool::dbWithTransaction(pool, 
-                                                    function(con){
-                                                      
-                                                      DBI::dbSendStatement(con, 
-                                                                           "ALTER TABLE version
+                            pool::poolWithTransaction(pool, 
+                                                      function(con){
+                                                        
+                                                        DBI::dbSendStatement(con, 
+                                                                             "ALTER TABLE version
                                                                             ADD db_version TEXT;")
-                                                    })
+                                                      })
                           }) 
     remove(delete_me)
     
@@ -198,7 +207,8 @@ idbac_update_db <- function(pool,
                       to = new_path), collapse = "\nto\n"))
   
   file.copy(from = provided_db_path,
-            to = new_path
+            to = new_path,
+            copy.mode = F
   )
   
   message("Finished copying")
