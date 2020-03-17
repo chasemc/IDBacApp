@@ -4,10 +4,14 @@
 \alias{idbac_update_db}
 \title{Update IDBac Database from version 1 to 2}
 \usage{
-idbac_update_db(pool)
+idbac_update_db(pool, copy_overwrite = "copy", latest_db_version = "2.0.0")
 }
 \arguments{
 \item{pool}{pool object}
+
+\item{copy_overwrite}{should the db be copied or overwritten?}
+
+\item{latest_db_version}{current database version}
 }
 \value{
 NA, side effect

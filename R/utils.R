@@ -53,10 +53,10 @@ deserial <- function(input){
   input <- gsub("]",
                 "",
                 input)
-    scan(text = input,
-         sep =",", 
-         what = double(),
-         quiet = T)
+  scan(text = input,
+       sep =",", 
+       what = double(),
+       quiet = T)
 }
 
 
@@ -101,7 +101,7 @@ chartoRawtoCompressed <- function(input, compression){
   input <- base::enc2utf8(input)
   input <- base::charToRaw(input)
   compress(input = input,
-                     compression = compression)
+           compression = compression)
 }
 
 
@@ -173,7 +173,7 @@ serializeXML <- function(path) {
   
   path <- readChar(path, nchars = file.info(path)$size, useBytes = T)
   chartoRawtoCompressed(input = path,
-                                  compression = 0)
+                        compression = 0)
   
 }
 
@@ -241,9 +241,13 @@ poolToCon <- function(con) {
 #' Check if a pool object
 #'
 #' @param pool variable to check
+#' @return NA, stops function if not a pool object
 .checkPool <- function(pool){
   
-  if (!inherits(pool, "Pool")) {
+  val <- all(inherits(pool, "Pool"),
+             inherits(pool, "R6"))
+  
+  if (isFALSE(val)) {
     # paste0(deparse(sys.calls()[[sys.nframe()-1]]) gets the info of the calling function
     stop(paste0(deparse(sys.calls()[[sys.nframe() - 1]]),
                 " expected a pool object"))
@@ -253,6 +257,26 @@ poolToCon <- function(con) {
 
 
 
-
+#' Find database path from pool object
+#'
+#' @param pool {pool} object
+#'
+#' @return Path to pool's database
+.db_path_from_pool <- function(pool){
+  
+  .checkPool(pool = pool)
+  
+  provided_db_path <- normalizePath(pool$fetch()@dbname,
+                                    winslash = "/")
+  
+  if (file.exists(provided_db_path)) {
+    return(provided_db_path)
+  } else {
+    stop("\n",
+         "Couldn't find:",
+         "\n",
+         provided_db_path)
+  }
+}
 
 

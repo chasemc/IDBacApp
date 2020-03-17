@@ -9,6 +9,9 @@
 \arguments{
 \item{pool}{variable to check}
 }
+\value{
+NA, stops function if not a pool object
+}
 \description{
 Check if a pool object
 }
