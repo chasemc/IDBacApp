@@ -96,7 +96,7 @@ createFuzzyVector <- function(massStart,
     #z3 <-  mapply(function(x, y) x * y, z2, intensityList[[i]])
     z3 <-  mapply(function(x, y) x * y,
                   z2,
-                  1000,
+                  intensityList[[i]],
                   SIMPLIFY = FALSE)
     
     if (!class(z3) == "list") {
