@@ -12,7 +12,7 @@ distMatrix <- function(data,
   if (method == "cosine") {
     return(stats::as.dist(1 - coop::cosine(data)))
   }else{
-    return(stats::dist(t(data), method = method))
+    return(stats::dist(Matrix::t(data), method = method))
   }
 }
 
