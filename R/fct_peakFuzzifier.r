@@ -144,18 +144,7 @@ createFuzzyVector <- function(massStart,
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-#' High-dimensional representation of mass peaks
+#' Experimental binning
 #'
 #' @param massStart beginning of mass range (as of now, must be smaller than smallest mass)
 #' @param massEnd end of mass range (as of now, must be smaller than smallest mass)
@@ -164,7 +153,6 @@ createFuzzyVector <- function(massStart,
 #' @return matrix where rows are samples and columns are variables (m/z preojections)
 #' 
 #' @importFrom stats dnorm
-#' @export
 #' @examples
 #' \dontrun{
 #' masses <- list(Sample_A = c(5000,6000,7000), 
@@ -195,27 +183,24 @@ createFuzzyVectorUnit <- function(massStart,
   abba <- lapply(massList,
                  function(x){
                    
-                   a <- unique(c( .bincode(x, breaks, F),
-                                  .bincode(x, breaks2, F)))
+                   a <- c(.bincode(x, breaks, F),
+                          .bincode(x, breaks2, F) + length(breaks))
                    a <- a[!is.na(a)]
+                   a
                  })
-  
-  
   
   
   if (!all(lengths(massList) > 0)) {
     warning(paste0(sum(!lengths(massList) > 0), "Empty massList found in createFuzzyVector()"))
   }
   
-  # Create sparse matrix to hold the peak probability data
-  # Columns are samples, rows are m/z/intensity probabilities 
-  # transform back to actual m/z can be accessed via rownames()
-  Matrix::sparseMatrix(i = unlist(abba), 
+  Matrix::sparseMatrix(i = unlist(abba),
                        j = rep(seq_along(abba), lengths(abba)),
                        x = 1L,
-                       dims=c(length(breaks), 
+                       dims=c(length(breaks) + length(breaks2),
                               length(massList)),
-                       dimnames = list(breaks,
+                       dimnames = list(c(breaks, breaks2 + length(breaks)),
                                        names(massList)))
-  
+}
+
 }
