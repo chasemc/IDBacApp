@@ -127,7 +127,7 @@ updateMeta_server <- function(input,
       if (!is.null(pool())) {
         conn <- pool::poolCheckout(pool())
         
-        if (!"metadata" %in% DBI::dbListTables(conn)) {
+        if (!"metadata" %in% tolower(DBI::dbListTables(conn))) {
           
           warning("It appears the experiment file may be corrupt, please create again.")
           rhand$rtab <- data.frame(strain_id = "It appears the experiment file may be corrupt, please create the experiment again.")
