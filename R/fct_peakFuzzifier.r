@@ -203,4 +203,62 @@ createFuzzyVectorUnit <- function(massStart,
                                        names(massList)))
 }
 
+
+
+
+#' MALDIquant binning
+#'
+#' @param massStart beginning of mass range (as of now, must be smaller than smallest mass)
+#' @param massEnd end of mass range (as of now, must be smaller than smallest mass)
+#' @param massList list of mass vectors (eg list(1:10, 1:10))
+#'
+#' @return matrix where rows are samples and columns are variables (m/z preojections)
+#' 
+#' @importFrom MALDIquant binPeaks
+#' @importFrom MALDIquant createMassPeaks
+#' @importFrom MALDIquant intensityMatrix
+#' @inheritParams MALDIquant::binPeaks
+#'
+#' @export
+#' 
+#' @examples
+#' \dontrun{
+#' masses <- list(Sample_A = c(5000,6000,7000), 
+#' Sample_B = c(5000,6010,7005), Sample_C = c(5000,6010,7005))  
+#' intensities <- list(Sample_A = rep(1, 3), 
+#' Sample_B = rep(1, 3),
+#'  Sample_C = rep(1, 3))
+#' zx <- binnR(massStart = 3000,
+#'             massEnd = 15000,
+#'             ppm = 500,
+#'             massList = masses,
+#'             intensityList = intensities)
+#'             }
+mquant_bin <- function(massStart,
+                       massEnd,
+                       massList,
+                       method,
+                       tolerance){
+  
+  a <- mapply(function(x, y){
+    
+    createMassPeaks(mass = x,
+                    intensity = y)
+  },
+  massList,
+  intensityList)
+  
+  a <- binPeaks(l = a,
+                method = method,
+                tolerance = tolerance)
+  
+  a <- intensityMatrix(a)
+  
+  a <- t(a)
+  
+  a[is.na(a)] <- 0
+  
+  colnames(a) <- names(massList)
+  a
+  
 }
