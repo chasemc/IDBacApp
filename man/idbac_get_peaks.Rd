@@ -12,7 +12,7 @@ idbac_get_peaks(
   upperMassCutoff,
   minSNR,
   tolerance = 0.002,
-  protein,
+  type,
   mergeReplicates = TRUE
 )
 }
@@ -31,7 +31,7 @@ idbac_get_peaks(
 
 \item{tolerance}{binning tolerance ppm / 10e6}
 
-\item{protein}{whether to search SQL for protein or small mol spectra}
+\item{type}{"protein",  "small", or "all"}
 
 \item{mergeReplicates}{should replicates be merged? TRUE/FALSE}
 }

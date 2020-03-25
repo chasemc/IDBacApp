@@ -66,8 +66,7 @@ transferToNewDB_server <- function(input,
   chosenSamples <-  shiny::callModule(sampleChooser_server,
                                       "chooseNewDBSamples",
                                       pool = selectedDB$pool,
-                                      allSamples = TRUE,
-                                      whetherProtein = FALSE)
+                                      type = "all")
   
   
   continue <- reactiveValues(val = FALSE)

@@ -50,7 +50,7 @@ prioritizer <- function(pool,
                                  upperMassCutoff = small_mol_upperMassCutoff,
                                  minSNR = small_mol_SNR,
                                  tolerance = tolerance,
-                                 protein = FALSE,
+                                 type = "small",
                                  mergeReplicates = TRUE)
   
   # Split/cut dendrogram

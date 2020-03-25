@@ -2,41 +2,47 @@
 #' Retrieve MALDIquant peak objects from an IDBac sqlite database
 #' 
 #' @param pool sqlite pool
-#' @param sampleIDs sample IDs of samples to process
-#' @param protein whether to search SQL for protein or small mol spectra
+#' @param ids filter retrieved peaks by sample ID (character vector, or NULL to return all)
+#' @param type "protein",  "small", or "all"
 #' @param minSNR minimum SNR a a peak must have to be retained
 #' @return unlisted MALDIquant peak objects correspoding to the provided fileshas
 #' @export
 #' 
-.retrieve_peaks_from_pool <-  function(pool, sampleIDs, protein, minSNR){
-  if (!is.logical(protein)) {stop("Provided value for 'protein' wasn't logical-type.")}
+.retrieve_peaks_from_pool <-  function(pool, 
+                                       ids,
+                                       type,
+                                       minSNR){
+
+   if (!inherits(type, "character")) stop("Provided value for 'type' wasn't character.")
+  if (!inherits(ids, c("character", "NULL"))) stop("Provided value for 'sampleIDs' wasn't character or NULL.")
+  .checkPool(pool)
   
-  if (protein == TRUE) {
-    sym <- '>'
-  } else {
-    sym <- '<'
-  }  
-  
-  IDBacApp:::.checkPool(pool)
-  
-  shiny::validate({
-    need(is.character(sampleIDs), 
-         glue::glue("Expected sampleIDs to be a character object, received: {class(sampleIDs)}"))
-  })
+  switch(type,
+         "protein" = assign("sym", "WHERE max_mass > 6000"),
+         "small" = assign("sym", "WHERE max_mass < 6000"),
+         "all" = assign("sym", ""))
   
   conn <- pool::poolCheckout(pool = pool)
   
-  query <- DBI::dbSendStatement(glue::glue("SELECT strain_id, peak_matrix
-                              FROM spectra
-                                  WHERE max_mass {sym} 6000
-                                  AND (strain_id = ?)"),
-                                con = conn)
+  if (inherits(ids, "character")) {
+    
+    query <- DBI::dbSendStatement(glue::glue("SELECT strain_id, peak_matrix
+                                           FROM spectra
+                                           {sym}
+                                           AND (strain_id = ?)"),
+                                  con = conn)
+    DBI::dbBind(query, list(as.character(as.vector(ids))))
+    results <- DBI::dbFetch(query)
+    DBI::dbClearResult(query)
+    
+  } else if (is.null(ids)) {
+    
+    results <- DBI::dbGetQuery(glue::glue("SELECT strain_id, peak_matrix
+                                            FROM spectra
+                                            {sym}"))
+  }
   
-  DBI::dbBind(query, list(as.character(as.vector(sampleIDs))))
   
-  
-  results <- DBI::dbFetch(query)
-  DBI::dbClearResult(query)
   pool::poolReturn(conn)
   
   .parse_json_peaks(results,

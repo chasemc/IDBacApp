@@ -6,7 +6,7 @@
 #' 
 #' @return a single trimmed and binned MALDIquant peak object
 
-smallMolDFtoNetwork <- function(peakList,
+small_maldiquant_to_network <- function(peakList,
                                 sampleIDs){
   
   smallNetwork <- MALDIquant::intensityMatrix(peakList)

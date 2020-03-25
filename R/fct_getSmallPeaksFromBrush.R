@@ -47,37 +47,21 @@
                                                  brushYmax = brushInputs()$ymax)
       }
     } else {
-      
-      checkedPool <- pool::poolCheckout(pool)
-      
-      # retrieve all strain_ids in db that have small molecule spectra
-      sampleIDs <- DBI::dbGetQuery(checkedPool, 
-                                   glue::glue("SELECT DISTINCT strain_id
-                                      FROM spectra 
-                                      WHERE max_mass < 6000"))
-      # Return pool
-      pool::poolReturn(checkedPool)
-      sampleIDs <- as.vector(sampleIDs)[,1]
+      # All mall moleculesamples
+      sampleIDs <- NULL
     }
     
   }
   
-  samples <- lapply(sampleIDs, 
-                    function(sampleIDs){ 
-                      idbac_get_peaks(pool = pool,
-                                      sampleIDs = sampleIDs,
-                                      peakPercentPresence = peakPercentPresence,
-                                      lowerMassCutoff = lowerMassCutoff,
-                                      upperMassCutoff = upperMassCutoff,  
-                                      minSNR = minSNR, 
-                                      tolerance = 0.002,
-                                      protein = FALSE,
-                                      mergeReplicates = TRUE)[[1]]
-                      
-                    })
+  idbac_get_peaks(pool = pool,
+                  sampleIDs = sampleIDs,
+                  peakPercentPresence = peakPercentPresence,
+                  lowerMassCutoff = lowerMassCutoff,
+                  upperMassCutoff = upperMassCutoff,  
+                  minSNR = minSNR, 
+                  tolerance = 0.002,
+                  type = "small",
+                  mergeReplicates = TRUE)
   
-  
-  return(list(maldiQuantPeaks = samples,
-              sampleIDs = sampleIDs))
   
 }

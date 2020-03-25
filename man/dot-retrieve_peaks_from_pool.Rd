@@ -4,14 +4,14 @@
 \alias{.retrieve_peaks_from_pool}
 \title{Retrieve MALDIquant peak objects from an IDBac sqlite database}
 \usage{
-.retrieve_peaks_from_pool(pool, sampleIDs, protein, minSNR)
+.retrieve_peaks_from_pool(pool, ids, type, minSNR)
 }
 \arguments{
 \item{pool}{sqlite pool}
 
-\item{sampleIDs}{sample IDs of samples to process}
+\item{ids}{filter retrieved peaks by sample ID (character vector, or NULL to return all)}
 
-\item{protein}{whether to search SQL for protein or small mol spectra}
+\item{type}{"protein",  "small", or "all"}
 
 \item{minSNR}{minimum SNR a a peak must have to be retained}
 }

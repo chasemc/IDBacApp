@@ -40,8 +40,7 @@ idbac_update_db <- function(pool,
   copy_overwrite <- switch(as.character(copy_overwrite),
                            "copy" = TRUE,
                            "overwrite" = FALSE,
-                           stop("expected 'copy' or 'overwrite'")
-  )
+                           stop("expected 'copy' or 'overwrite'"))
   
   # Check if update is needed -----------------------------------------------
   
