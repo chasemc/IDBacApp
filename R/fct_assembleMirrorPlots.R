@@ -47,7 +47,7 @@ assembleMirrorPlots <- function(sampleID1,
                                                   upperMassCutoff = upperMassCutoff,
                                                   minSNR = minSNR,
                                                   tolerance = tolerance,
-                                                  protein = TRUE,
+                                                  type = "protein",
                                                   mergeReplicates = TRUE)[[1]] 
   
   
@@ -58,7 +58,7 @@ assembleMirrorPlots <- function(sampleID1,
                                                   upperMassCutoff = upperMassCutoff,
                                                   minSNR = minSNR,
                                                   tolerance = tolerance,
-                                                  protein = TRUE,
+                                                  type = "protein",
                                                   mergeReplicates = TRUE)[[1]]
   
   

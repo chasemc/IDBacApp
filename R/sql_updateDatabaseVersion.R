@@ -20,7 +20,7 @@
 # paste0("list(",paste0(a, collapse = ","), ")")
 
 
-
+  
 
 #' Update IDBac Database from version 1 to 2
 #'
@@ -40,17 +40,16 @@ idbac_update_db <- function(pool,
   copy_overwrite <- switch(as.character(copy_overwrite),
                            "copy" = TRUE,
                            "overwrite" = FALSE,
-                           stop("expected 'copy' or 'overwrite'")
-  )
+                           stop("expected 'copy' or 'overwrite'"))
   
   # Check if update is needed -----------------------------------------------
   
   provided_db_version <- tryCatch(pool::poolWithTransaction(pool, 
-                                                           function(con){
-                                                             DBI::dbGetQuery(con, 
-                                                                             "SELECT db_version FROM version")
-                                                           }),
-                                 error = function(x) FALSE) 
+                                                            function(con){
+                                                              DBI::dbGetQuery(con, 
+                                                                              "SELECT db_version FROM version")
+                                                            }),
+                                  error = function(x) FALSE) 
   
   provided_db_version <- tail(provided_db_version, 1)[[1]]
   
@@ -90,30 +89,39 @@ idbac_update_db <- function(pool,
                     "XML",
                     "locale",
                     "massTable",
-                    "metaData",
-                    "version")
+                    "metaData")
     
     new_tables <- c("spectra",
                     "xml",
                     "locale",
                     "mass_index",
-                    "metadata",
-                    "version")     
+                    "metadata")     
     
-    old_fields <- "list(c('spectrumMassHash','spectrumIntensityHash','XMLHash','Strain_ID','peakMatrix','spectrumIntensity','maxMass','minMass','ignore','number','timeDelay','timeDelta','calibrationConstants','v1tofCalibration','dataType','dataSystem','spectrometerType','inlet','ionizationMode','acquisitionMethod','acquisitionDate','acquisitionMode','tofMode','acquisitionOperatorMode','laserAttenuation','digitizerType','flexControlVersion','id','instrument','instrumentId','instrumentType','massError','laserShots','patch','path','laserRepetition','spot','spectrumType','targetCount','targetIdString','targetSerialNumber','targetTypeNumber'),c('XMLHash','XML','manufacturer','model','ionization','analyzer','detector','Instrument_MetaFile'),c('locale'),c('spectrumMassHash','massVector'),c('Strain_ID','Genbank_Accession','NCBI_TaxID','Kingdom','Phylum','Class','Order','Family','Genus','Species','MALDI_Matrix','DSM_Agar_Media','Cultivation_Temp_Celsius','Cultivation_Time_Days','Cultivation_Other','User','User_ORCID','PI_FirstName_LastName','PI_ORCID','dna_16S'),c('IDBacVersion','rVersion'))"
+    old_fields <- "list(c('spectrumMassHash','spectrumIntensityHash','XMLHash','Strain_ID','peakMatrix','spectrumIntensity','maxMass','minMass','ignore','number','timeDelay','timeDelta','calibrationConstants','v1tofCalibration','dataType','dataSystem','spectrometerType','inlet','ionizationMode','acquisitionMethod','acquisitionDate','acquisitionMode','tofMode','acquisitionOperatorMode','laserAttenuation','digitizerType','flexControlVersion','id','instrument','instrumentId','instrumentType','massError','laserShots','patch','path','laserRepetition','spot','spectrumType','targetCount','targetIdString','targetSerialNumber','targetTypeNumber'),c('XMLHash','XML','manufacturer','model','ionization','analyzer','detector','Instrument_MetaFile'),c('locale'),c('spectrumMassHash','massVector'),c('Strain_ID','Genbank_Accession','NCBI_TaxID','Kingdom','Phylum','Class','Order','Family','Genus','Species','MALDI_Matrix','DSM_Agar_Media','Cultivation_Temp_Celsius','Cultivation_Time_Days','Cultivation_Other','User','User_ORCID','PI_FirstName_LastName','PI_ORCID','dna_16S'))"
     old_fields <- eval(str2lang(old_fields))
     
     
-    new_fields <- "list(c('spectrum_mass_hash','spectrum_intensity_hash','xml_hash','strain_id','peak_matrix','spectrum_intensity','max_mass','min_mass','ignore','number','time_delay','time_delta','calibration_constants','v1_tof_calibration','data_type','data_system','spectrometer_type','inlet','ionization_mode','acquisition_method','acquisition_date','acquisition_mode','tof_mode','acquisition_operator_mode','laser_attenuation','digitizer_type','flex_control_version','id','instrument','instrument_id','instrument_type','mass_error','laser_shots','patch','path','laser_repetition','spot','spectrum_type','target_count','target_id_string','target_serial_number','target_type_number'),c('xml_hash','xml','manufacturer','model','ionization','analyzer','detector','instrument_metafile'),c('locale'),c('spectrum_mass_hash','mass_vector'),c('strain_id','genbank_accession','ncbi_taxid','kingdom','phylum','class','order','family','genus','species','maldi_matrix','dsm_cultivation_media','cultivation_temp_celsius','cultivation_time_days','cultivation_other','user_firstname_lastname','user_orcid','pi_firstname_lastname','pi_orcid','dna_16s'),c('idbac_version','r_version'))"
+    new_fields <- "list(c('spectrum_mass_hash','spectrum_intensity_hash','xml_hash','strain_id','peak_matrix','spectrum_intensity','max_mass','min_mass','ignore','number','time_delay','time_delta','calibration_constants','v1_tof_calibration','data_type','data_system','spectrometer_type','inlet','ionization_mode','acquisition_method','acquisition_date','acquisition_mode','tof_mode','acquisition_operator_mode','laser_attenuation','digitizer_type','flex_control_version','id','instrument','instrument_id','instrument_type','mass_error','laser_shots','patch','path','laser_repetition','spot','spectrum_type','target_count','target_id_string','target_serial_number','target_type_number'),c('xml_hash','xml','manufacturer','model','ionization','analyzer','detector','instrument_metafile'),c('locale'),c('spectrum_mass_hash','mass_vector'),c('strain_id','genbank_accession','ncbi_taxid','kingdom','phylum','class','order','family','genus','species','maldi_matrix','dsm_cultivation_media','cultivation_temp_celsius','cultivation_time_days','cultivation_other','user_firstname_lastname','user_orcid','pi_firstname_lastname','pi_orcid','dna_16s'))"
     new_fields <- eval(str2lang(new_fields))
     
+    
+    # Seems like 1.1.10 had some version table issues, so we'll remove an dput back
+    if ("version" %in% DBI::dbListTables(pool)) {
+      
+      tryCatch(pool::poolWithTransaction(pool, 
+                                         function(con){
+                                           DBI::dbExecute(con, 
+                                                          "DROP TABLE version")
+                                         }),
+               error = function(x) paste("Tried to delete version table while updating. Didn't work"),
+               finally = function(x) paste0(""))
+    }
+    sql_fill_version_table(pool = pool)
     
     
     a <- mapply(
       function(old, new, table){
-        
         glue::glue('ALTER TABLE {table} RENAME COLUMN "{old}" TO "{new}"')
-        
       },
       old_fields,
       new_fields,
@@ -123,8 +131,11 @@ idbac_update_db <- function(pool,
     a <- unlist(a)
     
     for (i in a) {
-      DBI::dbExecute(con, 
-                     i)
+      
+      tryCatch(DBI::dbExecute(con, i),
+               error = function(x) paste("Timed out"),
+               finally = function(x) paste0(""))
+      
     }
     
     DBI::dbExecute(con, 
@@ -139,24 +150,7 @@ idbac_update_db <- function(pool,
     
     message(paste0(unlist(old_fields), " is now ", unlist(new_fields), collapse = "\n"))
     
-    # Add db_version field if needed 
-    delete_me <- tryCatch(DBI::dbGetQuery(pool, "SELECT db_version FROM version;"),
-                          error = function(x){
-                            pool::poolWithTransaction(pool, 
-                                                      function(con){
-                                                        
-                                                        DBI::dbSendStatement(con, 
-                                                                             "ALTER TABLE version
-                                                                            ADD db_version TEXT;")
-                                                      })
-                          }) 
-    remove(delete_me)
-    
-    
     sql_fill_locale_table(pool = pool)
-    sql_fill_version_table(pool = pool)
-    
-    
     
     message(paste0("Updated database... \n",
                    "Installed IDBac version: ",  as.character(utils::packageVersion("IDBacApp")), "\n", 

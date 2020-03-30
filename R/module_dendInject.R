@@ -93,8 +93,8 @@ selectInjections_server <- function(input,
   chosen <-  shiny::callModule(sampleChooser_server,
                                "chooseNewDBSamples",
                                pool = selectedDB$pool,
-                               allSamples = FALSE,
-                               whetherProtein = TRUE)
+                               type= "protein")
+  
   observeEvent(chosen$chosen, {  
     chosenSamples$chosen <- chosen$chosen
     

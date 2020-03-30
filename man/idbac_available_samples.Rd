@@ -4,14 +4,12 @@
 \alias{idbac_available_samples}
 \title{Search an IDBac database to see which sample IDs have protein or small molecule data}
 \usage{
-idbac_available_samples(pool, whetherProtein, allSamples)
+idbac_available_samples(pool, type)
 }
 \arguments{
 \item{pool}{single IDBac pool connection}
 
-\item{whetherProtein}{T/F protein spectra (T), small mol (F)}
-
-\item{allSamples}{both protein and small mol? Takes precedence over whetherProtein}
+\item{type}{"protein", "small",}
 }
 \value{
 vector of sample names in database with protein or small mol spectra

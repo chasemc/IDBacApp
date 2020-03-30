@@ -213,8 +213,7 @@ app_server <- function(input, output, session) {
   chosenProteinSampleIDs <- shiny::callModule(sampleChooser_server,
                                               "proteinSampleChooser",
                                               pool = workingDB$pool,
-                                              allSamples = FALSE,
-                                              whetherProtein = TRUE)
+                                              type = "protein")
   
   
   # Collapse peaks ----------------------------------------------------------
@@ -241,7 +240,7 @@ app_server <- function(input, output, session) {
                                      upperMassCutoff = proteinPeakSettings$upperMass, 
                                      minSNR = proteinPeakSettings$SNR, 
                                      tolerance = 0.002,
-                                     protein = TRUE,   
+                                     type = "protein",   
                                      mergeReplicates = TRUE)[[1]]
                    })
     
@@ -260,8 +259,8 @@ app_server <- function(input, output, session) {
                                                upperMassCutoff = proteinPeakSettings$upperMass, 
                                                minSNR = proteinPeakSettings$SNR, 
                                                tolerance = 0.002,
-                                               protein = TRUE,
-                                               mergeReplicates)[[1]]
+                                               type = "protein",
+                                               mergeReplicates = TRUE)[[1]]
                              })
       )
       
@@ -307,11 +306,6 @@ app_server <- function(input, output, session) {
                       ppm = proteinPeakSettings$ppm,
                       massList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@mass),
                       intensityList = lapply(collapsedPeaksForDend()[!emptyProtein()], function(x) x@intensity))
-    
-    
-    
-    
-    
     
     
   })
@@ -613,22 +607,22 @@ app_server <- function(input, output, session) {
                                        lowerMassCutoff = smallPeakSettings$lowerMass,
                                        upperMassCutoff = smallPeakSettings$upperMass,
                                        minSNR = smallPeakSettings$SNR)
-    ids <- samples$sampleIDs
-    samples <- samples$maldiQuantPeaks
-    
-    # if no samples are selected, stop
+    ids <- names(samples)
+
+    # Stop if no samples
     req(length(ids) > 0)
     
-    aq<-sum(sapply(samples, function(x) length(x@mass))) > 1
+    # NULL out if no peaks in samples (need more than one peak among all samples combined)
+    aq <- sum(unlist(lapply(s, function(x) length(x@mass)))) > 1
     
     if(!aq){
+      # NULL out if no peaks in samples (need more than one peak among all samples combined)
       subtractedMatrixBlank$maldiQuantPeaks <- NULL
       subtractedMatrixBlank$sampleIDs <- NULL
     } else {
-      
-      
+    
       if ((input$selectMatrix != "None")) {
-        
+        # Retrieve matrix blank    
         matrixSample <- .getSmallPeaksFromBrush(pool = workingDB$pool(),
                                                 sampleIDs = input$selectMatrix,
                                                 dendrogram = proteinDendrogram$dendrogram,
@@ -638,22 +632,21 @@ app_server <- function(input, output, session) {
                                                 lowerMassCutoff = smallPeakSettings$lowerMass,
                                                 upperMassCutoff = smallPeakSettings$upperMass,
                                                 minSNR = smallPeakSettings$SNR)
-        
-        
+        # Bin matrix and samples
         samples <- MALDIquant::binPeaks(c(matrixSample$maldiQuantPeaks, samples),
                                         tolerance = .002)
         
-        
+        # Matrix sample is first in the list of peak lists, so iterate overthe rest
         for (i in 2:(length(samples))) {
-          
+          # Find peaks that are NOT also in the matrix blank
           toKeep <- !samples[[i]]@mass %in% samples[[1]]@mass 
-          
+          # Keep peaks that aren't in matrix sample
           samples[[i]]@mass <- samples[[i]]@mass[toKeep]
           samples[[i]]@intensity <- samples[[i]]@intensity[toKeep]
           samples[[i]]@snr <- samples[[i]]@snr[toKeep]
-          
         }
         
+        # Remove matrix sample from list of peak lists
         samples <- samples[-1]
         
         subtractedMatrixBlank$maldiQuantPeaks <- samples
@@ -705,6 +698,8 @@ app_server <- function(input, output, session) {
   
   smallMolDataFrame <- reactive({
     req(MALDIquant::isMassPeaksList(subtractedMatrixBlank$maldiQuantPeaks))
+    
+    
     smallNetwork <- MALDIquant::intensityMatrix(subtractedMatrixBlank$maldiQuantPeaks)
     rownames(smallNetwork) <- subtractedMatrixBlank$sampleIDs
     smallNetwork[is.na(smallNetwork)] <- 0

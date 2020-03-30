@@ -4,7 +4,7 @@
 \alias{mquant_bin}
 \title{MALDIquant binning}
 \usage{
-mquant_bin(massStart, massEnd, massList, method, tolerance)
+mquant_bin(massStart, massEnd, massList, intensityList, method, tolerance)
 }
 \arguments{
 \item{massStart}{beginning of mass range (as of now, must be smaller than smallest mass)}
@@ -12,6 +12,8 @@ mquant_bin(massStart, massEnd, massList, method, tolerance)
 \item{massEnd}{end of mass range (as of now, must be smaller than smallest mass)}
 
 \item{massList}{list of mass vectors (eg list(1:10, 1:10))}
+
+\item{intensityList}{list of intesity vectors (eg list(1:10, 1:10))}
 
 \item{method}{
     bin creation rule. \code{"strict"} creates bins never containing two

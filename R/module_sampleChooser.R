@@ -21,8 +21,7 @@ sampleChooser_UI <- function(id) {
 #' @param output shiny module
 #' @param session shiny module
 #' @param pool reactive object that contains a pool to currently-chosen database
-#' @param whetherProtein T  "allSamples takes precedence
-#' @param allSamples T/F
+#' @param type "protein" or "small"
 #'
 #' @return NA
 #' 
@@ -31,8 +30,7 @@ sampleChooser_server <- function(input,
                                  output,
                                  session,
                                  pool,
-                                 whetherProtein = FALSE,
-                                 allSamples = FALSE){
+                                 type){
   
   chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   nams <- reactiveValues(av = NULL)
@@ -41,8 +39,7 @@ sampleChooser_server <- function(input,
     chosenProteinSampleIDs$chosen <- NULL
     conn <- pool::poolCheckout(pool())
     nams$av <- idbac_available_samples(pool = conn,
-                                       whetherProtein = whetherProtein,
-                                       allSamples = allSamples)
+                                       type = "protein")
     
     pool::poolReturn(conn)
     

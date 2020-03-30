@@ -211,7 +211,8 @@ createFuzzyVectorUnit <- function(massStart,
 #' @param massStart beginning of mass range (as of now, must be smaller than smallest mass)
 #' @param massEnd end of mass range (as of now, must be smaller than smallest mass)
 #' @param massList list of mass vectors (eg list(1:10, 1:10))
-#'
+#' @param intensityList list of intesity vectors (eg list(1:10, 1:10))
+#' 
 #' @return matrix where rows are samples and columns are variables (m/z preojections)
 #' 
 #' @importFrom MALDIquant binPeaks
@@ -237,6 +238,7 @@ createFuzzyVectorUnit <- function(massStart,
 mquant_bin <- function(massStart,
                        massEnd,
                        massList,
+                       intensityList,
                        method,
                        tolerance){
   

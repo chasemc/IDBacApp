@@ -204,7 +204,7 @@ MAN_Server <- function(input,
   #----
   smallMolNetworkDataFrame <- reactive({
     req(MALDIquant::isMassPeaksList(subtractedMatrixBlank$maldiQuantPeaks))
-    smallMolDFtoNetwork(peakList = subtractedMatrixBlank$maldiQuantPeaks,
+    small_maldiquant_to_network(peakList = subtractedMatrixBlank$maldiQuantPeaks,
                                   sampleIDs = subtractedMatrixBlank$sampleIDs)
     
   })
