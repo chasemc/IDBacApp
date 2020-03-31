@@ -10,7 +10,7 @@ prioritizer(
   h = NULL,
   k = NULL,
   percent_metabolite_peaks,
-  small_mol_peakPercentPresence = 0.6,
+  small_mol_replicates_peakPercentPresence = 0.6,
   small_mol_lowerMassCutoff = 200,
   small_mol_upperMassCutoff = 2000,
   small_mol_SNR = 10,
@@ -26,7 +26,9 @@ should be cut.}
 \item{k}{numeric scalar (OR a vector) with the number of clusters
 the tree should be cut into.}
 
-\item{percent_metabolite_peaks}{percent of peaks that must be present in sample replicates (0 to 1)}
+\item{percent_metabolite_peaks}{percent of small molecule peaks to "capture" when selecting isolates}
+
+\item{small_mol_replicates_peakPercentPresence}{percent of peaks that must be present in sample replicates (0 to 1)}
 
 \item{small_mol_lowerMassCutoff}{lower mass cutoff for small molecule spectra}
 

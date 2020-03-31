@@ -1,10 +1,11 @@
 #' Prioritize Samples
 #'
 #' @param pool pool connection to IDBac database
-#' @param percent_metabolite_peaks  percent of peaks that must be present in sample replicates (0 to 1)
+#' @param small_mol_replicates_peakPercentPresence  percent of peaks that must be present in sample replicates (0 to 1)
 #' @param small_mol_lowerMassCutoff lower mass cutoff for small molecule spectra
 #' @param small_mol_upperMassCutoff upper mass cutoff for small molecule spectra
 #' @param small_mol_SNR minimum SNR for small molecule spectra
+#' @param percent_metabolite_peaks percent of small molecule peaks to "capture" when selecting isolates
 #'
 #' @inheritParams MALDIquant::binPeaks
 #' @inheritParams dendextend::cutree
@@ -17,7 +18,7 @@ prioritizer <- function(pool,
                         h = NULL,
                         k = NULL,
                         percent_metabolite_peaks,
-                        small_mol_peakPercentPresence = 0.6,
+                        small_mol_replicates_peakPercentPresence = 0.6,
                         small_mol_lowerMassCutoff = 200,
                         small_mol_upperMassCutoff = 2000,
                         small_mol_SNR = 10,
@@ -45,7 +46,7 @@ prioritizer <- function(pool,
   
   small_peaks <- idbac_get_peaks(pool = pool,
                                  sampleIDs = labels(dendrogram),
-                                 peakPercentPresence = small_mol_peakPercentPresence,
+                                 peakPercentPresence = small_mol_replicates_peakPercentPresence,
                                  lowerMassCutoff = small_mol_lowerMassCutoff,
                                  upperMassCutoff = small_mol_upperMassCutoff,
                                  minSNR = small_mol_SNR,
