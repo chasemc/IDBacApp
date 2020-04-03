@@ -12,8 +12,12 @@ spectrumMatrixToMALDIqaunt <- function(input){
     
     input <- lapply(input, 
                     function(x){
-                      MALDIquant::createMassSpectrum(mass = x[ , 1],
+                      x <- MALDIquant::createMassSpectrum(mass = x[ , 1],
                                                      intensity = x[ , 2])
+                      
+                      x@intensity <- x@intensity / max(x@intensity) * 100
+                      x
+                      
                     })
     
     
@@ -21,6 +25,9 @@ spectrumMatrixToMALDIqaunt <- function(input){
     
     input <- MALDIquant::createMassSpectrum(mass = input[ , 1],
                                             intensity = input[ , 2])
+    
+    input@intensity <- input@intensity / max(input@intensity) * 100
+    
     input <- list(input)
     
   }
@@ -28,7 +35,7 @@ spectrumMatrixToMALDIqaunt <- function(input){
   
   
   # Make sure to return input as a MassSpectrumList
-  if(MALDIquant::isMassSpectrumList(input)){
+  if (MALDIquant::isMassSpectrumList(input)) {
     return(input) 
   } else{
     stop("Error in spectrumMatrixToMALDIqaunt: Not a MALDIquant spec list")
