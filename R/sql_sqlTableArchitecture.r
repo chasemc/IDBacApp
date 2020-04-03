@@ -199,10 +199,11 @@ sql_create_version_table <- function(sqlConnection){
     
     a <- DBI::dbSendStatement(sqlConnection,
                               "CREATE TABLE version (
-  idbac_version     TEXT,
-  r_version         TEXT
-    );"
-    )
+                              idbac_version     TEXT,
+                              r_version         TEXT,
+                              db_version        TEXT
+                              );"
+                              )
     
     
     DBI::dbClearResult(a)
