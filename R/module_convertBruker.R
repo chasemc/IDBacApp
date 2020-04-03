@@ -72,10 +72,10 @@ convertOneBruker_Server <- function(input,
   rawFilesLocation <- reactive({
     
     req(input$rawFileDirectory > 0)
-      loc <- choose_dir()
-      if (!is.na(loc)) {
-        return(loc)
-      }
+    loc <- choose_dir()
+    if (!is.na(loc)) {
+      return(loc)
+    }
     
   })
   
@@ -129,7 +129,7 @@ convertOneBruker_Server <- function(input,
   #----
   multipleMaldiRawFileLocation <- reactive({
     req(input$multipleMaldiRawFileDirectory > 0)
-      choose_dir()
+    choose_dir()
   })
   
   
@@ -172,8 +172,8 @@ convertOneBruker_Server <- function(input,
     req(sampleMapReactive$rt)
     spots <- unlist(lapply(acquisitonInformation(), function(x) x$spot))
     findMissingSampleMapIds(spots = spots, 
-                                      sampleMap = sampleMapReactive$rt,
-                                      ignoreMissing = TRUE)
+                            sampleMap = sampleMapReactive$rt,
+                            ignoreMissing = TRUE)
   })
   
   
@@ -222,7 +222,7 @@ convertOneBruker_Server <- function(input,
   
   
   
-
+  
   
   
   success <- reactiveValues(val = FALSE)
@@ -243,20 +243,14 @@ convertOneBruker_Server <- function(input,
                    x$spot
                  }))
                  
-                 # should be the same because both come from acquisitonInformation()
-                 validate(need(identical(names(anyMissing()$matching), 
-                                         spots),
-                               list("Something happend when associating Bruker acqu spots", "\n",
-                                    "names:", names(anyMissing()$matching), "\n",
-                                    "spots:", spots)
-                 ))
                  
-                 validate(need(identical(length(anyMissing()$matching),
-                                         length(acquisitonInformation())),
+                 # should be the same because both come from acquisitonInformation()
+                 validate(need(identical(sort(names(anyMissing()$matching)), 
+                                         sort(unique(spots))),
                                list("Something happend when associating Bruker acqu spots", "\n",
-                                    "length(anyMissing()$matching):", length(anyMissing()$matching), "\n",
-                                    "length(acquisitonInformation()):", length(acquisitonInformation())
-                               )))
+                                    "names:", sort(names(anyMissing()$matching)), "\n",
+                                    "spots:", sort(unique(spots)))
+                 ))
                  
                  
                  acquisitionInfo <- split(acquisitonInformation(), anyMissing()$matching) 
@@ -272,8 +266,8 @@ convertOneBruker_Server <- function(input,
                  
                  
                  forProcessing <- proteoWizConvert(msconvertPath = "",
-                                                             samplePathList = files,
-                                                             convertWhere = tempMZDir)
+                                                   samplePathList = files,
+                                                   convertWhere = tempMZDir)
                  
                  popup3()
                  
@@ -281,12 +275,12 @@ convertOneBruker_Server <- function(input,
                               filePath = sqlDirectory$sqlDirectory)
                  
                  idbacPool <- idbac_connect(fileName = sanitizedNewExperimentName(),
-                               filePath = sqlDirectory$sqlDirectory)[[1]]
+                                            filePath = sqlDirectory$sqlDirectory)[[1]]
                  
                  db_from_mzml(mzFilePaths = forProcessing$mzFile,
-                                        sampleIds = forProcessing$sampleID,
-                                        idbacPool = idbacPool,
-                                        acquisitionInfo = acquisitionInfo)
+                              sampleIds = forProcessing$sampleID,
+                              idbacPool = idbacPool,
+                              acquisitionInfo = acquisitionInfo)
                  pool::poolClose(idbacPool)
                  
                  
