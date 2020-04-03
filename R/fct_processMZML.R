@@ -15,10 +15,6 @@ db_from_mzml <- function(mzFilePaths,
                          acquisitionInfo){
   
   
-  #TODO: fix idbac by moving this outside   
-  #idbacPool <- createNewSQLITEdb(newExperimentName = newExperimentName,
-  #                                         sqlDirectory = sqlDirectory)[[1]]
-  #                                         
   
   
   sql_fill_version_table(pool = idbacPool)
