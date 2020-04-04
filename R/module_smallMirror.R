@@ -186,12 +186,11 @@ smallmirrorPlots_Server <- function(input,
     
     mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = workingDB$pool(),
                                                                                         sampleID = input$Spectra1, 
-                                                                                        protein = FALSE,
-                                                                                        smallmol = TRUE))
+                                                                                        type = "small"))
+    
     mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = workingDB$pool(),
                                                                                         sampleID = input$Spectra2, 
-                                                                                        protein = FALSE,
-                                                                                        smallmol = TRUE))
+                                                                                        type = "small"))
     if (length(mirrorPlotEnv$spectrumSampleOne@intensity) > 50000 ) {
       # downsample so plotting is quicker
       mirrorPlotEnv$spectrumSampleOne@intensity <- mirrorPlotEnv$spectrumSampleOne@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleOne@intensity), 4)]

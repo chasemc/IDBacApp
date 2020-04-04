@@ -3,8 +3,7 @@
 #'
 #' @param pool single pool
 #' @param sampleID sample ID to retrieve
-#' @param protein TRUE/FALSE to retrieve protein spectra
-#' @param smallmol TRUE/FALSE to retrieve small molecule spectra
+#' @param type "protein",  "small", or "all"
 #' @param MALDIquant TRUE/FALSE data.table or MALDIquant spectrum
 #'
 #' @return single, averaged MALDIquant spectrum
@@ -12,37 +11,26 @@
 #'
 idbac_get_spectra <- function(pool,
                               sampleID, 
-                              protein = FALSE,
-                              smallmol = FALSE,
+                              type,
                               MALDIquant = TRUE){
   
   sampleID <- list(as.character(as.vector(sampleID)))
   
-  if (!any(is.logical(protein), is.logical(smallmol))) {
-    stop("idbac_get_spectra() protein and smallmol must be TRUE or FALSE")
-  }
-  if (length(unlist(list(protein, smallmol), recursive = TRUE)) != 2) {
-    stop("idbac_get_spectra() protein and smallmol must be logical vectors of length 1")
-  }
+
   if (!is.logical(MALDIquant)) {
     stop("idbac_get_spectra() MALDIquant must be logical vectors of length 1")
-    
   }
   if (length(MALDIquant) != 1L) {
     stop("idbac_get_spectra() MALDIquant must be logical vectors of length 1")
     
   }
+  .checkPool(pool)
+  if (!inherits(type, "character")) stop("Provided value for 'type' wasn't character.")
   
-  proteinOrSmall <- NULL
-  if (protein == TRUE) {
-    proteinOrSmall <- ">"
-  }
-  if (smallmol == TRUE) {
-    proteinOrSmall <- "<"
-  }
-  if(is.null(proteinOrSmall) || (sum(protein, smallmol) != 1)){
-    stop("One of protein or smallmol must be TRUE and one must be FALSE")
-  }
+  switch(type,
+         "protein" = assign("sym", "WHERE max_mass > 6000"),
+         "small" = assign("sym", "WHERE max_mass < 6000"),
+         "all" = assign("sym", ""))
   
   
   result <-  pool::poolWithTransaction(pool, 
@@ -52,9 +40,8 @@ idbac_get_spectra <- function(pool,
                                    LEFT JOIN spectra
                                    ON mass_index.spectrum_mass_hash = spectra.spectrum_mass_hash
                                    WHERE strain_id == ?
-                                   AND max_mass {proteinOrSmall} 6000"),
+                                   AND max_mass {sym} 6000"),
                                                                         con = conn)
-                                         
                                          
                                          DBI::dbBind(query, sampleID)
                                          result <- DBI::dbFetch(query)

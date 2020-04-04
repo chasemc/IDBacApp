@@ -4,22 +4,14 @@
 \alias{idbac_get_spectra}
 \title{Get spectra from database}
 \usage{
-idbac_get_spectra(
-  pool,
-  sampleID,
-  protein = FALSE,
-  smallmol = FALSE,
-  MALDIquant = TRUE
-)
+idbac_get_spectra(pool, sampleID, type, MALDIquant = TRUE)
 }
 \arguments{
 \item{pool}{single pool}
 
 \item{sampleID}{sample ID to retrieve}
 
-\item{protein}{TRUE/FALSE to retrieve protein spectra}
-
-\item{smallmol}{TRUE/FALSE to retrieve small molecule spectra}
+\item{type}{"protein",  "small", or "all"}
 
 \item{MALDIquant}{TRUE/FALSE data.table or MALDIquant spectrum}
 }
