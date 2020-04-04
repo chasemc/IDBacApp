@@ -12,11 +12,12 @@
                                        ids,
                                        type,
                                        minSNR){
-
-   if (!inherits(type, "character")) stop("Provided value for 'type' wasn't character.")
+  
+  if (!inherits(type, "character")) stop("Provided value for 'type' wasn't character.")
   if (!inherits(ids, c("character", "NULL"))) stop("Provided value for 'sampleIDs' wasn't character or NULL.")
   .checkPool(pool)
   
+  sym <- "" # Just to be safe with the SQL
   switch(type,
          "protein" = assign("sym", "WHERE max_mass > 6000"),
          "small" = assign("sym", "WHERE max_mass < 6000"),

@@ -27,9 +27,10 @@ idbac_get_spectra <- function(pool,
   .checkPool(pool)
   if (!inherits(type, "character")) stop("Provided value for 'type' wasn't character.")
   
+  sym <- "" # Just to be safe with the SQL
   switch(type,
-         "protein" = assign("sym", "WHERE max_mass > 6000"),
-         "small" = assign("sym", "WHERE max_mass < 6000"),
+         "protein" = assign("sym", "AND max_mass > 6000"),
+         "small" = assign("sym", "AND max_mass < 6000"),
          "all" = assign("sym", ""))
   
   
@@ -40,7 +41,7 @@ idbac_get_spectra <- function(pool,
                                    LEFT JOIN spectra
                                    ON mass_index.spectrum_mass_hash = spectra.spectrum_mass_hash
                                    WHERE strain_id == ?
-                                   AND max_mass {sym} 6000"),
+                                   {sym}"),
                                                                         con = conn)
                                          
                                          DBI::dbBind(query, sampleID)
