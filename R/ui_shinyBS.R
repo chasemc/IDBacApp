@@ -53,9 +53,11 @@ bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
   panels <- list(...)
   
   for(i in seq(length(panels))) {
-    if(getAttribs(panels[[i]])$value %in% open) {
-      panels[[i]]$children[[2]] <- addClass(panels[[i]]$children[[2]], "in")
-    }
+    
+# 
+#     if(getAttribs(panels[[i]])$value %in% open) {
+#       panels[[i]]$children[[2]] <- addClass(panels[[i]]$children[[2]], "in")
+#     }
     if(!multiple) {
       panels[[i]]$children[[1]]$children[[1]]$children[[1]] <- addAttribs(panels[[i]]$children[[1]]$children[[1]]$children[[1]], 'data-parent' = paste0("#", id))
     }
