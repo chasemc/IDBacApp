@@ -47,13 +47,7 @@ serial <- function(input){
 #' 
 
 deserial <- function(input){
-  input <- gsub("\\[",
-                "",
-                input)
-  input <- gsub("]",
-                "",
-                input)
-  scan(text = input,
+  scan(text =  gsub("\\[|\\]", "", input),
        sep =",", 
        what = double(),
        quiet = T)
