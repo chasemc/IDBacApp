@@ -19,13 +19,13 @@ db_from_bruker <- function(dataDirectory = NULL,
                            sampleMap = NULL,
                            tempDir = NULL){
   
-  if (legthn(dataDirectory) != 1L) {
+  if (length(dataDirectory) != 1L) {
     stop("dataDirectory must be character of length 1")
   }
   if (!dir.exists(dataDirectory)){
     stop("dataDirectory doesn't exist")
   }
-  if (legthn(filePath) != 1L) {
+  if (length(filePath) != 1L) {
     stop("filePath must be character of length 1")
   }
   if (!dir.exists(filePath)){
@@ -34,7 +34,7 @@ db_from_bruker <- function(dataDirectory = NULL,
   if (!inherits(sampleMap, c("matrix", "data.frame"))) {
     stop("sampleMap must be a matrix or dataframe")
   }
-  if (legthn(fileName) != 1L) {
+  if (length(fileName) != 1L) {
     stop("fileName must be character of length 1")
   }
   if (!is.character(fileName)) {
