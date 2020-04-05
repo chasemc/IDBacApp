@@ -14,10 +14,14 @@
 #'
 processSmallMolSpectra <- function(input,
                                    halfWindowSize = 20){
-  
-  peaks <- MALDIquant::smoothIntensity(input,
-                                       method = "SavitzkyGolay",
-                                       halfWindowSize = halfWindowSize) 
+  # Expected warning messages when negative values are replaced with zeros
+  # Suppress warnings info:
+  # https://github.com/sgibb/MALDIquant/blob/f8258c5b5001453b1816054eb6a9d35c1926dd47/NEWS#L345-L348
+  suppressWarnings({
+    peaks <- MALDIquant::smoothIntensity(input,
+                                         method = "SavitzkyGolay",
+                                         halfWindowSize = halfWindowSize) 
+  })
   peaks <- MALDIquant::removeBaseline(peaks,
                                       method = "TopHat")
   
@@ -42,14 +46,18 @@ processSmallMolSpectra <- function(input,
 processProteinSpectra <- function(input,
                                   halfWindowSize = 20){
   
-  # No way to turn off warnings in MALDIquant:::.replaceNegativeIntensityValues()
-  suppressWarnings(
+  # Expected warning messages when negative values are replaced with zeros
+  # Suppress warnings info:
+  # https://github.com/sgibb/MALDIquant/blob/f8258c5b5001453b1816054eb6a9d35c1926dd47/NEWS#L345-L348
+  suppressWarnings({
     peaks <- MALDIquant::transformIntensity(input, 
                                             method = "sqrt") 
-  )
-  peaks <- MALDIquant::smoothIntensity(peaks,
-                                       method = "SavitzkyGolay", 
-                                       halfWindowSize = halfWindowSize) 
+  })  
+  suppressWarnings({
+    peaks <- MALDIquant::smoothIntensity(peaks,
+                                         method = "SavitzkyGolay", 
+                                         halfWindowSize = halfWindowSize) 
+  })
   peaks <- MALDIquant::removeBaseline(peaks,
                                       method = "TopHat") 
   
