@@ -31,7 +31,7 @@ db_from_mzml <- function(mzFilePaths,
                    for (i in base::seq_along(mzFilePaths)) {
                      setProgress(value = i,
                                  message = 'Processing in progress',
-                                 detail = glue::glue(" \n Sample: {sampleIds[[i]]},
+                                 detail = glue::glue(" \n Sample: <br> {sampleIds[[i]]},
                                                    {i} of {progLength}"),
                                  session = getDefaultReactiveDomain())
                      
