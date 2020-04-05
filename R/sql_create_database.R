@@ -35,11 +35,14 @@ idbac_create <- function(fileName,
   filePaths <- file.path(filePath,
                          fileName)
   
+  if (!file.exists(filePaths)) {
+  
+  
   names(filePaths) <- tools::file_path_sans_ext(fileName)
   
   
   pool <- pool::dbPool(drv = RSQLite::SQLite(),
-                       dbname = base::file.path(filePath, fileName))
+                       dbname = file.path(filePath, fileName))
   
   conn <- pool::poolCheckout(pool)
   
@@ -61,6 +64,12 @@ idbac_create <- function(fileName,
   pool::poolClose(pool)
   
   #TODO: add check
+  
+  } else {
+    warning("New IDBac database not created because...\n",
+            filePaths,
+            "\n...already exists.")
+  }
   
   return(normalizePath(base::file.path(filePath, fileName), 
                        winslash = "/",
