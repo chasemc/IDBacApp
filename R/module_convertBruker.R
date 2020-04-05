@@ -238,51 +238,27 @@ convertOneBruker_Server <- function(input,
                  validate(need(any(!is.na(sampleMapReactive$rt)), 
                                "No samples entered into sample map, please try entering them again"))
                  
-                 # get target positions in order of acqus list
-                 spots <- unlist(lapply(acquisitonInformation(), function(x){
-                   x$spot
-                 }))
+                 # # get target positions in order of acqus list
+                 # spots <- unlist(lapply(acquisitonInformation(), function(x){
+                 #   x$spot
+                 # }))
+                 # 
+                 # 
+                 # # should be the same because both come from acquisitonInformation()
+                 # validate(need(identical(sort(names(anyMissing()$matching)), 
+                 #                         sort(unique(spots))),
+                 #               list("Something happend when associating Bruker acqu spots", "\n",
+                 #                    "names:", sort(names(anyMissing()$matching)), "\n",
+                 #                    "spots:", sort(unique(spots)))
+                 # ))
                  
-                 
-                 # should be the same because both come from acquisitonInformation()
-                 validate(need(identical(sort(names(anyMissing()$matching)), 
-                                         sort(unique(spots))),
-                               list("Something happend when associating Bruker acqu spots", "\n",
-                                    "names:", sort(names(anyMissing()$matching)), "\n",
-                                    "spots:", sort(unique(spots)))
-                 ))
-                 
-                 
-                 acquisitionInfo <- split(acquisitonInformation(), anyMissing()$matching) 
-                 
-                 files <- lapply(acquisitionInfo, function(x){
-                   lapply(x, function(y) y$file)
-                 })
-                 
-                 
-                 
-                 brukerToMzml_popup()
-                 
-                 
-                 
-                 forProcessing <- proteoWizConvert(msconvertPath = "",
-                                                   samplePathList = files,
-                                                   convertWhere = tempMZDir)
-                 
-                 popup3()
-                 
-                 idbac_create(fileName = sanitizedNewExperimentName(),
-                              filePath = sqlDirectory$sqlDirectory)
-                 
-                 idbacPool <- idbac_connect(fileName = sanitizedNewExperimentName(),
-                                            filePath = sqlDirectory$sqlDirectory)[[1]]
-                 
-                 db_from_mzml(mzFilePaths = forProcessing$mzFile,
-                              sampleIds = forProcessing$sampleID,
-                              idbacPool = idbacPool,
-                              acquisitionInfo = acquisitionInfo)
-                 pool::poolClose(idbacPool)
-                 
+                 db_from_bruker(dataDirectory,
+                                fileName = sanitizedNewExperimentName(),
+                                filePath = sqlDirectory$sqlDirectory,
+                                anyMissing = anyMissing(),
+                                acquisitionInfo = acquisitonInformation(),
+                                sampleMap  = NULL,
+                                tempDir = tempMZDir)
                  
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
