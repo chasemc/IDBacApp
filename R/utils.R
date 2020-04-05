@@ -39,7 +39,7 @@ serial <- function(input){
 }
 
 
-#' deserial
+#' deserial spectrum json (single json array)
 #'    Settings for serializing in IDBac (convert to json)
 #' @param input matrix or vector
 #'
