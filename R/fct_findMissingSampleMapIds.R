@@ -10,7 +10,7 @@
 findMissingSampleMapIds <- function(spots, 
                                     sampleMap,
                                     ignoreMissing){
-  spots <- unique(spots)
+  
   if (is.character(spots)) {
     
     
@@ -21,7 +21,7 @@ findMissingSampleMapIds <- function(spots,
       plateMap <- map384Well()
       # Which sample locations have data but weren't assigned an ID?
       sampleMap <- base::as.matrix(sampleMap)
-      b <- sapply(spots, function(x) sampleMap[which(plateMap %in% x)])
+      b <- sampleMap[match(spots, plateMap)]
       
     } else {
       warning("'findMissingSampleMapIds(spots = )' expected data.frame input \n \n",
@@ -36,14 +36,14 @@ findMissingSampleMapIds <- function(spots,
             "\n \n")
   }
   
-  missing <- names(which(is.na(b)))
+  missing <- unique(b[which(is.na(b))])
   
   if (isTRUE(ignoreMissing)) {
     return(list(missing = missing,
-                matching = b[which(!is.na(b))]))
+                matching = b))
   } else {
     
-    b[which(is.na(b))] <- paste0("Spot-", names(which(is.na(b))))
+    b[which(is.na(b))] <- paste0("Spot-", b[which(is.na(b))])
     return(list(missing = missing,
                 matching = b))
   }

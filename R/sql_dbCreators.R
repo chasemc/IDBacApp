@@ -184,11 +184,14 @@ createSpectraSQL <- function(mzML_con,
   zero_intensity_spectra <- which(unlist(lapply(spectraImport, MALDIquant::isEmpty)))
  
    # logical vector of maximum masses of mass vectors. True = small mol, False = protein
-  
- 
+    
+  smallIndex <- unlist(lapply(spectraImport, function(x) max(x@mass)))
+
    if (length(zero_intensity_spectra) > 0L) {
     spectraImport <- spectraImport[-zero_intensity_spectra]
-    smallIndex <- unlist(lapply(spectraImport, function(x) max(x@mass)))
+    acquisitionInfo <- acquisitionInfo[-zero_intensity_spectra]
+    smallIndex <- smallIndex[-zero_intensity_spectra]
+    
     #TODO: make this visible as a log file or whatever, for the GUI users
     warning(paste0("The following zero-intensity spectra were removed from sample: ", 
                    sampleID,
@@ -199,9 +202,7 @@ createSpectraSQL <- function(mzML_con,
                    "Spectrum:\n", 
                    paste0(zero_intensity_spectra, " max mass: ", smallIndex, collapse = "\n")
     ))
-   } else {
-     smallIndex <- unlist(lapply(spectraImport, function(x) max(x@mass)))
-  }
+   }
   
 
   smallIndex <- smallIndex < smallRangeEnd
