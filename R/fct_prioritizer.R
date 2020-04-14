@@ -5,7 +5,7 @@
 #' @param small_mol_lowerMassCutoff lower mass cutoff for small molecule spectra
 #' @param small_mol_upperMassCutoff upper mass cutoff for small molecule spectra
 #' @param small_mol_SNR minimum SNR for small molecule spectra
-#' @param percent_metabolite_peaks_to_retain percent of small molecule peaks to "capture" when selecting isolates
+#' @param fraction_metabolite_peaks_to_retain percent of small molecule peaks to "capture" when selecting isolates
 #' @inheritParams MALDIquant::binPeaks
 #' @inheritParams MALDIquant::filterPeaks
 #' @inheritParams dendextend::cutree
@@ -17,7 +17,7 @@ prioritizer <- function(pool,
                         dendrogram,
                         h = NULL,
                         k = NULL,
-                        percent_metabolite_peaks_to_retain_to_retain,
+                        fraction_metabolite_peaks_to_retain,
                         minFrequency = 0.6,
                         minNumber = NULL, 
                         small_mol_lowerMassCutoff = 200,
@@ -85,7 +85,7 @@ prioritizer <- function(pool,
                             original_total_peaks <- nrow(a)
                             index <- c()
                             
-                            while (perc < percent_metabolite_peaks_to_retain) {
+                            while (perc < fraction_metabolite_peaks_to_retain) {
                               samp_peaks <- colSums(a)
                               chosen <- order(samp_peaks, decreasing = TRUE)[[1]]
                               perc <- perc + (samp_peaks[chosen] / original_total_peaks * 100)
