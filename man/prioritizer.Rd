@@ -9,8 +9,9 @@ prioritizer(
   dendrogram,
   h = NULL,
   k = NULL,
-  percent_metabolite_peaks,
-  small_mol_replicates_peakPercentPresence = 0.6,
+  percent_metabolite_peaks_to_retain_to_retain,
+  minFrequency = 0.6,
+  minNumber = NULL,
   small_mol_lowerMassCutoff = 200,
   small_mol_upperMassCutoff = 2000,
   small_mol_SNR = 10,
@@ -26,9 +27,13 @@ should be cut.}
 \item{k}{numeric scalar (OR a vector) with the number of clusters
 the tree should be cut into.}
 
-\item{percent_metabolite_peaks}{percent of small molecule peaks to "capture" when selecting isolates}
+\item{minFrequency}{percent of peaks that must be present in sample replicates (0 to 1)}
 
-\item{small_mol_replicates_peakPercentPresence}{percent of peaks that must be present in sample replicates (0 to 1)}
+\item{minNumber}{
+    \code{double}, remove all peaks which occur in less than
+    \code{minNumber} \code{\linkS4class{MassPeaks}}
+    objects. It is an absolute threshold.
+  }
 
 \item{small_mol_lowerMassCutoff}{lower mass cutoff for small molecule spectra}
 
@@ -41,6 +46,8 @@ the tree should be cut into.}
     considered as identical. Must be multiplied by \code{10^-6} for ppm,
     e.g. use \code{tolerance=5e-6} for 5 ppm.
   }
+
+\item{percent_metabolite_peaks_to_retain}{percent of small molecule peaks to "capture" when selecting isolates}
 }
 \value{
 prioritization list

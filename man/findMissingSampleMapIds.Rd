@@ -9,7 +9,7 @@ findMissingSampleMapIds(spots, sampleMap, ignoreMissing)
 \arguments{
 \item{spots}{spot locations that have data}
 
-\item{sampleMap}{user-input sample names mapped to 384-well plate}
+\item{sampleMap}{user-input sample names mapped to 384-well plate (16 rows, 24 columns)}
 
 \item{ignoreMissing}{TRUE/FALSE whether to ignore target spots missing ids}
 }
