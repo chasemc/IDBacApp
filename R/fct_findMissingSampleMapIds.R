@@ -1,7 +1,7 @@
 #' Find which MALDI-target spots have data but an ID wasn't assigned 
 #'
 #' @param spots spot locations that have data 
-#' @param sampleMap user-input sample names mapped to 384-well plate
+#' @param sampleMap user-input sample names mapped to 384-well plate (16 rows, 24 columns)
 #' @param ignoreMissing TRUE/FALSE whether to ignore target spots missing ids
 #'
 #' @return character vector of missing sample IDs or character(0)
@@ -10,6 +10,10 @@
 findMissingSampleMapIds <- function(spots, 
                                     sampleMap,
                                     ignoreMissing){
+  
+  if (dims(sampleMap) != c(16, 24)) {
+    stop("Please provide a 16-row by 24-column matrix")
+  }
   
   if (is.character(spots)) {
     
