@@ -31,17 +31,19 @@ idbac_get_peaks <- function(pool,
   if (!inherits(pool, "Pool")) {
     stop("pool not pool")
   }
-  if (!inherits(minFrequency,  c("numeric", "logical"))) {
+  if (!inherits(minFrequency,  c("numeric", "logical", "integer"))) {
     stop("minFrequency not numeric or NA")
   }
-  if (!inherits(minNumber,  c("numeric", "logical"))) {
+  if (!inherits(minNumber,  c("numeric","integer"))) {
+    if (!is.na(minNumber)) {
     stop("minNumber not numeric or NA")
+    }
   }
-  if (!inherits(lowerMassCutoff, "numeric")) {
-    stop("mergeReplicates not numeric")
+  if (!inherits(lowerMassCutoff, c("numeric", "integer"))) {
+    stop("lowerMassCutoff not numeric")
   }
-  if (!inherits(upperMassCutoff, "numeric")) {
-    stop("mergeReplicates not numeric")
+  if (!inherits(upperMassCutoff, c("numeric", "integer"))) {
+    stop("upperMassCutoff not numeric")
   }
   if (!inherits(minSNR, "numeric")) {
     stop("minSNR not numeric")
