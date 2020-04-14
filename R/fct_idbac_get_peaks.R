@@ -18,7 +18,7 @@
 
 idbac_get_peaks <- function(pool,
                             sampleIDs,
-                            minFrequency = NA,
+                            minFrequency = 0,
                             minNumber = NA, 
                             lowerMassCutoff,
                             upperMassCutoff, 
@@ -31,8 +31,8 @@ idbac_get_peaks <- function(pool,
   if (!inherits(pool, "Pool")) {
     stop("pool not pool")
   }
-  if (!inherits(minFrequency,  c("numeric", "logical", "integer"))) {
-    stop("minFrequency not numeric or NA")
+  if (!inherits(minFrequency,  c("numeric", "integer"))) {
+    stop("minFrequency not numeric")
   }
   if (!inherits(minNumber,  c("numeric","integer"))) {
     if (!is.na(minNumber)) {

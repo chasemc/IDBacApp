@@ -7,7 +7,7 @@
 idbac_get_peaks(
   pool,
   sampleIDs,
-  minFrequency = NA,
+  minFrequency = 0,
   minNumber = NA,
   lowerMassCutoff,
   upperMassCutoff,
