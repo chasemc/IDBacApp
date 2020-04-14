@@ -47,7 +47,7 @@ prioritizer <- function(pool,
   
   small_peaks <- idbac_get_peaks(pool = pool,
                                  sampleIDs = labels(dendrogram),
-                                 peakPercentPresence = minFrequency,
+                                 minFrequency = minFrequency,
                                  lowerMassCutoff = small_mol_lowerMassCutoff,
                                  upperMassCutoff = small_mol_upperMassCutoff,
                                  minSNR = small_mol_SNR,

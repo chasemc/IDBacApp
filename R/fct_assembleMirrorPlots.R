@@ -2,7 +2,7 @@
 #'
 #' @param sampleID1 sample ID to search in IDBac sqlite database (will be positive spectrum)
 #' @param sampleID2 sample ID to search in IDBac sqlite database (will be negative spectrum)
-#' @param peakPercentPresence numeric between 0 and 100, peakPercentPresence
+#' @param minFrequency numeric between 0 and 100, minFrequency
 #' @param lowerMassCutoff lowerMassCutoff
 #' @param upperMassCutoff upperMassCutoff
 #' @param minSNR numeric, peaks with a SNR below this number will be removed
@@ -16,7 +16,7 @@
 #'
 assembleMirrorPlots <- function(sampleID1,
                                 sampleID2,
-                                peakPercentPresence,
+                                minFrequency,
                                 lowerMassCutoff,
                                 upperMassCutoff,
                                 minSNR,
@@ -40,7 +40,7 @@ assembleMirrorPlots <- function(sampleID1,
   
   mirrorPlotEnv$peaksSampleOne <- idbac_get_peaks(pool = pool1,
                                                   sampleIDs = sampleID1,
-                                                  peakPercentPresence = peakPercentPresence,
+                                                  minFrequency = minFrequency,
                                                   lowerMassCutoff = lowerMassCutoff,
                                                   upperMassCutoff = upperMassCutoff,
                                                   minSNR = minSNR,
@@ -51,7 +51,7 @@ assembleMirrorPlots <- function(sampleID1,
   
   mirrorPlotEnv$peaksSampleTwo <- idbac_get_peaks(pool = pool2,
                                                   sampleIDs = sampleID2,
-                                                  peakPercentPresence = peakPercentPresence,
+                                                  minFrequency = minFrequency,
                                                   lowerMassCutoff = lowerMassCutoff,
                                                   upperMassCutoff = upperMassCutoff,
                                                   minSNR = minSNR,

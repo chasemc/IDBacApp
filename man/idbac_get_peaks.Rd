@@ -7,13 +7,15 @@
 idbac_get_peaks(
   pool,
   sampleIDs,
-  peakPercentPresence,
+  minFrequency = NA,
+  minNumber = NA,
   lowerMassCutoff,
   upperMassCutoff,
   minSNR,
   tolerance = 0.002,
   type,
-  mergeReplicates = TRUE
+  mergeReplicates = TRUE,
+  method = "strict"
 )
 }
 \arguments{
@@ -21,7 +23,17 @@ idbac_get_peaks(
 
 \item{sampleIDs}{sample IDs of samples to process}
 
-\item{peakPercentPresence}{peaks in replciates that occurr less frequently than this will be removed}
+\item{minFrequency}{
+    \code{double}, remove all peaks which occur in less than
+    \code{minFrequency*length(l)} \code{\linkS4class{MassPeaks}}
+    objects. It is a relative threshold.
+  }
+
+\item{minNumber}{
+    \code{double}, remove all peaks which occur in less than
+    \code{minNumber} \code{\linkS4class{MassPeaks}}
+    objects. It is an absolute threshold.
+  }
 
 \item{lowerMassCutoff}{masses below this will be removed from analyses}
 
@@ -29,11 +41,20 @@ idbac_get_peaks(
 
 \item{minSNR}{minimum SNR a a peak must have to be retained}
 
-\item{tolerance}{binning tolerance ppm / 10e6}
+\item{tolerance}{
+    \code{double}, maximal relative deviation of a peak position (mass) to be
+    considered as identical. Must be multiplied by \code{10^-6} for ppm,
+    e.g. use \code{tolerance=5e-6} for 5 ppm.
+  }
 
 \item{type}{"protein",  "small", or "all"}
 
 \item{mergeReplicates}{should replicates be merged? TRUE/FALSE}
+
+\item{method}{
+    bin creation rule. \code{"strict"} creates bins never containing two
+    or more peaks of the sampe sample. \code{"relaxed"} allows multiple
+    peaks of the same sample in one bin.}
 }
 \value{
 a single trimmed and binned MALDIquant peak object

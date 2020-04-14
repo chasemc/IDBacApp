@@ -235,7 +235,7 @@ app_server <- function(input, output, session) {
                    function(ids){
                      idbac_get_peaks(pool = isolate(workingDB$pool()),
                                      sampleIDs = ids,
-                                     peakPercentPresence = proteinPeakSettings$percentPresence,
+                                     minFrequency = proteinPeakSettings$percentPresence,
                                      lowerMassCutoff = proteinPeakSettings$lowerMass,
                                      upperMassCutoff = proteinPeakSettings$upperMass, 
                                      minSNR = proteinPeakSettings$SNR, 
@@ -254,7 +254,7 @@ app_server <- function(input, output, session) {
                              function(ids){
                                idbac_get_peaks(pool = proteinSamplesToInject$db(),
                                                sampleIDs = ids,
-                                               peakPercentPresence = proteinPeakSettings$percentPresence,
+                                               minFrequency = proteinPeakSettings$percentPresence,
                                                lowerMassCutoff = proteinPeakSettings$lowerMass,
                                                upperMassCutoff = proteinPeakSettings$upperMass, 
                                                minSNR = proteinPeakSettings$SNR, 
@@ -603,7 +603,7 @@ app_server <- function(input, output, session) {
                                        dendrogram = proteinDendrogram$dendrogram,
                                        brushInputs = smallProtDend,
                                        matrixIDs = NULL,
-                                       peakPercentPresence = smallPeakSettings$percentPresence,
+                                       minFrequency = smallPeakSettings$percentPresence,
                                        lowerMassCutoff = smallPeakSettings$lowerMass,
                                        upperMassCutoff = smallPeakSettings$upperMass,
                                        minSNR = smallPeakSettings$SNR)
@@ -628,7 +628,7 @@ app_server <- function(input, output, session) {
                                                 dendrogram = proteinDendrogram$dendrogram,
                                                 brushInputs = smallProtDend,
                                                 matrixIDs = NULL,
-                                                peakPercentPresence = smallPeakSettings$percentPresence,
+                                                minFrequency = smallPeakSettings$percentPresence,
                                                 lowerMassCutoff = smallPeakSettings$lowerMass,
                                                 upperMassCutoff = smallPeakSettings$upperMass,
                                                 minSNR = smallPeakSettings$SNR)

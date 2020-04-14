@@ -4,7 +4,7 @@
 #' @param sampleIDs character vector of IDs (currently not used)
 #' @param dendrogram protein dendrogram that was brushed 
 #' @param matrixIDs sampleID that will be used as a matrix
-#' @param peakPercentPresence peaks whose frequency of occurence in replicates below this are dropped
+#' @param minFrequency peaks whose frequency of occurence in replicates below this are dropped
 #' @param lowerMassCutoff lower mass to retain
 #' @param upperMassCutoff upper mass to retain
 #' @param minSNR minimum SNR a peak must have to be retained
@@ -16,7 +16,7 @@
                                     dendrogram,
                                     brushInputs,
                                     matrixIDs = NULL,
-                                    peakPercentPresence,
+                                    minFrequency,
                                     lowerMassCutoff,
                                     upperMassCutoff, 
                                     minSNR){
@@ -55,7 +55,7 @@
   
   idbac_get_peaks(pool = pool,
                   sampleIDs = sampleIDs,
-                  peakPercentPresence = peakPercentPresence,
+                  minFrequency = minFrequency,
                   lowerMassCutoff = lowerMassCutoff,
                   upperMassCutoff = upperMassCutoff,  
                   minSNR = minSNR, 

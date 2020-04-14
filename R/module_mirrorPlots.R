@@ -128,7 +128,7 @@ mirrorPlots_Server <- function(input,
     
     assembleMirrorPlots(sampleID1 = input$Spectra1,
                                   sampleID2 = input$Spectra2,
-                                  peakPercentPresence = input$percentPresence,
+                                  minFrequency = input$percentPresence,
                                   lowerMassCutoff = input$lowerMass,
                                   upperMassCutoff = input$upperMass,
                                   minSNR = input$SNR,

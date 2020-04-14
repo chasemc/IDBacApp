@@ -5,12 +5,12 @@
 #' @param upperMassCutoff masses above this will be removed from analyses
 #' @param pool sqlite pool
 #' @param sampleIDs sample IDs of samples to process
-#' @param peakPercentPresence peaks in replciates that occurr less frequently than this will be removed
-#' @param tolerance binning tolerance ppm / 10e6
 #' @param mergeReplicates should replicates be merged? TRUE/FALSE
-#'
+#' 
 #' @inheritParams .retrieve_peaks_from_pool
-#'
+#' @inheritParams MALDIquant::filterPeaks
+#' @inheritParams MALDIquant::binPeaks
+#' @importFrom MALDIquant filterPeaks binPeaks mergeMassPeaks trim
 #' @export
 #' 
 #' @return a single trimmed and binned MALDIquant peak object
@@ -18,27 +18,53 @@
 
 idbac_get_peaks <- function(pool,
                             sampleIDs,
-                            peakPercentPresence,
+                            minFrequency = NA,
+                            minNumber = NA, 
                             lowerMassCutoff,
                             upperMassCutoff, 
                             minSNR, 
                             tolerance = 0.002,
                             type,
-                            mergeReplicates = TRUE){
+                            mergeReplicates = TRUE,
+                            method = "strict"){
   
-  validate(need(is.numeric(peakPercentPresence), "peakPercentPresence not numeric"))
-  validate(need(is.numeric(lowerMassCutoff), "lowerMassCutoff not numeric"))
-  validate(need(is.numeric(upperMassCutoff), "upperMassCutoff not numeric"))
-  validate(need(is.numeric(minSNR), "minSNR not numeric"))
-  validate(need(is.numeric(tolerance), "tolerance not numeric"))
-  validate(need(is.logical(mergeReplicates), "mergeReplicates not logical"))
+  if (!inherits(pool, "Pool")) {
+    stop("pool not pool")
+  }
+  if (!inherits(minFrequency,  c("numeric", "logical"))) {
+    stop("minFrequency not numeric or NA")
+  }
+  if (!inherits(minNumber,  c("numeric", "logical"))) {
+    stop("minNumber not numeric or NA")
+  }
+  if (!inherits(lowerMassCutoff, "numeric")) {
+    stop("mergeReplicates not numeric")
+  }
+  if (!inherits(upperMassCutoff, "numeric")) {
+    stop("mergeReplicates not numeric")
+  }
+  if (!inherits(minSNR, "numeric")) {
+    stop("minSNR not numeric")
+  }  
+  if (!inherits(tolerance, "numeric")) {
+    stop("tolerance not numeric")
+  }  
+  if (!inherits(method, "character")) {
+    stop("method not character")
+  }
+  if (!inherits(mergeReplicates, "logical")) {
+    stop("mergeReplicates not type logical")
+  }
+  if (!type %in% c("protein",  "small", "all")) {
+    stop('type must be one of c("protein",  "small", "all")')
+  }
+  
   .checkPool(pool)
   
   if (is.null(sampleIDs)) {
     sampleIDs <- IDBacApp::idbac_available_samples(pool = pool,
                                                    type = type)
-    }
-  
+  }
   
   temp <- .retrieve_peaks_from_pool(pool = pool,
                                     ids = sampleIDs,
@@ -50,7 +76,6 @@ idbac_get_peaks <- function(pool,
   
   lapply(temp, function(temp){
     
-    
     specNotZero <- sapply(temp, function(x) length(x@mass) > 0)
     
     # Only binPeaks if spectra(um) has peaks.
@@ -60,23 +85,24 @@ idbac_get_peaks <- function(pool,
     if (any(specNotZero) & mergeReplicates) {
       
       temp <- temp[specNotZero]
-      temp <- MALDIquant::binPeaks(temp,
-                                   tolerance = tolerance, 
-                                   method = c("strict")) 
+      temp <- binPeaks(temp,
+                       tolerance = tolerance, 
+                       method = method) 
       
-      temp <- MALDIquant::filterPeaks(temp,
-                                      minFrequency = peakPercentPresence / 100) 
+      temp <- filterPeaks(temp,
+                          minFrequency = minFrequency / 100,
+                          minNumber = minNumber) 
       
-      temp <- MALDIquant::mergeMassPeaks(temp, 
-                                         method = "mean") 
-      temp <- MALDIquant::trim(temp,
-                               c(lowerMassCutoff,
-                                 upperMassCutoff))
+      temp <- mergeMassPeaks(temp, 
+                             method = "mean") 
+      temp <- trim(temp,
+                   c(lowerMassCutoff,
+                     upperMassCutoff))
     } else {
       
-      temp <- MALDIquant::trim(temp,
-                               c(lowerMassCutoff,
-                                 upperMassCutoff))
+      temp <- trim(temp,
+                   c(lowerMassCutoff,
+                     upperMassCutoff))
     }
     
     return(temp)

@@ -10,7 +10,7 @@
   dendrogram,
   brushInputs,
   matrixIDs = NULL,
-  peakPercentPresence,
+  minFrequency,
   lowerMassCutoff,
   upperMassCutoff,
   minSNR
@@ -27,7 +27,7 @@
 
 \item{matrixIDs}{sampleID that will be used as a matrix}
 
-\item{peakPercentPresence}{peaks whose frequency of occurence in replicates below this are dropped}
+\item{minFrequency}{peaks whose frequency of occurence in replicates below this are dropped}
 
 \item{lowerMassCutoff}{lower mass to retain}
 
