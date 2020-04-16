@@ -51,7 +51,7 @@ idbac_update_db <- function(pool,
                                                             }),
                                   error = function(x) FALSE) 
   
-  provided_db_version <- tail(provided_db_version, 1)[[1]]
+  provided_db_version <- utils::tail(provided_db_version, 1)[[1]]
   
   # Check if database is earlier than 'db_version' was implemented
   if (isFALSE(provided_db_version)) {
@@ -61,7 +61,7 @@ idbac_update_db <- function(pool,
     provided_db_version <- "0"
   } else {
     # Exit function if version is up to date
-    if (compareVersion(provided_db_version, current_db_version()) > -1L) {
+    if (utils::compareVersion(provided_db_version, current_db_version()) > -1L) {
       return(message(basename(.db_path_from_pool(pool)), 
                      " is IDBac database version: ",
                      provided_db_version,
@@ -83,7 +83,7 @@ idbac_update_db <- function(pool,
   }
   
   
-  if (compareVersion(provided_db_version, "2.0.0") == -1L) {
+  if (utils::compareVersion(provided_db_version, "2.0.0") == -1L) {
     
     old_tables <- c("IndividualSpectra",
                     "XML",

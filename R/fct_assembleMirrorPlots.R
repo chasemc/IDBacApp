@@ -84,7 +84,7 @@ assembleMirrorPlots <- function(sampleID1,
   
   
   mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = pool1,
-                                                                                      sample_ids = sampleID1, 
+                                                                                      sampleIDs = sampleID1, 
                                                                                       type = "protein"))
   
   
@@ -99,7 +99,7 @@ assembleMirrorPlots <- function(sampleID1,
   
   
   mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = pool2,
-                                                                                      sample_ids = sampleID2, 
+                                                                                      sampleIDs = sampleID2, 
                                                                                       type = "protein"))
   
   

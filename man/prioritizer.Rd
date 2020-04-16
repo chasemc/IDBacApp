@@ -22,7 +22,7 @@ prioritizer(
 \item{pool}{pool connection to IDBac database}
 
 \item{dendrogram}{dendrogram object to be cut, doesn't necessarily have to be protein dendrogram
-but labels should be same as small molecule data labels}
+but labels should be the same as the small molecule data labels}
 
 \item{h}{numeric scalar (OR a vector) with a height where the tree
 should be cut.}
@@ -44,13 +44,13 @@ the tree should be cut into.}
 
 \item{smallMolUpperMassCutoff}{upper mass cutoff for small molecule spectra}
 
+\item{smallMolSnr}{minimum SNR for small molecule spectra}
+
 \item{tolerance}{
     \code{double}, maximal relative deviation of a peak position (mass) to be
     considered as identical. Must be multiplied by \code{10^-6} for ppm,
     e.g. use \code{tolerance=5e-6} for 5 ppm.
   }
-
-\item{small_mol_SNR}{minimum SNR for small molecule spectra}
 }
 \value{
 prioritization list

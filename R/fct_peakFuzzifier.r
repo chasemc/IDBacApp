@@ -149,7 +149,7 @@ createFuzzyVector <- function(massStart,
 #' @param massStart beginning of mass range (as of now, must be smaller than smallest mass)
 #' @param massEnd end of mass range (as of now, must be smaller than smallest mass)
 #' @param massList list of mass vectors (eg list(1:10, 1:10))
-#'
+#' @param chunksize size of bins
 #' @return matrix where rows are samples and columns are variables (m/z preojections)
 #' 
 #' @importFrom stats dnorm

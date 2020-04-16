@@ -6,7 +6,7 @@
 #' @param minFrequency  percent of peaks that must be present in sample replicates (0 to 1)
 #' @param smallMolLowerMassCutoff lower mass cutoff for small molecule spectra
 #' @param smallMolUpperMassCutoff upper mass cutoff for small molecule spectra
-#' @param small_mol_SNR minimum SNR for small molecule spectra
+#' @param smallMolSnr minimum SNR for small molecule spectra
 #' @param fractionMetabolitePeaksToRetain percent of small molecule peaks to "capture" when selecting isolates
 #' @inheritParams MALDIquant::binPeaks
 #' @inheritParams MALDIquant::filterPeaks
@@ -50,9 +50,9 @@ prioritizer <- function(pool,
   small_peaks <- idbac_get_peaks(pool = pool,
                                  sampleIDs = labels(dendrogram),
                                  minFrequency = minFrequency,
-                                 lowerMassCutoff = small_mol_lowerMassCutoff,
-                                 upperMassCutoff = small_mol_upperMassCutoff,
-                                 minSNR = small_mol_SNR,
+                                 lowerMassCutoff = smallMolLowerMassCutoff,
+                                 upperMassCutoff = smallMolUpperMassCutoff,
+                                 minSNR = smallMolSnr,
                                  tolerance = tolerance,
                                  type = "small",
                                  mergeReplicates = TRUE)
@@ -87,7 +87,7 @@ prioritizer <- function(pool,
                             original_total_peaks <- nrow(a)
                             index <- c()
                             
-                            while (perc < fraction_metabolite_peaks_to_retain) {
+                            while (perc < fractionMetabolitePeaksToRetain) {
                               samp_peaks <- colSums(a)
                               chosen <- order(samp_peaks, decreasing = TRUE)[[1]]
                               perc <- perc + (samp_peaks[chosen] / original_total_peaks * 100)

@@ -4,12 +4,12 @@
 \alias{idbac_get_spectra}
 \title{Get spectra from database}
 \usage{
-idbac_get_spectra(pool, sample_ids, type, MALDIquant = TRUE)
+idbac_get_spectra(pool, sampleIDs, type, MALDIquant = TRUE)
 }
 \arguments{
 \item{pool}{single pool}
 
-\item{sample_ids}{sample ID to retrieve}
+\item{sampleIDs}{sample ID to retrieve}
 
 \item{type}{"protein",  "small", or "all"}
 

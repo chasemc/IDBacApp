@@ -11,16 +11,15 @@ findMissingSampleMapIds <- function(spots,
                                     sampleMap,
                                     ignoreMissing){
   
-  if (dims(sampleMap) != c(16, 24)) {
+  if (!identical(dim(sampleMap), as.integer(c(16,24)))) {
     stop("Please provide a 16-row by 24-column matrix")
   }
   
   if (is.character(spots)) {
     
-    
     # sampleMap has to be df for display in shiny, but will need to be
     # converted to matrix for the functions below
-    if (is.data.frame(sampleMap) || is.matrix(sampleMap)) {
+    if (inherits(sampleMap, c("matrix", "data.frame"))) {
       # create sample map
       plateMap <- map384Well()
       # Which sample locations have data but weren't assigned an ID?

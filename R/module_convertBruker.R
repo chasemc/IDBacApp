@@ -252,7 +252,7 @@ convertOneBruker_Server <- function(input,
                  #                    "spots:", sort(unique(spots)))
                  # ))
                  
-                 db_from_bruker(dataDirectory,
+                 db_from_bruker(dataDirectory = input$rawFileDirectory,
                                 fileName = sanitizedNewExperimentName(),
                                 filePath = sqlDirectory$sqlDirectory,
                                 anyMissing = anyMissing(),
