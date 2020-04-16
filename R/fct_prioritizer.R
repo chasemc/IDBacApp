@@ -1,11 +1,13 @@
 #' Prioritize Samples
 #'
 #' @param pool pool connection to IDBac database
+#' @param dendrogram dendrogram object to be cut, doesn't necessarily have to be protein dendrogram
+#'     but labels should be the same as the small molecule data labels
 #' @param minFrequency  percent of peaks that must be present in sample replicates (0 to 1)
-#' @param small_mol_lowerMassCutoff lower mass cutoff for small molecule spectra
-#' @param small_mol_upperMassCutoff upper mass cutoff for small molecule spectra
+#' @param smallMolLowerMassCutoff lower mass cutoff for small molecule spectra
+#' @param smallMolUpperMassCutoff upper mass cutoff for small molecule spectra
 #' @param small_mol_SNR minimum SNR for small molecule spectra
-#' @param fraction_metabolite_peaks_to_retain percent of small molecule peaks to "capture" when selecting isolates
+#' @param fractionMetabolitePeaksToRetain percent of small molecule peaks to "capture" when selecting isolates
 #' @inheritParams MALDIquant::binPeaks
 #' @inheritParams MALDIquant::filterPeaks
 #' @inheritParams dendextend::cutree
@@ -17,12 +19,12 @@ prioritizer <- function(pool,
                         dendrogram,
                         h = NULL,
                         k = NULL,
-                        fraction_metabolite_peaks_to_retain,
+                        fractionMetabolitePeaksToRetain,
                         minFrequency = 0,
                         minNumber = NA, 
-                        small_mol_lowerMassCutoff = 200,
-                        small_mol_upperMassCutoff = 2000,
-                        small_mol_SNR = 10,
+                        smallMolLowerMassCutoff = 200,
+                        smallMolUpperMassCutoff = 2000,
+                        smallMolSnr = 10,
                         tolerance = .002){
   
   

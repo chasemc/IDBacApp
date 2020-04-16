@@ -9,17 +9,20 @@ prioritizer(
   dendrogram,
   h = NULL,
   k = NULL,
-  fraction_metabolite_peaks_to_retain,
+  fractionMetabolitePeaksToRetain,
   minFrequency = 0,
   minNumber = NA,
-  small_mol_lowerMassCutoff = 200,
-  small_mol_upperMassCutoff = 2000,
-  small_mol_SNR = 10,
+  smallMolLowerMassCutoff = 200,
+  smallMolUpperMassCutoff = 2000,
+  smallMolSnr = 10,
   tolerance = 0.002
 )
 }
 \arguments{
 \item{pool}{pool connection to IDBac database}
+
+\item{dendrogram}{dendrogram object to be cut, doesn't necessarily have to be protein dendrogram
+but labels should be same as small molecule data labels}
 
 \item{h}{numeric scalar (OR a vector) with a height where the tree
 should be cut.}
@@ -27,7 +30,7 @@ should be cut.}
 \item{k}{numeric scalar (OR a vector) with the number of clusters
 the tree should be cut into.}
 
-\item{fraction_metabolite_peaks_to_retain}{percent of small molecule peaks to "capture" when selecting isolates}
+\item{fractionMetabolitePeaksToRetain}{percent of small molecule peaks to "capture" when selecting isolates}
 
 \item{minFrequency}{percent of peaks that must be present in sample replicates (0 to 1)}
 
@@ -37,17 +40,17 @@ the tree should be cut into.}
     objects. It is an absolute threshold.
   }
 
-\item{small_mol_lowerMassCutoff}{lower mass cutoff for small molecule spectra}
+\item{smallMolLowerMassCutoff}{lower mass cutoff for small molecule spectra}
 
-\item{small_mol_upperMassCutoff}{upper mass cutoff for small molecule spectra}
-
-\item{small_mol_SNR}{minimum SNR for small molecule spectra}
+\item{smallMolUpperMassCutoff}{upper mass cutoff for small molecule spectra}
 
 \item{tolerance}{
     \code{double}, maximal relative deviation of a peak position (mass) to be
     considered as identical. Must be multiplied by \code{10^-6} for ppm,
     e.g. use \code{tolerance=5e-6} for 5 ppm.
   }
+
+\item{small_mol_SNR}{minimum SNR for small molecule spectra}
 }
 \value{
 prioritization list
