@@ -11,6 +11,8 @@ createFuzzyVectorUnit(massStart, massEnd, chunksize, massList)
 
 \item{massEnd}{end of mass range (as of now, must be smaller than smallest mass)}
 
+\item{chunksize}{size of bins}
+
 \item{massList}{list of mass vectors (eg list(1:10, 1:10))}
 }
 \value{

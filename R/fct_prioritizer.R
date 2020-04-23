@@ -6,8 +6,8 @@
 #' @param minFrequency  percent of peaks that must be present in sample replicates (0 to 1)
 #' @param smallMolLowerMassCutoff lower mass cutoff for small molecule spectra
 #' @param smallMolUpperMassCutoff upper mass cutoff for small molecule spectra
-#' @param small_mol_SNR minimum SNR for small molecule spectra
-#' @param fractionMetabolitePeaksToRetain percent of small molecule peaks to "capture" when selecting isolates
+#' @param smallMolSnr minimum SNR for small molecule spectra
+#' @param fractionMetabolitePeaksToRetain fraction of small molecule peaks to "capture" when selecting isolates
 #' @inheritParams MALDIquant::binPeaks
 #' @inheritParams MALDIquant::filterPeaks
 #' @inheritParams dendextend::cutree
@@ -25,7 +25,8 @@ prioritizer <- function(pool,
                         smallMolLowerMassCutoff = 200,
                         smallMolUpperMassCutoff = 2000,
                         smallMolSnr = 10,
-                        tolerance = .002){
+                        tolerance = .002,
+                        method = "strict"){
   
   
   
@@ -50,9 +51,10 @@ prioritizer <- function(pool,
   small_peaks <- idbac_get_peaks(pool = pool,
                                  sampleIDs = labels(dendrogram),
                                  minFrequency = minFrequency,
-                                 lowerMassCutoff = small_mol_lowerMassCutoff,
-                                 upperMassCutoff = small_mol_upperMassCutoff,
-                                 minSNR = small_mol_SNR,
+                                 minNumber = minNumber,
+                                 lowerMassCutoff = smallMolLowerMassCutoff,
+                                 upperMassCutoff = smallMolUpperMassCutoff,
+                                 minSNR = smallMolSnr,
                                  tolerance = tolerance,
                                  type = "small",
                                  mergeReplicates = TRUE)
@@ -77,22 +79,21 @@ prioritizer <- function(pool,
                           if (length(x) > 1) {
                             
                             a <- MALDIquant::intensityMatrix(MALDIquant::binPeaks(small_peaks[x], 
-                                                                                  method = "relaxed",
+                                                                                  method = "strict",
                                                                                   tolerance = tolerance))
                             a[is.na(a)] <- 0L
                             a[a > 0] <- 1L
-                            a <- t(a)
                             
                             perc <- 0
-                            original_total_peaks <- nrow(a)
+                            original_total_peaks <- ncol(a)
                             index <- c()
                             
-                            while (perc < fraction_metabolite_peaks_to_retain) {
-                              samp_peaks <- colSums(a)
+                            while (perc < fractionMetabolitePeaksToRetain) {
+                              samp_peaks <- rowSums(a)
                               chosen <- order(samp_peaks, decreasing = TRUE)[[1]]
-                              perc <- perc + (samp_peaks[chosen] / original_total_peaks * 100)
+                              perc <- perc + (samp_peaks[chosen] / original_total_peaks)
                               index <- c(index, chosen)
-                              a <- a[-which(a[,chosen] == 1L), ]
+                              a <- a[ , -which(a[chosen,] == 1L)]
                               
                             }
                             

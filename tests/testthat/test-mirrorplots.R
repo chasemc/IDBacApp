@@ -9,7 +9,7 @@ pool <- idbac_connect("testdb",
 
 my_plot <- assembleMirrorPlots(sampleID1 = "A",
                                sampleID2 = "A",
-                               peakPercentPresence = 0.7,
+                               minFrequency = 0.7,
                                lowerMassCutoff = 3000,
                                upperMassCutoff = 15000,
                                minSNR = 4, 

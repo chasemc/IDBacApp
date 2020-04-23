@@ -34,7 +34,7 @@
   
   temp_file_path <- tempfile()
   
-  download.file(url = latest_version_httr,
+  utils::download.file(url = latest_version_httr,
                 destfile = temp_file_path,
                 mode = "wb")
   

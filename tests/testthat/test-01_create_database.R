@@ -41,11 +41,11 @@ mzml_path <- normalizePath(mzml_path,
 mzml_path <- list.files(mzml_path, full.names = T)
 
 
-test_that("process_mzml gives messages", {
+test_that("db_from_mzml gives messages", {
   expect_message(
     suppressWarnings({
-      process_mzml(mzFilePaths = mzml_path,
-                   sampleIds = LETTERS,
+      db_from_mzml(mzFilePaths = mzml_path,
+                   sampleIds = LETTERS[1:4],
                    idbacPool = pool,
                    acquisitionInfo = NULL)
     })
@@ -69,5 +69,5 @@ mass_hashes <- pool::poolWithTransaction(pool,
 
 test_that("expected masses are present", {
   expect_equal(sort(unique(unlist(mass_hashes))),
-               c("6da07a39e4e6411e", "e68310493b583d60"))
+               c("821853542783fd0f", "e68310493b583d60"))
 })

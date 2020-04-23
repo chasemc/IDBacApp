@@ -2,7 +2,7 @@
 #' Get spectra from database
 #'
 #' @param pool single pool
-#' @param sample_ids sample ID to retrieve
+#' @param sampleIDs sample ID to retrieve
 #' @param type "protein",  "small", or "all"
 #' @param MALDIquant TRUE/FALSE data.table or MALDIquant spectrum
 #'
@@ -10,11 +10,11 @@
 #' @export
 #'
 idbac_get_spectra <- function(pool,
-                              sample_ids, 
+                              sampleIDs, 
                               type,
                               MALDIquant = TRUE){
   
-  sample_ids <- list(as.character(as.vector(sample_ids)))
+  sampleIDs <- list(as.character(as.vector(sampleIDs)))
   
 
   if (!is.logical(MALDIquant)) {
@@ -44,7 +44,7 @@ idbac_get_spectra <- function(pool,
                                    {sym}"),
                                                                         con = conn)
                                          
-                                         DBI::dbBind(query, sample_ids)
+                                         DBI::dbBind(query, sampleIDs)
                                          result <- DBI::dbFetch(query)
                                          DBI::dbClearResult(query)
                                          

@@ -40,27 +40,27 @@ findMSconvert <- function(proteoWizardLocation = ""){
         message("Given path to msconvert didn't work, trying to auto-find in Programs")
         
         # Check 64
-        proteoWizardLocation <- base::shell(cmd = "ECHO %ProgramFiles%\\ProteoWizard", 
-                                            translate = TRUE, 
-                                            intern = T)
-        proteoWizardLocation <- base::list.files(proteoWizardLocation,
-                                                 recursive = TRUE, 
-                                                 pattern = "msconvert.exe",
-                                                 full.names = TRUE)
+        proteoWizardLocation <- shell(cmd = "ECHO %ProgramFiles%\\ProteoWizard", 
+                                      translate = TRUE, 
+                                      intern = T)
+        proteoWizardLocation <- list.files(proteoWizardLocation,
+                                           recursive = TRUE, 
+                                           pattern = "msconvert.exe",
+                                           full.names = TRUE)
         
         if(length(proteoWizardLocation) == 0) {
           # Check 32
-          proteoWizardLocation <- base::shell(cmd = "ECHO %programfiles(x86)%\\ProteoWizard", 
-                                              translate = TRUE, 
-                                              intern = T)
-          proteoWizardLocation <- base::list.files(proteoWizardLocation,
-                                                   recursive = TRUE, 
-                                                   pattern = "msconvert.exe",
-                                                   full.names = TRUE)
+          proteoWizardLocation <- shell(cmd = "ECHO %programfiles(x86)%\\ProteoWizard", 
+                                        translate = TRUE, 
+                                        intern = T)
+          proteoWizardLocation <- list.files(proteoWizardLocation,
+                                             recursive = TRUE, 
+                                             pattern = "msconvert.exe",
+                                             full.names = TRUE)
         }
       } 
       
-      foundMSconvert <- base::file.exists(proteoWizardLocation)
+      foundMSconvert <- file.exists(proteoWizardLocation)
       
       if (length(foundMSconvert) > 0) {
         

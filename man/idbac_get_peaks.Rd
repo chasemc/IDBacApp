@@ -15,7 +15,8 @@ idbac_get_peaks(
   tolerance = 0.002,
   type,
   mergeReplicates = TRUE,
-  method = "strict"
+  method = "strict",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -55,6 +56,8 @@ idbac_get_peaks(
     bin creation rule. \code{"strict"} creates bins never containing two
     or more peaks of the sampe sample. \code{"relaxed"} allows multiple
     peaks of the same sample in one bin.}
+
+\item{verbose}{should minfreq/minnum warning be displayed}
 }
 \value{
 a single trimmed and binned MALDIquant peak object
