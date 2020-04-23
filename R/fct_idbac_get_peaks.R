@@ -6,6 +6,7 @@
 #' @param pool sqlite pool
 #' @param sampleIDs sample IDs of samples to process
 #' @param mergeReplicates should replicates be merged? TRUE/FALSE
+#' @param verbose should minfreq/minnum warning be displayed
 #' 
 #' @inheritParams .retrieve_peaks_from_pool
 #' @inheritParams MALDIquant::filterPeaks
@@ -26,7 +27,8 @@ idbac_get_peaks <- function(pool,
                             tolerance = 0.002,
                             type,
                             mergeReplicates = TRUE,
-                            method = "strict"){
+                            method = "strict",
+                            verbose = FALSE){
   
   if (!inherits(pool, "Pool")) {
     stop("pool not pool")
@@ -45,7 +47,7 @@ idbac_get_peaks <- function(pool,
   if (!inherits(upperMassCutoff, c("numeric", "integer"))) {
     stop("upperMassCutoff not numeric")
   }
-  if (!inherits(minSNR, "numeric")) {
+  if (!inherits(minSNR, c("integer", "numeric"))) {
     stop("minSNR not numeric")
   }  
   if (!inherits(tolerance, "numeric")) {
@@ -90,10 +92,17 @@ idbac_get_peaks <- function(pool,
       temp <- binPeaks(temp,
                        tolerance = tolerance, 
                        method = method) 
-      
+      if (verbose){
       temp <- filterPeaks(temp,
                           minFrequency = minFrequency / 100,
                           minNumber = minNumber) 
+      } else {
+        suppressWarnings(
+          temp <- filterPeaks(temp,
+                              minFrequency = minFrequency / 100,
+                              minNumber = minNumber)
+        )
+      }
       
       temp <- mergeMassPeaks(temp, 
                              method = "mean") 

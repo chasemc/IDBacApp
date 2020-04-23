@@ -15,7 +15,8 @@ prioritizer(
   smallMolLowerMassCutoff = 200,
   smallMolUpperMassCutoff = 2000,
   smallMolSnr = 10,
-  tolerance = 0.002
+  tolerance = 0.002,
+  method = "strict"
 )
 }
 \arguments{
@@ -30,7 +31,7 @@ should be cut.}
 \item{k}{numeric scalar (OR a vector) with the number of clusters
 the tree should be cut into.}
 
-\item{fractionMetabolitePeaksToRetain}{percent of small molecule peaks to "capture" when selecting isolates}
+\item{fractionMetabolitePeaksToRetain}{fraction of small molecule peaks to "capture" when selecting isolates}
 
 \item{minFrequency}{percent of peaks that must be present in sample replicates (0 to 1)}
 
@@ -51,6 +52,11 @@ the tree should be cut into.}
     considered as identical. Must be multiplied by \code{10^-6} for ppm,
     e.g. use \code{tolerance=5e-6} for 5 ppm.
   }
+
+\item{method}{
+    bin creation rule. \code{"strict"} creates bins never containing two
+    or more peaks of the sampe sample. \code{"relaxed"} allows multiple
+    peaks of the same sample in one bin.}
 }
 \value{
 prioritization list

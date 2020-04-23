@@ -29,6 +29,8 @@ processSmallMolSpectra <- function(input,
                           method = "SuperSmoother",
                           halfWindowSize = 20, 
                           SNR = 1)
+  
+  
 }
 
 
@@ -65,5 +67,27 @@ processProteinSpectra <- function(input,
                                    method = "MAD", 
                                    halfWindowSize = halfWindowSize, 
                                    SNR = 3)
+  if(inherits(peaks, "list")) {
+    
+    if (inherits(peaks, "MassPeaks")) {
+      peaks@intensity <- (peaks@intensity / max(peaks@intensity)) * 100
+    }
+    
+    peaks <- lapply(peaks, function(x){
+      
+      if(inherits(x, "list")){
+        x <- lapply(x, function(x){
+          x@intensity <- x@intensity / max(x@intensity) * 100
+          x
+        })
+      } else{
+        x@intensity <- x@intensity / max(x@intensity) * 100
+      }
+      x
+    })
+  } 
+  
+  return(peaks)
+  
 }
 

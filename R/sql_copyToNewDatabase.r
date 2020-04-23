@@ -38,8 +38,7 @@ copyToNewDatabase <- function(existingDBPool,
                     
                         # Setup New metadata ------------------------------------------------------
                         
-                        copyDB_setupMeta(newDBconn = newDBconn,
-                                                   existingDBconn = existingDBconn)
+                        sql_create_metadata_table(sqlConnection = newDBconn)
                         
                         # Setup New xml -----------------------------------------------------------
                         
@@ -81,16 +80,15 @@ copyToNewDatabase <- function(existingDBPool,
                                     session = getDefaultReactiveDomain())
                       }
                         
+                        a <- DBI::dbReadTable(existingDBconn, "metadata")
+                        b <- DBI::dbReadTable(newDBconn, "metadata")
                         
-                        state <- DBI::dbSendStatement(existingDBconn, 
-                                                      "INSERT INTO newDB.metadata
-                                                      SELECT *
-                                                      FROM main.metadata
-                                                      WHERE (strain_id = ?)")
-                        DBI::dbBind(state, list(sampleIDs))
-                        warning(state@sql)
-                        DBI::dbClearResult(state) 
-                        
+                        DBI::dbWriteTable(conn = pool,name = "metadata", 
+                                          value = merge(b,
+                                                        a[a$strain_id %in% sampleIDs, ], 
+                                                        sort = F, all = T),
+                                          overwrite = T)
+                        remove(a, b)
                         
                         if (!is.null(shiny::getDefaultReactiveDomain())) {
                         
@@ -239,6 +237,9 @@ copyDB_setupMeta <- function(newDBconn,
   # the current architecture, and also have the current architecture (ie we can't just copy/paste from the old DB)
   
   sql_create_metadata_table(sqlConnection = newDBconn)
+  
+  a <- DBI::dbReadTable(pool, "metadata")
+  b <- DBI::dbReadTable(pool, "metadata")
   
   a <- DBI::dbListFields(existingDBconn, "metadata") 
   b <- DBI::dbListFields(newDBconn, "metadata") 

@@ -17,27 +17,33 @@
   if (!inherits(ids, c("character", "NULL"))) stop("Provided value for 'sampleIDs' wasn't character or NULL.")
   .checkPool(pool)
   
-  sym <- "" # Just to be safe with the SQL
-  switch(type,
-         "protein" = assign("sym", "WHERE max_mass > 6000"),
-         "small" = assign("sym", "WHERE max_mass < 6000"),
-         "all" = assign("sym", ""))
+
   
   conn <- pool::poolCheckout(pool = pool)
   
   if (inherits(ids, "character")) {
     
+    sym <- "" # Just to be safe with the SQL
+    switch(type,
+           "protein" = assign("sym", "AND max_mass > 6000"),
+           "small" = assign("sym", "AND max_mass < 6000"),
+           "all" = assign("sym", ""))
+    
     query <- DBI::dbSendStatement(glue::glue("SELECT strain_id, peak_matrix
                                            FROM spectra
-                                           {sym}
-                                           AND (strain_id = ?)"),
+                                           WHERE (strain_id = ?)
+                                           {sym}"),
                                   con = conn)
     DBI::dbBind(query, list(as.character(as.vector(ids))))
     results <- DBI::dbFetch(query)
     DBI::dbClearResult(query)
     
   } else if (is.null(ids)) {
-    
+    sym <- "" # Just to be safe with the SQL
+    switch(type,
+           "protein" = assign("sym", "WHERE max_mass > 6000"),
+           "small" = assign("sym", "WHERE max_mass < 6000"),
+           "all" = assign("sym", ""))
     results <- DBI::dbGetQuery(glue::glue("SELECT strain_id, peak_matrix
                                             FROM spectra
                                             {sym}"))
@@ -82,7 +88,17 @@
   z <- lapply(seq(1L, len, 1L),
               function(x){
                 
-                x <- lapply(subby[c(c(1, 2, 3) + (3 * (x - 1)))], as.numeric)
+                suppressWarnings( # will warn when converting to NA
+                  # subby is 3*number of spectra: mass, int, snr, mass, int, snr
+                  x <- lapply(subby[c(c(1, 2, 3) + (3 * (x - 1)))], as.numeric)
+                )
+                
+                if (any(sapply(x[2:3], function(x) is.na(x[[1]])))) {
+                  # Account for weird exception of NA peaks
+                  for (i in 2:3) {
+                    x[[i]][is.na(x[[i]])] <- 0
+                  }
+                }
                 
                 ind <- x[[3]] >= minSNR
                 
