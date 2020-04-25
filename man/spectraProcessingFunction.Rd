@@ -5,7 +5,13 @@
 \title{Create IDBac SQLite database 
 Should work for mzML, mzXML, mgf, and txt data input}
 \usage{
-spectraProcessingFunction(rawDataFilePath, sampleID, pool, acquisitionInfo)
+spectraProcessingFunction(
+  rawDataFilePath,
+  sampleID,
+  pool,
+  acquisitionInfo,
+  halfWindowSize
+)
 }
 \arguments{
 \item{rawDataFilePath}{filepath of the data}
@@ -15,6 +21,12 @@ spectraProcessingFunction(rawDataFilePath, sampleID, pool, acquisitionInfo)
 \item{pool}{database connection (checked out pool)}
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
+
+\item{halfWindowSize}{half window size. The resulting
+    window reaches from \code{mass[currentIndex-halfWindowSize]} to
+    \code{mass[currentIndex+halfWindowSize]} (window size is
+    \code{2*halfWindowSize+1}).
+    The best size differs depending on the selected \code{method}.}
 }
 \value{
 the peak list modifed by binning then subtractng the matrix sample,

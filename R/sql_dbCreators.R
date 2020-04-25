@@ -162,7 +162,8 @@ createXMLSQL <- function(rawDataFilePath,
 #' @param XMLinfo NA
 #' @param smallRangeEnd end of mass region for small mol, if m/z above this- will be classified as "protein" spectrum
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
-#'
+#' @param ... pass methods to MALDIquant
+#' 
 #' @return writes to sqlite database
 #' 
 #'
@@ -171,7 +172,8 @@ createSpectraSQL <- function(mzML_con,
                              sampleID,
                              XMLinfo,
                              smallRangeEnd = 6000,
-                             acquisitionInfo){
+                             acquisitionInfo,
+                             ...){
   
   
   
@@ -213,7 +215,8 @@ createSpectraSQL <- function(mzML_con,
   if (any(smallIndex)) { 
     env <- processXMLIndSpectra(spectraImport = spectraImport,
                                 smallOrProtein = "small",
-                                index = smallIndex)
+                                index = smallIndex,
+                                halfWindowSize = halfWindowSize)
     
     insertIntoIndividualSpectra(env = env,
                                 XMLinfo = XMLinfo,
@@ -229,7 +232,8 @@ createSpectraSQL <- function(mzML_con,
     
     env <- processXMLIndSpectra(spectraImport = spectraImport,
                                 smallOrProtein = "protein",
-                                index = !smallIndex)
+                                index = !smallIndex,
+                                ...)
     insertIntoIndividualSpectra(env = env,
                                 XMLinfo = XMLinfo,
                                 pool = pool,

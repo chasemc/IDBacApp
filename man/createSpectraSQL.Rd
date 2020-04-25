@@ -10,7 +10,8 @@ createSpectraSQL(
   sampleID,
   XMLinfo,
   smallRangeEnd = 6000,
-  acquisitionInfo
+  acquisitionInfo,
+  ...
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ createSpectraSQL(
 \item{smallRangeEnd}{end of mass region for small mol, if m/z above this- will be classified as "protein" spectrum}
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
+
+\item{...}{pass methods to MALDIquant}
 }
 \value{
 writes to sqlite database

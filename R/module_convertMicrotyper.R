@@ -62,6 +62,7 @@ convertMicrotyper_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
+#' @inheritParams MALDIquant::smoothIntensity
 #'
 #' @return .
 #' 
@@ -72,7 +73,8 @@ convertMicrotyper_Server <- function(input,
                                      session,
                                      tempMZDir,
                                      sqlDirectory,
-                                     availableExperiments){
+                                     availableExperiments,
+                                     halfWindowSize){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -166,8 +168,8 @@ convertMicrotyper_Server <- function(input,
                  popup3()
                  
                  keys <- run_microtyperTomzML(proteinPaths = proteinFiles(),
-                                                        smallMolPaths = smallMolFiles(),
-                                                        exportDirectory = tempMZDir)
+                                              smallMolPaths = smallMolFiles(),
+                                              exportDirectory = tempMZDir)
                  
                  idbac_create(fileName = input$newExperimentName,
                               filePath = sqlDirectory$sqlDirectory)
@@ -176,9 +178,10 @@ convertMicrotyper_Server <- function(input,
                                             filePath = sqlDirectory$sqlDirectory)[[1]]
                  
                  db_from_mzml(mzFilePaths = keys$mzFilePaths,
-                                        sampleIds = keys$sampleID,
-                                        idbacPool = idbacPool,
-                                        acquisitionInfo = NULL)
+                              sampleIds = keys$sampleID,
+                              idbacPool = idbacPool,
+                              acquisitionInfo = NULL,
+                              halfWindowSize = halfWindowSize)
                  pool::poolClose(idbacPool)
                  
                  

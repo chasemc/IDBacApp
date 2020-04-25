@@ -47,7 +47,8 @@ convertMZ_UI <- function(id){
 #' @param session module
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
-#'
+#' @param ... pass methods to MALDIquant
+#' 
 #' @return .
 #' 
 #'
@@ -56,7 +57,8 @@ convertMZ_Server <-  function(input,
                               output,
                               session,
                               sqlDirectory,
-                              availableExperiments){
+                              availableExperiments,
+                              ...){
   
   
   
@@ -95,8 +97,8 @@ convertMZ_Server <-  function(input,
       
       # Get the folders contained within the chosen folder. Timer was taken out.
       foldersInFolder <- tryCatch(find_mz_files(mzmlRawFilesLocation(),
-                                                          recursive = TRUE,
-                                                          full = FALSE),
+                                                recursive = TRUE,
+                                                full = FALSE),
                                   error = function(x) paste("Timed out"),
                                   finally = function(x) x)
       
@@ -133,8 +135,8 @@ convertMZ_Server <-  function(input,
     popup3()
     
     mzFilePaths <- find_mz_files(mzmlRawFilesLocation(),
-                                           recursive = TRUE,
-                                           full = TRUE)
+                                 recursive = TRUE,
+                                 full = TRUE)
     
     
     idbac_create(fileName = sanity(),
@@ -142,11 +144,12 @@ convertMZ_Server <-  function(input,
     idbacPool <- idbac_connect(fileName = sanity(),
                                filePath = sqlDirectory$sqlDirectory)[[1]]
     
-  
+    
     db_from_mzml(mzFilePaths = mzFilePaths,
-                           sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
-                           idbacPool = idbacPool,
-                           acquisitionInfo = NULL)
+                 sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
+                 idbacPool = idbacPool,
+                 acquisitionInfo = NULL,
+                 ...)
     pool::poolClose(idbacPool)
     
     

@@ -8,7 +8,7 @@ pool <- idbac_connect("testdb",
                       sql_path)[[1]]
 
 prot <- idbac_get_peaks(pool = pool,
-                        sampleIDs = c("A", "B"),
+                        sampleIDs = c("D"),
                         minFrequency = 0,
                         minNumber = NA, 
                         lowerMassCutoff = 3000,

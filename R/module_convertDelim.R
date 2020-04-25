@@ -64,6 +64,7 @@ convertDelim_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
+#' @inheritParams MALDIquant::smoothIntensity
 #'
 #' @return .
 #' 
@@ -74,7 +75,8 @@ convertDelim_Server <- function(input,
                                 session,
                                 tempMZDir,
                                 sqlDirectory,
-                                availableExperiments){
+                                availableExperiments,
+                                halfWindowSize){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -199,7 +201,8 @@ convertDelim_Server <- function(input,
                  db_from_mzml(mzFilePaths = unname(keys),
                               sampleIds = names(keys),
                               idbacPool = idbacPool,
-                              acquisitionInfo = NULL)
+                              acquisitionInfo = NULL,
+                              halfWindowSize = halfWindowSize)
                  pool::poolClose(idbacPool)
                  
                  popup4()

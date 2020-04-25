@@ -75,9 +75,13 @@ a <- lapply(z, mzR::openMSfile)
 a <- lapply(a, mzR::peaks)
 
 test_that("parseDelimitedMS conversion retuens correct spectra", {
-  expect_known_hash(a, "8bc06a3792")  
-  expect_equal(a[[1]][, 2],
-               as.numeric(random_spec[[1]][, 1]))
-  expect_equal(a[[4]][, 2],
-               as.numeric(random_spec[[4]][, 1]))
+  expect_identical(object = a[[1]][, 1],
+                   expected = as.numeric(c(4000:8687))) 
+  expect_identical(object = as.integer(unique(a[[1]][, 2])),
+                   expected = as.integer(c(0,13,14,11,8,1,0,0,0,0,3,0,0,0,0,0,0,10,79,1,21,53,0,1,2,4,5,7,9,10,11,10,21,26,0,1,0,0,3,7,11,1,0,0,0,0,1,15,14,11,7,4,2,0,0,16,17,3,5,8,10,12,13,13,12,11,2,5,8,10,12,13,0,5,24,39,8,23,31)))
+  expect_identical(object = a[[5]][, 1],
+                   expected = as.numeric(c(4000:8687))) 
+  expect_identical(object = as.integer(unique(a[[5]][, 2])),
+                   expected = as.integer(c(0,13,14,11,8,1,0,0,0,0,3,0,0,0,0,0,0,10,79,1,21,53,0,1,2,4,5,7,9,10,11,10,21,26,0,1,0,0,3,7,11,1,0,0,0,0,1,15,14,11,7,4,2,0,0,16,17,3,5,8,10,12,13,13,12,11,2,5,8,10,12,13,0,5,24,39,8,23,31)))
+  
 })

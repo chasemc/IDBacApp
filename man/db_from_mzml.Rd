@@ -4,7 +4,7 @@
 \alias{db_from_mzml}
 \title{db_from_mzml}
 \usage{
-db_from_mzml(mzFilePaths, sampleIds, idbacPool, acquisitionInfo)
+db_from_mzml(mzFilePaths, sampleIds, idbacPool, acquisitionInfo, ...)
 }
 \arguments{
 \item{mzFilePaths}{file paths of the mzml files}
@@ -14,6 +14,8 @@ db_from_mzml(mzFilePaths, sampleIds, idbacPool, acquisitionInfo)
 \item{idbacPool}{idbac single pool, not a list of pools}
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
+
+\item{...}{pass methods to MALDIquant}
 }
 \value{
 Nothing direct, creates a sqlite database

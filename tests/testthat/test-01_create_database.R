@@ -69,5 +69,5 @@ mass_hashes <- pool::poolWithTransaction(pool,
 
 test_that("expected masses are present", {
   expect_equal(sort(unique(unlist(mass_hashes))),
-               c("821853542783fd0f", "e68310493b583d60"))
+               c("08caa9e63bcce83c", "90d91118298abb99"))
 })
