@@ -120,22 +120,26 @@ mirrorPlots_Server <- function(input,
   
   dataForInversePeakComparisonPlot <- reactive({
     
+    req(input$Spectra1 %in% idbac_available_samples(workingDB$pool(), type= "protein"))
+    req(input$Spectra2 %in% idbac_available_samples(workingDB$pool(), type= "protein"))
+    
     if (input$normSpec == 1L) {
       normalizeSpectra <- FALSE
     } else if (input$normSpec == 2L) {
       normalizeSpectra <- TRUE
     }
     
+    
     assembleMirrorPlots(sampleID1 = input$Spectra1,
-                                  sampleID2 = input$Spectra2,
-                                  minFrequency = input$percentPresence,
-                                  lowerMassCutoff = input$lowerMass,
-                                  upperMassCutoff = input$upperMass,
-                                  minSNR = input$SNR,
-                                  tolerance = 0.002,
-                                  pool1 = workingDB$pool(),
-                                  pool2 = workingDB$pool(),
-                                  normalizeSpectra = normalizeSpectra)
+                        sampleID2 = input$Spectra2,
+                        minFrequency = input$percentPresence,
+                        lowerMassCutoff = input$lowerMass,
+                        upperMassCutoff = input$upperMass,
+                        minSNR = input$SNR,
+                        tolerance = 0.002,
+                        pool1 = workingDB$pool(),
+                        pool2 = workingDB$pool(),
+                        normalizeSpectra = normalizeSpectra)
   })
   
   # Used in the the inverse-peak plot for zooming ---------------------------
@@ -172,8 +176,8 @@ mirrorPlots_Server <- function(input,
       grDevices::dev.off()
       
       if (file.exists(paste0(file1, ".svg")))
-      #TODO why
-          file.rename(paste0(file1, ".svg"), file1)
+        #TODO why
+        file.rename(paste0(file1, ".svg"), file1)
       
     })
   
