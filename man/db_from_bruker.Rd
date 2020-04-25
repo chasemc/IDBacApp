@@ -12,7 +12,7 @@ db_from_bruker(
   acquisitionInfo = NULL,
   sampleMap = NULL,
   tempDir = NULL,
-  halfWindowSize
+  ...
 )
 }
 \arguments{
@@ -30,11 +30,7 @@ db_from_bruker(
 
 \item{tempDir}{temporary folder with read/write permission to write intermediate mzml files to}
 
-\item{halfWindowSize}{half window size. The resulting
-    window reaches from \code{mass[currentIndex-halfWindowSize]} to
-    \code{mass[currentIndex+halfWindowSize]} (window size is
-    \code{2*halfWindowSize+1}).
-    The best size differs depending on the selected \code{method}.}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 none, side effect of writing SQLite  file

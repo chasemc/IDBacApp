@@ -11,7 +11,7 @@ convertDelim_Server(
   tempMZDir,
   sqlDirectory,
   availableExperiments,
-  halfWindowSize
+  ...
 )
 }
 \arguments{
@@ -27,11 +27,7 @@ convertDelim_Server(
 
 \item{availableExperiments}{availableExperiments}
 
-\item{halfWindowSize}{half window size. The resulting
-    window reaches from \code{mass[currentIndex-halfWindowSize]} to
-    \code{mass[currentIndex+halfWindowSize]} (window size is
-    \code{2*halfWindowSize+1}).
-    The best size differs depending on the selected \code{method}.}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 .

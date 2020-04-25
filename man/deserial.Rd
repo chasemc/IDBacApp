@@ -3,7 +3,7 @@
 \name{deserial}
 \alias{deserial}
 \title{deserial spectrum json (single json array)
-   Settings for serializing in IDBac (convert to json)}
+Settings for serializing in IDBac (convert to json)}
 \usage{
 deserial(input)
 }
@@ -15,5 +15,5 @@ dataframe
 }
 \description{
 deserial spectrum json (single json array)
-   Settings for serializing in IDBac (convert to json)
+Settings for serializing in IDBac (convert to json)
 }

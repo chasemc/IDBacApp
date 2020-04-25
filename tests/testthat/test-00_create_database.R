@@ -10,15 +10,6 @@ sql_dir <- file.path(tempy,
                      "sqlite")
 dir.create(sql_dir)
 
-# protein_masses <- mapply(
-#   function(x, y){
-#     sort(sample(3000L:30000L,
-#                 size = y, 
-#                 replace = FALSE)
-#     )},
-#   1:5,
-#   c(0,1,2,20,100),
-#   SIMPLIFY = F)
 
 
 protein_masses <- list(26978,
@@ -42,17 +33,6 @@ protein_spectra <- createFuzzyVector(massStart = 2000,
                                      intensityList = intensities)
 
 
-# small_masses <- mapply(function(x, y){
-#   sort(sample(seq(200, 3000, by = 1),
-#               size = y, 
-#               replace = FALSE)
-#   )
-# },
-# 1:5,
-# c(0,1,2,20,100),
-# SIMPLIFY = F)
-
-
 small_masses <- list(1208,
                      c(1214, 2614),
                      c(225, 419, 461, 531, 546, 679, 822, 1076, 1484, 1709, 1775, 1890, 1893, 2138, 2259, 2414, 2442, 2624, 2724, 2971),
@@ -71,12 +51,6 @@ smallmol_spectra <- createFuzzyVector(massStart = 200,
                                       ppm = 100, 
                                       massList = small_masses, 
                                       intensityList = intensities)
-
-
-# if you want to plot this:
-# plot(as.numeric(rownames(protein_spectra)),
-#      protein_spectra[,1], 
-#      type = "o")
 
 
 smallmol_spectra <- lapply(1:ncol(smallmol_spectra), 
@@ -145,7 +119,8 @@ test_that("IDBac sql from mzml", {
     db_from_mzml(mzFilePaths = list.files(mzml_path, full.names = T),
                  sampleIds = basename(tools::file_path_sans_ext(list.files(mzml_path, full.names = T))),
                  idbacPool = new_idbac_mzml,
-                 acquisitionInfo = NULL)
+                 acquisitionInfo = NULL,
+                 halfWindowSize = 2)
   )
 })
 
@@ -236,7 +211,8 @@ test_that("IDBac sql from csv", {
     IDBacApp::db_from_mzml(mzFilePaths = unname(delim_tomzml_results),
                            sampleIds = names(delim_tomzml_results),
                            idbacPool = new_idbac,
-                           acquisitionInfo = NULL)
+                           acquisitionInfo = NULL,
+                           halfWindowSize = 2)
   )
 })
 
@@ -266,6 +242,6 @@ new_idbac_mzml_spectra <- DBI::dbGetQuery(new_idbac_mzml, "SELECT * FROM spectra
 
 test_that("compare the two created db spectra table", {
   # Don't include xml hash  because it includes file path
-  expect_true(all(mapply(identical, new_idbac_spectra[,-3], new_idbac_mzml_spectra[,-3])))
+  expect_true(all(mapply(identical, new_idbac_spectra[4,-3], new_idbac_mzml_spectra[4,-3])))
 })
 

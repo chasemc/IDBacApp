@@ -47,7 +47,7 @@ convertMZ_UI <- function(id){
 #' @param session module
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
-#' @param ... pass methods to MALDIquant
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #' 
 #' @return .
 #' 
@@ -150,18 +150,15 @@ convertMZ_Server <-  function(input,
                  idbacPool = idbacPool,
                  acquisitionInfo = NULL,
                  ...)
+    
     pool::poolClose(idbacPool)
     
-    
     popup4() 
-    
     
     # Update available experiments
     availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                     pattern = ".sqlite",
                                                                     full.names = FALSE))
-    
   })
-  
   
 }

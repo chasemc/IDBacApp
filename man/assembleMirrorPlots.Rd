@@ -14,7 +14,8 @@ assembleMirrorPlots(
   tolerance = 0.002,
   pool1,
   pool2,
-  normalizeSpectra = FALSE
+  normalizeSpectra = FALSE,
+  ...
 )
 }
 \arguments{
@@ -37,6 +38,8 @@ assembleMirrorPlots(
 \item{pool2}{pool that contains sample 2 (negative spectrum)}
 
 \item{normalizeSpectra}{should spectra be normalized? TRUE/FALSE}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:normalizeSpectrumIntensity]{IDBacApp::normalizeSpectrumIntensity()}}}
 }
 \value{
 environment containing mirror plot data

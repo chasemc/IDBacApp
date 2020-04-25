@@ -3,7 +3,7 @@
 \name{serial}
 \alias{serial}
 \title{serial
-   Settings for serializing in IDBac (convert to json)}
+Settings for serializing in IDBac (convert to json)}
 \usage{
 serial(input)
 }
@@ -15,5 +15,5 @@ JSON
 }
 \description{
 serial
-   Settings for serializing in IDBac (convert to json)
+Settings for serializing in IDBac (convert to json)
 }

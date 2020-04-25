@@ -5,6 +5,7 @@
 \title{Process protein spectra with MALDIquant}
 \usage{
 processProteinSpectra(
+  input,
   smoothIntensityMethod = "SavitzkyGolay",
   removeBaselineMethod = "TopHat",
   detectPeaksMethod = "MAD",
@@ -14,6 +15,8 @@ processProteinSpectra(
 )
 }
 \arguments{
+\item{input}{MALDIquant mass spectrum list}
+
 \item{smoothIntensityMethod}{see ?MALDIquant::smoothIntensity}
 
 \item{removeBaselineMethod}{see ?MALDIquant::smoothIntensity}
@@ -29,8 +32,6 @@ processProteinSpectra(
     The best size differs depending on the selected \code{method}.}
 
 \item{minSNR}{see ?MALDIquant::detectPeaks}
-
-\item{input}{MALDIquant mass spectrum list}
 }
 \value{
 MALDIquant mass spectrum list

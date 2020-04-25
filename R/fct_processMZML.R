@@ -5,8 +5,8 @@
 #' @param sampleIds sampleIds that are in the same order as the paths
 #' @param idbacPool idbac single pool, not a list of pools
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
-#' @param ... pass methods to MALDIquant
-#' 
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
+#'  
 #' @return Nothing direct, creates a sqlite database
 #' @export
 #'

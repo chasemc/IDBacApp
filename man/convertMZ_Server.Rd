@@ -24,7 +24,7 @@ convertMZ_Server(
 
 \item{availableExperiments}{availableExperiments}
 
-\item{...}{pass methods to MALDIquant}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 .

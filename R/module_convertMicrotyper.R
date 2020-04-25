@@ -62,9 +62,9 @@ convertMicrotyper_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
-#' @inheritParams MALDIquant::smoothIntensity
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #'
-#' @return .
+#' @return none, side effect of creating database
 #' 
 #'
 
@@ -74,7 +74,7 @@ convertMicrotyper_Server <- function(input,
                                      tempMZDir,
                                      sqlDirectory,
                                      availableExperiments,
-                                     halfWindowSize){
+                                     ...){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -181,7 +181,7 @@ convertMicrotyper_Server <- function(input,
                               sampleIds = keys$sampleID,
                               idbacPool = idbacPool,
                               acquisitionInfo = NULL,
-                              halfWindowSize = halfWindowSize)
+                              ...)
                  pool::poolClose(idbacPool)
                  
                  

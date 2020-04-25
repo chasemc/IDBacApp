@@ -47,7 +47,8 @@ test_that("db_from_mzml gives messages", {
       db_from_mzml(mzFilePaths = mzml_path,
                    sampleIds = LETTERS[1:4],
                    idbacPool = pool,
-                   acquisitionInfo = NULL)
+                   acquisitionInfo = NULL,
+                   halfWindowSize = 2)
     })
   )
 })

@@ -59,9 +59,9 @@ processSmallMolSpectra <- function(input,
 #' @inheritParams MALDIquant::smoothIntensity
 #'
 #' @return MALDIquant mass spectrum list
-#' @export
 #'
-processProteinSpectra <- function(smoothIntensityMethod = "SavitzkyGolay",
+processProteinSpectra <- function(input, 
+                                  smoothIntensityMethod = "SavitzkyGolay",
                                   removeBaselineMethod = "TopHat",
                                   detectPeaksMethod = "MAD",
                                   transformIntensityMethod = "sqrt",

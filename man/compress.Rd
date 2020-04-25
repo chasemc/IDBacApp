@@ -3,7 +3,7 @@
 \name{compress}
 \alias{compress}
 \title{compress
-  Settings for compressing raw vectors}
+Settings for compressing raw vectors}
 \usage{
 compress(input, compression = 0)
 }
@@ -17,5 +17,5 @@ Raw vector
 }
 \description{
 compress
-  Settings for compressing raw vectors
+Settings for compressing raw vectors
 }

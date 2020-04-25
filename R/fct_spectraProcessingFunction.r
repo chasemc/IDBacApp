@@ -6,14 +6,15 @@
 #' @param sampleID the sample ID to be read and added to the database
 #' @param pool database connection (checked out pool)
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
-#' @inheritParams MALDIquant::smoothIntensity
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
+#' 
 #' @return the peak list modifed by binning then subtractng the matrix sample,
 #' 
 spectraProcessingFunction <- function(rawDataFilePath,
                                       sampleID,
                                       pool, 
                                       acquisitionInfo,
-                                      halfWindowSize){
+                                      ...){
   
   
   if (!length(sampleID) > 0) {
@@ -47,7 +48,7 @@ spectraProcessingFunction <- function(rawDataFilePath,
                    sampleID = sampleID,
                    XMLinfo = XMLinfo, 
                    acquisitionInfo = acquisitionInfo,
-                   halfWindowSize = halfWindowSize)
+                   ...)
 }
 
 

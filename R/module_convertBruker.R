@@ -55,7 +55,7 @@ convertOneBruker_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory
 #' @param availableExperiments availableExperiments
-#' @inheritParams MALDIquant::smoothIntensity
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #'
 #' @return NA
 #'
@@ -65,7 +65,7 @@ convertOneBruker_Server <- function(input,
                                     tempMZDir,
                                     sqlDirectory,
                                     availableExperiments,
-                                    halfWindowSize){
+                                    ...){
   
   
   
@@ -261,7 +261,7 @@ convertOneBruker_Server <- function(input,
                                 acquisitionInfo = acquisitonInformation(),
                                 sampleMap  = NULL,
                                 tempDir = tempMZDir,
-                                halfWindowSize = halfWindowSize)
+                                ...)
                  
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,

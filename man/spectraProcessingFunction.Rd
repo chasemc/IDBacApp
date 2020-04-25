@@ -2,7 +2,7 @@
 % Please edit documentation in R/fct_spectraProcessingFunction.r
 \name{spectraProcessingFunction}
 \alias{spectraProcessingFunction}
-\title{Create IDBac SQLite database 
+\title{Create IDBac SQLite database
 Should work for mzML, mzXML, mgf, and txt data input}
 \usage{
 spectraProcessingFunction(
@@ -10,7 +10,7 @@ spectraProcessingFunction(
   sampleID,
   pool,
   acquisitionInfo,
-  halfWindowSize
+  ...
 )
 }
 \arguments{
@@ -22,16 +22,12 @@ spectraProcessingFunction(
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 
-\item{halfWindowSize}{half window size. The resulting
-    window reaches from \code{mass[currentIndex-halfWindowSize]} to
-    \code{mass[currentIndex+halfWindowSize]} (window size is
-    \code{2*halfWindowSize+1}).
-    The best size differs depending on the selected \code{method}.}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 the peak list modifed by binning then subtractng the matrix sample,
 }
 \description{
-Create IDBac SQLite database 
+Create IDBac SQLite database
 Should work for mzML, mzXML, mgf, and txt data input
 }

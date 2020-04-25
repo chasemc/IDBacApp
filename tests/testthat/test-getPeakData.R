@@ -20,7 +20,7 @@ prot <- idbac_get_peaks(pool = pool,
                         method = "strict")
 
 small <- idbac_get_peaks(pool = pool,
-                         sampleIDs = c("A", "B"),
+                         sampleIDs = c("D"),
                          minFrequency = 0,
                          minNumber = NA, 
                          lowerMassCutoff = 300,
@@ -33,12 +33,9 @@ small <- idbac_get_peaks(pool = pool,
 
 test_that("getPeakData works", {
   
-  expect_equal(length(prot), 2)
-  expect_equal(length(small), 2)
-  expect_equal(unname(lengths(prot)), c(4,4))
-  expect_equal(unname(lengths(small)), c(4,4))
-  
-  expect_known_hash(prot, "f91b054766")
-  expect_known_hash(small, "2a2b945389")
+  expect_equal(length(prot), 1)
+  expect_equal(length(small), 1)
+    expect_known_hash(prot, "1b98afbf42")
+  expect_known_hash(small, "0d0d0cd8e5")
   
 })

@@ -10,6 +10,7 @@
 #' @param pool1 pool that contains sample 1 (positive spectrum)
 #' @param pool2 pool that contains sample 2 (negative spectrum)
 #' @param normalizeSpectra should spectra be normalized? TRUE/FALSE
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::normalizeSpectrumIntensity()]
 #'
 #' @return environment containing mirror plot data
 #' @export
@@ -23,7 +24,8 @@ assembleMirrorPlots <- function(sampleID1,
                                 tolerance = 0.002,
                                 pool1,
                                 pool2,
-                                normalizeSpectra = FALSE){
+                                normalizeSpectra = FALSE,
+                                ...){
   
   mirrorPlotEnv <- new.env(parent = parent.frame())
   
@@ -89,7 +91,8 @@ assembleMirrorPlots <- function(sampleID1,
   
   
   if (normalizeSpectra) {
-    mirrorPlotEnv$spectrumSampleOne <- normalizeSpectrumIntensity(mirrorPlotEnv$spectrumSampleOne)
+    mirrorPlotEnv$spectrumSampleOne <- normalizeSpectrumIntensity(spectrum = mirrorPlotEnv$spectrumSampleOne,
+                                                                  ...)
     
   }
   
@@ -105,7 +108,8 @@ assembleMirrorPlots <- function(sampleID1,
   
   
   if (normalizeSpectra) {
-    mirrorPlotEnv$spectrumSampleTwo <- normalizeSpectrumIntensity(mirrorPlotEnv$spectrumSampleTwo)
+    mirrorPlotEnv$spectrumSampleTwo <- normalizeSpectrumIntensity(spectrum = mirrorPlotEnv$spectrumSampleTwo,
+                                                                  ...)
     
     
   }

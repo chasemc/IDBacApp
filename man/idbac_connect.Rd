@@ -3,7 +3,7 @@
 \name{idbac_connect}
 \alias{idbac_connect}
 \title{Create a pool connecton, given file names and a path
-   If there is no existing database by that name, create one.}
+If there is no existing database by that name, create one.}
 \usage{
 idbac_connect(fileName, filePath)
 }
@@ -17,5 +17,5 @@ a list of pool connections
 }
 \description{
 Create a pool connecton, given file names and a path
-   If there is no existing database by that name, create one.
+If there is no existing database by that name, create one.
 }

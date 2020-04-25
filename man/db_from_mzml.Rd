@@ -15,7 +15,7 @@ db_from_mzml(mzFilePaths, sampleIds, idbacPool, acquisitionInfo, ...)
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 
-\item{...}{pass methods to MALDIquant}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 Nothing direct, creates a sqlite database

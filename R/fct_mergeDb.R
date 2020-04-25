@@ -37,7 +37,7 @@ merge_idbac_experiments <- function(existing_db_paths,
     samp_names <- IDBacApp::idbac_available_samples(con,type = "all")
     pool::poolReturn(con)
     
-    IDBacApp:::copyToNewDatabase(existingDBPool = existing_pool,
+    copyToNewDatabase(existingDBPool = existing_pool,
                                  newDBPool = new_pool,
                                  sampleIDs = samp_names)
     
