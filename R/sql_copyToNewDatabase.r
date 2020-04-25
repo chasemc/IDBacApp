@@ -83,7 +83,8 @@ copyToNewDatabase <- function(existingDBPool,
                         a <- DBI::dbReadTable(existingDBconn, "metadata")
                         b <- DBI::dbReadTable(newDBconn, "metadata")
                         
-                        DBI::dbWriteTable(conn = pool,name = "metadata", 
+                        DBI::dbWriteTable(conn = newDBconn,
+                                          name = "metadata", 
                                           value = merge(b,
                                                         a[a$strain_id %in% sampleIDs, ], 
                                                         sort = F, all = T),
@@ -237,9 +238,6 @@ copyDB_setupMeta <- function(newDBconn,
   # the current architecture, and also have the current architecture (ie we can't just copy/paste from the old DB)
   
   sql_create_metadata_table(sqlConnection = newDBconn)
-  
-  a <- DBI::dbReadTable(pool, "metadata")
-  b <- DBI::dbReadTable(pool, "metadata")
   
   a <- DBI::dbListFields(existingDBconn, "metadata") 
   b <- DBI::dbListFields(newDBconn, "metadata") 

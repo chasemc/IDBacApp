@@ -4,13 +4,34 @@
 \alias{normalizeSpectrumIntensity}
 \title{Smooth, remove baseline, and normalize intensity of a spectrum}
 \usage{
-normalizeSpectrumIntensity(spectrum)
+normalizeSpectrumIntensity(
+  spectrum,
+  smoothIntensityMethod = "SavitzkyGolay",
+  removeBaselineMethod = "TopHat",
+  calibrateIntensityMethod = "median",
+  transformIntensityMethod = "sqrt",
+  halfWindowSize = 20L
+)
 }
 \arguments{
-\item{spectrum}{spectrum}
+\item{spectrum}{MALDIquant spectrum}
+
+\item{smoothIntensityMethod}{see ?MALDIquant::smoothIntensity}
+
+\item{removeBaselineMethod}{see ?MALDIquant::smoothIntensity}
+
+\item{calibrateIntensityMethod}{see ?MALDIquant::calibrateIntensityMethod}
+
+\item{transformIntensityMethod}{see ?MALDIquant::transformIntensity}
+
+\item{halfWindowSize}{half window size. The resulting
+    window reaches from \code{mass[currentIndex-halfWindowSize]} to
+    \code{mass[currentIndex+halfWindowSize]} (window size is
+    \code{2*halfWindowSize+1}).
+    The best size differs depending on the selected \code{method}.}
 }
 \value{
-normalized MALDIquant massSpectrum
+MALDIquant mass spectrum
 }
 \description{
 Smooth, remove baseline, and normalize intensity of a spectrum

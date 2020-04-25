@@ -47,7 +47,8 @@ test_that("db_from_mzml gives messages", {
       db_from_mzml(mzFilePaths = mzml_path,
                    sampleIds = LETTERS[1:4],
                    idbacPool = pool,
-                   acquisitionInfo = NULL)
+                   acquisitionInfo = NULL,
+                   halfWindowSize = 2)
     })
   )
 })
@@ -69,5 +70,5 @@ mass_hashes <- pool::poolWithTransaction(pool,
 
 test_that("expected masses are present", {
   expect_equal(sort(unique(unlist(mass_hashes))),
-               c("821853542783fd0f", "e68310493b583d60"))
+               c("08caa9e63bcce83c", "90d91118298abb99"))
 })

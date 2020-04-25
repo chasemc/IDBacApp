@@ -62,8 +62,9 @@ convertMicrotyper_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #'
-#' @return .
+#' @return none, side effect of creating database
 #' 
 #'
 
@@ -72,7 +73,8 @@ convertMicrotyper_Server <- function(input,
                                      session,
                                      tempMZDir,
                                      sqlDirectory,
-                                     availableExperiments){
+                                     availableExperiments,
+                                     ...){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -166,8 +168,8 @@ convertMicrotyper_Server <- function(input,
                  popup3()
                  
                  keys <- run_microtyperTomzML(proteinPaths = proteinFiles(),
-                                                        smallMolPaths = smallMolFiles(),
-                                                        exportDirectory = tempMZDir)
+                                              smallMolPaths = smallMolFiles(),
+                                              exportDirectory = tempMZDir)
                  
                  idbac_create(fileName = input$newExperimentName,
                               filePath = sqlDirectory$sqlDirectory)
@@ -176,9 +178,10 @@ convertMicrotyper_Server <- function(input,
                                             filePath = sqlDirectory$sqlDirectory)[[1]]
                  
                  db_from_mzml(mzFilePaths = keys$mzFilePaths,
-                                        sampleIds = keys$sampleID,
-                                        idbacPool = idbacPool,
-                                        acquisitionInfo = NULL)
+                              sampleIds = keys$sampleID,
+                              idbacPool = idbacPool,
+                              acquisitionInfo = NULL,
+                              ...)
                  pool::poolClose(idbacPool)
                  
                  

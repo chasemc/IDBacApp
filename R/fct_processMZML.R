@@ -5,14 +5,16 @@
 #' @param sampleIds sampleIds that are in the same order as the paths
 #' @param idbacPool idbac single pool, not a list of pools
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
-#'
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
+#'  
 #' @return Nothing direct, creates a sqlite database
 #' @export
 #'
 db_from_mzml <- function(mzFilePaths,
                          sampleIds,
                          idbacPool,
-                         acquisitionInfo){
+                         acquisitionInfo,
+                         ...){
   
   
   
@@ -38,7 +40,8 @@ db_from_mzml <- function(mzFilePaths,
                      spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                                sampleID = sampleIds[[i]],
                                                pool = idbacPool,
-                                               acquisitionInfo = acquisitionInfo[[i]]) # pool connection
+                                               acquisitionInfo = acquisitionInfo[[i]],
+                                               ...)
                    }
                  })
     
@@ -51,7 +54,8 @@ db_from_mzml <- function(mzFilePaths,
       spectraProcessingFunction(rawDataFilePath = mzFilePaths[[i]],
                                 sampleID = sampleIds[[i]],
                                 pool = idbacPool,
-                                acquisitionInfo = acquisitionInfo[[i]]) # pool connection
+                                acquisitionInfo = acquisitionInfo[[i]],
+                                ...)
     }
   }
 }

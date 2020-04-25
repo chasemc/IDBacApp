@@ -2,10 +2,16 @@
 % Please edit documentation in R/fct_spectraProcessingFunction.r
 \name{spectraProcessingFunction}
 \alias{spectraProcessingFunction}
-\title{Create IDBac SQLite database 
+\title{Create IDBac SQLite database
 Should work for mzML, mzXML, mgf, and txt data input}
 \usage{
-spectraProcessingFunction(rawDataFilePath, sampleID, pool, acquisitionInfo)
+spectraProcessingFunction(
+  rawDataFilePath,
+  sampleID,
+  pool,
+  acquisitionInfo,
+  ...
+)
 }
 \arguments{
 \item{rawDataFilePath}{filepath of the data}
@@ -15,11 +21,13 @@ spectraProcessingFunction(rawDataFilePath, sampleID, pool, acquisitionInfo)
 \item{pool}{database connection (checked out pool)}
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 the peak list modifed by binning then subtractng the matrix sample,
 }
 \description{
-Create IDBac SQLite database 
+Create IDBac SQLite database
 Should work for mzML, mzXML, mgf, and txt data input
 }

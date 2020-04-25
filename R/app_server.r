@@ -613,7 +613,7 @@ app_server <- function(input, output, session) {
     req(length(ids) > 0)
     
     # NULL out if no peaks in samples (need more than one peak among all samples combined)
-    aq <- sum(unlist(lapply(s, function(x) length(x@mass)))) > 1
+    aq <- sum(unlist(lapply(samples, function(x) length(x@mass)))) > 1
     
     if(!aq){
       # NULL out if no peaks in samples (need more than one peak among all samples combined)

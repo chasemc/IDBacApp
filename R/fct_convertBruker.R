@@ -7,6 +7,7 @@
 #' @param anyMissing  advanced, mainly here to be used by the GUI code
 #' @param acquisitionInfo advanced, mainly here to be used by the GUI code
 #' @param tempDir temporary folder with read/write permission to write intermediate mzml files to
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #'
 #' @return none, side effect of writing SQLite  file
 #' @export
@@ -17,7 +18,8 @@ db_from_bruker <- function(dataDirectory = NULL,
                            anyMissing = NULL,
                            acquisitionInfo = NULL,
                            sampleMap = NULL,
-                           tempDir = NULL){
+                           tempDir = NULL,
+                           ...){
   
   if (length(dataDirectory) != 1L) {
     stop("dataDirectory must be character of length 1")
@@ -79,7 +81,9 @@ db_from_bruker <- function(dataDirectory = NULL,
   db_from_mzml(mzFilePaths = forProcessing$mzFile,
                sampleIds = forProcessing$sampleID,
                idbacPool = idbacPool,
-               acquisitionInfo = acquisitionInfo)
+               acquisitionInfo = acquisitionInfo,
+               ...)
+  
   pool::poolClose(idbacPool)
   
 }

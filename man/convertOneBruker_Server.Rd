@@ -10,7 +10,8 @@ convertOneBruker_Server(
   session,
   tempMZDir,
   sqlDirectory,
-  availableExperiments
+  availableExperiments,
+  ...
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ convertOneBruker_Server(
 \item{sqlDirectory}{sqlDirectory}
 
 \item{availableExperiments}{availableExperiments}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 NA

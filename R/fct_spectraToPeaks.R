@@ -5,30 +5,40 @@
 #because for all three intensity groups in Table 1, the variance is approximately constant."
 
 
-#' processSmallMolSpectra
-#'
-#' @param input MALDIquant mass spectrum list
-#' @inheritParams MALDIquant::smoothIntensity
-#' @return MALDIquant mass spectrum list
+
+#' Process small molecule spectra with MALDIquant
 #' 
+#' @param input MALDIquant mass spectrum list
+#' @param smoothIntensityMethod see ?MALDIquant::smoothIntensity
+#' @param removeBaselineMethod see ?MALDIquant::smoothIntensity
+#' @param detectPeaksMethod see ?MALDIquant::detectPeaks
+#' @param minSNR see ?MALDIquant::detectPeaks
+#' @inheritParams MALDIquant::smoothIntensity
+#'
+#' @return MALDIquant mass spectrum list
 #'
 processSmallMolSpectra <- function(input,
-                                   halfWindowSize = 20){
+                                   smoothIntensityMethod = "SavitzkyGolay",
+                                   removeBaselineMethod = "TopHat",
+                                   detectPeaksMethod = "SuperSmoother",
+                                   halfWindowSize = 20L,
+                                   minSNR = 1){
   # Expected warning messages when negative values are replaced with zeros
   # Suppress warnings info:
   # https://github.com/sgibb/MALDIquant/blob/f8258c5b5001453b1816054eb6a9d35c1926dd47/NEWS#L345-L348
   suppressWarnings({
-    peaks <- MALDIquant::smoothIntensity(input,
-                                         method = "SavitzkyGolay",
+    input <- MALDIquant::smoothIntensity(object = input,
+                                         method = smoothIntensityMethod,
                                          halfWindowSize = halfWindowSize) 
   })
-  peaks <- MALDIquant::removeBaseline(peaks,
-                                      method = "TopHat")
   
-  MALDIquant::detectPeaks(peaks, 
-                          method = "SuperSmoother",
-                          halfWindowSize = 20, 
-                          SNR = 1)
+  input <- MALDIquant::removeBaseline(object = input,
+                                      method = removeBaselineMethod)
+  
+  MALDIquant::detectPeaks(object = input, 
+                          method = detectPeaksMethod,
+                          SNR = minSNR,
+                          halfWindowSize = halfWindowSize) 
   
   
 }
@@ -38,42 +48,52 @@ processSmallMolSpectra <- function(input,
 
 
 
-#' processProteinSpectra
-#'
-#' @param input MALDIquant mass spectrum list
-#' @inheritParams MALDIquant::smoothIntensity
-#' @return MALDIquant mass spectrum list
+#' Process protein spectra with MALDIquant
 #' 
+#' @param input MALDIquant mass spectrum list
+#' @param smoothIntensityMethod see ?MALDIquant::smoothIntensity
+#' @param removeBaselineMethod see ?MALDIquant::smoothIntensity
+#' @param detectPeaksMethod see ?MALDIquant::detectPeaks
+#' @param minSNR see ?MALDIquant::detectPeaks
+#' @param transformIntensityMethod see ?MALDIquant::transformIntensity
+#' @inheritParams MALDIquant::smoothIntensity
 #'
-processProteinSpectra <- function(input,
-                                  halfWindowSize = 20){
+#' @return MALDIquant mass spectrum list
+#'
+processProteinSpectra <- function(input, 
+                                  smoothIntensityMethod = "SavitzkyGolay",
+                                  removeBaselineMethod = "TopHat",
+                                  detectPeaksMethod = "MAD",
+                                  transformIntensityMethod = "sqrt",
+                                  halfWindowSize = 20L,
+                                  minSNR = 3){
   
   # Expected warning messages when negative values are replaced with zeros
   # Suppress warnings info:
   # https://github.com/sgibb/MALDIquant/blob/f8258c5b5001453b1816054eb6a9d35c1926dd47/NEWS#L345-L348
   suppressWarnings({
-    peaks <- MALDIquant::transformIntensity(input, 
-                                            method = "sqrt") 
+    input <- MALDIquant::transformIntensity(object = input, 
+                                            method = transformIntensityMethod) 
   })  
   suppressWarnings({
-    peaks <- MALDIquant::smoothIntensity(peaks,
-                                         method = "SavitzkyGolay", 
+    input <- MALDIquant::smoothIntensity(object = input,
+                                         method = smoothIntensityMethod, 
                                          halfWindowSize = halfWindowSize) 
   })
-  peaks <- MALDIquant::removeBaseline(peaks,
-                                      method = "TopHat") 
+  input <- MALDIquant::removeBaseline(object = input,
+                                      method = removeBaselineMethod) 
   
-  peaks <- MALDIquant::detectPeaks(peaks, 
-                                   method = "MAD", 
+  input <- MALDIquant::detectPeaks(object = input, 
+                                   method = detectPeaksMethod, 
                                    halfWindowSize = halfWindowSize, 
                                    SNR = 3)
-  if(inherits(peaks, "list")) {
+  if(inherits(input, "list")) {
     
-    if (inherits(peaks, "MassPeaks")) {
-      peaks@intensity <- (peaks@intensity / max(peaks@intensity)) * 100
+    if (inherits(input, "MassPeaks")) {
+      input@intensity <- (input@intensity / max(input@intensity)) * 100
     }
     
-    peaks <- lapply(peaks, function(x){
+    input <- lapply(input, function(x){
       
       if(inherits(x, "list")){
         x <- lapply(x, function(x){
@@ -87,7 +107,7 @@ processProteinSpectra <- function(input,
     })
   } 
   
-  return(peaks)
+  return(input)
   
 }
 

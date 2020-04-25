@@ -4,7 +4,7 @@
 \alias{processXMLIndSpectra}
 \title{Process spectra data for input into SQLite}
 \usage{
-processXMLIndSpectra(spectraImport, smallOrProtein, index)
+processXMLIndSpectra(spectraImport, smallOrProtein, index, ...)
 }
 \arguments{
 \item{spectraImport}{maldiquant spectra list}
@@ -12,6 +12,8 @@ processXMLIndSpectra(spectraImport, smallOrProtein, index)
 \item{smallOrProtein}{"small" or "protein" chooses which processing pipeline is used}
 
 \item{index}{logical vector describing which spectraImport spectra to use}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 environment

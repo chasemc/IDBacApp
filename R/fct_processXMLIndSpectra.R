@@ -4,13 +4,15 @@
 #' @param spectraImport maldiquant spectra list
 #' @param smallOrProtein "small" or "protein" chooses which processing pipeline is used
 #' @param index logical vector describing which spectraImport spectra to use
-#'
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
+#' 
 #' @return environment 
 #' 
 #'
 processXMLIndSpectra <- function(spectraImport,
                                  smallOrProtein,
-                                 index){
+                                 index,
+                                 ...){
   
   env <- new.env()
   
@@ -51,9 +53,11 @@ processXMLIndSpectra <- function(spectraImport,
   
   
   if (smallOrProtein == "small") {
-    env$peak_matrix <- processSmallMolSpectra(spectraImport[index])
+    env$peak_matrix <- processSmallMolSpectra(input = spectraImport[index],
+                                              ...)
   } else if (smallOrProtein == "protein") {
-    env$peak_matrix <- processProteinSpectra(spectraImport[index])
+    env$peak_matrix <- processProteinSpectra(input = spectraImport[index],
+                                             ...)
   }
   
   if (!MALDIquant::isMassPeaksList(env$peak_matrix)) {
@@ -71,10 +75,6 @@ processXMLIndSpectra <- function(spectraImport,
   env$peak_matrix <- unlist(lapply(env$peak_matrix, 
                                    function(x)
                                      as.character(serial(x))))
-  
-  
-  
-  
   
   return(env)
   

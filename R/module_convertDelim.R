@@ -64,6 +64,7 @@ convertDelim_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #'
 #' @return .
 #' 
@@ -74,7 +75,8 @@ convertDelim_Server <- function(input,
                                 session,
                                 tempMZDir,
                                 sqlDirectory,
-                                availableExperiments){
+                                availableExperiments,
+                                ...){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
@@ -91,7 +93,7 @@ convertDelim_Server <- function(input,
     selectedPaths$smallmol <- choose_dir()
     
   })
- 
+  
   
   output$newExperimentNameText <- renderText({
     a <- gsub(" ", "", sanitize(input$newExperimentName))
@@ -199,7 +201,8 @@ convertDelim_Server <- function(input,
                  db_from_mzml(mzFilePaths = unname(keys),
                               sampleIds = names(keys),
                               idbacPool = idbacPool,
-                              acquisitionInfo = NULL)
+                              acquisitionInfo = NULL,
+                              ...)
                  pool::poolClose(idbacPool)
                  
                  popup4()
@@ -208,16 +211,8 @@ convertDelim_Server <- function(input,
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE))
-               
-                 
-              
                  
                  selectedPaths$smallmol <- NULL
                  selectedPaths$protein <- NULL
-                  
-                
-                 })
-  
-
-  
+               })
 }

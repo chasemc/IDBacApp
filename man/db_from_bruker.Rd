@@ -11,7 +11,8 @@ db_from_bruker(
   anyMissing = NULL,
   acquisitionInfo = NULL,
   sampleMap = NULL,
-  tempDir = NULL
+  tempDir = NULL,
+  ...
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ db_from_bruker(
 \item{sampleMap}{matrix or df representing the MALDI target plate (you can replace values in matrix created with IDBacApp:::map384Well())}
 
 \item{tempDir}{temporary folder with read/write permission to write intermediate mzml files to}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 none, side effect of writing SQLite  file

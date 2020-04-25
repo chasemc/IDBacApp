@@ -6,13 +6,15 @@
 #' @param sampleID the sample ID to be read and added to the database
 #' @param pool database connection (checked out pool)
 #' @param acquisitionInfo acquisitionInfo (currently only used when converting from Bruker raw data)
-#'
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
+#' 
 #' @return the peak list modifed by binning then subtractng the matrix sample,
 #' 
 spectraProcessingFunction <- function(rawDataFilePath,
                                       sampleID,
                                       pool, 
-                                      acquisitionInfo){
+                                      acquisitionInfo,
+                                      ...){
   
   
   if (!length(sampleID) > 0) {
@@ -20,32 +22,33 @@ spectraProcessingFunction <- function(rawDataFilePath,
   }
   
   sampleID <- trimws(sampleID, 
-                    which = c("both"))
-    
+                     which = c("both"))
+  
   # If sample ID doesn't exist, create it in table
   # TODO: userprompt with option to change ID
   createMetaSQL(sampleID = sampleID,
-                          pool = pool)
+                pool = pool)
   
   
   # Create xml table -------------------------------------------------------
-
+  
   # Make connection to mzML file
   mzML_con <- mzR::openMSfile(rawDataFilePath,
                               backend = "pwiz")
   
   XMLinfo <- createXMLSQL(rawDataFilePath = rawDataFilePath,
-                                    pool = pool,
-                                    mzML_con = mzML_con)
+                          pool = pool,
+                          mzML_con = mzML_con)
   
   
- 
+  
   
   createSpectraSQL(mzML_con = mzML_con,
-                             pool = pool,
-                             sampleID = sampleID,
-                             XMLinfo = XMLinfo, 
-                             acquisitionInfo = acquisitionInfo)
+                   pool = pool,
+                   sampleID = sampleID,
+                   XMLinfo = XMLinfo, 
+                   acquisitionInfo = acquisitionInfo,
+                   ...)
 }
 
 

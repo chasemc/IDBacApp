@@ -2,22 +2,37 @@
 % Please edit documentation in R/fct_spectraToPeaks.R
 \name{processSmallMolSpectra}
 \alias{processSmallMolSpectra}
-\title{processSmallMolSpectra}
+\title{Process small molecule spectra with MALDIquant}
 \usage{
-processSmallMolSpectra(input, halfWindowSize = 20)
+processSmallMolSpectra(
+  input,
+  smoothIntensityMethod = "SavitzkyGolay",
+  removeBaselineMethod = "TopHat",
+  detectPeaksMethod = "SuperSmoother",
+  halfWindowSize = 20L,
+  minSNR = 1
+)
 }
 \arguments{
 \item{input}{MALDIquant mass spectrum list}
+
+\item{smoothIntensityMethod}{see ?MALDIquant::smoothIntensity}
+
+\item{removeBaselineMethod}{see ?MALDIquant::smoothIntensity}
+
+\item{detectPeaksMethod}{see ?MALDIquant::detectPeaks}
 
 \item{halfWindowSize}{half window size. The resulting
     window reaches from \code{mass[currentIndex-halfWindowSize]} to
     \code{mass[currentIndex+halfWindowSize]} (window size is
     \code{2*halfWindowSize+1}).
     The best size differs depending on the selected \code{method}.}
+
+\item{minSNR}{see ?MALDIquant::detectPeaks}
 }
 \value{
 MALDIquant mass spectrum list
 }
 \description{
-processSmallMolSpectra
+Process small molecule spectra with MALDIquant
 }

@@ -79,20 +79,22 @@ convertDataTab_Server <- function(input,
   
   output$brukerConversionUi <- renderUI({
     controlBrukerDisplay(session,
-                                   pwizAvailable)
+                         pwizAvailable)
   })
   
   shiny::callModule(convertMZ_Server,
                     "beginWithMZ",
                     sqlDirectory = sqlDirectory,
-                    availableExperiments = availableExperiments)
+                    availableExperiments = availableExperiments,
+                    halfWindowSize = 20)
   
   
   shiny::callModule(convertOneBruker_Server,
                     "convertOneBruker",
                     tempMZDir = tempMZDir,
                     sqlDirectory = sqlDirectory,
-                    availableExperiments = availableExperiments)
+                    availableExperiments = availableExperiments,
+                    halfWindowSize = 20)
   
   
   
@@ -100,21 +102,18 @@ convertDataTab_Server <- function(input,
                     "convertDelim",
                     tempMZDir = tempMZDir,
                     sqlDirectory = sqlDirectory,
-                    availableExperiments = availableExperiments)
+                    availableExperiments = availableExperiments,
+                    halfWindowSize = 20)
   
   
   shiny::callModule(convertMicrotyper_Server,
                     "convertMicrotyper",
                     tempMZDir = tempMZDir,
                     sqlDirectory = sqlDirectory,
-                    availableExperiments = availableExperiments)
-  
-  
-  
+                    availableExperiments = availableExperiments,
+                    halfWindowSize = 20)
   
 }
-
-
 
 
 
