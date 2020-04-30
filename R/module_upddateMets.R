@@ -134,12 +134,7 @@ updateMeta_server <- function(input,
           
         } else{
           
-          dbQuery <- glue::glue_sql("SELECT *
-                                             FROM ({tab*})",
-                                    tab = "metadata",
-                                    .con = conn)
-          
-          dbQuery <- DBI::dbGetQuery(conn, dbQuery)
+          dbQuery <- DBI::dbGetQuery(conn, "SELECT * FROM metadata")
           
           exampleMetaData <- data.frame(      "strain_id"                    = "Example_Strain",
                                               "genbank_accession"            = "KY858228",
