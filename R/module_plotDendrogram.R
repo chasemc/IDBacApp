@@ -32,7 +32,6 @@ plotDendrogram <- function(dendrogram,
   
   dendrogram_labels <- labels(dendrogram$dendrogram)
 
-  print(appendDendLabels)
   
   if (!is.null(appendDendLabels)) {
 
