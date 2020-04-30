@@ -17,6 +17,7 @@ colored_dots(
   sort_by_labels_order = TRUE,
   horiz = FALSE,
   circ = FALSE,
+  dot_size = 1,
   ...
 )
 }
@@ -65,6 +66,8 @@ of the colors vector.}
 \item{horiz}{logical (FALSE by default). Set to TRUE when using plot(dend, horiz = TRUE)}
 
 \item{circ}{circularize, T/F}
+
+\item{dot_size}{dot_size}
 
 \item{...}{ignored at this point.}
 }

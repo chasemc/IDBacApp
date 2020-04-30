@@ -2,7 +2,7 @@
 #' I submitted this and it was pulled into dendextend but is left here for less dependency/more control
 #' 
 #' @param circ circularize, T/F
-#' 
+#' @param dot_size dot_size
 #' @return NA
 #' 
 #' @importFrom graphics abline barplot legend lines par plot points rect strheight strwidth text
@@ -12,8 +12,7 @@
 
 colored_dots <- function(colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
                         add = TRUE, y_scale, y_shift, text_shift = 1, sort_by_labels_order = TRUE,
-                        horiz = FALSE, circ = FALSE, ...)
-{
+                          horiz = FALSE, circ = FALSE,  dot_size = 1, ...){
   
   # Same as colored_bars.R, except with circle representation for each point
   
@@ -152,7 +151,7 @@ colored_dots <- function(colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
       
       
       #C<-as_tibble(C)
-      points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]))
+      points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]), cex = dot_size)
       
       
       par(srt = 90)
@@ -185,7 +184,7 @@ colored_dots <- function(colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
       xr <<-xr/max(xr)
       
       #C<-as_tibble(C)
-      points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]))
+      points((-yb+(-yt))/2,(xl+xr)/2,pch=19,col = as.character(C[, j]), cex = dot_size)
       
       
       par(srt = 90)
@@ -225,7 +224,7 @@ colored_dots <- function(colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
       
       
       
-      points((xl+xr)/2,(yb+yt)/2,pch=19,col = as.character(C[, j]))
+      points((xl+xr)/2,(yb+yt)/2,pch=19,col = as.character(C[, j]), cex = dot_size)
       
       
       
