@@ -144,7 +144,7 @@ createFuzzyVector <- function(massStart,
 
 
 
-#' Experimental binning
+#' Experimental binning AKA- not for use
 #'
 #' @param massStart beginning of mass range (as of now, must be smaller than smallest mass)
 #' @param massEnd end of mass range (as of now, must be smaller than smallest mass)
