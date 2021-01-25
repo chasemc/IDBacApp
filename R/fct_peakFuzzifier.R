@@ -242,13 +242,13 @@ mquant_bin <- function(massStart,
                        method,
                        tolerance){
   
-  a <- mapply(function(x, y){
-    
-    createMassPeaks(mass = x,
-                    intensity = y)
-  },
-  massList,
-  intensityList)
+  a <- mapply(
+    function(x, y){
+        createMassPeaks(mass = x,
+                        intensity = y)
+    },
+    massList,
+    intensityList)
   
   a <- binPeaks(l = a,
                 method = method,
