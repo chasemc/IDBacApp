@@ -1,7 +1,7 @@
 context("test-module_tsne")
 set.seed(42)
 
-a <- IDBacApp::tsneUiPop(function(x)x, 
+a <- tsneUiPop(function(x)x, 
                          plotTitle = "tsne")
 
 test_that("multiplication works", {

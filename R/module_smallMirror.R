@@ -5,7 +5,7 @@
 #' @param id namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 smallmirrorPlotsSampleSelect_UI <- function(id){
   ns <- NS(id)
@@ -19,7 +19,7 @@ smallmirrorPlotsSampleSelect_UI <- function(id){
 #' @param id  namespace
 #'
 #' @return NA
-#' @export
+#' 
 #'
 smallmirrorPlots_UI <- function(id){
   ns <- NS(id)
@@ -41,7 +41,7 @@ smallmirrorPlots_UI <- function(id){
 #' @param proteinOrSmall values = "proteinPeaks" or "smallMoleculePeaks" 
 #'
 #' @return NA
-#' @export
+#' 
 #'
 smallmirrorPlots_Server <- function(input,
                                     output,
@@ -53,9 +53,9 @@ smallmirrorPlots_Server <- function(input,
   inverseComparisonNames <- reactive({
     conn <- pool::poolCheckout(workingDB$pool())
     
-    a <- DBI::dbGetQuery(conn, glue::glue("SELECT DISTINCT Strain_ID
-                                           FROM IndividualSpectra 
-                                           WHERE maxMass < 6000"))
+    a <- DBI::dbGetQuery(conn, glue::glue("SELECT DISTINCT strain_id
+                                           FROM spectra 
+                                           WHERE max_mass < 6000"))
     pool::poolReturn(conn)
     
     a[ ,1]
@@ -113,31 +113,33 @@ smallmirrorPlots_Server <- function(input,
     mirrorPlotEnv <- new.env(parent = parent.frame())
     
     # connect to sql
-    conn <- pool::poolCheckout(workingDB$pool())
+    
     
     # get protein peak data for the 1st mirror plot selection
     
     
     
-    mirrorPlotEnv$peaksSampleOne <- IDBacApp::collapseReplicates(checkedPool = conn,
-                                                                 sampleIDs = input$Spectra1,
-                                                                 peakPercentPresence = input$percentPresence,
-                                                                 lowerMassCutoff = input$lowerMass,
-                                                                 upperMassCutoff = input$upperMass,
-                                                                 minSNR = input$SNR,
-                                                                 tolerance = 0.002,
-                                                                 protein = FALSE) 
+    mirrorPlotEnv$peaksSampleOne <- idbac_get_peaks(pool = workingDB$pool(),
+                                                    sampleIDs = input$Spectra1,
+                                                    minFrequency = input$percentPresence,
+                                                    lowerMassCutoff = input$lowerMass,
+                                                    upperMassCutoff = input$upperMass,
+                                                    minSNR = input$SNR,
+                                                    tolerance = 0.002,
+                                                    type = "small",
+                                                    mergeReplicates = TRUE)[[1]] 
     
     
     
-    mirrorPlotEnv$peaksSampleTwo <- IDBacApp::collapseReplicates(checkedPool = conn,
-                                                                 sampleIDs = input$Spectra2,
-                                                                 peakPercentPresence = input$percentPresence,
-                                                                 lowerMassCutoff = input$lowerMass,
-                                                                 upperMassCutoff = input$upperMass,
-                                                                 minSNR = input$SNR,
-                                                                 tolerance = 0.002,
-                                                                 protein = FALSE)
+    mirrorPlotEnv$peaksSampleTwo <- idbac_get_peaks(pool = workingDB$pool(),
+                                                    sampleIDs = input$Spectra2,
+                                                    minFrequency = input$percentPresence,
+                                                    lowerMassCutoff = input$lowerMass,
+                                                    upperMassCutoff = input$upperMass,
+                                                    minSNR = input$SNR,
+                                                    tolerance = 0.002,
+                                                    type = "small",
+                                                    mergeReplicates = TRUE)[[1]]
     
     
     
@@ -182,24 +184,25 @@ smallmirrorPlots_Server <- function(input,
     
     
     
-    mirrorPlotEnv$spectrumSampleOne <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
-                                                                   sampleID = input$Spectra1, 
-                                                                   proteinOrSmall = '<')
+    mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = workingDB$pool(),
+                                                                                        sampleIDs = input$Spectra1, 
+                                                                                        type = "small"))
     
+    mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = workingDB$pool(),
+                                                                                        sampleIDs = input$Spectra2, 
+                                                                                        type = "small"))
+    if (length(mirrorPlotEnv$spectrumSampleOne@intensity) > 50000 ) {
+      # downsample so plotting is quicker
+      mirrorPlotEnv$spectrumSampleOne@intensity <- mirrorPlotEnv$spectrumSampleOne@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleOne@intensity), 4)]
+      mirrorPlotEnv$spectrumSampleOne@mass <- mirrorPlotEnv$spectrumSampleOne@mass[seq(1, length(mirrorPlotEnv$spectrumSampleOne@mass), 4)]
+    }
     
+    if (length(mirrorPlotEnv$spectrumSampleTwo@intensity) > 50000 ) {
+      # downsample so plotting is quicker
+      mirrorPlotEnv$spectrumSampleTwo@intensity <- mirrorPlotEnv$spectrumSampleTwo@intensity[seq(1, length(mirrorPlotEnv$spectrumSampleTwo@intensity), 4)]
+      mirrorPlotEnv$spectrumSampleTwo@mass <- mirrorPlotEnv$spectrumSampleTwo@mass[seq(1, length(mirrorPlotEnv$spectrumSampleTwo@mass), 4)]
+    }
     
-    
-    mirrorPlotEnv$spectrumSampleTwo <- IDBacApp::mquantSpecFromSQL(checkedPool = conn,
-                                                                   sampleID = input$Spectra2, 
-                                                                   proteinOrSmall = '<')
-    
-    
-    
-    
-    
-    
-    
-    pool::poolReturn(conn)
     # Return the entire saved environment
     mirrorPlotEnv
     
@@ -256,7 +259,7 @@ smallmirrorPlots_Server <- function(input,
          ylim = c(ranges2()$y1, ranges2()$y2),
          xlim = c(ranges2()$x1,ranges2()$x2),
          type = "l",
-         col = adjustcolor("Black", alpha = 0.3),
+         col = grDevices::adjustcolor("Black", alpha = 0.3),
          xlab = "m/z",
          ylab = "Intensity")
     lines(x = mirrorPlotEnv$spectrumSampleTwo@mass,
@@ -291,10 +294,11 @@ smallmirrorPlots_Server <- function(input,
       svglite::svglite(file1, width = 10, height = 8, bg = "white",
                        pointsize = 12, standalone = TRUE)
       
-      IDBacApp::baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
+      baserMirrorPlot(mirrorPlotEnv = dataForInversePeakComparisonPlot())
       
-      dev.off()
+      grDevices::dev.off()
       if (file.exists(paste0(file1, ".svg")))
+        #TODO why
         file.rename(paste0(file1, ".svg"), file1)
       
     })

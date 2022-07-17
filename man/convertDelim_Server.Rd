@@ -4,8 +4,15 @@
 \alias{convertDelim_Server}
 \title{convertDelim_Server}
 \usage{
-convertDelim_Server(input, output, session, tempMZDir, sqlDirectory,
-  availableExperiments)
+convertDelim_Server(
+  input,
+  output,
+  session,
+  tempMZDir,
+  sqlDirectory,
+  availableExperiments,
+  ...
+)
 }
 \arguments{
 \item{input}{module}
@@ -19,6 +26,8 @@ convertDelim_Server(input, output, session, tempMZDir, sqlDirectory,
 \item{sqlDirectory}{sqlDirectory}
 
 \item{availableExperiments}{availableExperiments}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 .

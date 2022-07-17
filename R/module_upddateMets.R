@@ -4,7 +4,7 @@
 #' @param id id
 #'
 #' @return ui
-#' @export
+#' 
 #'
 updateMeta_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -38,7 +38,7 @@ updateMeta_UI <- function(id) {
 #' @param selectedDB  .
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 updateMeta_server <- function(input,
@@ -73,7 +73,7 @@ updateMeta_server <- function(input,
   
   observeEvent(input$insertNewMetaColumn, 
                ignoreInit = TRUE, {
-                 IDBacApp::insertMetadataColumns(pool = pool(),
+                 insertMetadataColumns(pool = pool(),
                                                  columnNames = input$addMetaColumnName)
                })
   
@@ -88,7 +88,7 @@ updateMeta_server <- function(input,
                    title = "Saving...",
                    easyClose = FALSE, 
                    footer = ""))   
-                 
+                
                  #----
                  #make sure not to use the wrong metadata table
                  query <- glue::glue_sql("SELECT  `strain_id`
@@ -127,19 +127,14 @@ updateMeta_server <- function(input,
       if (!is.null(pool())) {
         conn <- pool::poolCheckout(pool())
         
-        if (!"metadata" %in% DBI::dbListTables(conn)) {
+        if (!"metadata" %in% tolower(DBI::dbListTables(conn))) {
           
           warning("It appears the experiment file may be corrupt, please create again.")
           rhand$rtab <- data.frame(strain_id = "It appears the experiment file may be corrupt, please create the experiment again.")
           
         } else{
           
-          dbQuery <- glue::glue_sql("SELECT *
-                                             FROM ({tab*})",
-                                    tab = "metadata",
-                                    .con = conn)
-          
-          dbQuery <- DBI::dbGetQuery(conn, dbQuery)
+          dbQuery <- DBI::dbGetQuery(conn, "SELECT * FROM metadata")
           
           exampleMetaData <- data.frame(      "strain_id"                    = "Example_Strain",
                                               "genbank_accession"            = "KY858228",
@@ -175,4 +170,3 @@ updateMeta_server <- function(input,
   })
   
 }
-

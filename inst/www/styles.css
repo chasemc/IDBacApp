@@ -119,7 +119,7 @@ font-family: 'Arial';
   cursor: move;
   /* Fade out while not hovering */
   opacity: 0.65;
-  zoom: 0.9;
+
   transition: opacity 500ms ease;
 }
 
@@ -150,11 +150,10 @@ font-family: 'Arial';
 .popup_Plots {
   /* Appearance */
   background-color: Gainsboro;
-  padding: 20px 20px 20px 20px;
-  cursor: move;
+  /*padding: 20px 20px 20px 20px; */
+  /*cursor: move;/*
   /* Fade out while not hovering */
   opacity: 0.65;
-  zoom: 0.9;
   transition: opacity 500ms ease;
 }
 

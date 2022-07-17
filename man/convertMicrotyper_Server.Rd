@@ -4,8 +4,15 @@
 \alias{convertMicrotyper_Server}
 \title{convertDelim_Server}
 \usage{
-convertMicrotyper_Server(input, output, session, tempMZDir, sqlDirectory,
-  availableExperiments)
+convertMicrotyper_Server(
+  input,
+  output,
+  session,
+  tempMZDir,
+  sqlDirectory,
+  availableExperiments,
+  ...
+)
 }
 \arguments{
 \item{input}{module}
@@ -19,9 +26,11 @@ convertMicrotyper_Server(input, output, session, tempMZDir, sqlDirectory,
 \item{sqlDirectory}{sqlDirectory}
 
 \item{availableExperiments}{availableExperiments}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
-.
+none, side effect of creating database
 }
 \description{
 convertDelim_Server

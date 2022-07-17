@@ -4,7 +4,7 @@
 #' @param id namespace id
 #'
 #' @return ui to choose the algorithm for creating the dendrogram
-#' @export
+#' 
 #'
 
 dendrogramCreatorUI <- function(id) {
@@ -72,71 +72,31 @@ dendrogramCreatorUI <- function(id) {
 
 
 
-#' dendrogramCreator
-#'
-#' @param input shiny modules default
-#' @param output shiny modules default
-#' @param proteinMatrix proteinMatrix , rows are samples, cols are peak intensities
-#' @param session shiny modules default
-#'
-#' @return dendrogram
-#' @export
-#'
 
+#' Title
+#'
+#' @param input sd
+#' @param output sd
+#' @param session sd
+#' @param proteinMatrix sd
+#'
+#' @return sd
+#' 
 dendrogramCreator <- function(input,
                               output,
                               session,
                               proteinMatrix){
   
-  
   pMatrixReactive <- reactive({
-    
+  
     #require more than two samples
-    req(nrow(proteinMatrix() > 2))
+    req(ncol(proteinMatrix() > 2))
+
+    idbac_dendrogram_creator(bootstraps = 0L,
+                      distanceMethod = input$distanceMethod,
+                      clusteringMethod = input$clustering,
+                      proteinMatrix = proteinMatrix())
     
-    dend <- proteinMatrix()
-    
-    createHclustObject <- function(x){
-      x <- IDBacApp::distMatrix(data = x,
-                                method = input$distanceMethod,
-                                booled = input$booled)
-      
-      stats::hclust(x,
-                    method = input$clustering)
-    }
-    bootstraps <- ""
-    if (is.numeric(input$bootstraps)) {
-      if ((input$bootstraps > 1) & (input$bootstraps < 1000)) {
-        
-        bootstraps <- IDBacApp::bootstrap(dend,
-                                          fun = createHclustObject,
-                                          n = input$bootstraps)
-        
-        
-      }
-    }
-    
-    disty <- IDBacApp::distMatrix(data = dend,
-                                  method = input$distanceMethod,
-                                  booled = input$booled)
-    
-    dend <- stats::hclust(disty,
-                          method = input$clustering)
-    
-    
-    
-    
-    dend <- stats::as.dendrogram(dend)
-    
-    
-    return(list(dendrogram = dend,
-                bootstraps = bootstraps,
-                distance = disty))
   })
   
-  return(pMatrixReactive)
-  
 }
-
-
-

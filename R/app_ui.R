@@ -2,7 +2,7 @@
 #' Main UI of IDBac
 #'
 #' @return Main UI of IDBac
-#' @export
+#' 
 #'
 app_ui <- function(){
   
@@ -14,7 +14,6 @@ app_ui <- function(){
   # "h3", "p", and "br" are HTML,the other lines setup the different panels, tabs, plots, etc of the user interface.
   #tags$body(background = "rotatingPCA.gif",
   navbarPage(collapsible = T,
-             # theme = "css.css",
              title = "IDBac",
              id = "mainIDBacNav",
              tabPanel(
@@ -22,11 +21,9 @@ app_ui <- function(){
                div(class = "introPageImage",
                    
                    div(class = "introPage",
-                       #includeCSS(file.path(system.file('www', package = 'IDBacApp'), 'style.css')),
                        tags$head(tags$link(href = "www/styles.css", rel = "stylesheet")),
                        tags$head(tags$link(href = "www/collapse/shinyBS.js")),
                        tags$head(tags$link(href = "www/collapse/shinyBS.css")),
-                    #   shinyjs::useShinyjs(),
                                 wellPanel(class = "intro_WellPanel",
                                           h1("Welcome to IDBac",
                                              align = "center"),
@@ -96,7 +93,7 @@ app_ui <- function(){
                                             tags$ul(
                                               tags$li(
                                                 p("For reproducibility, cite this specific version of IDBac as version:",
-                                                  as.character(packageVersion("IDBacApp"))
+                                                  as.character(utils::packageVersion("IDBacApp"))
                                                 )
                                               )
                                             )
@@ -105,7 +102,7 @@ app_ui <- function(){
                                           h4("Use the navigation bar at the top of the page to begin", 
                                              align = "center"),
                                           div(align = "center",
-                                              IDBacApp::selectDirectory_UI("userWorkingDirectory",
+                                              selectDirectory_UI("userWorkingDirectory",
                                                                            label = "Select IDBac Data Storage Location"),
                                               verbatimTextOutput("userWorkingDirectoryText")
                                           )
@@ -118,7 +115,7 @@ app_ui <- function(){
              tabPanel(
                "Starting with Raw Data",
                value = "rawDataUiTab",
-               IDBacApp::convertDataTab_UI("convertDataTab"))
+               convertDataTab_UI("convertDataTab"))
              
   )
 }

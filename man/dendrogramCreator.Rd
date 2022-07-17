@@ -2,22 +2,22 @@
 % Please edit documentation in R/module_dendrogramCreator.R
 \name{dendrogramCreator}
 \alias{dendrogramCreator}
-\title{dendrogramCreator}
+\title{Title}
 \usage{
 dendrogramCreator(input, output, session, proteinMatrix)
 }
 \arguments{
-\item{input}{shiny modules default}
+\item{input}{sd}
 
-\item{output}{shiny modules default}
+\item{output}{sd}
 
-\item{session}{shiny modules default}
+\item{session}{sd}
 
-\item{proteinMatrix}{proteinMatrix , rows are samples, cols are peak intensities}
+\item{proteinMatrix}{sd}
 }
 \value{
-dendrogram
+sd
 }
 \description{
-dendrogramCreator
+Title
 }

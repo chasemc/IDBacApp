@@ -4,7 +4,7 @@
 #' @param label label of the directory action button
 #'
 #' @return NA
-#' @export
+#' 
 #'
 selectDirectory_UI <- function(id, label){
   
@@ -25,7 +25,7 @@ selectDirectory_UI <- function(id, label){
 #' @param sqlDirectory sqlDirectory
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 selectDirectory_Server <- function(input,
@@ -35,7 +35,7 @@ selectDirectory_Server <- function(input,
   
   
   observeEvent(input$rawFileDirectory, {
-    loc <- IDBacApp::choose_dir()
+    loc <- choose_dir()
     
     if (!is.na(loc)) {
       sqlDirectory$sqlDirectory <- loc

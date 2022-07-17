@@ -4,8 +4,18 @@
 \alias{manPageProtDend_Server}
 \title{manPageProtDend_Server}
 \usage{
-manPageProtDend_Server(input, output, session, dendrogram, colorByLines,
-  cutHeightLines, colorByLabels, cutHeightLabels, plotHeight, plotWidth)
+manPageProtDend_Server(
+  input,
+  output,
+  session,
+  dendrogram,
+  colorByLines,
+  cutHeightLines,
+  colorByLabels,
+  cutHeightLabels,
+  plotHeight,
+  plotWidth
+)
 }
 \arguments{
 \item{input}{input}

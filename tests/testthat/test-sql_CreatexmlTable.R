@@ -1,40 +1,26 @@
-
-a <- system.file("extdata/sqlite", package = "IDBacApp")
-z1 <- IDBacApp::createPool("sample", 
-                           a)[[1]]
-z1 <- pool::poolCheckout(z1)
-
-
-
-a2 <- tempfile()
-z2 <- IDBacApp::createPool(basename(a2), 
-                           dirname(a2))[[1]]
-z2 <- pool::poolCheckout(z2)
-
-
-
-
-DBI::dbListTables(z2)
-
-
-test_that("new DB is empty", {
-  expect_equal(character(0), 
-               DBI::dbListTables(z2))
-})
-
-
-IDBacApp::sql_CreatexmlTable(z2)
-a <- DBI::dbListFields(z2, "XML")
-
-test_that("new DB has XML table", {
-  expect_equal("XML", 
-               DBI::dbListTables(z2))
-  
-  expect_identical("XMLHashXMLmanufacturermodelionizationanalyzerdetectorInstrument_MetaFile",
-                    paste0(a, collapse = ""))
-  
-})
-
-
-
-
+# a2 <- tempfile()
+# z2 <- createPool(basename(a2), 
+#                            dirname(a2))[[1]]
+# z3 <- pool::poolCheckout(z2)
+# 
+# DBI::dbListTables(z3)
+# 
+# 
+# test_that("new DB is empty", {
+#   expect_equal(character(0), 
+#                DBI::dbListTables(z3))
+# })
+# 
+# 
+# sql_create_xml_table(z3)
+# a <- DBI::dbListFields(z3, "xml")
+# 
+# test_that("new DB has xml table", {
+#   expect_equal("xml", 
+#                DBI::dbListTables(z3))
+#   
+#   expect_identical("xml_hashxmlmanufacturermodelionizationanalyzerdetectorinstrument_metafile",
+#                     paste0(a, collapse = ""))
+#   
+# })
+# 

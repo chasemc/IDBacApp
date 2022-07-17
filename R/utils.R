@@ -1,7 +1,7 @@
 #' colorBlindPalette
 #'
 #' @return colorblind palette and then rainbow x1000
-#' @export
+#' 
 
 colorBlindPalette <- function(){
   c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",
@@ -15,7 +15,7 @@ colorBlindPalette <- function(){
 #' @param input object to hash 
 #'
 #' @return sha1 hash
-#' @export
+#' 
 
 hashR <- function(input){
   digest::digest(input, 
@@ -32,22 +32,25 @@ hashR <- function(input){
 #' @param input matrix or vector
 #'
 #' @return JSON
-#' @export
+#' 
 
 serial <- function(input){
   jsonlite::toJSON(input, digits = 5)
 }
 
 
-#' deserial
+#' deserial spectrum json (single json array)
 #'    Settings for serializing in IDBac (convert to json)
 #' @param input matrix or vector
 #'
-#' @return JSON
-#' @export
+#' @return dataframe
+#' 
 
 deserial <- function(input){
-  jsonlite::fromJSON(input)
+  scan(text =  gsub("\\[|\\]", "", input),
+       sep =",", 
+       what = double(),
+       quiet = T)
 }
 
 
@@ -58,7 +61,7 @@ deserial <- function(input){
 #' @param compression compression level 0-100
 #'
 #' @return Raw vector
-#' @export
+#' 
 compress <- function(input, compression = 0){
   fst::compress_fst(input, 
                     compressor = "ZSTD",
@@ -71,7 +74,7 @@ compress <- function(input, compression = 0){
 #' @param input compressed raw vector 
 #'
 #' @return raw vector 
-#' @export
+#' 
 
 decompress <- function(input){
   fst::decompress_fst(input)
@@ -86,13 +89,13 @@ decompress <- function(input){
 #' @param compression compression level 0-100
 #'
 #' @return NA
-#' @export
+#' 
 #'
 chartoRawtoCompressed <- function(input, compression){
   input <- base::enc2utf8(input)
   input <- base::charToRaw(input)
-  IDBacApp::compress(input = input,
-                     compression = compression)
+  compress(input = input,
+           compression = compression)
 }
 
 
@@ -104,25 +107,25 @@ chartoRawtoCompressed <- function(input, compression){
 #' @param test for testing only
 #'
 #' @return text representing the user's os
-#' @export
+#' 
 #'
 
 getOS <- function(test = NULL){
   if (is.null(test)) {
-  sysinf <- Sys.info()
-  if (!is.null(sysinf)) {
-    os <- sysinf['sysname']
-    if (os == 'Darwin')
-      os <- "osx"
-  } else { 
-    ## mystery machine
-    os <- .Platform$OS.type
-    if (grepl("^darwin", R.version$os))
-      os <- "osx"
-    if (grepl("linux-gnu", R.version$os))
-      os <- "linux"
-  }
-  return(as.character(tolower(os)))
+    sysinf <- Sys.info()
+    if (!is.null(sysinf)) {
+      os <- sysinf['sysname']
+      if (os == 'Darwin')
+        os <- "osx"
+    } else { 
+      ## mystery machine
+      os <- .Platform$OS.type
+      if (grepl("^darwin", R.version$os))
+        os <- "osx"
+      if (grepl("linux-gnu", R.version$os))
+        os <- "linux"
+    }
+    return(as.character(tolower(os)))
   } else {
     return(test)
   }
@@ -134,68 +137,46 @@ getOS <- function(test = NULL){
 #'
 #' @param recursive search directories recursively? T/F
 #' @param full full.names? T/F
-#' @param inputPath path to search
+#' @param path path to search
 #'
 #' @return file paths of found files
-#' @export
+#' 
 #'
-findmz <- function(inputPath,
-                   recursive = FALSE,
-                   full = FALSE){
+find_mz_files <- function(path,
+                          recursive = FALSE,
+                          full = FALSE){
   # sets time limit outside though so dont use yet setTimeLimit(elapsed = 5, transient = FALSE)
-  return(list.files(inputPath,
+  return(list.files(path,
                     recursive = recursive,
                     full.names = full,
                     pattern = "\\.mz"))
-  setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
+  #setTimeLimit(cpu = Inf, elapsed = Inf, transient = FALSE)
   
 }
 
 
 
-#' Read mzXML, XML and transform to raw character for storing in SQLite
+#' Read mzXML, xml and transform to raw character for storing in SQLite
 #'
 #' @param path filepath of mzML or mzXML
 #'
 #' @return compressed, raw, character 
-#' @export
+#' 
 #'
 serializeXML <- function(path) {
   
   path <- readChar(path, nchars = file.info(path)$size, useBytes = T)
-  IDBacApp::chartoRawtoCompressed(input = path,
-                                  compression = 0)
+  chartoRawtoCompressed(input = path,
+                        compression = 0)
   
 }
-
-
-
-
-#' People have trouble with spaces
-#'
-#' @param input character vector 
-#'
-#' @return character vector
-#' @export
-#'
-cleanWSpace <- function(input){
-  
-  input <- trimws(input)
-  input <- gsub(" ", "_", input)
-  input <- gsub("__", "_", input)
-  return(input)
-}
-
-
-
-
 
 
 
 #' Create 384-well matrix map
 #'
 #' @return 384 well-like matrix, each element in matrix contains its position (eg col 1, row 3 contains "C4")
-#' @export
+#' 
 #'
 map384Well <- function(){
   aa <- sapply(1:24, function(x) paste0(LETTERS[1:16], x))
@@ -209,10 +190,87 @@ map384Well <- function(){
 #' Create a 384-well matrix that is NA-filled
 #'
 #' @return 384-well matrix that is NA-filled
-#' @export
+#' 
 #'
 nulledMap384Well <- function() {
-  a <- IDBacApp::map384Well()
+  a <- map384Well()
   a[] <- NA
   as.data.frame(a)
 }
+
+
+
+
+#' Checkout pool if it isn't
+#'
+#' @param con db pool/connection
+#'
+#' @return checked out pool
+#' 
+#'
+poolToCon <- function(con) {
+  
+  type <- class(con)
+  
+  if ("Pool" %in% type) {
+    
+    return(pool::poolCheckout(con))
+    
+  } else  if ("SQLiteConnection" %in% type) {
+    
+    return(con)
+    
+  } else {
+    
+    stop("Expected either a pool or SQLite object.")
+    
+  }
+  
+  
+}
+
+
+
+
+#' Check if a pool object
+#'
+#' @param pool variable to check
+#' @return NA, stops function if not a pool object
+.checkPool <- function(pool){
+  
+  val <- all(inherits(pool, "Pool"),
+             inherits(pool, "R6"))
+  
+  if (isFALSE(val)) {
+    # paste0(deparse(sys.calls()[[sys.nframe()-1]]) gets the info of the calling function
+    stop(paste0(deparse(sys.calls()[[sys.nframe() - 1]]),
+                " expected a pool object"))
+  }
+  
+}
+
+
+
+#' Find database path from pool object
+#'
+#' @param pool {pool} object
+#'
+#' @return Path to pool's database
+.db_path_from_pool <- function(pool){
+  
+  .checkPool(pool = pool)
+  
+  provided_db_path <- normalizePath(pool$fetch()@dbname,
+                                    winslash = "/")
+  
+  if (file.exists(provided_db_path)) {
+    return(provided_db_path)
+  } else {
+    stop("\n",
+         "Couldn't find:",
+         "\n",
+         provided_db_path)
+  }
+}
+
+

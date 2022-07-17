@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{serializeXML}
 \alias{serializeXML}
-\title{Read mzXML, XML and transform to raw character for storing in SQLite}
+\title{Read mzXML, xml and transform to raw character for storing in SQLite}
 \usage{
 serializeXML(path)
 }
@@ -13,5 +13,5 @@ serializeXML(path)
 compressed, raw, character
 }
 \description{
-Read mzXML, XML and transform to raw character for storing in SQLite
+Read mzXML, xml and transform to raw character for storing in SQLite
 }

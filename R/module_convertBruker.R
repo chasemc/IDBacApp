@@ -4,7 +4,7 @@
 #' @param id NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 convertOneBruker_UI <- function(id){
@@ -55,6 +55,7 @@ convertOneBruker_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory
 #' @param availableExperiments availableExperiments
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #'
 #' @return NA
 #'
@@ -63,26 +64,27 @@ convertOneBruker_Server <- function(input,
                                     session,
                                     tempMZDir,
                                     sqlDirectory,
-                                    availableExperiments){
+                                    availableExperiments,
+                                    ...){
   
   
   
   # Reactive variable returning the user-chosen location of the raw MALDI files as string
   #----
   rawFilesLocation <- reactive({
-    if (input$rawFileDirectory > 0) {
-      loc <- IDBacApp::choose_dir()
-      
-      if (!is.na(loc)) {
-        return(loc)
-      }
+    
+    req(input$rawFileDirectory > 0)
+    loc <- choose_dir()
+    if (!is.na(loc)) {
+      return(loc)
     }
+    
   })
   
   
   sanitizedNewExperimentName <- reactive({
     
-    IDBacApp::path_sanitize(input$newExperimentName)
+    sanitize(input$newExperimentName)
     
   })
   
@@ -128,9 +130,8 @@ convertOneBruker_Server <- function(input,
   # Reactive variable returning the user-chosen location of the raw MALDI files as string
   #----
   multipleMaldiRawFileLocation <- reactive({
-    if (input$multipleMaldiRawFileDirectory > 0) {
-      IDBacApp::choose_dir()
-    }
+    req(input$multipleMaldiRawFileDirectory > 0)
+    choose_dir()
   })
   
   
@@ -159,7 +160,7 @@ convertOneBruker_Server <- function(input,
   # list of acqus info
   acquisitonInformation <- reactive({
     
-    IDBacApp::readBrukerAcqus(rawFilesLocation())
+    readBrukerAcqus(rawFilesLocation())
     
   })
   
@@ -171,16 +172,10 @@ convertOneBruker_Server <- function(input,
     
     req(rawFilesLocation())
     req(sampleMapReactive$rt)
-    
-    
-    
-    acquisitonInformation1 <<- acquisitonInformation
-    sampleMapReactive1 <<- sampleMapReactive
-    
     spots <- unlist(lapply(acquisitonInformation(), function(x) x$spot))
-    
-    IDBacApp::findMissingSampleMapIds(spots = spots, 
-                                      sampleMap = sampleMapReactive$rt)
+    findMissingSampleMapIds(spots = spots, 
+                            sampleMap = sampleMapReactive$rt,
+                            ignoreMissing = TRUE)
   })
   
   
@@ -193,7 +188,7 @@ convertOneBruker_Server <- function(input,
     }
   })
   
-  sampleMapReactive <- reactiveValues(rt = IDBacApp::nulledMap384Well())
+  sampleMapReactive <- reactiveValues(rt = nulledMap384Well())
   
   observeEvent(input$showSampleMap, 
                ignoreInit = TRUE, {  
@@ -215,21 +210,21 @@ convertOneBruker_Server <- function(input,
   
   output$plateDefault <- rhandsontable::renderRHandsontable({
     
-    IDBacApp::sampleMapViewer(sampleMapReactive$rt)
+    sampleMapViewer(sampleMapReactive$rt)
     
   })
   
   
   observeEvent(input$saveSampleMap, 
                ignoreInit = TRUE, {
-                 sampleMapReactive$rt <- IDBacApp::sampleMaptoDF(sampleData = input$plateDefault)
+                 sampleMapReactive$rt <- sampleMaptoDF(sampleData = input$plateDefault)
                  
                  shiny::removeModal()
                })
   
   
   
-
+  
   
   
   success <- reactiveValues(val = FALSE)
@@ -245,56 +240,34 @@ convertOneBruker_Server <- function(input,
                  validate(need(any(!is.na(sampleMapReactive$rt)), 
                                "No samples entered into sample map, please try entering them again"))
                  
-                 # get target positions in order of acqus list
-                 spots <- unlist(lapply(acquisitonInformation(), function(x){
-                   x$spot
-                 }))
+                 # # get target positions in order of acqus list
+                 # spots <- unlist(lapply(acquisitonInformation(), function(x){
+                 #   x$spot
+                 # }))
+                 # 
+                 # 
+                 # # should be the same because both come from acquisitonInformation()
+                 # validate(need(identical(sort(names(anyMissing()$matching)), 
+                 #                         sort(unique(spots))),
+                 #               list("Something happend when associating Bruker acqu spots", "\n",
+                 #                    "names:", sort(names(anyMissing()$matching)), "\n",
+                 #                    "spots:", sort(unique(spots)))
+                 # ))
                  
-                 # should be the same because both come from acquisitonInformation()
-                 validate(need(identical(names(anyMissing()$matching), 
-                                         spots),
-                               list("Something happend when associating Bruker acqu spots", "\n",
-                                    "names:", names(anyMissing()$matching), "\n",
-                                    "spots:", spots)
-                 ))
-                 
-                 validate(need(identical(length(anyMissing()$matching),
-                                         length(acquisitonInformation())),
-                               list("Something happend when associating Bruker acqu spots", "\n",
-                                    "length(anyMissing()$matching):", length(anyMissing()$matching), "\n",
-                                    "length(acquisitonInformation()):", length(acquisitonInformation())
-                               )))
-                 
-                 
-                 acquisitionInfo <- split(acquisitonInformation(), anyMissing()$matching) 
-                 
-                 files <- lapply(acquisitionInfo, function(x){
-                   lapply(x, function(y) y$file)
-                 })
-                 
-                 
-                 
-                 IDBacApp::brukerToMzml_popup()
-                 
-                 
-                 
-                 forProcessing <- IDBacApp::proteoWizConvert(msconvertPath = "",
-                                                             samplePathList = files,
-                                                             convertWhere = tempMZDir)
-                 
-                 IDBacApp::popup3()
-                 
-                 IDBacApp::processMZML(mzFilePaths = forProcessing$mzFile,
-                                       sampleIds = forProcessing$sampleID,
-                                       sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = sanitizedNewExperimentName(),
-                                       acquisitionInfo = acquisitionInfo )
+                 db_from_bruker(dataDirectory = input$rawFileDirectory,
+                                fileName = sanitizedNewExperimentName(),
+                                filePath = sqlDirectory$sqlDirectory,
+                                anyMissing = anyMissing(),
+                                acquisitionInfo = acquisitonInformation(),
+                                sampleMap  = NULL,
+                                tempDir = tempMZDir,
+                                ...)
                  
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE))
-                 IDBacApp::popup4()
+                 popup4()
                  
                })
   
@@ -308,10 +281,10 @@ convertOneBruker_Server <- function(input,
 #'
 #'  Rhandsontable 
 #'  
-#' @param df reactiveValues data frame input IDBacApp::nulledMap384Well()
+#' @param df reactiveValues data frame input nulledMap384Well()
 #'
 #' @return rhandsontable
-#' @export
+#' 
 #'
 sampleMapViewer <- function(df){
   rhandsontable::rhandsontable(df,
@@ -332,7 +305,7 @@ sampleMapViewer <- function(df){
 #' @param sampleData sample map rhandsontable
 #'
 #' @return none, side effect
-#' @export
+#' 
 #'
 sampleMaptoDF <- function(sampleData){
   as.data.frame(rhandsontable::hot_to_r(sampleData), 

@@ -1,13 +1,13 @@
 # context("test-databasetransfer")
 # 
 # a1 <- tempfile()
-# b1 <- IDBacApp::createPool(basename(a1),
+# b1 <- createPool(basename(a1),
 #                            gsub("\\\\", "/", dirname(a1)))
 # bb1 <- pool::poolCheckout(b1[[1]])
 # bb1path <- gsub("\\\\", "/", bb1@dbname)
 # 
 # a2 <- tempfile()
-# b2 <- IDBacApp::createPool(basename(a2),
+# b2 <- createPool(basename(a2),
 #                            gsub("\\\\", "/", dirname(a2)))
 # bb2 <- pool::poolCheckout(b2[[1]])
 # bb2path <- gsub("\\\\", "/", bb2@dbname)
@@ -15,7 +15,7 @@
 # 
 # 
 # test_that("SQL warning on attach", {
-#   expect_warning(IDBacApp::copyDB_dbAttach(bb1path, bb2))
+#   expect_warning(copyDB_dbAttach(bb1path, bb2))
 # })
 # 
 # z2 <- DBI::dbGetQuery(bb2, "PRAGMA database_list;")
@@ -42,13 +42,13 @@
 # # Setup new db ------------------------------------------------------------
 # 
 # a1 <- tempfile()
-# b1 <- IDBacApp::createPool(basename(a1),
+# b1 <- createPool(basename(a1),
 #                            gsub("\\\\", "/", dirname(a1)))
 # bb1 <- pool::poolCheckout(b1[[1]])
 # bb1path <- gsub("\\\\", "/", bb1@dbname)
 # 
 # a2 <- system.file(file.path("extdata", "sqlite","sample.sqlite"), package = 'IDBacApp')
-# b2 <- IDBacApp::createPool(basename(a2),
+# b2 <- createPool(basename(a2),
 #                            gsub("\\\\", "/", dirname(a2)))
 # bb2 <- pool::poolCheckout(b2[[1]])
 # bb2path <- gsub("\\\\", "/", bb2@dbname)
@@ -63,9 +63,9 @@
 # 
 # # metaData setup -------------------------------------------------------
 # 
-# IDBacApp::copyDB_setupMeta(newDBconn = bb1,
+# copyDB_setupMeta(newDBconn = bb1,
 #                            existingDBconn = bb2,
-#                            arch = IDBacApp::sqlTableArchitecture(1)
+#                            arch = sqlTableArchitecture(1)
 #                            )
 # a <- DBI::dbGetQuery(bb1,"SELECT * FROM metaData")
 # 
@@ -78,7 +78,7 @@
 # 
 # # XML setup ------------------------------------------------------------
 # 
-# IDBacApp::sql_CreatexmlTable(sqlConnection = bb1)
+# sql_CreatexmlTable(sqlConnection = bb1)
 # 
 # 
 # a <- DBI::dbGetQuery(bb1,"SELECT * FROM XML")
@@ -94,7 +94,7 @@
 # 
 # # masstable ---------------------------------------------------------------
 # 
-# IDBacApp::sql_CreatemassTable(sqlConnection = db1)
+# sql_CreatemassTable(sqlConnection = db1)
 # 
 # a <- DBI::dbGetQuery(bb1,"SELECT * FROM massTable")
 # 
@@ -107,9 +107,9 @@
 # # IndividualSpectra -------------------------------------------------------
 # 
 # 
-# IDBacApp::copyDB_setupIndividualSpectra(newDBconn = bb1,
+# copyDB_setupIndividualSpectra(newDBconn = bb1,
 #                                         existingDBconn = bb2,
-#                                         arch = IDBacApp::sqlTableArchitecture(1)
+#                                         arch = sqlTableArchitecture(1)
 # )
 # a <- DBI::dbGetQuery(bb1,"SELECT * FROM XML")
 # 

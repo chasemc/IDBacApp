@@ -4,8 +4,14 @@
 \alias{selectInjections_server}
 \title{Inject samples from another database into dendrogram}
 \usage{
-selectInjections_server(input, output, session, sqlDirectory,
-  availableExperiments, watchMainDb)
+selectInjections_server(
+  input,
+  output,
+  session,
+  sqlDirectory,
+  availableExperiments,
+  watchMainDb
+)
 }
 \arguments{
 \item{input}{shiny}

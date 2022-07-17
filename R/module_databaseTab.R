@@ -3,12 +3,12 @@
 #' @param id namespace
 #'
 #' @return ui for database UI
-#' @export
+#' 
 #'
 databaseTabUI <- function(id) {
   ns <- shiny::NS(id)
   
-  IDBacApp::databaseTabUIFunc(ns)
+  databaseTabUIFunc(ns)
     
   
   
@@ -27,7 +27,7 @@ databaseTabUI <- function(id) {
 #' @param availableExperiments availableExperiments 
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 databaseTabServer <- function(input,
@@ -37,16 +37,16 @@ databaseTabServer <- function(input,
                               availableExperiments){
   
   #outputs reactive inputs, access via $
-  selectedDB <- callModule(IDBacApp::databaseSelector_server,
+  selectedDB <- callModule(databaseSelector_server,
                            "databaseSelector",
                            h3Label = tags$h4("Select an experiment ", br(), "to work with:"),
                            availableExperiments = availableExperiments,
                            sqlDirectory = sqlDirectory)
   
   
-  shiny::callModule(IDBacApp::experimentSummary_Server,
+  shiny::callModule(experimentSummary_Server,
                     "experimentSummary",
-                    pool = selectedDB$userDBCon)
+                    pool = selectedDB$pool)
   
   
   
@@ -54,15 +54,15 @@ databaseTabServer <- function(input,
   
   
   
-  callModule(IDBacApp::updateMeta_server,
+  callModule(updateMeta_server,
              "updateMeta",
-             pool = selectedDB$userDBCon,
+             pool = selectedDB$pool,
              selectedDB = selectedDB$inputs)
   
   
   
   
-  callModule(IDBacApp::transferToNewDB_server,
+  callModule(transferToNewDB_server,
              "transferToNewDB",
              sqlDirectory = sqlDirectory,
              availableExperiments = availableExperiments)
@@ -76,10 +76,10 @@ databaseTabServer <- function(input,
   observeEvent(input$styleSelect, 
                ignoreInit = TRUE, {
                  ns <- session$ns
-                 IDBacApp::updateCollapse(session, ns("collapseSQLInstructions"))
-                 IDBacApp::updateCollapse(session, ns("modifySqlCollapse"))
+                 updateCollapse(session, ns("collapseSQLInstructions"))
+                 updateCollapse(session, ns("modifySqlCollapse"))
                  isolate(
-                   IDBacApp::updateCollapse(session, ns("collapseSQLSelector"))
+                   updateCollapse(session, ns("collapseSQLSelector"))
                  )
                }
   )
@@ -89,7 +89,7 @@ databaseTabServer <- function(input,
   
   # Export Data -------------------------------------------------------------
   
-  shiny::callModule(IDBacApp::exportSamples_server,
+  shiny::callModule(exportSamples_server,
                     "exportSamples",
                     availableExperiments = availableExperiments,
                     sqlDirectory = sqlDirectory)
@@ -103,7 +103,7 @@ databaseTabServer <- function(input,
   
   
   
-  return(list(pool = selectedDB$userDBCon,
+  return(list(pool = selectedDB$pool,
               move = selectedDB$inputs)
   )
   
@@ -121,7 +121,7 @@ databaseTabServer <- function(input,
 #' @param ns shiny namespace
 #'
 #' @return ui
-#' @export
+#' 
 #'
 
 databaseTabUIFunc <- function(ns) {
@@ -134,16 +134,16 @@ tagList(
            column(width = 12,
                   align = "center",
                   wellPanel(    
-                    IDBacApp::databaseSelector_UI(ns("databaseSelector"))
+                    databaseSelector_UI(ns("databaseSelector"))
                   )
            )
          )
   ),
   column(width = 8,
          fluidRow(
-           IDBacApp::bsCollapse(id = ns("collapseSQLInstructions"),
+           bsCollapse(id = ns("collapseSQLInstructions"),
                                 open = "Panel 1",
-                                IDBacApp::bsCollapsePanel(h4("Open\\Close Instructions", 
+                                bsCollapsePanel(h4("Open\\Close Instructions", 
                                                              align = "center"),
                                                           tags$b("What is an \"experiment\" in IDBac?"),
                                                           tags$ul(
@@ -165,40 +165,40 @@ tagList(
                                                             )
   ),
   fluidRow(
-    IDBacApp::bsCollapse(id = ns("modifySqlCollapse"),
-                         IDBacApp::bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
+    bsCollapse(id = ns("modifySqlCollapse"),
+                         bsCollapsePanel(h4("Click here to modify the selected experiment", align = "center"),  
                                                    tabsetPanel(id = ns("ExperimentNav"), 
                                                                
                                                                tabPanel("Add/modify information about samples",
                                                                         value = "experiment_metaData_tab",
-                                                                        IDBacApp::updateMeta_UI(ns("updateMeta"))
+                                                                        updateMeta_UI(ns("updateMeta"))
                                                                         
                                                                ),
                                                                tabPanel("Experiment Summary",
                                                                         value = "experiment_summary_tab",
-                                                                        IDBacApp::experimentSummary_UI(ns("experimentSummary"))
+                                                                        experimentSummary_UI(ns("experimentSummary"))
                                                                ) )
                          )
     )
   ),
   fluidRow(
-    IDBacApp::bsCollapse(id = ns("createDbFromDb"),
-                         IDBacApp::bsCollapsePanel(h4("Click here to copy samples from an existing experiment to a new experiment",
+    bsCollapse(id = ns("createDbFromDb"),
+                         bsCollapsePanel(h4("Click here to copy samples from an existing experiment to a new experiment",
                                                       align = "center"),  
                                                    wellPanel(
                                                      
-                                                     IDBacApp::transferToNewDB_UI(ns("transferToNewDB"))
+                                                     transferToNewDB_UI(ns("transferToNewDB"))
                                                    )
                                                    
                          )
     )
   ),
   fluidRow(
-    IDBacApp::bsCollapse(id = ns("exportmzml"),
-                         IDBacApp::bsCollapsePanel(h4("Click here to export samples as mzML",
+    bsCollapse(id = ns("exportmzml"),
+                         bsCollapsePanel(h4("Click here to export samples as mzML",
                                                       align = "center"),  
                                                    wellPanel(
-                                                     IDBacApp::exportSamples_ui(ns("exportSamples"))
+                                                     exportSamples_ui(ns("exportSamples"))
                                                    )
                                                    
                          )

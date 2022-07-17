@@ -4,7 +4,7 @@
 #' ui_smallMolMan
 #'
 #' @return UI
-#' @export
+#' 
 #'
 ui_smallMolMan <-  function(){
   
@@ -14,27 +14,27 @@ ui_smallMolMan <-  function(){
       
       sidebarPanel(width = 3,
                    style = 'padding:30px',
-                   IDBacApp::bsCollapse(id = "collapseManSettings",
+                   bsCollapse(id = "collapseManSettings",
                                         open = "Panel 1",
-                                        IDBacApp::bsCollapsePanel(p("Show/Hide MAN Settings", 
+                                        bsCollapsePanel(p("Show/Hide MAN Settings", 
                                                                     align = "center"),
                                                                   div(align = "center",
-                                                                      IDBacApp::peakRetentionSettings_UI("smallMirror",
-                                                                                                         minMass = 200, 
-                                                                                                         maxMass = 2000)
+                                                                      peakRetentionSettings_UI("smallMirror",
+                                                                                                         min_mass = 200, 
+                                                                                                         max_mass = 2000)
                                                                   )
                                         )),
                    uiOutput("matrixSelector"),
-                   IDBacApp::bsCollapse(id = "collapseManSettings",
+                   bsCollapse(id = "collapseManSettings",
                                         open = "Panel 1",
-                                        IDBacApp::bsCollapsePanel(p("Adjust MAN", 
+                                        bsCollapsePanel(p("Adjust MAN", 
                                                                     align = "center"),
-                                                                  IDBacApp::colorMANBy_UI("smMAN"),
-                                                                  IDBacApp::saveNetSVG("smMAN")
+                                                                  colorMANBy_UI("smMAN"),
+                                                                  saveNetSVG("smMAN")
                                         )),
-                   IDBacApp::bsCollapse(id = "collapseManSettings",
+                   bsCollapse(id = "collapseManSettings",
                                         open = "Panel 1",
-                                        IDBacApp::bsCollapsePanel(p("Adjust Protein Dendrogram", 
+                                        bsCollapsePanel(p("Adjust Protein Dendrogram", 
                                                                     align = "center"),
                                                                   numericInput("hclustHeightNetwork",
                                                                                label = h5(strong("Expand Tree")),
@@ -47,7 +47,7 @@ ui_smallMolMan <-  function(){
                                         )
                    ),
                    div(align = "center",
-                       IDBacApp::downloadSmNet_UI("smMAN")
+                       downloadSmNet_UI("smMAN")
                    ),
                    br(),
                    p(strong("Hint 1:"),
@@ -86,14 +86,15 @@ ui_smallMolMan <-  function(){
                               tabPanel(value = "smallMolMANUI","Small Molecule MAN",
                                        p("Nodes in the MAN are colored by modularity score, not the same colors as the protein dendrogram.",
                                          style = "font-size: 0.75em"),
-                                       IDBacApp::smMANPlot_UI("smMAN")),
+                                       verbatimTextOutput("noSmallPeaksText"),
+                                       smMANPlot_UI("smMAN")),
                               tabPanel(value = "smallMolPCAUi","Small Molecule PCA",
                                        
                                        plotly::plotlyOutput("smallMolPcaPlot")
                               ),
                               tabPanel(value = "smallMirror", "Small Molecule Mirror Plot",
-                                       IDBacApp::smallmirrorPlotsSampleSelect_UI("smallMirror"),
-                                       IDBacApp::smallmirrorPlots_UI("smallMirror"))
+                                       smallmirrorPlotsSampleSelect_UI("smallMirror"),
+                                       smallmirrorPlots_UI("smallMirror"))
                   )
                 )
       )

@@ -3,7 +3,7 @@
 \name{hashR}
 \alias{hashR}
 \title{hashR
-   Settings for hashing in IDBac}
+Settings for hashing in IDBac}
 \usage{
 hashR(input)
 }
@@ -15,5 +15,5 @@ sha1 hash
 }
 \description{
 hashR
-   Settings for hashing in IDBac
+Settings for hashing in IDBac
 }

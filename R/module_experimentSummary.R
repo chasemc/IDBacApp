@@ -4,7 +4,7 @@
 #' @param id namespace
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 experimentSummary_UI <- function(id) {
@@ -23,7 +23,7 @@ experimentSummary_UI <- function(id) {
 #' @param pool modules
 #'
 #' @return modules
-#' @export
+#' 
 #'
 
 experimentSummary_Server <- function(input,
@@ -36,13 +36,13 @@ experimentSummary_Server <- function(input,
   summarized <- reactive({
     checkedPool <- pool::poolCheckout(pool())
     
-    smallReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (Strain_ID) 
-                                       FROM IndividualSpectra
-                                       WHERE maxMass < 6000")
+    smallReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (strain_id) 
+                                       FROM spectra
+                                       WHERE max_mass < 6000")
     
-    proteinReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (Strain_ID) 
-                                       FROM IndividualSpectra
-                                       WHERE maxMass > 6000")
+    proteinReplicates <- DBI::dbGetQuery(checkedPool, "SELECT (strain_id) 
+                                       FROM spectra
+                                       WHERE max_mass > 6000")
     pool::poolReturn(checkedPool)
     
     

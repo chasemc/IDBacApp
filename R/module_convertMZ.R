@@ -4,7 +4,7 @@
 #' @param id NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 convertMZ_UI <- function(id){
@@ -47,16 +47,18 @@ convertMZ_UI <- function(id){
 #' @param session module
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
-#'
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
+#' 
 #' @return .
-#' @export
+#' 
 #'
 
 convertMZ_Server <-  function(input,
                               output,
                               session,
                               sqlDirectory,
-                              availableExperiments){
+                              availableExperiments,
+                              ...){
   
   
   
@@ -64,7 +66,7 @@ convertMZ_Server <-  function(input,
   #----
   mzmlRawFilesLocation <- reactive({
     if (input$mzmlRawFileDirectory > 0) {
-      loc <- IDBacApp::choose_dir()
+      loc <- choose_dir()
       
       if(!is.na(loc)){
         return(loc)
@@ -74,7 +76,7 @@ convertMZ_Server <-  function(input,
   
   
   output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    a <- gsub(" ", "", sanitize(input$newExperimentName))
     
     if (a == "") {
       "Once entered, the filename-friendly version of the entered name will appear here once. \n
@@ -94,9 +96,9 @@ convertMZ_Server <-  function(input,
       folders <- NULL
       
       # Get the folders contained within the chosen folder. Timer was taken out.
-      foldersInFolder <- tryCatch(IDBacApp::findmz(mzmlRawFilesLocation(),
-                                                   recursive = TRUE,
-                                                   full = FALSE),
+      foldersInFolder <- tryCatch(find_mz_files(mzmlRawFilesLocation(),
+                                                recursive = TRUE,
+                                                full = FALSE),
                                   error = function(x) paste("Timed out"),
                                   finally = function(x) x)
       
@@ -119,7 +121,7 @@ convertMZ_Server <-  function(input,
   
   #make sure the name is ok as a file name
   sanity <- reactive({
-    a <- IDBacApp::path_sanitize(input$newExperimentName)
+    a <- sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   
@@ -130,29 +132,33 @@ convertMZ_Server <-  function(input,
     req(!is.null(sanity()))
     req(sanity() != "")
     
-    IDBacApp::popup3()
+    popup3()
     
-    mzFilePaths <- IDBacApp::findmz(mzmlRawFilesLocation(),
-                                    recursive = TRUE,
-                                    full = TRUE)
-    
-    IDBacApp::processMZML(mzFilePaths = mzFilePaths,
-                          sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
-                          sqlDirectory = sqlDirectory$sqlDirectory,
-                          newExperimentName = sanity(),
-                          acquisitionInfo = NULL)
+    mzFilePaths <- find_mz_files(mzmlRawFilesLocation(),
+                                 recursive = TRUE,
+                                 full = TRUE)
     
     
+    idbac_create(fileName = sanity(),
+                 filePath = sqlDirectory$sqlDirectory)
+    idbacPool <- idbac_connect(fileName = sanity(),
+                               filePath = sqlDirectory$sqlDirectory)[[1]]
     
-    IDBacApp::popup4() 
     
+    db_from_mzml(mzFilePaths = mzFilePaths,
+                 sampleIds = base::basename(tools::file_path_sans_ext(mzFilePaths)),
+                 idbacPool = idbacPool,
+                 acquisitionInfo = NULL,
+                 ...)
+    
+    pool::poolClose(idbacPool)
+    
+    popup4() 
     
     # Update available experiments
     availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                     pattern = ".sqlite",
                                                                     full.names = FALSE))
-    
   })
- 
-
+  
 }

@@ -4,8 +4,14 @@
 \alias{convertMZ_Server}
 \title{convertMZ_Server}
 \usage{
-convertMZ_Server(input, output, session, sqlDirectory,
-  availableExperiments)
+convertMZ_Server(
+  input,
+  output,
+  session,
+  sqlDirectory,
+  availableExperiments,
+  ...
+)
 }
 \arguments{
 \item{input}{module}
@@ -17,6 +23,8 @@ convertMZ_Server(input, output, session, sqlDirectory,
 \item{sqlDirectory}{sqlDirectory}
 
 \item{availableExperiments}{availableExperiments}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 .

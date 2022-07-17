@@ -1,6 +1,6 @@
 context("test-samplemapviewer")
 
-a <- IDBacApp::sampleMapViewer(IDBacApp::nulledMap384Well())
+a <- sampleMapViewer(nulledMap384Well())
 
 
 test_that("samplemapviewer hasn't changed", {

@@ -4,7 +4,7 @@
 #' @param id namespace
 #'
 #' @return UI
-#' @export
+#' 
 #'
 sampleChooser_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -21,18 +21,16 @@ sampleChooser_UI <- function(id) {
 #' @param output shiny module
 #' @param session shiny module
 #' @param pool reactive object that contains a pool to currently-chosen database
-#' @param whetherProtein T  "allSamples takes precedence
-#' @param allSamples T/F
+#' @param type "protein" or "small"
 #'
 #' @return NA
-#' @export
+#' 
 #'
 sampleChooser_server <- function(input,
                                  output,
                                  session,
                                  pool,
-                                 whetherProtein = FALSE,
-                                 allSamples = FALSE){
+                                 type){
   
   chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   nams <- reactiveValues(av = NULL)
@@ -40,13 +38,13 @@ sampleChooser_server <- function(input,
   observe({
     chosenProteinSampleIDs$chosen <- NULL
     conn <- pool::poolCheckout(pool())
-    nams$av <- IDBacApp::availableSampleNames(checkedPool = conn,
-                                           whetherProtein = whetherProtein,
-                                           allSamples = allSamples)
+    nams$av <- idbac_available_samples(pool = conn,
+                                       type = "protein")
+    
     pool::poolReturn(conn)
     
   })
-
+  
   observeEvent(input$addSampleChooser, ignoreInit = TRUE, {
     chosenProteinSampleIDs$chosen <- input$addSampleChooser$right 
   })
@@ -54,14 +52,14 @@ sampleChooser_server <- function(input,
   
   
   output$chooseSamples <- renderUI({
-
-    tagList(IDBacApp::chooserInput(inputId = session$ns("addSampleChooser"),
-                                   leftLabel = "Available samples",
-                                   rightLabel = "Selected samples",
-                                   leftChoices = nams$av,
-                                   rightChoices = c(),
-                                   size = 10,
-                                   multiple = TRUE)
+    
+    tagList(chooserInput(inputId = session$ns("addSampleChooser"),
+                         leftLabel = "Available samples",
+                         rightLabel = "Selected samples",
+                         leftChoices = nams$av,
+                         rightChoices = c(),
+                         size = 10,
+                         multiple = TRUE)
     )
     
   })

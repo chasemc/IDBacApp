@@ -3,7 +3,7 @@
 #' @param id namespace
 #'
 #' @return ui
-#' @export
+#' 
 #'
 convertDataTab_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -26,7 +26,7 @@ convertDataTab_UI <- function(id) {
       value = ns("convert_mzml_nav"),
       wellPanel(class = "intro_WellPanel",
                 align = "center",
-                IDBacApp::convertMZ_UI(ns("beginWithMZ"))
+                convertMZ_UI(ns("beginWithMZ"))
       )
     ),
     tabPanel(
@@ -35,7 +35,7 @@ convertDataTab_UI <- function(id) {
       value = ns("convert_txt_nav"),
       wellPanel(class = "intro_WellPanel",
                 align = "center",
-                IDBacApp::convertDelim_UI(ns("convertDelim"))
+                convertDelim_UI(ns("convertDelim"))
       )
     ),
     tabPanel(
@@ -44,7 +44,7 @@ convertDataTab_UI <- function(id) {
       value = ns("convert_microtyper_nav"),
       wellPanel(class = "intro_WellPanel",
                 align = "center",
-                IDBacApp::convertMicrotyper_UI(ns("convertMicrotyper"))
+                convertMicrotyper_UI(ns("convertMicrotyper"))
       )
     )
   )
@@ -64,7 +64,7 @@ convertDataTab_UI <- function(id) {
 #' @param pwizAvailable whether msconvert was found, logical
 #'
 #' @return none, updates availableExperiments reactive value though
-#' @export
+#' 
 #'
 
 convertDataTab_Server <- function(input,
@@ -76,22 +76,25 @@ convertDataTab_Server <- function(input,
                                   pwizAvailable){
   
   
+  
   output$brukerConversionUi <- renderUI({
-    IDBacApp::controlBrukerDisplay(session,
-                                   pwizAvailable)
+    controlBrukerDisplay(session,
+                         pwizAvailable)
   })
   
   shiny::callModule(convertMZ_Server,
                     "beginWithMZ",
                     sqlDirectory = sqlDirectory,
-                    availableExperiments = availableExperiments)
+                    availableExperiments = availableExperiments,
+                    halfWindowSize = 20)
   
   
   shiny::callModule(convertOneBruker_Server,
                     "convertOneBruker",
                     tempMZDir = tempMZDir,
                     sqlDirectory = sqlDirectory,
-                    availableExperiments = availableExperiments)
+                    availableExperiments = availableExperiments,
+                    halfWindowSize = 20)
   
   
   
@@ -99,21 +102,18 @@ convertDataTab_Server <- function(input,
                     "convertDelim",
                     tempMZDir = tempMZDir,
                     sqlDirectory = sqlDirectory,
-                    availableExperiments = availableExperiments)
+                    availableExperiments = availableExperiments,
+                    halfWindowSize = 20)
   
   
   shiny::callModule(convertMicrotyper_Server,
                     "convertMicrotyper",
                     tempMZDir = tempMZDir,
                     sqlDirectory = sqlDirectory,
-                    availableExperiments = availableExperiments)
-  
-  
-  
+                    availableExperiments = availableExperiments,
+                    halfWindowSize = 20)
   
 }
-
-
 
 
 
@@ -124,7 +124,7 @@ convertDataTab_Server <- function(input,
 #' @param id NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 multipleMaldiPlates <- function(id){
@@ -202,12 +202,12 @@ multipleMaldiPlates <- function(id){
 #' @param ostest for testing function
 #'
 #' @return html
-#' @export
+#' 
 #'
 controlBrukerDisplay <- function(session, 
                                  pwizAvailable, 
                                  ostest = NULL){
-  if (IDBacApp::getOS(test = ostest) != "windows") {
+  if (getOS(test = ostest) != "windows") {
     wellPanel(class = "intro_WellPanel",
               align = "center",
               wellPanel(class = "intro_WellPanel",
@@ -218,7 +218,7 @@ controlBrukerDisplay <- function(session,
   } else if (pwizAvailable != "error") {
     wellPanel(class = "intro_WellPanel",
               align = "center",
-              IDBacApp::convertOneBruker_UI(session$ns("convertOneBruker"))
+              convertOneBruker_UI(session$ns("convertOneBruker"))
     )
   } else {
     wellPanel(class = "intro_WellPanel",

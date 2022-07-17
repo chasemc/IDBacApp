@@ -1,7 +1,7 @@
 #' ui_proteinClustering
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 ui_proteinClustering <- function() {
@@ -17,41 +17,41 @@ ui_proteinClustering <- function() {
                    div(p("Analysis Settings",
                          style = "text-decoration: underline; font-weight: bold; font-size: 1.2em;"),
                        align = "center"),
-                   IDBacApp::bsCollapse(id = "proteinPeakSettingsDropDown",
+                   bsCollapse(id = "proteinPeakSettingsDropDown",
                                         open = "Panel 1",
                                         
-                                        IDBacApp::bsCollapsePanel(title = div(p("Choose How Peaks Are Retained For Analyses", align = "center"),
+                                        bsCollapsePanel(title = div(p("Choose How Peaks Are Retained For Analyses", align = "center"),
                                                                               p("(Effects all protein analysis)",
                                                                                 style = "font-size: 0.75em",
                                                                                 align = "center")), 
                                                                   value = "proteinPeakSettingsDropDown2",
                                                                   div(align = "center",
-                                                                      IDBacApp::peakRetentionSettings_UI("protMirror")
+                                                                      peakRetentionSettings_UI("protMirror")
                                                                   )
                                                                   
                                                                   
                                         ),
-                                        IDBacApp::bsCollapsePanel(p("Select Samples", 
+                                        bsCollapsePanel(p("Select Samples", 
                                                                     align = "center"),
                                                                   value = "selectProteinSamplesDropDown",
                                                                   p("Move samples between boxes by clicking the samples's name
                                                                     and then an arrow. Samples in the right box will be used for analysis."),
-                                                                  IDBacApp::sampleChooser_UI("proteinSampleChooser")
+                                                                  sampleChooser_UI("proteinSampleChooser")
                                                                   
                                         ),
-                                        IDBacApp::bsCollapsePanel(p("Choose Clustering Settings", 
+                                        bsCollapsePanel(p("Choose Clustering Settings", 
                                                                     align = "center"),
                                                                   value = "proteinClustSettingsDropDown",
                                                                   div(align = "center",
-                                                                  IDBacApp::dendrogramCreatorUI("proteinHierOptions")
+                                                                  dendrogramCreatorUI("proteinHierOptions")
                                                                   )
                                         )           )
                  ),    
                  wellPanel(
                    div(p("Optional Settings", style = "text-decoration: underline; font-weight: bold; font-size: 1.2em;"), align = "center" ),
-                   IDBacApp::bsCollapse(id = "optionalProteinPeakSettingsDropDown",
+                   bsCollapse(id = "optionalProteinPeakSettingsDropDown",
                                         
-                                        IDBacApp::bsCollapsePanel(p("Adjust The Dendrogram", 
+                                        bsCollapsePanel(p("Adjust The Dendrogram", 
                                                                     align = "center"),
                                                                   value = "adjustProteinDendDropDown",
                                                                   shiny::numericInput("hclustHeight",
@@ -70,37 +70,37 @@ ui_proteinClustering <- function() {
                                                                                               "Hang labels" = "Phylogram"),
                                                                                selected = "Dendrogram")
                                                                   ),
-                                                                  fluidRow(IDBacApp::colordendLabelsUI("proth")),
-                                                                  fluidRow(IDBacApp::colordendLinesUI("proth")),
-                                                                  fluidRow(IDBacApp::addDotsActionUI("proth"))
+                                                                  fluidRow(colordendLabelsUI("proth")),
+                                                                  fluidRow(colordendLinesUI("proth")),
+                                                                  fluidRow(dendrogramActionsUI("proth"))
                                                                   
                                         ),
-                                        IDBacApp::bsCollapsePanel(p("Insert Samples From Another Experiment", 
+                                        bsCollapsePanel(p("Insert Samples From Another Experiment", 
                                                                     align = "center"),     
                                                                   value = "proteinInjectDropDown",
-                                                                  IDBacApp::selectInjections_UI("proteinInject")
+                                                                  selectInjections_UI("proteinInject")
                                                                   
                                         ),
-                                        IDBacApp::bsCollapsePanel(p("PCA, PCoA, t-SNE", 
+                                        bsCollapsePanel(p("PCA, PCoA, t-SNE", 
                                                                     align = "center"),   
                                                                   value = "proteinMuliDimDropDown",
                                                                   p("Principal Component Analysis (PCA)"),
-                                                                  IDBacApp::popupPlot_UI("proteinPCA", "PCA"),
+                                                                  popupPlot_UI("proteinPCA", "PCA"),
                                                                   
                                                                   p("Principal Coordinates Analysis (PCoA)"),
-                                                                  IDBacApp::popupPlot_UI("proteinPCOA", "PCoA"),
+                                                                  popupPlot_UI("proteinPCOA", "PCoA"),
                                                                   
                                                                   p("t-Distributed Stochastic Neighbor Embedding (t-SNE)"),
-                                                                  IDBacApp::popupPlotTsne_UI("tsnePanel")
+                                                                  popupPlotTsne_UI("tsnePanel")
                                                                   
                                                                   
                                         ),
-                                        IDBacApp::bsCollapsePanel(p("Save Dendrogram", 
+                                        bsCollapsePanel(p("Save Dendrogram", 
                                                                     align = "center"),   
                                                                   value = "proteinDendSaveDropDown",
                                                                   
-                                                                  IDBacApp::downloadHier("proth"),
-                                                                  IDBacApp::downloadSvg("proth")
+                                                                  downloadHier("proth"),
+                                                                  downloadSvg("proth")
                                         )             )
                  ),
                  br(),
@@ -120,19 +120,21 @@ ui_proteinClustering <- function() {
                            p("Note: Binning algorithm for mirror plot and dendrogram is different.", style = "font-size: 0.75em"),
                            br(),
                            fluidRow(
-                             IDBacApp::mirrorPlotsSettings_UI("protMirror")
+                             mirrorPlotsSettings_UI("protMirror")
                            ),
                            fluidRow(
-                             IDBacApp::mirrorPlots_UI("protMirror")
+                             mirrorPlots_UI("protMirror")
                            ),
                            fluidRow(
-                             IDBacApp::mirrorPlotDownload_UI("protMirror")
+                             mirrorPlotDownload_UI("protMirror")
                            )
                   ),
                   tabPanel(value = "proteinDendrogram","Dendrogram",
-                           IDBacApp::displayMissingProteinUI("proth"),
-                           IDBacApp::plotHier("proth"),
-                           IDBacApp::dendDotsUI("proth")
+                           displayMissingProteinUI("proth"),
+                           plotHier("proth"),
+                           dendDotsUI("proth"),
+                           appendDendLabsUI("proth")
+                           
                   )
       )
     )

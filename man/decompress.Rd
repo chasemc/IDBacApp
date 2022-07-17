@@ -3,7 +3,7 @@
 \name{decompress}
 \alias{decompress}
 \title{decompress
-   Settings for decompressing in IDBac, serialized called first}
+Settings for decompressing in IDBac, serialized called first}
 \usage{
 decompress(input)
 }
@@ -15,5 +15,5 @@ raw vector
 }
 \description{
 decompress
-   Settings for decompressing in IDBac, serialized called first
+Settings for decompressing in IDBac, serialized called first
 }

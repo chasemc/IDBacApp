@@ -3,7 +3,7 @@
 #' @param id NA
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 convertDelim_UI <- function(id){
@@ -34,13 +34,13 @@ convertDelim_UI <- function(id){
     actionButton(ns("delimitedDirectoryP"),
                  label = "Click to select folder containing protein data"),
     
-    verbatimTextOutput(ns("delimitedLocationPo"),
+    verbatimTextOutput(ns("proteinFiles"),
                        placeholder = FALSE),
     
     actionButton(ns("delimitedDirectorySM"),
                  label = "Click to select folder containing small-molecule data"),
     
-    verbatimTextOutput(ns("delimitedLocationSMo"),
+    verbatimTextOutput(ns("smallMolFiles"),
                        placeholder = FALSE),
     tags$hr(size = 20),
     p(strong("3: Begin conversion")),
@@ -64,9 +64,10 @@ convertDelim_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #'
 #' @return .
-#' @export
+#' 
 #'
 
 convertDelim_Server <- function(input,
@@ -74,27 +75,28 @@ convertDelim_Server <- function(input,
                                 session,
                                 tempMZDir,
                                 sqlDirectory,
-                                availableExperiments){
+                                availableExperiments,
+                                ...){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
   #----
-  delimitedLocationP <- reactive({
-    if (input$delimitedDirectoryP > 0) {
-      IDBacApp::choose_dir()
-    }
+  
+  selectedPaths <- reactiveValues()
+  
+  observeEvent(input$delimitedDirectoryP, {
+    selectedPaths$protein <- choose_dir()
+    
   })
   
-  # Reactive variable returning the user-chosen location of the raw delim files as string
-  #----
-  delimitedLocationSM <- reactive({
-    if (input$delimitedDirectorySM > 0) {
-      IDBacApp::choose_dir()
-    }
+  observeEvent(input$delimitedDirectorySM, {
+    selectedPaths$smallmol <- choose_dir()
+    
   })
+  
   
   output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    a <- gsub(" ", "", sanitize(input$newExperimentName))
     
     if (a == "") {
       "Once entered, the filename-friendly version of the entered name will appear here once. \n
@@ -107,16 +109,16 @@ convertDelim_Server <- function(input,
   
   # Creates text showing the user which directory they chose for raw files
   #----
-  output$delimitedLocationSMo <- renderText({
+  output$smallMolFiles <- renderText({
     req(smallMolFiles())
     names <- tools::file_path_sans_ext(base::basename(smallMolFiles()))
-     paste0(names, collapse = " \n ")
+    paste0(names, collapse = " \n ")
   })
   
   
   # Creates text showing the user which directory they chose for raw files
   #----
-  output$delimitedLocationPo <- renderText({
+  output$proteinFiles <- renderText({
     req(proteinFiles())
     names <- tools::file_path_sans_ext(base::basename(proteinFiles()))
     paste0(names, collapse = " \n ")
@@ -125,11 +127,11 @@ convertDelim_Server <- function(input,
   
   proteinFiles <- reactive({
     
-    if (is.null(delimitedLocationP())) {
+    if (is.null(selectedPaths$protein)) {
       NULL
     } else {
       
-      foldersInFolder <- list.files(delimitedLocationP(), 
+      foldersInFolder <- list.files(selectedPaths$protein, 
                                     recursive = TRUE, 
                                     full.names = TRUE,
                                     pattern = "(.txt|.tab|.csv)$") # Get the folders contained directly within the chosen folder.
@@ -140,10 +142,10 @@ convertDelim_Server <- function(input,
   
   smallMolFiles <- reactive({
     
-    if (is.null(delimitedLocationSM())) {
+    if (is.null(selectedPaths$smallmol)) {
       NULL
     } else {    
-      foldersInFolder <- list.files(delimitedLocationSM(), 
+      foldersInFolder <- list.files(selectedPaths$smallmol, 
                                     recursive = TRUE, 
                                     full.names = TRUE,
                                     pattern = "(.txt|.tab|.csv)$") # Get the folders contained directly within the chosen folder.
@@ -151,7 +153,7 @@ convertDelim_Server <- function(input,
   })
   
   sanity <- reactive({
-    a <- IDBacApp::path_sanitize(input$newExperimentName)
+    a <- sanitize(input$newExperimentName)
     gsub(" ","",a)
   })
   
@@ -159,10 +161,10 @@ convertDelim_Server <- function(input,
   #----
   observeEvent(input$runDelim, 
                ignoreInit = TRUE, {
-
+                 
                  req(!is.null(sanity()))
                  req(sanity() != "")
-                 req(!is.null(proteinFiles()) + !is.null(smallMolFiles()) > 0)
+                 req(is.null(proteinFiles()) + is.null(smallMolFiles()) < 2)
                  
                  if (is.null(smallMolFiles())) {
                    smallPaths <- NULL
@@ -170,8 +172,6 @@ convertDelim_Server <- function(input,
                  } else {
                    smallPaths <- smallMolFiles()
                    sampleNameSM <- tools::file_path_sans_ext(basename(smallPaths))
-                   sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-")[[1]][[1]]))
-                   
                  }
                  if (is.null(proteinFiles())) {
                    proteinPaths <- NULL
@@ -179,36 +179,40 @@ convertDelim_Server <- function(input,
                  } else {
                    proteinPaths <- proteinFiles()
                    sampleNameP <- tools::file_path_sans_ext(basename(proteinPaths))
-                   sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
                  }
                  
-                 keys <- IDBacApp::parseDelimitedMS(proteinPaths = proteinPaths,
-                                                    proteinNames = sampleNameP,
-                                                    smallMolPaths = smallPaths,
-                                                    smallMolNames = sampleNameSM,
-                                                    exportDirectory = tempMZDir,
-                                                    centroid = input$centroid)
+                 req(length(proteinPaths) == length(sampleNameP))
+                 req(length(smallPaths) == length(sampleNameSM))
+                 popup3()
                  
-                 IDBacApp::processMZML(mzFilePaths = keys$mzFilePaths,
-                                       sampleIds = keys$sampleIds,
-                                       sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = input$newExperimentName,
-                                       acquisitionInfo = NULL)
+                 keys <- delim_to_mzml(proteinPaths = proteinPaths,
+                                       proteinNames = sampleNameP,
+                                       smallMolPaths = smallPaths,
+                                       smallMolNames = sampleNameSM,
+                                       exportDirectory = tempMZDir,
+                                       centroid = input$centroid)
                  
-
-                 IDBacApp::popup4()
+                 idbac_create(fileName = input$newExperimentName,
+                              filePath = sqlDirectory$sqlDirectory)
+                 
+                 idbacPool <- idbac_connect(fileName = input$newExperimentName,
+                                            filePath = sqlDirectory$sqlDirectory)[[1]]
+                 
+                 db_from_mzml(mzFilePaths = unname(keys),
+                              sampleIds = names(keys),
+                              idbacPool = idbacPool,
+                              acquisitionInfo = NULL,
+                              ...)
+                 pool::poolClose(idbacPool)
+                 
+                 popup4()
                  
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",
                                                                                  full.names = FALSE))
+                 
+                 selectedPaths$smallmol <- NULL
+                 selectedPaths$protein <- NULL
                })
-  
-  
-  
-  
-} 
-
-
-
-
+}

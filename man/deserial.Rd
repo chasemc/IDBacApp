@@ -2,8 +2,8 @@
 % Please edit documentation in R/utils.R
 \name{deserial}
 \alias{deserial}
-\title{deserial
-   Settings for serializing in IDBac (convert to json)}
+\title{deserial spectrum json (single json array)
+Settings for serializing in IDBac (convert to json)}
 \usage{
 deserial(input)
 }
@@ -11,9 +11,9 @@ deserial(input)
 \item{input}{matrix or vector}
 }
 \value{
-JSON
+dataframe
 }
 \description{
-deserial
-   Settings for serializing in IDBac (convert to json)
+deserial spectrum json (single json array)
+Settings for serializing in IDBac (convert to json)
 }

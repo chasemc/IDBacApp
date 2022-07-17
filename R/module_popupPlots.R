@@ -4,7 +4,7 @@
 #' @param name name of plot-type (eg PCA, PCoA, t-SNE, scatter)
 #'
 #' @return PCA UI
-#' @export
+#' 
 #'
 popupPlot_UI <- function(id, name){
   ns <- shiny::NS(id)
@@ -25,7 +25,7 @@ popupPlot_UI <- function(id, name){
 #' @param plotTitle plot title
 #'
 #' @return NA
-#' @export
+#' 
 #'
 popupPlot_server <- function(input,
                              output,
@@ -53,7 +53,7 @@ popupPlot_server <- function(input,
                            colorsToUse, 
                            by = "nam")
     }
-    IDBacApp::plotly_3d_scatter(data = colorsToUse,
+    plotly_3d_scatter(data = colorsToUse,
                       plotTitle = plotTitle)
     
   })

@@ -4,8 +4,14 @@
 \alias{MAN_Server}
 \title{MAN_Server}
 \usage{
-MAN_Server(input, output, session, subtractedMatrixBlank, sampleIDs,
-  proteinDend)
+MAN_Server(
+  input,
+  output,
+  session,
+  subtractedMatrixBlank,
+  sampleIDs,
+  proteinDend
+)
 }
 \arguments{
 \item{input}{shiny input}

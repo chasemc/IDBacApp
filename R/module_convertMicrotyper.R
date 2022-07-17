@@ -3,7 +3,7 @@
 #' @param id NA
 #' 
 #' @return NA
-#' @export
+#' 
 #'
 
 convertMicrotyper_UI <- function(id){
@@ -62,9 +62,10 @@ convertMicrotyper_UI <- function(id){
 #' @param tempMZDir tempMZDir 
 #' @param sqlDirectory sqlDirectory 
 #' @param availableExperiments availableExperiments
+#' @param ... advanced arguments for MALDIquant, see [IDBacApp::processSmallMolSpectra()] and/or [IDBacApp::processProteinSpectra()]
 #'
-#' @return .
-#' @export
+#' @return none, side effect of creating database
+#' 
 #'
 
 convertMicrotyper_Server <- function(input,
@@ -72,14 +73,15 @@ convertMicrotyper_Server <- function(input,
                                      session,
                                      tempMZDir,
                                      sqlDirectory,
-                                     availableExperiments){
+                                     availableExperiments,
+                                     ...){
   
   
   # Reactive variable returning the user-chosen location of the raw delim files as string
   #----
   delimitedLocationP <- reactive({
     if (input$delimitedDirectoryP > 0) {
-      IDBacApp::choose_dir()
+      choose_dir()
     }
   })
   
@@ -88,14 +90,14 @@ convertMicrotyper_Server <- function(input,
   #----
   delimitedLocationSM <- reactive({
     if (input$delimitedDirectorySM > 0) {
-      IDBacApp::choose_dir()
+      choose_dir()
     }
   })
   
   
   
   output$newExperimentNameText <- renderText({
-    a <- gsub(" ", "", IDBacApp::path_sanitize(input$newExperimentName))
+    a <- gsub(" ", "", sanitize(input$newExperimentName))
     
     if (a == "") {
       "Once entered, the filename-friendly version of the entered name will appear here once. \n
@@ -109,7 +111,8 @@ convertMicrotyper_Server <- function(input,
   # Creates text showing the user which directory they chose for raw files
   #----
   output$delimitedLocationSMo <- renderText({
-    req(smallMolFiles())
+    shiny::validate(shiny::need(!is.null(delimitedLocationSM()),
+                                "No small molecule directory selected."))
     names <- tools::file_path_sans_ext(base::basename(smallMolFiles()))
     names <- paste0(names, collapse = " \n ")
   })
@@ -118,45 +121,29 @@ convertMicrotyper_Server <- function(input,
   # Creates text showing the user which directory they chose for raw files
   #----
   output$delimitedLocationPo <- renderText({
-    req(proteinFiles())
+    shiny::validate(shiny::need(!is.null(delimitedLocationP()),
+                                "No protein directory selected."))
     names <- tools::file_path_sans_ext(base::basename(proteinFiles()))
-    names <- paste0(names, collapse = " \n ")
+    paste0(names, collapse = " \n ")
     
   })
   
   proteinFiles <- reactive({
-    
-    if (is.null(delimitedLocationP())) {
-      NULL
-    } else {
-      
-      foldersInFolder <- list.files(delimitedLocationP(), 
-                                    recursive = FALSE, 
-                                    full.names = TRUE,
-                                    pattern = "(.txt)$") # Get the folders contained directly within the chosen folder.
-    }
+    getMicrotyperFiles(delimitedLocationP())
   })
   
-  
-  
   smallMolFiles <- reactive({
-    
-    if (is.null(delimitedLocationSM())) {
-      NULL
-    } else {    
-      foldersInFolder <- list.files(delimitedLocationSM(), 
-                                    recursive = FALSE, 
-                                    full.names = TRUE,
-                                    pattern = "(.txt)$") # Get the folders contained directly within the chosen folder.
-    }
+    getMicrotyperFiles(delimitedLocationSM())
   })
   
   
   
   
   sanity <- reactive({
-    a <- IDBacApp::path_sanitize(input$newExperimentName)
-    gsub(" ","",a)
+    a <- sanitize(input$newExperimentName)
+    gsub(" ",
+         "",
+         a)
   })
   
   
@@ -165,53 +152,40 @@ convertMicrotyper_Server <- function(input,
   #----
   observeEvent(input$runDelim, 
                ignoreInit = TRUE, {
-                 req(!is.null(sanity()))
-                 req(sanity() != "")
                  
-                 req(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0)
-                 req(length(proteinFiles()) + length(smallMolFiles()) > 0)
+                 # shiny::validate(shiny::need(!is.null(sanity()), 
+                 #                             "Filename must not be empty"))
+                 # 
+                 # shiny::validate(shiny::need(sanity() != "",
+                 #                             "Filename must not be empty"))
+                 # 
+                 # shiny::validate(shiny::need(is.null(proteinFiles()) + is.null(smallMolFiles()) > 0,
+                 #                             "No samples selected to process"))
+                 # 
+                 # shiny::validate(shiny::need(length(proteinFiles()) + length(smallMolFiles()) > 0,
+                 #                             "No samples selected to process"))
                  
+                 popup3()
                  
+                 keys <- run_microtyperTomzML(proteinPaths = proteinFiles(),
+                                              smallMolPaths = smallMolFiles(),
+                                              exportDirectory = tempMZDir)
                  
+                 idbac_create(fileName = input$newExperimentName,
+                              filePath = sqlDirectory$sqlDirectory)
                  
-                 if (is.null(smallMolFiles())) {
-                   smallPaths <- NULL
-                   sampleNameSM <- NULL
-                 } else {
-                   smallPaths <- smallMolFiles()
-                   sampleNameSM <- tools::file_path_sans_ext(basename(smallPaths))
-                   #   sampleNameSM <- unlist(lapply(sampleNameSM, function(x) strsplit(x, "-rep-")[[1]][[1]]))
-                   
-                 }
+                 idbacPool <- idbac_connect(fileName = input$newExperimentName,
+                                            filePath = sqlDirectory$sqlDirectory)[[1]]
                  
-                 if (is.null(proteinFiles())) {
-                   proteinPaths <- NULL
-                   sampleNameP <- NULL
-                 } else {
-                   proteinPaths <- proteinFiles()
-                   sampleNameP <- tools::file_path_sans_ext(basename(proteinPaths))
-                   #    sampleNameP <- unlist(lapply(sampleNameP, function(x) strsplit(x, "-")[[1]][[1]]))
-                 }
-                 
-                 
-                 
-                 
-                 keys <- IDBacApp::microtyperTomzML(proteinPaths = proteinPaths,
-                                                    proteinNames = sampleNameP,
-                                                    smallMolPaths = smallPaths,
-                                                    smallMolNames = sampleNameSM,
-                                                    exportDirectory = tempMZDir,
-                                                    centroid = input$centroid)
-                 
-                 IDBacApp::processMZML(mzFilePaths = keys$mzFilePaths,
-                                       sampleIds = keys$sampleIds,
-                                       sqlDirectory = sqlDirectory$sqlDirectory,
-                                       newExperimentName = input$newExperimentName,
-                                       acquisitionInfo  = NULL)
+                 db_from_mzml(mzFilePaths = keys$mzFilePaths,
+                              sampleIds = keys$sampleID,
+                              idbacPool = idbacPool,
+                              acquisitionInfo = NULL,
+                              ...)
+                 pool::poolClose(idbacPool)
                  
                  
-                 
-                 IDBacApp::popup4()
+                 popup4()
                  # Update available experiments
                  availableExperiments$db <- tools::file_path_sans_ext(list.files(sqlDirectory$sqlDirectory,
                                                                                  pattern = ".sqlite",

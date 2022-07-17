@@ -9,14 +9,14 @@ session$ns <- function(id)
 }
 
 
-a <- IDBacApp::controlBrukerDisplay(session, "error")
-b <- IDBacApp::controlBrukerDisplay(session, "literallyAnythingButerror")
-d <- IDBacApp::controlBrukerDisplay(session, "error", ostest = "sjd")
+a <- controlBrukerDisplay(session, "error")
+b <- controlBrukerDisplay(session, "literallyAnythingButerror")
+d <- controlBrukerDisplay(session, "error", ostest = "sjd")
 
 
 test_that("controlBrukerDisplay works", {
   skip_on_os(c("mac", "linux", "solaris"))
-  expect_known_hash(d, "6f0929edb5")
-  expect_known_hash(a, "fc64e7ede3")
-  expect_known_hash(b, "5a13d034da")
+  expect_known_hash(d, "4715410005")
+  expect_known_hash(a, "a877f31186")
+  expect_known_hash(b, "f74c411de8")
 })

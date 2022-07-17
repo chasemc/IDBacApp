@@ -4,8 +4,15 @@
 \alias{convertOneBruker_Server}
 \title{convertOneBruker_Server}
 \usage{
-convertOneBruker_Server(input, output, session, tempMZDir, sqlDirectory,
-  availableExperiments)
+convertOneBruker_Server(
+  input,
+  output,
+  session,
+  tempMZDir,
+  sqlDirectory,
+  availableExperiments,
+  ...
+)
 }
 \arguments{
 \item{input}{NS}
@@ -19,6 +26,8 @@ convertOneBruker_Server(input, output, session, tempMZDir, sqlDirectory,
 \item{sqlDirectory}{sqlDirectory}
 
 \item{availableExperiments}{availableExperiments}
+
+\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
 }
 \value{
 NA

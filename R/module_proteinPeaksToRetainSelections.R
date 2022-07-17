@@ -1,15 +1,15 @@
 #' peakRetentionSettings_UI
 #'
 #' @param id namespace
-#' @param minMass starting min mass
-#' @param maxMass starting max mass
+#' @param min_mass starting min mass
+#' @param max_mass starting max mass
 #'
 #' @return NA
-#' @export
+#' 
 #'
 peakRetentionSettings_UI <- function(id,
-                                     minMass = 3000, 
-                                     maxMass = 15000){
+                                     min_mass = 3000, 
+                                     max_mass = 15000){
   ns <- NS(id)
   
   tagList(
@@ -42,14 +42,14 @@ peakRetentionSettings_UI <- function(id,
     p("Lower Mass Cutoff"),
     numericInput(ns("lowerMass"), 
                  label = NULL,
-                 value = minMass,
+                 value = min_mass,
                  min = 1,
                  step = 50,
                  width = "50%"),
     p("Upper Mass Cutoff"),
     numericInput(ns("upperMass"), 
                  label = NULL,
-                 value = maxMass,
+                 value = max_mass,
                  step = 50,
                  width = "50%"),
     div(class = "tooltippy", "ppm tolerance", 
@@ -74,7 +74,7 @@ peakRetentionSettings_UI <- function(id,
 #' @param session shiny
 #'
 #' @return NA
-#' @export
+#' 
 #'
 
 peakRetentionSettings_Server <- function(input,

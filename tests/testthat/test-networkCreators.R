@@ -15,7 +15,7 @@ test_that("network from data frame works", {
 # modularity --------------------------------------------------------------
 
 
-z <- IDBacApp::modularityClustering(a)
+z <- modularityClustering(a)
 
 
 test_that("modularity scoring works", {
