@@ -8,7 +8,7 @@
 spectrumMatrixToMALDIqaunt <- function(input){
   
   
-  if (class(input) == "list") {
+  if (length(input) > 1 ){
     
     input <- lapply(input, 
                     function(x){
