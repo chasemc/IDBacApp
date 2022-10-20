@@ -29,10 +29,10 @@ IDBacApp::run_app()
 
 
 ### IDBac Method
+A detailed video and text version of the method and software is available in the following publication:
 
-[Click Here](https://github.com/chasemc/IDBacApp/blob/master/method.md#-idbac-instruction-manual-for-maldi-tof-ms-acquistion-and-data-analysis-)
-
-
+Clark, C. M., Costa, M. S., Conley, E., Li, E., Sanchez, L. M., Murphy, B. T. Using the Open-Source MALDI TOF-MS IDBac Pipeline for Analysis of Microbial Protein and Specialized Metabolite Data. J. Vis. Exp. (147), e59219, doi:10.3791/59219 (2019).
+[https://dx.doi.org/10.3791/59219](https://dx.doi.org/10.3791/59219)
 ### Citing IDBac
 
 Clark, C. M., Costa, M. S., Sanchez, L. M., & Murphy, B. T. (2018). Coupling MALDI-TOF mass spectrometry protein and specialized metabolite analyses to rapidly discriminate bacterial function. Proceedings of the National Academy of Sciences of the United States of America, 115(19), 4981-4986. [https://www.doi.org/10.1073/pnas.1801247115](https://www.doi.org/10.1073/pnas.1801247115)
