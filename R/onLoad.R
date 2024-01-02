@@ -3,5 +3,5 @@
 #'
 #' @noRd
 .onLoad <- function(...) {
-  shiny::addResourcePath('www', system.file('www', package = 'IDBacApp'))
+  shiny::addResourcePath("www", system.file("www", package = "IDBacApp"))
 }

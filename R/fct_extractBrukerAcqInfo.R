@@ -1,5 +1,3 @@
-
-
 #' Find a certain Bruker Acqus info
 #'
 #' @param acquisitonInformation parsed acqus
@@ -7,15 +5,13 @@
 #' @param type FUN.VALUE for vapply
 #'
 #' @return spot position vector
-#' 
+#'
 #'
 extractBrukerAcquistionInfo <- function(acquisitonInformation,
                                         name,
-                                        type){
-  
+                                        type) {
   vapply(acquisitonInformation,
-         function(x) x[[name, exact = TRUE]],
-         FUN.VALUE = type)
-  
+    function(x) x[[name, exact = TRUE]],
+    FUN.VALUE = type
+  )
 }
-

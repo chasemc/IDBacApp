@@ -4,15 +4,13 @@
 #' @param method distance metric to use
 #'
 #' @return distance matrix
-#' 
-
+#'
 distMatrix <- function(data,
-                       method){
-   validate(need(nrow(data) > 2, "Need >2 samples to cluster")) 
+                       method) {
+  validate(need(nrow(data) > 2, "Need >2 samples to cluster"))
   if (method == "cosine") {
     return(stats::as.dist(1 - coop::cosine(data)))
-  }else{
+  } else {
     return(stats::dist(Matrix::t(data), method = method))
   }
 }
-

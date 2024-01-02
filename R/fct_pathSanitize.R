@@ -1,4 +1,4 @@
-# This function was taken from the fs package by Jim Hester 
+# This function was taken from the fs package by Jim Hester
 # https://github.com/r-lib/fs/blob/6ee3322076bd2cb6b9cacd0b52ac1717b11996e4/R/sanitize.R
 #' Sanitize a filename by removing directory paths and invalid characters
 #'
@@ -17,27 +17,24 @@
 #'
 #' @seealso <https://www.npmjs.com/package/sanitize-filename>, upon which this
 #'   function is based.
-#' 
-#' 
+#'
+#'
 sanitize <- function(filename, replacement = "") {
   illegal <- "[/\\?<>\\:*|\":]"
   control <- "[[:cntrl:]]"
   reserved <- "^[.]+$"
   windows_reserved <- "^(con|prn|aux|nul|com[0-9]|lpt[0-9])([.].*)?$"
   windows_trailing <- "[. ]+$"
-  
   filename <- gsub(illegal, replacement, filename)
   filename <- gsub(control, replacement, filename)
   filename <- gsub(reserved, replacement, filename)
   filename <- gsub(windows_reserved, replacement, filename, ignore.case = TRUE)
   filename <- gsub(windows_trailing, replacement, filename)
-  filename <- gsub("\\.","_", filename)
+  filename <- gsub("\\.", "_", filename)
   filename <- gsub(" ", "_", filename)
-  
   while (grepl("__", filename)) {
-    filename <- gsub("__","_", filename)
+    filename <- gsub("__", "_", filename)
   }
-  
   # TODO: this substr should really be unicode aware, so it doesn't chop a
   # multibyte code point in half.
   filename <- substr(filename, 1, 50)

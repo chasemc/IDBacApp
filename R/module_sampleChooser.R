@@ -1,10 +1,9 @@
-
 #' UI for choosing all samples fromm an IDBac DB
 #'
 #' @param id namespace
 #'
 #' @return UI
-#' 
+#'
 #'
 sampleChooser_UI <- function(id) {
   ns <- shiny::NS(id)
@@ -12,8 +11,6 @@ sampleChooser_UI <- function(id) {
     uiOutput(ns("chooseSamples"))
   )
 }
-
-
 
 #' Server for choosing all samples fromm an IDBac DB
 #'
@@ -24,50 +21,41 @@ sampleChooser_UI <- function(id) {
 #' @param type "protein" or "small"
 #'
 #' @return NA
-#' 
+#'
 #'
 sampleChooser_server <- function(input,
                                  output,
                                  session,
                                  pool,
-                                 type){
-  
+                                 type) {
   chosenProteinSampleIDs <- reactiveValues(chosen = NULL)
   nams <- reactiveValues(av = NULL)
-  
   observe({
     chosenProteinSampleIDs$chosen <- NULL
     print(pool())
     conn <- pool::poolCheckout(pool())
-    nams$av <- idbac_available_samples(pool = conn,
-                                       type = "protein")
-    
-    pool::poolReturn(conn)
-    
-  })
-  
-  observeEvent(input$addSampleChooser, ignoreInit = TRUE, {
-    chosenProteinSampleIDs$chosen <- input$addSampleChooser$right 
-  })
-  
-  
-  
-  output$chooseSamples <- renderUI({
-    
-    tagList(chooserInput(inputId = session$ns("addSampleChooser"),
-                         leftLabel = "Available samples",
-                         rightLabel = "Selected samples",
-                         leftChoices = nams$av,
-                         rightChoices = c(),
-                         size = 10,
-                         multiple = TRUE)
+    nams$av <- idbac_available_samples(
+      pool = conn,
+      type = "protein"
     )
-    
+    pool::poolReturn(conn)
   })
-  
-  
-  
-  
-  
+  observeEvent(input$addSampleChooser, ignoreInit = TRUE, {
+    chosenProteinSampleIDs$chosen <- input$addSampleChooser$right
+  })
+
+  output$chooseSamples <- renderUI({
+    tagList(chooserInput(
+      inputId = session$ns("addSampleChooser"),
+      leftLabel = "Available samples",
+      rightLabel = "Selected samples",
+      leftChoices = nams$av,
+      rightChoices = c(),
+      size = 10,
+      multiple = TRUE
+    ))
+  })
+
+
   return(chosenProteinSampleIDs)
 }

@@ -3,21 +3,15 @@
 #' @param dataF dataframe
 #'
 #' @return igraph network
-#' 
 #'
-networkFromDF <- function(dataF){
-  
+#'
+networkFromDF <- function(dataF) {
   # Create igraph
   dataF <- igraph::graph_from_data_frame(dataF)
-  
-  #adjust wieght
+  # adjust wieght
   igraph::E(dataF)$Weight <- igraph::E(dataF)$Weight
-  
   return(dataF)
-  
 }
-
-
 
 
 #' Color network based on fastgreedy.community
@@ -26,15 +20,11 @@ networkFromDF <- function(dataF){
 #' @param hexColors colors as hex
 #'
 #' @return colored igraph
-#' 
+#'
 modularityClustering <- function(igraphNetwork,
-                                 hexColors = colorBlindPalette()[1:100]){
-  
+                                 hexColors = colorBlindPalette()[1:100]) {
   clusters <- igraph::as.undirected(igraphNetwork)
   clusters <- igraph::fastgreedy.community(clusters)
-  
   igraph::V(igraphNetwork)$color <- as.vector(hexColors)[clusters$membership]
-  
   return(igraphNetwork)
 }
-

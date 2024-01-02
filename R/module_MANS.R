@@ -1,24 +1,17 @@
-
 # Small molecule page -------------------------------------------------
 
-
-
-#nothing yet
+# nothing yet
 #' smallMolDendrogram_UI
 #'
 #' @param id .
 #'
 #' @return .
-#' 
 #'
-
-smallMolDendrogram_UI <- function(id){
+#'
+smallMolDendrogram_UI <- function(id) {
   ns <- shiny::NS(id)
-  #empty
+  # empty
 }
-
-
-
 
 
 
@@ -27,38 +20,34 @@ smallMolDendrogram_UI <- function(id){
 #' @param id shiny id
 #'
 #' @return shiny module ui
-#' 
 #'
-saveNetSVG <- function(id){
+#'
+saveNetSVG <- function(id) {
   ns <- shiny::NS(id)
-
   actionButton(ns("saveNetworkSvg"),
-               label = "Save MAN as SVG", 
-               icon = shiny::icon("download"))
-  
+    label = "Save MAN as SVG",
+    icon = shiny::icon("download")
+  )
 }
-
 
 # Brushable dend (protein) on small molecule page ---------------------------------------
 
-
 #' manPageProtDend_Server
 #'
-#' @param input input 
-#' @param output  output 
-#' @param session  session 
-#' @param dendrogram dendrogram 
-#' @param colorByLines colorByLines 
-#' @param cutHeightLines cutHeightLines 
-#' @param colorByLabels colorByLabels 
-#' @param cutHeightLabels cutHeightLabels 
-#' @param plotHeight plotHeight 
-#' @param plotWidth plotWidth 
+#' @param input input
+#' @param output  output
+#' @param session  session
+#' @param dendrogram dendrogram
+#' @param colorByLines colorByLines
+#' @param cutHeightLines cutHeightLines
+#' @param colorByLabels colorByLabels
+#' @param cutHeightLabels cutHeightLabels
+#' @param plotHeight plotHeight
+#' @param plotWidth plotWidth
 #'
 #' @return manPageProtDend_Server
-#' 
 #'
-
+#'
 manPageProtDend_Server <- function(input,
                                    output,
                                    session,
@@ -68,82 +57,65 @@ manPageProtDend_Server <- function(input,
                                    colorByLabels,
                                    cutHeightLabels,
                                    plotHeight,
-                                   plotWidth){
-  
-  output$hierOut <- renderPlot({
-    req(!is.null(dendrogram$dendrogram))
-    
-    par(mar = c(5, 5, 5, plotWidth()))
-    
-    plot(dendrogram$dendrogram, horiz = TRUE)
-    
-    if (!is.null(colorByLines())) {
-      if (colorByLines() == "height") {
-        graphics::abline(v = cutHeightLines(), lty = 2)
-        
+                                   plotWidth) {
+  output$hierOut <- renderPlot(
+    {
+      req(!is.null(dendrogram$dendrogram))
+      par(mar = c(5, 5, 5, plotWidth()))
+      plot(dendrogram$dendrogram, horiz = TRUE)
+      if (!is.null(colorByLines())) {
+        if (colorByLines() == "height") {
+          graphics::abline(v = cutHeightLines(), lty = 2)
+        }
       }
-    }
-    
-    if (!is.null(colorByLabels())) {
-      if (colorByLabels() == "height") {
-        graphics::abline(v = cutHeightLabels(), lty = 2)
+      if (!is.null(colorByLabels())) {
+        if (colorByLabels() == "height") {
+          graphics::abline(v = cutHeightLabels(), lty = 2)
+        }
       }
-    }
-    
-  }, height = plotHeight)
-  
-  
-  
-  
-  return(reactive(input$plot_brush))
-  
-}
+    },
+    height = plotHeight
+  )
 
+
+  return(reactive(input$plot_brush))
+}
 
 #' manPageProtDend_UI
 #'
 #' @param id namespace
 #'
 #' @return manPageProtDend_UI
-#' 
 #'
-
+#'
 manPageProtDend_UI <- function(id) {
   ns <- shiny::NS(id)
-  
   plotOutput(ns("hierOut"),
-             brush = ns("plot_brush"))
-  
-  
+    brush = ns("plot_brush")
+  )
 }
 
 
-
-
 # MAN Creator -------------------------------------------------------------
-
 
 #' smMANPlot_UI
 #'
 #' @param id .
 #'
-#' @return . 
-#' 
+#' @return .
 #'
-
+#'
 smMANPlot_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     shinycssloaders::withSpinner(
       sigmajs::sigmajsOutput(ns("metaboliteAssociationNetwork"),
-                             width = "100%",
-                             height = "500px")
+        width = "100%",
+        height = "500px"
+      )
     )
   )
 }
-
-
-
 
 
 #' downloadSmNet_UI
@@ -151,166 +123,130 @@ smMANPlot_UI <- function(id) {
 #' @param id shiny id
 #'
 #' @return shiny module ui
-#' 
 #'
-
+#'
 downloadSmNet_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
     downloadButton(ns("downloadSmallMolNetworkData"),
-                   label = "Download Current Network Data")
+      label = "Download Current Network Data"
+    )
   )
 }
-
 
 #' Color MAN settings
 #'
 #' @param id shiny id
 #'
 #' @return shiny module ui
-#' 
+#'
 #'
 colorMANBy_UI <- function(id) {
   ns <- shiny::NS(id)
-  selectInput(ns("colorMANBy"), 
-              label = h3("Color MAN by:"), 
-              choices = list("Color by Modularity" = "by_modularity",
-                             "Color by Dendrogram Labels" = "by_dendLabels"), 
-              selected = "by_modularity")
+  selectInput(ns("colorMANBy"),
+    label = h3("Color MAN by:"),
+    choices = list(
+      "Color by Modularity" = "by_modularity",
+      "Color by Dendrogram Labels" = "by_dendLabels"
+    ),
+    selected = "by_modularity"
+  )
 }
-
 #' MAN_Server
 #'
 #' @param input shiny input
 #' @param output shiny output
 #' @param session shiny session
-#' @param subtractedMatrixBlank subtractedMatrixBlank 
+#' @param subtractedMatrixBlank subtractedMatrixBlank
 #' @param sampleIDs sampleIDs
 #' @param proteinDend protein dendrogram
 #'
 #' @return NA
-#' 
+#'
 MAN_Server <- function(input,
                        output,
                        session,
                        subtractedMatrixBlank,
                        sampleIDs,
-                       proteinDend){
-  
-  
-  
-  
-  
+                       proteinDend) {
   #----
   smallMolNetworkDataFrame <- reactive({
     req(MALDIquant::isMassPeaksList(subtractedMatrixBlank$maldiQuantPeaks))
-    small_maldiquant_to_network(peakList = subtractedMatrixBlank$maldiQuantPeaks,
-                                  sampleIDs = subtractedMatrixBlank$sampleIDs)
-    
+    small_maldiquant_to_network(
+      peakList = subtractedMatrixBlank$maldiQuantPeaks,
+      sampleIDs = subtractedMatrixBlank$sampleIDs
+    )
   })
-  
   #----
-  
   output$downloadSmallMolNetworkData <- downloadHandler(
-    filename = function(){"SmallMolecule_Network.csv"
+    filename = function() {
+      "SmallMolecule_Network.csv"
     },
-    content = function(file){
+    content = function(file) {
       utils::write.csv(as.matrix(smallMolNetworkDataFrame()),
-                       paste0(file),
-                       row.names = FALSE)
+        paste0(file),
+        row.names = FALSE
+      )
     }
   )
-  
-  
+
   networkIgraph <- reactiveValues(graph = NULL)
-  
-  #This creates the network plot and calculations needed for such.
+  # This creates the network plot and calculations needed for such.
   #----
-  observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy),{
-    
-    
+  observeEvent(c(smallMolNetworkDataFrame(), input$colorMANBy), {
     networkIgraph$graph <- networkFromDF(smallMolNetworkDataFrame())
-    
     req(igraph::is.igraph(networkIgraph$graph))
     len <- length(attributes(igraph::V(networkIgraph$graph))$names)
     req(len > 0)
-    
     if (input$colorMANBy == "by_modularity") {
       networkIgraph$graph <- modularityClustering(networkIgraph$graph)
-      
     } else if (input$colorMANBy == "by_dendLabels") {
-      
-      
-      dendColors <- cbind(id = labels(proteinDend$dendrogram),
-                          color = dendextend::labels_col(proteinDend$dendrogram))
-      
+      dendColors <- cbind(
+        id = labels(proteinDend$dendrogram),
+        color = dendextend::labels_col(proteinDend$dendrogram)
+      )
       igraph::V(networkIgraph$graph)$color <- rep("#000000FF", len)
-      
       for (i in 1:len) {
         temp <- attributes(igraph::V(networkIgraph$graph))$names[i]
-        col <- dendColors[,2][dendColors[,1] %in% temp]
+        col <- dendColors[, 2][dendColors[, 1] %in% temp]
         if (length(col) > 0) {
           igraph::V(networkIgraph$graph)$color[i] <- col
         }
       }
     }
-    
     igraph::V(networkIgraph$graph)$label <- igraph::V(networkIgraph$graph)$name
-    
-    
+
     # Make sample nodes big
     sampleIndex <- which(igraph::V(networkIgraph$graph)$label %in% unique(smallMolNetworkDataFrame()$Source))
-    
     igraph::V(networkIgraph$graph)$size <- rep(5, length(igraph::V(networkIgraph$graph)))
-    
     igraph::V(networkIgraph$graph)$size[sampleIndex] <- 8
-    
     # make m/z nodes smaller
-    
   })
- 
-  
-  
+
   output$metaboliteAssociationNetwork <- sigmajs::renderSigmajs({
     req(igraph::is.igraph(networkIgraph$graph))
     len <- length(attributes(igraph::V(networkIgraph$graph))$names)
     req(len > 0)
-    
     igraph::E(networkIgraph$graph)$color <- "rgba(192, 192, 192, .8)"
-    
-    
-    
+
     sigmajs::sigmajs() %>%
-      sigmajs::sg_from_igraph(networkIgraph$graph) %>% 
-      sigmajs::sg_settings(drawLabels = TRUE,
-                           drawEdgeLabels = FALSE) %>% 
-      #sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight) %>% 
+      sigmajs::sg_from_igraph(networkIgraph$graph) %>%
+      sigmajs::sg_settings(
+        drawLabels = TRUE,
+        drawEdgeLabels = FALSE
+      ) %>%
+      # sigmajs::sg_force(edgeWeightInfluence = igraph::E(networkIgraph$graph)$Weight) %>%
       sigmajs::sg_force_start() %>% # start
       sigmajs::sg_force_stop(5000) %>% # stop after 5 seconds
       sigmajs::sg_drag_nodes()
-     
   })
-  
 
   observeEvent(input$saveNetworkSvg, {
-    
-    sigmajs::sigmajsProxy(session$ns("metaboliteAssociationNetwork")) %>% 
-      sigmajs::sg_export_svg_p(file = "MAN.svg", 
-                               size="100%", 
-                               labels = TRUE) 
+    sigmajs::sigmajsProxy(session$ns("metaboliteAssociationNetwork")) %>%
+      sigmajs::sg_export_svg_p(
+        file = "MAN.svg",
+        size = "100%",
+        labels = TRUE
+      )
   })
-  
-  
-    
-  
-  
 }
-
-
-
-
-
-
-
-
-

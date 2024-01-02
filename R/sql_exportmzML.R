@@ -1,19 +1,17 @@
-
 #' Export mzML/mzXML from SQLite DB
 #'
-#' @param pool pool connection, not-checked-out 
+#' @param pool pool connection, not-checked-out
 #' @param sampleIDs sample IDs
 #' @param saveToDir directory files should be saved to
 #'
 #' @return NA, files written
-#' 
+#'
 #' @importFrom DBI dbSendStatement dbBind dbHasCompleted dbFetch dbClearResult
 #' @importFrom pool poolReturn
 #' @importFrom glue glue
-
-exportmzML <- function (pool, sampleIDs, saveToDir) {
+exportmzML <- function(pool, sampleIDs, saveToDir) {
   conn <- pool::poolCheckout(pool)
-  query <-  dbSendStatement("SELECT xml.xml,spectra.strain_id
+  query <- dbSendStatement("SELECT xml.xml,spectra.strain_id
 FROM `xml`
 LEFT JOIN `spectra`
 ON xml.xml_hash = spectra.xml_hash
@@ -21,9 +19,8 @@ WHERE strain_id == ?
 GROUP BY strain_id;
 ", con = conn)
   dbBind(query, list(as.character(as.vector(sampleIDs))))
-  inc <- 100/length(sampleIDs)/5
-  counter = 0
-  
+  inc <- 100 / length(sampleIDs) / 5
+  counter <- 0
   while (!dbHasCompleted(query)) {
     chunk <- dbFetch(query, 5)
     counter <- counter - inc
@@ -40,18 +37,17 @@ GROUP BY strain_id;
       fl <- readLines(fileLoc[[i]], n = 20)
       if (any(grepl("<mzML", fl, ignore.case = TRUE))) {
         whichMZ <- "mzML"
-      }
-      else if (any(grepl("<mzXML", fl, ignore.case = TRUE))) {
+      } else if (any(grepl("<mzXML", fl, ignore.case = TRUE))) {
         whichMZ <- "mzXML"
-      }
-      else {
+      } else {
         stop("exportmzML() wasn't mzXML or mzML")
       }
-      file.rename(fileLoc, paste0(fileLoc, ".", 
-                                  whichMZ))
+      file.rename(fileLoc, paste0(
+        fileLoc, ".",
+        whichMZ
+      ))
       warning(glue("Exported: {ids[[i]]}"))
     }
-    
   }
   dbClearResult(query)
   poolReturn(conn)

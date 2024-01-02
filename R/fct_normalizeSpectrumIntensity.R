@@ -9,23 +9,22 @@
 #'
 #' @return MALDIquant mass spectrum
 #'
-normalizeSpectrumIntensity  <- function(spectrum,
-                                        smoothIntensityMethod = "SavitzkyGolay",
-                                        removeBaselineMethod = "TopHat",
-                                        calibrateIntensityMethod = "median",
-                                        transformIntensityMethod = "sqrt",
-                                        halfWindowSize = 20L){
-  
+normalizeSpectrumIntensity <- function(spectrum,
+                                       smoothIntensityMethod = "SavitzkyGolay",
+                                       removeBaselineMethod = "TopHat",
+                                       calibrateIntensityMethod = "median",
+                                       transformIntensityMethod = "sqrt",
+                                       halfWindowSize = 20L) {
   spectrum <- MALDIquant::smoothIntensity(spectrum,
-                                          method = smoothIntensityMethod,
-                                          halfWindowSize = halfWindowSize) 
+    method = smoothIntensityMethod,
+    halfWindowSize = halfWindowSize
+  )
   spectrum <- MALDIquant::removeBaseline(spectrum,
-                                         method = removeBaselineMethod)
-  spectrum <- MALDIquant::calibrateIntensity(spectrum, 
-                                             method = calibrateIntensityMethod)   
-  
+    method = removeBaselineMethod
+  )
+  spectrum <- MALDIquant::calibrateIntensity(spectrum,
+    method = calibrateIntensityMethod
+  )
   spectrum@intensity <- (spectrum@intensity / max(spectrum@intensity)) * 100
-  
   return(spectrum)
-  
 }

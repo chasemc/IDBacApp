@@ -19,18 +19,17 @@ db_from_bruker <- function(dataDirectory = NULL,
                            acquisitionInfo = NULL,
                            sampleMap = NULL,
                            tempDir = NULL,
-                           ...){
-  
+                           ...) {
   if (length(dataDirectory) != 1L) {
     stop("dataDirectory must be character of length 1")
   }
-  if (!dir.exists(dataDirectory)){
+  if (!dir.exists(dataDirectory)) {
     stop("dataDirectory doesn't exist")
   }
   if (length(filePath) != 1L) {
     stop("filePath must be character of length 1")
   }
-  if (!dir.exists(filePath)){
+  if (!dir.exists(filePath)) {
     stop("dataDirectory doesn't exist")
   }
   if (!inherits(sampleMap, c("matrix", "data.frame"))) {
@@ -42,48 +41,45 @@ db_from_bruker <- function(dataDirectory = NULL,
   if (!is.character(fileName)) {
     stop("fileName must be character")
   }
-  
-  
+
   # Get acqu info if not provided -------------------------------------------
   if (is.null(acquisitionInfo) | !inherits(acquisitionInfo, "list")) {
     acquisitionInfo <- readBrukerAcqus(dataDirectory)
   }
-  
   # Associate ids and spot-location in acqu ---------------------------------
-  
   if (is.null(anyMissing) | !inherits(anyMissing, "list")) {
-    
     spots <- unlist(lapply(acquisitionInfo, function(x) x$spot))
-    anyMissing <- findMissingSampleMapIds(spots = spots, 
-                                          sampleMap = sampleMap,
-                                          ignoreMissing = TRUE)
+    anyMissing <- findMissingSampleMapIds(
+      spots = spots,
+      sampleMap = sampleMap,
+      ignoreMissing = TRUE
+    )
   }
-  
-  acquisitionInfo <- split(acquisitionInfo, anyMissing$matching) 
-  
-  files <- lapply(acquisitionInfo, function(x){
+  acquisitionInfo <- split(acquisitionInfo, anyMissing$matching)
+  files <- lapply(acquisitionInfo, function(x) {
     lapply(x, function(y) y$file)
   })
-  
   brukerToMzml_popup()
-  
-  forProcessing <- proteoWizConvert(msconvertPath = "",
-                                    samplePathList = files,
-                                    convertWhere = tempDir)
+  forProcessing <- proteoWizConvert(
+    msconvertPath = "",
+    samplePathList = files,
+    convertWhere = tempDir
+  )
   popup3()
-  
-  idbac_create(fileName = fileName,
-               filePath = filePath)
-  
-  idbacPool <- idbac_connect(fileName = fileName,
-                             filePath = filePath)[[1]]
-  
-  db_from_mzml(mzFilePaths = forProcessing$mzFile,
-               sampleIds = forProcessing$sampleID,
-               idbacPool = idbacPool,
-               acquisitionInfo = acquisitionInfo,
-               ...)
-  
+  idbac_create(
+    fileName = fileName,
+    filePath = filePath
+  )
+  idbacPool <- idbac_connect(
+    fileName = fileName,
+    filePath = filePath
+  )[[1]]
+  db_from_mzml(
+    mzFilePaths = forProcessing$mzFile,
+    sampleIds = forProcessing$sampleID,
+    idbacPool = idbacPool,
+    acquisitionInfo = acquisitionInfo,
+    ...
+  )
   pool::poolClose(idbacPool)
-  
 }

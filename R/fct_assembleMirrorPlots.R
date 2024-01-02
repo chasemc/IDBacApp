@@ -25,55 +25,55 @@ assembleMirrorPlots <- function(sampleID1,
                                 pool1,
                                 pool2,
                                 normalizeSpectra = FALSE,
-                                ...){
-  
+                                ...) {
   mirrorPlotEnv <- new.env(parent = parent.frame())
-  
-  
+
   # get protein peak data for the 1st mirror plot selection
   # need(checkSinglePool(pool1))
   # need(checkSinglePool(pool2))
   # need(!is.null(sampleID1))
   # need(!is.null(sampleID2))
-  
   mirrorPlotEnv$sampleIDOne <- sampleID1
   mirrorPlotEnv$sampleIDTwo <- sampleID2
-  
-  
-  mirrorPlotEnv$peaksSampleOne <- idbac_get_peaks(pool = pool1,
-                                                  sampleIDs = sampleID1,
-                                                  minFrequency = minFrequency,
-                                                  lowerMassCutoff = lowerMassCutoff,
-                                                  upperMassCutoff = upperMassCutoff,
-                                                  minSNR = minSNR,
-                                                  tolerance = tolerance,
-                                                  type = "protein",
-                                                  mergeReplicates = TRUE)[[1]] 
-  
-  
-  mirrorPlotEnv$peaksSampleTwo <- idbac_get_peaks(pool = pool2,
-                                                  sampleIDs = sampleID2,
-                                                  minFrequency = minFrequency,
-                                                  lowerMassCutoff = lowerMassCutoff,
-                                                  upperMassCutoff = upperMassCutoff,
-                                                  minSNR = minSNR,
-                                                  tolerance = tolerance,
-                                                  type = "protein",
-                                                  mergeReplicates = TRUE)[[1]]
-  
-  
+
+  mirrorPlotEnv$peaksSampleOne <- idbac_get_peaks(
+    pool = pool1,
+    sampleIDs = sampleID1,
+    minFrequency = minFrequency,
+    lowerMassCutoff = lowerMassCutoff,
+    upperMassCutoff = upperMassCutoff,
+    minSNR = minSNR,
+    tolerance = tolerance,
+    type = "protein",
+    mergeReplicates = TRUE
+  )[[1]]
+
+  mirrorPlotEnv$peaksSampleTwo <- idbac_get_peaks(
+    pool = pool2,
+    sampleIDs = sampleID2,
+    minFrequency = minFrequency,
+    lowerMassCutoff = lowerMassCutoff,
+    upperMassCutoff = upperMassCutoff,
+    minSNR = minSNR,
+    tolerance = tolerance,
+    type = "protein",
+    mergeReplicates = TRUE
+  )[[1]]
+
   shiny::validate(
-    shiny::need(sum(length(mirrorPlotEnv$peaksSampleOne@mass),
-                    length(mirrorPlotEnv$peaksSampleTwo@mass)) > 0,
-                "No peaks found in either sample, double-check the settings or your raw data.")
+    shiny::need(
+      sum(
+        length(mirrorPlotEnv$peaksSampleOne@mass),
+        length(mirrorPlotEnv$peaksSampleTwo@mass)
+      ) > 0,
+      "No peaks found in either sample, double-check the settings or your raw data."
+    )
   )
   # Binpeaks for the two samples so we can color code similar peaks within the plot
   # Note: different binning algorithm than used for hierarchical clustering
   temp <- MALDIquant::binPeaks(c(mirrorPlotEnv$peaksSampleOne, mirrorPlotEnv$peaksSampleTwo), tolerance = tolerance)
-  
   mirrorPlotEnv$peaksSampleOne <- temp[[1]]
   mirrorPlotEnv$peaksSampleTwo <- temp[[2]]
-  
   # Set all peak colors for positive spectrum as red
   mirrorPlotEnv$SampleOneColors <- rep("red", length(mirrorPlotEnv$peaksSampleOne@mass))
   # Which peaks top samaple one are also in the bottom sample:
@@ -81,41 +81,37 @@ assembleMirrorPlots <- function(sampleID1,
   # Color matching peaks in positive spectrum blue
   mirrorPlotEnv$SampleOneColors[temp] <- "blue"
   remove(temp)
-  
   conn <- pool::poolCheckout(pool1)
-  
-  
-  mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = pool1,
-                                                                                      sampleIDs = sampleID1, 
-                                                                                      type = "protein"))
-  
-  
+
+  mirrorPlotEnv$spectrumSampleOne <- MALDIquant::averageMassSpectra(idbac_get_spectra(
+    pool = pool1,
+    sampleIDs = sampleID1,
+    type = "protein"
+  ))
+
   if (normalizeSpectra) {
-    mirrorPlotEnv$spectrumSampleOne <- normalizeSpectrumIntensity(spectrum = mirrorPlotEnv$spectrumSampleOne,
-                                                                  ...)
-    
+    mirrorPlotEnv$spectrumSampleOne <- normalizeSpectrumIntensity(
+      spectrum = mirrorPlotEnv$spectrumSampleOne,
+      ...
+    )
   }
-  
-  
+
   pool::poolReturn(conn)
   conn <- pool::poolCheckout(pool2)
-  
-  
-  mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(idbac_get_spectra(pool = pool2,
-                                                                                      sampleIDs = sampleID2, 
-                                                                                      type = "protein"))
-  
-  
-  
+
+  mirrorPlotEnv$spectrumSampleTwo <- MALDIquant::averageMassSpectra(idbac_get_spectra(
+    pool = pool2,
+    sampleIDs = sampleID2,
+    type = "protein"
+  ))
+
   if (normalizeSpectra) {
-    mirrorPlotEnv$spectrumSampleTwo <- normalizeSpectrumIntensity(spectrum = mirrorPlotEnv$spectrumSampleTwo,
-                                                                  ...)
-    
-    
+    mirrorPlotEnv$spectrumSampleTwo <- normalizeSpectrumIntensity(
+      spectrum = mirrorPlotEnv$spectrumSampleTwo,
+      ...
+    )
   }
-  
   pool::poolReturn(conn)
-  
-  
+
   return(mirrorPlotEnv)
 }

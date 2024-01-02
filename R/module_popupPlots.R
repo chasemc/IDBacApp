@@ -4,9 +4,9 @@
 #' @param name name of plot-type (eg PCA, PCoA, t-SNE, scatter)
 #'
 #' @return PCA UI
-#' 
 #'
-popupPlot_UI <- function(id, name){
+#'
+popupPlot_UI <- function(id, name) {
   ns <- shiny::NS(id)
   tagList(
     actionButton(ns("openAbsPanel"), glue::glue("Open {name} plot")),
@@ -14,9 +14,8 @@ popupPlot_UI <- function(id, name){
   )
 }
 
-
 #' popupPlot_server
-#' 
+#'
 #' @param input shiny nput
 #' @param output shiny output
 #' @param session shiny session
@@ -25,87 +24,87 @@ popupPlot_UI <- function(id, name){
 #' @param plotTitle plot title
 #'
 #' @return NA
-#' 
+#'
 #'
 popupPlot_server <- function(input,
                              output,
                              session,
                              dataFrame,
                              namedColors,
-                             plotTitle){ 
-  
-  
+                             plotTitle) {
   output$plot <- plotly::renderPlotly({
-    req(nrow(dataFrame()) > 2,
-        ncol(dataFrame()) > 2)
-    
-    
+    req(
+      nrow(dataFrame()) > 2,
+      ncol(dataFrame()) > 2
+    )
+
     if (is.null(namedColors())) {
-      colorsToUse <- cbind.data.frame(fac = rep("#000000", nrow(dataFrame())), 
-                                      dataFrame())
+      colorsToUse <- cbind.data.frame(
+        fac = rep("#000000", nrow(dataFrame())),
+        dataFrame()
+      )
     } else {
-      
-      colorsToUse <- cbind.data.frame(fac = as.vector(namedColors()), 
-                                      nam = (names(namedColors())))
-      
-      
+      colorsToUse <- cbind.data.frame(
+        fac = as.vector(namedColors()),
+        nam = (names(namedColors()))
+      )
+
       colorsToUse <- merge(dataFrame(),
-                           colorsToUse, 
-                           by = "nam")
+        colorsToUse,
+        by = "nam"
+      )
     }
-    plotly_3d_scatter(data = colorsToUse,
-                      plotTitle = plotTitle)
-    
+    plotly_3d_scatter(
+      data = colorsToUse,
+      plotTitle = plotTitle
+    )
   })
-  
   observeEvent(input$closeAbsPanel, {
     output$absPanel <- renderUI({
       # Intentionally Blank
     })
-  })  
-  
+  })
   observeEvent(input$openAbsPanel,
-               ignoreInit = T,
-               ignoreNULL = T,
-               {
-                 
-                 if (nrow(dataFrame()) < 2 || ncol(dataFrame()) < 3) {
-                   output$absPanel <- renderUI(
-                     glue::glue("Select more samples for {plotTitle}")
-                   )
-                 } else {
-                   
-                   
-                   output$absPanel <- renderUI(
-                     
-                     shiny::fixedPanel(
-                       class = "popup_Plots",
-                       top = "20%",
-                       bottom = "20%",
-                       width = "60%",
-                       draggable = F,
-                       style = "z-index:1002;",
-                       p(plotTitle),
-                       absolutePanel(
-                         top = "0%",
-                         bottom = "95%",
-                         right = "5%",
-                         left = "95%",
-                         fixed = F,
-                         shiny::actionButton(session$ns("closeAbsPanel"),
-                                             class = "closeX",
-                                             label = "",
-                                             icon = icon("far fa-window-close"))
-                       ),
-                       fluidRow(   
-                         shinycssloaders::withSpinner(
-                           plotly::plotlyOutput(session$ns("plot"),
-                                                width = "100%", 
-                                                height = "100%")
-                         )
-                       )
-                     )
-                   )
-                 }
-               })
+    ignoreInit = T,
+    ignoreNULL = T,
+    {
+      if (nrow(dataFrame()) < 2 || ncol(dataFrame()) < 3) {
+        output$absPanel <- renderUI(
+          glue::glue("Select more samples for {plotTitle}")
+        )
+      } else {
+        output$absPanel <- renderUI(
+          shiny::fixedPanel(
+            class = "popup_Plots",
+            top = "20%",
+            bottom = "20%",
+            width = "60%",
+            draggable = F,
+            style = "z-index:1002;",
+            p(plotTitle),
+            absolutePanel(
+              top = "0%",
+              bottom = "95%",
+              right = "5%",
+              left = "95%",
+              fixed = F,
+              shiny::actionButton(session$ns("closeAbsPanel"),
+                class = "closeX",
+                label = "",
+                icon = icon("far fa-window-close")
+              )
+            ),
+            fluidRow(
+              shinycssloaders::withSpinner(
+                plotly::plotlyOutput(session$ns("plot"),
+                  width = "100%",
+                  height = "100%"
+                )
+              )
+            )
+          )
+        )
+      }
+    }
+  )
 }

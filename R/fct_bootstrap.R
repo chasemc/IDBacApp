@@ -1,5 +1,4 @@
-#From: https://github.com/sgibb/bootstrap
-
+# From: https://github.com/sgibb/bootstrap
 ## Copyright 2013 Sebastian Gibb
 ## <mail@sebastiangibb.de>
 ##
@@ -15,7 +14,6 @@
 ##
 ## See <http://www.gnu.org/licenses/>
 
-
 #' Bootstrap
 #'
 #' @param x see: https://github.com/sgibb/bootstrap
@@ -23,42 +21,33 @@
 #' @param n see: https://github.com/sgibb/bootstrap
 #'
 #' @return see: https://github.com/sgibb/bootstrap
-#' 
 #'
-bootstrap <- function(x, fun, n=1000L) {
+#'
+bootstrap <- function(x, fun, n = 1000L) {
   fun <- match.fun(fun)
-  
-  origin <- .clust(x, fun=fun)
-  
+  origin <- .clust(x, fun = fun)
   v <- lapply(seq_len(n), function(y, origin, size, fun, nco) {
-    current <- .clust(.resample(x, size=size), fun=fun)
+    current <- .clust(.resample(x, size = size), fun = fun)
     return(.calculateMatches(origin, current, nco))
-  }, origin=origin, size=ncol(x), fun=fun, nco=ncol(origin))
-  
-  return(colSums(do.call(rbind, v))/n)
+  }, origin = origin, size = ncol(x), fun = fun, nco = ncol(origin))
+  return(colSums(do.call(rbind, v)) / n)
 }
-
-
-
 
 
 ## based on pvclust:::hc2split (pvclust 1.2-2) by
 ## Ryota Suzuki <suzuki@ef-prime.com>
-#' as.binary.matrix.hclust 
+#' as.binary.matrix.hclust
 #'
 #' @param x see: https://github.com/sgibb/bootstrap
 #'
 #' @return see: https://github.com/sgibb/bootstrap
-#' 
+#'
 #'
 as.binary.matrix.hclust <- function(x) {
   nr <- as.integer(nrow(x$merge))
-  
-  m <- matrix(0L, nrow=nr, ncol=nr+1L)
-  
+  m <- matrix(0L, nrow = nr, ncol = nr + 1L)
   for (i in seq_len(nr)) {
     left <- x$merge[i, 1L]
-    
     if (left < 0L) {
       ## negative values correspond to observations
       m[i, -left] <- 1L
@@ -66,21 +55,17 @@ as.binary.matrix.hclust <- function(x) {
       ## positive values correspond to childcluster
       m[i, ] <- m[left, ]
     }
-    
     right <- x$merge[i, 2L]
-    
     if (right < 0L) {
       ## negative values correspond to observations
       m[i, -right] <- 1L
     } else {
       ## positive values correspond to childcluster
-      m[i, ] <- m[i,] | m[right, ]
+      m[i, ] <- m[i, ] | m[right, ]
     }
   }
-  
   return(m)
 }
-
 ## based on pvclust:::hc2axes (pvclust 1.2-2) by
 ## Ryota Suzuki <suzuki@ef-prime.com>
 #' .text.coord.hclust
@@ -88,19 +73,18 @@ as.binary.matrix.hclust <- function(x) {
 #' @param x  see: https://github.com/sgibb/bootstrap
 #'
 #' @return see: https://github.com/sgibb/bootstrap
-#'  
+#'
 #'
 .text.coord.hclust <- function(x) {
   nr <- as.integer(nrow(x$merge))
-  
-  p <- matrix(c(rep(0L, nr), x$height), nrow=nr, ncol=2, byrow=FALSE,
-              dimnames=list(c(), c("x", "y")))
+  p <- matrix(c(rep(0L, nr), x$height),
+    nrow = nr, ncol = 2, byrow = FALSE,
+    dimnames = list(c(), c("x", "y"))
+  )
   o <- order(x$order)
   tmp <- double(2)
-  
   for (i in seq_len(nr)) {
     left <- x$merge[i, 1L]
-    
     if (left < 0L) {
       ## negative values correspond to observations
       tmp[1L] <- o[-left]
@@ -108,9 +92,7 @@ as.binary.matrix.hclust <- function(x) {
       ## positive values correspond to childcluster
       tmp[1L] <- p[left, 1L]
     }
-    
     right <- x$merge[i, 2L]
-    
     if (right < 0L) {
       ## negative values correspond to observations
       tmp[2L] <- o[-right]
@@ -118,13 +100,10 @@ as.binary.matrix.hclust <- function(x) {
       ## positive values correspond to childcluster
       tmp[2L] <- p[right, 1L]
     }
-    
     p[i, 1L] <- mean(tmp)
   }
-  
   return(p)
 }
-
 #' Print bootstrap values.
 #'
 #' This function prints bootstrap values to the corresponding node.
@@ -136,31 +115,28 @@ as.binary.matrix.hclust <- function(x) {
 #'
 #' @seealso \code{\link{bootstrap}}
 #' @rdname bootlabels
-#' 
-bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
+#'
+bootlabels.hclust <- function(x, bootstrapValues, horiz = FALSE, ...) {
   p <- .text.coord.hclust(x)
   if (horiz) {
-    p[, c(2,1)] <- p
+    p[, c(2, 1)] <- p
   }
-  
   labs <- sprintf("%.2f", bootstrapValues)
-  text(p, labels=labs, ...)
+  text(p, labels = labs, ...)
   invisible(NULL)
 }
-
 #' .clust
 #'
 #' @param x   see: https://github.com/sgibb/bootstrap
 #' @param fun   see: https://github.com/sgibb/bootstrap
 #'
 #' @return  see: https://github.com/sgibb/bootstrap
-#' 
+#'
 #'
 .clust <- function(x, fun) {
   hc <- fun(x)
   return(as.binary.matrix.hclust(hc))
 }
-
 #' .calculateMatches
 #'
 #' @param origin   see: https://github.com/sgibb/bootstrap
@@ -168,30 +144,25 @@ bootlabels.hclust <- function(x, bootstrapValues, horiz=FALSE, ...) {
 #' @param nc   see: https://github.com/sgibb/bootstrap
 #'
 #' @return  see: https://github.com/sgibb/bootstrap
-#' 
 #'
-.calculateMatches <- function(origin, current, nc=ncol(origin)) {
+#'
+.calculateMatches <- function(origin, current, nc = ncol(origin)) {
   ## both 1
   one <- tcrossprod(origin, current)
   ## both 0
-  zero <- tcrossprod(1-origin, 1-current)
-  
+  zero <- tcrossprod(1 - origin, 1 - current)
   ## calc matches
   return(rowSums(one + zero == nc))
 }
-
 #' resample
 #'
 #' @param x  see: https://github.com/sgibb/bootstrap
 #' @param size  see: https://github.com/sgibb/bootstrap
 #'
 #' @return see: https://github.com/sgibb/bootstrap
-#' 
 #'
-.resample <- function(x, size=ncol(x)) {
-  sel <- sample.int(ncol(x), size=size, replace=TRUE)
+#'
+.resample <- function(x, size = ncol(x)) {
+  sel <- sample.int(ncol(x), size = size, replace = TRUE)
   return(x[, sel])
 }
-
-
-

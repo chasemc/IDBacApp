@@ -3,13 +3,13 @@
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' 
 #'
-sql_create_spectra_table <- function(sqlConnection){
+#'
+sql_create_spectra_table <- function(sqlConnection) {
   if (!DBI::dbExistsTable(sqlConnection, "spectra")) {
-    
-    a <- DBI::dbSendStatement(sqlConnection, 
-                              "CREATE TABLE `spectra` (
+    a <- DBI::dbSendStatement(
+      sqlConnection,
+      "CREATE TABLE `spectra` (
   spectrum_mass_hash                     TEXT,
   spectrum_intensity_hash                TEXT,
   xml_hash                              TEXT,
@@ -52,12 +52,12 @@ sql_create_spectra_table <- function(sqlConnection){
   target_id_string                       TEXT,
   target_serial_number                   TEXT,
   target_type_number                     TEXT,
-  
+
   UNIQUE(strain_id, spectrum_mass_hash, spectrum_intensity_hash) ON CONFLICT IGNORE
   );"
     )
-    
-    
+
+
     DBI::dbClearResult(a)
   } else {
     warning("spectra table already exists")
@@ -73,17 +73,16 @@ sql_create_spectra_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' 
 #'
-sql_create_massindex_table <- function(sqlConnection){
-  
+#'
+sql_create_massindex_table <- function(sqlConnection) {
   if (!DBI::dbExistsTable(sqlConnection, "mass_index")) {
-    
-    a <- DBI::dbSendStatement(sqlConnection,
-                              "CREATE TABLE `mass_index` (
+    a <- DBI::dbSendStatement(
+      sqlConnection,
+      "CREATE TABLE `mass_index` (
   spectrum_mass_hash    TEXT,
   mass_vector          BLOB,
- 
+
   UNIQUE(spectrum_mass_hash) ON CONFLICT IGNORE
   );"
     )
@@ -101,45 +100,43 @@ sql_create_massindex_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' 
 #'
-sql_create_metadata_table <- function(sqlConnection){
-  
+#'
+sql_create_metadata_table <- function(sqlConnection) {
   if (!DBI::dbExistsTable(sqlConnection, "metadata")) {
-    
-    a <- DBI::dbSendStatement(sqlConnection,
-                              "CREATE TABLE `metadata` (
-'strain_id'                  TEXT,     
-'genbank_accession'          TEXT,             
-'ncbi_taxid'                 TEXT,       
-'kingdom'                    TEXT,   
-'phylum'                     TEXT,   
-'class'                      TEXT, 
-'order'                      TEXT, 
-'family'                     TEXT,   
-'genus'                      TEXT, 
-'species'                    TEXT,   
-'maldi_matrix'               TEXT,         
-'dsm_cultivation_media'      TEXT,           
-'cultivation_temp_celsius'   TEXT,                     
-'cultivation_time_days'      TEXT,                 
-'cultivation_other'          TEXT,             
-'user_firstname_lastname'    TEXT, 
-'user_orcid'                 TEXT,       
-'pi_firstname_lastname'      TEXT,                 
-'pi_orcid'                   TEXT,     
-'dna_16s'                    TEXT,   
- 
+    a <- DBI::dbSendStatement(
+      sqlConnection,
+      "CREATE TABLE `metadata` (
+'strain_id'                  TEXT,
+'genbank_accession'          TEXT,
+'ncbi_taxid'                 TEXT,
+'kingdom'                    TEXT,
+'phylum'                     TEXT,
+'class'                      TEXT,
+'order'                      TEXT,
+'family'                     TEXT,
+'genus'                      TEXT,
+'species'                    TEXT,
+'maldi_matrix'               TEXT,
+'dsm_cultivation_media'      TEXT,
+'cultivation_temp_celsius'   TEXT,
+'cultivation_time_days'      TEXT,
+'cultivation_other'          TEXT,
+'user_firstname_lastname'    TEXT,
+'user_orcid'                 TEXT,
+'pi_firstname_lastname'      TEXT,
+'pi_orcid'                   TEXT,
+'dna_16s'                    TEXT,
+
   UNIQUE(strain_id) ON CONFLICT IGNORE
   );"
     )
-    
-    
+
+
     DBI::dbClearResult(a)
   } else {
     warning("metadata table already exists")
   }
-  
 }
 
 
@@ -153,14 +150,13 @@ sql_create_metadata_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' 
 #'
-sql_create_xml_table <- function(sqlConnection){
-  
+#'
+sql_create_xml_table <- function(sqlConnection) {
   if (!DBI::dbExistsTable(sqlConnection, "xml")) {
-    
-    a <- DBI::dbSendStatement(sqlConnection,
-                              "CREATE TABLE `xml` (
+    a <- DBI::dbSendStatement(
+      sqlConnection,
+      "CREATE TABLE `xml` (
   xml_hash         TEXT,
   xml             BLOB,
   manufacturer    TEXT,
@@ -173,8 +169,8 @@ sql_create_xml_table <- function(sqlConnection){
   UNIQUE(xml_hash) ON CONFLICT IGNORE
     );"
     )
-    
-    
+
+
     DBI::dbClearResult(a)
   } else {
     warning("xml table already exists")
@@ -191,21 +187,20 @@ sql_create_xml_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' 
 #'
-sql_create_version_table <- function(sqlConnection){
-  
+#'
+sql_create_version_table <- function(sqlConnection) {
   if (!DBI::dbExistsTable(sqlConnection, "version")) {
-    
-    a <- DBI::dbSendStatement(sqlConnection,
-                              "CREATE TABLE version (
+    a <- DBI::dbSendStatement(
+      sqlConnection,
+      "CREATE TABLE version (
                               idbac_version     TEXT,
                               r_version         TEXT,
                               db_version        TEXT
                               );"
-                              )
-    
-    
+    )
+
+
     DBI::dbClearResult(a)
   } else {
     warning("version table already exists")
@@ -219,26 +214,20 @@ sql_create_version_table <- function(sqlConnection){
 #' @param sqlConnection sqlConnection
 #'
 #' @return SQL code as character
-#' 
 #'
-sql_create_locale_table <- function(sqlConnection){
-  
+#'
+sql_create_locale_table <- function(sqlConnection) {
   if (!DBI::dbExistsTable(sqlConnection, "locale")) {
-    
-    a <- DBI::dbSendStatement(sqlConnection,
-                              "CREATE TABLE locale (
+    a <- DBI::dbSendStatement(
+      sqlConnection,
+      "CREATE TABLE locale (
   locale         TEXT
     );"
     )
-    
-    
+
+
     DBI::dbClearResult(a)
   } else {
     warning("locale table already exists")
   }
 }
-
-
-
-
-
