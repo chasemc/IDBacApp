@@ -43,11 +43,11 @@ db_from_bruker <- function(dataDirectory = NULL,
   }
 
   # Get acqu info if not provided -------------------------------------------
-  if (is.null(acquisitionInfo) | !inherits(acquisitionInfo, "list")) {
+  if (is.null(acquisitionInfo) || !inherits(acquisitionInfo, "list")) {
     acquisitionInfo <- readBrukerAcqus(dataDirectory)
   }
   # Associate ids and spot-location in acqu ---------------------------------
-  if (is.null(anyMissing) | !inherits(anyMissing, "list")) {
+  if (is.null(anyMissing) || !inherits(anyMissing, "list")) {
     spots <- unlist(lapply(acquisitionInfo, function(x) x$spot))
     anyMissing <- findMissingSampleMapIds(
       spots = spots,

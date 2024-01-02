@@ -46,6 +46,12 @@
       sampleIDs <- NULL
     }
   }
+  print("hit")
+  print(sampleIDs)
+  print("hit2")
+  if (length(sampleIDs) == 0) {
+    sampleIDs <- NULL
+  }
   idbac_get_peaks(
     pool = pool,
     sampleIDs = sampleIDs,

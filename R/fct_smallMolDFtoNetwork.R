@@ -8,8 +8,6 @@
 small_maldiquant_to_network <- function(peakList,
                                         sampleIDs) {
   smallNetwork <- MALDIquant::intensityMatrix(peakList)
-  temp <- NULL
-
   rownames(smallNetwork) <- sampleIDs
   smallNetwork[is.na(smallNetwork)] <- 0
   smallNetwork <- ifelse(smallNetwork > 0, 1, 0)

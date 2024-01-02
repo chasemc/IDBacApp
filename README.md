@@ -43,3 +43,7 @@ Every IDBac release is preserved at Zenodo for citability/reproducibility:
 
 ### For IDBac Developers
 
+irlba::prcomp_irlba(mtcars,
+    n = 3,
+    fastpath = FALSE
+  )

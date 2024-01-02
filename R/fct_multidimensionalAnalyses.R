@@ -31,6 +31,7 @@ pcaCalculation <- function(dataMatrix,
   dataMatrix[is.infinite(dataMatrix)] <- missing
   # Check for NAs
   dataMatrix[is.na(dataMatrix)] <- missing
+  summary(dataMatrix)
   dataMatrix <- irlba::prcomp_irlba(dataMatrix,
     n = 3,
     fastpath = FALSE

@@ -21,7 +21,7 @@ subtractMatrixBlank <- function(sampleIds,
     peaksa <- binned[-matrixIndex]
     # peaksb = matrix blank sample
     peaksb <- binned[[matrixIndex]]
-    for (i in 1:length(peaksa)) {
+    for (i in seq_along(peaksa)) {
       commonIons <- which(!is.element(peaksa[[i]]@mass, peaksb@mass))
       if (length(commonIons) != 0) { # Without this if statement, peaksa values will be set to 0 if no matrix matches are found == BAD
         peaksa[[i]]@mass <- peaksa[[i]]@mass[-commonIons]

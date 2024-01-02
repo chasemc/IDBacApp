@@ -81,7 +81,7 @@ plotDendrogram <- function(dendrogram,
       graphics::abline(v = cutHeightLabels, lty = 2)
     }
   }
-  if (is.numeric(boots) & sum(boots) > 0L) {
+  if (is.numeric(boots) && sum(boots) > 0L) {
     bootlabels.hclust(stats::as.hclust(dendrogram$dendrogram),
       boots,
       horiz = TRUE,

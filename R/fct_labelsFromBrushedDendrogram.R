@@ -13,10 +13,11 @@ labelsFromBrushedDendrogram <- function(dendrogram,
   # Takes "dendextend" dendrogram and user-brushed-input as input and returns sample_IDs corresponding to the brush
   # This takes a brush selection over the heirarchical clustering plot within the MAN tab and uses this selection of samples for MAN analysis
   location_of_Heirarchical_Leaves <- dendextend::get_nodes_xy(dendrogram)
+
   # See underneath for explanation of each column
   threeColTable <- data.frame(
-    seq(1:length(labels(dendrogram))),
-    rep(1:length(labels(dendrogram))),
+    seq(seq_along(labels(dendrogram))),
+    rep(seq_along(labels(dendrogram))),
     labels(dendrogram)
   )
   # note: because rotated tree, x is actually y, y is actually x

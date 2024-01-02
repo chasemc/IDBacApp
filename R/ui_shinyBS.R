@@ -35,11 +35,11 @@ getAttribs <- function(tag) {
 #'
 #'
 bsCollapse <- function(..., id = NULL, multiple = FALSE, open = NULL) {
-  if (!multiple & length(open) > 1) {
+  if (!multiple && length(open) > 1) {
     open <- open[1]
   }
   panels <- list(...)
-  for (i in seq(length(panels))) {
+  for (i in seq_along(panels)) {
     #
     #     if(getAttribs(panels[[i]])$value %in% open) {
     #       panels[[i]]$children[[2]] <- addClass(panels[[i]]$children[[2]], "in")
@@ -95,7 +95,7 @@ bsCollapsePanel <- function(title, ..., value = title, style = NULL) {
 #'
 addAttribs <- function(tag, ...) {
   a <- list(...)
-  for (i in seq(length(a))) {
+  for (i in seq_along(a)) {
     tag$attribs[names(a)[i]] <- a[[i]]
   }
   return(tag)

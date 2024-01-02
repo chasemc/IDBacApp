@@ -617,11 +617,6 @@ app_server <- function(input, output, session) {
   })
 
 
-  # plotHeightHeirNetwork ---------------------------------------------------
-  # User input changes the height of the heirarchical clustering plot within the network analysis pane
-  plotHeightHeirNetwork <- reactive({
-    return(as.numeric(input$hclustHeightNetwork))
-  })
 
 
   # Suggested Reporting Paragraphs for small molecule data ------------------

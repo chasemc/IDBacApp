@@ -60,8 +60,6 @@ proteoWizConvert <- function(msconvertPath = "",
       )
     }
 
-    lengthProgress <- length(msconvertCmdLineCommands)
-
     numCores <- parallel::detectCores()
     numCores <- ifelse(numCores > 2,
       numCores - 1,

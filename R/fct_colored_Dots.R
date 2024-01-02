@@ -115,7 +115,7 @@ colored_dots <- function(colors, dend, rowLabels = NULL, cex.rowLabels = 0.9,
   y_shift <- y_shift - y_scale
   colors <- as.matrix(colors)
   dimC <- dim(colors)
-  if (is.null(rowLabels) & (length(dimnames(colors)[[2]]) ==
+  if (is.null(rowLabels) && (length(dimnames(colors)[[2]]) ==
     dimC[2])) {
     rowLabels <- names(as.data.frame(colors))
   }

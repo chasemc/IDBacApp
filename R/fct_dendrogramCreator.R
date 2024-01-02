@@ -22,7 +22,7 @@ idbac_dendrogram_creator <- function(bootstraps = 0L,
     )
   }
   if (is.numeric(bootstraps)) {
-    if ((bootstraps > 1) & (bootstraps < 1000)) {
+    if ((bootstraps > 1) && (bootstraps < 1000)) {
       bootstraps <- bootstrap(proteinMatrix,
         fun = createHclustObject,
         n = bootstraps

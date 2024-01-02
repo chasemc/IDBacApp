@@ -30,6 +30,7 @@ findMSconvert <- function(proteoWizardLocation = "") {
       if (!file.exists(file.path(dirname(proteoWizardLocation), "msconvert.exe"))) {
         message("Given path to msconvert didn't work, trying to auto-find in Programs")
         # Check 64
+        # base::shell() is only available on Windows
         proteoWizardLocation <- shell(
           cmd = "ECHO %ProgramFiles%\\ProteoWizard",
           translate = TRUE,

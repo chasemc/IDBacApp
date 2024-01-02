@@ -101,7 +101,7 @@ convertMZ_Server <- function(input,
              selected has lots of folders within it... because IDBac looks through all
              of them for mzML/mzXML files.")
       } else {
-        for (i in 1:length(foldersInFolder)) {
+        for (i in seq_along(foldersInFolder)) {
           # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
           folders <- paste0(
             folders,

@@ -62,7 +62,6 @@ delim_to_mzml <- function(proteinPaths,
   key <- base::split(importedFiles, combNames)
   names(mzFilePaths) <- names(key)
   lengthProgress <- length(key)
-  count <- 0
   # withProgress doesn't currently work outside shiny
   if (!is.null(shiny::getDefaultReactiveDomain())) {
     withProgress(

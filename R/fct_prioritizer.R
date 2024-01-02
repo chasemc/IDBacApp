@@ -65,8 +65,6 @@ prioritizer <- function(pool,
   # Get the number of leaves in each subtree
   dend_split_lengths <- lengths(dend_split_labels)
   only_protein <- which(dend_split_lengths < 2)
-  # Get IDs of samples in groups containing more than 1 sample
-  for_small_prioritization <- unlist(lapply(dend_split[which(dend_split_lengths > 1)], labels))
   # Loop over all dendrogram groups
   prioritized <- lapply(
     dend_split_labels,

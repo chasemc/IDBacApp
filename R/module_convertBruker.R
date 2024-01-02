@@ -100,7 +100,7 @@ convertOneBruker_Server <- function(input,
         recursive = FALSE,
         full.names = FALSE
       )
-      for (i in 1:length(foldersInFolder)) {
+      for (i in seq_along(foldersInFolder)) {
         # Creates user feedback about which raw data folders were chosen.  Individual folders displayed on a new line "\n"
         folders <- paste0(
           folders,
@@ -131,7 +131,7 @@ convertOneBruker_Server <- function(input,
         recursive = FALSE,
         full.names = FALSE
       )
-      for (i in 1:length(foldersInFolder)) {
+      for (i in seq_along(foldersInFolder)) {
         # Creates user feedback about which raw data folders were chosen.
         # Individual folders displayed on a new line "\n"
         folders <- paste0(folders, "\n", foldersInFolder[[i]])
