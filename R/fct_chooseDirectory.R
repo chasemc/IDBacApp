@@ -9,7 +9,7 @@ choose_dir <- function(caption = "Select data directory") {
   if (getOS() == "osx") {
     toreturn <- tryCatch(
       system('osascript -l JavaScript -e \'a=Application.currentApplication();a.includeStandardAdditions=true;a.chooseFolder({withPrompt:"Please select a file to process:"}).toString()\'', intern = TRUE, ignore.stderr = T),
-      error = function(x) paste("Error connecting with GitHub"),
+      error = function(x) paste("Error trying to select a directory with osascript"),
       finally = ""
     )
     if (length(toreturn) > 0) {
