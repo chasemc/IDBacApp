@@ -6,10 +6,24 @@
 #'
 #'
 choose_dir <- function(caption = "Select data directory") {
-  if (exists("choose.dir", where = "package:utils", mode = "function")) {
-    a <- utils::choose.dir(caption = caption)
-  } else {
-    a <- tcltk::tk_choose.dir(caption = caption)
+  if (getOS() == "osx") {
+    toreturn <- tryCatch(
+      system('osascript -l JavaScript -e \'a=Application.currentApplication();a.includeStandardAdditions=true;a.chooseFolder({withPrompt:"Please select a file to process:"}).toString()\'', intern = TRUE, ignore.stderr = T),
+      error = function(x) paste("Error connecting with GitHub"),
+      finally = ""
+    )
+    if (length(toreturn) > 0) {
+      print(toreturn)
+      return(toreturn)
+    } else {
+      return(NA)
+    }
   }
-  return(a)
+  if (exists("choose.dir", where = "package:utils", mode = "function")) {
+    toreturn <- utils::choose.dir(caption = caption)
+  } else {
+    toreturn <- tcltk::tk_choose.dir(caption = caption)
+  }
+  print(toreturn)
+  return(toreturn)
 }
