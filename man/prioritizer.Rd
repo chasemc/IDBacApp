@@ -55,8 +55,10 @@ the tree should be cut into.}
 
 \item{method}{
     bin creation rule. \code{"strict"} creates bins never containing two
-    or more peaks of the sampe sample. \code{"relaxed"} allows multiple
-    peaks of the same sample in one bin.}
+    or more peaks of the same sample. \code{"relaxed"} allows multiple
+    peaks of the same sample in one bin. \code{"reference"} generates bins
+    around the mass values from the first \code{\linkS4class{MassPeaks}} object
+    in \code{l}.}
 }
 \value{
 prioritization list

@@ -37,6 +37,7 @@ sampleChooser_server <- function(input,
   
   observe({
     chosenProteinSampleIDs$chosen <- NULL
+    print(pool())
     conn <- pool::poolCheckout(pool())
     nams$av <- idbac_available_samples(pool = conn,
                                        type = "protein")

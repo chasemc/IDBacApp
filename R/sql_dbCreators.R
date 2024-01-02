@@ -28,6 +28,7 @@ sql_fill_locale_table <- function(pool) {
                         overwrite = FALSE) # Do not overwrite
       
     })
+  
 }  
 
 
@@ -175,7 +176,7 @@ createSpectraSQL <- function(mzML_con,
                              acquisitionInfo,
                              ...){
   
-  
+  print(sampleID)
   
   spectraImport <- mzR::peaks(mzML_con)
   

@@ -63,15 +63,15 @@ databaseSelector_server <- function(input,
   
   pool <- reactive({
     
-    req(!is.null(input$selectExperiment))
-    req(nchar(input$selectExperiment) > 0)
-    req(input$selectExperiment != "None")
+    req(!is.null(input$selectExperiment),cancelOutput =TRUE)
+    req(nchar(input$selectExperiment) > 0,cancelOutput =TRUE)
+    req(input$selectExperiment != "None",cancelOutput =TRUE)
     validate(need(length(input$selectExperiment) == length(sqlDirectory$sqlDirectory), 
                   "databaseTabServer: pool, idbac_connect inputs are different lengths."))
     
     # pool will create a new sqlite if one doesn't exist, so let's stop that from happening here:
     req(file.exists(file.path(sqlDirectory$sqlDirectory, 
-                              paste0(input$selectExperiment, ".sqlite"))))
+                              paste0(input$selectExperiment, ".sqlite"))),cancelOutput =TRUE)
     
     z <- idbac_connect(fileName = input$selectExperiment,
                               filePath = sqlDirectory$sqlDirectory)[[1]]
@@ -84,7 +84,7 @@ databaseSelector_server <- function(input,
            "spectra",
            "version")
     
-    req(all(q %in% tolower(DBI::dbListTables(z))))
+    req(all(q %in% tolower(DBI::dbListTables(z))),cancelOutput =TRUE)
     
     return(z)
     

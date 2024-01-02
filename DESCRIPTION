@@ -53,6 +53,6 @@ Imports:
 Suggests:
     knitr (>= 1.23),
     testthat (>= 2.2.1)
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 Roxygen: list(markdown = TRUE)

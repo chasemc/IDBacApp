@@ -39,7 +39,7 @@ assembleMirrorPlots(
 
 \item{normalizeSpectra}{should spectra be normalized? TRUE/FALSE}
 
-\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:normalizeSpectrumIntensity]{IDBacApp::normalizeSpectrumIntensity()}}}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[=normalizeSpectrumIntensity]{normalizeSpectrumIntensity()}}}
 }
 \value{
 environment containing mirror plot data

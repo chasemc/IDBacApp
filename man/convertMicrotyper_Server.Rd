@@ -27,7 +27,7 @@ convertMicrotyper_Server(
 
 \item{availableExperiments}{availableExperiments}
 
-\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[=processSmallMolSpectra]{processSmallMolSpectra()}} and/or \code{\link[=processProteinSpectra]{processProteinSpectra()}}}
 }
 \value{
 none, side effect of creating database

@@ -147,6 +147,8 @@ app_server <- function(input, output, session) {
                  removeTab(inputId = "mainIDBacNav",
                            target = "Small Molecule Data Analysis"
                  )
+                 print(inherits(workingDB$pool(), "Pool"))
+                 req(inherits(workingDB$pool(), "Pool"))
                  pool <- pool::poolCheckout(workingDB$pool())
                  
                  p <- DBI::dbGetQuery(pool, glue::glue("SELECT 1 
@@ -223,7 +225,7 @@ app_server <- function(input, output, session) {
   #observe({
   collapsedPeaksForDend <- reactive({
     req(!is.null(chosenProteinSampleIDs$chosen))
-    req(length(chosenProteinSampleIDs$chosen) > 0)
+    req(length(chosenProteinSampleIDs$chosen) > 1)
     req(workingDB$pool())
     # For each sample:
     # bin peaks and keep only the peaks that occur in proteinPeakSettings$percentPresence percent of replicates

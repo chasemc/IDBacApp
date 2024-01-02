@@ -30,7 +30,7 @@ db_from_bruker(
 
 \item{tempDir}{temporary folder with read/write permission to write intermediate mzml files to}
 
-\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[=processSmallMolSpectra]{processSmallMolSpectra()}} and/or \code{\link[=processProteinSpectra]{processProteinSpectra()}}}
 }
 \value{
 none, side effect of writing SQLite  file

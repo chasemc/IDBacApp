@@ -22,7 +22,7 @@ spectraProcessingFunction(
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 
-\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[=processSmallMolSpectra]{processSmallMolSpectra()}} and/or \code{\link[=processProteinSpectra]{processProteinSpectra()}}}
 }
 \value{
 the peak list modifed by binning then subtractng the matrix sample,

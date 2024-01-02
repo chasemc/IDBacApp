@@ -27,7 +27,7 @@ createSpectraSQL(
 
 \item{acquisitionInfo}{acquisitionInfo (currently only used when converting from Bruker raw data)}
 
-\item{...}{advanced arguments for MALDIquant, see \code{\link[IDBacApp:processSmallMolSpectra]{IDBacApp::processSmallMolSpectra()}} and/or \code{\link[IDBacApp:processProteinSpectra]{IDBacApp::processProteinSpectra()}}}
+\item{...}{advanced arguments for MALDIquant, see \code{\link[=processSmallMolSpectra]{processSmallMolSpectra()}} and/or \code{\link[=processProteinSpectra]{processProteinSpectra()}}}
 }
 \value{
 writes to sqlite database

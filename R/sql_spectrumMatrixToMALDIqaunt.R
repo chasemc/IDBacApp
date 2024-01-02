@@ -8,7 +8,7 @@
 spectrumMatrixToMALDIqaunt <- function(input){
   
   
-  if (!inherits(input, "matrix")){
+  if (inherits(input, "list")) {
     
     input <- lapply(input, 
                     function(x){
@@ -21,7 +21,7 @@ spectrumMatrixToMALDIqaunt <- function(input){
                     })
     
     
-  } else {
+  } else if (inherits(input, "matrix")){
     
     input <- MALDIquant::createMassSpectrum(mass = input[ , 1],
                                             intensity = input[ , 2])
