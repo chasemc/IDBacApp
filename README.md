@@ -1,3 +1,9 @@
+### Update 12-19-2024
+
+Closed beta web version now available: https://idbac.org
+
+---
+
 There are currently no easy-installs for versions >2.0 and limited support. IDBac is currently under development in another repository.
 If you encounter issues with version 2.0, please fall back to version 1.1.10:
 https://github.com/chasemc/IDBacApp/releases/tag/1.1.10
