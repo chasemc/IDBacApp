@@ -1,6 +1,8 @@
-For copyright.license of icons, (see inst/www/LICENSE-ICONS.md)[https://github.com/chasemc/IDBacApp/blob/master/inst/www/LICENSE-ICONS.md]
+For copyright/license of icons, see [inst/www/LICENSE-ICONS.md)](https://github.com/chasemc/IDBacApp/blob/master/inst/www/LICENSE-ICONS.md)
+
 For the software, see below:
-------------------------------------------------------------------------------
+
+---
 
     Copyright (C) 2019 Chase Clark
 
